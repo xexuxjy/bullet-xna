@@ -31,6 +31,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 {
     public class HingeConstraint : TypedConstraint
     {
+		public static bool debugHingeConstrainst = false;
         private const bool HINGE_USE_FRAME_OFFSET = true;
 
         private static Vector3 vHinge = new Vector3(0, 0, 1);
@@ -462,7 +463,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
                     info.m_solverConstraints[nrow].m_rhs *= m_biasFactor;
                 } // if(limit)
             } // if angular limit or powered
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -477,17 +478,22 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref Matrix transA, ref Matrix transB, ref Vector3 angVelA, ref Vector3 angVelB)
         {
 	        // transforms in world space
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbAFrame", m_rbAFrame);
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbBFrame", m_rbBFrame);
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transA", transA);
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transB", transB);
+			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			{
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbAFrame", m_rbAFrame);
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbBFrame", m_rbBFrame);
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transA", transA);
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transB", transB);
+			}
 
             Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
             Matrix trB = MathUtil.BulletMatrixMultiply(transB, m_rbBFrame);
 
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trA", trA);
-			MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trB", trB);
-
+			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			{
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trA", trA);
+				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trB", trB);
+			}
 	        // pivot point
 	        Vector3 pivotAInW = trA.Translation;
 	        Vector3 pivotBInW = trB.Translation;
@@ -731,7 +737,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
                     info.m_solverConstraints[srow].m_rhs *= m_biasFactor;
 		        } // if(limit)
 	        } // if angular limit or powered
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}

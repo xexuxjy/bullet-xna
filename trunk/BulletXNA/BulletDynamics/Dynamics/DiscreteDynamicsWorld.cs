@@ -170,9 +170,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
             if (m_synchronizeAllMotionStates)
             {
                 //iterate  over all collision objects
-                foreach (CollisionObject colObj in m_collisionObjects)
-                {
-                    RigidBody body = RigidBody.Upcast(colObj);
+				int length = m_collisionObjects.Count;
+				for (int i = 0; i < length;++i )
+				{
+                    RigidBody body = RigidBody.Upcast(m_collisionObjects[i]);
                     if (body != null)
                     {
                         SynchronizeSingleMotionState(body);
@@ -182,8 +183,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
             else
             {
 		        //iterate over all active rigid bodies
-		        foreach (RigidBody body in m_nonStaticRigidBodies)
+				int length = m_nonStaticRigidBodies.Count;
+		        for(int i=0;i<length;++i)
 		        {
+					RigidBody body =  m_nonStaticRigidBodies[i];
 			        if (body.IsActive())
                     {
 				        SynchronizeSingleMotionState(body);
@@ -258,8 +261,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    public override void SetGravity(ref Vector3 gravity)
         {
             m_gravity = gravity;
-            foreach (RigidBody body in m_nonStaticRigidBodies)
+			int length = m_nonStaticRigidBodies.Count;
+            for(int i=0;i<length;++i)
             {
+				RigidBody body = m_nonStaticRigidBodies[i];
                 if(body.IsActive() && ((body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY) != 0))
 		        {
 			        body.SetGravity(ref gravity);
@@ -408,8 +413,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
                 if(wireFrame || aabb)
                 {
-                    foreach (CollisionObject colObj in m_collisionObjects)
-                    {
+					int length = m_collisionObjects.Count;
+					for (int i = 0; i < length;++i )
+					{
+	                    CollisionObject colObj = m_collisionObjects[i];
+
                         if (wireFrame)
                         {
                             Vector3 color = new Vector3(255, 255, 255);
@@ -462,9 +470,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
         	
 		            if (debugMode != 0)
 		            {
-			            foreach(IActionInterface action in m_actions)
+						int length2 = m_actions.Count;
+			            for(int i=0;i<length2;++i)
 			            {
-				            action.DebugDraw(m_debugDrawer);
+				            m_actions[i].DebugDraw(m_debugDrawer);
 			            }
 		            }
                 }
@@ -504,18 +513,20 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    ///the forces on each rigidbody is accumulating together with gravity. clear this after each timestep.
 	    public override void ClearForces()
         {
-            foreach(RigidBody body in m_nonStaticRigidBodies)
+			int length = m_nonStaticRigidBodies.Count;
+            for(int i=0;i<length;++i)
             {
-		        body.ClearForces();
+		        m_nonStaticRigidBodies[i].ClearForces();
 	        }
         }
 
 	    ///apply gravity, call this once per timestep
-	    public virtual void ApplyGravity
-            ()
+	    public virtual void ApplyGravity()
         {
-            foreach(RigidBody body in m_nonStaticRigidBodies)
-            {
+			int length = m_nonStaticRigidBodies.Count;
+			for (int i = 0; i < length; ++i)
+			{
+				RigidBody body = m_nonStaticRigidBodies[i];
 		        if (body != null && body.IsActive())
 		        {
 			        body.ApplyGravity();
@@ -559,9 +570,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    protected virtual void PredictUnconstraintMotion(float timeStep)
         {
             //BT_PROFILE("predictUnconstraintMotion");
-	        foreach (RigidBody body in m_nonStaticRigidBodies)
-	        {
-		        if (body != null)
+			int length = m_nonStaticRigidBodies.Count;
+			for (int i = 0; i < length; ++i)
+			{
+				RigidBody body = m_nonStaticRigidBodies[i];
+				if (body != null)
 		        {
 			        if (!body.IsStaticOrKinematicObject())
 			        {
@@ -581,9 +594,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
         {
             //BT_PROFILE("integrateTransforms");
 	        Matrix predictedTrans = Matrix.Identity;
-	        foreach (RigidBody body  in m_nonStaticRigidBodies)
-	        {
-		        if (body != null)
+			int length = m_nonStaticRigidBodies.Count;
+			for (int i = 0; i < length; ++i)
+			{
+				RigidBody body = m_nonStaticRigidBodies[i];
+				if (body != null)
 		        {
 			        body.SetHitFraction(1f);
 
@@ -629,8 +644,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	        GetSimulationIslandManager().UpdateActivationState(GetCollisionWorld(),GetCollisionWorld().GetDispatcher());
 	        {
-		        foreach(TypedConstraint constraint in m_constraints)
-		        {
+		        int length = m_constraints.Count;
+				for(int i=0;i<length;++i)
+				{
+					TypedConstraint constraint = m_constraints[i];
 			        RigidBody colObj0 = constraint.GetRigidBodyA();
 			        RigidBody colObj1 = constraint.GetRigidBodyB();
 
@@ -699,9 +716,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
         {
             //BT_PROFILE("updateActivationState");
 
-	        foreach (RigidBody body in m_nonStaticRigidBodies)
-	        {
-		        if (body != null)
+			int length = m_nonStaticRigidBodies.Count;
+			for (int i = 0; i < length; ++i)
+			{
+				RigidBody body = m_nonStaticRigidBodies[i];
+				if (body != null)
 		        {
 			        body.UpdateDeactivation(timeStep);
                      
@@ -735,11 +754,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    protected void	UpdateActions(float timeStep)
         {
             //BT_PROFILE("updateActions");
-        	
-            foreach (IActionInterface action in m_actions)
-            {
-                action.UpdateAction( this, timeStep);
-            }
+			int length = m_actions.Count;
+			for (int i = 0; i < length;++i )
+			{
+				m_actions[i].UpdateAction(this, timeStep);
+			}
         }
 
         protected void StartProfiling(float timeStep)
@@ -806,18 +825,19 @@ namespace BulletXNA.BulletDynamics.Dynamics
             ///to switch status _after_ adding kinematic objects to the world
             ///fix it for Bullet 3.x release
 
-	        foreach (CollisionObject colObj in m_collisionObjects)
-	        {
-		        RigidBody body = RigidBody.Upcast(colObj);
-		        if (body != null && body.GetActivationState() != ActivationState.ISLAND_SLEEPING)
-		        {
-			        if (body.IsKinematicObject())
-			        {
-				        //to calculate velocities next frame
-				        body.SaveKinematicState(timeStep);
-			        }
-		        }
-	        }
+			int length = m_collisionObjects.Count;
+			for (int i = 0; i < length;++i )
+			{
+				RigidBody body = RigidBody.Upcast(m_collisionObjects[i]);
+				if (body != null && body.GetActivationState() != ActivationState.ISLAND_SLEEPING)
+				{
+					if (body.IsKinematicObject())
+					{
+						//to calculate velocities next frame
+						body.SaveKinematicState(timeStep);
+					}
+				}
+			}
         }
 
         public static int GetConstraintIslandId(TypedConstraint lhs)
@@ -1061,10 +1081,13 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				    if (collisionPair.m_algorithm != null)
 				    {
 					    collisionPair.m_algorithm.GetAllContactManifolds(manifoldArray);
-					    foreach(PersistentManifold manifold in manifoldArray)
+						int length = manifoldArray.Count;
+						for(int i=0;i<length;++i)
 					    {
-						    if (manifold.GetNumContacts()>0)
-							    return false;
+							if (manifoldArray[i].GetNumContacts() > 0)
+							{
+								return false;
+							}
 					    }
 				    }
 			    }

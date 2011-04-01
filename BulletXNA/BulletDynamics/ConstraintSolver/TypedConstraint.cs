@@ -57,7 +57,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
         public const float DEFAULT_DEBUGDRAW_SIZE = 0.3f;
 
-        public static bool debugConstraint = true;
+        public static bool debugConstraint = false;
 
         private int	m_userConstraintType;
 	    private int	m_userConstraintId;

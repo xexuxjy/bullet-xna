@@ -94,9 +94,6 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
             m_checkCollideWith = false;
             m_worldTransform = Matrix.Identity;
         }
-        
-        
-
 
         public virtual bool CheckCollideWithOverride(CollisionObject obj)
         {
@@ -378,6 +375,10 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 		    return m_interpolationAngularVelocity;
 	    }
 
+        public Vector3 GetInterpolationLinearVelocity()
+        {
+            return m_interpolationLinearVelocity;
+        }
 
 
 	    public int GetIslandTag() 

@@ -195,7 +195,7 @@ namespace BulletXNA.BullettCollision.CollisionShapes
 		    m_userPointer = userPtr;
 	    }
 
-	    public Object SetUserPointer()
+	    public Object GetUserPointer()
 	    {
 		    return m_userPointer;
 	    }

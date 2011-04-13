@@ -632,7 +632,7 @@ namespace BulletXNADemos.Demos
 
         public ShapeCache Cache(ConvexShape shape)
         {
-	        ShapeCache sc=(ShapeCache)shape.SetUserPointer();
+	        ShapeCache sc=(ShapeCache)shape.GetUserPointer();
 	        if(sc == null)
 	        {
 		        sc=new ShapeCache(shape);

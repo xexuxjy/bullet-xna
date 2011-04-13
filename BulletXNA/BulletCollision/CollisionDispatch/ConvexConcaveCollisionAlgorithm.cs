@@ -183,6 +183,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     Vector3 max = m_convexTriangleCallback.GetAabbMax();
 
                     concaveShape.ProcessAllTriangles(m_convexTriangleCallback, ref min,ref max);
+                    resultOut.RefreshContactPoints();
                 }
             }
         }

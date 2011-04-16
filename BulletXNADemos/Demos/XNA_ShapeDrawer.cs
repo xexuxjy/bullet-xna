@@ -218,7 +218,7 @@ namespace BulletXNADemos.Demos
 	        {
 		        ConcaveShape concaveMesh = (ConcaveShape) shape;
 
-		        XNADrawcallback drawCallback = new XNADrawcallback(this);
+		        XNADrawcallback drawCallback = new XNADrawcallback(this,ref m);
 		        drawCallback.m_wireframe = false;
 
 		        concaveMesh.ProcessAllTriangles(drawCallback,ref worldBoundsMin,ref worldBoundsMax);
@@ -600,7 +600,7 @@ namespace BulletXNADemos.Demos
                     {
                         ConcaveShape concaveMesh = (ConcaveShape)shape;
 
-                        XNADrawcallback drawCallback = new XNADrawcallback(this);
+                        XNADrawcallback drawCallback = new XNADrawcallback(this,ref m);
                         drawCallback.m_wireframe = (debugMode & DebugDrawModes.DBG_DrawWireframe) != 0;
 
                         concaveMesh.ProcessAllTriangles(drawCallback, ref worldBoundsMin, ref worldBoundsMax);
@@ -1136,11 +1136,13 @@ namespace BulletXNADemos.Demos
         private static Vector3 RED = new Vector3(1, 0, 0);
         private static Vector3 BLUE = new Vector3(0, 1, 0);
         private static Vector3 GREEN = new Vector3(0, 0, 1);
+		private Matrix matrix; // not included up till now
         
-	    public XNADrawcallback(XNA_ShapeDrawer shapeDrawer)
+	    public XNADrawcallback(XNA_ShapeDrawer shapeDrawer,ref Matrix m)
 	    {
             m_wireframe = false;
             m_shapeDrawer = shapeDrawer;
+			matrix = m;
 	    }
 
         public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
@@ -1148,6 +1150,10 @@ namespace BulletXNADemos.Demos
 		    if (m_wireframe)
 		    {
                 Vector3[] raw = triangle.GetRawArray();
+
+				// put them in object space.
+				Vector3.Transform(raw, ref matrix, raw);
+
 
                 m_shapeDrawer.DrawLine(ref raw[0], ref raw[1], ref RED);
                 m_shapeDrawer.DrawLine(ref raw[1], ref raw[2], ref GREEN);
@@ -1157,15 +1163,15 @@ namespace BulletXNADemos.Demos
                 Vector3 d = raw[1] - raw[0];
                 Vector3 e = raw[2] - raw[0];
                 // Reverse the cross here to account for winding, shouldn't change the way rest of bullet works.
-                //Vector3 cross = Vector3.Cross(d, e);
-                Vector3 cross = Vector3.Cross(e,d);
+				Vector3 cross = Vector3.Cross(d, e);
+				//Vector3 cross = Vector3.Cross(e,d);
 
                 Vector3 colour = new Vector3(1, 0, 1);
                 int ibreak = 0;
                 Vector3 center = (raw[0]+raw[1]+raw[2])*(1.0f/3.0f);
 
                 cross += center;
-                //m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
+				m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
 
 		    } 
             else

@@ -40,7 +40,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public int m_vertexStride;
         //// The index type is set when adding an indexed mesh to the
         //// btTriangleIndexVertexArray, do not set it manually
-        public PHY_ScalarType	m_indexType = PHY_ScalarType.PHY_INTEGER;
+		//public PHY_ScalarType	m_indexType = PHY_ScalarType.PHY_INTEGER;
+		public PHY_ScalarType m_indexType;
+		public PHY_ScalarType m_vertexType = PHY_ScalarType.PHY_FLOAT;
     }
 
 
@@ -84,7 +86,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	        numverts = mesh.m_numVertices;
 	        vertexbase = mesh.m_vertexBase;
-	        type = PHY_ScalarType.PHY_FLOAT;
+			type = mesh.m_vertexType;
 	        vertexStride = mesh.m_vertexStride;
 
 	        numfaces = mesh.m_numTriangles;
@@ -102,7 +104,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	        numverts = mesh.m_numVertices;
 	        vertexbase = mesh.m_vertexBase;
-	        type = PHY_ScalarType.PHY_FLOAT;
+			type = mesh.m_vertexType;
 
 	        vertexStride = mesh.m_vertexStride;
 

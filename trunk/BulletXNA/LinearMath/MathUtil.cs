@@ -49,17 +49,6 @@ namespace BulletXNA
         public static Matrix ScaleBasis(ref Matrix m, ref Vector3 v)
         {
             Matrix m1 = Matrix.Identity;
-            //m1.M11 = m.M11 * v.X;
-            //m1.M12 = m.M12 * v.Y;
-            //m1.M13 = m.M13 * v.Z;
-
-            //m1.M21 = m.M21 * v.X;
-            //m1.M22 = m.M22 * v.Y;
-            //m1.M23 = m.M23 * v.Z;
-
-            //m1.M31 = m.M31 * v.X;
-            //m1.M32 = m.M32 * v.Y;
-            //m1.M33 = m.M33 * v.Z;
 
             m1.M11 = m.M11 * v.X;
             m1.M12 = m.M12 * v.X;
@@ -73,10 +62,6 @@ namespace BulletXNA
             m1.M32 = m.M32 * v.Z;
             m1.M33 = m.M33 * v.Z;
 
-
-            //m1.Right = m.Right*v;
-            //m1.Up = m.Up * v;
-            //m1.Backward = m.Backward * v;
             return m1;
 
         }
@@ -92,26 +77,9 @@ namespace BulletXNA
         public static Matrix TransposeTimesBasis(ref Matrix mA, ref Matrix mB)
 
         {
-            //Matrix mb1 = Matrix.Identity;
-            //BasisMatrix(ref a, ref mb1);
-            //mb1 = Matrix.Transpose(mb1);
-            //Matrix mb2 = Matrix.Identity;
-            //BasisMatrix(ref b, ref mb2);
-            //return BulletMatrixMultiply(ref mb1, ref mb2);			
-            return new Matrix(
-				mA.M11 * mB.M11 + mA.M21 * mB.M21 + mA.M31 * mB.M31,
-				mA.M11 * mB.M12 + mA.M21 * mB.M22 + mA.M31 * mB.M32,
-				mA.M11 * mB.M13 + mA.M21 * mB.M23 + mA.M31 * mB.M33,
-				0,
-				mA.M12 * mB.M11 + mA.M22 * mB.M21 + mA.M32 * mB.M31,
-				mA.M12 * mB.M12 + mA.M22 * mB.M22 + mA.M32 * mB.M32,
-				mA.M12 * mB.M13 + mA.M22 * mB.M23 + mA.M32 * mB.M33,
-				0,
-				mA.M13 * mB.M11 + mA.M23 * mB.M21 + mA.M33 * mB.M31,
-				mA.M13 * mB.M12 + mA.M23 * mB.M22 + mA.M33 * mB.M32,
-				mA.M13 * mB.M13 + mA.M23 * mB.M23 + mA.M33 * mB.M33,
-				0, 0, 0, 0, 1);
-
+            Matrix ba = MathUtil.BasisMatrix(ref mA);
+            Matrix bb = MathUtil.BasisMatrix(ref mB);
+            return BulletMatrixMultiply(ba, bb);
         }
 
         public static Matrix InverseTimes(Matrix a, Matrix b)
@@ -121,11 +89,8 @@ namespace BulletXNA
 
         public static Matrix InverseTimes(ref Matrix a, ref Matrix b)
         {
-            Vector3 v = b.Translation - a.Translation;
-            Matrix a1 = TransposeTimesBasis(ref a, ref b);
-			v = TransposeTransformNormal(ref v, ref a);
-            a1.Translation = v;
-            return a1;
+            Matrix m = Matrix.Invert(a);
+            return BulletMatrixMultiply(ref m, ref b);
         }
 
         public static Matrix TransposeBasis(Matrix m)
@@ -1251,17 +1216,17 @@ namespace BulletXNA
 
 		public static void PrintQuaternion(TextWriter writer, Quaternion q)
 		{
-			writer.Write(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000} W:{3:0.00000000}}}", q.X, q.Y, q.Z,q.W));
+            writer.Write(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000} W:{3:0.000000000000}}}", q.X, q.Y, q.Z, q.W));
 		}
 
 		public static void PrintVector3(TextWriter writer, Vector3 v)
 		{
-			writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000}}}", v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000}}}", v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector3(TextWriter writer, String name ,Vector3 v)
 		{
-			writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name,v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000}}}", name, v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector4(TextWriter writer, Vector4 v)
@@ -1271,7 +1236,7 @@ namespace BulletXNA
 
 		public static void PrintVector4(TextWriter writer, String name, Vector4 v)
 		{
-			writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000} W:{4:0.00000000}}}", name, v.X, v.Y, v.Z,v.W));
+			writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000} W:{4:0.000000000000}}}", name, v.X, v.Y, v.Z,v.W));
 		}
 
 

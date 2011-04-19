@@ -73,8 +73,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        {
 		        int index = 0;
                 ObjectArray<CollisionObject> list = collisionWorld.GetCollisionObjectArray();
-		        foreach(CollisionObject collisionObject in list)
+                int length = list.Count;
+                CollisionObject[] rawList = list.GetRawArray();
+		        for(int i=0;i<length;++i)
 		        {
+                    CollisionObject collisionObject = rawList[i];
 			        collisionObject.SetIslandTag(index);
 			        collisionObject.SetCompanionId(-1);
 			        collisionObject.SetHitFraction(1f);
@@ -90,8 +93,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             int index = 0;
             ObjectArray<CollisionObject> list = collisionWorld.GetCollisionObjectArray();
-            foreach (CollisionObject collisionObject in list)
+            int length = list.Count;
+            CollisionObject[] rawList = list.GetRawArray();
+            for (int i = 0; i < length; ++i)
             {
+                CollisionObject collisionObject = rawList[i];
                 if (!collisionObject.IsStaticOrKinematicObject())
                 {
                     collisionObject.SetIslandTag(m_unionFind.Find(index));
@@ -109,20 +115,23 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public void FindUnions(IDispatcher dispatcher, CollisionWorld collisionWorld)
         {
-            ObjectArray<BroadphasePair> broadphaseList = collisionWorld.GetPairCache().GetOverlappingPairArray();
-            foreach(BroadphasePair collisionPair in broadphaseList)
-		    {
-			    CollisionObject colObj0 = (CollisionObject)collisionPair.m_pProxy0.m_clientObject;
-			    CollisionObject colObj1 = (CollisionObject)collisionPair.m_pProxy1.m_clientObject;
+            ObjectArray<BroadphasePair> list = collisionWorld.GetPairCache().GetOverlappingPairArray();
+            int length = list.Count;
+            BroadphasePair[] rawList = list.GetRawArray();
+            for (int i = 0; i < length;++i )
+            {
+                BroadphasePair collisionPair = rawList[i];
+                CollisionObject colObj0 = (CollisionObject)collisionPair.m_pProxy0.m_clientObject;
+                CollisionObject colObj1 = (CollisionObject)collisionPair.m_pProxy1.m_clientObject;
 
-			    if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
+                if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
                     ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
-			    {
+                {
 
-				    m_unionFind.Unite((colObj0).GetIslandTag(),
-					    (colObj1).GetIslandTag());
-			    }
-		    }
+                    m_unionFind.Unite((colObj0).GetIslandTag(),
+                        (colObj1).GetIslandTag());
+                }
+            }
         }
 
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)

@@ -117,6 +117,47 @@ namespace BulletXNA.LinearMath
 			return new ReadOnlyCollection<T>(this);
 		}
 
+	    public void	Resize(int newsize,bool allocate)
+		{
+			int curSize = Count;
+
+			if (newsize < curSize)
+			{
+                if (allocate)
+                {
+                    for (int i = newsize; i < curSize; i++)
+                    {
+                        this._items[i] = new T();
+                    }
+                }
+                else
+                {
+                    for (int i = newsize; i < curSize; i++)
+                    {
+                        this._items[i] = default(T);
+                    }
+                }
+			} else
+			{
+				if (newsize > Count)
+				{
+					Capacity = newsize;
+				}
+                if(allocate)
+                {
+				    for (int i=curSize;i<newsize;i++)
+				    {
+					    this._items[i] = new T();
+				    }
+                }
+
+			}
+
+            this._size = newsize;
+		}
+	
+
+
 		public int BinarySearch(T item)
 		{
 			return this.BinarySearch(0, this.Count, item, null);

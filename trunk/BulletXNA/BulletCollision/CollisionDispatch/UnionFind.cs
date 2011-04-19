@@ -80,9 +80,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             Allocate(N);
 
+            Element[] raw = m_elements.GetRawArray();
             for (int i = 0; i < N; i++)
             {
-                m_elements[i].m_id = i; m_elements[i].m_sz = 1;
+                raw[i].m_id = i; 
+                raw[i].m_sz = 1;
             } 
         }
 
@@ -104,31 +106,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
    
         public void	Allocate(int N)
         {
-            // create a copy of the old list so we can restore it on the newly created list.
-            IList<Element> oldList = new List<Element>(m_elements.Count);
-            for (int i = 0; i < m_elements.Count; ++i)
-            {
-                oldList.Add(m_elements[i]);
-            }
-
-            m_elements.Clear();
-            int oldLength = oldList.Count;
-            for (int i = 0; i < N; ++i)
-            {
-                if (i < oldLength)
-                {
-                    m_elements.Add(oldList[i]);
-                }
-                else
-                {
-                    m_elements.Add(new Element());
-                }
-            }
-            //int start = N - m_elements.Count - 1;
-            //for(int i=0;i<start;++i)
-            //{
-            //    m_elements.Add(new Element());
-            //}
+            m_elements.Resize(N,true);
         }
         public void Free()
         {

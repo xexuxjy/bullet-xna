@@ -31,7 +31,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     public class GjkEpaSolver2
     {
-        public static bool debugGJK = true;
+        public static bool debugGJK = false;
 
         public static void Initialize(ConvexShape shape0,ref Matrix wtrs0,
             ConvexShape shape1,ref Matrix wtrs1,
@@ -47,12 +47,18 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             shapeR.m_shapes[0] =	shape0;
             shapeR.m_shapes[1] =	shape1;
 
-            shapeR.m_toshape1 = MathUtil.TransposeTimesBasis(ref wtrs1,ref wtrs0);
+            shapeR.m_toshape1 = MathUtil.TransposeTimesBasis(ref wtrs1, ref wtrs0);
             shapeR.m_toshape0 = MathUtil.InverseTimes(ref wtrs0, ref wtrs1);
+
+
+
 
             if (BulletGlobals.g_streamWriter != null && debugGJK)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::shape0", shapeR.m_toshape0);
+                MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::WTRS0", wtrs0);
+                MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::WTRS1", wtrs1);
+
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::shape1", shapeR.m_toshape1);
             }
 
@@ -265,7 +271,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public Vector3 Support(ref Vector3 d)
         {
             Vector3 minusD = -d;
-            return(Support0(ref d)-Support1(ref minusD));
+            Vector3 temp = Support1(ref minusD);
+            return(Support0(ref d)-temp);
         }
         
         public Vector3	Support(ref Vector3 d,uint index)

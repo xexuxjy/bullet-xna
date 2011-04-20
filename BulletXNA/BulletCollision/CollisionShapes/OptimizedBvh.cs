@@ -323,6 +323,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         //    return *this;
         //}
 
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
         public NodeTriangleCallback(ObjectArray<OptimizedBvhNode> triangleNodes)
 		{
             m_triangleNodes = triangleNodes;
@@ -363,6 +368,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	public class QuantizedNodeTriangleCallback : IInternalTriangleIndexCallback
 	{
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
         private IList<QuantizedBvhNode> m_triangleNodes;
 		QuantizedBvh m_optimizedTree; // for quantization
 

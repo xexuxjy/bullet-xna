@@ -62,7 +62,7 @@ namespace BulletXNADemos.Demos
 			int indicesTotal = totalTriangles * 3;
             gIndices = new ObjectArray<int>(indicesTotal);
 
-			BulletGlobals.gContactAddedCallback = new CustomMaterialCombinerCallback();
+            //BulletGlobals.gContactAddedCallback = new CustomMaterialCombinerCallback();
 
 			SetVertexPositions(waveheight,0f);
 
@@ -147,7 +147,7 @@ namespace BulletXNADemos.Demos
             //CollisionShape groundShape = trimeshShape;//m_trimeshShape;
             CollisionShape groundShape = m_trimeshShape;//m_trimeshShape;
 
-            //groundShape = new TriangleShape(new Vector3(0, 0, 100), new Vector3(100, 0, 0),new Vector3(-100, 0, -100));
+            //groundShape = new TriangleShape(new Vector3(0,` 0, 100), new Vector3(100, 0, 0),new Vector3(-100, 0, -100));
             //groundShape = new StaticPlaneShape(Vector3.Up, 0f);
             //groundShape = new BoxShape(new Vector3(100f, 0.1f, 100f));
             Vector3 up = new Vector3(0.4f,1,0);

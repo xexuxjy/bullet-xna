@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.LargeMeshDemo</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.IslandStressDemo</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>
@@ -117,6 +117,7 @@
     <Compile Include="Demos\ConstraintDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
+    <Compile Include="Demos\IslandStressDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />

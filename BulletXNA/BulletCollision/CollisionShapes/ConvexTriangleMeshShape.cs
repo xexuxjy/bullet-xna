@@ -193,6 +193,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
     public class LocalSupportVertexCallback: IInternalTriangleIndexCallback
     {
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
 	    public LocalSupportVertexCallback(ref Vector3 supportVecLocal)
 	    {
             m_supportVertexLocal = Vector3.Zero;
@@ -238,6 +244,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             volume = 0f;
         }
 
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
         public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
         {
             if (first)
@@ -281,6 +292,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
     public class InertiaCallback: IInternalTriangleIndexCallback
     {
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
         public InertiaCallback(ref Vector3 center)
         {
             m_sum = new Matrix();

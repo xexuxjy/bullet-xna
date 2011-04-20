@@ -546,7 +546,10 @@ namespace BulletXNADemos.Demos
             eyePos = Vector3.Transform(eyePos, (rot * roll));
             eyePos2 = Vector3.Transform(eyePos2, m3);
 
-            m_cameraTargetPosition = m_cameraPosition + eyePos;
+            //m_cameraTargetPosition = m_cameraPosition + eyePos;
+            m_cameraPosition = eyePos;
+
+            m_cameraPosition += m_cameraTargetPosition;
 
             if (m_glutScreenWidth == 0 && m_glutScreenHeight == 0)
                 return;

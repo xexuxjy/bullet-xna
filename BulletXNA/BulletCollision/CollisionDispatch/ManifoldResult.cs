@@ -38,13 +38,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     ///btManifoldResult is a helper class to manage  contact results.
     public class ManifoldResult : IDiscreteCollisionDetectorInterfaceResult
     {
-	    public ManifoldResult()
-	    {
+        public ManifoldResult()
+        {
             int ibreak = 0;
 #if DEBUG_PART_INDEX
-	m_partId0 = -1;
-	m_partId1 = -1;
-	m_index0 = -1;
+    m_partId0 = -1;
+    m_partId1 = -1;
+    m_index0 = -1;
     m_index1 = -1;
 #endif //DEBUG_PART_INDEX
 
@@ -52,14 +52,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public ManifoldResult(CollisionObject body0, CollisionObject body1)
         {
-            if (body0 == null || body1 == null)
-            {
-                int ibreak = 0;
-            }
+            Initialise(body0, body1);
+        }
+
+        public void Initialise(CollisionObject body0, CollisionObject body1)
+        {
             m_body0 = body0;
             m_body1 = body1;
 	        m_rootTransA = body0.GetWorldTransform();
 	        m_rootTransB = body1.GetWorldTransform();
+            m_manifoldPtr = null;
         }
 
 	    public void	SetPersistentManifold(PersistentManifold manifoldPtr)

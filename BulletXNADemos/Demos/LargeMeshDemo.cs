@@ -23,9 +23,9 @@ namespace BulletXNADemos.Demos
 			base.InitializeDemo();
 			SetCameraDistance(SCALING * 50f);
 
-			//string filename = @"C:\users\man\bullett\xna-largemesh-output.txt";
-			//FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-			//BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            string filename = @"C:\users\man\bullett\xna-largemesh-output.txt";
+            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 			///collision configuration contains default setup for memory, collision setup
 			m_collisionConfiguration = new DefaultCollisionConfiguration();
@@ -56,21 +56,25 @@ namespace BulletXNADemos.Demos
 			CollisionShape groundShape = BuildLargeMesh();
 			m_collisionShapes.Add(groundShape);
 
-			Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0, -10, 0));
+			Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0, 0, 0));
 			//Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0,-10,0));
+            Matrix rotateMatrix = Matrix.CreateFromYawPitchRoll(0,MathUtil.SIMD_PI/2.0f, 0);
+            //Matrix rotateMatrix = Matrix.Identity;
+            rotateMatrix.Translation = Vector3.Zero;
 			float mass = 0f;
-			LocalCreateRigidBody(mass, ref groundTransform, groundShape);
+			LocalCreateRigidBody(mass, ref rotateMatrix, groundShape);
 
 
-			CollisionShape boxShape = new BoxShape(new Vector3(0.2f, 0.2f, 0.2f));
+            CollisionShape boxShape = new BoxShape(new Vector3(0.2f, 0.2f, 0.2f));
+            //CollisionShape boxShape = new CylinderShape(new Vector3(0.2f,0.4f,0.2f));
 
 			Matrix boxTransform = Matrix.Identity;
 			boxTransform.Translation = new Vector3(0, 3, 0);
 
 
-			LocalCreateRigidBody(1.0f, boxTransform, boxShape);
+			LocalCreateRigidBody(1.25f, boxTransform, boxShape);
 
-
+            ClientResetScene();
 
 		}
 

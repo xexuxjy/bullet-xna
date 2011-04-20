@@ -32,11 +32,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
     {
 	    void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex);
         void Cleanup();
+        bool graphics();
+
     }
 
     public interface IInternalTriangleIndexCallback
     {
         void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex);
         void Cleanup();
+        bool graphics();
     }
 }

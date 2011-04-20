@@ -205,6 +205,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public float m_maxDot;
 	    public Vector3 m_supportVecLocal;
 
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
+
 	    public SupportVertexCallback(ref Vector3 supportVecWorld,ref Matrix trans)
 	    {
             m_supportVertexLocal = Vector3.Zero;
@@ -257,6 +263,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_aabbMin = aabbMin;
             m_aabbMax = aabbMax;
         }
+
+        public virtual bool graphics()
+        {
+            return m_callback.graphics();
+        }
+
 
 		public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle,int partId,int triangleIndex)
 		{

@@ -1392,6 +1392,11 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
             m_worldTrans = worldTrans;
         }
 
+        public virtual bool graphics()
+        {
+            return true;
+        }
+
         public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
         {
             ProcessTriangle(triangle,partId,triangleIndex);

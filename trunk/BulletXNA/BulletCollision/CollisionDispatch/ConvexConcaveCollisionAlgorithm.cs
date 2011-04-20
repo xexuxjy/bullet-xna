@@ -273,7 +273,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             public float m_ccdSphereRadius;
             public float m_hitFraction;
-	
+
+            public virtual bool graphics()
+            {
+                return false;
+            }
 
 		    public LocalTriangleSphereCastCallback(ref Matrix from,ref Matrix to,float ccdSphereRadius,float hitFraction)
 		    {
@@ -335,6 +339,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         public int	m_triangleCount;
 	
 	    public PersistentManifold m_manifoldPtr;
+
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
 
         public ConvexTriangleCallback(IDispatcher dispatcher, CollisionObject body0, CollisionObject body1, bool isSwapped)
         {

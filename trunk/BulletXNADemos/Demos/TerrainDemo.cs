@@ -145,6 +145,13 @@ namespace BulletXNADemos.Demos
 	        // create ground object
 	        float mass = 0.0f;
             m_terrainRigidBody = LocalCreateRigidBody(mass, ref tr, m_terrainShape);
+
+            CollisionShape sphere = new SphereShape(0.5f);
+            tr = Matrix.CreateTranslation(new Vector3(0, 0, 0));
+
+            LocalCreateRigidBody(1f,ref tr,sphere);
+
+
         }
 
         public override void ShutdownDemo()

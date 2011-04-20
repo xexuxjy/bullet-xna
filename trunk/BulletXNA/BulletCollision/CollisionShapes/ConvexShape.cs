@@ -62,6 +62,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public Vector3 LocalGetSupportVertexWithoutMarginNonVirtual(ref Vector3 localDir)
         {
             Vector3 result = Vector3.Zero;
+            if (BulletGlobals.g_streamWriter != null && debugConvexShape)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual " + GetName());
+            }
+
             switch (m_shapeType)
             {
                 case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
@@ -92,14 +97,17 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         TriangleShape triangleShape = (TriangleShape)this;
                         Vector3 dir = localDir;
                         IList<Vector3> vertices = triangleShape.m_vertices1;
-                            Vector3 dots = new Vector3(Vector3.Dot(dir, vertices[0]), Vector3.Dot(dir, vertices[1]), Vector3.Dot(dir, vertices[2]));
-                        Vector3 sup = vertices[MathUtil.MaxAxis(ref dots)];
+                        Vector3 dots = new Vector3(Vector3.Dot(dir, vertices[0]), Vector3.Dot(dir, vertices[1]), Vector3.Dot(dir, vertices[2]));
+                        int maxAxis = MathUtil.MaxAxis(ref dots);
+                        Vector3 sup = vertices[maxAxis];
                         if (BulletGlobals.g_streamWriter != null && debugConvexShape)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual::Triangle");
+                            BulletGlobals.g_streamWriter.WriteLine(String.Format("MaxAxis [{0}]", maxAxis));
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "vtx0", vertices[0]);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "vtx1", vertices[1]);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "vtx2", vertices[2]);
+                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "dir", dir);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "dots", dots);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sup", sup);
 

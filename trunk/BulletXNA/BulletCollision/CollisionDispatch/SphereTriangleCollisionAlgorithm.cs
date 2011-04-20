@@ -97,8 +97,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
         {
-            resultOut = new ManifoldResult();
-            //not yet
             return 1f;
         }
 

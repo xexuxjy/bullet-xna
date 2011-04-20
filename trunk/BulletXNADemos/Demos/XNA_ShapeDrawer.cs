@@ -1053,7 +1053,7 @@ namespace BulletXNADemos.Demos
 	    private IList<ShapeCache> m_shapecaches = new List<ShapeCache>();
 
         private const int m_textureVertexMaxSize = 10000;
-        private const int m_lineVertexMaxSize = 5000;
+        private const int m_lineVertexMaxSize = 50000;
 
         private int m_texturedVertexCount;
         private int m_lineIndex = 0;
@@ -1131,6 +1131,12 @@ namespace BulletXNADemos.Demos
 
     public class XNADrawcallback : ITriangleCallback
     {
+
+        public virtual bool graphics()
+        {
+            return true;
+        }
+
 	    public bool	m_wireframe;
         private XNA_ShapeDrawer m_shapeDrawer;
         private static Vector3 RED = new Vector3(1, 0, 0);
@@ -1184,10 +1190,16 @@ namespace BulletXNADemos.Demos
         {
         }
 
+
     }
 
     public class TriangleGlDrawcallback : IInternalTriangleIndexCallback
     {
+        public virtual bool graphics()
+        {
+            return true;
+        }
+
         public TriangleGlDrawcallback(XNA_ShapeDrawer shapeDrawer)
         {
             m_shapeDrawer = shapeDrawer;

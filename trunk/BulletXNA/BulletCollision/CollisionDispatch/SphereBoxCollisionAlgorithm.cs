@@ -67,7 +67,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             //(void)resultOut;
             if (m_manifoldPtr == null)
             {
-                resultOut = null;
                 return;
             }
 
@@ -82,7 +81,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        float radius = sphere0.GetRadius();
         	
 	        float dist = GetSphereDistance(boxObj,ref pOnBox,ref pOnSphere,ref sphereCenter,radius);
-            resultOut = new ManifoldResult();
 	        resultOut.SetPersistentManifold(m_manifoldPtr);
 
 	        if (dist < MathUtil.SIMD_EPSILON)

@@ -90,8 +90,15 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 								triangle[1] = vertexList[indexList[triIndex+1]] * meshScaling;
 								triangle[2] = vertexList[indexList[triIndex+2]] * meshScaling;
 
+						        if(BulletGlobals.g_streamWriter != null && debugStridingMesh && !callback.graphics())
+						        {
+							        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+						        }
 
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
+
+                                callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
 						}
                         else if (vertexbase is ObjectArray<float>)
@@ -242,7 +249,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		}
 
         protected Vector3 m_scaling;
-
+        public static bool debugStridingMesh = false;
     }
 
 
@@ -256,6 +263,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			m_aabbMin = MathUtil.MAX_VECTOR;
 			m_aabbMax = MathUtil.MIN_VECTOR;
 		}
+        public virtual bool graphics()
+        {
+            return false;
+        }
 
         public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
 		{

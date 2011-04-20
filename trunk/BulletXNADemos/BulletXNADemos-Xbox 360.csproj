@@ -74,6 +74,7 @@
     <Compile Include="Demos\ConstraintDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
+    <Compile Include="Demos\IslandStressDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />

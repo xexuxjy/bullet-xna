@@ -48,6 +48,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_hitFraction = 1f;
         }
 
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
         public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
         {
             Vector3[] raw = triangle.GetRawArray();
@@ -168,6 +174,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_triangleToWorld = triangleToWorld;
             m_triangleCollisionMargin = triangleCollisionMargin;
         }
+
+        public virtual bool graphics()
+        {
+            return false;
+        }
+
 
         public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
         {

@@ -54,6 +54,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
+
+            if (BulletGlobals.g_streamWriter != null && debugGJK)
+            {
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
+            }
+
         }
 
         public GjkPairDetector(ConvexShape objectA, ConvexShape objectB, BroadphaseNativeTypes shapeTypeA, BroadphaseNativeTypes shapeTypeB, float marginA, float marginB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
@@ -72,6 +78,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
+            if (BulletGlobals.g_streamWriter != null && debugGJK)
+            {
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector-alt [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
+            }
 
         }
 
@@ -162,28 +172,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     }
                     Vector3 seperatingAxisInA = MathUtil.TransposeTransformNormal(-m_cachedSeparatingAxis, input.m_transformA);
                     Vector3 seperatingAxisInB = MathUtil.TransposeTransformNormal(m_cachedSeparatingAxis, input.m_transformB);
-#if true
 
                     Vector3 pInA = m_minkowskiA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
                     Vector3 qInB = m_minkowskiB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
 
-                    //			btVector3 pInA  = localGetSupportingVertexWithoutMargin(m_shapeTypeA, m_minkowskiA, seperatingAxisInA,input.m_convexVertexData[0]);//, &featureIndexA);
-                    //			btVector3 qInB  = localGetSupportingVertexWithoutMargin(m_shapeTypeB, m_minkowskiB, seperatingAxisInB,input.m_convexVertexData[1]);//, &featureIndexB);
-
-#else
-                    Vector3 pInA = m_minkowskiA.localGetSupportingVertexWithoutMargin(ref seperatingAxisInA);
-                    Vector3 qInB = m_minkowskiB.localGetSupportingVertexWithoutMargin(ref seperatingAxisInB);
-#if TEST_NON_VIRTUAL
-                    Vector3 pInAv = m_minkowskiA->localGetSupportingVertexWithoutMargin(seperatingAxisInA);
-                    Vector3 qInBv = m_minkowskiB->localGetSupportingVertexWithoutMargin(seperatingAxisInB);
-                    Debug.Assert((pInAv-pInA).Length() < 0.0001);
-                    Debug.Assert((qInBv-qInB).Length() < 0.0001);
-#endif //
-#endif
                     Vector3 pWorld = Vector3.Transform(pInA, localTransA);
                     Vector3 qWorld = Vector3.Transform(qInB, localTransB);
-
-
 
                     if (check2d)
                     {
@@ -402,11 +396,14 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         if (BulletGlobals.g_streamWriter != null && debugGJK)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("calcPenDepthResult");
+                            BulletGlobals.g_streamWriter.WriteLine("lastMethodUsed : "+m_lastUsedMethod);
+                            
                             MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "localTransA", localTransA);
                             MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "localTransB", localTransB);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sepAxis", m_cachedSeparatingAxis);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "tmpA", tmpPointOnA);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "tmpB", tmpPointOnB);
+                            
                         }
 
 
@@ -560,6 +557,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         //temp globals, to improve GJK/EPA/penetration calculations
         private static int gNumDeepPenetrationChecks = 0;
         private static int gNumGjkChecks = 0;
-        public static bool debugGJK = false;
+        public static bool debugGJK = true;
     }
 }

@@ -572,6 +572,11 @@ namespace BulletXNA
         Vector3 m_color;
         Matrix m_worldTrans;
 
+        public virtual bool graphics()
+        {
+            return true;
+        }
+
         public DebugDrawcallback(IDebugDraw debugDrawer, ref Matrix worldTrans, ref Vector3 color)
         {
             m_debugDrawer = debugDrawer;

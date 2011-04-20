@@ -75,7 +75,7 @@ namespace BulletXNA.BullettCollision.BroadphaseCollision
 
 	        CollisionObject	col0 = body0;
 	        CollisionObject	col1 = body1;
-            resultOut = new ManifoldResult(body0, body1);
+            //resultOut = new ManifoldResult(body0, body1);
 	        BoxShape box0 = (BoxShape)col0.GetCollisionShape();
 	        BoxShape box1 = (BoxShape)col1.GetCollisionShape();
 

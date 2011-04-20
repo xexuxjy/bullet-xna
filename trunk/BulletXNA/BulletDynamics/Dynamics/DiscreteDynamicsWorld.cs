@@ -139,6 +139,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        //clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
 		        int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps)? maxSubSteps : numSimulationSubSteps;
 
+                if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine(String.Format("Stepsimulation numClamped[{0}] timestep[{1:0.00000}]", clampedSimulationSteps, fixedTimeStep));
+                }
+
 		        SaveKinematicState(fixedTimeStep*clampedSimulationSteps);
 
 		        ApplyGravity();
@@ -593,6 +598,11 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    protected virtual void	IntegrateTransforms(float timeStep)
         {
             //BT_PROFILE("integrateTransforms");
+            if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms");
+            }
+
 	        Matrix predictedTrans = Matrix.Identity;
 			int length = m_nonStaticRigidBodies.Count;
 			for (int i = 0; i < length; ++i)
@@ -701,7 +711,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
             if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
             {
-                BulletGlobals.g_streamWriter.WriteLine("buildAndProcessIsland");
+                BulletGlobals.g_streamWriter.WriteLine("buildAndProcessIslands");
             }
 
 	        /// solve all the constraints for this island

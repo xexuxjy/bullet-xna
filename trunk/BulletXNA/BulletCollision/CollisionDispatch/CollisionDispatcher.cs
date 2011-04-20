@@ -21,6 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#define USE_POOLED_MANIFOLDRESULT
+
 using System;
 using System.Collections.Generic;
 
@@ -40,8 +42,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_collisionConfiguration = collisionConfiguration;
             m_dispatcherFlags = DispatcherFlags.CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD;
             SetNearCallback(new DefaultNearCallback());
-            //m_manifoldsPtr = new List<PersistentManifold>();
-            m_manifoldsPtr = new ObjectArray<PersistentManifold>();
 
             int maxTypes = (int)BroadphaseNativeTypes.MAX_BROADPHASE_COLLISION_TYPES;
             m_doubleDispatch = new CollisionAlgorithmCreateFunc[maxTypes,maxTypes];
@@ -87,7 +87,19 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        float contactProcessingThreshold = Math.Min(body0.GetContactProcessingThreshold(),body1.GetContactProcessingThreshold());
         		
-	        PersistentManifold manifold = new PersistentManifold (body0,body1,0,contactBreakingThreshold,contactProcessingThreshold);
+            // nothing in our pool so create a new one and return it.
+            // need a way to flush the pool ideally
+            PersistentManifold manifold = null;
+            if (m_persistentManifoldsPool.Count == 0)
+            {
+                manifold = new PersistentManifold() ;
+                m_persistentManifoldsPool.Push(manifold);
+            }
+            
+            // remove the last item in the pool.
+            manifold = m_persistentManifoldsPool.Pop();
+            manifold.Initialise(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
+            
             manifold.m_index1a = m_manifoldsPtr.Count;
 	        m_manifoldsPtr.Add(manifold);
 
@@ -107,7 +119,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_manifoldsPtr[m_manifoldsPtr.Count-1] = swapTemp;
             m_manifoldsPtr[findIndex].m_index1a = findIndex;
             m_manifoldsPtr.RemoveAt(m_manifoldsPtr.Count-1);
-
+            
+            // and return it to free list.
+            m_persistentManifoldsPool.Push(manifold);
         }
         
         public virtual void ClearManifold(PersistentManifold manifold)
@@ -236,7 +250,36 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return m_manifoldsPtr;
         }
 
-        private ObjectArray<PersistentManifold> m_manifoldsPtr;
+        public ManifoldResult GetNewManifoldResult(CollisionObject o1, CollisionObject o2)
+        {
+            ManifoldResult manifoldResult= null;
+#if USE_POOLED_MANIFOLDRESULT
+            if (m_manifoldResultsPool.Count == 0)
+            {
+                manifoldResult = new ManifoldResult();
+                m_manifoldResultsPool.Push(manifoldResult);
+            }
+            Debug.Assert(m_manifoldResultsPool.Count > 0);
+            manifoldResult = m_manifoldResultsPool.Pop();
+#endif
+            manifoldResult.Initialise(o1, o2);
+            return manifoldResult;
+        }
+
+        public void FreeManifoldResult(ManifoldResult result)
+        {
+#if USE_POOLED_MANIFOLDRESULT
+            m_manifoldResultsPool.Push(result);
+#else
+
+#endif
+        }
+
+
+        private ObjectArray<PersistentManifold> m_manifoldsPtr = new ObjectArray<PersistentManifold>();
+        private Stack<PersistentManifold> m_persistentManifoldsPool = new Stack<PersistentManifold>();
+        private Stack<ManifoldResult> m_manifoldResultsPool = new Stack<ManifoldResult>();
+
         private DispatcherFlags m_dispatcherFlags;
 
         //private bool m_useIslands;
@@ -313,7 +356,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 			    if (collisionPair.m_algorithm != null)
 			    {
-				    ManifoldResult contactPointResult = new ManifoldResult(colObj0,colObj1);
+				    ManifoldResult contactPointResult = dispatcher.GetNewManifoldResult(colObj0,colObj1);
 
                     if (dispatchInfo.GetDispatchFunc() == DispatchFunc.DISPATCH_DISCRETE)
 				    {
@@ -329,6 +372,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                             dispatchInfo.SetTimeOfImpact(toi);
                         }
 				    }
+
+                    dispatcher.FreeManifoldResult(contactPointResult);
 			    }
 		    }
         }

@@ -1253,14 +1253,10 @@ namespace BulletXNA
 				{
 					writer.WriteLine(name);
 				}
-				writer.Write("[Right       ]");
-				PrintVector3(writer, m.Right);
-				writer.Write("[Up          ]");
-				PrintVector3(writer, m.Up);
-				writer.Write("[Backward    ]");
-				PrintVector3(writer, m.Backward);
-				writer.Write("[Translation ]");
-				PrintVector3(writer, m.Translation);
+				PrintVector3(writer, "Right       ",m.Right);
+				PrintVector3(writer, "Up          ",m.Up);
+				PrintVector3(writer, "Backward    ",m.Backward);
+				PrintVector3(writer, "Translation ",m.Translation);
 			}
 		}
 

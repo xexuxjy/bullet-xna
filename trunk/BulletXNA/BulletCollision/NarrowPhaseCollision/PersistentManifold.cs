@@ -115,6 +115,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public PersistentManifold()
             : base((int)ContactManifoldTypes.BT_PERSISTENT_MANIFOLD_TYPE)
         {
+            for (int i = 0; i < m_pointCache.Length; ++i)
+            {
+                m_pointCache[i] = new ManifoldPoint();
+            }
         }
 
         public PersistentManifold(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold)
@@ -129,6 +133,15 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             {
                 m_pointCache[i] = new ManifoldPoint();
             }
+        }
+
+        public void Initialise(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold)
+        {
+            m_body0 = body0;
+            m_body1 = body1;
+            m_contactBreakingThreshold = contactBreakingThreshold;
+            m_contactProcessingThreshold = contactProcessingThreshold;
+            m_cachedPoints = 0;
         }
 
         public Object GetBody0()
@@ -437,7 +450,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public static IContactProcessedCallback gContactProcessedCallback = null;
 
 
-        public static bool debugPersistentManifold = false;
+        public static bool debugPersistentManifold = true;
 
         #region IComparable Members
 

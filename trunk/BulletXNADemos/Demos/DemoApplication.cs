@@ -1483,7 +1483,7 @@ namespace BulletXNADemos.Demos
 		        double parent_time = m_profileIterator.Is_Root() ? time_since_reset : m_profileIterator.Get_Current_Parent_Total_Time();
 
 		        {
-                    blockTime = String.Format("--- Profiling: {0} (total running time: {1} ms) ---",m_profileIterator.Get_Current_Parent_Name(), parent_time);
+                    blockTime = String.Format("--- Profiling: {0} (total running time: {1:0.000} ms) ---",m_profileIterator.Get_Current_Parent_Name(), parent_time);
 			        DisplayProfileString(xOffset,yStart,blockTime);
 			        yStart += yIncr;
     			
@@ -1502,7 +1502,7 @@ namespace BulletXNADemos.Demos
 			        accumulated_time += current_total_time;
 			        double fraction = parent_time > MathUtil.SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0f;
 
-			        blockTime = String.Format("{0} -- {1} ({2} %%) :: {3} ms / frame ({4} calls)",
+			        blockTime = String.Format("{0} -- {1} ({2:0.00} %%) :: {3:0.000} ms / frame ({4} calls)",
 				        ++i, m_profileIterator.Get_Current_Name(), fraction,
 				        (current_total_time / (double)frames_since_reset),m_profileIterator.Get_Current_Total_Calls());
 			        DisplayProfileString(xOffset,yStart,blockTime);
@@ -1510,7 +1510,7 @@ namespace BulletXNADemos.Demos
 			        totalTime += current_total_time;
 		        }
 
-		        blockTime = String.Format("{0} ({1}%) :: {2} ms", "Unaccounted",
+		        blockTime = String.Format("{0} ({1:0.000}%) :: {2:0.000} ms", "Unaccounted",
 			        // (min(0, time_since_reset - totalTime) / time_since_reset) * 100);
 			        parent_time > MathUtil.SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0f, parent_time - accumulated_time);
 

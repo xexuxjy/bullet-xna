@@ -138,7 +138,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
 	    public virtual void	UpdateAabbs()
         {
-            //BT_PROFILE("updateAabbs");
+            BulletGlobals.StartProfile("updateAabbs");
 
 	        Matrix predictedTrans = new Matrix();
 	        for (int i=0;i<m_collisionObjects.Count;i++)
@@ -151,6 +151,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 			        UpdateSingleAabb(colObj);
 		        }
 	        }
+            BulletGlobals.StopProfile();
         }
 
 	
@@ -184,7 +185,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 	    /// This allows for several queries: first hit, all hits, any hit, dependent on the value returned by the callback.
 	    public virtual void	RayTest(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, RayResultCallback resultCallback)
         {
-            //BT_PROFILE("rayTest");
+            BulletGlobals.StartProfile("rayTest");
 	        /// use the broadphase to accelerate the search for objects, based on their aabb
 	        /// and for each object with ray-aabb overlap, perform an exact ray test
 	        SingleRayCallback rayCB = new SingleRayCallback(ref rayFromWorld,ref rayToWorld,this,resultCallback);
@@ -199,7 +200,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 		        rayCB.Process(m_collisionObjects[i].GetBroadphaseHandle());
 	        }	
             #endif //USE_BRUTEFORCE_RAYBROADPHASE
-
+            BulletGlobals.StopProfile();
         }
 
 
@@ -225,7 +226,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
         public virtual void ConvexSweepTest (ConvexShape castShape, ref Matrix convexFromWorld, ref Matrix convexToWorld, ConvexResultCallback resultCallback,  float allowedCcdPenetration)
         {
-            //BT_PROFILE("convexSweepTest");
+            BulletGlobals.StartProfile("convexSweepTest");
 	        /// use the broadphase to accelerate the search for objects, based on their aabb
 	        /// and for each object with ray-aabb overlap, perform an exact ray test
 	        /// unfortunately the implementation for rayTest and convexSweepTest duplicated, albeit practically identical
@@ -284,6 +285,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 		        }
 	        }
         #endif //USE_BRUTEFORCE_RAYBROADPHASE
+            BulletGlobals.StopProfile();
         }
 
         public virtual void AddCollisionObject(CollisionObject collisionObject)
@@ -332,26 +334,29 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
         public virtual void	PerformDiscreteCollisionDetection()
         {
-            //BT_PROFILE("performDiscreteCollisionDetection");
+            BulletGlobals.StartProfile("performDiscreteCollisionDetection");
 
 	        DispatcherInfo dispatchInfo = GetDispatchInfo();
 
 	        UpdateAabbs();
 
 	        {
-                //BT_PROFILE("calculateOverlappingPairs");
+                BulletGlobals.StartProfile("calculateOverlappingPairs");
 		        m_broadphasePairCache.CalculateOverlappingPairs(m_dispatcher1);
+                BulletGlobals.StopProfile();
 	        }
 
 
 	        IDispatcher dispatcher = GetDispatcher();
 	        {
-                //BT_PROFILE("dispatchAllCollisionPairs");
+                BulletGlobals.StartProfile("dispatchAllCollisionPairs");
 		        if (dispatcher != null)
                 {
 			        dispatcher.DispatchAllCollisionPairs(m_broadphasePairCache.GetOverlappingPairCache(),dispatchInfo,m_dispatcher1);
                 }
+                BulletGlobals.StopProfile();
 	        }
+            BulletGlobals.StopProfile();
         }
 
 
@@ -397,7 +402,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
 	    if (collisionShape.IsConvex())
 	    {
-    //		BT_PROFILE("rayTestConvex");
+            BulletGlobals.StartProfile("rayTestConvex");
 		    CastResult castResult = new CastResult();
 		    castResult.m_fraction = resultCallback.m_closestHitFraction;
 
@@ -451,12 +456,13 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 			    }
 		    }
             castResult.Cleanup();
+            BulletGlobals.StopProfile();
 	    } 
         else 
         {
 		    if (collisionShape.IsConcave())
 		    {
-    //			BT_PROFILE("rayTestConcave");
+                BulletGlobals.StartProfile("rayTestConcave");
 		    	if (collisionShape.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE && collisionShape is BvhTriangleMeshShape)
 	    		{
 				    ///optimized version for btBvhTriangleMeshShape
@@ -494,10 +500,11 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 				    concaveShape.ProcessAllTriangles(rcb,ref rayAabbMinLocal,ref rayAabbMaxLocal);
                     rcb.Cleanup();
 			    }
+                BulletGlobals.StopProfile();
 		    } 
             else 
             {
-                // BT_PROFILE("rayTestCompound");
+                BulletGlobals.StartProfile("rayTestCompound");
 			    ///@todo: use AABB tree or other BVH acceleration structure, see btDbvt
 			    if (collisionShape.IsCompound())
 			    {
@@ -524,8 +531,10 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 					    collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
                         my_cb.cleanup();
 				    }
-			    }
-		    }
+                }
+
+                BulletGlobals.StopProfile();
+            }
 	    }
     }
 
@@ -537,7 +546,8 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
     {
 	    if (collisionShape.IsConvex())
 	    {
-		    //BT_PROFILE("convexSweepConvex");
+
+		    BulletGlobals.StartProfile("convexSweepConvex");
 		    CastResult castResult = new CastResult();
 		    castResult.m_allowedPenetration = allowedPenetration;
 		    castResult.m_fraction = resultCallback.m_closestHitFraction;//float(1.);//??
@@ -575,6 +585,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 				    }
 			    }
 		    }
+            BulletGlobals.StopProfile();
 	    } 
         else 
         {
@@ -582,7 +593,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 		    {
 			    if (collisionShape.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE)
 			    {
-				    //BT_PROFILE("convexSweepbtBvhTriangleMesh");
+                    BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
 				    BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
 				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
 				    Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation,worldTocollisionObject);
@@ -597,10 +608,11 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
                     Vector3 boxMaxLocal = new Vector3();
 				    castShape.GetAabb(ref rotationXform, ref boxMinLocal, ref boxMaxLocal);
 				    triangleMesh.PerformConvexCast(tccb,ref convexFromLocal,ref convexToLocal,ref boxMinLocal, ref boxMaxLocal);
+                    BulletGlobals.StopProfile();
 			    } 
                 else
 			    {
-				    //BT_PROFILE("convexSweepConcave");
+                    BulletGlobals.StartProfile("convexSweepConcave");
 				    ConcaveShape concaveShape = (ConcaveShape)collisionShape;
 				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
 				    Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation,worldTocollisionObject);
@@ -624,6 +636,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 				    rayAabbMinLocal += boxMinLocal;
 				    rayAabbMaxLocal += boxMaxLocal;
 				    concaveShape.ProcessAllTriangles(tccb,ref rayAabbMinLocal,ref rayAabbMaxLocal);
+                    BulletGlobals.StopProfile();
 			    }
             } 
             else 
@@ -631,7 +644,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 			    ///@todo : use AABB tree or other BVH acceleration structure!
 			    if (collisionShape.IsCompound())
 			    {
-                    //BT_PROFILE("convexSweepCompound");
+                    BulletGlobals.StartProfile("convexSweepCompound");
                     CompoundShape compoundShape = (CompoundShape)collisionShape;
 				    for (int i=0;i<compoundShape.GetNumChildShapes();i++)
 				    {
@@ -654,7 +667,8 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 					    // restore
 					    collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
 				    }
-			    }
+                    BulletGlobals.StopProfile();
+                }
 		    }
 	    }
     }

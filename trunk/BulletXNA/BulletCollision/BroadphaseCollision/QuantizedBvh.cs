@@ -631,9 +631,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			        ///thanks Joerg/hiker for the reproduction case!
 			        ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
 
-			        //BT_PROFILE("btRayAabb2");
+			        BulletGlobals.StartProfile("btRayAabb2");
 			        rayBoxOverlap = AabbUtil2.RayAabb2 (ref raySource, ref rayDirection, sign, bounds, ref param, 0.0f, lambda_max);
-        			
+                    BulletGlobals.StopProfile();
 #else
                     rayBoxOverlap = true;//btRayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
 #endif

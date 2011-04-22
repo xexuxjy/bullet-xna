@@ -29,8 +29,8 @@ namespace BulletXNA
 {
     public interface IProfile
     {
-         void startProfile(String name);
-         void endProfile(String name);
+         void StartProfile(String name);
+         void EndProfile(String name);
     }
 
     public interface IProfileManager
@@ -43,8 +43,8 @@ namespace BulletXNA
          int Get_Frame_Count_Since_Reset();
          float Get_Time_Since_Reset();
 
-	     void	dumpRecursive(IProfileIterator profileIterator, int spacing);
-         void dumpAll();
+	     void	DumpRecursive(IProfileIterator profileIterator, int spacing);
+         void DumpAll();
 
          IProfileIterator getIterator();
 

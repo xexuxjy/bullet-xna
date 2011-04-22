@@ -98,7 +98,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
         {
 	        StartProfiling(timeStep);
 
-            //BT_PROFILE("stepSimulation");
+            BulletGlobals.StartProfile("stepSimulation");
 
 	        int numSimulationSubSteps = 0;
 
@@ -371,7 +371,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	    public override void DebugDrawWorld()
         {
-            //BT_PROFILE("debugDrawWorld");
+            BulletGlobals.StartProfile("debugDrawWorld");
             //base.debugDrawWorld();
             //if (getDebugDrawer() != null && ((getDebugDrawer().getDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
             //{
@@ -482,7 +482,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 			            }
 		            }
                 }
-	        }
+                BulletGlobals.StopProfile();
+            }
         }
 
 	    public override void SetConstraintSolver(IConstraintSolver solver)
@@ -574,7 +575,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	    protected virtual void PredictUnconstraintMotion(float timeStep)
         {
-            //BT_PROFILE("predictUnconstraintMotion");
+            BulletGlobals.StartProfile("predictUnconstraintMotion");
 			int length = m_nonStaticRigidBodies.Count;
 			for (int i = 0; i < length; ++i)
 			{
@@ -593,11 +594,12 @@ namespace BulletXNA.BulletDynamics.Dynamics
 			        }
 		        }
 	        }
+            BulletGlobals.StopProfile();
         }
     	
 	    protected virtual void	IntegrateTransforms(float timeStep)
         {
-            //BT_PROFILE("integrateTransforms");
+            BulletGlobals.StartProfile("integrateTransforms");
             if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms");
@@ -619,7 +621,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 				        if (body.GetCcdSquareMotionThreshold() != 0 && body.GetCcdSquareMotionThreshold() < squareMotion)
 				        {
-                            //BT_PROFILE("CCD motion clamping");
+                            BulletGlobals.StartProfile("CCD motion clamping");
 					        if (body.GetCollisionShape().IsConvex())
 					        {
 						        gNumClampedCcdMotions++;
@@ -640,17 +642,19 @@ namespace BulletXNA.BulletDynamics.Dynamics
         //							printf("clamped integration to hit fraction = %f\n",fraction);
 						        }
 					        }
+                            BulletGlobals.StopProfile();
 				        }
 				        body.ProceedToTransform(ref predictedTrans);
 			        }
 		        }
 	        }
+            BulletGlobals.StopProfile();
         }
     		
 	    protected virtual void	CalculateSimulationIslands()
         {
 
-            //BT_PROFILE("calculateSimulationIslands");
+            BulletGlobals.StartProfile("calculateSimulationIslands");
 
 	        GetSimulationIslandManager().UpdateActivationState(GetCollisionWorld(),GetCollisionWorld().GetDispatcher());
 	        {
@@ -675,6 +679,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	        //Store the island id in each body
 	        GetSimulationIslandManager().StoreIslandActivationState(GetCollisionWorld());
+            BulletGlobals.StopProfile();
         }
 
 	    protected virtual void SolveConstraints(ContactSolverInfo solverInfo)
@@ -724,7 +729,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
     	
 	    protected void	UpdateActivationState(float timeStep)
         {
-            //BT_PROFILE("updateActivationState");
+            BulletGlobals.StartProfile("updateActivationState");
 
 			int length = m_nonStaticRigidBodies.Count;
 			for (int i = 0; i < length; ++i)
@@ -759,29 +764,29 @@ namespace BulletXNA.BulletDynamics.Dynamics
 			        }
 		        }
 	        }
+            BulletGlobals.StopProfile();
         }
 
 	    protected void	UpdateActions(float timeStep)
         {
-            //BT_PROFILE("updateActions");
+            BulletGlobals.StartProfile("updateActions");
 			int length = m_actions.Count;
 			for (int i = 0; i < length;++i )
 			{
 				m_actions[i].UpdateAction(this, timeStep);
 			}
+            BulletGlobals.StopProfile();
         }
 
         protected void StartProfiling(float timeStep)
         {
-            if (m_profileManager != null)
-            {
-                m_profileManager.Reset();
-            }
+            BulletGlobals.ResetProfile();
+
         }
 
 	    protected virtual void InternalSingleStepSimulation( float timeStep)
         {
-            //BT_PROFILE("internalSingleStepSimulation");
+            BulletGlobals.StartProfile("internalSingleStepSimulation");
 
             if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
             {
@@ -825,7 +830,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	        if(m_internalTickCallback != null) 
             {
 		        m_internalTickCallback.InternalTickCallback(this, timeStep);
-	        }	
+	        }
+            BulletGlobals.StopProfile();
         }
 
 

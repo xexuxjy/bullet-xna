@@ -144,7 +144,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        int startIslandIndex;
 	        int numElem = GetUnionFind().GetNumElements();
 
-            //BT_PROFILE("processIslands");
+            BulletGlobals.StartProfile("processIslands");
 
 	        if(!m_splitIslands)
 	        {
@@ -159,11 +159,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		        //std::sort(islandmanifold.begin(), islandmanifold.end(), btPersistentManifoldSortPredicate);
 
 		        int numManifolds = m_islandmanifold.Count;
-                if (numManifolds != 0 && m_islandmanifold[0].GetNumContacts() > 0)
-                {
-                    int ibreak = 0;
-                }
-
 
 		        //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
                 //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
@@ -174,11 +169,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 		        int startManifoldIndex = 0;
 		        int endManifoldIndex = 1;
-
-		        //int islandId;
-
-	            //	printf("Start Islands\n");
-
 		        //traverse the simulation islands, and call the solver, unless all objects are sleeping/deactivated
 		        for ( startIslandIndex=0;startIslandIndex<numElem;startIslandIndex = endIslandIndex)
 		        {
@@ -245,12 +235,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			        m_islandBodies.Clear();
 		        }
 	        } // else if(!splitIslands) 
-
+            BulletGlobals.StopProfile();
         }
 
         public void BuildIslands(IDispatcher dispatcher, CollisionWorld collisionWorld)
         {
-            //BT_PROFILE("islandUnionFindAndQuickSort");
+            BulletGlobals.StartProfile("islandUnionFindAndQuickSort");
 
             ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
 
@@ -393,7 +383,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     }
                 }
             }
-
+            BulletGlobals.StopProfile();
         }
 
 	    public bool GetSplitIslands()

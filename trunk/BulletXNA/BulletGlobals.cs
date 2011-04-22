@@ -49,8 +49,30 @@ namespace BulletXNA
 
         public static StreamWriter g_streamWriter;
 
+        public static IProfileManager g_profileManager;
 
+        public static void StartProfile(String name)
+        {
+            if (g_profileManager != null)
+            {
+                g_profileManager.Start_Profile(name);
+            }
 
+        }
+        public static void StopProfile()
+        {
+            if (g_profileManager != null)
+            {
+                g_profileManager.Stop_Profile();
+            }
+        }
 
+        public static void ResetProfile()
+        {
+            if (g_profileManager != null)
+            {
+                g_profileManager.Reset();
+            }
+        }
     }
 }

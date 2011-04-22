@@ -163,7 +163,14 @@ namespace BulletXNADemos.Demos
             RenderScenePass(0, gameTime);
             Vector3 location = new Vector3(10, 10, 0);
             Vector3 colour = new Vector3(1,1,1);
-            m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)),location,colour);
+            //m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)),location,colour);
+            int	xOffset = 10;
+            int yStart = 20;
+		    int yIncr = 20;
+
+            ShowProfileInfo(xOffset, yStart, yIncr);
+
+
             m_shapeDrawer.RenderOthers(gameTime, ref m_lookAt, ref m_perspective);
         }
 
@@ -1523,6 +1530,7 @@ namespace BulletXNADemos.Demos
 
         private void DisplayProfileString(int xOffset, int yStart, String message)
         {
+            m_shapeDrawer.DrawText(message,new Vector3(xOffset,yStart,0),new Vector3(1,1,1));
         }
 
         //----------------------------------------------------------------------------------------------

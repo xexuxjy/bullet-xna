@@ -64,6 +64,7 @@
   </PropertyGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="BasicProfiler.cs" />
     <Compile Include="BulletCollision\CollisionDispatch\Box2dBox2dCollisionAlgorithm.cs" />
     <Compile Include="BulletCollision\CollisionDispatch\BoxBoxDetector2.cs" />
     <Compile Include="BulletCollision\CollisionDispatch\Convex2dConvex2dAlgorithm.cs" />

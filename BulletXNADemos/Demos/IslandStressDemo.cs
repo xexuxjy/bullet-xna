@@ -12,6 +12,8 @@ using BulletXNA.BulletDynamics.ConstraintSolver;
 using BulletXNA.LinearMath;
 using System.IO;
 using BulletXNA;
+using BulletXNA.BullettDynamics.Dynamics;
+using BulletXNA.BullettCollision.CollisionDispatch;
 
 namespace BulletXNADemos.Demos
 {
@@ -48,6 +50,10 @@ namespace BulletXNADemos.Demos
             Vector3 gravity = new Vector3(0, -10, 0);
             m_dynamicsWorld.SetGravity(ref gravity);
 
+            m_profileManager = new BasicProfileManager();
+            BulletGlobals.g_profileManager = m_profileManager;
+            m_profileIterator = m_profileManager.getIterator();
+
             ///create a few basic rigid bodies
             Vector3 halfExtents = new Vector3(50, 50, 50);
             //Vector3 halfExtents = new Vector3(10, 10, 10);
@@ -57,13 +63,14 @@ namespace BulletXNADemos.Demos
             //CollisionShape groundShape = BuildLargeMesh();
             m_collisionShapes.Add(groundShape);
             CollisionShape sphereShape = new SphereShape(0.2f);
-            int size = 16; // 16
+            int size = 5; // 16
             for (int i = 0; i < size; ++i)
             {
                 for (int j = 0; j < size; ++j)
                 {
                     Matrix m = Matrix.CreateTranslation(new Vector3(i, 1, j));
-                    LocalCreateRigidBody(1f, m, sphereShape);
+                    RigidBody rb = LocalCreateRigidBody(1f, m, sphereShape);
+                    rb.SetActivationState(ActivationState.ISLAND_SLEEPING);
                 }
             }
 

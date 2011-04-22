@@ -641,7 +641,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		public virtual float SolveGroup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
-			//BT_PROFILE("solveGroup");
+			BulletGlobals.StartProfile("solveGroup");
 			//you need to provide at least some bodies
 			Debug.Assert(bodies.Count > 0);
 
@@ -651,7 +651,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 			SolveGroupCacheFriendlyFinish(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
 
-
+            BulletGlobals.StopProfile();
 			return 0.0f;
 
 		}
@@ -762,13 +762,14 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		protected virtual float SolveGroupCacheFriendlySetup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
-			//BT_PROFILE("solveGroupCacheFriendlySetup");
+			BulletGlobals.StartProfile("solveGroupCacheFriendlySetup");
 			m_counter++;
 
 			if ((numConstraints + numManifolds) == 0)
 			{
 				//		printf("empty\n");
-				return 0f;
+                BulletGlobals.StopProfile();
+                return 0f;
 			}
 
 			//if (true)
@@ -959,6 +960,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				}
 			}
 
+            BulletGlobals.StopProfile();
 			return 0f;
 
 
@@ -967,7 +969,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		//protected virtual float solveGroupCacheFriendlyIterations()
 		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
-			//BT_PROFILE("solveGroupCacheFriendlyIterations");
+            BulletGlobals.StartProfile("solveGroupCacheFriendlyIterations");
 
 			//should traverse the contacts random order...
 			{
@@ -978,6 +980,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
 			}
+            BulletGlobals.StopProfile();
 			return 0.0f;
 		}
 

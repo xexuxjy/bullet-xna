@@ -74,10 +74,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	        Vector3 projectedCenter = center - (Vector3.Dot(m_planeNormal,center) - m_planeConstant)*m_planeNormal;
 
-            ObjectArray<Vector3> triangle = new ObjectArray<Vector3>(3);
-	        triangle.Add(projectedCenter + tangentDir0*radius + tangentDir1*radius);
-            triangle.Add(projectedCenter + tangentDir0 * radius - tangentDir1 * radius);
-            triangle.Add(projectedCenter - tangentDir0 * radius - tangentDir1 * radius);
+            Vector3[] triangle = new Vector3[3];
+	        triangle[0] = (projectedCenter + tangentDir0*radius + tangentDir1*radius);
+            triangle[1] = (projectedCenter + tangentDir0 * radius - tangentDir1 * radius);
+            triangle[2] = (projectedCenter - tangentDir0 * radius - tangentDir1 * radius);
 
 	        callback.ProcessTriangle(triangle,0,0);
 

@@ -333,21 +333,17 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_triangleNodes = triangleNodes;
 		}
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
 		{
-            Vector3 t1 = triangle[0];
-            Vector3 t2 = triangle[1];
-            Vector3 t3 = triangle[2];
-
 			OptimizedBvhNode node = new OptimizedBvhNode();
 			Vector3	aabbMin = MathUtil.MAX_VECTOR;
             Vector3 aabbMax = MathUtil.MIN_VECTOR;
-            MathUtil.VectorMax(ref t1,ref aabbMax);
-            MathUtil.VectorMin(ref t1,ref aabbMin);
-            MathUtil.VectorMax(ref t2,ref aabbMax);
-            MathUtil.VectorMin(ref t2,ref aabbMin);
-            MathUtil.VectorMax(ref t3,ref aabbMax);
-            MathUtil.VectorMin(ref t3,ref aabbMin);
+            MathUtil.VectorMax(ref triangle[0], ref aabbMax);
+            MathUtil.VectorMin(ref triangle[0], ref aabbMin);
+            MathUtil.VectorMax(ref triangle[1], ref aabbMax);
+            MathUtil.VectorMin(ref triangle[1], ref aabbMin);
+            MathUtil.VectorMax(ref triangle[2], ref aabbMax);
+            MathUtil.VectorMin(ref triangle[2], ref aabbMin);
 
 			//with quantization?
 			node.m_aabbMinOrg = aabbMin;
@@ -383,7 +379,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_optimizedTree = tree;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
 		{
 			// The partId and triangle index must fit in the same (positive) integer
 			Debug.Assert(partId < (1<<MAX_NUM_PARTS_IN_BITS));
@@ -396,16 +392,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			aabbMin = MathUtil.MAX_VECTOR;
             aabbMax = MathUtil.MIN_VECTOR;
 
-            Vector3 t1 = triangle[0];
-            Vector3 t2 = triangle[1];
-            Vector3 t3 = triangle[2];
-
-            MathUtil.VectorMin(ref t1, ref aabbMin);
-            MathUtil.VectorMax(ref t1, ref aabbMax);
-            MathUtil.VectorMin(ref t2, ref aabbMin);
-            MathUtil.VectorMax(ref t2, ref aabbMax);
-            MathUtil.VectorMin(ref t3, ref aabbMin);
-            MathUtil.VectorMax(ref t3, ref aabbMax);
+            MathUtil.VectorMin(ref triangle[0], ref aabbMin);
+            MathUtil.VectorMax(ref triangle[0], ref aabbMax);
+            MathUtil.VectorMin(ref triangle[1], ref aabbMin);
+            MathUtil.VectorMax(ref triangle[1], ref aabbMax);
+            MathUtil.VectorMin(ref triangle[2], ref aabbMin);
+            MathUtil.VectorMax(ref triangle[2], ref aabbMax);
 		
 			//PCK: add these checks for zero dimensions of aabb
 			float MIN_AABB_DIMENSION = 0.002f;

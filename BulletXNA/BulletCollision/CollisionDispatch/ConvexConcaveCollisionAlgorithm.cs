@@ -291,14 +291,14 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             {
             }
 
-            public void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+            public void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
 		    {
 			    //do a swept sphere for now
 			    Matrix ident = Matrix.Identity;
 			    CastResult castResult = new CastResult();
 			    castResult.m_fraction = m_hitFraction;
 			    SphereShape	pointShape = new SphereShape(m_ccdSphereRadius);
-			    TriangleShape triShape = new TriangleShape(triangle[0],triangle[1],triangle[2]);
+			    TriangleShape triShape = new TriangleShape(ref triangle[0],ref triangle[1],ref triangle[2]);
 			    VoronoiSimplexSolver	simplexSolver = new VoronoiSimplexSolver();
 			    SubSimplexConvexCast convexCaster = new SubSimplexConvexCast(pointShape,triShape,simplexSolver);
 			    //GjkConvexCast	convexCaster(&pointShape,convexShape,&simplexSolver);
@@ -317,11 +317,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		    }
 
 	    };
-
-
-	
-
-
 
     public class ConvexTriangleCallback : ITriangleCallback
     {
@@ -380,7 +375,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        m_aabbMin -= extra;
         }
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
 	        //aabb filter is already applied!	
 	        CollisionAlgorithmConstructionInfo ci = new CollisionAlgorithmConstructionInfo();
@@ -395,11 +390,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        {
 		        Vector3 color = new Vector3(1,1,0);
 		        Matrix tr = ob.GetWorldTransform();
+
                 Vector3[] transformedTriangles = new Vector3[3];
-                for(int i=0;i<transformedTriangles.Length;++i)
-                {
-                    transformedTriangles[i] = Vector3.Transform(triangle[i],tr);
-                }
+                Vector3.Transform(triangle, ref tr, transformedTriangles);
+
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[0], ref transformedTriangles[1], ref color);
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[1], ref transformedTriangles[2], ref color);
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[2], ref transformedTriangles[0], ref color);

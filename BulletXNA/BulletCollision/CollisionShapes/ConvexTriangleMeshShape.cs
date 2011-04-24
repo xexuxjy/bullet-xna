@@ -206,11 +206,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_maxDot = float.MinValue;
 	    }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
 	    {
 		    for (int i=0;i<3;i++)
 		    {
-			    float dot = Vector3.Dot(m_supportVecLocal,triangle[i]);
+			    float dot;
+                Vector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;
@@ -249,7 +250,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return false;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
             if (first)
             {
@@ -304,7 +305,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_center = center;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
             Matrix i = new Matrix();
             Vector3 a = triangle[0] - m_center;

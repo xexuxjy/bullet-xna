@@ -220,13 +220,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             //m_supportVecLocal = Vector3.TransformNormal(supportVecWorld, m_worldTrans);
 	    }
 
-	    public virtual void ProcessTriangle(ObjectArray<Vector3> triangle,int partId, int triangleIndex)
+	    public virtual void ProcessTriangle(Vector3[] triangle,int partId, int triangleIndex)
 	    {
-            Vector3[] rawData = triangle.GetRawArray();
 		    for (int i=0;i<3;i++)
 		    {
 			    float dot;
-                Vector3.Dot(ref m_supportVecLocal,ref rawData[i],out dot);
+                Vector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;
@@ -270,7 +269,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 
-		public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle,int partId,int triangleIndex)
+		public virtual void InternalProcessTriangleIndex(Vector3[] triangle,int partId,int triangleIndex)
 		{
 			if (AabbUtil2.TestTriangleAgainstAabb2(triangle,ref m_aabbMin,ref m_aabbMax))
 			{

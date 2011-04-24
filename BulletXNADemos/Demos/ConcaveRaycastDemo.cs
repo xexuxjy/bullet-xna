@@ -142,11 +142,11 @@ namespace BulletXNADemos.Demos
 
 
 
-            m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression, ref aabbMin, ref aabbMax, true);
+            //m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression, ref aabbMin, ref aabbMax, true);
             //m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression,true);
 	        Vector3 scaling = Vector3.One;
 			CollisionShape groundShape = m_trimeshShape;
-			//groundShape = new TriangleMeshShape(indexVertexArrays);
+            groundShape = new TriangleMeshShape(indexVertexArrays);
 			//groundShape = new StaticPlaneShape(Vector3.Up, 0f);
             Vector3 up = new Vector3(0.4f,1,0);
             up.Normalize();

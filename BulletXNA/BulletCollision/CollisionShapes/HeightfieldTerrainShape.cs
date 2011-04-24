@@ -448,8 +448,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     }
             }
 
-            ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
-            Vector3[] tempVectors = new Vector3[3];
+            Vector3[] vertices = new Vector3[3];
             for (int j = startJ; j < endJ; j++)
             {
                 for (int x = startX; x < endX; x++)
@@ -457,48 +456,29 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0)))
                     {
                         //first triangle
-                        GetVertex(x, j, ref tempVectors[0]);
-                        GetVertex(x + 1, j, ref tempVectors[1]);
-                        GetVertex(x + 1, j + 1, ref tempVectors[2]);
-                        vertices.Clear();
-                        for (int a = 0; a < tempVectors.Length; ++a)
-                        {
-                            vertices.Add(tempVectors[a]);
-                        }
+                        GetVertex(x, j, ref vertices[0]);
+                        GetVertex(x + 1, j, ref vertices[1]);
+                        GetVertex(x + 1, j + 1, ref vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                         //second triangle
-                        GetVertex(x, j, ref tempVectors[0]);
-                        GetVertex(x + 1, j + 1, ref tempVectors[1]);
-                        GetVertex(x, j + 1, ref tempVectors[2]);
-                        vertices.Clear();
-                        for (int a = 0; a < tempVectors.Length; ++a)
-                        {
-                            vertices.Add(tempVectors[a]);
-                        }
+                        GetVertex(x, j, ref vertices[0]);
+                        GetVertex(x + 1, j + 1, ref vertices[1]);
+                        GetVertex(x, j + 1, ref vertices[2]);
+
                         callback.ProcessTriangle(vertices, x, j);
                     }
                     else
                     {
                         //first triangle
-                        GetVertex(x, j, ref tempVectors[0]);
-                        GetVertex(x, j + 1, ref tempVectors[1]);
-                        GetVertex(x + 1, j, ref tempVectors[2]);
-                        vertices.Clear();
-                        for (int a = 0; a < tempVectors.Length; ++a)
-                        {
-                            vertices.Add(tempVectors[a]);
-                        }
+                        GetVertex(x, j, ref vertices[0]);
+                        GetVertex(x, j + 1, ref vertices[1]);
+                        GetVertex(x + 1, j, ref vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
 
                         //second triangle
-                        GetVertex(x + 1, j, ref tempVectors[0]);
-                        GetVertex(x, j + 1, ref tempVectors[1]);
-                        GetVertex(x + 1, j + 1, ref tempVectors[2]);
-                        vertices.Clear();
-                        for (int a = 0; a < tempVectors.Length; ++a)
-                        {
-                            vertices.Add(tempVectors[a]);
-                        }
+                        GetVertex(x + 1, j, ref vertices[0]);
+                        GetVertex(x, j + 1, ref vertices[1]);
+                        GetVertex(x + 1, j + 1, ref vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                     }
                 }

@@ -36,7 +36,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         void DestroyProxy(BroadphaseProxy proxy,IDispatcher dispatcher);
 	    void SetAabb(BroadphaseProxy proxy,ref Vector3 aabbMin,ref Vector3 aabbMax, IDispatcher dispatcher);
-	    void GetAabb(BroadphaseProxy proxy,ref Vector3 aabbMin,ref Vector3 aabbMax );
+	    void GetAabb(BroadphaseProxy proxy,out Vector3 aabbMin,out Vector3 aabbMax );
 
         void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback);
 	    void RayTest(ref Vector3 rayFrom,ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax);
@@ -49,7 +49,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 	    ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
 	    ///will add some transform later
-	    void GetBroadphaseAabb(ref Vector3 aabbMin,ref Vector3 aabbMax);
+	    void GetBroadphaseAabb(out Vector3 aabbMin,out Vector3 aabbMax);
 
 	    ///reset broadphase internal structures, to ensure determinism/reproducability
         void ResetPool(IDispatcher dispatcher);

@@ -109,8 +109,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
             for (int i = 0; i < multiProxy.m_bridgeProxies.Count; i++)
             {
-                Vector3 worldAabbMin = Vector3.Zero, worldAabbMax = Vector3.Zero;
-                multiProxy.m_bridgeProxies[i].m_childBroadphase.GetBroadphaseAabb(ref worldAabbMin, ref worldAabbMax);
+                Vector3 worldAabbMin;
+                Vector3 worldAabbMax;
+                multiProxy.m_bridgeProxies[i].m_childBroadphase.GetBroadphaseAabb(out worldAabbMin, out worldAabbMax);
                 bool overlapsBroadphase = AabbUtil2.TestAabbAgainstAabb2(ref worldAabbMin, ref worldAabbMax, ref multiProxy.m_aabbMin, ref multiProxy.m_aabbMax);
                 if (!overlapsBroadphase)
                 {
@@ -212,7 +213,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
         }
 
-        public virtual void GetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             MultiSapProxy multiProxy = (MultiSapProxy)(proxy);
             aabbMin = multiProxy.m_aabbMin;
@@ -349,7 +350,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 	    ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
 	    ///will add some transform later
-        public virtual void GetBroadphaseAabb(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
 		    aabbMin = MathUtil.MIN_VECTOR;
 		    aabbMax = MathUtil.MAX_VECTOR;
@@ -363,10 +364,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             for (int i = 0; i < m_sapBroadphases.Count; i++)
             {
                 QuantizedBvhNode node = new QuantizedBvhNode();
-                Vector3 aabbMin = Vector3.Zero, aabbMax = Vector3.Zero;
-                m_sapBroadphases[i].GetBroadphaseAabb(ref aabbMin, ref aabbMax);
-                m_optimizedAabbTree.Quantize(ref node.m_quantizedAabbMin, ref aabbMin, false);
-                m_optimizedAabbTree.Quantize(ref node.m_quantizedAabbMax, ref aabbMax, true);
+                Vector3 aabbMin;
+                Vector3 aabbMax;
+                m_sapBroadphases[i].GetBroadphaseAabb(out aabbMin, out aabbMax);
+                m_optimizedAabbTree.Quantize(out node.m_quantizedAabbMin, ref aabbMin, false);
+                m_optimizedAabbTree.Quantize(out node.m_quantizedAabbMax, ref aabbMax, true);
                 int partId = 0;
                 node.m_escapeIndexOrTriangleIndex = (partId << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)) | i;
                 nodes.Add(node);

@@ -200,7 +200,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 QuantizedBvhNode bvh = m_quantizedContiguousNodes[nodeIndex];
-                Quantize(ref bvh.m_quantizedAabbMin, ref aabbMin, false);
+                Quantize(out bvh.m_quantizedAabbMin, ref aabbMin, false);
                 m_quantizedContiguousNodes[nodeIndex] = bvh;
             }
             else
@@ -215,7 +215,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 QuantizedBvhNode bvh = m_quantizedContiguousNodes[nodeIndex];
-                Quantize(ref bvh.m_quantizedAabbMax, ref aabbMax, true);
+                Quantize(out bvh.m_quantizedAabbMax, ref aabbMax, true);
                 m_quantizedContiguousNodes[nodeIndex] = bvh;
             }
             else
@@ -230,7 +230,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         {
             if (m_useQuantization)
             {
-                return UnQuantize(m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMin);
+                Vector3 output;
+                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMin,out output);
+                return output;
             }
             //non-quantized
             return m_leafNodes[nodeIndex].m_aabbMinOrg;
@@ -240,7 +242,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         {
             if (m_useQuantization)
             {
-                return UnQuantize(m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMax);
+                Vector3 output;
+                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMax,out output);
+                return output;
             }
             //non-quantized
             return m_leafNodes[nodeIndex].m_aabbMaxOrg;
@@ -251,10 +255,6 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 m_quantizedContiguousNodes[nodeIndex].m_escapeIndexOrTriangleIndex = -escapeIndex;
-                if (m_quantizedContiguousNodes[nodeIndex].IsLeafNode())
-                {
-                    int ibreak = 0;
-                }
             }
             else
             {
@@ -273,10 +273,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         {
             if (m_useQuantization)
             {
-                UShortVector3 quantizedAabbMin = new UShortVector3();
-                UShortVector3 quantizedAabbMax = new UShortVector3();
-                Quantize(ref quantizedAabbMin, ref newAabbMin, false);
-                Quantize(ref quantizedAabbMax, ref newAabbMax, true);
+                UShortVector3 quantizedAabbMin;
+                UShortVector3 quantizedAabbMax;
+                Quantize(out quantizedAabbMin, ref newAabbMin, false);
+                Quantize(out quantizedAabbMax, ref newAabbMax, true);
 
                 QuantizedBvhNode node = m_quantizedContiguousNodes[nodeIndex];
                 node.m_quantizedAabbMin.min(ref quantizedAabbMin);
@@ -571,10 +571,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             rayAabbMin += aabbMin;
             rayAabbMax += aabbMax;
 
-            UShortVector3 quantizedQueryAabbMin = new UShortVector3();
-            UShortVector3 quantizedQueryAabbMax = new UShortVector3();
-            QuantizeWithClamp(ref quantizedQueryAabbMin, ref rayAabbMin, false);
-            QuantizeWithClamp(ref quantizedQueryAabbMax, ref rayAabbMax, true);
+            UShortVector3 quantizedQueryAabbMin;
+            UShortVector3 quantizedQueryAabbMax;
+            QuantizeWithClamp(out quantizedQueryAabbMin, ref rayAabbMin, false);
+            QuantizeWithClamp(out quantizedQueryAabbMax, ref rayAabbMax, true);
 
             while (curIndex < endNodeIndex)
             {
@@ -589,9 +589,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 //if (curIndex == drawPatch&& debugDrawerPtr != null)
                 if (debugDrawerPtr != null && curIndex == drawPatch)
 		        {
-			        Vector3 aabbMin2 = Vector3.Zero,aabbMax2 = Vector3.Zero;
-			        aabbMin2 = UnQuantize(ref rootNode.m_quantizedAabbMin);
-			        aabbMax2 = UnQuantize(ref rootNode.m_quantizedAabbMax);
+			        Vector3 aabbMin2;
+                    Vector3 aabbMax2;
+			        UnQuantize(ref rootNode.m_quantizedAabbMin,out aabbMin2);
+                    UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax2);
 			        Vector3	color = new Vector3(1f/curIndex,0,0);
 			        debugDrawerPtr.DrawAabb(ref aabbMin2,ref aabbMax2,ref color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
@@ -612,8 +613,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 if (boxBoxOverlap)
                 {
                     Vector3[] bounds = new Vector3[2];
-                    bounds[0] = UnQuantize(rootNode.m_quantizedAabbMin);
-                    bounds[1] = UnQuantize(rootNode.m_quantizedAabbMax);
+                    UnQuantize(ref rootNode.m_quantizedAabbMin,out bounds[0]);
+                    UnQuantize(ref rootNode.m_quantizedAabbMax, out bounds[1]);
                     /* Add box cast extents */
                     bounds[0] -= aabbMax;
                     bounds[1] -= aabbMin;
@@ -692,8 +693,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 //if (debugDrawerPtr != null)
 		        {
 			        Vector3 aabbMin,aabbMax;
-			        aabbMin = UnQuantize(ref rootNode.m_quantizedAabbMin);
-			        aabbMax = UnQuantize(ref rootNode.m_quantizedAabbMax);
+                    UnQuantize(ref rootNode.m_quantizedAabbMin, out aabbMin);
+                    UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax);
 			        Vector3	color = new Vector3(1,0,0);
 			        debugDrawerPtr.DrawAabb(ref aabbMin,ref aabbMax,ref color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
@@ -1003,10 +1004,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 ///quantize query AABB
-                UShortVector3 quantizedQueryAabbMin = new UShortVector3();
-                UShortVector3 quantizedQueryAabbMax = new UShortVector3();
-                QuantizeWithClamp(ref quantizedQueryAabbMin, ref aabbMin, false);
-                QuantizeWithClamp(ref quantizedQueryAabbMax, ref aabbMax, true);
+                UShortVector3 quantizedQueryAabbMin;
+                UShortVector3 quantizedQueryAabbMax;
+                QuantizeWithClamp(out quantizedQueryAabbMin, ref aabbMin, false);
+                QuantizeWithClamp(out quantizedQueryAabbMax, ref aabbMax, true);
 
                 switch (m_traversalMode)
                 {
@@ -1074,7 +1075,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         }
 
-        public void Quantize(ref UShortVector3 result, ref Vector3 point, bool isMax)
+        public void Quantize(out UShortVector3 result, ref Vector3 point, bool isMax)
         {
             Debug.Assert(m_useQuantization);
 
@@ -1090,6 +1091,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             ///Make sure rounding is done in a way that unQuantize(quantizeWithClamp(...)) is conservative
             ///end-points always set the first bit, so that they are sorted properly (so that neighbouring AABBs overlap properly)
             ///@todo: double-check this
+
+            result = new UShortVector3();
             if (isMax)
             {
                 result.X = (ushort)(((ushort)(v.X + 1f) | 1));
@@ -1105,7 +1108,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 
 #if DEBUG_CHECK_DEQUANTIZATION
-            Vector3 newPoint = UnQuantize(result);
+            Vector3 newPoint;
+            UnQuantize(ref result,out newPoint);
             if (isMax)
             {
                 if (newPoint.X < point.X)
@@ -1152,7 +1156,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         //    quantize(ref result, ref clampedPoint, isMax);
         //}
 
-        public void QuantizeWithClamp(ref UShortVector3 result, ref Vector3 point2, bool isMax)
+        public void QuantizeWithClamp(out UShortVector3 result, ref Vector3 point2, bool isMax)
         {
 
             Debug.Assert(m_useQuantization);
@@ -1161,23 +1165,22 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             MathUtil.VectorMax(ref m_bvhAabbMin, ref clampedPoint);
             MathUtil.VectorMin(ref m_bvhAabbMax, ref clampedPoint);
 
-            Quantize(ref result, ref clampedPoint, isMax);
+            Quantize(out result, ref clampedPoint, isMax);
         }
 
 
 
-        public Vector3 UnQuantize(UShortVector3 vecIn)
-        {
-            return UnQuantize(ref vecIn);
-        }
+        //public void UnQuantize(UShortVector3 vecIn,out Vector3 vecOut)
+        //{
+        //    UnQuantize(ref vecIn,out vecOut);
+        //}
 
-        public Vector3 UnQuantize(ref UShortVector3 vecIn)
+        public void UnQuantize(ref UShortVector3 vecIn,out Vector3 vecOut)
         {
-            Vector3 vecOut = new Vector3(((float)vecIn.X) / m_bvhQuantization.X,
+            vecOut = new Vector3(((float)vecIn.X) / m_bvhQuantization.X,
                                         ((float)vecIn.Y) / m_bvhQuantization.Y,
                                         ((float)vecIn.Z) / m_bvhQuantization.Z);
             vecOut += m_bvhAabbMin;
-            return vecOut;
         }
 
         ///setTraversalMode let's you choose between stackless, recursive or stackless cache friendly tree traversal. Note this is only implemented for quantized trees.

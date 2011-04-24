@@ -223,8 +223,8 @@ namespace BulletXNADemos.Demos
 			        }
 		        }
 
-                Vector3 aabbMin = Vector3.Zero, aabbMax = Vector3.Zero;
-		        m_dynamicsWorld.GetBroadphase().GetBroadphaseAabb(ref aabbMin,ref aabbMax);
+                Vector3 aabbMin, aabbMax;
+		        m_dynamicsWorld.GetBroadphase().GetBroadphaseAabb(out aabbMin,out aabbMax);
 
                 aabbMin -= MathUtil.MAX_VECTOR;
                 aabbMax += MathUtil.MAX_VECTOR;

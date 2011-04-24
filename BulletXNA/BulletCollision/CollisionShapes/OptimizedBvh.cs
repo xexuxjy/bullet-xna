@@ -153,11 +153,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        ///we should update all quantization values, using updateBvhNodes(meshInterface);
 	        ///but we only update chunks that overlap the given aabb
         	
-	        UShortVector3 quantizedQueryAabbMin = new UShortVector3();
-            UShortVector3 quantizedQueryAabbMax = new UShortVector3();
+	        UShortVector3 quantizedQueryAabbMin;
+            UShortVector3 quantizedQueryAabbMax;
 
-	        Quantize(ref quantizedQueryAabbMin,ref aabbMin,false);
-	        Quantize(ref quantizedQueryAabbMax,ref aabbMax,true);
+	        Quantize(out quantizedQueryAabbMin,ref aabbMin,false);
+	        Quantize(out quantizedQueryAabbMax,ref aabbMax,true);
 
 	        for (int i=0;i<m_SubtreeHeaders.Count;i++)
 	        {
@@ -275,8 +275,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				    MathUtil.VectorMin(ref triangleVerts[2],ref aabbMin);
 				    MathUtil.VectorMax(ref triangleVerts[2],ref aabbMax);
 
-				    Quantize(ref curNode.m_quantizedAabbMin,ref aabbMin,false);
-				    Quantize(ref curNode.m_quantizedAabbMax,ref aabbMax,true);
+				    Quantize(out curNode.m_quantizedAabbMin,ref aabbMin,false);
+				    Quantize(out curNode.m_quantizedAabbMax,ref aabbMax,true);
     				
 			    } 
                 else
@@ -418,8 +418,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				aabbMin.Z = (aabbMin.Z - MIN_AABB_HALF_DIMENSION);
 			}
 
-			m_optimizedTree.Quantize(ref node.m_quantizedAabbMin,ref aabbMin,false);
-			m_optimizedTree.Quantize(ref node.m_quantizedAabbMax,ref aabbMax,true);
+			m_optimizedTree.Quantize(out node.m_quantizedAabbMin,ref aabbMin,false);
+			m_optimizedTree.Quantize(out node.m_quantizedAabbMax,ref aabbMax,true);
 
 			node.m_escapeIndexOrTriangleIndex = (partId<<(31-MAX_NUM_PARTS_IN_BITS)) | triangleIndex;
 

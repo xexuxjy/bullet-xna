@@ -452,7 +452,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                     callback);
         }
 
-        public virtual void GetAabb(BroadphaseProxy absproxy, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy absproxy, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             DbvtProxy proxy = (DbvtProxy)absproxy;
             aabbMin = proxy.GetMinAABB();
@@ -532,7 +532,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             return m_paircache;
         }
 
-	    public virtual void	GetBroadphaseAabb(ref Vector3 aabbMin,ref Vector3 aabbMax)
+	    public virtual void	GetBroadphaseAabb(out Vector3 aabbMin,out Vector3 aabbMax)
         {
 	        DbvtAabbMm bounds = new DbvtAabbMm();
 

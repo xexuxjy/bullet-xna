@@ -849,7 +849,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 		    m_raycastAccelerator.SetAabb(handle.m_dbvtProxy,ref aabbMin,ref aabbMax,dispatcher);
         }
     }
-	public virtual void GetAabb(BroadphaseProxy proxy,ref Vector3 aabbMin, ref Vector3 aabbMax )
+	public virtual void GetAabb(BroadphaseProxy proxy,out Vector3 aabbMin, out Vector3 aabbMax )
     {
 	    Handle pHandle = (Handle)proxy;
 	    aabbMin = pHandle.GetMinAABB();
@@ -996,7 +996,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 	///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
 	///will add some transform later
-	public virtual void GetBroadphaseAabb(ref Vector3 aabbMin,ref Vector3 aabbMax)
+	public virtual void GetBroadphaseAabb(out Vector3 aabbMin,out Vector3 aabbMax)
 	{
 		aabbMin = m_worldAabbMin;
 		aabbMax = m_worldAabbMax;

@@ -501,8 +501,8 @@ namespace BulletXNADemos.Demos
 	        Vector3 wheelColor = new Vector3(1,0,0);
 
 
-            Vector3 worldBoundsMin = Vector3.Zero, worldBoundsMax = Vector3.Zero;
-            GetDynamicsWorld().GetBroadphase().GetBroadphaseAabb(ref worldBoundsMin, ref worldBoundsMax);
+            Vector3 worldBoundsMin, worldBoundsMax;
+            GetDynamicsWorld().GetBroadphase().GetBroadphaseAabb(out worldBoundsMin, out worldBoundsMax);
 
             for (int i = 0; i < m_vehicle.GetNumWheels(); i++)
             {

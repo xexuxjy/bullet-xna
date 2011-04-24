@@ -72,9 +72,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 	        ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-        public override void GetAabb(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-	        m_childConvexShape.GetAabb(ref t,ref aabbMin,ref aabbMax);
+	        m_childConvexShape.GetAabb(ref t,out aabbMin,out aabbMax);
 	        Vector3 aabbCenter = (aabbMax+aabbMin)*.5f;
 	        Vector3 scaledAabbHalfExtends = (aabbMax-aabbMin)*0.5f*m_uniformScalingFactor;
 
@@ -83,9 +83,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         }
 
-        public override void GetAabbSlow(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabbSlow(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-	        m_childConvexShape.GetAabbSlow(ref t,ref aabbMin,ref aabbMax);
+	        m_childConvexShape.GetAabbSlow(ref t,out aabbMin,out aabbMax);
 	        Vector3 aabbCenter = (aabbMax+aabbMin)* 0.5f;
 	        Vector3 scaledAabbHalfExtends = (aabbMax-aabbMin)*0.5f*m_uniformScalingFactor;
 

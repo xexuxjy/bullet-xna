@@ -67,9 +67,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public override void CalculateLocalInertia(float mass,ref Vector3 inertia) 
 	    {
             Matrix identity = Matrix.Identity;
-		    Vector3 aabbMin = new Vector3();
-            Vector3 aabbMax = new Vector3();
-		    GetAabb(ref identity,ref aabbMin,ref aabbMax);
+		    Vector3 aabbMin;
+            Vector3 aabbMax;
+		    GetAabb(ref identity,out aabbMin,out aabbMax);
 
 		    Vector3 halfExtents = (aabbMax-aabbMin)*0.5f;
 

@@ -108,7 +108,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_localAabbMin.Z = tmp.Z - m_collisionMargin;
         }
 
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Vector3 localHalfExtents = 0.5f * (m_localAabbMax - m_localAabbMin);
             float margin = GetMargin();
@@ -118,19 +118,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             Matrix abs_b = Matrix.Identity;
             MathUtil.AbsoluteMatrix(ref trans, ref abs_b);
             //Vector3 center = trans.Translation;
-            Vector3 center = Vector3.Transform(localCenter,trans);
+            Vector3 center;
+            Vector3.Transform(ref localCenter,ref trans,out center);
             Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
                                             Vector3.Dot(abs_b.Up, localHalfExtents),
                                             Vector3.Dot(abs_b.Backward, localHalfExtents));
-            Vector3 extent2 = new Vector3(Vector3.Dot(new Vector3(abs_b.M11, abs_b.M12, abs_b.M13), localHalfExtents),
-                   Vector3.Dot(new Vector3(abs_b.M21, abs_b.M22, abs_b.M23), localHalfExtents),
-                  Vector3.Dot(new Vector3(abs_b.M31, abs_b.M32, abs_b.M33), localHalfExtents));
-
-            if (extent != extent2)
-            {
-                int ibreak = 0;
-            }
-
             aabbMin = center - extent;
             aabbMax = center + extent;
 

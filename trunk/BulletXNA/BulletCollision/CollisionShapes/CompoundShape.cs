@@ -73,9 +73,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             child.m_childMargin = shape.GetMargin();
 
             //extend the local aabbMin/aabbMax
-            Vector3 localAabbMin = new Vector3();
-            Vector3 localAabbMax = new Vector3();
-            shape.GetAabb(ref localTransform, ref localAabbMin, ref localAabbMax);
+            Vector3 localAabbMin;
+            Vector3 localAabbMax;
+            shape.GetAabb(ref localTransform, out localAabbMin, out localAabbMax);
             MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
             MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
 
@@ -142,9 +142,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             if (m_dynamicAabbTree != null)
             {
                 ///update the dynamic aabb tree
-                Vector3 localAabbMin = new Vector3();
-                Vector3 localAabbMax = new Vector3();
-                m_children[childIndex].m_childShape.GetAabb(ref newChildTransform, ref localAabbMin, ref localAabbMax);
+                Vector3 localAabbMin;
+                Vector3 localAabbMax;
+                m_children[childIndex].m_childShape.GetAabb(ref newChildTransform, out localAabbMin, out localAabbMax);
                 DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
                 //int index = m_children.Count - 1;
                 m_dynamicAabbTree.Update(m_children[childIndex].m_treeNode, ref bounds);
@@ -178,7 +178,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Vector3 localHalfExtents = .5f * (m_localAabbMax - m_localAabbMin);
             Vector3 localCenter = .5f * (m_localAabbMax + m_localAabbMin);
@@ -217,21 +217,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_localAabbMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
             //extend the local aabbMin/aabbMax
+            Vector3 localAabbMin;
+            Vector3 localAabbMax;
             for (int j = 0; j < m_children.Count; j++)
             {
-                Vector3 localAabbMin = new Vector3();
-                Vector3 localAabbMax = new Vector3();
 				Matrix foo = m_children[j].m_transform;
-                m_children[j].m_childShape.GetAabb(ref foo, ref localAabbMin, ref localAabbMax);
+                m_children[j].m_childShape.GetAabb(ref foo, out localAabbMin, out localAabbMax);
 				MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
 				MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
-
-				//m_localAabbMin.X = Math.Min(m_localAabbMin.X, localAabbMin.X);
-				//m_localAabbMin.Y = Math.Min(m_localAabbMin.Y, localAabbMin.Y);
-				//m_localAabbMin.Z = Math.Min(m_localAabbMin.Z, localAabbMin.Z);
-				//m_localAabbMax.X = Math.Max(m_localAabbMax.X, localAabbMax.X);
-				//m_localAabbMax.Y = Math.Max(m_localAabbMax.Y, localAabbMax.Y);
-				//m_localAabbMax.Z = Math.Max(m_localAabbMax.Z, localAabbMax.Z);
             }
         }
 
@@ -244,9 +237,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             //approximation: take the inertia from the aabb for now
             Matrix ident = Matrix.Identity;
-            Vector3 aabbMin = new Vector3();
-            Vector3 aabbMax = new Vector3();
-            GetAabb(ref ident, ref aabbMin, ref aabbMax);
+            Vector3 aabbMin;
+            Vector3 aabbMax;
+            GetAabb(ref ident, out aabbMin, out aabbMax);
 
             Vector3 halfExtents = (aabbMax - aabbMin) * .5f;
             float lx = 2f * (halfExtents.X);

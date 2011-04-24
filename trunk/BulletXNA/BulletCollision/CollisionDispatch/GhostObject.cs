@@ -51,12 +51,13 @@ public class GhostObject : CollisionObject
 	    Matrix	convexFromTrans = convexFromWorld;
         Matrix convexToTrans  = convexToWorld;
 
-        Vector3 castShapeAabbMin = Vector3.Zero, castShapeAabbMax = Vector3.Zero;
+        Vector3 castShapeAabbMin;
+        Vector3 castShapeAabbMax;
         /* Compute AABB that encompasses angular movement */
         Vector3 linVel = Vector3.Zero, angVel = Vector3.Zero;
 	    TransformUtil.CalculateVelocity (ref convexFromTrans, ref convexToTrans, 1.0f, ref linVel, ref angVel);
 	    Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
-	    castShape.CalculateTemporalAabb (ref R, ref linVel, ref angVel, 1.0f, ref castShapeAabbMin, ref castShapeAabbMax);
+	    castShape.CalculateTemporalAabb (ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 	
 	    /// go over all objects, and if the ray intersects their aabb + cast shape aabb,
 	    // do a ray-shape query using convexCaster (CCD)
@@ -67,13 +68,15 @@ public class GhostObject : CollisionObject
 		    if(resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
             {
 			    //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
-                Vector3 collisionObjectAabbMin = Vector3.Zero, collisionObjectAabbMax = Vector3.Zero;
+                Vector3 collisionObjectAabbMin;
+                Vector3 collisionObjectAabbMax;
                 Matrix t = collisionObject.GetWorldTransform();
-			    collisionObject.GetCollisionShape().GetAabb(ref t,ref collisionObjectAabbMin,ref collisionObjectAabbMax);
+			    collisionObject.GetCollisionShape().GetAabb(ref t,out collisionObjectAabbMin,out collisionObjectAabbMax);
 			    AabbUtil2.AabbExpand (ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref castShapeAabbMin, ref castShapeAabbMax);
 			    float hitLambda = 1f; //could use resultCallback.m_closestHitFraction, but needs testing
-                Vector3 hitNormal = Vector3.Zero;
-                if (AabbUtil2.RayAabb(convexFromWorld.Translation, convexToWorld.Translation, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, hitNormal))
+                Vector3 hitNormal;
+
+                if (AabbUtil2.RayAabb(convexFromWorld.Translation, convexToWorld.Translation, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, out hitNormal))
 			    {
                     Matrix wt = collisionObject.GetWorldTransform();
 				    CollisionWorld.ObjectQuerySingle(castShape, ref convexFromTrans,ref convexToTrans,

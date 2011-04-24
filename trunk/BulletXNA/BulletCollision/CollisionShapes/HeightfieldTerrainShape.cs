@@ -341,7 +341,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 
-        public override void GetAabb(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Vector3 halfExtents = (m_localAabbMax - m_localAabbMin) * m_localScaling * 0.5f;
 

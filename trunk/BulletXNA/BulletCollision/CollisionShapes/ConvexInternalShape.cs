@@ -66,20 +66,23 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 	    ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-	    public override void GetAabb(ref Matrix t,ref Vector3 aabbMin,ref Vector3 aabbMax)
+	    public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
 	    {
-		    GetAabbSlow(ref t,ref aabbMin,ref aabbMax);
+		    GetAabbSlow(ref t,out aabbMin,out aabbMax);
 	    }
 
 
 
-        public override void GetAabbSlow(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabbSlow(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
 	        float margin = GetMargin();
-	        for (int i=0;i<3;i++)
+            aabbMin = Vector3.Zero;
+            aabbMax = Vector3.Zero;
+            for (int i = 0; i < 3; i++)
 	        {
 		        Vector3 vec = new Vector3();
 		        MathUtil.VectorComponent(ref vec,i,1f);
+
 
 				Vector3 temp = MathUtil.TransposeTransformNormal(vec, trans);
 				Vector3 sv = LocalGetSupportingVertex(ref temp);
@@ -90,24 +93,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				sv = LocalGetSupportingVertex(ref temp);
 				tmp = Vector3.Transform(sv, trans);
 				MathUtil.VectorComponent(ref aabbMin, i, MathUtil.VectorComponent(ref tmp, i) - margin);
-
-
-		//btVector3 sv = localGetSupportingVertex(vec*trans.getBasis());
-
-		//btVector3 tmp = trans(sv);
-		//maxAabb[i] = tmp[i]+margin;
-		//vec[i] = btScalar(-1.);
-		//tmp = trans(localGetSupportingVertex(vec*trans.getBasis()));
-		//minAabb[i] = tmp[i]-margin;
-
-				//MathUtil.rotateVector(ref vec,ref trans,ref temp);
-				//Vector3 sv = localGetSupportingVertex(ref temp);
-				//Vector3 tmp = Vector3.Transform(sv,trans);
-				//MathUtil.vectorComponent(ref aabbMax,i,MathUtil.vectorComponent(ref tmp,i)+margin);
-				//MathUtil.vectorComponent(ref vec,i,-1);
-				//MathUtil.rotateVector(ref vec, ref trans, ref temp);
-				//tmp = Vector3.Transform(localGetSupportingVertex(ref temp),trans);
-				//MathUtil.vectorComponent(ref aabbMin, i, MathUtil.vectorComponent(ref tmp, i) - margin);
 	        }
         }
 
@@ -148,9 +133,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	
 	    public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector)
 	    {
-            //(void)penetrationVector;
-            //(void)index;
-            //btAssert(0);
             Debug.Assert(false);
         }
 
@@ -175,18 +157,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_localAabbMax = aabbMax;
         }
 
-        public void GetCachedLocalAabb(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public void GetCachedLocalAabb(out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Debug.Assert(m_isLocalAabbValid);
             aabbMin = m_localAabbMin;
             aabbMax = m_localAabbMax;
         }
 
-        public void GetNonvirtualAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax, float margin)
+        public void GetNonvirtualAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax, float margin)
         {
             //lazy evaluation of local aabb
             Debug.Assert(m_isLocalAabbValid);
-            AabbUtil2.TransformAabb(ref m_localAabbMin, ref m_localAabbMax, margin, ref trans, ref aabbMin, ref aabbMax);
+            AabbUtil2.TransformAabb(ref m_localAabbMin, ref m_localAabbMax, margin, ref trans, out aabbMin, out aabbMax);
         }
 
         public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
@@ -211,9 +193,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_isLocalAabbValid = false;
         }
 
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-            GetNonvirtualAabb(ref trans, ref aabbMin, ref aabbMax, GetMargin());
+            GetNonvirtualAabb(ref trans, out aabbMin, out aabbMax, GetMargin());
         }
 
         public override void SetLocalScaling(ref Vector3 scaling)

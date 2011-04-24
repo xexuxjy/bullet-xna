@@ -49,7 +49,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
  	         base.Cleanup();
         }
 
-        public override void GetAabb(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             aabbMin = MathUtil.MIN_VECTOR;
             aabbMax = MathUtil.MAX_VECTOR;

@@ -82,7 +82,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        Matrix ident = Matrix.Identity;
 
 	        Vector3 aabbMin = Vector3.Zero,aabbMax = Vector3.Zero;
-	        GetAabb(ref ident,ref aabbMin,ref aabbMax);
+	        GetAabb(ref ident,out aabbMin,out aabbMax);
 	        Vector3 halfExtents = (aabbMax-aabbMin)*0.5f;
 
 	        float lx=2.0f*(halfExtents.X+margin);
@@ -127,25 +127,25 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    m_localAabbMax = aabbMax;
 	    }
 
-	    protected void GetCachedLocalAabb(ref Vector3 aabbMin, ref Vector3 aabbMax)
+	    protected void GetCachedLocalAabb(out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
 		    Debug.Assert(m_isLocalAabbValid);
 		    aabbMin = m_localAabbMin;
 		    aabbMax = m_localAabbMax;
 	    }
 
-        public void GetNonvirtualAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax, float margin)
+        public void GetNonvirtualAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax, float margin)
         {
             //lazy evaluation of local aabb
             Debug.Assert(m_isLocalAabbValid);
-            MathUtil.TransformAabb(ref m_localAabbMin, ref m_localAabbMax, margin, ref trans, ref aabbMin, ref aabbMax);
+            MathUtil.TransformAabb(ref m_localAabbMin, ref m_localAabbMax, margin, ref trans, out aabbMin, out aabbMax);
         }
 
 	
 
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-            GetNonvirtualAabb(ref trans, ref aabbMin, ref aabbMax, GetMargin());
+            GetNonvirtualAabb(ref trans, out aabbMin, out aabbMax, GetMargin());
         }
 
         public override void SetLocalScaling(ref Vector3 scaling)

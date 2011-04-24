@@ -88,8 +88,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    Vector3 normal = Vector3.Up;
 		    CalcNormal(ref normal);
 		    //distance to plane
-            float dist = Vector3.Dot(pt,normal);
-		    float planeconst = Vector3.Dot(m_vertices1[0],normal);
+            float dist;
+            Vector3.Dot(ref pt,ref normal,out dist);
+		    float planeconst;
+            Vector3.Dot(ref m_vertices1[0],ref normal,out planeconst);
 		    dist -= planeconst;
 		    if (dist >= -tolerance && dist <= tolerance)
 		    {
@@ -100,10 +102,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				    Vector3 pa = Vector3.Zero,pb=Vector3.Zero;
 				    GetEdge(i,ref pa,ref pb);
 				    Vector3 edge = pb-pa;
-                    Vector3 edgeNormal = Vector3.Cross(edge,normal);
+                    Vector3 edgeNormal;
+                    Vector3.Cross(ref edge,ref normal,out edgeNormal);
 				    edgeNormal.Normalize();
-                    float dist2 = Vector3.Dot(pt, edgeNormal);
-				    float edgeConst = Vector3.Dot(pa, edgeNormal);
+                    float dist2;
+                    Vector3.Dot(ref pt, ref edgeNormal,out dist2);
+				    float edgeConst;
+                    Vector3.Dot(ref pa, ref edgeNormal,out edgeConst);
 				    dist2 -= edgeConst;
 				    if (dist2 < -tolerance)
                     {
@@ -141,7 +146,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 3;
         }
 
-        public virtual IList<Vector3> GetVertexPtr(int i)
+        public virtual Vector3[] GetVertexPtr(int i)
         {
             return m_vertices1;
         }
@@ -162,18 +167,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             GetVertex((i + 1) % 3, ref pb);
         }
 
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-            GetAabbSlow(ref trans, ref aabbMin, ref aabbMax);
+            GetAabbSlow(ref trans, out aabbMin, out aabbMax);
         }
 
         public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 dir)
 	    {
             float a,b,c;
-            a = Vector3.Dot(dir, m_vertices1[0]);
-            b = Vector3.Dot(dir, m_vertices1[1]);
-            c = Vector3.Dot(dir, m_vertices1[2]);
-		    Vector3 dots = new Vector3(a,b,c);
+            Vector3.Dot(ref dir, ref m_vertices1[0], out a);
+            Vector3.Dot(ref dir, ref m_vertices1[1], out b);
+            Vector3.Dot(ref dir, ref m_vertices1[2], out c);
+            Vector3 dots = new Vector3(a, b, c);
             return m_vertices1[MathUtil.MaxAxis(ref dots)];
 	    }
 
@@ -183,16 +188,15 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    {
 			    Vector3 dir = vectors[i];
                 float a, b, c;
-                a = Vector3.Dot(dir, m_vertices1[0]);
-                b = Vector3.Dot(dir, m_vertices1[1]);
-                c = Vector3.Dot(dir, m_vertices1[2]);
+                Vector3.Dot(ref dir, ref m_vertices1[0],out a);
+                Vector3.Dot(ref dir, ref m_vertices1[1],out b);
+                Vector3.Dot(ref dir, ref m_vertices1[2],out c);
 
                 Vector3 dots = new Vector3(a, b, c);
                 supportVerticesOut[i] = new Vector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
 		    }
 	    }
 
-
-        public IList<Vector3> m_vertices1 = new ObjectArray<Vector3>(3);
+        public Vector3[] m_vertices1 = new Vector3[3];
     }
 }

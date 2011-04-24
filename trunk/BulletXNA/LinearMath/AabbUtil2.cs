@@ -146,18 +146,19 @@ namespace BulletXNA
 
         public static bool RayAabb(Vector3 rayFrom,
                                     Vector3 rayTo,
-                                    Vector3 aabbMin,
-                                    Vector3 aabbMax,
-                                    float param, Vector3 normal)
+                                    ref Vector3 aabbMin,
+                                    ref Vector3 aabbMax,
+                                    ref float param, out Vector3 normal)
         {
-            return RayAabb(ref rayFrom, ref rayTo, ref aabbMin, ref aabbMax, ref param, ref normal);
+            return RayAabb(ref rayFrom, ref rayTo, ref aabbMin, ref aabbMax, ref param, out normal);
         }
+
 
         public static bool RayAabb(ref Vector3 rayFrom,
                                     ref Vector3 rayTo,
                                     ref Vector3 aabbMin,
                                     ref Vector3 aabbMax,
-                                    ref float param, ref Vector3 normal)
+                                    ref float param, out Vector3 normal)
         {
             Vector3 aabbHalfExtent = (aabbMax - aabbMin) * 0.5f;
             Vector3 aabbCenter = (aabbMax + aabbMin) * 0.5f;
@@ -210,6 +211,8 @@ namespace BulletXNA
                     return true;
                 }
             }
+            param = 0f;
+            normal = Vector3.Zero;
             return false;
         }
 
@@ -229,19 +232,16 @@ namespace BulletXNA
             return overlap;
         }
 
-		public static void TransformAabb(Vector3 halfExtents, float margin,ref Matrix t,ref Vector3 aabbMinOut,ref Vector3 aabbMaxOut)
+		public static void TransformAabb(Vector3 halfExtents, float margin,ref Matrix t,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
 		{
-			TransformAabb(ref halfExtents, margin, ref t, ref aabbMinOut, ref aabbMaxOut);
+			TransformAabb(ref halfExtents, margin, ref t, out aabbMinOut, out aabbMaxOut);
 		}
 
-        public static void TransformAabb(ref Vector3 halfExtents, float margin,ref Matrix t,ref Vector3 aabbMinOut,ref Vector3 aabbMaxOut)
+        public static void TransformAabb(ref Vector3 halfExtents, float margin,ref Matrix t,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
         {
 	        Vector3 halfExtentsWithMargin = halfExtents+ new Vector3(margin,margin,margin);
 	        Matrix abs_b = MathUtil.AbsoluteMatrix(ref t);  
 	        Vector3 center = t.Translation;
-            //Vector3 extent = new Vector3(Vector3.Dot(MathUtil.matrixColumn(ref abs_b,0),halfExtentsWithMargin),
-            //                            Vector3.Dot(MathUtil.matrixColumn(ref abs_b,1),halfExtentsWithMargin),
-            //                            Vector3.Dot(MathUtil.matrixColumn(ref abs_b,2),halfExtentsWithMargin));
 
             Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), halfExtentsWithMargin),
                                         Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), halfExtentsWithMargin),
@@ -252,7 +252,7 @@ namespace BulletXNA
         }
 
 
-        public static void TransformAabb(ref Vector3 localAabbMin,ref Vector3 localAabbMax, float margin,ref Matrix trans,ref Vector3 aabbMinOut,ref Vector3 aabbMaxOut)
+        public static void TransformAabb(ref Vector3 localAabbMin,ref Vector3 localAabbMax, float margin,ref Matrix trans,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
         {
 	        Debug.Assert(localAabbMin.X <= localAabbMax.X);
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
@@ -263,9 +263,6 @@ namespace BulletXNA
 	        Vector3 localCenter = 0.5f *(localAabbMax+localAabbMin);
             Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans); 
 	        Vector3 center = Vector3.Transform(localCenter,trans);
-            //Vector3 extent = new Vector3(Vector3.Dot(MathUtil.matrixColumn(ref abs_b, 0), localHalfExtents),
-            //                            Vector3.Dot(MathUtil.matrixColumn(ref abs_b, 1), localHalfExtents),
-            //                            Vector3.Dot(MathUtil.matrixColumn(ref abs_b, 2), localHalfExtents));
 
             Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), localHalfExtents),
                             Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), localHalfExtents),

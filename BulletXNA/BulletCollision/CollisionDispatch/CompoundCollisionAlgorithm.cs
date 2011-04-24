@@ -152,13 +152,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        if (tree != null)
 	        {
 
-		        Vector3 localAabbMin = new Vector3();
-                Vector3 localAabbMax = new Vector3();
+                Vector3 localAabbMin;
+                Vector3 localAabbMax;
 		        Matrix otherInCompoundSpace = Matrix.Identity;
 				//otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
 				otherInCompoundSpace = MathUtil.InverseTimes(colObj.GetWorldTransform(), otherObj.GetWorldTransform());
 
-		        otherObj.GetCollisionShape().GetAabb(ref otherInCompoundSpace,ref localAabbMin,ref localAabbMax);
+		        otherObj.GetCollisionShape().GetAabb(ref otherInCompoundSpace,out localAabbMin,out localAabbMax);
 
                 DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
 		        //process all children, that overlap with  the given AABB bounds
@@ -194,13 +194,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 						Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
 
 				        //perform an AABB check first
-				        Vector3 aabbMin0 = new Vector3();
-                        Vector3 aabbMax0 = new Vector3();
-                        Vector3 aabbMin1 = new Vector3();
-                        Vector3 aabbMax1 = new Vector3();
+				        Vector3 aabbMin0;
+                        Vector3 aabbMax0;
+                        Vector3 aabbMin1;
+                        Vector3 aabbMax1;
                             
-				        childShape.GetAabb(ref newChildWorldTrans,ref aabbMin0,ref aabbMax0);
-				        otherObj.GetCollisionShape().GetAabb(otherObj.GetWorldTransform(),ref aabbMin1,ref aabbMax1);
+				        childShape.GetAabb(ref newChildWorldTrans,out aabbMin0,out aabbMax0);
+				        otherObj.GetCollisionShape().GetAabb(otherObj.GetWorldTransform(),out aabbMin1,out aabbMax1);
 
 				        if (!AabbUtil2.TestAabbAgainstAabb2(ref aabbMin0,ref aabbMax0,ref aabbMin1,ref aabbMax1))
 				        {
@@ -317,13 +317,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			Matrix	newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans,ref childTrans);
 
 		    //perform an AABB check first
-		    Vector3 aabbMin0 = Vector3.Zero;
-            Vector3 aabbMax0 = Vector3.Zero;
-            Vector3 aabbMin1 = Vector3.Zero;
-            Vector3 aabbMax1 = Vector3.Zero;
+		    Vector3 aabbMin0;
+            Vector3 aabbMax0;
+            Vector3 aabbMin1;
+            Vector3 aabbMax1;
 
-		    childShape.GetAabb(ref newChildWorldTrans,ref aabbMin0,ref aabbMax0);
-		    m_otherObj.GetCollisionShape().GetAabb(m_otherObj.GetWorldTransform(),ref aabbMin1,ref aabbMax1);
+		    childShape.GetAabb(ref newChildWorldTrans,out aabbMin0,out aabbMax0);
+		    m_otherObj.GetCollisionShape().GetAabb(m_otherObj.GetWorldTransform(),out aabbMin1,out aabbMax1);
 
 		    if (AabbUtil2.TestAabbAgainstAabb2(ref aabbMin0,ref aabbMax0,ref aabbMin1,ref aabbMax1))
 		    {
@@ -373,10 +373,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		    CollisionShape childShape = compoundShape.GetChildShape(index);
             if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawAabb)) != 0))
             {
-			    Vector3 worldAabbMin = Vector3.Zero;
-                Vector3 worldAabbMax = Vector3.Zero;
+			    Vector3 worldAabbMin;
+                Vector3 worldAabbMax;
 			    Matrix orgTrans = m_compoundColObj.GetWorldTransform();
-			    MathUtil.TransformAabb(leaf.volume.Mins(),leaf.volume.Maxs(),0f,orgTrans,ref worldAabbMin,ref worldAabbMax);
+			    MathUtil.TransformAabb(leaf.volume.Mins(),leaf.volume.Maxs(),0f,orgTrans,out worldAabbMin,out worldAabbMax);
                 m_dispatchInfo.getDebugDraw().DrawAabb(worldAabbMin, worldAabbMax, new Vector3(1, 0, 0));
 		    }
 		    ProcessChildShape(childShape,index);

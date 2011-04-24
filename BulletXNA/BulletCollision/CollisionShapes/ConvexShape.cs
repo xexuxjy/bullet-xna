@@ -411,11 +411,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     {
                         PolyhedralConvexAabbCachingShape convexHullShape = (PolyhedralConvexAabbCachingShape)this;
                         float margin = convexHullShape.GetMarginNonVirtual();
-                        convexHullShape.GetNonvirtualAabb(ref t, ref aabbMin, ref aabbMax, margin);
+                        convexHullShape.GetNonvirtualAabb(ref t, out aabbMin, out aabbMax, margin);
                     }
                     break;
                 default:
-                    GetAabb(ref t, ref aabbMin, ref aabbMax);
+                    GetAabb(ref t, out aabbMin, out aabbMax);
                     break;
             }
 
@@ -431,7 +431,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
 
-        public abstract void GetAabbSlow(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax);
+        public abstract void GetAabbSlow(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax);
 
         public abstract int GetNumPreferredPenetrationDirections();
 

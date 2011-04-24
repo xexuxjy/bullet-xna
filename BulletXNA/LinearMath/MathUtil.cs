@@ -384,12 +384,12 @@ namespace BulletXNA
             output = Vector3.Transform(vec, rotation);
         }
 
-        public static void TransformAabb(Vector3 halfExtents, float margin, Matrix trans, ref Vector3 aabbMinOut, ref Vector3 aabbMaxOut)
+        public static void TransformAabb(Vector3 halfExtents, float margin, Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-            TransformAabb(ref halfExtents,margin,ref trans,ref aabbMinOut,ref aabbMaxOut);
+            TransformAabb(ref halfExtents,margin,ref trans,out aabbMinOut,out aabbMaxOut);
         }
 
-        public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix trans, ref Vector3 aabbMinOut, ref Vector3 aabbMaxOut)
+        public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin, margin, margin);
             Vector3 center = Vector3.Zero, extent = Vector3.Zero;
@@ -398,12 +398,12 @@ namespace BulletXNA
             aabbMaxOut = center + extent;
         }
 
-        public static void TransformAabb(Vector3 localAabbMin, Vector3 localAabbMax, float margin, Matrix trans, ref Vector3 aabbMinOut, ref Vector3 aabbMaxOut)
+        public static void TransformAabb(Vector3 localAabbMin, Vector3 localAabbMax, float margin, Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-            TransformAabb(ref localAabbMin, ref localAabbMax, margin, ref trans, ref aabbMinOut, ref aabbMaxOut);
+            TransformAabb(ref localAabbMin, ref localAabbMax, margin, ref trans, out aabbMinOut, out aabbMaxOut);
         }
 
-        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, ref Vector3 aabbMinOut, ref Vector3 aabbMaxOut)
+        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Debug.Assert(localAabbMin.X <= localAabbMax.X);
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);

@@ -154,8 +154,9 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        {
 			        if (body.IsActive() && (!body.IsStaticObject()))
 			        {
-                        Vector3 minAabb = Vector3.Zero, maxAabb = Vector3.Zero;
-				        colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), ref minAabb,ref maxAabb);
+                        Vector3 minAabb;
+                        Vector3 maxAabb;
+				        colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), out minAabb,out maxAabb);
 				        IBroadphaseInterface bp = GetBroadphase();
 				        bp.SetAabb(body.GetBroadphaseHandle(),ref minAabb,ref maxAabb, m_dispatcher1);
 			        }

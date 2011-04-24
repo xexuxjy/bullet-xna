@@ -367,7 +367,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             //Matrix convexInTriangleSpace = MathUtil.bulletMatrixMultiply(Matrix.Invert(m_triBody.getWorldTransform()) , m_convexBody.getWorldTransform());
             Matrix convexInTriangleSpace = MathUtil.InverseTimes(m_triBody.GetWorldTransform(), m_convexBody.GetWorldTransform());
             CollisionShape convexShape = m_convexBody.GetCollisionShape();
-	        convexShape.GetAabb(ref convexInTriangleSpace,ref m_aabbMin,ref m_aabbMax);
+	        convexShape.GetAabb(ref convexInTriangleSpace,out m_aabbMin,out m_aabbMax);
 	        float extraMargin = collisionMarginTriangle;
 	        Vector3 extra = new Vector3(extraMargin,extraMargin,extraMargin);
 

@@ -640,9 +640,9 @@ namespace BulletXNA.BullettDynamics.Dynamics
 	    }
 
 	
-	    public void	GetAabb(ref Vector3 aabbMin,ref Vector3 aabbMax)
+	    public void	GetAabb(out Vector3 aabbMin,out Vector3 aabbMax)
         {
-            GetCollisionShape().GetAabb(m_worldTransform, ref aabbMin, ref aabbMax);
+            GetCollisionShape().GetAabb(m_worldTransform, out aabbMin, out aabbMax);
         }
 	
 	    public float ComputeImpulseDenominator(ref Vector3 pos, ref Vector3 normal)

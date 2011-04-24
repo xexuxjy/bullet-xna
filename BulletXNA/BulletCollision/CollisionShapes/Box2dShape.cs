@@ -128,9 +128,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			m_implicitShapeDimensions = (unScaledImplicitShapeDimensionsWithMargin * m_localScaling) - oldMargin;
 		}
 
-		public override void GetAabb(ref Matrix t,ref Vector3 aabbMin,ref Vector3 aabbMax)
+		public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
 		{
-			AabbUtil2.TransformAabb(GetHalfExtentsWithoutMargin(),GetMargin(),ref t, ref aabbMin,ref aabbMax);
+			AabbUtil2.TransformAabb(GetHalfExtentsWithoutMargin(),GetMargin(),ref t, out aabbMin,out aabbMax);
 		}
 
 		

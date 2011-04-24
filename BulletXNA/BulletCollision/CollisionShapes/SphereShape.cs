@@ -75,7 +75,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             inertia.Z = elem;
         }
 
-        public override void GetAabb(ref Matrix t, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
 	        Vector3 center = t.Translation;
             float margin = GetMargin();

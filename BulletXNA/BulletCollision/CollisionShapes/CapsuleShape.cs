@@ -181,7 +181,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        }
         }
 	
-	    public override void GetAabb (ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
 	        Vector3 halfExtents = new Vector3(getRadius(),getRadius(),getRadius());
 	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, getRadius() + getHalfHeight());

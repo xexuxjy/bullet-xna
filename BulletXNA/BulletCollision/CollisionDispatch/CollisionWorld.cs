@@ -92,10 +92,10 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
         public void	UpdateSingleAabb(CollisionObject colObj)
         {
-	        Vector3 minAabb = new Vector3();
-            Vector3 maxAabb = new Vector3();
+	        Vector3 minAabb;
+            Vector3 maxAabb;
             Matrix wt = colObj.GetWorldTransform();
-	        colObj.GetCollisionShape().GetAabb(ref wt, ref minAabb,ref maxAabb);
+	        colObj.GetCollisionShape().GetAabb(ref wt, out minAabb,out maxAabb);
 	        //need to increase the aabb for contact thresholds
             Vector3 contactThreshold = new Vector3(BulletGlobals.gContactBreakingThreshold, BulletGlobals.gContactBreakingThreshold, BulletGlobals.gContactBreakingThreshold);
 	        minAabb -= contactThreshold;
@@ -235,8 +235,8 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
             Matrix convexToTrans = new Matrix();
 	        convexFromTrans = convexFromWorld;
 	        convexToTrans = convexToWorld;
-            Vector3 castShapeAabbMin = new Vector3(); 
-            Vector3 castShapeAabbMax = new Vector3();
+            Vector3 castShapeAabbMin; 
+            Vector3 castShapeAabbMax;
 	        /* Compute AABB that encompasses angular movement */
 	        {
 		        Vector3 linVel = new Vector3();
@@ -244,7 +244,7 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 		        TransformUtil.CalculateVelocity (ref convexFromTrans, ref convexToTrans, 1.0f, ref linVel, ref angVel);
 		        Vector3 zeroLinVel = new Vector3();
                 Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
-		        castShape.CalculateTemporalAabb (ref R, ref zeroLinVel, ref angVel, 1.0f, ref castShapeAabbMin, ref castShapeAabbMax);
+		        castShape.CalculateTemporalAabb (ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 	        }
 
         #if !USE_BRUTEFORCE_RAYBROADPHASE
@@ -303,10 +303,10 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
 		    //calculate new AABB
 		    Matrix trans = collisionObject.GetWorldTransform();
-            Vector3 minAabb = new Vector3();
-            Vector3 maxAabb= new Vector3();
+            Vector3 minAabb;
+            Vector3 maxAabb;
 
-		    collisionObject.GetCollisionShape().GetAabb(ref trans,ref minAabb,ref maxAabb);
+		    collisionObject.GetCollisionShape().GetAabb(ref trans,out minAabb,out maxAabb);
 
 		    BroadphaseNativeTypes type = collisionObject.GetCollisionShape().GetShapeType();
 		    collisionObject.SetBroadphaseHandle( GetBroadphase().CreateProxy(
@@ -604,9 +604,9 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
 				    BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans,ref convexToTrans,resultCallback,collisionObject,triangleMesh, ref colObjWorldTransform);
 				    tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-				    Vector3 boxMinLocal = new Vector3();
-                    Vector3 boxMaxLocal = new Vector3();
-				    castShape.GetAabb(ref rotationXform, ref boxMinLocal, ref boxMaxLocal);
+				    Vector3 boxMinLocal;
+                    Vector3 boxMaxLocal;
+				    castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
 				    triangleMesh.PerformConvexCast(tccb,ref convexFromLocal,ref convexToLocal,ref boxMinLocal, ref boxMaxLocal);
                     BulletGlobals.StopProfile();
 			    } 
@@ -622,9 +622,9 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 
                     BridgeTriangleConvexcastCallback2 tccb = new BridgeTriangleConvexcastCallback2(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
 				    tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-				    Vector3 boxMinLocal = new Vector3();
-                    Vector3 boxMaxLocal = new Vector3();
-				    castShape.GetAabb(ref rotationXform, ref boxMinLocal, ref boxMaxLocal);
+				    Vector3 boxMinLocal;
+                    Vector3 boxMaxLocal;
+				    castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
 
 				    Vector3  rayAabbMinLocal = convexFromLocal;
                     MathUtil.VectorMin(ref convexToLocal,ref rayAabbMinLocal);

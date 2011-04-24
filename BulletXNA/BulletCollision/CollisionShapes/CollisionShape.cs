@@ -45,21 +45,21 @@ namespace BulletXNA.BullettCollision.CollisionShapes
 	    ///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
         ///
         public virtual void GetAabb
-            (Matrix t,ref Vector3 aabbMin,ref Vector3 aabbMax)
+            (Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
         {
             // t isn't assigned to as we're just getting the bounds.
-            GetAabb(ref t,ref aabbMin,ref aabbMax);
+            GetAabb(ref t,out aabbMin,out aabbMax);
         }
 
-        public abstract void GetAabb(ref Matrix t,ref Vector3 aabbMin,ref Vector3 aabbMax);
+        public abstract void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax);
 
 	    public virtual void GetBoundingSphere(ref Vector3 center,ref float radius)
         {
 	        Matrix tr = Matrix.Identity;
-	        Vector3 aabbMin = new Vector3();
-            Vector3 aabbMax = new Vector3();
+	        Vector3 aabbMin;
+            Vector3 aabbMax;
 
-	        GetAabb(ref tr,ref aabbMin,ref aabbMax);
+	        GetAabb(ref tr,out aabbMin,out aabbMax);
 
 	        radius = (aabbMax-aabbMin).Length()*0.5f;
 	        center = (aabbMin+aabbMax)*0.5f;
@@ -83,10 +83,10 @@ namespace BulletXNA.BullettCollision.CollisionShapes
 
         ///calculateTemporalAabb calculates the enclosing aabb for the moving object over interval [0..timeStep)
 	    ///result is conservative
-	    public void CalculateTemporalAabb(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep, ref Vector3 temporalAabbMin,ref Vector3 temporalAabbMax)
+	    public void CalculateTemporalAabb(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep, out Vector3 temporalAabbMin,out Vector3 temporalAabbMax)
         {
 	        //start with static aabb
-	        GetAabb(ref curTrans,ref temporalAabbMin,ref temporalAabbMax);
+	        GetAabb(ref curTrans,out temporalAabbMin,out temporalAabbMax);
 
 	        float temporalAabbMaxx = temporalAabbMax.X;
 	        float temporalAabbMaxy = temporalAabbMax.Y;

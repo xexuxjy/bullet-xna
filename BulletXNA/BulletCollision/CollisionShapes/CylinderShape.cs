@@ -84,13 +84,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_implicitShapeDimensions;//changed in Bullet 2.63: assume the scaling and margin are included
 	    }
 	    ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             //skip the box 'getAabb'
             // FIXME - Don't think we can call on it directly as below
             //PolyhedralConvexShape.getAabb(ref trans,ref aabbMin,ref aabbMax);
             //base.getAabb(ref trans,ref aabbMin,ref aabbMax);
-            MathUtil.TransformAabb(GetHalfExtentsWithoutMargin(), GetMargin(), trans, ref aabbMin, ref aabbMax);
+            MathUtil.TransformAabb(GetHalfExtentsWithoutMargin(), GetMargin(), trans, out aabbMin, out aabbMax);
         }
 
         public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)

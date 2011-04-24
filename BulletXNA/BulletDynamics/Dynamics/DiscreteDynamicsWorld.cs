@@ -465,9 +465,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
                         }
                         if (aabb)
                         {
-                            Vector3 minAabb = Vector3.Zero, maxAabb = Vector3.Zero;
+                            Vector3 minAabb;
+                            Vector3 maxAabb;
                             Vector3 colorvec = new Vector3(1, 0, 0);
-                            colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), ref minAabb, ref maxAabb);
+                            colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), out minAabb, out maxAabb);
                             m_debugDrawer.DrawAabb(ref minAabb, ref maxAabb, ref colorvec);
                         }
 

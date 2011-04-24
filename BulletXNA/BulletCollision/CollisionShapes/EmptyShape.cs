@@ -42,7 +42,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             base.Cleanup();
         }
 
-        public override void GetAabb(ref Matrix t,ref Vector3 aabbMin,ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
         {
             float fmargin = GetMargin();
             Vector3 margin = new Vector3(fmargin,fmargin,fmargin);

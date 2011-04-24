@@ -115,10 +115,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	    }
 
-        public override void GetAabb(ref Matrix trans, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-            AabbUtil2.TransformAabb(ref halfExtents, GetMargin(), ref trans, ref aabbMin, ref aabbMax);
+            AabbUtil2.TransformAabb(ref halfExtents, GetMargin(), ref trans, out aabbMin, out aabbMax);
         }
 
         public override void CalculateLocalInertia(float mass, ref Vector3 inertia)

@@ -39,14 +39,15 @@ namespace BulletXNA.BulletDynamics.Dynamics
         protected void UpdateTemporalAabbs(float timeStep)
         {
 
-            Vector3 temporalAabbMin = Vector3.Zero, temporalAabbMax = Vector3.Zero;
+            Vector3 temporalAabbMin;
+            Vector3 temporalAabbMax = Vector3.Zero;
 
 	        foreach(CollisionObject colObj in m_collisionObjects)
 	        {
 		        RigidBody body = RigidBody.Upcast(colObj);
 		        if (body != null)
 		        {
-			        body.GetCollisionShape().GetAabb(colObj.GetWorldTransform(),ref temporalAabbMin,ref temporalAabbMax);
+			        body.GetCollisionShape().GetAabb(colObj.GetWorldTransform(),out temporalAabbMin,out temporalAabbMax);
 			        Vector3 linvel = body.GetLinearVelocity();
 
 			        //make the AABB temporal

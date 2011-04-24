@@ -39,7 +39,7 @@ namespace BulletXNADemos.Demos
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
-            m_broadphase = new SimpleBroadphase(10000, pairCache);
+            //m_broadphase = new SimpleBroadphase(10000, pairCache);
 
             ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
             SequentialImpulseConstraintSolver sol = new SequentialImpulseConstraintSolver();
@@ -63,7 +63,7 @@ namespace BulletXNADemos.Demos
             //CollisionShape groundShape = BuildLargeMesh();
             m_collisionShapes.Add(groundShape);
             CollisionShape sphereShape = new SphereShape(0.2f);
-            int size = 5; // 16
+            int size = 32;// 5; // 16
             for (int i = 0; i < size; ++i)
             {
                 for (int j = 0; j < size; ++j)

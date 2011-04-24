@@ -54,21 +54,19 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             return false;
         }
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
-            Vector3[] raw = triangle.GetRawArray();
-
             Vector3 v10;
             Vector3 v20;
-            
-            Vector3.Subtract(ref raw[1],ref raw[0],out v10);
-            Vector3.Subtract(ref raw[2],ref raw[0],out v20);
+
+            Vector3.Subtract(ref triangle[1], ref triangle[0], out v10);
+            Vector3.Subtract(ref triangle[2], ref triangle[0], out v20);
 
             Vector3 triangleNormal;
             Vector3.Cross(ref v10,ref v20,out triangleNormal);
 
             float dist;
-            Vector3.Dot(ref raw[0],ref triangleNormal,out dist);
+            Vector3.Dot(ref triangle[0], ref triangleNormal, out dist);
             float dist_a;
             Vector3.Dot(ref triangleNormal,ref m_from,out dist_a);
             dist_a -= dist;
@@ -102,9 +100,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
                     Vector3 v0p;
-                    Vector3.Subtract(ref raw[0],ref point,out v0p);
+                    Vector3.Subtract(ref triangle[0], ref point, out v0p);
                     Vector3 v1p;
-                    Vector3.Subtract(ref raw[1],ref point,out v1p);
+                    Vector3.Subtract(ref triangle[1], ref point, out v1p);
 
                     Vector3 cp0;
                     Vector3.Cross(ref v0p,ref v1p,out cp0);
@@ -114,7 +112,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     if (dot >= edge_tolerance)
                     {
                         Vector3 v2p;
-                        Vector3.Subtract(ref raw[2],ref point,out v2p);
+                        Vector3.Subtract(ref triangle[2], ref point, out v2p);
                         Vector3 cp1; //= Vector3.Cross(v1p,v2p);
                         Vector3.Cross(ref v1p, ref v2p, out cp1);
 
@@ -181,9 +179,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         }
 
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
-	        TriangleShape triangleShape = new TriangleShape(triangle[0], triangle[1], triangle[2]);
+	        TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
             triangleShape.SetMargin(m_triangleCollisionMargin);
 
 	        VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();

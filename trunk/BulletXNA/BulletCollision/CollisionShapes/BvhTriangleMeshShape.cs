@@ -232,16 +232,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
     {
         public StridingMeshInterface m_meshInterface;
         public ITriangleCallback m_callback;
-        ObjectArray<Vector3> m_triangle = new ObjectArray<Vector3>(3);
+        Vector3[] m_triangle = new Vector3[3];
 
         public MyNodeOverlapCallback(ITriangleCallback callback, StridingMeshInterface meshInterface)
         {
             m_meshInterface = meshInterface;
             m_callback = callback;
-            // populate with basic data.
-            m_triangle.Add(Vector3.One);
-            m_triangle.Add(Vector3.One);
-            m_triangle.Add(Vector3.One);
 
         }
 
@@ -277,7 +273,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
             Vector3 meshScaling = m_meshInterface.GetScaling();
             Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
-            Vector3[] localRaw = m_triangle.GetRawArray();
             int[] indexRaw = ((ObjectArray<int>)indexBase).GetRawArray();
             for (int j=2;j>=0;j--)
             {
@@ -288,8 +283,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     int floatIndex = graphicsIndex * stride;
                     if (vertexBase is ObjectArray<Vector3>)
                     {
-                        localRaw[j] = vertexBaseRaw[floatIndex];
-                        Vector3.Multiply(ref localRaw[j],ref meshScaling,out localRaw[j]);
+                        m_triangle[j] = vertexBaseRaw[floatIndex];
+                        Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
                     }
                     else if(vertexBase is ObjectArray<float>)
                     {

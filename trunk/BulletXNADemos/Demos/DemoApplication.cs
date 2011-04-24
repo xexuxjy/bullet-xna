@@ -163,10 +163,10 @@ namespace BulletXNADemos.Demos
             RenderScenePass(0, gameTime);
             Vector3 location = new Vector3(10, 10, 0);
             Vector3 colour = new Vector3(1,1,1);
-            //m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)),location,colour);
+            m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)), location, colour);
             int	xOffset = 10;
             int yStart = 20;
-		    int yIncr = 20;
+		    int yIncr = 15;
 
             ShowProfileInfo(xOffset, yStart, yIncr);
 
@@ -1464,65 +1464,68 @@ namespace BulletXNADemos.Demos
         //----------------------------------------------------------------------------------------------
         public void ShowProfileInfo(int xOffset, int yStart, int yIncr)
         {
-	        double time_since_reset = 0f;
-	        if (!m_idle)
-	        {
-		        time_since_reset = m_profileManager.Get_Time_Since_Reset();
-	        }
+            if (m_profileManager != null)
+            {
+                double time_since_reset = 0f;
+                if (!m_idle)
+                {
+                    time_since_reset = m_profileManager.Get_Time_Since_Reset();
+                }
 
 
-	        {
-		        //recompute profiling data, and store profile strings
-                String blockTime;
-		        double totalTime = 0;
+                {
+                    //recompute profiling data, and store profile strings
+                    String blockTime;
+                    double totalTime = 0;
 
-                int frames_since_reset = m_profileManager.Get_Frame_Count_Since_Reset();
+                    int frames_since_reset = m_profileManager.Get_Frame_Count_Since_Reset();
 
-		        m_profileIterator.First();
+                    m_profileIterator.First();
 
-		        double parent_time = m_profileIterator.Is_Root() ? time_since_reset : m_profileIterator.Get_Current_Parent_Total_Time();
+                    double parent_time = m_profileIterator.Is_Root() ? time_since_reset : m_profileIterator.Get_Current_Parent_Total_Time();
 
-		        {
-                    blockTime = String.Format("--- Profiling: {0} (total running time: {1:0.000} ms) ---",m_profileIterator.Get_Current_Parent_Name(), parent_time);
-			        DisplayProfileString(xOffset,yStart,blockTime);
-			        yStart += yIncr;
-    			
-                    blockTime = "press number (1,2...) to display child timings, or 0 to go up to parent";
-			        DisplayProfileString(xOffset,yStart,blockTime);
-			        yStart += yIncr;
+                    {
+                        blockTime = String.Format("--- Profiling: {0} (total running time: {1:0.000} ms) ---", m_profileIterator.Get_Current_Parent_Name(), parent_time);
+                        DisplayProfileString(xOffset, yStart, blockTime);
+                        yStart += yIncr;
 
-		        }
+                        blockTime = "press number (1,2...) to display child timings, or 0 to go up to parent";
+                        DisplayProfileString(xOffset, yStart, blockTime);
+                        yStart += yIncr;
 
-
-		        double accumulated_time = 0f;
-
-		        for (int i = 0; !m_profileIterator.Is_Done(); m_profileIterator.Next())
-		        {
-			        double current_total_time = m_profileIterator.Get_Current_Total_Time();
-			        accumulated_time += current_total_time;
-			        double fraction = parent_time > MathUtil.SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0f;
-
-			        blockTime = String.Format("{0} -- {1} ({2:0.00} %%) :: {3:0.000} ms / frame ({4} calls)",
-				        ++i, m_profileIterator.Get_Current_Name(), fraction,
-				        (current_total_time / (double)frames_since_reset),m_profileIterator.Get_Current_Total_Calls());
-			        DisplayProfileString(xOffset,yStart,blockTime);
-			        yStart += yIncr;
-			        totalTime += current_total_time;
-		        }
-
-		        blockTime = String.Format("{0} ({1:0.000}%) :: {2:0.000} ms", "Unaccounted",
-			        // (min(0, time_since_reset - totalTime) / time_since_reset) * 100);
-			        parent_time > MathUtil.SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0f, parent_time - accumulated_time);
-
-		        DisplayProfileString(xOffset,yStart,blockTime);
-		        yStart += yIncr;
+                    }
 
 
+                    double accumulated_time = 0f;
 
-		        blockTime = "-------------------------------------------------";
-		        DisplayProfileString(xOffset,yStart,blockTime);
-		        yStart += yIncr;
-	        }
+                    for (int i = 0; !m_profileIterator.Is_Done(); m_profileIterator.Next())
+                    {
+                        double current_total_time = m_profileIterator.Get_Current_Total_Time();
+                        accumulated_time += current_total_time;
+                        double fraction = parent_time > MathUtil.SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0f;
+
+                        blockTime = String.Format("{0} -- {1} ({2:0.00} %%) :: {3:0.000} ms / frame ({4} calls)",
+                            ++i, m_profileIterator.Get_Current_Name(), fraction,
+                            (current_total_time / (double)frames_since_reset), m_profileIterator.Get_Current_Total_Calls());
+                        DisplayProfileString(xOffset, yStart, blockTime);
+                        yStart += yIncr;
+                        totalTime += current_total_time;
+                    }
+
+                    blockTime = String.Format("{0} ({1:0.000}%) :: {2:0.000} ms", "Unaccounted",
+                        // (min(0, time_since_reset - totalTime) / time_since_reset) * 100);
+                        parent_time > MathUtil.SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0f, parent_time - accumulated_time);
+
+                    DisplayProfileString(xOffset, yStart, blockTime);
+                    yStart += yIncr;
+
+
+
+                    blockTime = "-------------------------------------------------";
+                    DisplayProfileString(xOffset, yStart, blockTime);
+                    yStart += yIncr;
+                }
+            }
         }
 
         

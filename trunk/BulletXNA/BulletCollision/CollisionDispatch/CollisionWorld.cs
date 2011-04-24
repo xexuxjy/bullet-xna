@@ -1411,19 +1411,20 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
             return true;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
             ProcessTriangle(triangle,partId,triangleIndex);
         }
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
             //(voidpartId;
             //(void)triangleIndex;
 
-            Vector3 wv0 = Vector3.Transform(triangle[0],m_worldTrans);
-            Vector3 wv1 = Vector3.Transform(triangle[1],m_worldTrans);
-            Vector3 wv2 = Vector3.Transform(triangle[2],m_worldTrans);
+            Vector3 wv0,wv1,wv2;
+            Vector3.Transform(ref triangle[0],ref m_worldTrans,out wv0);
+            Vector3.Transform(ref triangle[1],ref m_worldTrans,out wv1);
+            Vector3.Transform(ref triangle[2], ref m_worldTrans, out wv2);
             Vector3 center = (wv0+wv1+wv2)*(1f/3f);
 
             Vector3 normal = Vector3.Cross((wv1-wv0),(wv2-wv0));

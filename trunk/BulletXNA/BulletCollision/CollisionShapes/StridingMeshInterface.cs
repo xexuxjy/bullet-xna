@@ -52,11 +52,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        PHY_ScalarType gfxindextype = PHY_ScalarType.PHY_INTEGER;
 	        int stride = 0,numverts = 0 ,numtriangles = 0;
 
-            ObjectArray<Vector3> triangle = new ObjectArray<Vector3>(3);
-			// ugly.  - could do with either a static , or allowing these methods to take a list or a fixed array...		
-			triangle.Add(Vector3.Zero);
-			triangle.Add(Vector3.Zero);
-			triangle.Add(Vector3.Zero);
+            Vector3[] triangle = new Vector3[3];
 
 	        float graphicsBase = 0f;
 
@@ -268,18 +264,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return false;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
 		{
-            Vector3 t1 = triangle[0];
-            Vector3 t2 = triangle[1];
-            Vector3 t3 = triangle[2];
-
-			MathUtil.VectorMin(ref t1,ref m_aabbMin);
-			MathUtil.VectorMax(ref t1,ref m_aabbMax);
-			MathUtil.VectorMin(ref t2,ref m_aabbMin);
-			MathUtil.VectorMax(ref t2,ref m_aabbMax);
-			MathUtil.VectorMin(ref t3,ref m_aabbMin);
-			MathUtil.VectorMax(ref t3,ref m_aabbMax);
+			MathUtil.VectorMin(ref triangle[0],ref m_aabbMin);
+            MathUtil.VectorMax(ref triangle[0], ref m_aabbMax);
+            MathUtil.VectorMin(ref triangle[1], ref m_aabbMin);
+            MathUtil.VectorMax(ref triangle[1], ref m_aabbMax);
+            MathUtil.VectorMin(ref triangle[2], ref m_aabbMin);
+            MathUtil.VectorMax(ref triangle[2], ref m_aabbMax);
 		}
 
         public void Cleanup()

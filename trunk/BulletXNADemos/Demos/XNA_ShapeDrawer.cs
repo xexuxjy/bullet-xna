@@ -1151,30 +1151,28 @@ namespace BulletXNADemos.Demos
 			matrix = m;
 	    }
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
 	    {
 		    if (m_wireframe)
 		    {
-                Vector3[] raw = triangle.GetRawArray();
-
 				// put them in object space.
-				Vector3.Transform(raw, ref matrix, raw);
+				Vector3.Transform(triangle, ref matrix, triangle);
 
 
-                m_shapeDrawer.DrawLine(ref raw[0], ref raw[1], ref RED);
-                m_shapeDrawer.DrawLine(ref raw[1], ref raw[2], ref GREEN);
-                m_shapeDrawer.DrawLine(ref raw[2], ref raw[0], ref BLUE);
+                m_shapeDrawer.DrawLine(ref triangle[0], ref triangle[1], ref RED);
+                m_shapeDrawer.DrawLine(ref triangle[1], ref triangle[2], ref GREEN);
+                m_shapeDrawer.DrawLine(ref triangle[2], ref triangle[0], ref BLUE);
 
                 //draw normal?
-                Vector3 d = raw[1] - raw[0];
-                Vector3 e = raw[2] - raw[0];
+                Vector3 d = triangle[1] - triangle[0];
+                Vector3 e = triangle[2] - triangle[0];
                 // Reverse the cross here to account for winding, shouldn't change the way rest of bullet works.
 				Vector3 cross = Vector3.Cross(d, e);
 				//Vector3 cross = Vector3.Cross(e,d);
 
                 Vector3 colour = new Vector3(1, 0, 1);
                 int ibreak = 0;
-                Vector3 center = (raw[0]+raw[1]+raw[2])*(1.0f/3.0f);
+                Vector3 center = (triangle[0]+triangle[1]+triangle[2])*(1.0f/3.0f);
 
                 cross += center;
 				m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
@@ -1205,7 +1203,7 @@ namespace BulletXNADemos.Demos
             m_shapeDrawer = shapeDrawer;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
 	    {
             m_shapeDrawer.DrawSolidTriangle(triangle);
 	    }

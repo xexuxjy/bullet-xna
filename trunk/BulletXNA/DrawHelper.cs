@@ -584,20 +584,20 @@ namespace BulletXNA
             m_worldTrans = worldTrans;
         }
 
-        public virtual void InternalProcessTriangleIndex(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
             ProcessTriangle(triangle, partId, triangleIndex);
         }
 
-        public virtual void ProcessTriangle(ObjectArray<Vector3> triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
             //(void)partId;
             //(void)triangleIndex;
 
             Vector3 wv0, wv1, wv2;
-            wv0 = Vector3.Transform(triangle[0], m_worldTrans);
-            wv1 = Vector3.Transform(triangle[1], m_worldTrans);
-            wv2 = Vector3.Transform(triangle[2], m_worldTrans);
+            Vector3.Transform(ref triangle[0], ref m_worldTrans,out wv0);
+            Vector3.Transform(ref triangle[1], ref m_worldTrans,out wv1);
+            Vector3.Transform(ref triangle[2], ref m_worldTrans,out wv2);
 
             m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
             m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);

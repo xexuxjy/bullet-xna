@@ -349,8 +349,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             MathUtil.VectorComponent(ref localOrigin, m_upAxis, (m_minHeight + m_maxHeight) * 0.5f);
             localOrigin *= m_localScaling;
 
-            Matrix abs_b = Matrix.Identity;
-            MathUtil.AbsoluteMatrix(ref t, ref abs_b);
+            Matrix abs_b;
+            MathUtil.AbsoluteMatrix(ref t, out abs_b);
             Vector3 center = t.Translation;
             Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents),
                                             Vector3.Dot(abs_b.Up, halfExtents),

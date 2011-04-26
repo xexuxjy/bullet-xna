@@ -21,12 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using System.Collections.Generic;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
-    public class CollisionMargin
+    public static class CollisionMargin
     {
         public const float CONVEX_DISTANCE_MARGIN = 0.04f;
     }

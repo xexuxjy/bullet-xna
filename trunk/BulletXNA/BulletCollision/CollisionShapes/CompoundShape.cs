@@ -192,8 +192,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             float margin = GetMargin();
             localHalfExtents += new Vector3(margin, margin, margin);
 
-            Matrix abs_b = Matrix.Identity;
-            MathUtil.AbsoluteMatrix(ref trans, ref abs_b);
+            Matrix abs_b;
+            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
             
 			
 			//Vector3 center = trans.Translation;

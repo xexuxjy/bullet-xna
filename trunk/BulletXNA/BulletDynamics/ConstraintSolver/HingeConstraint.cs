@@ -142,8 +142,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
             // since no frame is given, assume this to be zero angle and just pick rb transform axis
             // fixed axis in worldspace
-            Vector3 rbAxisA1 = Vector3.Zero, rbAxisA2 = Vector3.Zero;
-            TransformUtil.PlaneSpace1(ref axisInA, ref rbAxisA1, ref rbAxisA2); 
+            Vector3 rbAxisA1, rbAxisA2;
+            TransformUtil.PlaneSpace1(ref axisInA, out rbAxisA1, out rbAxisA2); 
 
             m_rbAFrame.Translation = pivotInA;
             MathUtil.SetBasis(ref m_rbAFrame,ref rbAxisA1,ref rbAxisA2,ref axisInA);
@@ -290,7 +290,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             Vector3 a1 = pivotAInW - transA.Translation;
             {
                 Vector3 a1neg = -a1;
-                MathUtil.GetSkewSymmetricMatrix(ref a1neg, ref info.m_solverConstraints[0].m_relpos1CrossNormal, ref info.m_solverConstraints[1].m_relpos1CrossNormal, ref info.m_solverConstraints[2].m_relpos1CrossNormal);
+                MathUtil.GetSkewSymmetricMatrix(ref a1neg,
+                    out info.m_solverConstraints[0].m_relpos1CrossNormal,
+                    out info.m_solverConstraints[1].m_relpos1CrossNormal,
+                    out info.m_solverConstraints[2].m_relpos1CrossNormal);
                 //if (info.m_solverConstraints[0].m_relpos1CrossNormal.X == 0.15)
                 //{
                 //    int ibreak = 0;
@@ -300,7 +303,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             }
             Vector3 a2 = pivotBInW - transB.Translation;
             {
-                MathUtil.GetSkewSymmetricMatrix(ref a2, ref info.m_solverConstraints[0].m_relpos2CrossNormal, ref info.m_solverConstraints[1].m_relpos2CrossNormal, ref info.m_solverConstraints[2].m_relpos2CrossNormal);
+                MathUtil.GetSkewSymmetricMatrix(ref a2,
+                    out info.m_solverConstraints[0].m_relpos2CrossNormal,
+                    out info.m_solverConstraints[1].m_relpos2CrossNormal,
+                    out info.m_solverConstraints[2].m_relpos2CrossNormal);
             }
             // linear RHS
             float k = info.fps * info.erp;
@@ -843,8 +849,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
         public void	SetAxis(ref Vector3 axisInA)
         {
-            Vector3 rbAxisA1 = Vector3.Zero, rbAxisA2 = Vector3.Zero;
-            TransformUtil.PlaneSpace1(ref axisInA, ref rbAxisA1, ref rbAxisA2);
+            Vector3 rbAxisA1, rbAxisA2;
+            TransformUtil.PlaneSpace1(ref axisInA, out rbAxisA1, out rbAxisA2);
             Vector3 pivotInA = m_rbAFrame.Translation;
             //		m_rbAFrame.Translation = pivotInA;
 

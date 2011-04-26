@@ -1304,8 +1304,8 @@ namespace BulletXNA.BullettCollision.CollisionDispatch
 	    {
 		    bool isSwapped = m_manifoldPtr.GetBody0() != m_body0;
 		    Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
-		    Vector3 localA = Vector3.Zero;
-		    Vector3 localB = Vector3.Zero;;
+		    Vector3 localA;
+		    Vector3 localB;
 		    if (isSwapped)
 		    {
 			    localA = MathUtil.InverseTransform(ref m_rootTransB,ref pointA );

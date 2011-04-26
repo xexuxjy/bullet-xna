@@ -29,7 +29,7 @@ using System.IO;
 
 namespace BulletXNA
 {
-    public class BulletGlobals
+    public static class BulletGlobals
     {
         public static bool gDisableDeactivation = false;
         public static int gOverlappingPairs = 0;

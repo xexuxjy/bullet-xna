@@ -98,7 +98,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         public override void SetLocalScaling(ref Vector3 scaling)
         {
-            MathUtil.AbsoluteVector(ref scaling, ref m_localScaling);
+            MathUtil.AbsoluteVector(ref scaling, out m_localScaling);
         }
 
         public override Vector3 GetLocalScaling()

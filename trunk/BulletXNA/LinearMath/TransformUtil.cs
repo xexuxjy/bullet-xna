@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
-    public class TransformUtil
+    public static class TransformUtil
     {
         public static IList<float> FloatToList(float f)
         {
@@ -68,7 +68,7 @@ namespace BulletXNA
         //    return Vector3.Transform(v, Matrix.Invert(m));
         //}
         
-        public static void PlaneSpace1(ref Vector3 n, ref Vector3 p, ref Vector3 q)
+        public static void PlaneSpace1(ref Vector3 n, out Vector3 p, out Vector3 q)
         {
             if (Math.Abs(n.Z) > MathUtil.SIMDSQRT12)
             {

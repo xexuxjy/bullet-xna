@@ -187,12 +187,18 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			Vector3 a1 = Vector3.TransformNormal(m_rbAFrame.Translation, transA);
 			{
 				Vector3 a1neg = -a1;
-				MathUtil.GetSkewSymmetricMatrix(ref a1neg, ref info.m_solverConstraints[0].m_relpos1CrossNormal, ref info.m_solverConstraints[1].m_relpos1CrossNormal, ref info.m_solverConstraints[2].m_relpos1CrossNormal);
+                MathUtil.GetSkewSymmetricMatrix(ref a1neg,
+                    out info.m_solverConstraints[0].m_relpos1CrossNormal,
+                    out info.m_solverConstraints[1].m_relpos1CrossNormal,
+                    out info.m_solverConstraints[2].m_relpos1CrossNormal);
 			}
 
 			Vector3 a2 = Vector3.TransformNormal(m_rbBFrame.Translation, transB);
 			{
-				MathUtil.GetSkewSymmetricMatrix(ref a2, ref info.m_solverConstraints[0].m_relpos2CrossNormal, ref info.m_solverConstraints[1].m_relpos2CrossNormal, ref info.m_solverConstraints[2].m_relpos2CrossNormal);
+                MathUtil.GetSkewSymmetricMatrix(ref a2,
+                    out info.m_solverConstraints[0].m_relpos2CrossNormal,
+                    out info.m_solverConstraints[1].m_relpos2CrossNormal,
+                    out info.m_solverConstraints[2].m_relpos2CrossNormal);
 			}
 
 			// set right hand side

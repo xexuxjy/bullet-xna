@@ -63,11 +63,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         	
 	        //this is where the triangles are generated, given AABB and plane equation (normal/constant)
 
-	        Vector3 tangentDir0 = Vector3.Zero;
-            Vector3 tangentDir1 = Vector3.Zero;
+	        Vector3 tangentDir0;
+            Vector3 tangentDir1;
 
 	        //tangentDir0/tangentDir1 can be precalculated
-	        TransformUtil.PlaneSpace1(ref m_planeNormal,ref tangentDir0,ref tangentDir1);
+	        TransformUtil.PlaneSpace1(ref m_planeNormal, out tangentDir0, out tangentDir1);
 
             Vector3 supVertex0 = Vector3.Zero;
             Vector3 supVertex1 = Vector3.Zero;

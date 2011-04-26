@@ -41,7 +41,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_contactBreakingThreshold = contactBreakingThreshold;
         }
             
-        public bool Collide(ref Vector3 sphereCenter,ref Vector3 point, ref Vector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
+        public bool Collide(ref Vector3 sphereCenter, out Vector3 point, out Vector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
         {
 	        IList<Vector3> vertices = m_triangle.GetVertexPtr(0);
 	        Vector3 c = sphereCenter;
@@ -86,7 +86,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 {
 			        // Could be inside one of the contact capsules
 			        float contactCapsuleRadiusSqr = (r + contactMargin) * (r + contactMargin);
-			        Vector3 nearestOnEdge = Vector3.Zero;
+			        Vector3 nearestOnEdge;
 			        for (int i = 0; i < m_triangle.GetNumEdges(); i++) {
         				
 				        Vector3 pa = Vector3.Zero;
@@ -94,7 +94,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         				
 				        m_triangle.GetEdge(i,ref pa,ref pb);
 
-				        float distanceSqr = SegmentSqrDistance(ref pa,ref pb,ref c, ref nearestOnEdge);
+				        float distanceSqr = SegmentSqrDistance(ref pa,ref pb,ref c, out nearestOnEdge);
 				        if (distanceSqr < contactCapsuleRadiusSqr) 
                         {
 					        // Yep, we're inside a capsule
@@ -171,7 +171,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        Matrix transformA = input.m_transformA;
 	        Matrix transformB = input.m_transformB;
 
-            Vector3 point = Vector3.Zero, normal = Vector3.Up;
+            Vector3 point, normal;
 	        float timeOfImpact = 1f;
             float depth = 0f;
             //	output.m_distance = float(1e30);
@@ -179,7 +179,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			Matrix sphereInTr = MathUtil.InverseTimes(transformB,transformA);
 
             Vector3 temp = sphereInTr.Translation;
-	        if (Collide(ref temp,ref point,ref normal,ref depth,ref timeOfImpact,m_contactBreakingThreshold))
+	        if (Collide(ref temp,out point,out normal,ref depth,ref timeOfImpact,m_contactBreakingThreshold))
 	        {
 		        if (swapResults)
 		        {
@@ -201,7 +201,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         // See also geometrictools.com
         // Basic idea: D = |p - (lo + t0*lv)| where t0 = lv . (p - lo) / lv . lv
-        public static float SegmentSqrDistance(ref Vector3 from, ref Vector3 to,ref Vector3 p, ref Vector3 nearest)
+        public static float SegmentSqrDistance(ref Vector3 from, ref Vector3 to,ref Vector3 p, out Vector3 nearest)
         {
 	        Vector3 diff = p - from;
 	        Vector3 v = to - from;

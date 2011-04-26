@@ -91,9 +91,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        if (resultOut.GetPersistentManifold().GetNumContacts()<m_minimumPointsPerturbationThreshold)
 	        {
-		        Vector3 v0 = Vector3.Zero;
-                Vector3 v1 = Vector3.Zero;
-		        TransformUtil.PlaneSpace1(ref planeNormal,ref v0,ref v1);
+		        Vector3 v0;
+                Vector3 v1;
+		        TransformUtil.PlaneSpace1(ref planeNormal, out v0, out v1);
 		        //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
 
                 float angleLimit = 0.125f * MathUtil.SIMD_PI;

@@ -484,7 +484,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 						else
 						{
 							//re-calculate friction direction every frame, todo: check if this is really needed
-							TransformUtil.PlaneSpace1(ref cp.m_normalWorldOnB, ref cp.m_lateralFrictionDir1, ref cp.m_lateralFrictionDir2);
+							TransformUtil.PlaneSpace1(ref cp.m_normalWorldOnB, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
 							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
 							{
 								ApplyAnisotropicFriction(colObj0, ref cp.m_lateralFrictionDir2);

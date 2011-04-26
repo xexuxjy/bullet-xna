@@ -185,11 +185,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        //perform perturbation when more then 'm_minimumPointsPerturbationThreshold' points
 	        if (m_numPerturbationIterations > 0 &&  resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
 	        {
-                Vector3 v0 = Vector3.Zero, v1 = Vector3.Zero;
+                Vector3 v0, v1;
 
                 Vector3 sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis();
                 sepNormalWorldSpace.Normalize();
-                TransformUtil.PlaneSpace1(ref sepNormalWorldSpace, ref v0, ref v1);
+                TransformUtil.PlaneSpace1(ref sepNormalWorldSpace, out v0, out v1);
 
 		        bool perturbeA = true;
 		        const float angleLimit = 0.125f * MathUtil.SIMD_PI;
@@ -397,10 +397,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	    }
 
         public static void SegmentsClosestPoints(
-	        ref Vector3 ptsVector,
-	        ref Vector3 offsetA,
-	        ref Vector3 offsetB,
-	        ref float tA, ref float tB,
+	        out Vector3 ptsVector,
+	        out Vector3 offsetA,
+	        out Vector3 offsetB,
+	        out float tA, out float tB,
 	        ref Vector3 translation,
 	        ref Vector3 dirA, float hlenA,
 	        ref Vector3 dirB, float hlenB )
@@ -511,12 +511,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        // compute the closest points of the capsule line segments
 
-	        Vector3 ptsVector = Vector3.Zero;           // the vector between the closest points
+	        Vector3 ptsVector;           // the vector between the closest points
 
-            Vector3 offsetA = Vector3.Zero, offsetB = Vector3.Zero;    // offsets from segment centers to their closest points
-	        float tA = 0f, tB = 0f;              // parameters on line segment
+            Vector3 offsetA, offsetB;    // offsets from segment centers to their closest points
+	        float tA, tB;              // parameters on line segment
 
-	        SegmentsClosestPoints( ref ptsVector, ref offsetA, ref offsetB, ref tA, ref tB, ref translation,
+            SegmentsClosestPoints(out ptsVector, out offsetA, out offsetB, out tA, out tB, ref translation,
 						           ref directionA, capsuleLengthA, ref directionB, capsuleLengthB );
 
 	        float distance = ptsVector.Length() - capsuleRadiusA - capsuleRadiusB;
@@ -530,8 +530,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             if (lenSqr <= (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
 	        {
 		        //degenerate case where 2 capsules are likely at the same location: take a vector tangential to 'directionA'
-		        Vector3 q = Vector3.Zero;
-		        TransformUtil.PlaneSpace1(ref directionA,ref normalOnB,ref q);
+		        Vector3 q;
+		        TransformUtil.PlaneSpace1(ref directionA, out normalOnB, out q);
 	        } 
             else
 	        {

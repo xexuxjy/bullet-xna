@@ -633,7 +633,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			        ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
 
 			        BulletGlobals.StartProfile("btRayAabb2");
-			        rayBoxOverlap = AabbUtil2.RayAabb2 (ref raySource, ref rayDirection, sign, bounds, ref param, 0.0f, lambda_max);
+			        rayBoxOverlap = AabbUtil2.RayAabb2 (ref raySource, ref rayDirection, sign, bounds, out param, 0.0f, lambda_max);
                     BulletGlobals.StopProfile();
 #else
                     rayBoxOverlap = true;//btRayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
@@ -797,7 +797,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			        ///careful with this check: need to check division by zero (above) and fix the unQuantize method
 			        ///thanks Joerg/hiker for the reproduction case!
 			        ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
-		        rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2 (ref raySource, ref rayDirectionInverse, sign, bounds, ref param, 0.0f, lambda_max) : false;
+		        rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2 (ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
 
 #else
                 Vector3 normal = Vector3.Zero;

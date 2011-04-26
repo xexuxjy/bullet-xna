@@ -197,16 +197,16 @@ namespace BulletXNADemos.TestDebug
 			m = Matrix.Identity;
 			m = MathUtil.SetEulerZYX(1, -2, -1);
 			m.Translation = new Vector3(-1, 2, -3);
-			MathUtil.MatrixToEulerXYZ(ref m, ref result);
+			MathUtil.MatrixToEulerXYZ(ref m, out result);
 			MathUtil.PrintVector3(streamWriter, result);
 			streamWriter.WriteLine("");
 
 
 			streamWriter.WriteLine("getSkewSymmetrixMatrix");
 			v = new Vector3(0.2f, 0.7f, -0.3f);
-			Vector3 v3 = Vector3.Zero;
-			Vector3 v4 = Vector3.Zero; ;
-			MathUtil.GetSkewSymmetricMatrix(ref v,ref v2, ref v3, ref v4);
+			Vector3 v3;
+			Vector3 v4; ;
+			MathUtil.GetSkewSymmetricMatrix(ref v, out v2, out v3, out v4);
 			MathUtil.PrintVector3(streamWriter, v2);
 			streamWriter.WriteLine("");
 			MathUtil.PrintVector3(streamWriter, v3);

@@ -23,12 +23,10 @@
 
 //#define DISABLE_BVH
 using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using System.Diagnostics;
+using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -138,7 +136,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
 #if DISABLE_BVH
-	        base.processAllTriangles(callback,ref aabbMin,ref aabbMax);
+	        base.ProcessAllTriangles(callback,ref aabbMin,ref aabbMax);
 #else
 			if (m_bvh != null)
 			{

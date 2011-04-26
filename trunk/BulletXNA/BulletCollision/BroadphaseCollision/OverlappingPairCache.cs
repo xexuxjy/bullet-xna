@@ -22,9 +22,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 
-using BulletXNA.BullettCollision.BroadphaseCollision;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 

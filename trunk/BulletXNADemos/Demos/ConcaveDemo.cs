@@ -23,22 +23,15 @@
 
 #define USE_TRIMESH_SHAPE
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using BulletXNA;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BullettDynamics.Dynamics;
-using BulletXNA.BulletCollision.CollisionDispatch;
 using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.BulletDynamics.ConstraintSolver;
 using BulletXNA.BulletDynamics.Dynamics;
-using BulletXNA.BullettCollision.CollisionShapes;
 using BulletXNA.LinearMath;
-using System.IO;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNADemos.Demos
 {

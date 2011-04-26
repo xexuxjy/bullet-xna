@@ -21,11 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using System.Collections.Generic;
+using BulletXNA.BulletCollision.CollisionDispatch;
 using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.CollisionDispatch;
 
 namespace BulletXNA.BulletDynamics.Character
 {

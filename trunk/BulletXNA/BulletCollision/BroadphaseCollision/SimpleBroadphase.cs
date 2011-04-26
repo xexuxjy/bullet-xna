@@ -22,11 +22,10 @@
  */
 #define CLEAN_INVALID_PAIRS
 
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.BroadphaseCollision
 {

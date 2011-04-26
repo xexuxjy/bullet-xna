@@ -21,16 +21,12 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettDynamics.Dynamics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BullettCollision.CollisionDispatch;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.Dynamics
 {

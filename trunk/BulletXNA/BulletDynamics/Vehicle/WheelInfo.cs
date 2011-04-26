@@ -22,10 +22,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-
+using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
-using BulletXNA.BullettDynamics.Dynamics;
 
 namespace BulletXNA.BulletDynamics.Vehicle
 {

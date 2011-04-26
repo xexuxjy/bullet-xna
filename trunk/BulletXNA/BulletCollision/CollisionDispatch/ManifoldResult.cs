@@ -21,12 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using System.Diagnostics;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {

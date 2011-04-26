@@ -27,8 +27,8 @@
 //using System.Linq;
 //using System.Text;
 //using Microsoft.Xna.Framework;
-//using BulletXNA.BullettCollision.CollisionShapes;
-//using BulletXNA.BullettCollision.CollisionDispatch;
+//using BulletXNA.BulletCollision.CollisionShapes;
+//using BulletXNA.BulletCollision.CollisionDispatch;
 //using System.Diagnostics;
 //using BulletXNA;
 

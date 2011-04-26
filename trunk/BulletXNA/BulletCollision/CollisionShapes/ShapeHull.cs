@@ -23,10 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-using System.IO;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {

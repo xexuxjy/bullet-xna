@@ -24,7 +24,7 @@
 //using System;
 //using System.Collections.Generic;
 //using Microsoft.Xna.Framework;
-//using BulletXNA.BullettDynamics.Dynamics;
+//using BulletXNA.BulletDynamics.Dynamics;
 
 //namespace BulletXNA.BulletDynamics.ConstraintSolver
 //{

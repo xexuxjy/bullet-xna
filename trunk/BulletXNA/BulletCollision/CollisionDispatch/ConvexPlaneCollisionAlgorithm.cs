@@ -21,14 +21,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
 using System.Collections.Generic;
 using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BullettCollision.CollisionDispatch;
 using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {

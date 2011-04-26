@@ -22,15 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-
-
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettDynamics.Dynamics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletDynamics.ConstraintSolver;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.Dynamics
 {

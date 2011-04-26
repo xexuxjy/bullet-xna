@@ -23,12 +23,11 @@
 
 using System;
 using System.Collections.Generic;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletDynamics.ConstraintSolver;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BullettCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletXNA

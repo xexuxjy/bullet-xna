@@ -23,16 +23,13 @@
 #define DEBUG_CONTACTS
 //#define BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
 
-using System;
 using System.Collections.Generic;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.CollisionShapes;
 using System.Diagnostics;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 
 namespace BulletXNA.BulletCollision.CollisionDispatch

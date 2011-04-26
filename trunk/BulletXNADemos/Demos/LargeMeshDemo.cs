@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.CollisionShapes;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.Dynamics;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.LinearMath;
-using System.IO;
+﻿using System.IO;
 using BulletXNA;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNADemos.Demos
 {

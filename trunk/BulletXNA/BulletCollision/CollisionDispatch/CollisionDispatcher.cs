@@ -25,11 +25,8 @@
 
 using System;
 using System.Collections.Generic;
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.CollisionDispatch;
 using System.Diagnostics;
+using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 

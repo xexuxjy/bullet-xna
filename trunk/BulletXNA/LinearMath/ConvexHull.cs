@@ -17,9 +17,9 @@ subject to the following restrictions:
 */
 
 using System;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.LinearMath
 {

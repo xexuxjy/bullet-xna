@@ -23,7 +23,6 @@
 
 #define USE_PATH_COMPRESSION
 using System;
-using System.Collections.Generic;
 using BulletXNA.LinearMath;
 
 

@@ -350,29 +350,31 @@ namespace BulletXNA
 
         public static void AbsoluteMatrix(ref Matrix input, out Matrix output)
         {
-            output.M11 = Math.Abs(input.M11);
-            output.M12 = Math.Abs(input.M12);
-            output.M13 = Math.Abs(input.M13);
-            output.M14 = Math.Abs(input.M14);
-            output.M21 = Math.Abs(input.M21);
-            output.M22 = Math.Abs(input.M22);
-            output.M23 = Math.Abs(input.M23);
-            output.M24 = Math.Abs(input.M24);
-            output.M31 = Math.Abs(input.M31);
-            output.M32 = Math.Abs(input.M32);
-            output.M33 = Math.Abs(input.M33);
-            output.M34 = Math.Abs(input.M34);
-            output.M41 = Math.Abs(input.M41);
-            output.M42 = Math.Abs(input.M42);
-            output.M43 = Math.Abs(input.M43);
-            output.M44 = Math.Abs(input.M44);
+            output = new Matrix(
+                Math.Abs(input.M11),
+                Math.Abs(input.M12),
+                Math.Abs(input.M13),
+                Math.Abs(input.M14),
+                Math.Abs(input.M21),
+                Math.Abs(input.M22),
+                Math.Abs(input.M23),
+                Math.Abs(input.M24),
+                Math.Abs(input.M31),
+                Math.Abs(input.M32),
+                Math.Abs(input.M33),
+                Math.Abs(input.M34),
+                Math.Abs(input.M41),
+                Math.Abs(input.M42),
+                Math.Abs(input.M43),
+                Math.Abs(input.M44));
         }
 
         public static void AbsoluteVector(ref Vector3 input, out Vector3 output)
         {
-            output.X = Math.Abs(input.X);
-            output.Y = Math.Abs(input.Y);
-            output.Z = Math.Abs(input.Z);
+            output = new Vector3(
+                Math.Abs(input.X),
+                Math.Abs(input.Y),
+                Math.Abs(input.Z));
         }
 
         public static void RotateVector(ref Vector3 vec, ref Matrix m, out Vector3 output)
@@ -679,9 +681,10 @@ namespace BulletXNA
 
         public static void VectorMin(ref Vector3 input1, ref Vector3 input2, out Vector3 output)
         {
-            output.X = Math.Min(input1.X, input2.X);
-            output.Y = Math.Min(input1.Y, input2.Y);
-            output.Z = Math.Min(input1.Z, input2.Z);
+            output = new Vector3(
+                Math.Min(input1.X, input2.X),
+                Math.Min(input1.Y, input2.Y),
+                Math.Min(input1.Z, input2.Z));
         }
 
         public static void VectorMax(Vector3 input, ref Vector3 output)
@@ -698,9 +701,10 @@ namespace BulletXNA
 
         public static void VectorMax(ref Vector3 input1, ref Vector3 input2, out Vector3 output)
         {
-            output.X = Math.Max(input1.X, input2.X);
-            output.Y = Math.Max(input1.Y, input2.Y);
-            output.Z = Math.Max(input1.Z, input2.Z);
+            output = new Vector3(
+                Math.Max(input1.X, input2.X),
+                Math.Max(input1.Y, input2.Y),
+                Math.Max(input1.Z, input2.Z));
         }
 
         public static float RecipSqrt(float a)
@@ -961,9 +965,7 @@ namespace BulletXNA
 
         public static void Vector3FromFloat(out Vector3 v, float[] fa)
         {
-            v.X = fa[0];
-            v.Y = fa[1];
-            v.Z = fa[2];
+            v = new Vector3(fa[0], fa[1], fa[2]);
         }
 
 		//public static void FloatFromVector3(Vector3 v, float[] fa)
@@ -1010,26 +1012,29 @@ namespace BulletXNA
 	        {
 		        if (fi > -1.0f)
 		        {
-			        xyz.X = (float)Math.Atan2(-matElem5,matElem8);
-                    xyz.Y = (float)Math.Asin(matElem2);
-                    xyz.Z = (float)Math.Atan2(-matElem1, matElem0);
+                    xyz = new Vector3(
+                        (float)Math.Atan2(-matElem5, matElem8),
+                        (float)Math.Asin(matElem2),
+                        (float)Math.Atan2(-matElem1, matElem0));
 			        return true;
 		        }
 		        else
 		        {
 			        // WARNING.  Not unique.  XA - ZA = -atan2(r10,r11)
-                    xyz.X = (float)-Math.Atan2(matElem3, matElem4);
-			        xyz.Y = -SIMD_HALF_PI;
-			        xyz.Z = 0f;
+                    xyz = new Vector3(
+                        (float)-Math.Atan2(matElem3, matElem4),
+                        -SIMD_HALF_PI,
+                        0f);
 			        return false;
 		        }
 	        }
 	        else
 	        {
 		        // WARNING.  Not unique.  XAngle + ZAngle = atan2(r10,r11)
-                xyz.X = (float)Math.Atan2(matElem3, matElem4);
-		        xyz.Y = SIMD_HALF_PI;
-		        xyz.Z = 0.0f;
+                xyz = new Vector3(
+                    (float)Math.Atan2(matElem3, matElem4),
+		            SIMD_HALF_PI,
+		            0.0f);
 	        }
 	        return false;
         }

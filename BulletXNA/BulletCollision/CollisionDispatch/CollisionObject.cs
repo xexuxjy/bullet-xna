@@ -22,13 +22,12 @@
  */
 
 using System;
-using System.Collections.Generic;
 
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.CollisionShapes;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BullettCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision.CollisionDispatch
 {
         [Flags]
         public enum CollisionFlags

@@ -22,12 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettDynamics.Dynamics;
 using System.Diagnostics;
 using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletDynamics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.raintSolver
 {

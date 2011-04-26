@@ -21,17 +21,13 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
 using System.Collections.Generic;
-
-
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.Character
 {

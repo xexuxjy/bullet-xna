@@ -22,24 +22,18 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using BulletXNA.BullettDynamics.Dynamics;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BullettCollision.CollisionShapes;
-using BulletXNA.BullettCollision.BroadphaseCollision;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.Dynamics;
+using System.Reflection;
 using BulletXNA;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionDispatch;
-using System.IO;
-using System.Reflection;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace BulletXNADemos.Demos
 {

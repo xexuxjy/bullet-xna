@@ -18,20 +18,17 @@ subject to the following restrictions:
 Written by: Marten Svanfeldt
 */
 
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletDynamics.Dynamics;
-using BulletXNA.BullettCollision.CollisionShapes;
-using BulletXNA.BullettDynamics.Dynamics;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
 using System.IO;
-using System;
 using BulletXNA;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.CollisionShapes;
+using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+
 namespace BulletXNADemos.Demos
 {
     public class RagDollDemo : DemoApplication

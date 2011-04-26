@@ -20,12 +20,8 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-using System;
-using System.Collections.Generic;
-
 
 using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BullettCollision.BroadphaseCollision;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {

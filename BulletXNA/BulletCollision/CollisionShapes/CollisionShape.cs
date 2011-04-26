@@ -22,12 +22,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BullettCollision.CollisionShapes
+namespace BulletXNA.BulletCollision.CollisionShapes
 {
     public abstract class CollisionShape
     {

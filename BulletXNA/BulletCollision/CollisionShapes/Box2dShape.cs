@@ -21,11 +21,12 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 using System;
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using System.Collections.Generic;
 using System.Diagnostics;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using Microsoft.Xna.Framework;
+
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
 ///The btBox2dShape is a box primitive around the origin, its sides axis aligned with length specified by half extents, in local shape coordinates. When used as part of a btCollisionObject or btRigidBody it will be an oriented box in world space.

@@ -21,14 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using BulletXNA.BullettCollision.CollisionDispatch;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.BulletCollision.BroadphaseCollision;
-
-
+using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics.ConstraintSolver
 {

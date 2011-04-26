@@ -23,14 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.BullettCollision.CollisionShapes;
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using System.Diagnostics;
+using BulletXNA;
+using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BulletXNA;
-using System.Diagnostics;
 
 namespace BulletXNADemos.Demos
 {

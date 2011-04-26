@@ -25,13 +25,11 @@
 // HAVE TESTED THIS WITH REPLACEMENT VERSION WITH NO DIFFERENCE
 
 using System;
-using System.Collections.Generic;
-
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionShapes;
 using System.Diagnostics;
+using BulletXNA.BulletCollision.BroadphaseCollision;
+using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {

@@ -24,13 +24,10 @@
 #define BT_USE_EQUAL_VERTEX_THRESHOLD
 #define CATCH_DEGENERATE_TETRAHEDRON
 
-using System;
-using System.Collections.Generic;
-
-
 using System.Collections;
-using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {

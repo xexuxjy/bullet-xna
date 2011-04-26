@@ -32,10 +32,9 @@
 /// 4 : rotation Y (2nd Euler rotational around new position of Y axis, range [-PI/2+epsilon, PI/2-epsilon] )
 /// 5 : rotation Z (1st Euler rotational around Z axis, range [-PI+epsilon, PI-epsilon] )
 using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using System.Diagnostics;
-using BulletXNA.BullettDynamics.Dynamics;
+using BulletXNA.BulletDynamics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.ConstraintSolver
 {

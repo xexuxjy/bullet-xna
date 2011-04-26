@@ -22,10 +22,8 @@
  */
 
 using System;
-using System.Collections.Generic;
 using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {

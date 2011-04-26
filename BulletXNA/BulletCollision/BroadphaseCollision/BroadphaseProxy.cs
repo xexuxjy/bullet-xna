@@ -21,12 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 using System;
-using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 
-namespace BulletXNA.BullettCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
 ///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases. 
 ///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.

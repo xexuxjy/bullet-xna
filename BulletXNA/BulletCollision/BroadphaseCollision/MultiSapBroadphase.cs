@@ -22,10 +22,8 @@
  */
 using System;
 using System.Collections.Generic;
-
-using BulletXNA.BullettCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.BroadphaseCollision
 {

@@ -22,11 +22,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-
-using Microsoft.Xna.Framework;
 using System.Diagnostics;
-using BulletXNA.BullettDynamics.Dynamics;
+using BulletXNA.BulletDynamics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics.ConstraintSolver
 {

@@ -22,12 +22,10 @@
  */
 
 #define USE_BATCHED_SUPPORT
-using System;
 using System.Collections.Generic;
-
-using Microsoft.Xna.Framework;
 using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {

@@ -21,8 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BullettCollision.BroadphaseCollision;
 using System;
+
 namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
     public interface IOverlappingPairCallback

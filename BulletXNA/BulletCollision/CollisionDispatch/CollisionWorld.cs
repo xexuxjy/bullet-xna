@@ -22,20 +22,15 @@
  */
 
 //#define USE_BRUTEFORCE_RAYBROADPHASE
-using System;
-using System.Collections.Generic;
 
-using Microsoft.Xna.Framework;
-using BulletXNA.BullettCollision.BroadphaseCollision;
+using System.Diagnostics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BullettCollision.CollisionShapes;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BullettCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class CollisionWorld
     {

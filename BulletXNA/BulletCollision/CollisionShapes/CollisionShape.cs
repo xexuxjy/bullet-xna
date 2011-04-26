@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         public abstract void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax);
 
-	    public virtual void GetBoundingSphere(ref Vector3 center,ref float radius)
+	    public virtual void GetBoundingSphere(out Vector3 center, out float radius)
         {
 	        Matrix tr = Matrix.Identity;
 	        Vector3 aabbMin;
@@ -67,9 +67,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    ///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	    public virtual float GetAngularMotionDisc()
         {
-	        Vector3	center = new Vector3();
-	        float disc =0f;
-	        GetBoundingSphere(ref center,ref disc);
+	        Vector3	center;
+	        float disc;
+            GetBoundingSphere(out center, out disc);
 	        disc += (center).Length();
 	        return disc;
         }
@@ -169,8 +169,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             return new Vector3(1, 1, 1);
         }
-        public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public virtual void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
+            inertia = Vector3.Zero;
         }
 
         //debugging support

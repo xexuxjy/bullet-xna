@@ -136,7 +136,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 		
 
-		public override void CalculateLocalInertia(float mass,ref Vector3 inertia)
+		public override void CalculateLocalInertia(float mass, out Vector3 inertia)
 		{
 
 		//float margin = float(0.);
@@ -175,11 +175,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			return m_normals;
 		}
 
-		public override void GetPlane(ref Vector3 planeNormal,ref Vector3 planeSupport,int i )
+        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
 		{
 			//this plane might not be aligned...
-			Vector4 plane  = new Vector4();
-			GetPlaneEquation(ref plane,i);
+			Vector4 plane;
+			GetPlaneEquation(out plane,i);
 			planeNormal = new Vector3(plane.X,plane.Y,plane.Z);
 			planeSupport = LocalGetSupportingVertex(-planeNormal);
 		}
@@ -201,7 +201,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		}
 
 
-		public override void GetVertex(int i,ref Vector3 vtx)
+		public override void GetVertex(int i, out Vector3 vtx)
 		{
 			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
@@ -212,7 +212,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		}
 		
 
-		public void GetPlaneEquation(ref Vector4 plane,int i)
+		public void GetPlaneEquation(out Vector4 plane,int i)
 		{
 			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
@@ -238,12 +238,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				break;
 			default:
 				Debug.Assert(false);
+                plane = Vector4.Zero;
 				break;
 			}
 		}
 
-		
-		public override void GetEdge(int i,ref Vector3 pa,ref Vector3 pb)
+
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
 		//virtual void getEdge(int i,Edge& edge) const
 		{
 			int edgeVert0 = 0;
@@ -306,8 +307,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				break;
 
 			}
-			GetVertex(edgeVert0,ref pa );
-			GetVertex(edgeVert1,ref pb );
+            GetVertex(edgeVert0, out pa);
+            GetVertex(edgeVert1, out pb);
 		}
 
 
@@ -340,7 +341,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			return 6;
 		}
 		
-		public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector) 
+		public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector) 
 		{
 			switch (index)
 			{
@@ -364,6 +365,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				break;
 			default:
 				Debug.Assert(false);
+                penetrationVector = Vector3.Zero;
 				break;
 			}
 		}

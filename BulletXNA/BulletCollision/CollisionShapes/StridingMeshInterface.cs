@@ -182,7 +182,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
         }
 		///brute force method to calculate aabb
-		public void CalculateAabbBruteForce(ref Vector3 aabbMin,ref Vector3 aabbMax)
+        public void CalculateAabbBruteForce(out Vector3 aabbMin, out Vector3 aabbMax)
         {
 		        //first calculate the total aabb for all triangles
 	        AabbCalculationCallback	aabbCallback = new AabbCalculationCallback();
@@ -226,7 +226,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
         }
 
-        public virtual void	GetPremadeAabb(ref Vector3 aabbMin, ref Vector3 aabbMax )
+        public virtual void GetPremadeAabb(out Vector3 aabbMin, out Vector3 aabbMax)
         {
             aabbMin = Vector3.Zero;
             aabbMax = Vector3.Zero;

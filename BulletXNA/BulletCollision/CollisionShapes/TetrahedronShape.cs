@@ -119,17 +119,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 0;
         }
 
-	    public override void GetEdge(int i,ref Vector3 pa, ref Vector3 pb)
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
         {
-            pa = Vector3.Zero;
-            pb = Vector3.Zero;
-
             switch (m_numVertices)
             {
                 case 2:
                     pa = m_vertices[0];
                     pb = m_vertices[1];
-                    break;
+                    return;
                 case 3:
 
                     switch (i)
@@ -137,15 +134,15 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         case 0:
                             pa = m_vertices[0];
                             pb = m_vertices[1];
-                            break;
+                            return;
                         case 1:
                             pa = m_vertices[1];
                             pb = m_vertices[2];
-                            break;
+                            return;
                         case 2:
                             pa = m_vertices[2];
                             pb = m_vertices[0];
-                            break;
+                            return;
 
                     }
                     break;
@@ -155,33 +152,35 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         case 0:
                             pa = m_vertices[0];
                             pb = m_vertices[1];
-                            break;
+                            return;
                         case 1:
                             pa = m_vertices[1];
                             pb = m_vertices[2];
-                            break;
+                            return;
                         case 2:
                             pa = m_vertices[2];
                             pb = m_vertices[0];
-                            break;
+                            return;
                         case 3:
                             pa = m_vertices[0];
                             pb = m_vertices[3];
-                            break;
+                            return;
                         case 4:
                             pa = m_vertices[1];
                             pb = m_vertices[3];
-                            break;
+                            return;
                         case 5:
                             pa = m_vertices[2];
                             pb = m_vertices[3];
-                            break;
+                            return;
                     }
                     break;
             }
+            pa = Vector3.Zero;
+            pb = Vector3.Zero;
         }
-    	
-	    public override void GetVertex(int i,ref Vector3 vtx) 
+
+        public override void GetVertex(int i, out Vector3 vtx) 
         {
             vtx = m_vertices[i];
         }
@@ -207,7 +206,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
         }
 
-	    public override void GetPlane(ref Vector3 planeNormal,ref Vector3 planeSupport,int i)
+	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport,int i)
         {
             planeNormal = Vector3.Up;
             planeSupport = Vector3.Zero;

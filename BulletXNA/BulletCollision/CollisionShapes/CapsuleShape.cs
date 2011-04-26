@@ -42,7 +42,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        m_implicitShapeDimensions = new Vector3(radius,0.5f*height,radius);
         }
 	    ///CollisionShape Interface
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        Matrix ident = Matrix.Identity;
         	

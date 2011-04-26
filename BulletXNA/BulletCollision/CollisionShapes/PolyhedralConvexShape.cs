@@ -41,7 +41,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             	int i;
 
-	            Vector3 vtx = Vector3.Zero;
+	            Vector3 vtx;
 	            float newDot = 0f;
 
                 for (i = 0; i < numVectors; i++)
@@ -59,7 +59,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 		            for (i=0;i<GetNumVertices();i++)
 		            {
-			            GetVertex(i,ref vtx);
+                        GetVertex(i, out vtx);
 			            newDot = Vector3.Dot(vec,vtx);
 			            if (newDot > supportVerticesOut[j].W)
 			            {
@@ -71,7 +71,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        //not yet, return box inertia
 
@@ -99,10 +99,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
     	
 	    public abstract int	GetNumVertices();
 	    public abstract int GetNumEdges();
-	    public abstract void GetEdge(int i,ref Vector3 pa,ref Vector3 pb);
-	    public abstract void GetVertex(int i,ref Vector3 vtx);
+        public abstract void GetEdge(int i, out Vector3 pa, out Vector3 pb);
+	    public abstract void GetVertex(int i, out Vector3 vtx);
 	    public abstract int	GetNumPlanes();
-	    public abstract void GetPlane(ref Vector3 planeNormal,ref Vector3 planeSupport,int i );
+        public abstract void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i);
     //	virtual int getIndex(int i) const = 0 ; 
 
 	    public abstract bool IsInside(ref Vector3 pt,float tolerance);

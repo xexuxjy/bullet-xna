@@ -60,7 +60,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 supportVerticesOut[i] = new Vector4(LocalGetSupportingVertexWithoutMargin(ref temp),0f);
             }
         }
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             Debug.Assert(false);
             inertia = Vector3.Zero;

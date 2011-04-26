@@ -87,7 +87,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             inertia = Vector3.Zero;
         }

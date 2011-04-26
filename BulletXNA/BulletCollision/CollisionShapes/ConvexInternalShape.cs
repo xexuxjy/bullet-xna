@@ -128,9 +128,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return 0;
 	    }
 	
-	    public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector)
+	    public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
 	    {
             Debug.Assert(false);
+            penetrationVector = Vector3.Zero;
         }
 
 

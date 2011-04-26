@@ -159,7 +159,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        m_hasAabb = true; // this is intentionally an int see notes in header
 
         }
-        public override void GetPremadeAabb(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void GetPremadeAabb(out Vector3 aabbMin, out Vector3 aabbMax)
         {
             aabbMin = m_aabbMin;
             aabbMax = m_aabbMax;

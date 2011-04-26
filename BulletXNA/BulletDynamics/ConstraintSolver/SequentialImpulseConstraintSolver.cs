@@ -174,7 +174,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		protected void SetupContactConstraint(ref SolverConstraint solverConstraint, CollisionObject colObj0, CollisionObject colObj1, ManifoldPoint cp,
 								ContactSolverInfo infoGlobal, ref Vector3 vel, ref float rel_vel, ref float relaxation,
-								ref Vector3 rel_pos1, ref Vector3 rel_pos2)
+								out Vector3 rel_pos1, out Vector3 rel_pos2)
 		{
 			RigidBody rb0 = RigidBody.Upcast(colObj0);
 			RigidBody rb1 = RigidBody.Upcast(colObj1);
@@ -421,8 +421,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 					//                    Vector3 pos1 = cp.getPositionWorldOnA();
 					//                    Vector3 pos2 = cp.getPositionWorldOnB();
 
-					Vector3 rel_pos1 = Vector3.Zero;
-					Vector3 rel_pos2 = Vector3.Zero;
+					Vector3 rel_pos1;
+					Vector3 rel_pos2;
 					//;
 
 					float relaxation = 1f;
@@ -445,7 +445,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 					solverConstraint.m_originalContactPoint = cp;
 
-					SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, ref rel_pos1, ref rel_pos2);
+                    SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, out rel_pos1, out rel_pos2);
 
 					if (BulletGlobals.g_streamWriter != null && debugSolver)
 					{

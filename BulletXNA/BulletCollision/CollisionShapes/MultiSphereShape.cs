@@ -44,7 +44,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 	    ///CollisionShape Interface
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             Vector3 localAabbMin;
             Vector3 localAabbMax;

@@ -432,7 +432,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         public abstract int GetNumPreferredPenetrationDirections();
 
-        public abstract void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector);
+        public abstract void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector);
 
         public static Vector3 ConvexHullSupport(ref Vector3 localDirOrg, IList<Vector3> points, int numPoints, ref Vector3 localScaling)
         {

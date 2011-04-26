@@ -56,7 +56,7 @@ namespace BulletXNA.BulletDynamics.raintSolver
                             float depthA, ref Vector3 normalA,
                             ref Vector3 rel_posB1, ref Vector3 rel_posB2,
                             float depthB, ref Vector3 normalB,
-                            ref float imp0, ref float imp1)
+                            out float imp0, out float imp1)
         {
             //(void)linvelA;
             //(void)linvelB;

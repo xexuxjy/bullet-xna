@@ -37,7 +37,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_shapeType = BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE;
             if (meshInterface.HasPremadeAabb())
             {
-                meshInterface.GetPremadeAabb(ref m_localAabbMin, ref m_localAabbMax);
+                meshInterface.GetPremadeAabb(out m_localAabbMin, out m_localAabbMax);
             }
             else
             {
@@ -139,7 +139,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             filterCallback.Cleanup();
         }
 
-	    public override void CalculateLocalInertia(float mass,ref Vector3 inertia)
+	    public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        //moving concave objects not supported
 	        Debug.Assert(false);

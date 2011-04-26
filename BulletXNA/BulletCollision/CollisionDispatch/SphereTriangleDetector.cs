@@ -88,10 +88,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			        Vector3 nearestOnEdge;
 			        for (int i = 0; i < m_triangle.GetNumEdges(); i++) {
         				
-				        Vector3 pa = Vector3.Zero;
-				        Vector3 pb = Vector3.Zero;
-        				
-				        m_triangle.GetEdge(i,ref pa,ref pb);
+				        Vector3 pa;
+				        Vector3 pb;
+
+                        m_triangle.GetEdge(i, out pa, out pb);
 
 				        float distanceSqr = SegmentSqrDistance(ref pa,ref pb,ref c, out nearestOnEdge);
 				        if (distanceSqr < contactCapsuleRadiusSqr) 

@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return halfExtents;
 	    }
     	
-        public override void CalculateLocalInertia(float mass,ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        //approximation of box shape, todo: implement cylinder shape inertia before people notice ;-)
 	        Vector3 halfExtents = GetHalfExtentsWithMargin();

@@ -41,7 +41,7 @@ namespace BulletXNA
 	    }
 
 	    ///synchronizes world transform from user to physics
-	    public virtual void GetWorldTransform(ref Matrix centerOfMassWorldTrans )
+	    public virtual void GetWorldTransform(out Matrix centerOfMassWorldTrans )
 	    {
             centerOfMassWorldTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_centerOfMassOffset),m_graphicsWorldTrans);
 	    }

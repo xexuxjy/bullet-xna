@@ -480,10 +480,10 @@ namespace BulletXNADemos.Demos
                 return;
             }
 
-            Matrix chassisWorldTrans = Matrix.Identity;
+            Matrix chassisWorldTrans;
 
             //look at the vehicle
-            m_carChassis.GetMotionState().GetWorldTransform(ref chassisWorldTrans);
+            m_carChassis.GetMotionState().GetWorldTransform(out chassisWorldTrans);
             m_cameraTargetPosition = chassisWorldTrans.Translation;
 
             m_cameraPosition.Y = (15.0f * m_cameraPosition.Y + m_cameraTargetPosition.Y + m_cameraHeight) / 16.0f;

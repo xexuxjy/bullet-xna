@@ -53,9 +53,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 
-        public override void GetPlane(ref Vector3 planeNormal, ref Vector3 planeSupport, int i)
+        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
 	    {
-		    GetPlaneEquation(i,ref planeNormal,ref planeSupport);
+            GetPlaneEquation(i, out planeNormal, out planeSupport);
 	    }
 
         public override int GetNumPlanes()
@@ -63,19 +63,19 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return 1;
 	    }
 
-	    public void CalcNormal(ref Vector3 normal) 
+        public void CalcNormal(out Vector3 normal) 
 	    {
             normal = Vector3.Cross(m_vertices1[1]-m_vertices1[0],m_vertices1[2]-m_vertices1[0]);
 		    normal.Normalize();
 	    }
 
-        public virtual void GetPlaneEquation(int i, ref Vector3 planeNormal, ref Vector3 planeSupport)
+        public virtual void GetPlaneEquation(int i, out Vector3 planeNormal, out Vector3 planeSupport)
 	    {
-		    CalcNormal(ref planeNormal);
+            CalcNormal(out planeNormal);
 		    planeSupport = m_vertices1[0];
 	    }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
 	    {
 		    Debug.Assert(false);
 		    inertia = Vector3.Zero;
@@ -83,8 +83,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         public override bool IsInside(ref Vector3 pt, float tolerance)
 	    {
-		    Vector3 normal = Vector3.Up;
-		    CalcNormal(ref normal);
+		    Vector3 normal;
+		    CalcNormal(out normal);
 		    //distance to plane
             float dist;
             Vector3.Dot(ref pt,ref normal,out dist);
@@ -97,8 +97,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			    int i;
 			    for (i=0;i<3;i++)
 			    {
-				    Vector3 pa = Vector3.Zero,pb=Vector3.Zero;
-				    GetEdge(i,ref pa,ref pb);
+				    Vector3 pa, pb;
+                    GetEdge(i, out pa, out pb);
 				    Vector3 edge = pb-pa;
                     Vector3 edgeNormal;
                     Vector3.Cross(ref edge,ref normal,out edgeNormal);
@@ -130,9 +130,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return 2;
 	    }
 
-        public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector)
+        public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
         {
-	        CalcNormal(ref penetrationVector);
+	        CalcNormal(out penetrationVector);
 	        if (index > 0)
             {
 		        penetrationVector *= -1f;
@@ -149,7 +149,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return m_vertices1;
         }
 
-        public override void GetVertex(int i, ref Vector3 vert)
+        public override void GetVertex(int i, out Vector3 vert)
         {
             vert = m_vertices1[i];
         }
@@ -159,10 +159,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 3;
         }
 
-        public override void GetEdge(int i, ref Vector3 pa, ref Vector3 pb)
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
         {
-            GetVertex(i, ref pa);
-            GetVertex((i + 1) % 3, ref pb);
+            GetVertex(i, out pa);
+            GetVertex((i + 1) % 3, out pb);
         }
 
         public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)

@@ -97,7 +97,7 @@ namespace BulletXNADemos.Demos
 		        Vector3 localInertia = Vector3.Zero;
 		        if (isDynamic)
                 {
-			        colShape.CalculateLocalInertia(mass,ref localInertia);
+			        colShape.CalculateLocalInertia(mass, out localInertia);
                 }
 		        float start_x = START_POS_X - ARRAY_SIZE_X/2;
 		        float start_y = START_POS_Y;

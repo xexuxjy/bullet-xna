@@ -454,8 +454,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			DbvtNode	node=stack[--depth];
 			bounds[0] = node.volume.Mins()-aabbMax;
 			bounds[1] = node.volume.Maxs()-aabbMin;
-			float tmin=1.0f,lambda_min=0.0f;
-			bool result1 = AabbUtil2.RayAabb2(ref rayFrom,ref rayDirectionInverse,signs,bounds,ref tmin,lambda_min,lambda_max);
+			float tmin,lambda_min=0.0f;
+			bool result1 = AabbUtil2.RayAabb2(ref rayFrom,ref rayDirectionInverse,signs,bounds,out tmin,lambda_min,lambda_max);
 			if(result1)
 			{
 				if(node.IsInternal())
@@ -1039,8 +1039,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             //r = a;
             //SetMin(ref r._min, ref b._min);
             //SetMax(ref r._max, ref b._max);
-            MathUtil.VectorMin(ref a._min, ref b._min, ref r._min);
-            MathUtil.VectorMax(ref a._max, ref b._max, ref r._max);
+            MathUtil.VectorMin(ref a._min, ref b._min, out r._min);
+            MathUtil.VectorMax(ref a._max, ref b._max, out r._max);
 
         }
 

@@ -115,8 +115,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             localHalfExtents += new Vector3(margin, margin, margin);
             Vector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
 
-            Matrix abs_b = Matrix.Identity;
-            MathUtil.AbsoluteMatrix(ref trans, ref abs_b);
+            Matrix abs_b;
+            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
             //Vector3 center = trans.Translation;
             Vector3 center;
             Vector3.Transform(ref localCenter,ref trans,out center);

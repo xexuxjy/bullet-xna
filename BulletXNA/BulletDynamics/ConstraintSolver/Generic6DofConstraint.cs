@@ -191,7 +191,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         protected virtual void CalculateAngleInfo()
         {
             Matrix relative_frame = MathUtil.BulletMatrixMultiplyBasis(MathUtil.InverseBasis(m_calculatedTransformA),MathUtil.BasisMatrix(ref m_calculatedTransformB));
-            MathUtil.MatrixToEulerXYZ(ref relative_frame,ref m_calculatedAxisAngleDiff);
+            MathUtil.MatrixToEulerXYZ(ref relative_frame, out m_calculatedAxisAngleDiff);
 
             // in euler angle mode we do not actually constrain the angular velocity
             // along the axes axis[0] and axis[2] (although we do use axis[1]) :

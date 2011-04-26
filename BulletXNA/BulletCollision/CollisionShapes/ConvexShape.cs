@@ -358,8 +358,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         float margin = convexShape.GetMarginNonVirtual();
                         Vector3 halfExtents = convexShape.GetImplicitShapeDimensions();
                         halfExtents += new Vector3(margin, margin, margin);
-                        Matrix abs_b = Matrix.Identity;
-                        MathUtil.AbsoluteMatrix(ref t, ref abs_b);
+                        Matrix abs_b;
+                        MathUtil.AbsoluteMatrix(ref t, out abs_b);
                         Vector3 center = t.Translation;
                         Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents), Vector3.Dot(abs_b.Up, halfExtents), Vector3.Dot(abs_b.Backward, halfExtents));
 
@@ -397,8 +397,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         float nvMargin = capsuleShape.GetMarginNonVirtual();
                         halfExtents += new Vector3(nvMargin);
 
-                        Matrix abs_b = Matrix.Identity;
-                        MathUtil.AbsoluteMatrix(ref t, ref abs_b);
+                        Matrix abs_b;
+                        MathUtil.AbsoluteMatrix(ref t, out abs_b);
                         Vector3 center = t.Translation;
                         Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents), Vector3.Dot(abs_b.Up, halfExtents), Vector3.Dot(abs_b.Backward, halfExtents));
 

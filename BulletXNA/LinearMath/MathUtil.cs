@@ -29,7 +29,7 @@ using BulletXNA.BulletCollision.NarrowPhaseCollision;
 
 namespace BulletXNA
 {
-    public class MathUtil
+    public static class MathUtil
     {
         public static void SetBasis(ref Matrix m, ref Vector3 right, ref Vector3 up, ref Vector3 backward)
         {
@@ -343,12 +343,12 @@ namespace BulletXNA
 
         public static Matrix AbsoluteMatrix(ref Matrix input)
         {
-            Matrix output = Matrix.Identity;
-            AbsoluteMatrix(ref input, ref output);
+            Matrix output;
+            AbsoluteMatrix(ref input, out output);
             return output;
         }
 
-        public static void AbsoluteMatrix(ref Matrix input, ref Matrix output)
+        public static void AbsoluteMatrix(ref Matrix input, out Matrix output)
         {
             output.M11 = Math.Abs(input.M11);
             output.M12 = Math.Abs(input.M12);
@@ -368,14 +368,14 @@ namespace BulletXNA
             output.M44 = Math.Abs(input.M44);
         }
 
-        public static void AbsoluteVector(ref Vector3 input, ref Vector3 output)
+        public static void AbsoluteVector(ref Vector3 input, out Vector3 output)
         {
             output.X = Math.Abs(input.X);
             output.Y = Math.Abs(input.Y);
             output.Z = Math.Abs(input.Z);
         }
 
-        public static void RotateVector(ref Vector3 vec, ref Matrix m, ref Vector3 output)
+        public static void RotateVector(ref Vector3 vec, ref Matrix m, out Vector3 output)
         {
             Quaternion rotation;
             Vector3 scale;
@@ -392,8 +392,8 @@ namespace BulletXNA
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin, margin, margin);
-            Vector3 center = Vector3.Zero, extent = Vector3.Zero;
-            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, ref center, ref extent);
+            Vector3 center = Vector3.Zero, extent;
+            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, ref center, out extent);
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
         }
@@ -424,10 +424,10 @@ namespace BulletXNA
             aabbMaxOut = center + extent;
         }
 
-        public static void AbsoluteExtents(ref Matrix trans, ref Vector3 vec, ref Vector3 center, ref Vector3 extent)
+        public static void AbsoluteExtents(ref Matrix trans, ref Vector3 vec, ref Vector3 center, out Vector3 extent)
         {
-            Matrix abs_b = Matrix.Identity;
-            AbsoluteMatrix(ref trans, ref abs_b);
+            Matrix abs_b;
+            AbsoluteMatrix(ref trans, out abs_b);
 
             center = trans.Translation;
             extent = new Vector3(Vector3.Dot(abs_b.Right, vec),
@@ -574,17 +574,17 @@ namespace BulletXNA
 
         public static Vector3 MatrixColumn(ref Matrix matrix, int row)
         {
-            Vector3 vectorRow = Vector3.Zero;
-            MatrixColumn(ref matrix, row, ref vectorRow);
+            Vector3 vectorRow;
+            MatrixColumn(ref matrix, row, out vectorRow);
             return vectorRow;
         }
 
-        public static void MatrixColumn(Matrix matrix, int row, ref Vector3 vectorRow)
+        public static void MatrixColumn(Matrix matrix, int row, out Vector3 vectorRow)
         {
-            MatrixColumn(ref matrix,row,ref vectorRow);
+            MatrixColumn(ref matrix,row, out vectorRow);
         }
 
-        public static void MatrixColumn(ref Matrix matrix, int row, ref Vector3 vectorRow)
+        public static void MatrixColumn(ref Matrix matrix, int row, out Vector3 vectorRow)
         {
             if (row == 0)
             {
@@ -677,7 +677,7 @@ namespace BulletXNA
             output.Z = Math.Min(input.Z, output.Z);
         }
 
-        public static void VectorMin(ref Vector3 input1, ref Vector3 input2 ,ref Vector3 output)
+        public static void VectorMin(ref Vector3 input1, ref Vector3 input2, out Vector3 output)
         {
             output.X = Math.Min(input1.X, input2.X);
             output.Y = Math.Min(input1.Y, input2.Y);
@@ -696,7 +696,7 @@ namespace BulletXNA
             output.Z = Math.Max(input.Z, output.Z);
         }
 
-        public static void VectorMax(ref Vector3 input1, ref Vector3 input2 ,ref Vector3 output)
+        public static void VectorMax(ref Vector3 input1, ref Vector3 input2, out Vector3 output)
         {
             output.X = Math.Max(input1.X, input2.X);
             output.Y = Math.Max(input1.Y, input2.Y);
@@ -730,11 +730,11 @@ namespace BulletXNA
             uint testEqz = ~testNz;
             return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz)); 
         }
-        public static void BasisMatrix(Matrix matrixIn, ref Matrix matrixOut)
+        public static void BasisMatrix(Matrix matrixIn, out Matrix matrixOut)
         {
-            BasisMatrix(ref matrixIn, ref matrixOut);
+            BasisMatrix(ref matrixIn, out matrixOut);
         }
-        public static void BasisMatrix(ref Matrix matrixIn, ref Matrix matrixOut)
+        public static void BasisMatrix(ref Matrix matrixIn, out Matrix matrixOut)
         {
             matrixOut = Matrix.Identity;
             matrixOut.Right = matrixIn.Right;
@@ -907,7 +907,7 @@ namespace BulletXNA
             }
         }
 
-        public static void	GetSkewSymmetricMatrix(ref Vector3 vecin,ref Vector3 v0,ref Vector3 v1,ref Vector3 v2)
+        public static void	GetSkewSymmetricMatrix(ref Vector3 vecin, out Vector3 v0, out Vector3 v1, out Vector3 v2)
 		{
             v0 = new Vector3(0f,-vecin.Z,vecin.Y);
             v1 = new Vector3(vecin.Z,0f,-vecin.X);
@@ -959,7 +959,7 @@ namespace BulletXNA
 
         }
 
-        public static void Vector3FromFloat(ref Vector3 v, float[] fa)
+        public static void Vector3FromFloat(out Vector3 v, float[] fa)
         {
             v.X = fa[0];
             v.Y = fa[1];
@@ -988,7 +988,7 @@ namespace BulletXNA
 		//    return new float[] { v.X, v.Y, v.Z };
 		//}
 
-        public static bool MatrixToEulerXYZ(ref Matrix mat,ref Vector3 xyz)
+        public static bool MatrixToEulerXYZ(ref Matrix mat, out Vector3 xyz)
         {
 	        //	// rot =  cy*cz          -cy*sz           sy
 	        //	//        cz*sx*sy+cx*sz  cx*cz-sx*sy*sz -cy*sx
@@ -1120,10 +1120,10 @@ namespace BulletXNA
 
         public static Matrix BulletMatrixMultiplyBasis(ref Matrix m1, ref Matrix m2)
         {
-			Matrix mb1 = Matrix.Identity;
-			BasisMatrix(ref m1,ref mb1);
-			Matrix mb2 = Matrix.Identity;
-			BasisMatrix(ref m2, ref mb2);
+			Matrix mb1;
+			BasisMatrix(ref m1, out mb1);
+			Matrix mb2;
+			BasisMatrix(ref m2, out mb2);
 			return BulletMatrixMultiply(ref mb1, ref mb2);
         }
 

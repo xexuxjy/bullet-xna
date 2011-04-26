@@ -895,7 +895,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 	    }
     }
 
-    public class BroadphaseBenchmark
+    public static class BroadphaseBenchmark
     {
 	    public static int UnsignedRand()
         {

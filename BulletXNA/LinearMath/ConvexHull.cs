@@ -1185,8 +1185,8 @@ public class HullTriangle : int3
 
                         Vector3 temp = v - p;
 
-                        Vector3 absTemp = Vector3.Zero;
-                        MathUtil.AbsoluteVector(ref temp, ref absTemp);
+                        Vector3 absTemp;
+                        MathUtil.AbsoluteVector(ref temp, out absTemp);
 
                         if (absTemp.X < normalepsilon && absTemp.Y < normalepsilon && absTemp.Z < normalepsilon)
 				        {

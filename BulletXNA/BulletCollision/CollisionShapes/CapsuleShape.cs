@@ -186,8 +186,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        Vector3 halfExtents = new Vector3(getRadius(),getRadius(),getRadius());
 	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, getRadius() + getHalfHeight());
 	        halfExtents += new Vector3(GetMargin(),GetMargin(),GetMargin());
-            Matrix abs_b = Matrix.Identity;
-            MathUtil.AbsoluteMatrix(ref trans, ref abs_b);
+            Matrix abs_b;
+            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
             Vector3 center = trans.Translation;
             Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents),
                                             Vector3.Dot(abs_b.Up, halfExtents),

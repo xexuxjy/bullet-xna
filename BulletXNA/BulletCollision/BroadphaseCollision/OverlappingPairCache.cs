@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
     //-------------------------------------------------------------------------------------------------
 
-    public class OverlappingPairCacheGlobals
+    public static class OverlappingPairCacheGlobals
     {
         public static int gOverlappingPairs = 0;
 

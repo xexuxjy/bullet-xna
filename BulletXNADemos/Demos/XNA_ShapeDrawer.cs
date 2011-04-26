@@ -480,8 +480,8 @@ namespace BulletXNADemos.Demos
                                 float planeConst = staticPlaneShape.GetPlaneConstant();
                                 Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
                                 Vector3 planeOrigin = planeNormal * planeConst;
-                                Vector3 vec0 = Vector3.Zero, vec1 = Vector3.Zero;
-                                TransformUtil.PlaneSpace1(ref planeNormal, ref vec0, ref vec1);
+                                Vector3 vec0, vec1;
+                                TransformUtil.PlaneSpace1(ref planeNormal, out vec0, out vec1);
                                 float vecLen = 100f;
                                 Vector3 pt0 = planeOrigin + vec0 * vecLen;
                                 Vector3 pt1 = planeOrigin - vec0 * vecLen;

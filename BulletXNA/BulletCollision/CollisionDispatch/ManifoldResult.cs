@@ -115,8 +115,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
 
-	        Vector3 localA = Vector3.Zero;
-	        Vector3 localB = Vector3.Zero;
+	        Vector3 localA;
+	        Vector3 localB;
         	
 	        if (isSwapped)
 	        {

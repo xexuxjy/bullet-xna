@@ -241,7 +241,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		        factA = 0.5f;
 	        }
 	        factB = 1.0f - factA;
-	        Vector3 ax1 = Vector3.Zero, p= Vector3.Zero, q= Vector3.Zero;
+	        Vector3 ax1 = Vector3.Zero, p, q;
 	        Vector3 ax1A = MathUtil.MatrixColumn(ref trA,0);
 	        Vector3 ax1B = MathUtil.MatrixColumn(ref trB,0);
 	        if(m_useOffsetForConstraintFrame)
@@ -251,7 +251,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		        ax1 = ax1A * factA + ax1B * factB;
 		        ax1.Normalize();
 		        // construct two orthos to slider axis
-		        TransformUtil.PlaneSpace1 (ref ax1, ref p, ref q);
+		        TransformUtil.PlaneSpace1 (ref ax1, out p, out q);
 	        }
 	        else
 	        { // old way - use frameA

@@ -30,7 +30,7 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
-    public class AabbUtil2
+    public static class AabbUtil2
     {
         public static void AabbExpand(ref Vector3 aabbMin,
                                    ref Vector3 aabbMax,
@@ -112,7 +112,7 @@ namespace BulletXNA
                                   ref Vector3 rayInvDirection,
                                   bool[] raySign,
                                   Vector3[] bounds,
-                                  ref float tmin,
+                                  out float tmin,
                                   float lambda_min,
                                   float lambda_max)
         {

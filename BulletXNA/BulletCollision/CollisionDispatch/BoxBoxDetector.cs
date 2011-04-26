@@ -273,7 +273,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 }
 
 
-                float alpha = 0f, beta = 0f;
+                float alpha, beta;
                 IndexedVector3 ua = new IndexedVector3();
                 IndexedVector3 ub = new IndexedVector3();
                 for (int i = 0; i < 3; i++)
@@ -285,7 +285,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     ub[i] = R2[((code) - 7) % 3 + i * 4];
                 }
 
-                DLineClosestApproach(ref pa1, ref ua, ref pb1, ref ub, ref alpha, ref beta);
+                DLineClosestApproach(ref pa1, ref ua, ref pb1, ref ub, out alpha, out beta);
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -613,7 +613,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         private static void DLineClosestApproach(ref IndexedVector3 pa, ref IndexedVector3 ua,
                        ref IndexedVector3 pb, ref IndexedVector3 ub,
-                       ref float alpha, ref float beta)
+                       out float alpha, out float beta)
         {
             IndexedVector3 p = pb - pa;
 

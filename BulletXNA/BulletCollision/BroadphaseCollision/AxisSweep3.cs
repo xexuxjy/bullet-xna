@@ -933,7 +933,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     }
 	///unQuantize should be conservative: aabbMin/aabbMax should be larger then 'getAabb' result
-	public void UnQuantize(BroadphaseProxy proxy,ref Vector3 aabbMin, ref Vector3 aabbMax )
+    public void UnQuantize(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
     {
 	    Handle pHandle = (Handle)proxy;
 

@@ -947,14 +947,16 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         vecInMin[2] = (ushort)m_pEdges[2,pHandle.m_minEdges[2]].m_pos;
         vecInMax[2] = (ushort)(m_pEdges[2,pHandle.m_maxEdges[2]].m_pos + 1);
 
-        aabbMin.X = (float)(vecInMin[0]) / (m_quantize.X);
-        aabbMin.Y = (float)(vecInMin[1]) / (m_quantize.Y);
-        aabbMin.Z = (float)(vecInMin[2]) / (m_quantize.Z);
+        aabbMin = new Vector3(
+            (float)(vecInMin[0]) / (m_quantize.X),
+            (float)(vecInMin[1]) / (m_quantize.Y),
+            (float)(vecInMin[2]) / (m_quantize.Z));
 	    aabbMin += m_worldAabbMin;
 
-        aabbMax.X = (float)(vecInMax[0]) / (m_quantize.X);
-        aabbMax.Y = (float)(vecInMax[1]) / (m_quantize.Y);
-        aabbMax.Z = (float)(vecInMax[2]) / (m_quantize.Z);
+        aabbMax = new Vector3(
+            (float)(vecInMax[0]) / (m_quantize.X),
+            (float)(vecInMax[1]) / (m_quantize.Y),
+            (float)(vecInMax[2]) / (m_quantize.Z));
 	    aabbMax += m_worldAabbMax;
 
     }

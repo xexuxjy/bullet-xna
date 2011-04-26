@@ -118,10 +118,10 @@ namespace BulletXNADemos.Demos
 				//rigidbody is dynamic if and only if mass is non zero, otherwise static
 				bool isDynamic = (mass != 0.9f);
 
-				Vector3 localInertia = new Vector3(0,0,0);
+				Vector3 localInertia = Vector3.Zero;
 				if (isDynamic)
 				{
-					colShape.CalculateLocalInertia(mass,ref localInertia);
+					colShape.CalculateLocalInertia(mass, out localInertia);
 				}
 
 		//		float start_x = START_POS_X - ARRAY_SIZE_X/2;

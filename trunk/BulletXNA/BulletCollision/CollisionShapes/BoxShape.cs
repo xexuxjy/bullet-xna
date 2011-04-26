@@ -120,7 +120,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             AabbUtil2.TransformAabb(ref halfExtents, GetMargin(), ref trans, out aabbMin, out aabbMax);
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        //btScalar margin = btScalar(0.);
 	        Vector3 halfExtents = GetHalfExtentsWithMargin();
@@ -134,11 +134,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 					        mass/(12.0f) * (lx*lx + ly*ly));
         }
 
-	    public override void GetPlane(ref Vector3 planeNormal,ref Vector3 planeSupport,int i )
+	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
 	    {
 		    //this plane might not be aligned...
-            Plane plane = new Plane();
-		    GetPlaneEquation(ref plane,i);
+            Plane plane;
+		    GetPlaneEquation(out plane, i);
             planeNormal = plane.Normal;
             Vector3 negNormal = -planeNormal;
 		    planeSupport = LocalGetSupportingVertex(ref negNormal);
@@ -160,17 +160,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    }
 
 
-	    public override  void GetVertex(int i,ref Vector3 vtx)
+	    public override  void GetVertex(int i, out Vector3 vtx)
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
-		    vtx.X = halfExtents.X * (1-(i&1)) - halfExtents.X * (i&1);
-            vtx.Y = halfExtents.Y * (1-((i&2)>>1)) - halfExtents.Y * ((i&2)>>1);
-            vtx.Z = halfExtents.Z * (1-((i&4)>>2)) - halfExtents.Z * ((i&4)>>2);
+            vtx = new Vector3(
+                halfExtents.X * (1 - (i & 1)) - halfExtents.X * (i & 1),
+                halfExtents.Y * (1 - ((i & 2) >> 1)) - halfExtents.Y * ((i & 2) >> 1),
+                halfExtents.Z * (1 - ((i & 4) >> 2)) - halfExtents.Z * ((i & 4) >> 2));
 	    }
 	
 
-	    public virtual void	GetPlaneEquation(ref Plane plane,int i)
+	    public virtual void	GetPlaneEquation(out Plane plane, int i)
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
@@ -203,12 +204,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			    break;
 		    default:
 			    Debug.Assert(false);
+                plane = new Plane();
                 break;
 		    }
 	    }
 
 
-        public override void GetEdge(int i, ref Vector3 pa, ref Vector3 pb)
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
 	    //virtual void getEdge(int i,Edge& edge) const
 	    {
 		    int edgeVert0 = 0;
@@ -271,8 +273,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                break;
 		    }
 
-		    GetVertex(edgeVert0,ref pa );
-		    GetVertex(edgeVert1,ref pb );
+		    GetVertex(edgeVert0, out pa);
+            GetVertex(edgeVert1, out pb);
 	    }
 	
 	    public override bool IsInside(ref Vector3 pt,float tolerance)
@@ -302,8 +304,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    {
 		    return 6;
 	    }
-	
-	    public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector)
+
+        public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
 	    {
 		    switch (index)
 		    {
@@ -327,6 +329,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			    break;
 		    default:
                 Debug.Assert(false);
+                penetrationVector = Vector3.Zero;
                 break;
 		    }
 	    }

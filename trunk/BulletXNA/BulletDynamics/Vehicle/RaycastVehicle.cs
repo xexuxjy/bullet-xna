@@ -448,7 +448,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
             Matrix chassisTrans = GetChassisWorldTransform();
             if (interpolatedTransform && (GetRigidBody().GetMotionState() != null))
             {
-                GetRigidBody().GetMotionState().GetWorldTransform(ref chassisTrans);
+                GetRigidBody().GetMotionState().GetWorldTransform(out chassisTrans);
             }
 
             wheel.m_raycastInfo.m_hardPointWS = Vector3.Transform(wheel.m_chassisConnectionPointCS,chassisTrans);

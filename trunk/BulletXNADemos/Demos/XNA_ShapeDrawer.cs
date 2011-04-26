@@ -574,17 +574,17 @@ namespace BulletXNADemos.Demos
                             Vector3 colour = new Vector3(255, 255, 255);
                             for (int i = 0; i < polyshape.GetNumVertices(); i++)
                             {
-                                Vector3 vtx = Vector3.Zero;
-                                polyshape.GetVertex(i, ref vtx);
+                                Vector3 vtx;
+                                polyshape.GetVertex(i, out vtx);
                                 String buf = " " + i;
                                 DrawText(buf, ref vtx, ref colour);
                             }
 
                             for (int i = 0; i < polyshape.GetNumPlanes(); i++)
                             {
-                                Vector3 normal = Vector3.Zero;
-                                Vector3 vtx = Vector3.Zero;
-                                polyshape.GetPlane(ref normal, ref vtx, i);
+                                Vector3 normal;
+                                Vector3 vtx;
+                                polyshape.GetPlane(out normal, out vtx, i);
                                 float d = Vector3.Dot(vtx, normal);
                                 vtx *= d;
 

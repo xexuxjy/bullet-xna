@@ -180,12 +180,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 0;
         }
 
-        public override void GetEdge(int i, ref Vector3 pa, ref Vector3 pb)
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
         {
             Debug.Assert(false);
+            pa = Vector3.Zero;
+            pb = Vector3.Zero;
         }
 
-        public override void GetVertex(int i, ref Vector3 vtx)
+        public override void GetVertex(int i, out Vector3 vtx)
         {
             vtx = m_unscaledPoints[i] * m_localScaling;
         }
@@ -194,9 +196,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 0;
         }
 
-        public override void GetPlane(ref Vector3 planeNormal, ref Vector3 planeSupport, int i)
+        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
         {
             Debug.Assert(false);
+            planeNormal = Vector3.Zero;
+            planeSupport = Vector3.Zero;
         }
 
         public override bool IsInside(ref Vector3 pt, float tolerance)

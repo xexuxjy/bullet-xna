@@ -67,12 +67,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             float elem = 0.4f * mass * GetMargin()*GetMargin();
-	        inertia.X = elem;
-            inertia.Y = elem;
-            inertia.Z = elem;
+            inertia = new Vector3(elem);
         }
 
         public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)

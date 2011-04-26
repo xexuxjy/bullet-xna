@@ -230,7 +230,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return m_localScaling;
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             //approximation: take the inertia from the aabb for now
             Matrix ident = Matrix.Identity;
@@ -276,7 +276,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         ///"principal" has to be applied inversely to all children transforms in order for the local coordinate system of the compound
         ///shape to be centered at the center of mass and to coincide with the principal axes. This also necessitates a correction of the world transform
         ///of the collision object by the principal transform.
-        public void CalculatePrincipalAxisTransform(IList<float> masses, ref Matrix principal, ref Vector3 inertia)
+        public void CalculatePrincipalAxisTransform(IList<float> masses, ref Matrix principal, out Vector3 inertia)
         {
             int n = m_children.Count;
 
@@ -294,8 +294,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             Matrix tensor = new Matrix();
             for (int k = 0; k < n; k++)
             {
-                Vector3 i = Vector3.Zero;
-                m_children[k].m_childShape.CalculateLocalInertia(masses[k], ref i);
+                Vector3 i;
+                m_children[k].m_childShape.CalculateLocalInertia(masses[k], out i);
 
                 Matrix t = m_children[k].m_transform;
                 Vector3 o = t.Translation - center;

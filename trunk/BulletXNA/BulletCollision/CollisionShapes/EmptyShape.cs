@@ -58,9 +58,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_localScaling;
 	    }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             Debug.Assert(false);
+            inertia = Vector3.Zero;
         }
 	
 	    public override String GetName()

@@ -67,8 +67,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 {
                     for (int i = 0; i < numPDA; i++)
                     {
-                        Vector3 norm = Vector3.Up;
-                        convexA.GetPreferredPenetrationDirection(i, ref norm);
+                        Vector3 norm;
+                        convexA.GetPreferredPenetrationDirection(i, out norm);
                         norm = Vector3.TransformNormal(norm, transA);
                         sPenetrationDirections[numSampleDirections] = norm;
                         seperatingAxisInABatch[numSampleDirections] = Vector3.TransformNormal(-norm, transA);
@@ -84,8 +84,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 {
                     for (int i = 0; i < numPDB; i++)
                     {
-                        Vector3 norm = Vector3.Up;
-                        convexB.GetPreferredPenetrationDirection(i, ref norm);
+                        Vector3 norm;
+                        convexB.GetPreferredPenetrationDirection(i, out norm);
                         norm = Vector3.TransformNormal(norm, transB);
                         sPenetrationDirections[numSampleDirections] = norm;
                         seperatingAxisInABatch[numSampleDirections] = Vector3.TransformNormal(-norm, transA);
@@ -137,13 +137,13 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             int numSampleDirections = NUM_UNITSPHERE_POINTS;
 
 	        {
-		        int numPDA = convexA.getNumPreferredPenetrationDirections();
+		        int numPDA = convexA.GetNumPreferredPenetrationDirections();
 		        if (numPDA > 0)
 		        {
 			        for (int i=0;i<numPDA;i++)
 			        {
-				        Vector3 norm = Vector3.Zero;
-				        convexA.getPreferredPenetrationDirection(i,ref norm);
+				        Vector3 norm;
+				        convexA.GetPreferredPenetrationDirection(i, out norm);
 				        norm  = Vector3.TransformNormal(norm,transA);
 				        sPenetrationDirections[numSampleDirections] = norm;
 				        numSampleDirections++;
@@ -152,13 +152,13 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 	        }
 
 	        {
-		        int numPDB = convexB.getNumPreferredPenetrationDirections();
+		        int numPDB = convexB.GetNumPreferredPenetrationDirections();
 		        if (numPDB > 0)
 		        {
 			        for (int i=0;i<numPDB;i++)
 			        {
                         Vector3 norm = Vector3.Zero;
-				        convexB.getPreferredPenetrationDirection(i,ref norm);
+				        convexB.GetPreferredPenetrationDirection(i, out norm);
 				        norm  = Vector3.TransformNormal(norm,transB);
 				        sPenetrationDirections[numSampleDirections] = norm;
 				        numSampleDirections++;
@@ -177,8 +177,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 {
                     seperatingAxisInA = Vector3.TransformNormal(-norm, transA);
                     seperatingAxisInB = Vector3.TransformNormal(norm, transB);
-                    pInA = convexA.localGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
-                    qInB = convexB.localGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
+                    pInA = convexA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
+                    qInB = convexB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
                     pWorld = Vector3.Transform(pInA, transA);
                     qWorld = Vector3.Transform(qInB, transB);
                     if (check2d)

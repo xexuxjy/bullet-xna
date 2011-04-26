@@ -63,11 +63,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return tmpVertex*m_uniformScalingFactor;
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
 	        ///this linear upscaling is not realistic, but we don't deal with large mass ratios...
-	        Vector3 tmpInertia = new Vector3();
-	        m_childConvexShape.CalculateLocalInertia(mass,ref tmpInertia);
+	        Vector3 tmpInertia;
+	        m_childConvexShape.CalculateLocalInertia(mass, out tmpInertia);
 	        inertia = tmpInertia * m_uniformScalingFactor;
         }
 
@@ -118,9 +118,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return m_childConvexShape.GetNumPreferredPenetrationDirections();
         }
 	
-        public override void GetPreferredPenetrationDirection(int index, ref Vector3 penetrationVector)
+        public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
         {
-	        m_childConvexShape.GetPreferredPenetrationDirection(index,ref penetrationVector);
+            m_childConvexShape.GetPreferredPenetrationDirection(index, out penetrationVector);
         }
 
 	    public float GetUniformScalingFactor()

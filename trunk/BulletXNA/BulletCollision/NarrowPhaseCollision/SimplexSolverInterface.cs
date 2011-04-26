@@ -46,7 +46,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 	     bool EmptySimplex() ;
 
-	     void ComputePoints(ref Vector3 p1, ref Vector3 p2);
+	     void ComputePoints(out Vector3 p1, out Vector3 p2);
 
 	     int NumVertices();
 

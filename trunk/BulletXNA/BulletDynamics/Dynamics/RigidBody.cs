@@ -142,7 +142,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	        if (m_optionalMotionState != null)
 	        {
-		        m_optionalMotionState.GetWorldTransform(ref m_worldTransform);
+		        m_optionalMotionState.GetWorldTransform(out m_worldTransform);
 	        } 
             else
 	        {
@@ -218,7 +218,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        //if we use motionstate to synchronize world transforms, get the new kinematic/animated world transform
 		        if (GetMotionState() != null)
                 {
-			        GetMotionState().GetWorldTransform(ref m_worldTransform);
+                    GetMotionState().GetWorldTransform(out m_worldTransform);
                 }
                 Vector3 linVel = Vector3.Zero, angVel = Vector3.Zero;
 
@@ -729,7 +729,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		    m_optionalMotionState = motionState;
 		    if (m_optionalMotionState != null)
             {
-			    motionState.GetWorldTransform(ref m_worldTransform);
+                motionState.GetWorldTransform(out m_worldTransform);
             }
 	    }
 

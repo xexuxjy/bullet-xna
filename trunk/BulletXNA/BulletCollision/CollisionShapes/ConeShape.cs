@@ -64,7 +64,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public float GetHeight()  { return m_height;}
 
 
-	    public override void CalculateLocalInertia(float mass,ref Vector3 inertia) 
+	    public override void CalculateLocalInertia(float mass, out Vector3 inertia) 
 	    {
             Matrix identity = Matrix.Identity;
 		    Vector3 aabbMin;

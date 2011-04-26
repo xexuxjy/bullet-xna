@@ -171,7 +171,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 
-        protected void GetVertex(int x, int y, ref Vector3 vertex)
+        protected void GetVertex(int x, int y, out Vector3 vertex)
         {
             Debug.Assert(x >= 0);
             Debug.Assert(y >= 0);
@@ -212,6 +212,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     {
                         //need to get valid m_upAxis
                         Debug.Assert(false);
+                        vertex = Vector3.Zero;
                         break;
                     }
             }
@@ -453,36 +454,36 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0)))
                     {
                         //first triangle
-                        GetVertex(x, j, ref vertices[0]);
-                        GetVertex(x + 1, j, ref vertices[1]);
-                        GetVertex(x + 1, j + 1, ref vertices[2]);
+                        GetVertex(x, j, out vertices[0]);
+                        GetVertex(x + 1, j, out vertices[1]);
+                        GetVertex(x + 1, j + 1, out vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                         //second triangle
-                        GetVertex(x, j, ref vertices[0]);
-                        GetVertex(x + 1, j + 1, ref vertices[1]);
-                        GetVertex(x, j + 1, ref vertices[2]);
+                        GetVertex(x, j, out vertices[0]);
+                        GetVertex(x + 1, j + 1, out vertices[1]);
+                        GetVertex(x, j + 1, out vertices[2]);
 
                         callback.ProcessTriangle(vertices, x, j);
                     }
                     else
                     {
                         //first triangle
-                        GetVertex(x, j, ref vertices[0]);
-                        GetVertex(x, j + 1, ref vertices[1]);
-                        GetVertex(x + 1, j, ref vertices[2]);
+                        GetVertex(x, j, out vertices[0]);
+                        GetVertex(x, j + 1, out vertices[1]);
+                        GetVertex(x + 1, j, out vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
 
                         //second triangle
-                        GetVertex(x + 1, j, ref vertices[0]);
-                        GetVertex(x, j + 1, ref vertices[1]);
-                        GetVertex(x + 1, j + 1, ref vertices[2]);
+                        GetVertex(x + 1, j, out vertices[0]);
+                        GetVertex(x, j + 1, out vertices[1]);
+                        GetVertex(x + 1, j + 1, out vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                     }
                 }
             }
         }
 
-        public override void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             //moving concave objects not supported
             inertia = Vector3.Zero;

@@ -626,7 +626,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             return (NumVertices() == 0);
         }
 
-        public void ComputePoints(ref Vector3 p1, ref Vector3 p2)
+        public void ComputePoints(out Vector3 p1, out Vector3 p2)
         {
             UpdateClosestVectorAndPoints();
             p1 = m_cachedP1;

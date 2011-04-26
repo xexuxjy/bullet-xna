@@ -141,7 +141,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         }
 
         protected virtual void BuildLinearJacobian(
-            ref JacobianEntry jacLinear, ref Vector3 normalWorld,
+            out JacobianEntry jacLinear, ref Vector3 normalWorld,
             ref Vector3 pivotAInW, ref Vector3 pivotBInW)
         {
 	        jacLinear = new JacobianEntry(
@@ -156,7 +156,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
                 m_rbB.GetInvMass());
         }
 
-        protected virtual void BuildAngularJacobian(ref JacobianEntry jacAngular, ref Vector3 jointAxisW)
+        protected virtual void BuildAngularJacobian(out JacobianEntry jacAngular, ref Vector3 jointAxisW)
         {
 	        jacAngular = new JacobianEntry(jointAxisW,
                                       MathUtil.TransposeBasis(m_rbA.GetCenterOfMassTransform()),

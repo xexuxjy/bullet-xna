@@ -124,22 +124,27 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             return 0;
         }
-        public override void GetEdge(int i, ref Vector3 pa, ref Vector3 pb)
+        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
         {
             Debug.Assert(false);
+            pa = Vector3.Zero;
+            pb = Vector3.Zero;
         }
-        public override void GetVertex(int i, ref Vector3 vtx)
+        public override void GetVertex(int i, out Vector3 vtx)
         {
             Debug.Assert(false);
+            vtx = Vector3.Zero;
         }
         public override int GetNumPlanes()
         {
             return 0;
         }
 
-        public override void GetPlane(ref Vector3 planeNormal, ref Vector3 planeSupport, int i)
+        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
         {
             Debug.Assert(false);
+            planeNormal = Vector3.Zero;
+            planeSupport = Vector3.Zero;
         }
 
         public override bool IsInside(ref Vector3 pt, float tolerance)
@@ -164,7 +169,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    ///by the mass. The resulting transform "principal" has to be applied inversely to the mesh in order for the local coordinate system of the
 	    ///shape to be centered at the center of mass and to coincide with the principal axes. This also necessitates a correction of the world transform
 	    ///of the collision object by the principal transform. This method also computes the volume of the convex mesh.
-        public void CalculatePrincipalAxisTransform(ref Matrix principal, ref Vector3 inertia, float volume)
+        public void CalculatePrincipalAxisTransform(ref Matrix principal, out Vector3 inertia, float volume)
         {
             CenterCallback centerCallback = new CenterCallback();
             Vector3 aabbMax = MathUtil.MAX_VECTOR;

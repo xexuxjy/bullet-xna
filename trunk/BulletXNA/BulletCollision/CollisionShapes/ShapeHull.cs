@@ -44,8 +44,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		        {
 			        for (int i=0;i<numPDA;i++)
 			        {
-				        Vector3 norm = new Vector3();
-				        m_shape.GetPreferredPenetrationDirection(i,ref norm);
+				        Vector3 norm;
+				        m_shape.GetPreferredPenetrationDirection(i, out norm);
 				        UnitSpherePoints[numSampleDirections] = norm;
 				        numSampleDirections++;
 			        }

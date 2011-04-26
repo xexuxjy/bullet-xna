@@ -818,7 +818,7 @@ namespace BulletXNADemos.Demos
             Vector3 localInertia = Vector3.Zero;
             if (isDynamic)
             {
-                shape.CalculateLocalInertia(mass, ref localInertia);
+                shape.CalculateLocalInertia(mass, out localInertia);
             }
             //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 

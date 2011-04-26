@@ -157,8 +157,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 return false;
             }
 
-            Vector3 hitA = Vector3.Zero, hitB = Vector3.Zero;
-	        m_simplexSolver.ComputePoints(ref hitA,ref hitB);
+            Vector3 hitA, hitB;
+            m_simplexSolver.ComputePoints(out hitA, out hitB);
 	        result.m_hitPoint=hitB;
 	        return true;
 

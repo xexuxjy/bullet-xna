@@ -629,8 +629,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				if (m_twistSpan >= 0f)
 				{
-					Vector3 twistAxis = Vector3.Zero;
-					ComputeTwistLimitInfo(ref qABTwist, ref m_twistAngle, ref twistAxis);
+					Vector3 twistAxis;
+					ComputeTwistLimitInfo(ref qABTwist, out m_twistAngle, out twistAxis);
 
 					if (m_twistAngle > m_twistSpan * m_limitSoftness)
 					{
@@ -772,8 +772,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				// clamp twist
 				if (m_twistSpan >= 0.05f)
 				{
-					float twistAngle = 0f; Vector3 twistAxis = Vector3.Zero;
-					ComputeTwistLimitInfo(ref qTargetTwist, ref twistAngle, ref twistAxis);
+					float twistAngle; Vector3 twistAxis;
+					ComputeTwistLimitInfo(ref qTargetTwist, out twistAngle, out twistAxis);
 
 					if (Math.Abs(twistAngle) > MathUtil.SIMD_EPSILON)
 					{
@@ -889,7 +889,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 		protected void ComputeTwistLimitInfo(ref Quaternion qTwist, // in
-			ref float twistAngle, ref Vector3 vTwistAxis) // all outs
+			out float twistAngle, out Vector3 vTwistAxis) // all outs
 		{
 			Quaternion qMinTwist = qTwist;
 			twistAngle = MathUtil.QuatAngle(ref qTwist);

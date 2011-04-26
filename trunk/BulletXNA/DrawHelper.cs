@@ -240,8 +240,8 @@ namespace BulletXNA
 
                                 for (int i = 0; i < polyshape.GetNumEdges(); i++)
                                 {
-                                    Vector3 a = Vector3.Zero, b = Vector3.Zero;
-                                    polyshape.GetEdge(i, ref a, ref b);
+                                    Vector3 a, b;
+                                    polyshape.GetEdge(i, out a, out b);
                                     Vector3 wa = Vector3.Transform(a, worldTransform);
                                     Vector3 wb = Vector3.Transform(b, worldTransform);
                                     debugDraw.DrawLine(ref wa, ref wb, ref color);

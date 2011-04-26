@@ -27,7 +27,7 @@ namespace BulletXNA
 {
     public interface IMotionState
     {
-        void GetWorldTransform(ref Matrix worldTrans );
+        void GetWorldTransform(out Matrix worldTrans);
 		//Bullet only calls the update of worldtransform for active objects
         void SetWorldTransform(Matrix worldTrans);
         void SetWorldTransform(ref Matrix worldTrans);

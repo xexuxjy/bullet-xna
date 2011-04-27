@@ -92,7 +92,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             Matrix wt = colObj.GetWorldTransform();
 	        colObj.GetCollisionShape().GetAabb(ref wt, out minAabb,out maxAabb);
 	        //need to increase the aabb for contact thresholds
-            Vector3 contactThreshold = new Vector3(BulletGlobals.gContactBreakingThreshold, BulletGlobals.gContactBreakingThreshold, BulletGlobals.gContactBreakingThreshold);
+            Vector3 contactThreshold = new Vector3(BulletGlobals.gContactBreakingThreshold);
 	        minAabb -= contactThreshold;
 	        maxAabb += contactThreshold;
 
@@ -105,7 +105,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
 
 
-	        IBroadphaseInterface bp = (IBroadphaseInterface)m_broadphasePairCache;
+            IBroadphaseInterface bp = m_broadphasePairCache as IBroadphaseInterface;
 
 	        //moving objects should be moderately sized, probably something wrong if not
 	        if ( colObj.IsStaticObject() || ((maxAabb-minAabb).LengthSquared() < 1e12f))
@@ -135,7 +135,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             BulletGlobals.StartProfile("updateAabbs");
 
-	        Matrix predictedTrans = new Matrix();
+	        //Matrix predictedTrans = new Matrix();
 	        for (int i=0;i<m_collisionObjects.Count;i++)
 	        {
 		        CollisionObject colObj = m_collisionObjects[i];
@@ -503,7 +503,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			    ///@todo: use AABB tree or other BVH acceleration structure, see btDbvt
 			    if (collisionShape.IsCompound())
 			    {
-				    CompoundShape compoundShape = (CompoundShape)(collisionShape);
+				    CompoundShape compoundShape = collisionShape as CompoundShape;
 				    int i=0;
 				    for (i=0;i<compoundShape.GetNumChildShapes();i++)
 				    {
@@ -512,7 +512,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 					    Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform,childTrans) ;
 					    // replace collision shape so that callback can determine the triangle
 					    CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
-					    collisionObject.InternalSetTemporaryCollisionShape((CollisionShape)childCollisionShape);
+					    collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
 
                         LocalInfoAdder2 my_cb = new LocalInfoAdder2(i, resultCallback);
 					    my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
@@ -648,7 +648,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 					    Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform,childTrans);
 					    // replace collision shape so that callback can determine the triangle
 					    CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
-					    collisionObject.InternalSetTemporaryCollisionShape((CollisionShape)childCollisionShape);
+					    collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
 
                         LocalInfoAdder my_cb = new LocalInfoAdder(i, resultCallback);
 					    my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
@@ -1101,7 +1101,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             {   
 			    return false;
             }
-		    CollisionObject	collisionObject = (CollisionObject)proxy.m_clientObject;
+            CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
 		    //only perform raycast if filterMask matches
 		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
@@ -1188,7 +1188,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             {
                 return false;
             }
-		    CollisionObject	collisionObject = (CollisionObject)proxy.m_clientObject;
+            CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
 		    //only perform raycast if filterMask matches
 		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
@@ -1360,11 +1360,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	    public virtual bool Process(BroadphaseProxy proxy)
 	    {
-		    CollisionObject collisionObject = (CollisionObject)proxy.m_clientObject;
-		    if (collisionObject == m_collisionObject)
+            if (proxy.m_clientObject == m_collisionObject)
             {
 			    return true;
             }
+            CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
 		    //only perform raycast if filterMask matches
 		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 

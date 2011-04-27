@@ -340,8 +340,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     {
         public void NearCallback(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo)
         {
-    		CollisionObject colObj0 = (CollisionObject)collisionPair.m_pProxy0.GetClientObject();
-		    CollisionObject colObj1 = (CollisionObject)collisionPair.m_pProxy1.GetClientObject();
+            CollisionObject colObj0 = collisionPair.m_pProxy0.GetClientObject() as CollisionObject;
+            CollisionObject colObj1 = collisionPair.m_pProxy1.GetClientObject() as CollisionObject;
 
 		    if (dispatcher.NeedsCollision(colObj0,colObj1))
 		    {

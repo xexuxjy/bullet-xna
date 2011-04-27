@@ -1078,7 +1078,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		    if (!base.NeedsCollision(proxy0))
 			    return false;
 
-		    CollisionObject otherObj = (CollisionObject) proxy0.m_clientObject;
+            CollisionObject otherObj = proxy0.m_clientObject as CollisionObject;
 
 		    //call needsResponse, see http://code.google.com/p/bullet/issues/detail?id=179
 		    if (m_dispatcher.NeedsResponse(m_me,otherObj))

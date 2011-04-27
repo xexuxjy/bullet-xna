@@ -112,7 +112,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
             Object object1 = m_vehicleRaycaster.CastRay(ref source, ref target, ref rayResults);
 
-            if (object1 != null && ((RigidBody)object1).m_debugBodyId != 1)
+            if (object1 != null && (object1 as RigidBody).m_debugBodyId != 1)
             {
                 int ibreak = 0;
             }
@@ -541,7 +541,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	        for (int i=0;i<numWheel;i++)
 	        {
 		        WheelInfo wheelInfo = m_wheelInfo[i];
-		        RigidBody groundObject = (RigidBody) wheelInfo.m_raycastInfo.m_groundObject;
+                RigidBody groundObject = wheelInfo.m_raycastInfo.m_groundObject as RigidBody;
 		        if (groundObject != null)
                 {
 			        numWheelsOnGround++;
@@ -562,7 +562,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 		        for(int i=0;i<numWheel;++i)
                 {
                     WheelInfo wheelInfo = m_wheelInfo[i];
-			        RigidBody groundObject = (RigidBody) wheelInfo.m_raycastInfo.m_groundObject;
+                    RigidBody groundObject = wheelInfo.m_raycastInfo.m_groundObject as RigidBody;
 
 			        if (groundObject != null)
 			        {
@@ -598,7 +598,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	            for (int wheel =0;wheel <numWheel;wheel++)
 	            {
 		            WheelInfo wheelInfo = m_wheelInfo[wheel];
-		            RigidBody groundObject = (RigidBody) wheelInfo.m_raycastInfo.m_groundObject;
+                    RigidBody groundObject = wheelInfo.m_raycastInfo.m_groundObject as RigidBody;
 
 		            float	rollingFriction = 0f;
 
@@ -688,7 +688,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 		            }
                     if (m_sideImpulse[wheel] != 0f)
                     {
-                        RigidBody groundObject = (RigidBody)m_wheelInfo[wheel].m_raycastInfo.m_groundObject;
+                        RigidBody groundObject = m_wheelInfo[wheel].m_raycastInfo.m_groundObject as RigidBody;
 
                         Vector3 rel_pos2 = wheelInfo.m_raycastInfo.m_contactPointWS -
                             groundObject.GetCenterOfMassPosition();

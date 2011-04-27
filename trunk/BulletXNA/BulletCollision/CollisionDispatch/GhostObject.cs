@@ -95,7 +95,7 @@ public class GhostObject : CollisionObject
 	///this method is mainly for expert/internal use only.
     public virtual void AddOverlappingObjectInternal(BroadphaseProxy otherProxy, BroadphaseProxy thisProxy)
     {
-        CollisionObject otherObject = (CollisionObject)otherProxy.m_clientObject;
+        CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
         Debug.Assert(otherObject != null);
         ///if this linearSearch becomes too slow (too many overlapping objects) we should add a more appropriate data structure
         if(!m_overlappingObjects.Contains(otherObject))
@@ -107,7 +107,7 @@ public class GhostObject : CollisionObject
 	///this method is mainly for expert/internal use only.
     public virtual void RemoveOverlappingObjectInternal(BroadphaseProxy otherProxy, IDispatcher dispatcher, BroadphaseProxy thisProxy)
     {
-        CollisionObject otherObject = (CollisionObject)otherProxy.m_clientObject;
+        CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
         Debug.Assert(otherObject != null);
         ///if this linearSearch becomes too slow (too many overlapping objects) we should add a more appropriate data structure
         if(!m_overlappingObjects.Contains(otherObject))
@@ -167,7 +167,7 @@ public class GhostObject : CollisionObject
             BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : GetBroadphaseHandle();
             Debug.Assert(actualThisProxy != null);
 
-            CollisionObject otherObject = (CollisionObject)otherProxy.m_clientObject;
+            CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
             Debug.Assert(otherObject != null);
             if(!m_overlappingObjects.Contains(otherObject))
             {
@@ -178,7 +178,7 @@ public class GhostObject : CollisionObject
 
         public override void RemoveOverlappingObjectInternal(BroadphaseProxy otherProxy, IDispatcher dispatcher, BroadphaseProxy thisProxy)
         {
-            CollisionObject otherObject = (CollisionObject)otherProxy.m_clientObject;
+            CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
             BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : GetBroadphaseHandle();
             Debug.Assert(actualThisProxy != null);
 
@@ -214,8 +214,8 @@ public class GhostObject : CollisionObject
 
 	    public virtual BroadphasePair AddOverlappingPair(BroadphaseProxy proxy0,BroadphaseProxy proxy1)
 	    {
-		    CollisionObject colObj0 = (CollisionObject) proxy0.m_clientObject;
-		    CollisionObject colObj1 = (CollisionObject) proxy1.m_clientObject;
+            CollisionObject colObj0 = proxy0.m_clientObject as CollisionObject;
+            CollisionObject colObj1 = proxy1.m_clientObject as CollisionObject;
 		    GhostObject ghost0 = GhostObject.Upcast(colObj0);
 		    GhostObject ghost1 = GhostObject.Upcast(colObj1);
             if (ghost0 != null)
@@ -231,8 +231,8 @@ public class GhostObject : CollisionObject
 
 	    public virtual Object RemoveOverlappingPair(BroadphaseProxy proxy0,BroadphaseProxy proxy1,IDispatcher dispatcher)
 	    {
-		    CollisionObject colObj0 = (CollisionObject) proxy0.m_clientObject;
-		    CollisionObject colObj1 = (CollisionObject) proxy1.m_clientObject;
+            CollisionObject colObj0 = proxy0.m_clientObject as CollisionObject;
+            CollisionObject colObj1 = proxy1.m_clientObject as CollisionObject;
 		    GhostObject ghost0 = GhostObject.Upcast(colObj0);
 		    GhostObject ghost1 = GhostObject.Upcast(colObj1);
             if (ghost0 != null)

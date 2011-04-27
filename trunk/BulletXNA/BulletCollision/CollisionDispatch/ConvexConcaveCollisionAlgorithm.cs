@@ -377,7 +377,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        CollisionAlgorithmConstructionInfo ci = new CollisionAlgorithmConstructionInfo();
 	        ci.SetDispatcher(m_dispatcher);
 
-	        CollisionObject ob = (CollisionObject)m_triBody;
+            CollisionObject ob = m_triBody as CollisionObject;
         	
 	        ///debug drawing of the overlapping triangles
             ///

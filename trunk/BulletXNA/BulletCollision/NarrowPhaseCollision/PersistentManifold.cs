@@ -471,11 +471,13 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         private static int getIslandId(PersistentManifold lhs)
         {
-            int islandId;
-            CollisionObject rcolObj0 = (CollisionObject)(lhs.GetBody0());
-            CollisionObject rcolObj1 = (CollisionObject)(lhs.GetBody1());
-            islandId = rcolObj0.GetIslandTag() >= 0 ? rcolObj0.GetIslandTag() : rcolObj1.GetIslandTag();
-            return islandId;
+            CollisionObject rcolObj0 = lhs.GetBody0() as CollisionObject;
+            int islandId = rcolObj0.GetIslandTag();
+            if (islandId >= 0)
+                return rcolObj0.GetIslandTag();
+
+            CollisionObject rcolObj1 = lhs.GetBody1() as CollisionObject;
+            return rcolObj1.GetIslandTag();
         }
     }
 

@@ -118,8 +118,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             for (int i = 0; i < length;++i )
             {
                 BroadphasePair collisionPair = rawList[i];
-                CollisionObject colObj0 = (CollisionObject)collisionPair.m_pProxy0.m_clientObject;
-                CollisionObject colObj1 = (CollisionObject)collisionPair.m_pProxy1.m_clientObject;
+                CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
+                CollisionObject colObj1 = collisionPair.m_pProxy1.m_clientObject as CollisionObject;
 
                 if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
                     ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
@@ -353,8 +353,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             {
                 PersistentManifold manifold = dispatcher.GetManifoldByIndexInternal(i);
 
-                CollisionObject colObj0 = (CollisionObject)(manifold.GetBody0());
-                CollisionObject colObj1 = (CollisionObject)(manifold.GetBody1());
+                CollisionObject colObj0 = manifold.GetBody0() as CollisionObject;
+                CollisionObject colObj1 = manifold.GetBody1() as CollisionObject;
 
                 ///@todo: check sleeping conditions!
                 if (((colObj0 != null) && colObj0.GetActivationState() != ActivationState.ISLAND_SLEEPING) ||
@@ -396,11 +396,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     
         public static int GetIslandId(PersistentManifold lhs)
         {
-	        int islandId;
-	        CollisionObject rcolObj0 = (CollisionObject)(lhs.GetBody0());
-            CollisionObject rcolObj1 = (CollisionObject)(lhs.GetBody1());
-	        islandId = rcolObj0.GetIslandTag()>=0?rcolObj0.GetIslandTag():rcolObj1.GetIslandTag();
-	        return islandId;
+            CollisionObject rcolObj0 = lhs.GetBody0() as CollisionObject;
+            int islandId = rcolObj0.GetIslandTag();
+            if (islandId >= 0)
+                return islandId;
+
+            CollisionObject rcolObj1 = lhs.GetBody1() as CollisionObject;
+            return rcolObj1.GetIslandTag();
         }
 
 

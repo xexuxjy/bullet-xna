@@ -23,11 +23,10 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletDynamics.ConstraintSolver;
 using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.raintSolver
+namespace BulletXNA.BulletDynamics.ConstraintSolver
 {
     /// raint class used for lateral tyre friction.
     public class Solve2LinearConstraint

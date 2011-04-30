@@ -1371,9 +1371,10 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
+        static Enum[] keysEnumValues = GetEnumValues(typeof(Keys));
         private void GenerateKeyEvents(ref KeyboardState old, ref KeyboardState current,GameTime gameTime)
         {
-            foreach (Keys key in GetEnumValues(typeof(Keys)))
+            foreach (Keys key in keysEnumValues)
             {
                 bool released = WasReleased(ref old,ref current, key);
                 if (released || IsHeldKey(ref current,key))

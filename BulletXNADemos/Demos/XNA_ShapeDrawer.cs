@@ -945,9 +945,9 @@ namespace BulletXNADemos.Demos
 
         public void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color, float stepDegrees)
         {
-            Vector3[] vA = new Vector3[74];
-            Vector3[] vB = new Vector3[74];
-            Vector3[] pvA = vA, pvB = vB, pT;
+            Vector3[] vA;
+            Vector3[] vB;
+            Vector3[] pvA, pvB, pT;
             Vector3 npole = center + up * radius;
             Vector3 spole = center - up * radius;
             Vector3 arcStart = Vector3.Zero;
@@ -994,6 +994,11 @@ namespace BulletXNADemos.Demos
             }
             int n_vert = (int)((maxPs - minPs) / step) + 1;
             if (n_vert < 2) n_vert = 2;
+
+            vA = new Vector3[n_vert];
+            vB = new Vector3[n_vert];
+            pvA = vA; pvB = vB;
+
             float step_v = (maxPs - minPs) / (float)(n_vert - 1);
             for (int i = 0; i < n_hor; i++)
             {

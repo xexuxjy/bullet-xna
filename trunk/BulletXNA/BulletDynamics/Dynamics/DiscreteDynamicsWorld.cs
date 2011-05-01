@@ -679,7 +679,18 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    protected virtual void SolveConstraints(ContactSolverInfo solverInfo)
         {
 	        //sorted version of all btTypedConstraint, based on islandId
-            ObjectArray<TypedConstraint> sortedConstraints = new ObjectArray<TypedConstraint>(GetNumConstraints());
+            ObjectArray<TypedConstraint> sortedConstraints;
+            if (GetNumConstraints() > 0)
+            {
+                sortedConstraints = new ObjectArray<TypedConstraint>(m_constraints);
+
+                //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
+                sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
+            }
+            else
+            {
+                sortedConstraints = null;
+            }
 
             if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
             {
@@ -687,19 +698,9 @@ namespace BulletXNA.BulletDynamics.Dynamics
             }
 
 
-	        for (int i=0;i<GetNumConstraints();i++)
-	        {
-		        sortedConstraints.Add(m_constraints[i]);
-	        }
-
         //	btAssert(0);
 
-            //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
-			sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
-        	
-	        ObjectArray<TypedConstraint> constraintsPtr = GetNumConstraints() > 0 ? sortedConstraints : null;
-
-            InplaceSolverIslandCallback solverCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, constraintsPtr, sortedConstraints.Count, m_debugDrawer, m_dispatcher1);
+            InplaceSolverIslandCallback solverCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, sortedConstraints, GetNumConstraints(), m_debugDrawer, m_dispatcher1);
 
             if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
             {
@@ -937,13 +938,13 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				if (numManifolds + m_numConstraints > 0)
 				{
 					///we don't split islands, so all constraints/contact manifolds/bodies are passed into the solver regardless the island id
-					m_solver.SolveGroup( bodies,numBodies,manifolds, numManifolds,m_sortedConstraints,m_numConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
+					m_solver.SolveGroup( bodies,numBodies,manifolds,numManifolds,m_sortedConstraints,0,m_numConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
 				}
 			} 
             else
 			{
 				//also add all non-contact constraints/joints for this island
-                ObjectArray<TypedConstraint> startConstraint = new ObjectArray<TypedConstraint>();
+                int startConstraint = 0;
 				int numCurConstraints = 0;
                 int i = 0;
 				
@@ -952,11 +953,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				{
 					if (DiscreteDynamicsWorld.GetConstraintIslandId(m_sortedConstraints[i]) == islandId)
 					{
-						// FIXME - Do we need add everything after i to mirror the pointer?
-                        for (int k = i; k < m_numConstraints; ++k)
-                        {
-                            startConstraint.Add(m_sortedConstraints[k]);
-                        }
+                        startConstraint = i;
                         break;
 					}
 				}
@@ -974,7 +971,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 					///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
 					if (numManifolds + numCurConstraints != 0)
 					{
-						m_solver.SolveGroup( bodies,numBodies,manifolds, numManifolds,startConstraint,numCurConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
+                        m_solver.SolveGroup(bodies, numBodies, manifolds, numManifolds, m_sortedConstraints, startConstraint, numCurConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
 					}
 				} 
                 else
@@ -987,9 +984,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
                     {
 						m_manifolds.Add(manifolds[i]);
                     }
-					for (i=0;i<numCurConstraints;i++)
+                    int lastConstraint = startConstraint + numCurConstraints;
+                    for (i = startConstraint; i < lastConstraint; i++)
                     {
-						m_constraints.Add(startConstraint[i]);
+                        m_constraints.Add(m_sortedConstraints[i]);
                     }
 					if ((m_constraints.Count+m_manifolds.Count)>m_solverInfo.m_minimumSolverBatchSize)
 					{
@@ -1016,7 +1014,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		{
 			if (m_manifolds.Count + m_constraints.Count>0)
 			{
-				m_solver.SolveGroup( m_bodies,m_bodies.Count, m_manifolds, m_manifolds.Count, m_constraints, m_constraints.Count ,m_solverInfo,m_debugDrawer,m_dispatcher);
+				m_solver.SolveGroup( m_bodies,m_bodies.Count, m_manifolds, m_manifolds.Count, m_constraints, 0, m_constraints.Count ,m_solverInfo,m_debugDrawer,m_dispatcher);
 			}
 			m_bodies.Clear();
 			m_manifolds.Clear();

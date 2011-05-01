@@ -33,7 +33,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 	    void PrepareSolve (int numBodies , int numManifolds);
 
 	    ///solve a group of constraints
-	    float SolveGroup(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifold,int numManifolds,ObjectArray<TypedConstraint> constraints,int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
+	    float SolveGroup(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifold,int numManifolds,ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
 
 	    void AllSolved (ContactSolverInfo info ,IDebugDraw debugDrawer);
 

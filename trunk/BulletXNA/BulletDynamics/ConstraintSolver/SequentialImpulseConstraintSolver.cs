@@ -636,17 +636,17 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 
-		public virtual float SolveGroup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+		public virtual float SolveGroup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
 			BulletGlobals.StartProfile("solveGroup");
 			//you need to provide at least some bodies
 			Debug.Assert(bodies.Count > 0);
 
-			SolveGroupCacheFriendlySetup(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer, dispatcher);
+            SolveGroupCacheFriendlySetup(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
 
-			SolveGroupCacheFriendlyIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer, dispatcher);
+            SolveGroupCacheFriendlyIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
 
-			SolveGroupCacheFriendlyFinish(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
+            SolveGroupCacheFriendlyFinish(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 
             BulletGlobals.StopProfile();
 			return 0.0f;
@@ -673,7 +673,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			return s_fixed;
 		}
 
-		protected virtual void SolveGroupCacheFriendlySplitImpulseIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+        protected virtual void SolveGroupCacheFriendlySplitImpulseIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			if (infoGlobal.m_splitImpulse)
 			{
@@ -692,7 +692,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			}
 		}
 
-		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
 
@@ -757,7 +757,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		//    return 0f;
 		//}
 
-		protected virtual float SolveGroupCacheFriendlySetup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+        protected virtual float SolveGroupCacheFriendlySetup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
 			BulletGlobals.StartProfile("solveGroupCacheFriendlySetup");
 			m_counter++;
@@ -769,9 +769,11 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
                 return 0f;
 			}
 
+            int lastConstraint = startConstraint + numConstraints;
+
 			//if (true)
 			//{
-			//    for (int j=0;j<numConstraints;j++)
+            //    for (int j=startConstraint;j<lastConstraint;j++)
 			//    {
 			//        TypedConstraint constraint = constraints[j];
 			//        constraint.buildJacobian();
@@ -788,7 +790,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 					int totalNumRows = 0;
 					//calculate the total number of contraint rows
 					m_tmpConstraintSizesPool.Clear();
-					for (int i = 0; i < numConstraints; i++)
+                    for (int i = startConstraint; i < lastConstraint; i++)
 					{
 						ConstraintInfo1 info1 = new ConstraintInfo1();
 						m_tmpConstraintSizesPool.Add(info1);
@@ -801,7 +803,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 					///setup the btSolverConstraints
 					int currentRow = 0;
 
-					for (int i = 0; i < numConstraints; i++)
+                    for (int i = 0; i < numConstraints; i++)
 					{
 						ConstraintInfo1 info1a = m_tmpConstraintSizesPool[i];
 
@@ -810,7 +812,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 							Debug.Assert(currentRow < totalNumRows);
 
 							//SolverConstraint currentConstraintRow = m_tmpSolverNonContactConstraintPool[currentRow];
-							TypedConstraint constraint = constraints[i];
+							TypedConstraint constraint = constraints[startConstraint + i];
 
 							RigidBody rbA = constraint.GetRigidBodyA();
 							RigidBody rbB = constraint.GetRigidBodyB();
@@ -845,7 +847,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 							info2.fps = 1f / infoGlobal.m_timeStep;
 							info2.erp = infoGlobal.m_erp;
 							info2.m_numIterations = infoGlobal.m_numIterations;
-							constraints[i].GetInfo2(info2);
+							constraint.GetInfo2(info2);
 
 							///finalize the constraint setup
 							///
@@ -964,7 +966,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 		//protected virtual float solveGroupCacheFriendlyIterations()
-		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
             BulletGlobals.StartProfile("solveGroupCacheFriendlyIterations");
 
@@ -972,16 +974,16 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 				for (int iteration = 0; iteration < infoGlobal.m_numIterations; iteration++)
 				{
-					SolveSingleIteration(iteration, bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
+                    SolveSingleIteration(iteration, bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 				}
 
-				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
+				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 			}
             BulletGlobals.StopProfile();
 			return 0.0f;
 		}
 
-		protected float SolveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+        protected float SolveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;

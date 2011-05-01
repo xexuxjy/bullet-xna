@@ -40,6 +40,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 			m_localPointB = pointB; 
 			m_normalWorldOnB = normal; 
 			m_distance1 = distance;
+
+            /* Don't initialize default values twice in C#
             m_lateralFrictionDir1 = Vector3.Zero;
             m_lateralFrictionDir2 = Vector3.Zero;
             m_lifeTime = 0;
@@ -61,6 +63,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_combinedFriction = 0f;
             m_positionWorldOnA = Vector3.Zero;
             m_positionWorldOnB = Vector3.Zero;
+            */
 		}
 			
 		public float GetDistance()

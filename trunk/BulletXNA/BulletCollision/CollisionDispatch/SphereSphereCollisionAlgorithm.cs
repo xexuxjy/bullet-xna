@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -33,6 +33,20 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     {
 	    public SphereSphereCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1) : base(ci,body0,body1)
         {
+        /*
+			if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
+		*/
+		
+		// for some reason theres no check in 2.76 or 2.78 for a needs collision, just a check on pointer being null.
+		if (m_manifoldPtr == null)
+		            {
+		                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+		                m_ownManifold = true;
+            }
 
         }
 

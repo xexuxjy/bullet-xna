@@ -72,8 +72,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 	        CollisionObject	col0 = body0;
 	        CollisionObject	col1 = body1;
             //resultOut = new ManifoldResult(body0, body1);
-	        BoxShape box0 = (BoxShape)col0.GetCollisionShape();
-	        BoxShape box1 = (BoxShape)col1.GetCollisionShape();
+            BoxShape box0 = col0.GetCollisionShape() as BoxShape;
+            BoxShape box1 = col1.GetCollisionShape() as BoxShape;
 
             //if (((String)col0.getUserPointer()).Contains("Box") &&
             //    ((String)col1.getUserPointer()).Contains("Box") )

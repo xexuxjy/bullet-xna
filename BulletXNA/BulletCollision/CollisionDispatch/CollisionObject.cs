@@ -260,7 +260,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	    public bool IsActive() 
 	    {
-		    return ((GetActivationState() != ActivationState.ISLAND_SLEEPING) && (GetActivationState() != ActivationState.DISABLE_SIMULATION));
+            ActivationState activationState = GetActivationState();
+            return (activationState != ActivationState.ISLAND_SLEEPING && activationState != ActivationState.DISABLE_SIMULATION);
 	    }
 
 

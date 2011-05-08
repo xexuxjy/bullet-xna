@@ -131,25 +131,25 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        }
         }
 
-	    public virtual void	UpdateAabbs()
+        public virtual void UpdateAabbs()
         {
             BulletGlobals.StartProfile("updateAabbs");
 
-	        //Matrix predictedTrans = new Matrix();
-	        for (int i=0;i<m_collisionObjects.Count;i++)
-	        {
-		        CollisionObject colObj = m_collisionObjects[i];
+            //Matrix predictedTrans = new Matrix();
+            for (int i = 0; i < m_collisionObjects.Count; i++)
+            {
+                CollisionObject colObj = m_collisionObjects[i];
 
-		        //only update aabb of active objects
-		        if (m_forceUpdateAllAabbs || colObj.IsActive())
-		        {
-			        UpdateSingleAabb(colObj);
-		        }
-	        }
+                //only update aabb of active objects
+                if (m_forceUpdateAllAabbs || colObj.IsActive())
+                {
+                    UpdateSingleAabb(colObj);
+                }
+            }
             BulletGlobals.StopProfile();
         }
 
-	
+
 	    public virtual void	SetDebugDrawer(IDebugDraw debugDrawer)
 	    {
             m_debugDrawer = debugDrawer;
@@ -320,8 +320,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		    return m_collisionObjects;
 	    }
 
-        //public virtual void	performDiscreteCollisionDetection();
-
 	    public DispatcherInfo GetDispatchInfo()
 	    {
 		    return m_dispatchInfo;
@@ -401,7 +399,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		    CastResult castResult = new CastResult();
 		    castResult.m_fraction = resultCallback.m_closestHitFraction;
 
-		    ConvexShape convexShape = (ConvexShape)collisionShape;
+		    ConvexShape convexShape = collisionShape as ConvexShape;
             VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
     //#define USE_SUBSIMPLEX_CONVEX_CAST 1
     //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
@@ -547,7 +545,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		    castResult.m_allowedPenetration = allowedPenetration;
 		    castResult.m_fraction = resultCallback.m_closestHitFraction;//float(1.);//??
 
-		    ConvexShape convexShape = (ConvexShape) collisionShape;
+		    ConvexShape convexShape = collisionShape as ConvexShape;
 		    VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
 		    GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
     		

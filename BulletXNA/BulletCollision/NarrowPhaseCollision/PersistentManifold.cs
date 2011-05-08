@@ -237,7 +237,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public int GetCacheEntry(ManifoldPoint newPoint)
         {
-            float shortestDist = GetContactBreakingThreshold() * GetContactBreakingThreshold();
+            //float shortestDist = GetContactBreakingThreshold() * GetContactBreakingThreshold();
+            float shortestDist = GetContactBreakingThreshold(); shortestDist *= shortestDist;
             int size = GetNumContacts();
             int nearestPoint = -1;
             for (int i = 0; i < size; i++)
@@ -359,7 +360,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
 
 
-
             //#ifdef DEBUG_PERSISTENCY
             //    printf("refreshContactPoints posA = (%f,%f,%f) posB = (%f,%f,%f)\n",
             //        trA.getOrigin().getX(),
@@ -370,7 +370,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             //        trB.getOrigin().getZ());
             //#endif //DEBUG_PERSISTENCY
             /// first refresh worldspace positions and distance
-            for (int i = GetNumContacts() - 1; i >= 0; i--)
+            int numContacts = GetNumContacts() - 1;
+            for (int i = numContacts; i >= 0; i--)
             {
                 ManifoldPoint manifoldPoint = m_pointCache[i];
                 Vector3 pointA = Vector3.Transform(manifoldPoint.GetLocalPointA(), trA);
@@ -386,7 +387,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             /// then 
             float distance2d;
             Vector3 projectedDifference, projectedPoint;
-            for (int i = GetNumContacts() - 1; i >= 0; i--)
+            for (int i = numContacts; i >= 0; i--)
             {
                 ManifoldPoint manifoldPoint = m_pointCache[i];
                 //contact becomes invalid when signed distance exceeds margin (projected on contactnormal direction)

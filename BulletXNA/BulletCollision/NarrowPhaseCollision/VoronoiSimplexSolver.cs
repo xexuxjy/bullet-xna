@@ -540,7 +540,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_numVertices++;
         }
 
-        public bool Closest(ref Vector3 v)
+        public bool Closest(out Vector3 v)
         {
             if (BulletGlobals.g_streamWriter != null && debugVoronoiSimplex)
             {

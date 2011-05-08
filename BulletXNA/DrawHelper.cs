@@ -63,7 +63,7 @@ namespace BulletXNA
 
                     case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
                         {
-                            SphereShape sphereShape = (SphereShape)shape;
+                            SphereShape sphereShape = shape as SphereShape;
                             float radius = sphereShape.GetMargin();//radius doesn't include the margin, so draw with margin
                             DebugDrawSphere(radius, ref worldTransform, ref color,debugDraw);
                             break;
@@ -83,7 +83,7 @@ namespace BulletXNA
                         }
                     case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
                         {
-                            CapsuleShape capsuleShape = (CapsuleShape)shape;
+                            CapsuleShape capsuleShape = shape as CapsuleShape;
 
                             float radius = capsuleShape.getRadius();
                             float halfHeight = capsuleShape.getHalfHeight();
@@ -179,7 +179,7 @@ namespace BulletXNA
 
                     case BroadphaseNativeTypes.STATIC_PLANE_PROXYTYPE:
                         {
-                            StaticPlaneShape staticPlaneShape = (StaticPlaneShape)shape;
+                            StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
                             float planeConst = staticPlaneShape.GetPlaneConstant();
                             Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
                             Vector3 planeOrigin = planeNormal * planeConst;
@@ -267,7 +267,7 @@ namespace BulletXNA
             {
                 case TypedConstraintType.POINT2POINT_CONSTRAINT_TYPE:
                     {
-                        Point2PointConstraint p2pC = (Point2PointConstraint)constraint;
+                        Point2PointConstraint p2pC = constraint as Point2PointConstraint;
                         Matrix tr = Matrix.Identity;
                         Vector3 pivot = p2pC.GetPivotInA();
                         pivot = Vector3.Transform(pivot, p2pC.GetRigidBodyA().GetCenterOfMassTransform());
@@ -282,7 +282,7 @@ namespace BulletXNA
                     break;
                 case TypedConstraintType.HINGE_CONSTRAINT_TYPE:
                     {
-                        HingeConstraint pHinge = (HingeConstraint)constraint;
+                        HingeConstraint pHinge = constraint as HingeConstraint;
                         Matrix tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyA().GetCenterOfMassTransform(),pHinge.GetAFrame());
                         if (drawFrames)
                         {
@@ -318,7 +318,7 @@ namespace BulletXNA
                     break;
                 case TypedConstraintType.CONETWIST_CONSTRAINT_TYPE:
                     {
-                        ConeTwistConstraint pCT = (ConeTwistConstraint)constraint;
+                        ConeTwistConstraint pCT = constraint as ConeTwistConstraint;
                         Matrix tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(),pCT.GetAFrame());
                         if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
                         tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform() ,pCT.GetBFrame());
@@ -369,7 +369,7 @@ namespace BulletXNA
                     break;
                 case TypedConstraintType.D6_CONSTRAINT_TYPE:
                     {
-                        Generic6DofConstraint p6DOF = (Generic6DofConstraint)constraint;
+                        Generic6DofConstraint p6DOF = constraint as Generic6DofConstraint;
                         Matrix tr = p6DOF.GetCalculatedTransformA();
 						if (drawFrames)
 						{
@@ -425,7 +425,7 @@ namespace BulletXNA
                     break;
                 case TypedConstraintType.SLIDER_CONSTRAINT_TYPE:
                     {
-                        SliderConstraint pSlider = (SliderConstraint)constraint;
+                        SliderConstraint pSlider = constraint as SliderConstraint;
                         Matrix tr = pSlider.GetCalculatedTransformA();
                         if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
                         tr = pSlider.GetCalculatedTransformB();

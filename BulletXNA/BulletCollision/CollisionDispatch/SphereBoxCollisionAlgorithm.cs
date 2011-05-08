@@ -70,7 +70,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        CollisionObject sphereObj = m_isSwapped? body1 : body0;
 	        CollisionObject boxObj = m_isSwapped? body0 : body1;
 
-	        SphereShape sphere0 = (SphereShape)sphereObj.GetCollisionShape();
+            SphereShape sphere0 = sphereObj.GetCollisionShape() as SphereShape;
 
             //Vector3 normalOnSurfaceB;
             Vector3 pOnBox = Vector3.Zero, pOnSphere = Vector3.Zero;
@@ -116,7 +116,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
 	        float margins;
 	        Vector3[] bounds = new Vector3[2];
-	        BoxShape boxShape= (BoxShape)boxObj.GetCollisionShape();
+            BoxShape boxShape = boxObj.GetCollisionShape() as BoxShape;
         	
 	        bounds[0] = -boxShape.GetHalfExtentsWithoutMargin();
 	        bounds[1] = boxShape.GetHalfExtentsWithoutMargin();

@@ -69,7 +69,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        CollisionObject sphereObj = m_swapped? body1 : body0;
 	        CollisionObject triObj = m_swapped? body0 : body1;
 
-	        SphereShape sphere = (SphereShape)sphereObj.GetCollisionShape();
+            SphereShape sphere = sphereObj.GetCollisionShape() as SphereShape;
 	        TriangleShape triangle = (TriangleShape)triObj.GetCollisionShape();
         	
 	        /// report a contact. internally this will be kept persistent, and contact reduction is done

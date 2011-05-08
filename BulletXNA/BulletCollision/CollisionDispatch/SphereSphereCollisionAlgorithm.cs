@@ -64,8 +64,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        resultOut.SetPersistentManifold(m_manifoldPtr);
 
-	        SphereShape sphere0 = (SphereShape)body0.GetCollisionShape();
-	        SphereShape sphere1 = (SphereShape)body1.GetCollisionShape();
+            SphereShape sphere0 = body0.GetCollisionShape() as SphereShape;
+            SphereShape sphere1 = body1.GetCollisionShape() as SphereShape;
 
 	        Vector3 diff = body0.GetWorldTransform().Translation - body1.GetWorldTransform().Translation;
 	        float len = diff.Length();

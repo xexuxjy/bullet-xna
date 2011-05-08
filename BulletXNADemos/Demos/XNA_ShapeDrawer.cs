@@ -181,7 +181,7 @@ namespace BulletXNADemos.Demos
 		        bool useWireframeFallback = true;
                 if (shape.IsConvex())
                 {
-                    ShapeCache	sc=Cache((ConvexShape)shape);
+                    ShapeCache	sc=Cache(shape as ConvexShape);
                     ShapeHull hull  = sc.m_shapehull;
                     //glBegin(GL_QUADS);
                     for(int i=0;i<sc.m_edges.Count;++i)
@@ -383,7 +383,7 @@ namespace BulletXNADemos.Demos
                     {
                         case BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE:
                             {
-                                BoxShape boxShape = (BoxShape)(shape);
+                                BoxShape boxShape = shape as BoxShape;
                                 Vector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
 
                                 DrawSolidCube(ref halfExtents, ref m, ref view, ref projection);
@@ -399,7 +399,7 @@ namespace BulletXNADemos.Demos
 
                         case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
                             {
-                                SphereShape sphereShape = (SphereShape)(shape);
+                                SphereShape sphereShape = shape as SphereShape;
                                 float radius = sphereShape.GetMargin();//radius doesn't include the margin, so draw with margin
                                 DrawSolidSphere(radius,10,10,ref m,ref view, ref projection);
                                 //glutSolidSphere(radius,10,10);
@@ -408,7 +408,7 @@ namespace BulletXNADemos.Demos
                             }
                         case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
 		                    {
-			                    CapsuleShape capsuleShape = (CapsuleShape)(shape);
+                                CapsuleShape capsuleShape = shape as CapsuleShape;
 
 			                    float radius = capsuleShape.getRadius();
 			                    float halfHeight = capsuleShape.getHalfHeight();
@@ -475,7 +475,7 @@ namespace BulletXNADemos.Demos
 
                         case BroadphaseNativeTypes.STATIC_PLANE_PROXYTYPE:
                             {
-                                StaticPlaneShape staticPlaneShape = (StaticPlaneShape)(shape);
+                                StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
                                 float planeConst = staticPlaneShape.GetPlaneConstant();
                                 Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
                                 Vector3 planeOrigin = planeNormal * planeConst;
@@ -513,7 +513,7 @@ namespace BulletXNADemos.Demos
                             {
                                 if (shape.IsConvex())
                                 {
-                                    ShapeCache	sc=Cache((ConvexShape)shape);
+                                    ShapeCache	sc=Cache(shape as ConvexShape);
 
                                     //if (shape.getUserPointer())
                                     {

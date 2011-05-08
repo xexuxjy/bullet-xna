@@ -145,7 +145,7 @@ namespace BulletXNADemos.Demos
 					
 							//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 							DefaultMotionState myMotionState = new DefaultMotionState(startTransform,Matrix.Identity);
-							RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(0,null,null);
+							RigidBodyConstructionInfo rbInfo;
 							switch (j%3)
 							{
 		#if true

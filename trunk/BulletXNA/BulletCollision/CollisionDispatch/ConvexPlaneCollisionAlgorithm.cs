@@ -73,8 +73,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             CollisionObject convexObj = m_isSwapped? body1 : body0;
 	        CollisionObject planeObj = m_isSwapped? body0: body1;
 
-	        ConvexShape convexShape = (ConvexShape) convexObj.GetCollisionShape();
-	        StaticPlaneShape planeShape = (StaticPlaneShape) planeObj.GetCollisionShape();
+	        ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
+	        StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             //bool hasCollision = false;
 	        Vector3 planeNormal = planeShape.GetPlaneNormal();
@@ -125,8 +125,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             CollisionObject convexObj = m_isSwapped? body1 : body0;
 	        CollisionObject planeObj = m_isSwapped? body0: body1;
 
-	        ConvexShape convexShape = (ConvexShape) convexObj.GetCollisionShape();
-	        StaticPlaneShape planeShape = (StaticPlaneShape) planeObj.GetCollisionShape();
+	        ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
+            StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             bool hasCollision = false;
 	        Vector3 planeNormal = planeShape.GetPlaneNormal();

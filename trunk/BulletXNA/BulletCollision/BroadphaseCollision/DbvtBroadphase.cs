@@ -88,8 +88,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 	    {
 		    if(na!=nb)
 		    {
-			    DbvtProxy	pa=(DbvtProxy)na.data;
-			    DbvtProxy	pb=(DbvtProxy)nb.data;
+                DbvtProxy pa = na.data as DbvtProxy;
+                DbvtProxy pb = nb.data as DbvtProxy;
     #if DBVT_BP_SORTPAIRS
 			    if(pa.m_uniqueId>pb.m_uniqueId) 
 				    btSwap(pa,pb);
@@ -106,16 +106,16 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public class BroadphaseRayTester : Collide
     {
-	    public BroadphaseRayTester(BroadphaseRayCallback orgCallback)
-	    {
+        public BroadphaseRayTester(BroadphaseRayCallback orgCallback)
+        {
             m_rayCallback = orgCallback;
-	    }
-	    public override void Process(DbvtNode leaf)
-	    {
-		    DbvtProxy	proxy=(DbvtProxy)leaf.data;
-		    m_rayCallback.Process(proxy);
-	    }
-	    BroadphaseRayCallback m_rayCallback;
+        }
+        public override void Process(DbvtNode leaf)
+        {
+            DbvtProxy proxy = leaf.data as DbvtProxy;
+            m_rayCallback.Process(proxy);
+        }
+        BroadphaseRayCallback m_rayCallback;
     }
 
 
@@ -242,8 +242,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			        for(int i=0;i<ni;++i)
 			        {
 				        BroadphasePair	p=pairs[(m_cid+i)%pairs.Count];
-				        DbvtProxy		pa=(DbvtProxy)p.m_pProxy0;
-				        DbvtProxy		pb=(DbvtProxy)p.m_pProxy1;
+                        DbvtProxy pa = p.m_pProxy0 as DbvtProxy;
+                        DbvtProxy pb = p.m_pProxy1 as DbvtProxy;
                         if (!DbvtAabbMm.Intersect(ref pa.leaf.volume, ref pb.leaf.volume))
 				        {
         #if DBVT_BP_SORTPAIRS
@@ -322,7 +322,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public virtual void DestroyProxy(BroadphaseProxy absproxy, IDispatcher dispatcher)
         {
-            DbvtProxy proxy = (DbvtProxy)absproxy;
+            DbvtProxy proxy = absproxy as DbvtProxy;
             if (proxy.stage == STAGECOUNT)
             {
                 m_sets[1].Remove(proxy.leaf);
@@ -346,7 +346,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         
         public virtual void SetAabb(BroadphaseProxy absproxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
         {
-	        DbvtProxy proxy=(DbvtProxy)absproxy;
+            DbvtProxy proxy = absproxy as DbvtProxy;
 	        DbvtAabbMm	aabb = DbvtAabbMm.FromMM(ref aabbMin,ref aabbMax);
         #if DBVT_BP_PREVENTFALSEUPDATE
 	        if(NotEqual(ref aabb,proxy,leaf.volume))
@@ -452,7 +452,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public virtual void GetAabb(BroadphaseProxy absproxy, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-            DbvtProxy proxy = (DbvtProxy)absproxy;
+            DbvtProxy proxy = absproxy as DbvtProxy;
             aabbMin = proxy.GetMinAABB();
             aabbMax = proxy.GetMaxAABB();
         }
@@ -464,7 +464,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         ///http://code.google.com/p/bullet/issues/detail?id=223
         public void setAabbForceUpdate(BroadphaseProxy absproxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
         {
-	        DbvtProxy proxy=(DbvtProxy)absproxy;
+            DbvtProxy proxy = absproxy as DbvtProxy;
             DbvtAabbMm	bounds=DbvtAabbMm.FromMM(ref aabbMin,ref aabbMax);
 	        bool	docollide=false;
 	        if(proxy.stage==STAGECOUNT)
@@ -672,8 +672,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                     if (!isDuplicate)
                     {
                         //important to perform AABB check that is consistent with the broadphase
-                        DbvtProxy pa = (DbvtProxy)pair.m_pProxy0;
-                        DbvtProxy pb = (DbvtProxy)pair.m_pProxy1;
+                        DbvtProxy pa = pair.m_pProxy0 as DbvtProxy;
+                        DbvtProxy pb = pair.m_pProxy1 as DbvtProxy;
                         bool hasOverlap = DbvtAabbMm.Intersect(ref pa.leaf.volume, ref pb.leaf.volume);
 
                         if (hasOverlap)
@@ -843,11 +843,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 	    {
             m_aabbCallback = orgCallback;
 	    }
-	    public void	Process(DbvtNode leaf)
-	    {
-		    DbvtProxy	proxy=(DbvtProxy)leaf.data;
-		    m_aabbCallback.Process(proxy);
-	    }
+        public override void Process(DbvtNode leaf)
+        {
+            DbvtProxy proxy = leaf.data as DbvtProxy;
+            m_aabbCallback.Process(proxy);
+        }
     }
 
 

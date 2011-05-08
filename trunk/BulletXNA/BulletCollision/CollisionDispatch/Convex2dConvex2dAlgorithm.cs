@@ -69,8 +69,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	        //resultOut.getPersistentManifold().clearManifold();
 
 
-	        ConvexShape min0 = (ConvexShape)(body0.GetCollisionShape());
-	        ConvexShape min1 = (ConvexShape)(body1.GetCollisionShape());
+	        ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
+            ConvexShape min1 = body1.GetCollisionShape() as ConvexShape;
 
 	        Vector3  normalOnB = Vector3.Zero;
 	        Vector3  pointOnBWorld = Vector3.Zero;
@@ -139,7 +139,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        /// Convex0 against sphere for Convex1
 	        {
-		        ConvexShape convex0 = (ConvexShape)(body0.GetCollisionShape());
+                ConvexShape convex0 = body0.GetCollisionShape() as ConvexShape;
 
 		        SphereShape	sphere1 = new SphereShape(body1.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
 		        CastResult result = new CastResult();
@@ -174,7 +174,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 	        /// Sphere (for convex0) against Convex1
 	        {
-		        ConvexShape convex1 = (ConvexShape)(body1.GetCollisionShape());
+                ConvexShape convex1 = body1.GetCollisionShape() as ConvexShape;
 
 		        SphereShape	sphere0 = new SphereShape(body0.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
 		        CastResult result = new CastResult();

@@ -73,7 +73,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     }
                 case BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE:
                     {
-                        BoxShape convexShape = (BoxShape)this;
+                        BoxShape convexShape = this as BoxShape;
                         Vector3 halfExtents = convexShape.GetImplicitShapeDimensions();
 
                         result = new Vector3(MathUtil.FSel(localDir.X, halfExtents.X, -halfExtents.X),
@@ -185,7 +185,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     {
                         Vector3 vec0 = localDir;
 
-                        CapsuleShape capsuleShape = (CapsuleShape)this;
+                        CapsuleShape capsuleShape = this as CapsuleShape;
                         float halfHeight = capsuleShape.getHalfHeight();
                         int capsuleUpAxis = capsuleShape.GetUpAxis();
 
@@ -293,34 +293,34 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             {
                 case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
                     {
-                        SphereShape sphereShape = (SphereShape)this;
+                        SphereShape sphereShape = this as SphereShape;
                         return sphereShape.GetRadius();
                     }
                 case BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE:
                     {
-                        BoxShape convexShape = (BoxShape)this;
+                        BoxShape convexShape = this as BoxShape;
                         return convexShape.GetMarginNV();
                     }
                 case BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE:
                     {
-                        TriangleShape triangleShape = (TriangleShape)this;
+                        TriangleShape triangleShape = this as TriangleShape;
                         return triangleShape.GetMarginNV();
                     }
                 case BroadphaseNativeTypes.CYLINDER_SHAPE_PROXYTYPE:
                     {
-                        CylinderShape cylShape = (CylinderShape)this;
+                        CylinderShape cylShape = this as CylinderShape;
                         return cylShape.GetMarginNV();
                     }
                 case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
                     {
-                        CapsuleShape capsuleShape = (CapsuleShape)this;
+                        CapsuleShape capsuleShape = this as CapsuleShape;
                         return capsuleShape.GetMarginNV();
                     }
                 case BroadphaseNativeTypes.CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
                 /* fall through */
                 case BroadphaseNativeTypes.CONVEX_HULL_SHAPE_PROXYTYPE:
                     {
-                        PolyhedralConvexShape convexHullShape = (PolyhedralConvexShape)this;
+                        PolyhedralConvexShape convexHullShape = this as PolyhedralConvexShape;
                         return convexHullShape.GetMarginNV();
                     }
                 default:
@@ -338,7 +338,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             {
                 case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
                     {
-                        SphereShape sphereShape = (SphereShape)this;
+                        SphereShape sphereShape = this as SphereShape;
                         float radius = sphereShape.GetImplicitShapeDimensions().X;// * convexShape->getLocalScaling().getX();
                         float margin = radius + sphereShape.GetMarginNonVirtual();
                         Vector3 center = t.Translation;
@@ -351,7 +351,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 /* fall through */
                 case BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE:
                     {
-                        BoxShape convexShape = (BoxShape)this;
+                        BoxShape convexShape = this as BoxShape;
                         float margin = convexShape.GetMarginNonVirtual();
                         Vector3 halfExtents = convexShape.GetImplicitShapeDimensions();
                         halfExtents += new Vector3(margin, margin, margin);
@@ -386,7 +386,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     break;
                 case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
                     {
-                        CapsuleShape capsuleShape = (CapsuleShape)this;
+                        CapsuleShape capsuleShape = this as CapsuleShape;
                         float r = capsuleShape.getRadius();
                         Vector3 halfExtents = new Vector3(r, r, r);
                         int m_upAxis = capsuleShape.GetUpAxis();

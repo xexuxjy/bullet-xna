@@ -131,6 +131,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
         }
 
+        static Comparison<PersistentManifold> sortPredicate = new Comparison<PersistentManifold>(PersistentManifoldSortPredicate);
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
 	        ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
@@ -160,7 +161,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 		        //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
                 //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
                 //((ObjectArray<PersistentManifold>)m_islandmanifold).Sort();
-                m_islandmanifold.Sort(new Comparison<PersistentManifold>(PersistentManifoldSortPredicate));
+                m_islandmanifold.Sort(sortPredicate);
 
 		        //now process all active islands (sets of manifolds for now)
 

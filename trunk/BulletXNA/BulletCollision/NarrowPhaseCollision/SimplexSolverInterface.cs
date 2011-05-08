@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 	     void AddVertex(ref Vector3 w, ref Vector3 p, ref Vector3 q);
     	
-	     bool Closest(ref Vector3 v);
+	     bool Closest(out Vector3 v);
 
 	     float MaxVertex();
 

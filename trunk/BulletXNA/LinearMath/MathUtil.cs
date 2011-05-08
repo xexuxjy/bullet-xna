@@ -411,7 +411,7 @@ namespace BulletXNA
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
             Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
             Vector3 localHalfExtents = 0.5f * (localAabbMax - localAabbMin);
-            localHalfExtents += new Vector3(margin, margin, margin);
+            localHalfExtents += new Vector3(margin);
 
             Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
             Matrix abs_b = MathUtil.AbsoluteMatrix(MathUtil.BasisMatrix(ref trans));

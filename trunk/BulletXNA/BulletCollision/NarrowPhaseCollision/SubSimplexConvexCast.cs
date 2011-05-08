@@ -121,7 +121,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     m_simplexSolver.AddVertex(ref w, ref supVertexA, ref supVertexB);
                 }
 
-		        if (m_simplexSolver.Closest(ref v))
+		        if (m_simplexSolver.Closest(out v))
 		        {
 			        dist2 = v.LengthSquared();
 			        hasResult = true;
@@ -230,7 +230,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     }
                 }
                 m_simplexSolver.AddVertex(ref w, ref x, ref p);
-                if (m_simplexSolver.Closest(ref v))
+                if (m_simplexSolver.Closest(out v))
                 {
                     dist2 = v.LengthSquared();
                 }

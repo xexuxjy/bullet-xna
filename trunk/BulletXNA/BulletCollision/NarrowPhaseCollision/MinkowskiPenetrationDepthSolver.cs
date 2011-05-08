@@ -46,10 +46,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 #if USE_BATCHED_SUPPORT
 
 
-            IList<Vector4> supportVerticesABatch = new ObjectArray<Vector4>(NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2);
-            IList<Vector4> supportVerticesBBatch = new ObjectArray<Vector4>(NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2);
-            IList<Vector3> seperatingAxisInABatch = new ObjectArray<Vector3>(NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2);
-            IList<Vector3> seperatingAxisInBBatch = new ObjectArray<Vector3>(NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2);
+            Vector4[] supportVerticesABatch = new Vector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+            Vector4[] supportVerticesBBatch = new Vector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+            Vector3[] seperatingAxisInABatch = new Vector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+            Vector3[] seperatingAxisInBBatch = new Vector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
 
 
             int numSampleDirections = NUM_UNITSPHERE_POINTS;
@@ -72,7 +72,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         norm = Vector3.TransformNormal(norm, transA);
                         sPenetrationDirections[numSampleDirections] = norm;
                         seperatingAxisInABatch[numSampleDirections] = Vector3.TransformNormal(-norm, transA);
-                        seperatingAxisInBBatch[numSampleDirections] = Vector3.Transform(norm, transB);
+                        seperatingAxisInBBatch[numSampleDirections] = Vector3.TransformNormal(norm, transB);
                         numSampleDirections++;
                     }
                 }
@@ -234,7 +234,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             float offsetDist = minProj;
             Vector3 offset = minNorm * offsetDist;
 
-            ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input;// = new ClosestPointInput();
 
             Vector3 newOrg = transA.Translation + offset;
 
@@ -246,7 +246,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             input.m_maximumDistanceSquared = float.MaxValue;
 
             MinkowskiIntermediateResult res = new MinkowskiIntermediateResult();
-            Vector3 temp = -minNorm;
             gjkdet.SetCachedSeperatingAxis(-minNorm);
 
             gjkdet.GetClosestPoints(input, res, debugDraw,false);

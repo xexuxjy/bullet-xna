@@ -169,7 +169,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         int ibreak = 0;
                     }
                     Vector3 seperatingAxisInA = MathUtil.TransposeTransformNormal(-m_cachedSeparatingAxis, input.m_transformA);
-                    Vector3 seperatingAxisInB = MathUtil.TransposeTransformNormal(m_cachedSeparatingAxis, input.m_transformB);
+                    Vector3 seperatingAxisInB = MathUtil.TransposeTransformNormal(ref m_cachedSeparatingAxis, ref input.m_transformB);
 
                     Vector3 pInA = m_minkowskiA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
                     Vector3 qInB = m_minkowskiB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
@@ -246,9 +246,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     m_simplexSolver.AddVertex(ref w, ref pWorld, ref qWorld);
 
                     //calculate the closest point to the origin (update vector v)
-                    Vector3 newCachedSeparatingAxis = new Vector3();
+                    Vector3 newCachedSeparatingAxis;
 
-                    if (!m_simplexSolver.Closest(ref newCachedSeparatingAxis))
+                    if (!m_simplexSolver.Closest(out newCachedSeparatingAxis))
                     {
                         m_degenerateSimplex = 3;
                         checkSimplex = true;
@@ -289,18 +289,19 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         break;
                     }
 #endif //
-                    m_cachedSeparatingAxis = newCachedSeparatingAxis;
 
                     //redundant m_simplexSolver->compute_points(pointOnA, pointOnB);
 
                     //are we getting any closer ?
                     if (previousSquaredDistance - squaredDistance <= MathUtil.SIMD_EPSILON * previousSquaredDistance)
                     {
-                        m_simplexSolver.BackupClosest(ref m_cachedSeparatingAxis);
+                        //m_simplexSolver.BackupClosest(ref m_cachedSeparatingAxis);
                         checkSimplex = true;
                         m_degenerateSimplex = 12;
                         break;
                     }
+
+                    m_cachedSeparatingAxis = newCachedSeparatingAxis;
 
                     //degeneracy, this is typically due to invalid/uninitialized worldtransforms for a btCollisionObject   
                     if (m_curIter++ > gGjkMaxIter)
@@ -327,7 +328,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     if (!check)
                     {
                         //do we need this backup_closest here ?
-                        m_simplexSolver.BackupClosest(ref m_cachedSeparatingAxis);
+                        //m_simplexSolver.BackupClosest(ref m_cachedSeparatingAxis);
                         m_degenerateSimplex = 13;
 
                         break;

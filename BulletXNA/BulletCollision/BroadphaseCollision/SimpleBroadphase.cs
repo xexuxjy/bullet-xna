@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
     public class SimpleBroadphase : IBroadphaseInterface
     {
 
-	    public SimpleBroadphase(int maxProxies,IOverlappingPairCache overlappingPairCache)
+        public SimpleBroadphase(int maxProxies, IOverlappingPairCache overlappingPairCache)
         {
             if (overlappingPairCache == null)
             {
@@ -42,23 +42,23 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_pHandles = new SimpleBroadphaseProxy[maxProxies];
             m_pairCache = overlappingPairCache;
             m_maxHandles = maxProxies;
-	        m_numHandles = 0;
-	        m_firstFreeHandle = 0;
-	        m_LastHandleIndex = -1;
-	
-		    for (int i = m_firstFreeHandle; i < maxProxies; i++)
-		    {
+            m_numHandles = 0;
+            m_firstFreeHandle = 0;
+            m_LastHandleIndex = -1;
+
+            for (int i = m_firstFreeHandle; i < maxProxies; i++)
+            {
                 m_pHandles[i] = new SimpleBroadphaseProxy(i);
-			    m_pHandles[i].SetNextFree(i + 1);
-                m_pHandles[i].m_uniqueId = ++m_proxyCounter;;//any UID will do, we just avoid too trivial values (0,1) for debugging purposes
-		    }
-		    m_pHandles[maxProxies - 1].SetNextFree(0);
-	
+                m_pHandles[i].SetNextFree(i + 1);
+                m_pHandles[i].m_uniqueId = ++m_proxyCounter; ;//any UID will do, we just avoid too trivial values (0,1) for debugging purposes
+            }
+            m_pHandles[maxProxies - 1].SetNextFree(0);
+
         }
 
         public virtual void Cleanup()
         {
-            for (int i = 0; i < m_pHandles.Length;++i )
+            for (int i = 0; i < m_pHandles.Length; ++i)
             {
                 if (m_pHandles[i] != null)
                 {
@@ -66,13 +66,13 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 }
                 m_pHandles[i] = null;
             }
-            
-	        if (m_ownsPairCache)
-	        {
-		        m_pairCache.Cleanup();
+
+            if (m_ownsPairCache)
+            {
+                m_pairCache.Cleanup();
                 m_pairCache = null;
-		        m_ownsPairCache = false;
-	        }
+                m_ownsPairCache = false;
+            }
         }
 
 
@@ -103,20 +103,20 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
         private void FreeHandle(SimpleBroadphaseProxy proxy)
-	    {
-		    int handle = proxy.GetPosition();
-		    Debug.Assert(handle >= 0 && handle < m_maxHandles);
-		    if(handle == m_LastHandleIndex)
-		    {
-			    m_LastHandleIndex--;
-		    }
-		    proxy.SetNextFree(m_firstFreeHandle);
-		    m_firstFreeHandle = handle;
+        {
+            int handle = proxy.GetPosition();
+            Debug.Assert(handle >= 0 && handle < m_maxHandles);
+            if (handle == m_LastHandleIndex)
+            {
+                m_LastHandleIndex--;
+            }
+            proxy.SetNextFree(m_firstFreeHandle);
+            m_firstFreeHandle = handle;
 
-		    proxy.m_clientObject = null;
+            proxy.m_clientObject = null;
 
-		    m_numHandles--;
-	    }
+            m_numHandles--;
+        }
 
 
         public virtual BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
@@ -133,147 +133,147 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
 
             int position = AllocHandle();
-            m_pHandles[position] = new SimpleBroadphaseProxy(position,ref aabbMin,ref aabbMax,shapeType,userPtr,collisionFilterGroup,collisionFilterMask,multiSapProxy);;
+            m_pHandles[position] = new SimpleBroadphaseProxy(position, ref aabbMin, ref aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, multiSapProxy); ;
             m_pHandles[position].m_uniqueId = ++m_proxyCounter;
             return m_pHandles[position];
         }
 
-	    public virtual void	CalculateOverlappingPairs(IDispatcher dispatcher)
+        public virtual void CalculateOverlappingPairs(IDispatcher dispatcher)
         {
-	        //first check for new overlapping pairs
-	        if (m_numHandles > 0)
-	        {
+            //first check for new overlapping pairs
+            if (m_numHandles > 0)
+            {
                 int new_largest_index = -1;
-		        for (int i=0; i <= m_LastHandleIndex; i++)
-		        {
-			        SimpleBroadphaseProxy proxy0 = m_pHandles[i];
-			        if(proxy0.GetClientObject() == null)
-			        {
-				        continue;
-			        }
+                for (int i = 0; i <= m_LastHandleIndex; i++)
+                {
+                    SimpleBroadphaseProxy proxy0 = m_pHandles[i];
+                    if (proxy0.GetClientObject() == null)
+                    {
+                        continue;
+                    }
                     new_largest_index = i;
-                    for (int j=i+1; j <= m_LastHandleIndex; j++)
-			        {
-				        SimpleBroadphaseProxy proxy1 = m_pHandles[j];
+                    for (int j = i + 1; j <= m_LastHandleIndex; j++)
+                    {
+                        SimpleBroadphaseProxy proxy1 = m_pHandles[j];
                         //btAssert(proxy0 != proxy1);
-				        if(proxy1.GetClientObject() == null)
-				        {
-					        continue;
-				        }
+                        if (proxy1.GetClientObject() == null)
+                        {
+                            continue;
+                        }
 
-				        if (AabbOverlap(proxy0,proxy1))
-				        {
-					        if (m_pairCache.FindPair(proxy0,proxy1) == null)
-					        {
-						        m_pairCache.AddOverlappingPair(proxy0,proxy1);
-					        }
-				        } 
+                        if (AabbOverlap(proxy0, proxy1))
+                        {
+                            if (m_pairCache.FindPair(proxy0, proxy1) == null)
+                            {
+                                m_pairCache.AddOverlappingPair(proxy0, proxy1);
+                            }
+                        }
                         else
-				        {
-					        if (!m_pairCache.HasDeferredRemoval())
-					        {
-						        if ( m_pairCache.FindPair(proxy0,proxy1) != null)
-						        {
-							        m_pairCache.RemoveOverlappingPair(proxy0,proxy1,dispatcher);
-						        }
-					        }
-				        }
-			        }
-		        }
+                        {
+                            if (!m_pairCache.HasDeferredRemoval())
+                            {
+                                if (m_pairCache.FindPair(proxy0, proxy1) != null)
+                                {
+                                    m_pairCache.RemoveOverlappingPair(proxy0, proxy1, dispatcher);
+                                }
+                            }
+                        }
+                    }
+                }
 
-		        m_LastHandleIndex = new_largest_index;
+                m_LastHandleIndex = new_largest_index;
 
-		        if (m_ownsPairCache && m_pairCache.HasDeferredRemoval())
-		        {
-			        IList<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
+                if (m_ownsPairCache && m_pairCache.HasDeferredRemoval())
+                {
+                    IList<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
 
-			        //perform a sort, to find duplicates and to sort 'invalid' pairs to the end
-					((List<BroadphasePair>)overlappingPairArray).Sort();
+                    //perform a sort, to find duplicates and to sort 'invalid' pairs to the end
+                    ((List<BroadphasePair>)overlappingPairArray).Sort();
 
-					//overlappingPairArray.Capacity = (overlappingPairArray.Count - m_invalidPair);
-			        m_invalidPair = 0;
+                    //overlappingPairArray.Capacity = (overlappingPairArray.Count - m_invalidPair);
+                    m_invalidPair = 0;
 
-			        BroadphasePair previousPair = new BroadphasePair();
+                    BroadphasePair previousPair = new BroadphasePair();
 
-			        for (int i=0;i<overlappingPairArray.Count;i++)
-			        {
+                    for (int i = 0; i < overlappingPairArray.Count; i++)
+                    {
 
-				        BroadphasePair pair = overlappingPairArray[i];
+                        BroadphasePair pair = overlappingPairArray[i];
 
-				        bool isDuplicate = (pair == previousPair);
+                        bool isDuplicate = (pair == previousPair);
 
-				        previousPair = pair;
+                        previousPair = pair;
 
-				        bool needsRemoval = false;
+                        bool needsRemoval = false;
 
-				        if (!isDuplicate)
-				        {
-					        bool hasOverlap = TestAabbOverlap(pair.m_pProxy0,pair.m_pProxy1);
+                        if (!isDuplicate)
+                        {
+                            bool hasOverlap = TestAabbOverlap(pair.m_pProxy0, pair.m_pProxy1);
 
-					        if (hasOverlap)
-					        {
-						        needsRemoval = false;//callback->processOverlap(pair);
-					        } 
+                            if (hasOverlap)
+                            {
+                                needsRemoval = false;//callback->processOverlap(pair);
+                            }
                             else
-					        {
-						        needsRemoval = true;
-					        }
-				        } 
+                            {
+                                needsRemoval = true;
+                            }
+                        }
                         else
-				        {
-					        //remove duplicate
-					        needsRemoval = true;
-					        //should have no algorithm
+                        {
+                            //remove duplicate
+                            needsRemoval = true;
+                            //should have no algorithm
                             //btAssert(!pair.m_algorithm);
-				        }
+                        }
 
-				        if (needsRemoval)
-				        {
-					        m_pairCache.CleanOverlappingPair(pair,dispatcher);
+                        if (needsRemoval)
+                        {
+                            m_pairCache.CleanOverlappingPair(pair, dispatcher);
 
-					        //		m_overlappingPairArray.swap(i,m_overlappingPairArray.size()-1);
-					        //		m_overlappingPairArray.pop_back();
-					        pair.m_pProxy0 = null;
-					        pair.m_pProxy1 = null;
-					        m_invalidPair++;
+                            //		m_overlappingPairArray.swap(i,m_overlappingPairArray.size()-1);
+                            //		m_overlappingPairArray.pop_back();
+                            pair.m_pProxy0 = null;
+                            pair.m_pProxy1 = null;
+                            m_invalidPair++;
                             BulletGlobals.gOverlappingPairs--;
-				        } 
+                        }
 
-			        }
+                    }
 
-			        ///if you don't like to skip the invalid pairs in the array, execute following code:
-        #if CLEAN_INVALID_PAIRS
+                    ///if you don't like to skip the invalid pairs in the array, execute following code:
+#if CLEAN_INVALID_PAIRS
 
-			        //perform a sort, to sort 'invalid' pairs to the end
+                    //perform a sort, to sort 'invalid' pairs to the end
                     //overlappingPairArray.quickSort(new BroadphasePairSortPredicate());
-					((List<BroadphasePair>)overlappingPairArray).Sort();
-					//overlappingPairArray.Capacity = overlappingPairArray.Count - m_invalidPair;
-			        m_invalidPair = 0;
-        #endif//CLEAN_INVALID_PAIRS
+                    ((List<BroadphasePair>)overlappingPairArray).Sort();
+                    //overlappingPairArray.Capacity = overlappingPairArray.Count - m_invalidPair;
+                    m_invalidPair = 0;
+#endif//CLEAN_INVALID_PAIRS
 
-		        }
-	        }
+                }
+            }
         }
 
-	    public virtual void	DestroyProxy(BroadphaseProxy proxy,IDispatcher dispatcher)
+        public virtual void DestroyProxy(BroadphaseProxy proxy, IDispatcher dispatcher)
         {
-		    SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
+            SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
             //freeHandle(proxy0);
-		    m_pairCache.RemoveOverlappingPairsContainingProxy(proxy,dispatcher);
-        }
-	    
-        public virtual void	SetAabb(BroadphaseProxy proxy,ref Vector3 aabbMin,ref Vector3 aabbMax, IDispatcher dispatcher)
-        {
-	        SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
-	        sbp.SetMinAABB(ref aabbMin);
-	        sbp.SetMaxAABB(ref aabbMax);
+            m_pairCache.RemoveOverlappingPairsContainingProxy(proxy, dispatcher);
         }
 
-	    public virtual void	GetAabb(BroadphaseProxy proxy,out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void SetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
         {
-	        SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
-	        aabbMin = sbp.GetMinAABB();
-	        aabbMax = sbp.GetMaxAABB();
+            SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
+            sbp.SetMinAABB(ref aabbMin);
+            sbp.SetMaxAABB(ref aabbMax);
+        }
+
+        public virtual void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        {
+            SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
+            aabbMin = sbp.GetMinAABB();
+            aabbMax = sbp.GetMaxAABB();
         }
 
         public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback)
@@ -284,7 +284,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-	    public virtual void RayTest(ref Vector3 rayFrom,ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin,ref Vector3 aabbMax)
+        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
             for (int i = 0; i <= m_LastHandleIndex; i++)
             {
@@ -297,56 +297,56 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
         }
 
-    	
+
         public virtual void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback callback)
         {
-	        for (int i=0; i <= m_LastHandleIndex; i++)
-	        {
-		        SimpleBroadphaseProxy proxy = m_pHandles[i];
-		        if(proxy.m_clientObject == null)
-		        {
-			        continue;
-		        }
-		        if (AabbUtil2.TestAabbAgainstAabb2(ref aabbMin,ref aabbMax,ref proxy.m_aabbMin,ref proxy.m_aabbMax))
-		        {
-			        callback.Process(proxy);
-		        }
-	        }
+            for (int i = 0; i <= m_LastHandleIndex; i++)
+            {
+                SimpleBroadphaseProxy proxy = m_pHandles[i];
+                if (proxy.m_clientObject == null)
+                {
+                    continue;
+                }
+                if (AabbUtil2.TestAabbAgainstAabb2(ref aabbMin, ref aabbMax, ref proxy.m_aabbMin, ref proxy.m_aabbMax))
+                {
+                    callback.Process(proxy);
+                }
+            }
         }
 
-	
 
-	    public IOverlappingPairCache GetOverlappingPairCache()
-	    {
-		    return m_pairCache;
-	    }
 
-	    public bool	TestAabbOverlap(BroadphaseProxy proxy0,BroadphaseProxy proxy1)
+        public IOverlappingPairCache GetOverlappingPairCache()
+        {
+            return m_pairCache;
+        }
+
+        public bool TestAabbOverlap(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
         {
             return AabbOverlap((SimpleBroadphaseProxy)proxy0, (SimpleBroadphaseProxy)proxy1);
         }
 
 
-	    ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
-	    ///will add some transform later
-	    public virtual void GetBroadphaseAabb(out Vector3 aabbMin,out Vector3 aabbMax)
-	    {
-		    aabbMin = MathUtil.MIN_VECTOR;
-		    aabbMax = MathUtil.MAX_VECTOR;
-	    }
+        ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
+        ///will add some transform later
+        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        {
+            aabbMin = MathUtil.MIN_VECTOR;
+            aabbMax = MathUtil.MAX_VECTOR;
+        }
 
-	    public virtual void	PrintStats()
-	    {
-    //		printf("btSimpleBroadphase.h\n");
-    //		printf("numHandles = %d, maxHandles = %d\n",m_numHandles,m_maxHandles);
-	    }
+        public virtual void PrintStats()
+        {
+            //		printf("btSimpleBroadphase.h\n");
+            //		printf("numHandles = %d, maxHandles = %d\n",m_numHandles,m_maxHandles);
+        }
 
 
         protected SimpleBroadphaseProxy GetSimpleProxyFromProxy(BroadphaseProxy proxy)
-	    {
-		    SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
-		    return proxy0;
-	    }
+        {
+            SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
+            return proxy0;
+        }
 
         ///reset broadphase internal structures, to ensure determinism/reproducability
         public virtual void ResetPool(IDispatcher dispatcher)
@@ -373,7 +373,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         int m_invalidPair;
 
 
-	    protected int m_numHandles;						// number of active handles
+        protected int m_numHandles;						// number of active handles
         protected int m_maxHandles;						// max number of handles
         protected int m_LastHandleIndex;
 
@@ -381,7 +381,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         protected Object m_pHandlesRawPtr;
         protected int m_firstFreeHandle;		// free handles list
-     
+
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -393,12 +393,12 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_position = position;
         }
 
-        public SimpleBroadphaseProxy(int position,ref Vector3 minpt, ref Vector3 maxpt, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapProxy)
-	    :   base(ref minpt,ref maxpt,userPtr,collisionFilterGroup,collisionFilterMask,multiSapProxy)
-	    {
+        public SimpleBroadphaseProxy(int position, ref Vector3 minpt, ref Vector3 maxpt, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapProxy)
+            : base(ref minpt, ref maxpt, userPtr, collisionFilterGroup, collisionFilterMask, multiSapProxy)
+        {
             // bit of a cheat/hack - store the position in the array as we can't find it for freehandle otherwise.
             m_position = position;
-	    }
+        }
 
         public int GetNextFree()
         {
@@ -423,28 +423,28 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public class RemovingOverlapCallback : IOverlapCallback
     {
-	    public virtual bool	ProcessOverlap(BroadphasePair pair)
-	    {
+        public virtual bool ProcessOverlap(BroadphasePair pair)
+        {
             //(void)pair;
             //btAssert(0);
-		    return false;
-	    }
+            return false;
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
 
     public class RemovePairContainingProxy
     {
-	    public virtual void Cleanup()
-	    {
-	    }
-	    protected virtual bool ProcessOverlap(ref BroadphasePair pair)
-	    {
-		    SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(pair.m_pProxy0);
-		    SimpleBroadphaseProxy proxy1 = (SimpleBroadphaseProxy)(pair.m_pProxy1);
-		    return ((m_targetProxy == proxy0 || m_targetProxy == proxy1));
-	    }
-	    private BroadphaseProxy	m_targetProxy;
+        public virtual void Cleanup()
+        {
+        }
+        protected virtual bool ProcessOverlap(ref BroadphasePair pair)
+        {
+            SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(pair.m_pProxy0);
+            SimpleBroadphaseProxy proxy1 = (SimpleBroadphaseProxy)(pair.m_pProxy1);
+            return ((m_targetProxy == proxy0 || m_targetProxy == proxy1));
+        }
+        private BroadphaseProxy m_targetProxy;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -452,10 +452,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
     //then remove non-overlapping ones
     public class CheckOverlapCallback : IOverlapCallback
     {
-	    public virtual bool ProcessOverlap(BroadphasePair pair)
-	    {
-		    return (!SimpleBroadphase.AabbOverlap((SimpleBroadphaseProxy)(pair.m_pProxy0),(SimpleBroadphaseProxy)(pair.m_pProxy1)));
-	    }
+        public virtual bool ProcessOverlap(BroadphasePair pair)
+        {
+            return (!SimpleBroadphase.AabbOverlap((SimpleBroadphaseProxy)(pair.m_pProxy0), (SimpleBroadphaseProxy)(pair.m_pProxy1)));
+        }
     }
     //-------------------------------------------------------------------------------------------------
 

@@ -27,8 +27,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
     public interface IOverlappingPairCallback
     {
-    	BroadphasePair AddOverlappingPair(BroadphaseProxy proxy0,BroadphaseProxy proxy1);
-	    Object RemoveOverlappingPair(BroadphaseProxy proxy0,BroadphaseProxy proxy1,IDispatcher dispatcher);
-	    void RemoveOverlappingPairsContainingProxy(BroadphaseProxy proxy0,IDispatcher dispatcher);
+        BroadphasePair AddOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1);
+        Object RemoveOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, IDispatcher dispatcher);
+        void RemoveOverlappingPairsContainingProxy(BroadphaseProxy proxy0, IDispatcher dispatcher);
     }
 }

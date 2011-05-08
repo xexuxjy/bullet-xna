@@ -46,14 +46,14 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             a.Z = Math.Max(a.Z, b.Z);
         }
 
-		///* Collide	*/
-		//public interface Collide : IDisposable
-		//{
-		//    void Process(DbvtNode a, DbvtNode b);
-		//    void Process(DbvtNode a);
-		//    bool Descent(DbvtNode a);
-		//    bool AllLeafs(DbvtNode a);
-		//};
+        ///* Collide	*/
+        //public interface Collide : IDisposable
+        //{
+        //    void Process(DbvtNode a, DbvtNode b);
+        //    void Process(DbvtNode a);
+        //    bool Descent(DbvtNode a);
+        //    bool AllLeafs(DbvtNode a);
+        //};
 
         public Dbvt()
         {
@@ -428,54 +428,54 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-	public void	RayTestInternal(DbvtNode root,
-								ref Vector3 rayFrom,
-								ref Vector3 rayTo,
-								ref Vector3 rayDirectionInverse,
-								bool[] signs,
-								float lambda_max,
-								ref Vector3 aabbMin,
-								ref Vector3 aabbMax,
-								Collide policy)
-{
-	//    (void) rayTo;
-	//DBVT_CHECKTYPE
-	if(root != null)
-	{
-		Vector3 resultNormal = Vector3.Up;
+        public void RayTestInternal(DbvtNode root,
+                                    ref Vector3 rayFrom,
+                                    ref Vector3 rayTo,
+                                    ref Vector3 rayDirectionInverse,
+                                    bool[] signs,
+                                    float lambda_max,
+                                    ref Vector3 aabbMin,
+                                    ref Vector3 aabbMax,
+                                    Collide policy)
+        {
+            //    (void) rayTo;
+            //DBVT_CHECKTYPE
+            if (root != null)
+            {
+                Vector3 resultNormal = Vector3.Up;
 
-		int								depth=1;
-		int								treshold=DOUBLE_STACKSIZE-2;
-		ObjectArray<DbvtNode>	stack = new ObjectArray<DbvtNode>(DOUBLE_STACKSIZE);
-		stack[0]=root;
-		Vector3[] bounds = new Vector3[2];
-		do	
-		{
-			DbvtNode	node=stack[--depth];
-			bounds[0] = node.volume.Mins()-aabbMax;
-			bounds[1] = node.volume.Maxs()-aabbMin;
-			float tmin,lambda_min=0.0f;
-			bool result1 = AabbUtil2.RayAabb2(ref rayFrom,ref rayDirectionInverse,signs,bounds,out tmin,lambda_min,lambda_max);
-			if(result1)
-			{
-				if(node.IsInternal())
-				{
-					//if(depth>treshold)
-					//{
-					//    stack.resize(stack.size()*2);
-					//    treshold=stack.size()-2;
-					//}
-					stack[depth++]=node._children[0];
-					stack[depth++]=node._children[1];
-				}
-				else
-				{
-					policy.Process(node);
-				}
-			}
-		} while(depth != 0);
-	}
-}
+                int depth = 1;
+                int treshold = DOUBLE_STACKSIZE - 2;
+                ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>(DOUBLE_STACKSIZE);
+                stack[0] = root;
+                Vector3[] bounds = new Vector3[2];
+                do
+                {
+                    DbvtNode node = stack[--depth];
+                    bounds[0] = node.volume.Mins() - aabbMax;
+                    bounds[1] = node.volume.Maxs() - aabbMin;
+                    float tmin, lambda_min = 0.0f;
+                    bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, signs, bounds, out tmin, lambda_min, lambda_max);
+                    if (result1)
+                    {
+                        if (node.IsInternal())
+                        {
+                            //if(depth>treshold)
+                            //{
+                            //    stack.resize(stack.size()*2);
+                            //    treshold=stack.size()-2;
+                            //}
+                            stack[depth++] = node._children[0];
+                            stack[depth++] = node._children[1];
+                        }
+                        else
+                        {
+                            policy.Process(node);
+                        }
+                    }
+                } while (depth != 0);
+            }
+        }
 
 
 
@@ -873,48 +873,48 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 
 
-		public static DbvtNode RemoveLeaf(Dbvt pdbvt, DbvtNode leaf)
-		{
-			if (leaf == pdbvt.Root)
-			{
-				pdbvt.Root = null;
-				return null;
-			}
-			else
-			{
-				DbvtNode parent = leaf.parent;
-				DbvtNode prev = parent.parent;
-				DbvtNode sibling = parent._children[1 - IndexOf(leaf)];
-				if (prev != null)
-				{
-					prev._children[IndexOf(parent)] = sibling;
-					sibling.parent = prev;
-					DeleteNode(pdbvt, ref parent);
-					while (prev != null)
-					{
-						DbvtAabbMm pb = prev.volume;
-						DbvtAabbMm.Merge(ref prev._children[0].volume, ref prev._children[1].volume, ref prev.volume);
-						if (DbvtAabbMm.NotEqual(ref pb, ref prev.volume))
-						{
-							sibling = prev;
-							prev = prev.parent;
-						}
-						else
-						{
-							break;
-						}
-					}
-					return (prev != null ? prev : pdbvt.Root);
-				}
-				else
-				{
-					pdbvt.Root = sibling;
-					sibling.parent = null;
-					DeleteNode(pdbvt, ref parent);
-					return (pdbvt.Root);
-				}
-			}
-		}
+        public static DbvtNode RemoveLeaf(Dbvt pdbvt, DbvtNode leaf)
+        {
+            if (leaf == pdbvt.Root)
+            {
+                pdbvt.Root = null;
+                return null;
+            }
+            else
+            {
+                DbvtNode parent = leaf.parent;
+                DbvtNode prev = parent.parent;
+                DbvtNode sibling = parent._children[1 - IndexOf(leaf)];
+                if (prev != null)
+                {
+                    prev._children[IndexOf(parent)] = sibling;
+                    sibling.parent = prev;
+                    DeleteNode(pdbvt, ref parent);
+                    while (prev != null)
+                    {
+                        DbvtAabbMm pb = prev.volume;
+                        DbvtAabbMm.Merge(ref prev._children[0].volume, ref prev._children[1].volume, ref prev.volume);
+                        if (DbvtAabbMm.NotEqual(ref pb, ref prev.volume))
+                        {
+                            sibling = prev;
+                            prev = prev.parent;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    return (prev != null ? prev : pdbvt.Root);
+                }
+                else
+                {
+                    pdbvt.Root = sibling;
+                    sibling.parent = null;
+                    DeleteNode(pdbvt, ref parent);
+                    return (pdbvt.Root);
+                }
+            }
+        }
 
 
 
@@ -958,13 +958,13 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public class DbvtNode
     {
-		public DbvtNode()
-		{
-		}
+        public DbvtNode()
+        {
+        }
         public DbvtNode(Dbvt tree, DbvtNode aparent, ref DbvtAabbMm avolume, Object adata)
-        { 
-            volume = avolume; 
-            parent = aparent; 
+        {
+            volume = avolume;
+            parent = aparent;
             data = adata;
             if (data is int)
             {
@@ -975,7 +975,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         public DbvtNode parent;
         public DbvtNode[] _children = new DbvtNode[2];
         public Object data;
-        public int	dataAsInt;
+        public int dataAsInt;
 
         public bool IsLeaf() { return (_children[1] == null); }
         public bool IsInternal() { return (!IsLeaf()); }

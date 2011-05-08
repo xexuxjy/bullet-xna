@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         //12 bytes - hah yeah right...
         public UShortVector3 m_quantizedAabbMin;
         public UShortVector3 m_quantizedAabbMax;
-        
+
         //4 bytes
         public int m_escapeIndexOrTriangleIndex;
 
@@ -73,7 +73,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             //Debug.Assert(isLeafNode());
             // Get only the lower bits where the triangle index is stored
             int result = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
-            int result2 = (m_escapeIndexOrTriangleIndex &~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
+            int result2 = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
 
             return result;
         }
@@ -163,13 +163,13 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         //quantization data
         protected bool m_useQuantization;
 
-		protected ObjectArray<OptimizedBvhNode> m_leafNodes = new ObjectArray<OptimizedBvhNode>();
-		protected ObjectArray<OptimizedBvhNode> m_contiguousNodes = new ObjectArray<OptimizedBvhNode>();
-		protected ObjectArray<QuantizedBvhNode> m_quantizedLeafNodes = new ObjectArray<QuantizedBvhNode>();
-		protected ObjectArray<QuantizedBvhNode> m_quantizedContiguousNodes = new ObjectArray<QuantizedBvhNode>();
+        protected ObjectArray<OptimizedBvhNode> m_leafNodes = new ObjectArray<OptimizedBvhNode>();
+        protected ObjectArray<OptimizedBvhNode> m_contiguousNodes = new ObjectArray<OptimizedBvhNode>();
+        protected ObjectArray<QuantizedBvhNode> m_quantizedLeafNodes = new ObjectArray<QuantizedBvhNode>();
+        protected ObjectArray<QuantizedBvhNode> m_quantizedContiguousNodes = new ObjectArray<QuantizedBvhNode>();
 
         protected TraversalMode m_traversalMode;
-		protected ObjectArray<BvhSubtreeInfo> m_SubtreeHeaders = new ObjectArray<BvhSubtreeInfo>();
+        protected ObjectArray<BvhSubtreeInfo> m_SubtreeHeaders = new ObjectArray<BvhSubtreeInfo>();
 
         //This is only used for serialization so we don't have to add serialization directly to btAlignedObjectArray
         protected int m_subtreeHeaderCount;
@@ -231,7 +231,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 Vector3 output;
-                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMin,out output);
+                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMin, out output);
                 return output;
             }
             //non-quantized
@@ -243,7 +243,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             if (m_useQuantization)
             {
                 Vector3 output;
-                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMax,out output);
+                UnQuantize(ref m_quantizedLeafNodes[nodeIndex].m_quantizedAabbMax, out output);
                 return output;
             }
             //non-quantized
@@ -281,13 +281,13 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 QuantizedBvhNode node = m_quantizedContiguousNodes[nodeIndex];
                 node.m_quantizedAabbMin.min(ref quantizedAabbMin);
                 node.m_quantizedAabbMax.max(ref quantizedAabbMax);
-                m_quantizedContiguousNodes[nodeIndex]= node;
+                m_quantizedContiguousNodes[nodeIndex] = node;
             }
             else
             {
                 OptimizedBvhNode node = m_contiguousNodes[nodeIndex];
                 //non-quantized
-                MathUtil.VectorMin(ref newAabbMin,ref node.m_aabbMinOrg);
+                MathUtil.VectorMin(ref newAabbMin, ref node.m_aabbMinOrg);
                 MathUtil.VectorMin(ref newAabbMax, ref node.m_aabbMaxOrg);
                 m_contiguousNodes[nodeIndex] = node;
             }
@@ -553,7 +553,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             Vector3 rayDirection = (rayTarget - raySource);
             rayDirection.Normalize();
             lambda_max = Vector3.Dot(rayDirection, rayTarget - raySource);
-	        ///what about division by zero? --> just set rayDirection[i] to 1.0
+            ///what about division by zero? --> just set rayDirection[i] to 1.0
             rayDirection.X = MathUtil.FuzzyZero(rayDirection.X) ? MathUtil.BT_LARGE_FLOAT : 1f / rayDirection.X;
             rayDirection.Y = MathUtil.FuzzyZero(rayDirection.Y) ? MathUtil.BT_LARGE_FLOAT : 1f / rayDirection.Y;
             rayDirection.Z = MathUtil.FuzzyZero(rayDirection.Z) ? MathUtil.BT_LARGE_FLOAT : 1f / rayDirection.Z;
@@ -581,23 +581,23 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
                 //#define VISUALLY_ANALYZE_BVH 1
 #if VISUALLY_ANALYZE_BVH
-		        //some code snippet to debugDraw aabb, to visually analyze bvh structure
+                //some code snippet to debugDraw aabb, to visually analyze bvh structure
                 int drawPatch = 3;
                 //need some global access to a debugDrawer
                 IDebugDraw debugDrawerPtr = BulletGlobals.gDebugDraw;
                 //IDebugDraw debugDrawerPtr = null;
                 //if (curIndex == drawPatch&& debugDrawerPtr != null)
                 if (debugDrawerPtr != null && curIndex == drawPatch)
-		        {
-			        Vector3 aabbMin2;
+                {
+                    Vector3 aabbMin2;
                     Vector3 aabbMax2;
-			        UnQuantize(ref rootNode.m_quantizedAabbMin,out aabbMin2);
+                    UnQuantize(ref rootNode.m_quantizedAabbMin, out aabbMin2);
                     UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax2);
-			        Vector3	color = new Vector3(1f/curIndex,0,0);
-			        debugDrawerPtr.DrawAabb(ref aabbMin2,ref aabbMax2,ref color);
+                    Vector3 color = new Vector3(1f / curIndex, 0, 0);
+                    debugDrawerPtr.DrawAabb(ref aabbMin2, ref aabbMax2, ref color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
-                    
-		        }
+
+                }
 #endif//VISUALLY_ANALYZE_BVH
 
                 //catch bugs in tree data
@@ -613,7 +613,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 if (boxBoxOverlap)
                 {
                     Vector3[] bounds = new Vector3[2];
-                    UnQuantize(ref rootNode.m_quantizedAabbMin,out bounds[0]);
+                    UnQuantize(ref rootNode.m_quantizedAabbMin, out bounds[0]);
                     UnQuantize(ref rootNode.m_quantizedAabbMax, out bounds[1]);
                     /* Add box cast extents */
                     bounds[0] -= aabbMax;
@@ -628,12 +628,12 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 			        }
 #endif
 #if RAYAABB2
-			        ///careful with this check: need to check division by zero (above) and fix the unQuantize method
-			        ///thanks Joerg/hiker for the reproduction case!
-			        ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
+                    ///careful with this check: need to check division by zero (above) and fix the unQuantize method
+                    ///thanks Joerg/hiker for the reproduction case!
+                    ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
 
-			        BulletGlobals.StartProfile("btRayAabb2");
-			        rayBoxOverlap = AabbUtil2.RayAabb2 (ref raySource, ref rayDirection, sign, bounds, out param, 0.0f, lambda_max);
+                    BulletGlobals.StartProfile("btRayAabb2");
+                    rayBoxOverlap = AabbUtil2.RayAabb2(ref raySource, ref rayDirection, sign, bounds, out param, 0.0f, lambda_max);
                     BulletGlobals.StopProfile();
 #else
                     rayBoxOverlap = true;//btRayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
@@ -683,24 +683,24 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
                 //#define VISUALLY_ANALYZE_BVH 1
 #if VISUALLY_ANALYZE_BVH
-		        //some code snippet to debugDraw aabb, to visually analyze bvh structure
-		        int drawPatch = 9;
-		        //need some global access to a debugDrawer
+                //some code snippet to debugDraw aabb, to visually analyze bvh structure
+                int drawPatch = 9;
+                //need some global access to a debugDrawer
                 IDebugDraw debugDrawerPtr = BulletGlobals.gDebugDraw;
                 //IDebugDraw debugDrawerPtr = null;
                 //if (curIndex == drawPatch&& debugDrawerPtr != null)
                 if (debugDrawerPtr != null && curIndex == drawPatch)
                 //if (debugDrawerPtr != null)
-		        {
-			        Vector3 aabbMin,aabbMax;
+                {
+                    Vector3 aabbMin, aabbMax;
                     UnQuantize(ref rootNode.m_quantizedAabbMin, out aabbMin);
                     UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax);
-			        Vector3	color = new Vector3(1,0,0);
-			        debugDrawerPtr.DrawAabb(ref aabbMin,ref aabbMax,ref color);
+                    Vector3 color = new Vector3(1, 0, 0);
+                    debugDrawerPtr.DrawAabb(ref aabbMin, ref aabbMax, ref color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
 
 
-		        }
+                }
 #endif//VISUALLY_ANALYZE_BVH
 
                 //unQuantize version with out param
@@ -763,15 +763,15 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             rayAabbMax += aabbMax;
 
 #if RAYAABB2
-	        Vector3 rayDir = (rayTarget-raySource);
-	        rayDir.Normalize ();
-	        lambda_max = Vector3.Dot(rayDir,rayTarget-raySource);
-	        ///what about division by zero? --> just set rayDirection[i] to 1.0
-	        Vector3 rayDirectionInverse = new Vector3();
-	        rayDirectionInverse.X = MathUtil.FuzzyZero(rayDir.X) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X;
+            Vector3 rayDir = (rayTarget - raySource);
+            rayDir.Normalize();
+            lambda_max = Vector3.Dot(rayDir, rayTarget - raySource);
+            ///what about division by zero? --> just set rayDirection[i] to 1.0
+            Vector3 rayDirectionInverse = new Vector3();
+            rayDirectionInverse.X = MathUtil.FuzzyZero(rayDir.X) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X;
             rayDirectionInverse.Y = MathUtil.FuzzyZero(rayDir.Y) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y;
             rayDirectionInverse.Z = MathUtil.FuzzyZero(rayDir.Z) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z;
-	        bool[] sign = new bool[]{ rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f};
+            bool[] sign = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
 #endif
 
             Vector3[] bounds = new Vector3[2];
@@ -794,10 +794,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 //perhaps profile if it is worth doing the aabbOverlap test first
 
 #if RAYAABB2
-			        ///careful with this check: need to check division by zero (above) and fix the unQuantize method
-			        ///thanks Joerg/hiker for the reproduction case!
-			        ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
-		        rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2 (ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
+                ///careful with this check: need to check division by zero (above) and fix the unQuantize method
+                ///thanks Joerg/hiker for the reproduction case!
+                ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
+                rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2(ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
 
 #else
                 Vector3 normal = Vector3.Zero;
@@ -970,10 +970,10 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_curNodeIndex = 0;
 
             BuildTree(0, numLeafNodes);
-            for(int i=0;i<m_quantizedContiguousNodes.Count;++i)
+            for (int i = 0; i < m_quantizedContiguousNodes.Count; ++i)
             {
                 QuantizedBvhNode bvhn = m_quantizedContiguousNodes[i];
-                System.Console.WriteLine(String.Format("QNode[{0}] Esc[{1}] min[{2},{3},{4}] max[{5},{6},{7}]",i,bvhn.m_escapeIndexOrTriangleIndex,bvhn.m_quantizedAabbMin.X,bvhn.m_quantizedAabbMin.Y,bvhn.m_quantizedAabbMin.Z,bvhn.m_quantizedAabbMax.X,bvhn.m_quantizedAabbMax.Y,bvhn.m_quantizedAabbMax.Z));
+                System.Console.WriteLine(String.Format("QNode[{0}] Esc[{1}] min[{2},{3},{4}] max[{5},{6},{7}]", i, bvhn.m_escapeIndexOrTriangleIndex, bvhn.m_quantizedAabbMin.X, bvhn.m_quantizedAabbMin.Y, bvhn.m_quantizedAabbMin.Z, bvhn.m_quantizedAabbMax.X, bvhn.m_quantizedAabbMax.Y, bvhn.m_quantizedAabbMax.Z));
             }
 
             ///if the entire tree is small then subtree size, we need to create a header info for the tree
@@ -1109,7 +1109,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 #if DEBUG_CHECK_DEQUANTIZATION
             Vector3 newPoint;
-            UnQuantize(ref result,out newPoint);
+            UnQuantize(ref result, out newPoint);
             if (isMax)
             {
                 if (newPoint.X < point.X)
@@ -1175,7 +1175,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         //    UnQuantize(ref vecIn,out vecOut);
         //}
 
-        public void UnQuantize(ref UShortVector3 vecIn,out Vector3 vecOut)
+        public void UnQuantize(ref UShortVector3 vecIn, out Vector3 vecOut)
         {
             vecOut = new Vector3(((float)vecIn.X) / m_bvhQuantization.X,
                                         ((float)vecIn.Y) / m_bvhQuantization.Y,

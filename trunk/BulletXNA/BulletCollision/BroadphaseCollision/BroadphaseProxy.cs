@@ -26,14 +26,14 @@ using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
-///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases. 
-///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
+    ///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases. 
+    ///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
     public class BroadphaseProxy
     {
-	    ///optional filtering to cull potential collisions
+        ///optional filtering to cull potential collisions
 
-	    //Usually the client btCollisionObject or Rigidbody class
-	    public Object	m_clientObject;
+        //Usually the client btCollisionObject or Rigidbody class
+        public Object m_clientObject;
         public CollisionFilterGroups m_collisionFilterGroup;
         public CollisionFilterGroups m_collisionFilterMask;
         public Object m_multiSapParentProxy;
@@ -42,69 +42,69 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         public Vector3 m_aabbMin;
         public Vector3 m_aabbMax;
 
-	    public int GetUid()
-	    {
-		    return m_uniqueId;
-	    }
+        public int GetUid()
+        {
+            return m_uniqueId;
+        }
 
-	    //used for memory pools
-	    public BroadphaseProxy()
-	    {
+        //used for memory pools
+        public BroadphaseProxy()
+        {
             m_clientObject = null;
             m_multiSapParentProxy = null;
-	    }
+        }
 
         public BroadphaseProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapParentProxy)
-	    {
-		    m_clientObject = userPtr;
-		    m_collisionFilterGroup = collisionFilterGroup;
-		    m_collisionFilterMask = collisionFilterMask;
-		    m_aabbMin = aabbMin;
-		    m_aabbMax = aabbMax;
-		    m_multiSapParentProxy = multiSapParentProxy;
-	    }
+        {
+            m_clientObject = userPtr;
+            m_collisionFilterGroup = collisionFilterGroup;
+            m_collisionFilterMask = collisionFilterMask;
+            m_aabbMin = aabbMin;
+            m_aabbMax = aabbMax;
+            m_multiSapParentProxy = multiSapParentProxy;
+        }
 
         public static bool IsPolyhedral(BroadphaseNativeTypes proxyType)
-	    {
-		    return (proxyType < BroadphaseNativeTypes.IMPLICIT_CONVEX_SHAPES_START_HERE);
-	    }
+        {
+            return (proxyType < BroadphaseNativeTypes.IMPLICIT_CONVEX_SHAPES_START_HERE);
+        }
 
         public static bool IsConvex(BroadphaseNativeTypes proxyType)
-	    {
-		    return (proxyType < BroadphaseNativeTypes.CONCAVE_SHAPES_START_HERE);
-	    }
+        {
+            return (proxyType < BroadphaseNativeTypes.CONCAVE_SHAPES_START_HERE);
+        }
 
         public static bool IsNonMoving(BroadphaseNativeTypes proxyType)
-	    {
-		    return (IsConcave(proxyType) && !(proxyType==BroadphaseNativeTypes.GIMPACT_SHAPE_PROXYTYPE));
-	    }
+        {
+            return (IsConcave(proxyType) && !(proxyType == BroadphaseNativeTypes.GIMPACT_SHAPE_PROXYTYPE));
+        }
 
 
         public static bool IsConcave(BroadphaseNativeTypes proxyType)
-	    {
-		    return ((proxyType > BroadphaseNativeTypes.CONCAVE_SHAPES_START_HERE) &&
-			    (proxyType < BroadphaseNativeTypes.CONCAVE_SHAPES_END_HERE));
-	    }
+        {
+            return ((proxyType > BroadphaseNativeTypes.CONCAVE_SHAPES_START_HERE) &&
+                (proxyType < BroadphaseNativeTypes.CONCAVE_SHAPES_END_HERE));
+        }
         public static bool IsCompound(BroadphaseNativeTypes proxyType)
-	    {
-		    return (proxyType == BroadphaseNativeTypes.COMPOUND_SHAPE_PROXYTYPE);
-	    }
+        {
+            return (proxyType == BroadphaseNativeTypes.COMPOUND_SHAPE_PROXYTYPE);
+        }
 
         public static bool IsSoftBody(BroadphaseNativeTypes proxyType)
-	    {
-		    return (proxyType == BroadphaseNativeTypes.SOFTBODY_SHAPE_PROXYTYPE);
-	    }
+        {
+            return (proxyType == BroadphaseNativeTypes.SOFTBODY_SHAPE_PROXYTYPE);
+        }
 
 
         public static bool IsInfinite(BroadphaseNativeTypes proxyType)
-	    {
+        {
             return (proxyType == BroadphaseNativeTypes.STATIC_PLANE_PROXYTYPE);
-	    }
+        }
 
         public static bool IsConvex2d(BroadphaseNativeTypes proxyType)
-	    {
+        {
             return (proxyType == BroadphaseNativeTypes.BOX_2D_SHAPE_PROXYTYPE) || (proxyType == BroadphaseNativeTypes.CONVEX_2D_SHAPE_PROXYTYPE);
-	    }
+        }
 
 
         public Vector3 GetMinAABB()
@@ -144,40 +144,40 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public class BroadphasePair : IComparable
     {
-	    public BroadphasePair ()
+        public BroadphasePair()
         {
-    	    m_pProxy0 = null;
-		    m_pProxy1 = null;
-		    m_algorithm = null;
-		    m_internalInfo1 = null;
-	    }
+            m_pProxy0 = null;
+            m_pProxy1 = null;
+            m_algorithm = null;
+            m_internalInfo1 = null;
+        }
 
-	    public BroadphasePair(ref BroadphasePair other)
-		{
+        public BroadphasePair(ref BroadphasePair other)
+        {
             m_pProxy0 = other.m_pProxy0;
-			m_pProxy1 = other.m_pProxy1;
-			m_algorithm = other.m_algorithm;
-			m_internalInfo1 = other.m_internalInfo1;
-    	}
-	
-        public BroadphasePair(BroadphaseProxy proxy0,BroadphaseProxy proxy1)
-	    {
-		    //keep them sorted, so the std::set operations work
-		    if (proxy0.GetUid() < proxy1.GetUid())
-            { 
-                m_pProxy0 = proxy0; 
-                m_pProxy1 = proxy1; 
+            m_pProxy1 = other.m_pProxy1;
+            m_algorithm = other.m_algorithm;
+            m_internalInfo1 = other.m_internalInfo1;
+        }
+
+        public BroadphasePair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
+        {
+            //keep them sorted, so the std::set operations work
+            if (proxy0.GetUid() < proxy1.GetUid())
+            {
+                m_pProxy0 = proxy0;
+                m_pProxy1 = proxy1;
             }
-            else 
-            { 
-			    m_pProxy0 = proxy1; 
-                m_pProxy1 = proxy0; 
+            else
+            {
+                m_pProxy0 = proxy1;
+                m_pProxy1 = proxy0;
             }
 
-		    m_algorithm = null;
-		    m_internalInfo1 = null;
-	    }
-	
+            m_algorithm = null;
+            m_internalInfo1 = null;
+        }
+
 
         public override bool Equals(object obj)
         {
@@ -196,19 +196,19 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             return false;
         }
 
-        public static bool IsLessThen(BroadphasePair a,BroadphasePair b)
+        public static bool IsLessThen(BroadphasePair a, BroadphasePair b)
         {
-			int uidA0 = a.m_pProxy0 != null ? a.m_pProxy0.GetUid() : -1;
-			int uidB0 = b.m_pProxy0 != null ? b.m_pProxy0.GetUid() : -1;
-			int uidA1 = a.m_pProxy1 != null ? a.m_pProxy1.GetUid() : -1;
-			int uidB1 = b.m_pProxy1 != null ? b.m_pProxy1.GetUid() : -1;
+            int uidA0 = a.m_pProxy0 != null ? a.m_pProxy0.GetUid() : -1;
+            int uidB0 = b.m_pProxy0 != null ? b.m_pProxy0.GetUid() : -1;
+            int uidA1 = a.m_pProxy1 != null ? a.m_pProxy1.GetUid() : -1;
+            int uidB1 = b.m_pProxy1 != null ? b.m_pProxy1.GetUid() : -1;
 
-             //return uidA0 > uidB0 || 
-             //   (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
-             //   (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1 && a.m_algorithm > b.m_algorithm); 
+            //return uidA0 > uidB0 || 
+            //   (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
+            //   (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1 && a.m_algorithm > b.m_algorithm); 
             return uidA0 > uidB0 ||
                (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
-               (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1); 
+               (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1);
         }
 
         #region IComparable Members
@@ -222,12 +222,12 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
 
 
-	    public BroadphaseProxy m_pProxy0;
-	    public BroadphaseProxy m_pProxy1;
-    	
-	    public CollisionAlgorithm m_algorithm;
+        public BroadphaseProxy m_pProxy0;
+        public BroadphaseProxy m_pProxy1;
+
+        public CollisionAlgorithm m_algorithm;
         //don't use this data, it will be removed in future version.
-	    public Object m_internalInfo1;
+        public Object m_internalInfo1;
         public int m_internalTmpValue;
     }
 
@@ -287,14 +287,14 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     [Flags]
     public enum CollisionFilterGroups
-	{
-	        DefaultFilter = 1,
-	        StaticFilter = 2,
-	        KinematicFilter = 4,
-	        DebrisFilter = 8,
-			SensorTrigger = 16,
-			CharacterFilter = 32,
-	        AllFilter = -1 //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
-	}
+    {
+        DefaultFilter = 1,
+        StaticFilter = 2,
+        KinematicFilter = 4,
+        DebrisFilter = 8,
+        SensorTrigger = 16,
+        CharacterFilter = 32,
+        AllFilter = -1 //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
+    }
 
 }

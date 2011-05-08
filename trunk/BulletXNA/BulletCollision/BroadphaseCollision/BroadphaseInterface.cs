@@ -20,8 +20,8 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-using System;
 
+using System;
 using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.BroadphaseCollision
@@ -32,34 +32,33 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy);
         BroadphaseProxy CreateProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy);
 
-        void DestroyProxy(BroadphaseProxy proxy,IDispatcher dispatcher);
-	    void SetAabb(BroadphaseProxy proxy,ref Vector3 aabbMin,ref Vector3 aabbMax, IDispatcher dispatcher);
-	    void GetAabb(BroadphaseProxy proxy,out Vector3 aabbMin,out Vector3 aabbMax );
+        void DestroyProxy(BroadphaseProxy proxy, IDispatcher dispatcher);
+        void SetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher);
+        void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax);
 
         void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback);
-	    void RayTest(ref Vector3 rayFrom,ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax);
+        void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax);
         void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback callback);
 
-	    ///calculateOverlappingPairs is optional: incremental algorithms (sweep and prune) might do it during the set aabb
-	    void	CalculateOverlappingPairs(IDispatcher dispatcher);
+        ///calculateOverlappingPairs is optional: incremental algorithms (sweep and prune) might do it during the set aabb
+        void CalculateOverlappingPairs(IDispatcher dispatcher);
 
-	    IOverlappingPairCache GetOverlappingPairCache();
+        IOverlappingPairCache GetOverlappingPairCache();
 
-	    ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
-	    ///will add some transform later
-	    void GetBroadphaseAabb(out Vector3 aabbMin,out Vector3 aabbMax);
+        ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
+        ///will add some transform later
+        void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax);
 
-	    ///reset broadphase internal structures, to ensure determinism/reproducability
+        ///reset broadphase internal structures, to ensure determinism/reproducability
         void ResetPool(IDispatcher dispatcher);
 
-	    void PrintStats();
+        void PrintStats();
 
         void Cleanup();
     }
 
 
-    
-    public interface IBroadphaseAabbCallback 
+    public interface IBroadphaseAabbCallback
     {
         void Cleanup();
         bool Process(BroadphaseProxy proxy);
@@ -68,11 +67,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public abstract class BroadphaseRayCallback : IBroadphaseAabbCallback
     {
-	    ///added some cached data to accelerate ray-AABB tests
-	    public Vector3 m_rayDirectionInverse;
+        ///added some cached data to accelerate ray-AABB tests
+        public Vector3 m_rayDirectionInverse;
         public bool[] m_signs = new bool[3];
-	    public float m_lambda_max;
-        public virtual void Cleanup(){}
+        public float m_lambda_max;
+        public virtual void Cleanup() { }
         public abstract bool Process(BroadphaseProxy proxy);
     }
 }

@@ -36,19 +36,19 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         PersistentManifold GetNewManifold(CollisionObject body0, CollisionObject body1);
 
-	    void ReleaseManifold(PersistentManifold manifold);
+        void ReleaseManifold(PersistentManifold manifold);
 
-	    void ClearManifold(PersistentManifold manifold);
+        void ClearManifold(PersistentManifold manifold);
 
-	    bool	NeedsCollision(CollisionObject body0,CollisionObject body1);
+        bool NeedsCollision(CollisionObject body0, CollisionObject body1);
 
-	    bool	NeedsResponse(CollisionObject body0,CollisionObject body1);
+        bool NeedsResponse(CollisionObject body0, CollisionObject body1);
 
-	    void	DispatchAllCollisionPairs(IOverlappingPairCache pairCache,DispatcherInfo dispatchInfo,IDispatcher dispatcher);
+        void DispatchAllCollisionPairs(IOverlappingPairCache pairCache, DispatcherInfo dispatchInfo, IDispatcher dispatcher);
 
-	    int GetNumManifolds();
+        int GetNumManifolds();
 
-	    PersistentManifold GetManifoldByIndexInternal(int index);
+        PersistentManifold GetManifoldByIndexInternal(int index);
 
         ObjectArray<PersistentManifold> GetInternalManifoldPointer();
 
@@ -58,28 +58,28 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
     }
 
     public enum DispatchFunc
-	{
-		DISPATCH_DISCRETE = 1,
-		DISPATCH_CONTINUOUS
-	}
+    {
+        DISPATCH_DISCRETE = 1,
+        DISPATCH_CONTINUOUS
+    }
 
     public class DispatcherInfo
     {
-	    public DispatcherInfo()
+        public DispatcherInfo()
         {
-		    m_timeStep = 0f;
-		    m_stepCount = 0;
-		    m_dispatchFunc = DispatchFunc.DISPATCH_DISCRETE;
-		    m_timeOfImpact = 1f;
-		    m_useContinuous = false;
-		    m_debugDraw = null;
-		    m_enableSatConvex = false;
-		    m_enableSPU = true;
-		    m_useEpa = true;
-		    m_allowedCcdPenetration = 0.04f;
-		    m_useConvexConservativeDistanceUtil = false;
-		    m_convexConservativeDistanceThreshold = 0f;
-    	}
+            m_timeStep = 0f;
+            m_stepCount = 0;
+            m_dispatchFunc = DispatchFunc.DISPATCH_DISCRETE;
+            m_timeOfImpact = 1f;
+            m_useContinuous = false;
+            m_debugDraw = null;
+            m_enableSatConvex = false;
+            m_enableSPU = true;
+            m_useEpa = true;
+            m_allowedCcdPenetration = 0.04f;
+            m_useConvexConservativeDistanceUtil = false;
+            m_convexConservativeDistanceThreshold = 0f;
+        }
 
         public DispatchFunc GetDispatchFunc()
         {
@@ -141,17 +141,17 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             return m_convexConservativeDistanceThreshold;
         }
 
-	    float m_timeStep;
-	    int	m_stepCount;
-	    DispatchFunc m_dispatchFunc;
-	    float m_timeOfImpact;
-	    bool m_useContinuous;
-	    public IDebugDraw	m_debugDraw;
-	    bool m_enableSatConvex;
-	    bool m_enableSPU;
-	    bool m_useEpa;
-	    float m_allowedCcdPenetration;
-	    bool m_useConvexConservativeDistanceUtil;
-	    float m_convexConservativeDistanceThreshold;
+        float m_timeStep;
+        int m_stepCount;
+        DispatchFunc m_dispatchFunc;
+        float m_timeOfImpact;
+        bool m_useContinuous;
+        public IDebugDraw m_debugDraw;
+        bool m_enableSatConvex;
+        bool m_enableSPU;
+        bool m_useEpa;
+        float m_allowedCcdPenetration;
+        bool m_useConvexConservativeDistanceUtil;
+        float m_convexConservativeDistanceThreshold;
     }
 }

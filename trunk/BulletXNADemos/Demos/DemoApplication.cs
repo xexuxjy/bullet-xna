@@ -742,11 +742,7 @@ namespace BulletXNADemos.Demos
 
         public Vector3 GetRayTo(int x, int y)
         {
-            float top = 1f;
-            float bottom = -1f;
-            float nearPlane = 1f;
-            float tanFov = (top - bottom) * 0.5f / nearPlane;
-            float fov = 2.0f * (float)Math.Atan(tanFov);
+            float fov = MathHelper.ToRadians(40.0f);
 
             Vector3 rayFrom = GetCameraPosition();
             Vector3 rayForward = (GetCameraTargetPosition() - GetCameraPosition());

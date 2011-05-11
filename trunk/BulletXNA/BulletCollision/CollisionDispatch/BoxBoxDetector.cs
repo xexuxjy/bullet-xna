@@ -22,11 +22,10 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
 using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
-using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
@@ -874,7 +873,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         private static float DDOT(ref IndexedVector3 a, int aOffset, float[] b, int bOffset) { return DDOTpq(ref a, b, aOffset, bOffset, 1, 1); }
 
         private static float DDOT(float[] a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(a, ref b, aOffset, bOffset, 1, 1); }
-  
+
 
         private static float DDOT44(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 4); }
         private static float DDOT41(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 1); }

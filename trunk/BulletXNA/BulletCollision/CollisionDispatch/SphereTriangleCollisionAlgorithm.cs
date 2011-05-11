@@ -30,7 +30,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class SphereTriangleCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public SphereTriangleCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1,bool swapped) : base(ci,body0,body1)
+        public SphereTriangleCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
+            : base(ci, body0, body1)
         {
             m_ownManifold = false;
             m_manifoldPtr = mf;
@@ -46,14 +47,14 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         public override void Cleanup()
         {
             base.Cleanup();
-	        if (m_ownManifold)
-	        {
+            if (m_ownManifold)
+            {
                 if (m_manifoldPtr != null)
                 {
                     m_dispatcher.ReleaseManifold(m_manifoldPtr);
                     m_manifoldPtr = null;
                 }
-	        }
+            }
             m_ownManifold = false;
         }
 
@@ -61,47 +62,47 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             //resultOut = new ManifoldResult();
-	        if (m_manifoldPtr == null)
+            if (m_manifoldPtr == null)
             {
-		        return;
+                return;
             }
 
-	        CollisionObject sphereObj = m_swapped? body1 : body0;
-	        CollisionObject triObj = m_swapped? body0 : body1;
+            CollisionObject sphereObj = m_swapped ? body1 : body0;
+            CollisionObject triObj = m_swapped ? body0 : body1;
 
             SphereShape sphere = sphereObj.GetCollisionShape() as SphereShape;
-	        TriangleShape triangle = (TriangleShape)triObj.GetCollisionShape();
-        	
-	        /// report a contact. internally this will be kept persistent, and contact reduction is done
-	        resultOut.SetPersistentManifold(m_manifoldPtr);
-	        SphereTriangleDetector detector = new SphereTriangleDetector(sphere,triangle, m_manifoldPtr.GetContactBreakingThreshold());
-	        ClosestPointInput input = new ClosestPointInput();
-	        input.m_maximumDistanceSquared = float.MaxValue;
-	        input.m_transformA = sphereObj.GetWorldTransform();
-	        input.m_transformB = triObj.GetWorldTransform();
+            TriangleShape triangle = (TriangleShape)triObj.GetCollisionShape();
 
-	        bool swapResults = m_swapped;
+            /// report a contact. internally this will be kept persistent, and contact reduction is done
+            resultOut.SetPersistentManifold(m_manifoldPtr);
+            SphereTriangleDetector detector = new SphereTriangleDetector(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
+            ClosestPointInput input = new ClosestPointInput();
+            input.m_maximumDistanceSquared = float.MaxValue;
+            input.m_transformA = sphereObj.GetWorldTransform();
+            input.m_transformB = triObj.GetWorldTransform();
 
-	        detector.GetClosestPoints(input,resultOut,dispatchInfo.getDebugDraw(),swapResults);
+            bool swapResults = m_swapped;
 
-	        if (m_ownManifold)
+            detector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
+
+            if (m_ownManifold)
             {
-		        resultOut.RefreshContactPoints();
+                resultOut.RefreshContactPoints();
             }
         }
 
-        public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             return 1f;
         }
 
-	    public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-		    if (m_manifoldPtr != null && m_ownManifold)
-		    {
-			    manifoldArray.Add(m_manifoldPtr);
-		    }
-	    }
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        {
+            if (m_manifoldPtr != null && m_ownManifold)
+            {
+                manifoldArray.Add(m_manifoldPtr);
+            }
+        }
 
         private bool m_ownManifold;
         private PersistentManifold m_manifoldPtr;
@@ -109,10 +110,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     }
 
     public class SphereTriangleCreateFunc : CollisionAlgorithmCreateFunc
-	{
-		public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0,CollisionObject body1)
-		{
-			return new SphereTriangleCollisionAlgorithm(ci.GetManifold(),ci,body0,body1,m_swapped);
-		}
-	}
+    {
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            return new SphereTriangleCollisionAlgorithm(ci.GetManifold(), ci, body0, body1, m_swapped);
+        }
+    }
 }

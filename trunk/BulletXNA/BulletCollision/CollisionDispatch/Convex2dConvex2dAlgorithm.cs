@@ -31,7 +31,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class Convex2dConvex2dAlgorithm : ActivatingCollisionAlgorithm
     {
-	    public Convex2dConvex2dAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold) : base(ci,body0,body1)
+        public Convex2dConvex2dAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+            : base(ci, body0, body1)
         {
             m_simplexSolver = simplexSolver;
             m_pdSolver = pdSolver;
@@ -55,43 +56,43 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
         }
 
-	    public override void ProcessCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-	        if (m_manifoldPtr == null)
-	        {
-		        //swapped?
-		        m_manifoldPtr = m_dispatcher.GetNewManifold(body0,body1);
-		        m_ownManifold = true;
-	        }
-	        resultOut.SetPersistentManifold(m_manifoldPtr);
+            if (m_manifoldPtr == null)
+            {
+                //swapped?
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
+            resultOut.SetPersistentManifold(m_manifoldPtr);
 
-	        //comment-out next line to test multi-contact generation
-	        //resultOut.getPersistentManifold().clearManifold();
+            //comment-out next line to test multi-contact generation
+            //resultOut.getPersistentManifold().clearManifold();
 
 
-	        ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
+            ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
             ConvexShape min1 = body1.GetCollisionShape() as ConvexShape;
 
-	        Vector3  normalOnB = Vector3.Zero;
-	        Vector3  pointOnBWorld = Vector3.Zero;
+            Vector3 normalOnB = Vector3.Zero;
+            Vector3 pointOnBWorld = Vector3.Zero;
 
-	        {
-		        ClosestPointInput input = new ClosestPointInput();
+            {
+                ClosestPointInput input = new ClosestPointInput();
 
-		        GjkPairDetector	gjkPairDetector = new GjkPairDetector(min0,min1,m_simplexSolver,m_pdSolver);
-		        //TODO: if (dispatchInfo.m_useContinuous)
-		        gjkPairDetector.SetMinkowskiA(min0);
-		        gjkPairDetector.SetMinkowskiB(min1);
+                GjkPairDetector gjkPairDetector = new GjkPairDetector(min0, min1, m_simplexSolver, m_pdSolver);
+                //TODO: if (dispatchInfo.m_useContinuous)
+                gjkPairDetector.SetMinkowskiA(min0);
+                gjkPairDetector.SetMinkowskiB(min1);
 
-		        {
-			        input.m_maximumDistanceSquared = min0.GetMargin() + min1.GetMargin() + m_manifoldPtr.GetContactBreakingThreshold();
-			        input.m_maximumDistanceSquared*= input.m_maximumDistanceSquared;
-		        }
+                {
+                    input.m_maximumDistanceSquared = min0.GetMargin() + min1.GetMargin() + m_manifoldPtr.GetContactBreakingThreshold();
+                    input.m_maximumDistanceSquared *= input.m_maximumDistanceSquared;
+                }
 
-		        input.m_transformA = body0.GetWorldTransform();
-		        input.m_transformB = body1.GetWorldTransform();
+                input.m_transformA = body0.GetWorldTransform();
+                input.m_transformB = body1.GetWorldTransform();
 
-		        gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.getDebugDraw(),false);
+                gjkPairDetector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
 
                 if (BulletGlobals.g_streamWriter != null)
                 {
@@ -103,133 +104,133 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 //btVector3 v0,v1;
                 //btVector3 sepNormalWorldSpace;
 
-	        }
+            }
 
-	        if (m_ownManifold)
-	        {
-		        resultOut.RefreshContactPoints();
-	        }
+            if (m_ownManifold)
+            {
+                resultOut.RefreshContactPoints();
+            }
 
         }
 
-	    public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-	        ///Rather then checking ALL pairs, only calculate TOI when motion exceeds threshold
+            ///Rather then checking ALL pairs, only calculate TOI when motion exceeds threshold
 
-	        ///Linear motion for one of objects needs to exceed m_ccdSquareMotionThreshold
-	        ///body0.m_worldTransform,
-	        float resultFraction = 1.0f;
+            ///Linear motion for one of objects needs to exceed m_ccdSquareMotionThreshold
+            ///body0.m_worldTransform,
+            float resultFraction = 1.0f;
 
 
-	        float squareMot0 = (body0.GetInterpolationWorldTransform().Translation - body0.GetWorldTransform().Translation).LengthSquared();
-	        float squareMot1 = (body1.GetInterpolationWorldTransform().Translation - body1.GetWorldTransform().Translation).LengthSquared();
+            float squareMot0 = (body0.GetInterpolationWorldTransform().Translation - body0.GetWorldTransform().Translation).LengthSquared();
+            float squareMot1 = (body1.GetInterpolationWorldTransform().Translation - body1.GetWorldTransform().Translation).LengthSquared();
 
-	        if (squareMot0 < body0.GetCcdSquareMotionThreshold() &&
-		        squareMot1 < body1.GetCcdSquareMotionThreshold())
+            if (squareMot0 < body0.GetCcdSquareMotionThreshold() &&
+                squareMot1 < body1.GetCcdSquareMotionThreshold())
             {
-		        return resultFraction;
+                return resultFraction;
             }
 
-	        //An adhoc way of testing the Continuous Collision Detection algorithms
-	        //One object is approximated as a sphere, to simplify things
-	        //Starting in penetration should report no time of impact
-	        //For proper CCD, better accuracy and handling of 'allowed' penetration should be added
-	        //also the mainloop of the physics should have a kind of toi queue (something like Brian Mirtich's application of Timewarp for Rigidbodies)
+            //An adhoc way of testing the Continuous Collision Detection algorithms
+            //One object is approximated as a sphere, to simplify things
+            //Starting in penetration should report no time of impact
+            //For proper CCD, better accuracy and handling of 'allowed' penetration should be added
+            //also the mainloop of the physics should have a kind of toi queue (something like Brian Mirtich's application of Timewarp for Rigidbodies)
 
 
-	        /// Convex0 against sphere for Convex1
-	        {
+            /// Convex0 against sphere for Convex1
+            {
                 ConvexShape convex0 = body0.GetCollisionShape() as ConvexShape;
 
-		        SphereShape	sphere1 = new SphereShape(body1.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
-		        CastResult result = new CastResult();
-		        VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
-		        //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
-		        ///Simplification, one object is simplified as a sphere
-		        GjkConvexCast ccd1 = new GjkConvexCast( convex0 ,sphere1,voronoiSimplex);
-		        //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-		        if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(),body0.GetInterpolationWorldTransform(),
-			        body1.GetWorldTransform(),body1.GetInterpolationWorldTransform(),result))
-		        {
+                SphereShape sphere1 = new SphereShape(body1.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = new CastResult();
+                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
+                ///Simplification, one object is simplified as a sphere
+                GjkConvexCast ccd1 = new GjkConvexCast(convex0, sphere1, voronoiSimplex);
+                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                {
 
-			        //store result.m_fraction in both bodies
+                    //store result.m_fraction in both bodies
 
-			        if (body0.GetHitFraction()> result.m_fraction)
+                    if (body0.GetHitFraction() > result.m_fraction)
                     {
-				        body0.SetHitFraction( result.m_fraction );
+                        body0.SetHitFraction(result.m_fraction);
                     }
 
-			        if (body1.GetHitFraction() > result.m_fraction)
+                    if (body1.GetHitFraction() > result.m_fraction)
                     {
-				        body1.SetHitFraction( result.m_fraction);
+                        body1.SetHitFraction(result.m_fraction);
                     }
 
-			        if (resultFraction > result.m_fraction)
+                    if (resultFraction > result.m_fraction)
                     {
-				        resultFraction = result.m_fraction;
+                        resultFraction = result.m_fraction;
                     }
 
-		        }
-	        }
+                }
+            }
 
-	        /// Sphere (for convex0) against Convex1
-	        {
+            /// Sphere (for convex0) against Convex1
+            {
                 ConvexShape convex1 = body1.GetCollisionShape() as ConvexShape;
 
-		        SphereShape	sphere0 = new SphereShape(body0.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
-		        CastResult result = new CastResult();
-		        VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
-		        //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
-		        ///Simplification, one object is simplified as a sphere
-		        GjkConvexCast ccd1 = new GjkConvexCast(sphere0,convex1,voronoiSimplex);
-		        //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-		        if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(),body0.GetInterpolationWorldTransform(),
-			        body1.GetWorldTransform(),body1.GetInterpolationWorldTransform(),result))
-		        {
+                SphereShape sphere0 = new SphereShape(body0.GetCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = new CastResult();
+                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
+                ///Simplification, one object is simplified as a sphere
+                GjkConvexCast ccd1 = new GjkConvexCast(sphere0, convex1, voronoiSimplex);
+                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                {
 
-			        //store result.m_fraction in both bodies
+                    //store result.m_fraction in both bodies
 
-			        if (body0.GetHitFraction()	> result.m_fraction)
+                    if (body0.GetHitFraction() > result.m_fraction)
                     {
-				        body0.SetHitFraction( result.m_fraction);
+                        body0.SetHitFraction(result.m_fraction);
                     }
 
-			        if (body1.GetHitFraction() > result.m_fraction)
+                    if (body1.GetHitFraction() > result.m_fraction)
                     {
-				        body1.SetHitFraction( result.m_fraction);
+                        body1.SetHitFraction(result.m_fraction);
                     }
 
-			        if (resultFraction > result.m_fraction)
+                    if (resultFraction > result.m_fraction)
                     {
-				        resultFraction = result.m_fraction;
+                        resultFraction = result.m_fraction;
                     }
 
-		        }
-	        }
+                }
+            }
 
-	        return resultFraction;
+            return resultFraction;
         }
 
-	    public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-		    ///should we use m_ownManifold to avoid adding duplicates?
-		    if (m_manifoldPtr != null && m_ownManifold)
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        {
+            ///should we use m_ownManifold to avoid adding duplicates?
+            if (m_manifoldPtr != null && m_ownManifold)
             {
-			    manifoldArray.Add(m_manifoldPtr);
+                manifoldArray.Add(m_manifoldPtr);
             }
-	    }
+        }
 
 
-	    public void	SetLowLevelOfDetail(bool useLowLevel)
+        public void SetLowLevelOfDetail(bool useLowLevel)
         {
             m_lowLevelOfDetail = useLowLevel;
         }
 
 
-	    public PersistentManifold GetManifold()
-	    {
-		    return m_manifoldPtr;
-	    }
+        public PersistentManifold GetManifold()
+        {
+            return m_manifoldPtr;
+        }
 
 
 

@@ -35,8 +35,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     public class CollisionWorld
     {
 
-	//this constructor doesn't own the dispatcher and paircache/broadphase
-	    public CollisionWorld(IDispatcher dispatcher,IBroadphaseInterface broadphasePairCache, ICollisionConfiguration collisionConfiguration)
+        //this constructor doesn't own the dispatcher and paircache/broadphase
+        public CollisionWorld(IDispatcher dispatcher, IBroadphaseInterface broadphasePairCache, ICollisionConfiguration collisionConfiguration)
         {
             m_dispatcher1 = dispatcher;
             m_broadphasePairCache = broadphasePairCache;
@@ -47,54 +47,54 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public virtual void Cleanup()
         {
-            foreach(CollisionObject collisionObject in m_collisionObjects)
-	        {
-		        BroadphaseProxy bp = collisionObject.GetBroadphaseHandle();
-		        if (bp != null)
-		        {
-			        //
-			        // only clear the cached algorithms
-			        //
+            foreach (CollisionObject collisionObject in m_collisionObjects)
+            {
+                BroadphaseProxy bp = collisionObject.GetBroadphaseHandle();
+                if (bp != null)
+                {
+                    //
+                    // only clear the cached algorithms
+                    //
                     if (GetBroadphase().GetOverlappingPairCache() != null)
                     {
                         GetBroadphase().GetOverlappingPairCache().CleanProxyFromPairs(bp, m_dispatcher1);
                     }
-                    GetBroadphase().DestroyProxy(bp,m_dispatcher1);
-			        collisionObject.SetBroadphaseHandle(null);
-		        }
-	        }
+                    GetBroadphase().DestroyProxy(bp, m_dispatcher1);
+                    collisionObject.SetBroadphaseHandle(null);
+                }
+            }
         }
 
-	    public void	SetBroadphase(IBroadphaseInterface pairCache)
-	    {
-		    m_broadphasePairCache = pairCache;
-	    }
-
-	    public IBroadphaseInterface	GetBroadphase()
-	    {
-		    return m_broadphasePairCache;
-	    }
-
-	    public IOverlappingPairCache	GetPairCache()
-	    {
-		    return m_broadphasePairCache.GetOverlappingPairCache();
-	    }
-
-	    public IDispatcher GetDispatcher()
-	    {
-		    return m_dispatcher1;
-	    }
-
-        public void	UpdateSingleAabb(CollisionObject colObj)
+        public void SetBroadphase(IBroadphaseInterface pairCache)
         {
-	        Vector3 minAabb;
+            m_broadphasePairCache = pairCache;
+        }
+
+        public IBroadphaseInterface GetBroadphase()
+        {
+            return m_broadphasePairCache;
+        }
+
+        public IOverlappingPairCache GetPairCache()
+        {
+            return m_broadphasePairCache.GetOverlappingPairCache();
+        }
+
+        public IDispatcher GetDispatcher()
+        {
+            return m_dispatcher1;
+        }
+
+        public void UpdateSingleAabb(CollisionObject colObj)
+        {
+            Vector3 minAabb;
             Vector3 maxAabb;
             Matrix wt = colObj.GetWorldTransform();
-	        colObj.GetCollisionShape().GetAabb(ref wt, out minAabb,out maxAabb);
-	        //need to increase the aabb for contact thresholds
+            colObj.GetCollisionShape().GetAabb(ref wt, out minAabb, out maxAabb);
+            //need to increase the aabb for contact thresholds
             Vector3 contactThreshold = new Vector3(BulletGlobals.gContactBreakingThreshold);
-	        minAabb -= contactThreshold;
-	        maxAabb += contactThreshold;
+            minAabb -= contactThreshold;
+            maxAabb += contactThreshold;
 
 
 
@@ -107,28 +107,28 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             IBroadphaseInterface bp = m_broadphasePairCache as IBroadphaseInterface;
 
-	        //moving objects should be moderately sized, probably something wrong if not
-	        if ( colObj.IsStaticObject() || ((maxAabb-minAabb).LengthSquared() < 1e12f))
-	        {
-		        bp.SetAabb(colObj.GetBroadphaseHandle(),ref minAabb,ref maxAabb, m_dispatcher1);
-	        } 
+            //moving objects should be moderately sized, probably something wrong if not
+            if (colObj.IsStaticObject() || ((maxAabb - minAabb).LengthSquared() < 1e12f))
+            {
+                bp.SetAabb(colObj.GetBroadphaseHandle(), ref minAabb, ref maxAabb, m_dispatcher1);
+            }
             else
-	        {
-		        //something went wrong, investigate
-		        //this assert is unwanted in 3D modelers (danger of loosing work)
-		        colObj.SetActivationState(ActivationState.DISABLE_SIMULATION);
+            {
+                //something went wrong, investigate
+                //this assert is unwanted in 3D modelers (danger of loosing work)
+                colObj.SetActivationState(ActivationState.DISABLE_SIMULATION);
 
                 //static bool reportMe = true;
                 bool reportMe = true;
-		        if (reportMe && m_debugDrawer != null)
-		        {
-			        reportMe = false;
-			        m_debugDrawer.ReportErrorWarning("Overflow in AABB, object removed from simulation");
-			        m_debugDrawer.ReportErrorWarning("If you can reproduce this, please email bugs@continuousphysics.com\n");
-			        m_debugDrawer.ReportErrorWarning("Please include above information, your Platform, version of OS.\n");
-			        m_debugDrawer.ReportErrorWarning("Thanks.\n");
-		        }
-	        }
+                if (reportMe && m_debugDrawer != null)
+                {
+                    reportMe = false;
+                    m_debugDrawer.ReportErrorWarning("Overflow in AABB, object removed from simulation");
+                    m_debugDrawer.ReportErrorWarning("If you can reproduce this, please email bugs@continuousphysics.com\n");
+                    m_debugDrawer.ReportErrorWarning("Please include above information, your Platform, version of OS.\n");
+                    m_debugDrawer.ReportErrorWarning("Thanks.\n");
+                }
+            }
         }
 
         public virtual void UpdateAabbs()
@@ -150,18 +150,18 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
-	    public virtual void	SetDebugDrawer(IDebugDraw debugDrawer)
-	    {
+        public virtual void SetDebugDrawer(IDebugDraw debugDrawer)
+        {
             m_debugDrawer = debugDrawer;
             BulletGlobals.gDebugDraw = debugDrawer;
-	    }
+        }
 
-	    public virtual IDebugDraw GetDebugDrawer()
-	    {
-		    return m_debugDrawer;
-	    }
+        public virtual IDebugDraw GetDebugDrawer()
+        {
+            return m_debugDrawer;
+        }
 
-	    public virtual void	DebugDrawWorld()
+        public virtual void DebugDrawWorld()
         {
 
         }
@@ -171,84 +171,84 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
-	    public int	GetNumCollisionObjects()
-	    {
-		    return m_collisionObjects.Count;
-	    }
+        public int GetNumCollisionObjects()
+        {
+            return m_collisionObjects.Count;
+        }
 
-	    /// rayTest performs a raycast on all objects in the btCollisionWorld, and calls the resultCallback
-	    /// This allows for several queries: first hit, all hits, any hit, dependent on the value returned by the callback.
-	    public virtual void	RayTest(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, RayResultCallback resultCallback)
+        /// rayTest performs a raycast on all objects in the btCollisionWorld, and calls the resultCallback
+        /// This allows for several queries: first hit, all hits, any hit, dependent on the value returned by the callback.
+        public virtual void RayTest(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, RayResultCallback resultCallback)
         {
             BulletGlobals.StartProfile("rayTest");
-	        /// use the broadphase to accelerate the search for objects, based on their aabb
-	        /// and for each object with ray-aabb overlap, perform an exact ray test
-	        SingleRayCallback rayCB = new SingleRayCallback(ref rayFromWorld,ref rayToWorld,this,resultCallback);
+            /// use the broadphase to accelerate the search for objects, based on their aabb
+            /// and for each object with ray-aabb overlap, perform an exact ray test
+            SingleRayCallback rayCB = new SingleRayCallback(ref rayFromWorld, ref rayToWorld, this, resultCallback);
 
-            #if !USE_BRUTEFORCE_RAYBROADPHASE
-            m_broadphasePairCache.RayTest(ref rayFromWorld,ref rayToWorld,rayCB);
+#if !USE_BRUTEFORCE_RAYBROADPHASE
+            m_broadphasePairCache.RayTest(ref rayFromWorld, ref rayToWorld, rayCB);
             rayCB.Cleanup();
 
-            #else
+#else
 	        for (int i=0;i<GetNumCollisionObjects();i++)
 	        {
 		        rayCB.Process(m_collisionObjects[i].GetBroadphaseHandle());
 	        }	
-            #endif //USE_BRUTEFORCE_RAYBROADPHASE
+#endif //USE_BRUTEFORCE_RAYBROADPHASE
             BulletGlobals.StopProfile();
         }
 
 
-	    ///contactTest performs a discrete collision test between colObj against all objects in the btCollisionWorld, and calls the resultCallback.
-	    ///it reports one or more contact points for every overlapping object (including the one with deepest penetration)
-	    public void	ContactTest(CollisionObject colObj, ContactResultCallback resultCallback)
+        ///contactTest performs a discrete collision test between colObj against all objects in the btCollisionWorld, and calls the resultCallback.
+        ///it reports one or more contact points for every overlapping object (including the one with deepest penetration)
+        public void ContactTest(CollisionObject colObj, ContactResultCallback resultCallback)
         {
         }
 
-	    ///contactTest performs a discrete collision test between two collision objects and calls the resultCallback if overlap if detected.
-	    ///it reports one or more contact points (including the one with deepest penetration)
+        ///contactTest performs a discrete collision test between two collision objects and calls the resultCallback if overlap if detected.
+        ///it reports one or more contact points (including the one with deepest penetration)
         public void ContactPairTest(CollisionObject colObjA, CollisionObject colObjB, ContactResultCallback resultCallback)
         {
         }
 
 
-	    // convexTest performs a swept convex cast on all objects in the btCollisionWorld, and calls the resultCallback
-	    // This allows for several queries: first hit, all hits, any hit, dependent on the value return by the callback.
+        // convexTest performs a swept convex cast on all objects in the btCollisionWorld, and calls the resultCallback
+        // This allows for several queries: first hit, all hits, any hit, dependent on the value return by the callback.
         public virtual void ConvexSweepTest(ConvexShape castShape, Matrix convexFromWorld, Matrix convexToWorld, ConvexResultCallback resultCallback, float allowedCcdPenetration)
         {
             ConvexSweepTest(castShape, ref convexFromWorld, ref convexToWorld, resultCallback, allowedCcdPenetration);
         }
 
-        public virtual void ConvexSweepTest (ConvexShape castShape, ref Matrix convexFromWorld, ref Matrix convexToWorld, ConvexResultCallback resultCallback,  float allowedCcdPenetration)
+        public virtual void ConvexSweepTest(ConvexShape castShape, ref Matrix convexFromWorld, ref Matrix convexToWorld, ConvexResultCallback resultCallback, float allowedCcdPenetration)
         {
             BulletGlobals.StartProfile("convexSweepTest");
-	        /// use the broadphase to accelerate the search for objects, based on their aabb
-	        /// and for each object with ray-aabb overlap, perform an exact ray test
-	        /// unfortunately the implementation for rayTest and convexSweepTest duplicated, albeit practically identical
+            /// use the broadphase to accelerate the search for objects, based on their aabb
+            /// and for each object with ray-aabb overlap, perform an exact ray test
+            /// unfortunately the implementation for rayTest and convexSweepTest duplicated, albeit practically identical
 
-	        Matrix convexFromTrans = new Matrix();
+            Matrix convexFromTrans = new Matrix();
             Matrix convexToTrans = new Matrix();
-	        convexFromTrans = convexFromWorld;
-	        convexToTrans = convexToWorld;
-            Vector3 castShapeAabbMin; 
+            convexFromTrans = convexFromWorld;
+            convexToTrans = convexToWorld;
+            Vector3 castShapeAabbMin;
             Vector3 castShapeAabbMax;
-	        /* Compute AABB that encompasses angular movement */
-	        {
-		        Vector3 linVel = new Vector3();
+            /* Compute AABB that encompasses angular movement */
+            {
+                Vector3 linVel = new Vector3();
                 Vector3 angVel = new Vector3();
-		        TransformUtil.CalculateVelocity (ref convexFromTrans, ref convexToTrans, 1.0f, ref linVel, ref angVel);
-		        Vector3 zeroLinVel = new Vector3();
+                TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, ref linVel, ref angVel);
+                Vector3 zeroLinVel = new Vector3();
                 Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
-		        castShape.CalculateTemporalAabb (ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
-	        }
+                castShape.CalculateTemporalAabb(ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
+            }
 
-        #if !USE_BRUTEFORCE_RAYBROADPHASE
-	        SingleSweepCallback	convexCB = new SingleSweepCallback(castShape,ref convexFromWorld,ref convexToWorld,this,resultCallback,allowedCcdPenetration);
+#if !USE_BRUTEFORCE_RAYBROADPHASE
+            SingleSweepCallback convexCB = new SingleSweepCallback(castShape, ref convexFromWorld, ref convexToWorld, this, resultCallback, allowedCcdPenetration);
             Vector3 tempFrom = convexFromTrans.Translation;
             Vector3 tempTo = convexToTrans.Translation;
-	        m_broadphasePairCache.RayTest(ref tempFrom,ref tempTo,convexCB,ref castShapeAabbMin,ref castShapeAabbMax);
+            m_broadphasePairCache.RayTest(ref tempFrom, ref tempTo, convexCB, ref castShapeAabbMin, ref castShapeAabbMax);
             convexCB.Cleanup();
-        #else
+#else
 	        /// go over all objects, and if the ray intersects their aabb + cast shape aabb,
 	        // do a ray-shape query using convexCaster (CCD)
 	        int i;
@@ -279,7 +279,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			        }
 		        }
 	        }
-        #endif //USE_BRUTEFORCE_RAYBROADPHASE
+#endif //USE_BRUTEFORCE_RAYBROADPHASE
             BulletGlobals.StopProfile();
         }
 
@@ -290,396 +290,396 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public virtual void AddCollisionObject(CollisionObject collisionObject, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask)
         {
-    	    //check that the object isn't already added
+            //check that the object isn't already added
             //btAssert( m_collisionObjects.findLinearSearch(collisionObject)  == m_collisionObjects.size());
 
             Debug.Assert(collisionObject != null);
-		    m_collisionObjects.Add(collisionObject);
+            m_collisionObjects.Add(collisionObject);
 
-		    //calculate new AABB
-		    Matrix trans = collisionObject.GetWorldTransform();
+            //calculate new AABB
+            Matrix trans = collisionObject.GetWorldTransform();
             Vector3 minAabb;
             Vector3 maxAabb;
 
-		    collisionObject.GetCollisionShape().GetAabb(ref trans,out minAabb,out maxAabb);
+            collisionObject.GetCollisionShape().GetAabb(ref trans, out minAabb, out maxAabb);
 
-		    BroadphaseNativeTypes type = collisionObject.GetCollisionShape().GetShapeType();
-		    collisionObject.SetBroadphaseHandle( GetBroadphase().CreateProxy(
-			    ref minAabb,
-			    ref maxAabb,
-			    type,
-			    collisionObject,
-			    collisionFilterGroup,
-			    collisionFilterMask,
-			    m_dispatcher1,0
-			    ))	;
+            BroadphaseNativeTypes type = collisionObject.GetCollisionShape().GetShapeType();
+            collisionObject.SetBroadphaseHandle(GetBroadphase().CreateProxy(
+                ref minAabb,
+                ref maxAabb,
+                type,
+                collisionObject,
+                collisionFilterGroup,
+                collisionFilterMask,
+                m_dispatcher1, 0
+                ));
         }
 
         public ObjectArray<CollisionObject> GetCollisionObjectArray()
-	    {
-		    return m_collisionObjects;
-	    }
+        {
+            return m_collisionObjects;
+        }
 
-	    public DispatcherInfo GetDispatchInfo()
-	    {
-		    return m_dispatchInfo;
-	    }
+        public DispatcherInfo GetDispatchInfo()
+        {
+            return m_dispatchInfo;
+        }
 
-        public virtual void	PerformDiscreteCollisionDetection()
+        public virtual void PerformDiscreteCollisionDetection()
         {
             BulletGlobals.StartProfile("performDiscreteCollisionDetection");
 
-	        DispatcherInfo dispatchInfo = GetDispatchInfo();
+            DispatcherInfo dispatchInfo = GetDispatchInfo();
 
-	        UpdateAabbs();
+            UpdateAabbs();
 
-	        {
+            {
                 BulletGlobals.StartProfile("calculateOverlappingPairs");
-		        m_broadphasePairCache.CalculateOverlappingPairs(m_dispatcher1);
+                m_broadphasePairCache.CalculateOverlappingPairs(m_dispatcher1);
                 BulletGlobals.StopProfile();
-	        }
+            }
 
 
-	        IDispatcher dispatcher = GetDispatcher();
-	        {
+            IDispatcher dispatcher = GetDispatcher();
+            {
                 BulletGlobals.StartProfile("dispatchAllCollisionPairs");
-		        if (dispatcher != null)
+                if (dispatcher != null)
                 {
-			        dispatcher.DispatchAllCollisionPairs(m_broadphasePairCache.GetOverlappingPairCache(),dispatchInfo,m_dispatcher1);
+                    dispatcher.DispatchAllCollisionPairs(m_broadphasePairCache.GetOverlappingPairCache(), dispatchInfo, m_dispatcher1);
                 }
                 BulletGlobals.StopProfile();
-	        }
+            }
             BulletGlobals.StopProfile();
         }
 
 
         public virtual void RemoveCollisionObject(CollisionObject collisionObject)
         {
-	        //bool removeFromBroadphase = false;
-	        {
-		        BroadphaseProxy bp = collisionObject.GetBroadphaseHandle();
-		        if (bp != null)
-		        {
-			        //
-			        // only clear the cached algorithms
-			        //
-			        GetBroadphase().GetOverlappingPairCache().CleanProxyFromPairs(bp,m_dispatcher1);
-			        GetBroadphase().DestroyProxy(bp,m_dispatcher1);
-			        collisionObject.SetBroadphaseHandle(null);
-		        }
-	        }
-	        //swapremove
-	        m_collisionObjects.Remove(collisionObject);
+            //bool removeFromBroadphase = false;
+            {
+                BroadphaseProxy bp = collisionObject.GetBroadphaseHandle();
+                if (bp != null)
+                {
+                    //
+                    // only clear the cached algorithms
+                    //
+                    GetBroadphase().GetOverlappingPairCache().CleanProxyFromPairs(bp, m_dispatcher1);
+                    GetBroadphase().DestroyProxy(bp, m_dispatcher1);
+                    collisionObject.SetBroadphaseHandle(null);
+                }
+            }
+            //swapremove
+            m_collisionObjects.Remove(collisionObject);
         }
 
-       	public bool	GetForceUpdateAllAabbs()
-	    {
-		    return m_forceUpdateAllAabbs;
-	    }
-
-	    public void SetForceUpdateAllAabbs( bool forceUpdateAllAabbs)
-	    {
-		    m_forceUpdateAllAabbs = forceUpdateAllAabbs;
-	    }
-
-
-    public virtual void	RayTestSingle(ref Matrix rayFromTrans,ref Matrix rayToTrans,
-					  CollisionObject collisionObject,
-					  CollisionShape collisionShape,
-					  ref Matrix colObjWorldTransform,
-					  RayResultCallback resultCallback)
-    {
-	    SphereShape pointShape = new SphereShape(0.0f);
-	    pointShape.SetMargin(0f);
-	    ConvexShape castShape = pointShape;
-
-	    if (collisionShape.IsConvex())
-	    {
-            BulletGlobals.StartProfile("rayTestConvex");
-		    CastResult castResult = new CastResult();
-		    castResult.m_fraction = resultCallback.m_closestHitFraction;
-
-		    ConvexShape convexShape = collisionShape as ConvexShape;
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-    //#define USE_SUBSIMPLEX_CONVEX_CAST 1
-    //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
-            
-            // FIXME - MAN - convexcat here seems to make big difference to forklift.
-            SubSimplexConvexCast convexCaster = new SubSimplexConvexCast(castShape, convexShape, simplexSolver);
-
-            //GjkConvexCast convexCaster = new GjkConvexCast(castShape, convexShape, simplexSolver);
-
-
-    //#else
-		    //btGjkConvexCast	convexCaster(castShape,convexShape,&simplexSolver);
-		    //btContinuousConvexCollision convexCaster(castShape,convexShape,&simplexSolver,0);
-    //#endif //#USE_SUBSIMPLEX_CONVEX_CAST
-
-		    if (convexCaster.CalcTimeOfImpact(ref rayFromTrans,ref rayToTrans,ref colObjWorldTransform,ref colObjWorldTransform,castResult))
-		    {
-			    //add hit
-			    if (castResult.m_normal.LengthSquared() > 0.0001f)
-			    {
-				    if (castResult.m_fraction < resultCallback.m_closestHitFraction)
-				    {
-
-                        //if (resultCallback.m_closestHitFraction != 1f)
-                        //{
-                        //    int ibreak = 0;
-                        //    convexCaster.calcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult);
-                        //}
-
-    //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
-					    //rotate normal into worldspace
-					    castResult.m_normal = Vector3.TransformNormal(castResult.m_normal,rayFromTrans);
-    //#endif //USE_SUBSIMPLEX_CONVEX_CAST
-
-					    castResult.m_normal.Normalize();
-					    LocalRayResult localRayResult = new LocalRayResult(
-							    collisionObject,
-							    null,
-							    ref castResult.m_normal,
-							    castResult.m_fraction
-						    );
-
-					    bool normalInWorldSpace = true;
-					    resultCallback.AddSingleResult(localRayResult, normalInWorldSpace);
-
-				    }
-			    }
-		    }
-            castResult.Cleanup();
-            BulletGlobals.StopProfile();
-	    } 
-        else 
+        public bool GetForceUpdateAllAabbs()
         {
-		    if (collisionShape.IsConcave())
-		    {
-                BulletGlobals.StartProfile("rayTestConcave");
-		    	if (collisionShape.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE && collisionShape is BvhTriangleMeshShape)
-	    		{
-				    ///optimized version for btBvhTriangleMeshShape
-					BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
-				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-				    Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation,worldTocollisionObject);
-				    Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation,worldTocollisionObject);
+            return m_forceUpdateAllAabbs;
+        }
 
-                    Matrix transform = Matrix.Identity;
-				    BridgeTriangleRaycastCallback rcb = new BridgeTriangleRaycastCallback(ref rayFromLocal,ref rayToLocal, resultCallback,collisionObject,triangleMesh,ref transform);
-				    rcb.m_hitFraction = resultCallback.m_closestHitFraction;
-				    triangleMesh.PerformRaycast(rcb,ref rayFromLocal,ref rayToLocal);
-                    rcb.Cleanup();
-			    } 
-                else
-			    {
-				    //generic (slower) case
-				    ConcaveShape concaveShape = (ConcaveShape)collisionShape;
+        public void SetForceUpdateAllAabbs(bool forceUpdateAllAabbs)
+        {
+            m_forceUpdateAllAabbs = forceUpdateAllAabbs;
+        }
 
-				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
 
-				    Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation,worldTocollisionObject);
-				    Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation,worldTocollisionObject);
+        public virtual void RayTestSingle(ref Matrix rayFromTrans, ref Matrix rayToTrans,
+                          CollisionObject collisionObject,
+                          CollisionShape collisionShape,
+                          ref Matrix colObjWorldTransform,
+                          RayResultCallback resultCallback)
+        {
+            SphereShape pointShape = new SphereShape(0.0f);
+            pointShape.SetMargin(0f);
+            ConvexShape castShape = pointShape;
 
-				    //ConvexCast::CastResult
-                    Matrix transform = Matrix.Identity;
-                    BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, concaveShape,ref transform);
-				    rcb.m_hitFraction = resultCallback.m_closestHitFraction;
-
-				    Vector3 rayAabbMinLocal = rayFromLocal;
-				    MathUtil.VectorMin(ref rayToLocal,ref rayAabbMinLocal);
-				    Vector3 rayAabbMaxLocal = rayFromLocal;
-                    MathUtil.VectorMax(ref rayToLocal,ref rayAabbMaxLocal);
-
-				    concaveShape.ProcessAllTriangles(rcb,ref rayAabbMinLocal,ref rayAabbMaxLocal);
-                    rcb.Cleanup();
-			    }
-                BulletGlobals.StopProfile();
-		    } 
-            else 
+            if (collisionShape.IsConvex())
             {
-                BulletGlobals.StartProfile("rayTestCompound");
-			    ///@todo: use AABB tree or other BVH acceleration structure, see btDbvt
-			    if (collisionShape.IsCompound())
-			    {
-				    CompoundShape compoundShape = collisionShape as CompoundShape;
-				    int i=0;
-				    for (i=0;i<compoundShape.GetNumChildShapes();i++)
-				    {
-					    Matrix childTrans = compoundShape.GetChildTransform(i);
-					    CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
-					    Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform,childTrans) ;
-					    // replace collision shape so that callback can determine the triangle
-					    CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
-					    collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
+                BulletGlobals.StartProfile("rayTestConvex");
+                CastResult castResult = new CastResult();
+                castResult.m_fraction = resultCallback.m_closestHitFraction;
 
-                        LocalInfoAdder2 my_cb = new LocalInfoAdder2(i, resultCallback);
-					    my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
-					
-					    RayTestSingle(ref rayFromTrans,ref rayToTrans,
-						    collisionObject,
-						    childCollisionShape,
-						    ref childWorldTrans,
-						    my_cb);
-					    // restore
-					    collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
-                        my_cb.cleanup();
-				    }
+                ConvexShape convexShape = collisionShape as ConvexShape;
+                VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+                //#define USE_SUBSIMPLEX_CONVEX_CAST 1
+                //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
+
+                // FIXME - MAN - convexcat here seems to make big difference to forklift.
+                SubSimplexConvexCast convexCaster = new SubSimplexConvexCast(castShape, convexShape, simplexSolver);
+
+                //GjkConvexCast convexCaster = new GjkConvexCast(castShape, convexShape, simplexSolver);
+
+
+                //#else
+                //btGjkConvexCast	convexCaster(castShape,convexShape,&simplexSolver);
+                //btContinuousConvexCollision convexCaster(castShape,convexShape,&simplexSolver,0);
+                //#endif //#USE_SUBSIMPLEX_CONVEX_CAST
+
+                if (convexCaster.CalcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult))
+                {
+                    //add hit
+                    if (castResult.m_normal.LengthSquared() > 0.0001f)
+                    {
+                        if (castResult.m_fraction < resultCallback.m_closestHitFraction)
+                        {
+
+                            //if (resultCallback.m_closestHitFraction != 1f)
+                            //{
+                            //    int ibreak = 0;
+                            //    convexCaster.calcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult);
+                            //}
+
+                            //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
+                            //rotate normal into worldspace
+                            castResult.m_normal = Vector3.TransformNormal(castResult.m_normal, rayFromTrans);
+                            //#endif //USE_SUBSIMPLEX_CONVEX_CAST
+
+                            castResult.m_normal.Normalize();
+                            LocalRayResult localRayResult = new LocalRayResult(
+                                    collisionObject,
+                                    null,
+                                    ref castResult.m_normal,
+                                    castResult.m_fraction
+                                );
+
+                            bool normalInWorldSpace = true;
+                            resultCallback.AddSingleResult(localRayResult, normalInWorldSpace);
+
+                        }
+                    }
                 }
-
+                castResult.Cleanup();
                 BulletGlobals.StopProfile();
             }
-	    }
-    }
-
-    /// objectQuerySingle performs a collision detection query and calls the resultCallback. It is used internally by rayTest.
-    public static void	ObjectQuerySingle(ConvexShape castShape,ref Matrix convexFromTrans,ref Matrix convexToTrans,
-					  CollisionObject collisionObject,CollisionShape collisionShape,
-					  ref Matrix colObjWorldTransform,
-					  ConvexResultCallback resultCallback, float allowedPenetration)
-    {
-	    if (collisionShape.IsConvex())
-	    {
-
-		    BulletGlobals.StartProfile("convexSweepConvex");
-		    CastResult castResult = new CastResult();
-		    castResult.m_allowedPenetration = allowedPenetration;
-		    castResult.m_fraction = resultCallback.m_closestHitFraction;//float(1.);//??
-
-		    ConvexShape convexShape = collisionShape as ConvexShape;
-		    VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-		    GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
-    		
-		    ContinuousConvexCollision convexCaster1 = new ContinuousConvexCollision(castShape,convexShape,simplexSolver, gjkEpaPenetrationSolver);
-		    //btGjkConvexCast convexCaster2(castShape,convexShape,&simplexSolver);
-		    //btSubsimplexConvexCast convexCaster3(castShape,convexShape,&simplexSolver);
-
-		    IConvexCast castPtr = convexCaster1;
-		
-		    if (castPtr.CalcTimeOfImpact(ref convexFromTrans,ref convexToTrans,ref colObjWorldTransform,ref colObjWorldTransform,castResult))
-		    {
-			    //add hit
-			    if (castResult.m_normal.LengthSquared() > 0.0001f)
-			    {
-				    if (castResult.m_fraction < resultCallback.m_closestHitFraction)
-				    {
-					    castResult.m_normal.Normalize();
-					    LocalConvexResult localConvexResult = new LocalConvexResult
-								    (
-									    collisionObject,
-									    null,
-									    ref castResult.m_normal,
-									    ref castResult.m_hitPoint,
-									    castResult.m_fraction
-								    );
-
-					    bool normalInWorldSpace = true;
-					    resultCallback.AddSingleResult(localConvexResult, normalInWorldSpace);
-
-				    }
-			    }
-		    }
-            BulletGlobals.StopProfile();
-	    } 
-        else 
-        {
-		    if (collisionShape.IsConcave())
-		    {
-			    if (collisionShape.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE)
-			    {
-                    BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
-				    BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
-				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-				    Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation,worldTocollisionObject);
-				    Vector3  convexToLocal = Vector3.Transform(convexToTrans.Translation,worldTocollisionObject);
-				    // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
-
-				    Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) *  MathUtil.BasisMatrix(ref convexToTrans);
-
-				    BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans,ref convexToTrans,resultCallback,collisionObject,triangleMesh, ref colObjWorldTransform);
-				    tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-				    Vector3 boxMinLocal;
-                    Vector3 boxMaxLocal;
-				    castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
-				    triangleMesh.PerformConvexCast(tccb,ref convexFromLocal,ref convexToLocal,ref boxMinLocal, ref boxMaxLocal);
-                    BulletGlobals.StopProfile();
-			    } 
-                else
-			    {
-                    BulletGlobals.StartProfile("convexSweepConcave");
-				    ConcaveShape concaveShape = (ConcaveShape)collisionShape;
-				    Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-				    Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation,worldTocollisionObject);
-				    Vector3 convexToLocal = Vector3.Transform(convexToTrans.Translation,worldTocollisionObject);
-				    // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
-                    Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) * MathUtil.BasisMatrix(ref convexToTrans);
-
-                    BridgeTriangleConvexcastCallback2 tccb = new BridgeTriangleConvexcastCallback2(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
-				    tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-				    Vector3 boxMinLocal;
-                    Vector3 boxMaxLocal;
-				    castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
-
-				    Vector3  rayAabbMinLocal = convexFromLocal;
-                    MathUtil.VectorMin(ref convexToLocal,ref rayAabbMinLocal);
-                    //rayAabbMinLocal.setMin(convexToLocal);
-				    Vector3  rayAabbMaxLocal = convexFromLocal;
-                    //rayAabbMaxLocal.setMax(convexToLocal);
-                    MathUtil.VectorMax(ref convexToLocal,ref rayAabbMaxLocal);
-
-				    rayAabbMinLocal += boxMinLocal;
-				    rayAabbMaxLocal += boxMaxLocal;
-				    concaveShape.ProcessAllTriangles(tccb,ref rayAabbMinLocal,ref rayAabbMaxLocal);
-                    BulletGlobals.StopProfile();
-			    }
-            } 
-            else 
+            else
             {
-			    ///@todo : use AABB tree or other BVH acceleration structure!
-			    if (collisionShape.IsCompound())
-			    {
-                    BulletGlobals.StartProfile("convexSweepCompound");
-                    CompoundShape compoundShape = (CompoundShape)collisionShape;
-				    for (int i=0;i<compoundShape.GetNumChildShapes();i++)
-				    {
-					    Matrix childTrans = compoundShape.GetChildTransform(i);
-					    CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
-					    Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform,childTrans);
-					    // replace collision shape so that callback can determine the triangle
-					    CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
-					    collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
+                if (collisionShape.IsConcave())
+                {
+                    BulletGlobals.StartProfile("rayTestConcave");
+                    if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE && collisionShape is BvhTriangleMeshShape)
+                    {
+                        ///optimized version for btBvhTriangleMeshShape
+                        BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
+                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
+                        Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation, worldTocollisionObject);
+                        Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation, worldTocollisionObject);
 
-                        LocalInfoAdder my_cb = new LocalInfoAdder(i, resultCallback);
-					    my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
+                        Matrix transform = Matrix.Identity;
+                        BridgeTriangleRaycastCallback rcb = new BridgeTriangleRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, triangleMesh, ref transform);
+                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
+                        rcb.Cleanup();
+                    }
+                    else
+                    {
+                        //generic (slower) case
+                        ConcaveShape concaveShape = (ConcaveShape)collisionShape;
 
+                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
 
-					    ObjectQuerySingle(castShape, ref convexFromTrans,ref convexToTrans,
-						    collisionObject,
-						    childCollisionShape,
-						    ref childWorldTrans,
-						    my_cb, allowedPenetration);
-					    // restore
-					    collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
-				    }
+                        Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation, worldTocollisionObject);
+                        Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation, worldTocollisionObject);
+
+                        //ConvexCast::CastResult
+                        Matrix transform = Matrix.Identity;
+                        BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, concaveShape, ref transform);
+                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+
+                        Vector3 rayAabbMinLocal = rayFromLocal;
+                        MathUtil.VectorMin(ref rayToLocal, ref rayAabbMinLocal);
+                        Vector3 rayAabbMaxLocal = rayFromLocal;
+                        MathUtil.VectorMax(ref rayToLocal, ref rayAabbMaxLocal);
+
+                        concaveShape.ProcessAllTriangles(rcb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
+                        rcb.Cleanup();
+                    }
                     BulletGlobals.StopProfile();
                 }
-		    }
-	    }
-    }
-    protected ObjectArray<CollisionObject> m_collisionObjects;
-	protected IDispatcher	m_dispatcher1;
-    protected DispatcherInfo m_dispatchInfo;
+                else
+                {
+                    BulletGlobals.StartProfile("rayTestCompound");
+                    ///@todo: use AABB tree or other BVH acceleration structure, see btDbvt
+                    if (collisionShape.IsCompound())
+                    {
+                        CompoundShape compoundShape = collisionShape as CompoundShape;
+                        int i = 0;
+                        for (i = 0; i < compoundShape.GetNumChildShapes(); i++)
+                        {
+                            Matrix childTrans = compoundShape.GetChildTransform(i);
+                            CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
+                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform, childTrans);
+                            // replace collision shape so that callback can determine the triangle
+                            CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
+                            collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
 
-	protected IBroadphaseInterface m_broadphasePairCache;
-	protected IDebugDraw m_debugDrawer;
-        
-    ///m_forceUpdateAllAabbs can be set to false as an optimization to only update active object AABBs
-    ///it is true by default, because it is error-prone (setting the position of static objects wouldn't update their AABB)
-    protected bool m_forceUpdateAllAabbs;
+                            LocalInfoAdder2 my_cb = new LocalInfoAdder2(i, resultCallback);
+                            my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
 
-    public static bool debugCollisionWorld = true;
+                            RayTestSingle(ref rayFromTrans, ref rayToTrans,
+                                collisionObject,
+                                childCollisionShape,
+                                ref childWorldTrans,
+                                my_cb);
+                            // restore
+                            collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
+                            my_cb.cleanup();
+                        }
+                    }
+
+                    BulletGlobals.StopProfile();
+                }
+            }
+        }
+
+        /// objectQuerySingle performs a collision detection query and calls the resultCallback. It is used internally by rayTest.
+        public static void ObjectQuerySingle(ConvexShape castShape, ref Matrix convexFromTrans, ref Matrix convexToTrans,
+                          CollisionObject collisionObject, CollisionShape collisionShape,
+                          ref Matrix colObjWorldTransform,
+                          ConvexResultCallback resultCallback, float allowedPenetration)
+        {
+            if (collisionShape.IsConvex())
+            {
+
+                BulletGlobals.StartProfile("convexSweepConvex");
+                CastResult castResult = new CastResult();
+                castResult.m_allowedPenetration = allowedPenetration;
+                castResult.m_fraction = resultCallback.m_closestHitFraction;//float(1.);//??
+
+                ConvexShape convexShape = collisionShape as ConvexShape;
+                VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+                GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
+
+                ContinuousConvexCollision convexCaster1 = new ContinuousConvexCollision(castShape, convexShape, simplexSolver, gjkEpaPenetrationSolver);
+                //btGjkConvexCast convexCaster2(castShape,convexShape,&simplexSolver);
+                //btSubsimplexConvexCast convexCaster3(castShape,convexShape,&simplexSolver);
+
+                IConvexCast castPtr = convexCaster1;
+
+                if (castPtr.CalcTimeOfImpact(ref convexFromTrans, ref convexToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult))
+                {
+                    //add hit
+                    if (castResult.m_normal.LengthSquared() > 0.0001f)
+                    {
+                        if (castResult.m_fraction < resultCallback.m_closestHitFraction)
+                        {
+                            castResult.m_normal.Normalize();
+                            LocalConvexResult localConvexResult = new LocalConvexResult
+                                        (
+                                            collisionObject,
+                                            null,
+                                            ref castResult.m_normal,
+                                            ref castResult.m_hitPoint,
+                                            castResult.m_fraction
+                                        );
+
+                            bool normalInWorldSpace = true;
+                            resultCallback.AddSingleResult(localConvexResult, normalInWorldSpace);
+
+                        }
+                    }
+                }
+                BulletGlobals.StopProfile();
+            }
+            else
+            {
+                if (collisionShape.IsConcave())
+                {
+                    if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE)
+                    {
+                        BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
+                        BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
+                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
+                        Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation, worldTocollisionObject);
+                        Vector3 convexToLocal = Vector3.Transform(convexToTrans.Translation, worldTocollisionObject);
+                        // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
+
+                        Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) * MathUtil.BasisMatrix(ref convexToTrans);
+
+                        BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, triangleMesh, ref colObjWorldTransform);
+                        tccb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        Vector3 boxMinLocal;
+                        Vector3 boxMaxLocal;
+                        castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
+                        triangleMesh.PerformConvexCast(tccb, ref convexFromLocal, ref convexToLocal, ref boxMinLocal, ref boxMaxLocal);
+                        BulletGlobals.StopProfile();
+                    }
+                    else
+                    {
+                        BulletGlobals.StartProfile("convexSweepConcave");
+                        ConcaveShape concaveShape = (ConcaveShape)collisionShape;
+                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
+                        Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation, worldTocollisionObject);
+                        Vector3 convexToLocal = Vector3.Transform(convexToTrans.Translation, worldTocollisionObject);
+                        // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
+                        Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) * MathUtil.BasisMatrix(ref convexToTrans);
+
+                        BridgeTriangleConvexcastCallback2 tccb = new BridgeTriangleConvexcastCallback2(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
+                        tccb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        Vector3 boxMinLocal;
+                        Vector3 boxMaxLocal;
+                        castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
+
+                        Vector3 rayAabbMinLocal = convexFromLocal;
+                        MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
+                        //rayAabbMinLocal.setMin(convexToLocal);
+                        Vector3 rayAabbMaxLocal = convexFromLocal;
+                        //rayAabbMaxLocal.setMax(convexToLocal);
+                        MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
+
+                        rayAabbMinLocal += boxMinLocal;
+                        rayAabbMaxLocal += boxMaxLocal;
+                        concaveShape.ProcessAllTriangles(tccb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
+                        BulletGlobals.StopProfile();
+                    }
+                }
+                else
+                {
+                    ///@todo : use AABB tree or other BVH acceleration structure!
+                    if (collisionShape.IsCompound())
+                    {
+                        BulletGlobals.StartProfile("convexSweepCompound");
+                        CompoundShape compoundShape = (CompoundShape)collisionShape;
+                        for (int i = 0; i < compoundShape.GetNumChildShapes(); i++)
+                        {
+                            Matrix childTrans = compoundShape.GetChildTransform(i);
+                            CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
+                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform, childTrans);
+                            // replace collision shape so that callback can determine the triangle
+                            CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
+                            collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
+
+                            LocalInfoAdder my_cb = new LocalInfoAdder(i, resultCallback);
+                            my_cb.m_closestHitFraction = resultCallback.m_closestHitFraction;
 
 
-    protected IProfileManager m_profileManager;
+                            ObjectQuerySingle(castShape, ref convexFromTrans, ref convexToTrans,
+                                collisionObject,
+                                childCollisionShape,
+                                ref childWorldTrans,
+                                my_cb, allowedPenetration);
+                            // restore
+                            collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
+                        }
+                        BulletGlobals.StopProfile();
+                    }
+                }
+            }
+        }
+        protected ObjectArray<CollisionObject> m_collisionObjects;
+        protected IDispatcher m_dispatcher1;
+        protected DispatcherInfo m_dispatchInfo;
+
+        protected IBroadphaseInterface m_broadphasePairCache;
+        protected IDebugDraw m_debugDrawer;
+
+        ///m_forceUpdateAllAabbs can be set to false as an optimization to only update active object AABBs
+        ///it is true by default, because it is error-prone (setting the position of static objects wouldn't update their AABB)
+        protected bool m_forceUpdateAllAabbs;
+
+        public static bool debugCollisionWorld = true;
+
+
+        protected IProfileManager m_profileManager;
     }
 
 
@@ -688,32 +688,32 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     ///Currently, only btTriangleMeshShape is available, so it just contains triangleIndex and subpart
     public class LocalShapeInfo
     {
-	    public int	m_shapePart;
-	    public int	m_triangleIndex;
-		
-	    //const btCollisionShape*	m_shapeTemp;
-	    //const btTransform*	m_shapeLocalTransform;
+        public int m_shapePart;
+        public int m_triangleIndex;
+
+        //const btCollisionShape*	m_shapeTemp;
+        //const btTransform*	m_shapeLocalTransform;
     };
 
 
 
     public class LocalRayResult
     {
-	    public LocalRayResult(CollisionObject	collisionObject, 
-		    LocalShapeInfo	localShapeInfo,
-		    ref Vector3	hitNormalLocal,
-		    float hitFraction)
+        public LocalRayResult(CollisionObject collisionObject,
+            LocalShapeInfo localShapeInfo,
+            ref Vector3 hitNormalLocal,
+            float hitFraction)
         {
-	        m_collisionObject = collisionObject;
-	        m_localShapeInfo = localShapeInfo;
-	        m_hitNormalLocal = hitNormalLocal;
-	        m_hitFraction = hitFraction;
-	    }
+            m_collisionObject = collisionObject;
+            m_localShapeInfo = localShapeInfo;
+            m_hitNormalLocal = hitNormalLocal;
+            m_hitFraction = hitFraction;
+        }
 
         public CollisionObject m_collisionObject;
         public LocalShapeInfo m_localShapeInfo;
         public Vector3 m_hitNormalLocal;
-	    public float m_hitFraction;
+        public float m_hitFraction;
 
     };
 
@@ -723,29 +723,29 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     public abstract class RayResultCallback
     {
 
-	    public bool	HasHit()
-	    {
-		    return (m_collisionObject != null);
-	    }
-
-	    public RayResultCallback()
+        public bool HasHit()
         {
-		    m_closestHitFraction = 1f;
-		    m_collisionObject = null;
-		    m_collisionFilterGroup = CollisionFilterGroups.DefaultFilter;
+            return (m_collisionObject != null);
+        }
+
+        public RayResultCallback()
+        {
+            m_closestHitFraction = 1f;
+            m_collisionObject = null;
+            m_collisionFilterGroup = CollisionFilterGroups.DefaultFilter;
             m_collisionFilterMask = CollisionFilterGroups.AllFilter;
-             //@BP Mod
-             m_flags = 0;
-		}
+            //@BP Mod
+            m_flags = 0;
+        }
 
-	    public virtual bool NeedsCollision(BroadphaseProxy proxy0)
-	    {
-		    bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
-		    collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask)!=0);
-		    return collides;
-	    }
+        public virtual bool NeedsCollision(BroadphaseProxy proxy0)
+        {
+            bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
+            collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
+            return collides;
+        }
 
-	    public abstract float AddSingleResult(LocalRayResult rayResult,bool normalInWorldSpace);
+        public abstract float AddSingleResult(LocalRayResult rayResult, bool normalInWorldSpace);
         public virtual void Cleanup()
         {
         }
@@ -768,180 +768,181 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
-	    public ClosestRayResultCallback(ref Vector3 rayFromWorld, ref Vector3 rayToWorld)
-	    {
-	        m_rayFromWorld = rayFromWorld;
-	        m_rayToWorld = rayToWorld;
-	    }
+        public ClosestRayResultCallback(ref Vector3 rayFromWorld, ref Vector3 rayToWorld)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+        }
 
-	    public Vector3	m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
+        public Vector3 m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
         public Vector3 m_rayToWorld;
 
         public Vector3 m_hitNormalWorld;
         public Vector3 m_hitPointWorld;
-			
-	    public override float AddSingleResult(LocalRayResult rayResult,bool normalInWorldSpace)
-	    {
-		    //caller already does the filter on the m_closestHitFraction
+
+        public override float AddSingleResult(LocalRayResult rayResult, bool normalInWorldSpace)
+        {
+            //caller already does the filter on the m_closestHitFraction
             //btAssert(rayResult.m_hitFraction <= m_closestHitFraction);
-			
-		    m_closestHitFraction = rayResult.m_hitFraction;
-		    m_collisionObject = rayResult.m_collisionObject;
-		    if (normalInWorldSpace)
-		    {
-			    m_hitNormalWorld = rayResult.m_hitNormalLocal;
-		    } 
+
+            m_closestHitFraction = rayResult.m_hitFraction;
+            m_collisionObject = rayResult.m_collisionObject;
+            if (normalInWorldSpace)
+            {
+                m_hitNormalWorld = rayResult.m_hitNormalLocal;
+            }
             else
-		    {
-			    ///need to transform normal into worldspace
-			    m_hitNormalWorld = Vector3.TransformNormal(rayResult.m_hitNormalLocal,m_collisionObject.GetWorldTransform());
-		    }
-		    m_hitPointWorld = MathUtil.Interpolate3(ref m_rayFromWorld,ref m_rayToWorld,rayResult.m_hitFraction);
-		    return rayResult.m_hitFraction;
-	    }
+            {
+                ///need to transform normal into worldspace
+                m_hitNormalWorld = Vector3.TransformNormal(rayResult.m_hitNormalLocal, m_collisionObject.GetWorldTransform());
+            }
+            m_hitPointWorld = MathUtil.Interpolate3(ref m_rayFromWorld, ref m_rayToWorld, rayResult.m_hitFraction);
+            return rayResult.m_hitFraction;
+        }
 
     }
 
 
 
-	public class LocalConvexResult
-	{
-		public LocalConvexResult(CollisionObject hitCollisionObject, 
-			LocalShapeInfo	localShapeInfo,
-			ref Vector3 hitNormalLocal,
-			ref Vector3 hitPointLocal,
-			float hitFraction
-			)
-		{
+    public class LocalConvexResult
+    {
+        public LocalConvexResult(CollisionObject hitCollisionObject,
+            LocalShapeInfo localShapeInfo,
+            ref Vector3 hitNormalLocal,
+            ref Vector3 hitPointLocal,
+            float hitFraction
+            )
+        {
             m_hitCollisionObject = hitCollisionObject;
-		    m_localShapeInfo = localShapeInfo;
-		    m_hitNormalLocal = hitNormalLocal;
-		    m_hitPointLocal = hitPointLocal;
-		    m_hitFraction = hitFraction;
-		}
+            m_localShapeInfo = localShapeInfo;
+            m_hitNormalLocal = hitNormalLocal;
+            m_hitPointLocal = hitPointLocal;
+            m_hitFraction = hitFraction;
+        }
 
-		public CollisionObject	m_hitCollisionObject;
+        public CollisionObject m_hitCollisionObject;
         public LocalShapeInfo m_localShapeInfo;
         public Vector3 m_hitNormalLocal;
         public Vector3 m_hitPointLocal;
         public float m_hitFraction;
-	};
+    };
 
 
-	///RayResultCallback is used to report new raycast results
-	public abstract class ConvexResultCallback
-	{
-		public ConvexResultCallback()
+    ///RayResultCallback is used to report new raycast results
+    public abstract class ConvexResultCallback
+    {
+        public ConvexResultCallback()
         {
             m_closestHitFraction = 1f;
-			m_collisionFilterGroup = CollisionFilterGroups.DefaultFilter;
+            m_collisionFilterGroup = CollisionFilterGroups.DefaultFilter;
             m_collisionFilterMask = CollisionFilterGroups.AllFilter;
-		}
+        }
 
-		public bool hasHit()
-		{
-			return (m_closestHitFraction < 1f);
-		}
+        public bool hasHit()
+        {
+            return (m_closestHitFraction < 1f);
+        }
 
-		public virtual bool NeedsCollision(BroadphaseProxy proxy0)
-		{
-			bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
-			collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
-			return collides;
-		}
+        public virtual bool NeedsCollision(BroadphaseProxy proxy0)
+        {
+            bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
+            collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
+            return collides;
+        }
 
-        public abstract float AddSingleResult(LocalConvexResult convexResult,bool normalInWorldSpace);
+        public abstract float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace);
 
-		public float m_closestHitFraction;
+        public float m_closestHitFraction;
         public CollisionFilterGroups m_collisionFilterGroup;
         public CollisionFilterGroups m_collisionFilterMask;
-		
-	};
+
+    };
 
 
 
-	public class ClosestConvexResultCallback : ConvexResultCallback
-	{
+    public class ClosestConvexResultCallback : ConvexResultCallback
+    {
         public ClosestConvexResultCallback(Vector3 convexFromWorld, Vector3 convexToWorld)
             : this(ref convexFromWorld, ref convexToWorld)
         {
         }
 
-		public ClosestConvexResultCallback(ref Vector3 convexFromWorld,ref Vector3 convexToWorld)
+        public ClosestConvexResultCallback(ref Vector3 convexFromWorld, ref Vector3 convexToWorld)
         {
-		    m_convexFromWorld = convexFromWorld;
-		    m_convexToWorld = convexToWorld;
-		    m_hitCollisionObject = null;
-		}
+            m_convexFromWorld = convexFromWorld;
+            m_convexToWorld = convexToWorld;
+            m_hitCollisionObject = null;
+        }
 
-		public override float AddSingleResult(LocalConvexResult convexResult,bool normalInWorldSpace)
-		{
+        public override float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace)
+        {
             //caller already does the filter on the m_closestHitFraction
             //btAssert(convexResult.m_hitFraction <= m_closestHitFraction);
-						
-			m_closestHitFraction = convexResult.m_hitFraction;
-			m_hitCollisionObject = convexResult.m_hitCollisionObject;
-			if (normalInWorldSpace)
-			{
-				m_hitNormalWorld = convexResult.m_hitNormalLocal;
-			} else
-			{
-				///need to transform normal into worldspace
-				m_hitNormalWorld = Vector3.TransformNormal(convexResult.m_hitNormalLocal,m_hitCollisionObject.GetWorldTransform());
-			}
-			m_hitPointWorld = convexResult.m_hitPointLocal;
-			return convexResult.m_hitFraction;
-		}
 
-        public Vector3	m_convexFromWorld;//used to calculate hitPointWorld from hitFraction
+            m_closestHitFraction = convexResult.m_hitFraction;
+            m_hitCollisionObject = convexResult.m_hitCollisionObject;
+            if (normalInWorldSpace)
+            {
+                m_hitNormalWorld = convexResult.m_hitNormalLocal;
+            }
+            else
+            {
+                ///need to transform normal into worldspace
+                m_hitNormalWorld = Vector3.TransformNormal(convexResult.m_hitNormalLocal, m_hitCollisionObject.GetWorldTransform());
+            }
+            m_hitPointWorld = convexResult.m_hitPointLocal;
+            return convexResult.m_hitFraction;
+        }
+
+        public Vector3 m_convexFromWorld;//used to calculate hitPointWorld from hitFraction
         public Vector3 m_convexToWorld;
 
         public Vector3 m_hitNormalWorld;
         public Vector3 m_hitPointWorld;
         public CollisionObject m_hitCollisionObject;
     }
-	//ConvexCast::CastResult
-	public class BridgeTriangleRaycastCallback : TriangleRaycastCallback
-	{
-		public RayResultCallback m_resultCallback;
+    //ConvexCast::CastResult
+    public class BridgeTriangleRaycastCallback : TriangleRaycastCallback
+    {
+        public RayResultCallback m_resultCallback;
         public CollisionObject m_collisionObject;
         public TriangleMeshShape m_triangleMesh;
         public Matrix m_colObjWorldTransform;
 
-		public BridgeTriangleRaycastCallback( ref Vector3 from,ref Vector3 to,
+        public BridgeTriangleRaycastCallback(ref Vector3 from, ref Vector3 to,
             RayResultCallback resultCallback, CollisionObject collisionObject, TriangleMeshShape triangleMesh, ref Matrix colObjWorldTransform) :
-			base(ref from,ref to, resultCallback.m_flags)
-			{
-                //@BP Mod
-                m_resultCallback = resultCallback;
-                m_collisionObject = collisionObject;
-                m_triangleMesh = triangleMesh;
-                m_colObjWorldTransform = colObjWorldTransform;
-			}
+            base(ref from, ref to, resultCallback.m_flags)
+        {
+            //@BP Mod
+            m_resultCallback = resultCallback;
+            m_collisionObject = collisionObject;
+            m_triangleMesh = triangleMesh;
+            m_colObjWorldTransform = colObjWorldTransform;
+        }
 
 
         public override float ReportHit(ref Vector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex)
-		{
-			LocalShapeInfo shapeInfo = new LocalShapeInfo();
-			shapeInfo.m_shapePart = partId;
-			shapeInfo.m_triangleIndex = triangleIndex;
+        {
+            LocalShapeInfo shapeInfo = new LocalShapeInfo();
+            shapeInfo.m_shapePart = partId;
+            shapeInfo.m_triangleIndex = triangleIndex;
 
             Vector3 hitNormalWorld = Vector3.TransformNormal(hitNormalLocal, m_colObjWorldTransform);
 
-			LocalRayResult rayResult = new LocalRayResult
-			(m_collisionObject,
-				shapeInfo,
-				ref hitNormalWorld,
-				hitFraction);
+            LocalRayResult rayResult = new LocalRayResult
+            (m_collisionObject,
+                shapeInfo,
+                ref hitNormalWorld,
+                hitFraction);
 
-			bool normalInWorldSpace = true;
-			return m_resultCallback.AddSingleResult(rayResult,normalInWorldSpace);
-		}
+            bool normalInWorldSpace = true;
+            return m_resultCallback.AddSingleResult(rayResult, normalInWorldSpace);
+        }
 
         public virtual void Cleanup()
         {
         }
-	}
+    }
 
 
     public class BridgeTriangleConcaveRaycastCallback : TriangleRaycastCallback
@@ -965,7 +966,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             shapeInfo.m_shapePart = partId;
             shapeInfo.m_triangleIndex = triangleIndex;
 
-            Vector3 hitNormalWorld = Vector3.TransformNormal(hitNormalLocal,m_colObjWorldTransform);
+            Vector3 hitNormalWorld = Vector3.TransformNormal(hitNormalLocal, m_colObjWorldTransform);
 
             LocalRayResult rayResult = new LocalRayResult
             (m_collisionObject,
@@ -986,41 +987,41 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-	//ConvexCast::CastResult
-	public class BridgeTriangleConvexcastCallback : TriangleConvexcastCallback
-	{
-		public BridgeTriangleConvexcastCallback(ConvexShape castShape, ref Matrix from,ref Matrix to,
-			ConvexResultCallback resultCallback, CollisionObject collisionObject,TriangleMeshShape triangleMesh, ref Matrix triangleToWorld):
-		base(castShape, ref from,ref to, ref triangleToWorld, triangleMesh.GetMargin())
-		{
+    //ConvexCast::CastResult
+    public class BridgeTriangleConvexcastCallback : TriangleConvexcastCallback
+    {
+        public BridgeTriangleConvexcastCallback(ConvexShape castShape, ref Matrix from, ref Matrix to,
+            ConvexResultCallback resultCallback, CollisionObject collisionObject, TriangleMeshShape triangleMesh, ref Matrix triangleToWorld) :
+            base(castShape, ref from, ref to, ref triangleToWorld, triangleMesh.GetMargin())
+        {
             m_resultCallback = resultCallback;
             m_collisionObject = collisionObject;
             m_triangleMesh = triangleMesh;
-		}
+        }
 
-		public override float ReportHit(ref Vector3 hitNormalLocal, ref Vector3 hitPointLocal, float hitFraction, int partId, int triangleIndex )
-		{
-			LocalShapeInfo shapeInfo = new LocalShapeInfo();
-			shapeInfo.m_shapePart = partId;
-			shapeInfo.m_triangleIndex = triangleIndex;
-			if (hitFraction <= m_resultCallback.m_closestHitFraction)
-			{
-				LocalConvexResult convexResult = new LocalConvexResult
-				(m_collisionObject,
-					shapeInfo,
-					ref hitNormalLocal,
-					ref hitPointLocal,
-					hitFraction);
+        public override float ReportHit(ref Vector3 hitNormalLocal, ref Vector3 hitPointLocal, float hitFraction, int partId, int triangleIndex)
+        {
+            LocalShapeInfo shapeInfo = new LocalShapeInfo();
+            shapeInfo.m_shapePart = partId;
+            shapeInfo.m_triangleIndex = triangleIndex;
+            if (hitFraction <= m_resultCallback.m_closestHitFraction)
+            {
+                LocalConvexResult convexResult = new LocalConvexResult
+                (m_collisionObject,
+                    shapeInfo,
+                    ref hitNormalLocal,
+                    ref hitPointLocal,
+                    hitFraction);
 
-				bool normalInWorldSpace = true;
-				return m_resultCallback.AddSingleResult(convexResult,normalInWorldSpace);
-			}
-			return hitFraction;
-		}
-		ConvexResultCallback m_resultCallback;
-		CollisionObject	m_collisionObject;
-		TriangleMeshShape	m_triangleMesh;
-	};
+                bool normalInWorldSpace = true;
+                return m_resultCallback.AddSingleResult(convexResult, normalInWorldSpace);
+            }
+            return hitFraction;
+        }
+        ConvexResultCallback m_resultCallback;
+        CollisionObject m_collisionObject;
+        TriangleMeshShape m_triangleMesh;
+    };
 
 
     //ConvexCast::CastResult
@@ -1064,79 +1065,79 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     }
 
 
-    
+
     public class SingleRayCallback : BroadphaseRayCallback
     {
-	    public SingleRayCallback(ref Vector3 rayFromWorld,ref Vector3 rayToWorld,CollisionWorld world,RayResultCallback resultCallback)
-	    {
+        public SingleRayCallback(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, CollisionWorld world, RayResultCallback resultCallback)
+        {
             m_rayFromWorld = rayFromWorld;
             m_rayToWorld = rayToWorld;
             m_world = world;
             m_resultCallback = resultCallback;
-		    m_rayFromTrans = Matrix.Identity;
-		    m_rayFromTrans.Translation = m_rayFromWorld;
-		    m_rayToTrans = Matrix.Identity;
-		    m_rayToTrans.Translation = m_rayToWorld;
+            m_rayFromTrans = Matrix.Identity;
+            m_rayFromTrans.Translation = m_rayFromWorld;
+            m_rayToTrans = Matrix.Identity;
+            m_rayToTrans.Translation = m_rayToWorld;
 
-		    Vector3 rayDir = (rayToWorld-rayFromWorld);
+            Vector3 rayDir = (rayToWorld - rayFromWorld);
 
-		    rayDir.Normalize();
-		    ///what about division by zero? -. just set rayDirection[i] to INF/1e30
-		    m_rayDirectionInverse.X = MathUtil.FuzzyZero(rayDir.X) ? float.MaxValue : 1f / rayDir.X;
+            rayDir.Normalize();
+            ///what about division by zero? -. just set rayDirection[i] to INF/1e30
+            m_rayDirectionInverse.X = MathUtil.FuzzyZero(rayDir.X) ? float.MaxValue : 1f / rayDir.X;
             m_rayDirectionInverse.Y = MathUtil.FuzzyZero(rayDir.Y) ? float.MaxValue : 1f / rayDir.Y;
             m_rayDirectionInverse.Z = MathUtil.FuzzyZero(rayDir.Z) ? float.MaxValue : 1f / rayDir.Z;
-		    m_signs[0] = m_rayDirectionInverse.X < 0.0f;
-		    m_signs[1] = m_rayDirectionInverse.Y < 0.0f;
-		    m_signs[2] = m_rayDirectionInverse.Z < 0.0f;
+            m_signs[0] = m_rayDirectionInverse.X < 0.0f;
+            m_signs[1] = m_rayDirectionInverse.Y < 0.0f;
+            m_signs[2] = m_rayDirectionInverse.Z < 0.0f;
 
-		    m_lambda_max = Vector3.Dot(rayDir,(m_rayToWorld-m_rayFromWorld));
-	    }
+            m_lambda_max = Vector3.Dot(rayDir, (m_rayToWorld - m_rayFromWorld));
+        }
 
-	    public override bool Process(BroadphaseProxy proxy)
-	    {
-		    ///terminate further ray tests, once the closestHitFraction reached zero
-		    if (MathUtil.FuzzyZero(m_resultCallback.m_closestHitFraction))
-            {   
-			    return false;
+        public override bool Process(BroadphaseProxy proxy)
+        {
+            ///terminate further ray tests, once the closestHitFraction reached zero
+            if (MathUtil.FuzzyZero(m_resultCallback.m_closestHitFraction))
+            {
+                return false;
             }
             CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
-		    //only perform raycast if filterMask matches
-		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
-		    {
-			    //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
-			    //Vector3 collisionObjectAabbMin,collisionObjectAabbMax;
-    //#if 0
-    //#ifdef RECALCULATE_AABB
-    //            Vector3 collisionObjectAabbMin,collisionObjectAabbMax;
-    //            collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
-    //#else
-			    //getBroadphase().getAabb(collisionObject.getBroadphaseHandle(),collisionObjectAabbMin,collisionObjectAabbMax);
-			    Vector3 collisionObjectAabbMin = collisionObject.GetBroadphaseHandle().m_aabbMin;
-			    Vector3 collisionObjectAabbMax = collisionObject.GetBroadphaseHandle().m_aabbMax;
-    //#endif
-    //#endif
-			    //float hitLambda = m_resultCallback.m_closestHitFraction;
-			    //culling already done by broadphase
-			    //if (btRayAabb(m_rayFromWorld,m_rayToWorld,collisionObjectAabbMin,collisionObjectAabbMax,hitLambda,m_hitNormal))
-			    {
+            //only perform raycast if filterMask matches
+            if (m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle()))
+            {
+                //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
+                //Vector3 collisionObjectAabbMin,collisionObjectAabbMax;
+                //#if 0
+                //#ifdef RECALCULATE_AABB
+                //            Vector3 collisionObjectAabbMin,collisionObjectAabbMax;
+                //            collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
+                //#else
+                //getBroadphase().getAabb(collisionObject.getBroadphaseHandle(),collisionObjectAabbMin,collisionObjectAabbMax);
+                Vector3 collisionObjectAabbMin = collisionObject.GetBroadphaseHandle().m_aabbMin;
+                Vector3 collisionObjectAabbMax = collisionObject.GetBroadphaseHandle().m_aabbMax;
+                //#endif
+                //#endif
+                //float hitLambda = m_resultCallback.m_closestHitFraction;
+                //culling already done by broadphase
+                //if (btRayAabb(m_rayFromWorld,m_rayToWorld,collisionObjectAabbMin,collisionObjectAabbMax,hitLambda,m_hitNormal))
+                {
                     Matrix trans = collisionObject.GetWorldTransform();
-				    m_world.RayTestSingle(ref m_rayFromTrans,ref m_rayToTrans,
-					    collisionObject,
-						    collisionObject.GetCollisionShape(),
-						    ref trans,
-						    m_resultCallback);
-			    }
-		    }
-		    return true;
-	    }
-	    Vector3	m_rayFromWorld;
-	    Vector3	m_rayToWorld;
-	    Matrix	m_rayFromTrans;
-	    Matrix	m_rayToTrans;
-	    Vector3	m_hitNormal;
-	    CollisionWorld	m_world;
-	    RayResultCallback m_resultCallback;
+                    m_world.RayTestSingle(ref m_rayFromTrans, ref m_rayToTrans,
+                        collisionObject,
+                            collisionObject.GetCollisionShape(),
+                            ref trans,
+                            m_resultCallback);
+                }
+            }
+            return true;
+        }
+        Vector3 m_rayFromWorld;
+        Vector3 m_rayToWorld;
+        Matrix m_rayFromTrans;
+        Matrix m_rayToTrans;
+        Vector3 m_hitNormal;
+        CollisionWorld m_world;
+        RayResultCallback m_resultCallback;
 
     }
 
@@ -1146,103 +1147,103 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     public class SingleSweepCallback : BroadphaseRayCallback
     {
 
-	    Matrix	m_convexFromTrans;
-	    Matrix	m_convexToTrans;
-	    Vector3	m_hitNormal;
-	    CollisionWorld	m_world;
-	    ConvexResultCallback	m_resultCallback;
-	    float m_allowedCcdPenetration;
-	    ConvexShape m_castShape;
+        Matrix m_convexFromTrans;
+        Matrix m_convexToTrans;
+        Vector3 m_hitNormal;
+        CollisionWorld m_world;
+        ConvexResultCallback m_resultCallback;
+        float m_allowedCcdPenetration;
+        ConvexShape m_castShape;
 
 
-	    public SingleSweepCallback(ConvexShape castShape, ref Matrix convexFromTrans,ref Matrix convexToTrans,CollisionWorld world,ConvexResultCallback resultCallback,float allowedPenetration)
-	    {
+        public SingleSweepCallback(ConvexShape castShape, ref Matrix convexFromTrans, ref Matrix convexToTrans, CollisionWorld world, ConvexResultCallback resultCallback, float allowedPenetration)
+        {
             m_convexFromTrans = convexFromTrans;
             m_convexToTrans = convexToTrans;
             m_world = world;
             m_resultCallback = resultCallback;
             m_allowedCcdPenetration = allowedPenetration;
             m_castShape = castShape;
-		    Vector3 unnormalizedRayDir = (m_convexToTrans.Translation-m_convexFromTrans.Translation);
-		    Vector3 rayDir = unnormalizedRayDir;
+            Vector3 unnormalizedRayDir = (m_convexToTrans.Translation - m_convexFromTrans.Translation);
+            Vector3 rayDir = unnormalizedRayDir;
             rayDir.Normalize();
-		    ///what about division by zero? -. just set rayDirection[i] to INF/1e30
-		    m_rayDirectionInverse.X = MathUtil.CompareFloat(rayDir.X ,0.0f) ? float.MaxValue : 1f / rayDir.X;
-		    m_rayDirectionInverse.Y = MathUtil.CompareFloat(rayDir.Y ,0.0f) ? float.MaxValue : 1f / rayDir.Y;
-		    m_rayDirectionInverse.Z = MathUtil.CompareFloat(rayDir.Z ,0.0f) ? float.MaxValue : 1f / rayDir.Z;
+            ///what about division by zero? -. just set rayDirection[i] to INF/1e30
+            m_rayDirectionInverse.X = MathUtil.CompareFloat(rayDir.X, 0.0f) ? float.MaxValue : 1f / rayDir.X;
+            m_rayDirectionInverse.Y = MathUtil.CompareFloat(rayDir.Y, 0.0f) ? float.MaxValue : 1f / rayDir.Y;
+            m_rayDirectionInverse.Z = MathUtil.CompareFloat(rayDir.Z, 0.0f) ? float.MaxValue : 1f / rayDir.Z;
 
-		    m_signs[0] = m_rayDirectionInverse.X < 0.0;
-		    m_signs[1] = m_rayDirectionInverse.Y < 0.0;
-		    m_signs[2] = m_rayDirectionInverse.Z < 0.0;
+            m_signs[0] = m_rayDirectionInverse.X < 0.0;
+            m_signs[1] = m_rayDirectionInverse.Y < 0.0;
+            m_signs[2] = m_rayDirectionInverse.Z < 0.0;
 
-		    m_lambda_max = Vector3.Dot(rayDir,unnormalizedRayDir);
+            m_lambda_max = Vector3.Dot(rayDir, unnormalizedRayDir);
 
-	    }
+        }
 
-	    public override bool Process(BroadphaseProxy proxy)
-	    {
-		    ///terminate further convex sweep tests, once the closestHitFraction reached zero
+        public override bool Process(BroadphaseProxy proxy)
+        {
+            ///terminate further convex sweep tests, once the closestHitFraction reached zero
             if (MathUtil.FuzzyZero(m_resultCallback.m_closestHitFraction))
             {
                 return false;
             }
             CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
-		    //only perform raycast if filterMask matches
-		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
+            //only perform raycast if filterMask matches
+            if (m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle()))
             {
-			    //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
+                //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
                 Matrix temp = collisionObject.GetWorldTransform();
-			    CollisionWorld.ObjectQuerySingle(m_castShape, ref m_convexFromTrans,ref m_convexToTrans,
-					    collisionObject,
-						    collisionObject.GetCollisionShape(),
-						    ref temp,
-						    m_resultCallback,
-						    m_allowedCcdPenetration);
-		    }
-    		
-		    return true;
-	    }
+                CollisionWorld.ObjectQuerySingle(m_castShape, ref m_convexFromTrans, ref m_convexToTrans,
+                        collisionObject,
+                            collisionObject.GetCollisionShape(),
+                            ref temp,
+                            m_resultCallback,
+                            m_allowedCcdPenetration);
+            }
+
+            return true;
+        }
     }
 
 
-	///ContactResultCallback is used to report contact points
-	public abstract class ContactResultCallback
-	{
+    ///ContactResultCallback is used to report contact points
+    public abstract class ContactResultCallback
+    {
         public CollisionFilterGroups m_collisionFilterGroup;
         public CollisionFilterGroups m_collisionFilterMask;
-		
-		public ContactResultCallback()
-		{
+
+        public ContactResultCallback()
+        {
             m_collisionFilterGroup = CollisionFilterGroups.DefaultFilter;
             m_collisionFilterMask = CollisionFilterGroups.AllFilter;
-		}
-		
-		public virtual bool NeedsCollision(BroadphaseProxy proxy0)
-		{
-			bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
-			collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
-			return collides;
-		}
+        }
 
-		public abstract float AddSingleResult(ManifoldPoint cp,	CollisionObject colObj0,int partId0,int index0,CollisionObject colObj1,int partId1,int index1);
-	}
+        public virtual bool NeedsCollision(BroadphaseProxy proxy0)
+        {
+            bool collides = (proxy0.m_collisionFilterGroup & m_collisionFilterMask) != 0;
+            collides = collides && ((m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
+            return collides;
+        }
+
+        public abstract float AddSingleResult(ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1);
+    }
 
 
-    public class LocalInfoAdder : ConvexResultCallback 
+    public class LocalInfoAdder : ConvexResultCallback
     {
         public ConvexResultCallback m_userCallback;
-		public int m_i;
+        public int m_i;
 
-        public LocalInfoAdder (int i, ConvexResultCallback user)
+        public LocalInfoAdder(int i, ConvexResultCallback user)
         {
             m_userCallback = user;
             m_i = i;
         }
-            
-        public override float AddSingleResult(LocalConvexResult	r,	bool b)
+
+        public override float AddSingleResult(LocalConvexResult r, bool b)
         {
-            LocalShapeInfo	shapeInfo = new LocalShapeInfo();
+            LocalShapeInfo shapeInfo = new LocalShapeInfo();
             shapeInfo.m_shapePart = -1;
             shapeInfo.m_triangleIndex = m_i;
             if (r.m_localShapeInfo == null)
@@ -1254,20 +1255,20 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     }
 
 
-    
-    public class LocalInfoAdder2 : RayResultCallback 
+
+    public class LocalInfoAdder2 : RayResultCallback
     {
-	    public int m_i;
-	    public RayResultCallback m_userCallback;
-        public LocalInfoAdder2 (int i, RayResultCallback user)
-	    { 
+        public int m_i;
+        public RayResultCallback m_userCallback;
+        public LocalInfoAdder2(int i, RayResultCallback user)
+        {
             m_i = i;
             m_userCallback = user;
-	    }
-	
+        }
+
         public override float AddSingleResult(LocalRayResult r, bool b)
         {
-            LocalShapeInfo	shapeInfo = new LocalShapeInfo();
+            LocalShapeInfo shapeInfo = new LocalShapeInfo();
             shapeInfo.m_shapePart = -1;
             shapeInfo.m_triangleIndex = m_i;
             if (r.m_localShapeInfo == null)
@@ -1280,119 +1281,119 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
         }
 
-};
+    };
 
 
     public class BridgedManifoldResult : ManifoldResult
     {
-	    ContactResultCallback	m_resultCallback;
+        ContactResultCallback m_resultCallback;
 
-	    public BridgedManifoldResult(CollisionObject obj0,CollisionObject obj1,ContactResultCallback resultCallback)
-		    :base(obj0,obj1)
-	    {
-		    m_resultCallback = resultCallback;
-	    }
+        public BridgedManifoldResult(CollisionObject obj0, CollisionObject obj1, ContactResultCallback resultCallback)
+            : base(obj0, obj1)
+        {
+            m_resultCallback = resultCallback;
+        }
 
-	    public override void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth)
-	    {
-		    bool isSwapped = m_manifoldPtr.GetBody0() != m_body0;
-		    Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
-		    Vector3 localA;
-		    Vector3 localB;
-		    if (isSwapped)
-		    {
-			    localA = MathUtil.InverseTransform(ref m_rootTransB,ref pointA );
-			    localB = MathUtil.InverseTransform(ref m_rootTransA,ref pointInWorld);
-		    } 
+        public override void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        {
+            bool isSwapped = m_manifoldPtr.GetBody0() != m_body0;
+            Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
+            Vector3 localA;
+            Vector3 localB;
+            if (isSwapped)
+            {
+                localA = MathUtil.InverseTransform(ref m_rootTransB, ref pointA);
+                localB = MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld);
+            }
             else
-		    {
-			    localA = MathUtil.InverseTransform(ref m_rootTransA,ref pointA );
-			    localB = MathUtil.InverseTransform(ref m_rootTransB,ref pointInWorld);
-		    }
-    		
-		    ManifoldPoint newPt = new ManifoldPoint(ref localA,ref localB,ref normalOnBInWorld,depth);
-		    newPt.m_positionWorldOnA = pointA;
-		    newPt.m_positionWorldOnB = pointInWorld;
-    		
-	       //BP mod, store contact triangles.
-		    if (isSwapped)
-		    {
-			    newPt.m_partId0 = m_partId1;
-			    newPt.m_partId1 = m_partId0;
-			    newPt.m_index0  = m_index1;
-			    newPt.m_index1  = m_index0;
-		    } 
-            else
-		    {
-			    newPt.m_partId0 = m_partId0;
-			    newPt.m_partId1 = m_partId1;
-			    newPt.m_index0  = m_index0;
-			    newPt.m_index1  = m_index1;
-		    }
+            {
+                localA = MathUtil.InverseTransform(ref m_rootTransA, ref pointA);
+                localB = MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld);
+            }
 
-		    //experimental feature info, for per-triangle material etc.
-		    CollisionObject obj0 = isSwapped? m_body1 : m_body0;
-		    CollisionObject obj1 = isSwapped? m_body0 : m_body1;
-		    m_resultCallback.AddSingleResult(newPt,obj0,newPt.m_partId0,newPt.m_index0,obj1,newPt.m_partId1,newPt.m_index1);
-	    }
+            ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);
+            newPt.m_positionWorldOnA = pointA;
+            newPt.m_positionWorldOnB = pointInWorld;
+
+            //BP mod, store contact triangles.
+            if (isSwapped)
+            {
+                newPt.m_partId0 = m_partId1;
+                newPt.m_partId1 = m_partId0;
+                newPt.m_index0 = m_index1;
+                newPt.m_index1 = m_index0;
+            }
+            else
+            {
+                newPt.m_partId0 = m_partId0;
+                newPt.m_partId1 = m_partId1;
+                newPt.m_index0 = m_index0;
+                newPt.m_index1 = m_index1;
+            }
+
+            //experimental feature info, for per-triangle material etc.
+            CollisionObject obj0 = isSwapped ? m_body1 : m_body0;
+            CollisionObject obj1 = isSwapped ? m_body0 : m_body1;
+            m_resultCallback.AddSingleResult(newPt, obj0, newPt.m_partId0, newPt.m_index0, obj1, newPt.m_partId1, newPt.m_index1);
+        }
     }
 
 
 
     public class SingleContactCallback : IBroadphaseAabbCallback
     {
-	    CollisionObject m_collisionObject;
-	    CollisionWorld	m_world;
-	    ContactResultCallback m_resultCallback;
-    	
-	    public SingleContactCallback(CollisionObject collisionObject, CollisionWorld world,ContactResultCallback resultCallback)
-	    {
+        CollisionObject m_collisionObject;
+        CollisionWorld m_world;
+        ContactResultCallback m_resultCallback;
+
+        public SingleContactCallback(CollisionObject collisionObject, CollisionWorld world, ContactResultCallback resultCallback)
+        {
             m_collisionObject = collisionObject;
             m_world = world;
             m_resultCallback = resultCallback;
-	    }
+        }
 
         public virtual void Cleanup()
         {
         }
 
-	    public virtual bool Process(BroadphaseProxy proxy)
-	    {
+        public virtual bool Process(BroadphaseProxy proxy)
+        {
             if (proxy.m_clientObject == m_collisionObject)
             {
-			    return true;
+                return true;
             }
             CollisionObject collisionObject = proxy.m_clientObject as CollisionObject;
 
-		    //only perform raycast if filterMask matches
-		    if(m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
-		    {
-			    CollisionAlgorithm algorithm = m_world.GetDispatcher().FindAlgorithm(m_collisionObject,collisionObject);
-			    if (algorithm != null)
-			    {
-				    BridgedManifoldResult contactPointResult = new BridgedManifoldResult(m_collisionObject,collisionObject, m_resultCallback);
-				    //discrete collision detection query
-				    algorithm.ProcessCollision(m_collisionObject,collisionObject, m_world.GetDispatchInfo(),contactPointResult);
+            //only perform raycast if filterMask matches
+            if (m_resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle()))
+            {
+                CollisionAlgorithm algorithm = m_world.GetDispatcher().FindAlgorithm(m_collisionObject, collisionObject);
+                if (algorithm != null)
+                {
+                    BridgedManifoldResult contactPointResult = new BridgedManifoldResult(m_collisionObject, collisionObject, m_resultCallback);
+                    //discrete collision detection query
+                    algorithm.ProcessCollision(m_collisionObject, collisionObject, m_world.GetDispatchInfo(), contactPointResult);
 
                     algorithm.Cleanup();
-				    m_world.GetDispatcher().FreeCollisionAlgorithm(algorithm);
-			    }
-		    }
-		    return true;
-	    }
+                    m_world.GetDispatcher().FreeCollisionAlgorithm(algorithm);
+                }
+            }
+            return true;
+        }
     }
 
 
 
     public class DebugDrawcallback : ITriangleCallback, IInternalTriangleIndexCallback
     {
-	    public IDebugDraw	m_debugDrawer;
-	    public Vector3	m_color;
-	    public Matrix m_worldTrans;
+        public IDebugDraw m_debugDrawer;
+        public Vector3 m_color;
+        public Matrix m_worldTrans;
 
         public static bool debugCollisionWorld = true;
 
-	    public DebugDrawcallback(IDebugDraw	debugDrawer,ref Matrix worldTrans,ref Vector3 color)
+        public DebugDrawcallback(IDebugDraw debugDrawer, ref Matrix worldTrans, ref Vector3 color)
         {
             m_debugDrawer = debugDrawer;
             m_color = color;
@@ -1406,7 +1407,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
-            ProcessTriangle(triangle,partId,triangleIndex);
+            ProcessTriangle(triangle, partId, triangleIndex);
         }
 
         public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
@@ -1414,20 +1415,20 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             //(voidpartId;
             //(void)triangleIndex;
 
-            Vector3 wv0,wv1,wv2;
-            Vector3.Transform(ref triangle[0],ref m_worldTrans,out wv0);
-            Vector3.Transform(ref triangle[1],ref m_worldTrans,out wv1);
+            Vector3 wv0, wv1, wv2;
+            Vector3.Transform(ref triangle[0], ref m_worldTrans, out wv0);
+            Vector3.Transform(ref triangle[1], ref m_worldTrans, out wv1);
             Vector3.Transform(ref triangle[2], ref m_worldTrans, out wv2);
-            Vector3 center = (wv0+wv1+wv2)*(1f/3f);
+            Vector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
 
-            Vector3 normal = Vector3.Cross((wv1-wv0),(wv2-wv0));
+            Vector3 normal = Vector3.Cross((wv1 - wv0), (wv2 - wv0));
             normal.Normalize();
-            Vector3 normalColor = new Vector3(1,1,0);
-            m_debugDrawer.DrawLine(center,center+normal,normalColor);
+            Vector3 normalColor = new Vector3(1, 1, 0);
+            m_debugDrawer.DrawLine(center, center + normal, normalColor);
 
-            m_debugDrawer.DrawLine(ref wv0,ref wv1,ref m_color);
-            m_debugDrawer.DrawLine(ref wv1,ref wv2,ref m_color);
-            m_debugDrawer.DrawLine(ref wv2,ref wv0,ref m_color);
+            m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
+            m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);
+            m_debugDrawer.DrawLine(ref wv2, ref wv0, ref m_color);
         }
         public void Cleanup()
         {

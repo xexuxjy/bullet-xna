@@ -33,20 +33,21 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
     public class BoxBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-	
-	    public BoxBoxCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
-		: base(ci) 
+
+        public BoxBoxCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
+            : base(ci)
         {
-            
+
         }
 
-        public BoxBoxCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1) : base(ci)
+        public BoxBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+            : base(ci)
         {
- 	        if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0,body1))
-	        {
-		        m_manifoldPtr = m_dispatcher.GetNewManifold(body0,body1);
-		        m_ownManifold = true;
-	        }
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
         }
 
         public override void Cleanup()
@@ -62,15 +63,15 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
         }
 
-	    public override void ProcessCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             if (m_manifoldPtr == null)
             {
-		        return;
+                return;
             }
 
-	        CollisionObject	col0 = body0;
-	        CollisionObject	col1 = body1;
+            CollisionObject col0 = body0;
+            CollisionObject col1 = body1;
             //resultOut = new ManifoldResult(body0, body1);
             BoxShape box0 = col0.GetCollisionShape() as BoxShape;
             BoxShape box1 = col1.GetCollisionShape() as BoxShape;
@@ -80,52 +81,52 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             //{
             //    int ibreak = 0;
             //}
-	        /// report a contact. internally this will be kept persistent, and contact reduction is done
-	        resultOut.SetPersistentManifold(m_manifoldPtr);
+            /// report a contact. internally this will be kept persistent, and contact reduction is done
+            resultOut.SetPersistentManifold(m_manifoldPtr);
 
-            #if !USE_PERSISTENT_CONTACTS	
+#if !USE_PERSISTENT_CONTACTS	
 	            m_manifoldPtr.ClearManifold();
-            #endif //USE_PERSISTENT_CONTACTS
+#endif //USE_PERSISTENT_CONTACTS
 
-	        ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input = new ClosestPointInput();
             input.m_maximumDistanceSquared = float.MaxValue;
-	        input.m_transformA = body0.GetWorldTransform();
-	        input.m_transformB = body1.GetWorldTransform();
+            input.m_transformA = body0.GetWorldTransform();
+            input.m_transformB = body1.GetWorldTransform();
 
-	        BoxBoxDetector detector = new BoxBoxDetector(box0,box1);
-	        detector.GetClosestPoints(input,resultOut,dispatchInfo.getDebugDraw(),false);
+            BoxBoxDetector detector = new BoxBoxDetector(box0, box1);
+            detector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
 
-            #if USE_PERSISTENT_CONTACTS
+#if USE_PERSISTENT_CONTACTS
             //  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
             if (m_ownManifold)
             {
-	            resultOut.RefreshContactPoints();
+                resultOut.RefreshContactPoints();
             }
-            #endif //USE_PERSISTENT_CONTACTS
+#endif //USE_PERSISTENT_CONTACTS
         }
 
-    	public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             return 1f;
         }
 
-	    public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-		    if (m_manifoldPtr != null && m_ownManifold)
-		    {
-			    manifoldArray.Add(m_manifoldPtr);
-		    }
-	    }
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        {
+            if (m_manifoldPtr != null && m_ownManifold)
+            {
+                manifoldArray.Add(m_manifoldPtr);
+            }
+        }
 
-	    bool m_ownManifold;
-	    PersistentManifold	m_manifoldPtr;
+        bool m_ownManifold;
+        PersistentManifold m_manifoldPtr;
     }
 
-    public class BoxBoxCreateFunc :CollisionAlgorithmCreateFunc
-	{
-		public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0,CollisionObject body1)
-		{
-			return new BoxBoxCollisionAlgorithm(null,ci,body0,body1);
-		}
-	}
+    public class BoxBoxCreateFunc : CollisionAlgorithmCreateFunc
+    {
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            return new BoxBoxCollisionAlgorithm(null, ci, body0, body1);
+        }
+    }
 }

@@ -32,15 +32,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     ///SimulationIslandManager creates and handles simulation islands, using btUnionFind
     public class SimulationIslandManager
     {
-	    private UnionFind m_unionFind;
-	    private ObjectArray<PersistentManifold> m_islandmanifold;
-	    private ObjectArray<CollisionObject> m_islandBodies;
-	
-	    private bool m_splitIslands;
+        private UnionFind m_unionFind;
+        private ObjectArray<PersistentManifold> m_islandmanifold;
+        private ObjectArray<CollisionObject> m_islandBodies;
+
+        private bool m_splitIslands;
 
         private static bool debugIslands = false;
 
-    	public SimulationIslandManager()
+        public SimulationIslandManager()
         {
             m_splitIslands = true;
             m_unionFind = new UnionFind();
@@ -52,36 +52,36 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
         }
 
-	    public void InitUnionFind(int n)
+        public void InitUnionFind(int n)
         {
             m_unionFind.Reset(n);
         }
-		
-	    public UnionFind GetUnionFind() 
-        { 
+
+        public UnionFind GetUnionFind()
+        {
             return m_unionFind;
         }
 
         public virtual void UpdateActivationState(CollisionWorld collisionWorld, IDispatcher dispatcher)
         {
             InitUnionFind(collisionWorld.GetCollisionObjectArray().Count);
-        	
-	        // put the index into m_controllers into m_tag	
-	        {
-		        int index = 0;
+
+            // put the index into m_controllers into m_tag	
+            {
+                int index = 0;
                 ObjectArray<CollisionObject> list = collisionWorld.GetCollisionObjectArray();
                 int length = list.Count;
                 CollisionObject[] rawList = list.GetRawArray();
-		        for(int i=0;i<length;++i)
-		        {
+                for (int i = 0; i < length; ++i)
+                {
                     CollisionObject collisionObject = rawList[i];
-			        collisionObject.SetIslandTag(index);
-			        collisionObject.SetCompanionId(-1);
-			        collisionObject.SetHitFraction(1f);
-			        index++;
-		        }
-	        }
-	        // do the union find
+                    collisionObject.SetIslandTag(index);
+                    collisionObject.SetCompanionId(-1);
+                    collisionObject.SetHitFraction(1f);
+                    index++;
+                }
+            }
+            // do the union find
 
             FindUnions(dispatcher, collisionWorld);
 
@@ -115,7 +115,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             ObjectArray<BroadphasePair> list = collisionWorld.GetPairCache().GetOverlappingPairArray();
             int length = list.Count;
             BroadphasePair[] rawList = list.GetRawArray();
-            for (int i = 0; i < length;++i )
+            for (int i = 0; i < length; ++i)
             {
                 BroadphasePair collisionPair = rawList[i];
                 CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
@@ -134,42 +134,42 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         static Comparison<PersistentManifold> sortPredicate = new Comparison<PersistentManifold>(PersistentManifoldSortPredicate);
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
-	        ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
+            ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
 
-	        BuildIslands(dispatcher,collisionWorld);
+            BuildIslands(dispatcher, collisionWorld);
 
-	        int endIslandIndex=1;
-	        int startIslandIndex;
-	        int numElem = GetUnionFind().GetNumElements();
+            int endIslandIndex = 1;
+            int startIslandIndex;
+            int numElem = GetUnionFind().GetNumElements();
 
             BulletGlobals.StartProfile("processIslands");
 
-	        if(!m_splitIslands)
-	        {
-		        ObjectArray<PersistentManifold> manifolds = dispatcher.GetInternalManifoldPointer();
-		        int maxNumManifolds = dispatcher.GetNumManifolds();
-		        callback.ProcessIsland(collisionObjects,collisionObjects.Count,manifolds,maxNumManifolds, -1);
-	        }
-	        else
-	        {
-		        // Sort manifolds, based on islands
-		        // Sort the vector using predicate and std::sort
-		        //std::sort(islandmanifold.begin(), islandmanifold.end(), btPersistentManifoldSortPredicate);
+            if (!m_splitIslands)
+            {
+                ObjectArray<PersistentManifold> manifolds = dispatcher.GetInternalManifoldPointer();
+                int maxNumManifolds = dispatcher.GetNumManifolds();
+                callback.ProcessIsland(collisionObjects, collisionObjects.Count, manifolds, maxNumManifolds, -1);
+            }
+            else
+            {
+                // Sort manifolds, based on islands
+                // Sort the vector using predicate and std::sort
+                //std::sort(islandmanifold.begin(), islandmanifold.end(), btPersistentManifoldSortPredicate);
 
-		        int numManifolds = m_islandmanifold.Count;
+                int numManifolds = m_islandmanifold.Count;
 
-		        //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
+                //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
                 //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
                 //((ObjectArray<PersistentManifold>)m_islandmanifold).Sort();
                 m_islandmanifold.Sort(sortPredicate);
 
-		        //now process all active islands (sets of manifolds for now)
+                //now process all active islands (sets of manifolds for now)
 
-		        int startManifoldIndex = 0;
-		        int endManifoldIndex = 1;
-		        //traverse the simulation islands, and call the solver, unless all objects are sleeping/deactivated
-		        for ( startIslandIndex=0;startIslandIndex<numElem;startIslandIndex = endIslandIndex)
-		        {
+                int startManifoldIndex = 0;
+                int endManifoldIndex = 1;
+                //traverse the simulation islands, and call the solver, unless all objects are sleeping/deactivated
+                for (startIslandIndex = 0; startIslandIndex < numElem; startIslandIndex = endIslandIndex)
+                {
                     int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
                     if (BulletGlobals.g_streamWriter != null && debugIslands)
@@ -179,60 +179,60 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
                     bool islandSleeping = false;
-        	                
-			        for (endIslandIndex = startIslandIndex;(endIslandIndex<numElem) && (GetUnionFind().GetElement(endIslandIndex).m_id == islandId);endIslandIndex++)
-			        {
-			            int i = GetUnionFind().GetElement(endIslandIndex).m_sz;
-			            CollisionObject colObj0 = collisionObjects[i];
-			            m_islandBodies.Add(colObj0);
-			            if (!colObj0.IsActive())
+
+                    for (endIslandIndex = startIslandIndex; (endIslandIndex < numElem) && (GetUnionFind().GetElement(endIslandIndex).m_id == islandId); endIslandIndex++)
+                    {
+                        int i = GetUnionFind().GetElement(endIslandIndex).m_sz;
+                        CollisionObject colObj0 = collisionObjects[i];
+                        m_islandBodies.Add(colObj0);
+                        if (!colObj0.IsActive())
                         {
                             islandSleeping = true;
                             //islandSleeping = false;
                         }
-			        }
-        	                
-			        //find the accompanying contact manifold for this islandId
-			        int numIslandManifolds = 0;
-			        PersistentManifold startManifold = null;
+                    }
 
-			        if (startManifoldIndex<numManifolds)
-			        {
-				        int curIslandId = GetIslandId(m_islandmanifold[startManifoldIndex]);
-				        if (curIslandId == islandId)
-				        {
-					        startManifold = m_islandmanifold[startManifoldIndex];
-        				
-					        for (endManifoldIndex = startManifoldIndex+1;(endManifoldIndex<numManifolds) && (islandId == GetIslandId(m_islandmanifold[endManifoldIndex]));endManifoldIndex++)
-					        {
+                    //find the accompanying contact manifold for this islandId
+                    int numIslandManifolds = 0;
+                    PersistentManifold startManifold = null;
 
-					        }
-					        /// Process the actual simulation, only if not sleeping/deactivated
-					        numIslandManifolds = endManifoldIndex-startManifoldIndex;
-				        }
+                    if (startManifoldIndex < numManifolds)
+                    {
+                        int curIslandId = GetIslandId(m_islandmanifold[startManifoldIndex]);
+                        if (curIslandId == islandId)
+                        {
+                            startManifold = m_islandmanifold[startManifoldIndex];
 
-			        }
+                            for (endManifoldIndex = startManifoldIndex + 1; (endManifoldIndex < numManifolds) && (islandId == GetIslandId(m_islandmanifold[endManifoldIndex])); endManifoldIndex++)
+                            {
 
-			        if (!islandSleeping)
-			        {
+                            }
+                            /// Process the actual simulation, only if not sleeping/deactivated
+                            numIslandManifolds = endManifoldIndex - startManifoldIndex;
+                        }
+
+                    }
+
+                    if (!islandSleeping)
+                    {
                         // pass shortedned list to callback.
                         ObjectArray<PersistentManifold> subList = new ObjectArray<PersistentManifold>();
-                        for(int i=0;i<numIslandManifolds;++i)
+                        for (int i = 0; i < numIslandManifolds; ++i)
                         {
-                            subList.Add(m_islandmanifold[startManifoldIndex+i]);
+                            subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
-				        callback.ProcessIsland(m_islandBodies,m_islandBodies.Count,subList,numIslandManifolds, islandId);
-	        //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
-			        }
-        			
-			        if (numIslandManifolds != 0)
-			        {
-				        startManifoldIndex = endManifoldIndex;
-			        }
+                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, subList, numIslandManifolds, islandId);
+                        //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
+                    }
 
-			        m_islandBodies.Clear();
-		        }
-	        } // else if(!splitIslands) 
+                    if (numIslandManifolds != 0)
+                    {
+                        startManifoldIndex = endManifoldIndex;
+                    }
+
+                    m_islandBodies.Clear();
+                }
+            } // else if(!splitIslands) 
             BulletGlobals.StopProfile();
         }
 
@@ -384,17 +384,17 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             BulletGlobals.StopProfile();
         }
 
-	    public bool GetSplitIslands()
-	    {
-		    return m_splitIslands;
-	    }
+        public bool GetSplitIslands()
+        {
+            return m_splitIslands;
+        }
 
-	    public void SetSplitIslands(bool doSplitIslands)
-	    {
-		    m_splitIslands = doSplitIslands;
-	    }    
+        public void SetSplitIslands(bool doSplitIslands)
+        {
+            m_splitIslands = doSplitIslands;
+        }
 
-    
+
         public static int GetIslandId(PersistentManifold lhs)
         {
             CollisionObject rcolObj0 = lhs.GetBody0() as CollisionObject;
@@ -425,7 +425,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
     public interface IIslandCallback
     {
-        void ProcessIsland(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifolds,int numManifolds, int islandId);
+        void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifolds, int numManifolds, int islandId);
     }
 
 

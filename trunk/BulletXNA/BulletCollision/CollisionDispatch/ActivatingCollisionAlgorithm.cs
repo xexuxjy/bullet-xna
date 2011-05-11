@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
         }
 
-        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1) 
+        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
             : base(ci)
         {
         }

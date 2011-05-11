@@ -32,7 +32,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class SphereBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-	    public SphereBoxCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject col0,CollisionObject col1, bool isSwapped) : base(ci,col0,col1)
+        public SphereBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
+            : base(ci, col0, col1)
         {
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
@@ -58,7 +59,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_ownManifold = false;
         }
 
-	    public override void ProcessCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             //(void)dispatchInfo;
             //(void)resultOut;
@@ -67,170 +68,170 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 return;
             }
 
-	        CollisionObject sphereObj = m_isSwapped? body1 : body0;
-	        CollisionObject boxObj = m_isSwapped? body0 : body1;
+            CollisionObject sphereObj = m_isSwapped ? body1 : body0;
+            CollisionObject boxObj = m_isSwapped ? body0 : body1;
 
             SphereShape sphere0 = sphereObj.GetCollisionShape() as SphereShape;
 
             //Vector3 normalOnSurfaceB;
             Vector3 pOnBox = Vector3.Zero, pOnSphere = Vector3.Zero;
             Vector3 sphereCenter = sphereObj.GetWorldTransform().Translation;
-	        float radius = sphere0.GetRadius();
-        	
-	        float dist = GetSphereDistance(boxObj,ref pOnBox,ref pOnSphere,ref sphereCenter,radius);
-	        resultOut.SetPersistentManifold(m_manifoldPtr);
+            float radius = sphere0.GetRadius();
 
-	        if (dist < MathUtil.SIMD_EPSILON)
-	        {
+            float dist = GetSphereDistance(boxObj, ref pOnBox, ref pOnSphere, ref sphereCenter, radius);
+            resultOut.SetPersistentManifold(m_manifoldPtr);
+
+            if (dist < MathUtil.SIMD_EPSILON)
+            {
                 Vector3 normalOnSurfaceB = (pOnBox - pOnSphere);
                 normalOnSurfaceB.Normalize();
 
-		        /// report a contact. internally this will be kept persistent, and contact reduction is done
+                /// report a contact. internally this will be kept persistent, and contact reduction is done
 
-		        resultOut.AddContactPoint(ref normalOnSurfaceB,ref pOnBox,dist);
-	        }
+                resultOut.AddContactPoint(ref normalOnSurfaceB, ref pOnBox, dist);
+            }
 
-	        if (m_ownManifold)
-	        {
-		        if (m_manifoldPtr.GetNumContacts() > 0)
-		        {
-			        resultOut.RefreshContactPoints();
-		        }
-	        }
+            if (m_ownManifold)
+            {
+                if (m_manifoldPtr.GetNumContacts() > 0)
+                {
+                    resultOut.RefreshContactPoints();
+                }
+            }
         }
 
-	    public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             return 1f;
         }
 
-	    public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-		    if (m_manifoldPtr != null && m_ownManifold)
-		    {
-			    manifoldArray.Add(m_manifoldPtr);
-		    }
-	    }
-
-	    public float GetSphereDistance(CollisionObject boxObj,ref Vector3 v3PointOnBox, ref Vector3 v3PointOnSphere, ref Vector3 v3SphereCenter, float fRadius )
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
         {
-	        float margins;
-	        Vector3[] bounds = new Vector3[2];
+            if (m_manifoldPtr != null && m_ownManifold)
+            {
+                manifoldArray.Add(m_manifoldPtr);
+            }
+        }
+
+        public float GetSphereDistance(CollisionObject boxObj, ref Vector3 v3PointOnBox, ref Vector3 v3PointOnSphere, ref Vector3 v3SphereCenter, float fRadius)
+        {
+            float margins;
+            Vector3[] bounds = new Vector3[2];
             BoxShape boxShape = boxObj.GetCollisionShape() as BoxShape;
-        	
-	        bounds[0] = -boxShape.GetHalfExtentsWithoutMargin();
-	        bounds[1] = boxShape.GetHalfExtentsWithoutMargin();
 
-	        margins = boxShape.GetMargin();//also add sphereShape margin?
+            bounds[0] = -boxShape.GetHalfExtentsWithoutMargin();
+            bounds[1] = boxShape.GetHalfExtentsWithoutMargin();
 
-	        Matrix m44T = boxObj.GetWorldTransform();
+            margins = boxShape.GetMargin();//also add sphereShape margin?
 
-	        Vector3[] boundsVec = new Vector3[2];
-	        float	fPenetration;
+            Matrix m44T = boxObj.GetWorldTransform();
 
-	        boundsVec[0] = bounds[0];
-	        boundsVec[1] = bounds[1];
+            Vector3[] boundsVec = new Vector3[2];
+            float fPenetration;
 
-	        Vector3	marginsVec = new Vector3( margins, margins, margins );
+            boundsVec[0] = bounds[0];
+            boundsVec[1] = bounds[1];
 
-	        // add margins
-	        bounds[0] += marginsVec;
-	        bounds[1] -= marginsVec;
+            Vector3 marginsVec = new Vector3(margins, margins, margins);
 
-	        /////////////////////////////////////////////////
+            // add margins
+            bounds[0] += marginsVec;
+            bounds[1] -= marginsVec;
 
-	        Vector3	tmp, prel, normal, v3P;
+            /////////////////////////////////////////////////
+
+            Vector3 tmp, prel, normal, v3P;
             Vector3[] n = new Vector3[6];
 
-	        float fSep = 10000000.0f;
+            float fSep = 10000000.0f;
             float fSepThis;
 
-	        n[0] = new Vector3(-1,0,0);
-	        n[1] = new Vector3(0,-1,0);
-	        n[2] = new Vector3(0,0,-1);
-	        n[3] = new Vector3(1,0,0);
-	        n[4] = new Vector3(0,1,0);
-	        n[5] = new Vector3(0,0,1);
+            n[0] = new Vector3(-1, 0, 0);
+            n[1] = new Vector3(0, -1, 0);
+            n[2] = new Vector3(0, 0, -1);
+            n[3] = new Vector3(1, 0, 0);
+            n[4] = new Vector3(0, 1, 0);
+            n[5] = new Vector3(0, 0, 1);
 
-	        // convert  point in local space
-            prel = MathUtil.InverseTransform(ref m44T,ref v3SphereCenter);
-        	
-	        bool	bFound = false;
+            // convert  point in local space
+            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
 
-	        v3P = prel;
+            bool bFound = false;
 
-	        for (int i=0;i<6;i++)
-	        {
-		        int j = i<3? 0:1;
-                fSepThis = Vector3.Dot((v3P-bounds[j]),n[i]);
-		        if ( fSepThis != 0f)
-		        {
-			        v3P = v3P - n[i]*fSepThis;		
-			        bFound = true;
-		        }
-	        }
-        	
-	        //
+            v3P = prel;
 
-	        if ( bFound )
-	        {
-		        bounds[0] = boundsVec[0];
-		        bounds[1] = boundsVec[1];
+            for (int i = 0; i < 6; i++)
+            {
+                int j = i < 3 ? 0 : 1;
+                fSepThis = Vector3.Dot((v3P - bounds[j]), n[i]);
+                if (fSepThis != 0f)
+                {
+                    v3P = v3P - n[i] * fSepThis;
+                    bFound = true;
+                }
+            }
+
+            //
+
+            if (bFound)
+            {
+                bounds[0] = boundsVec[0];
+                bounds[1] = boundsVec[1];
 
                 normal = (prel - v3P);
                 normal.Normalize();
-		        v3PointOnBox = v3P + normal*margins;
-		        v3PointOnSphere = prel - normal*fRadius;
+                v3PointOnBox = v3P + normal * margins;
+                v3PointOnSphere = prel - normal * fRadius;
 
-		        if ( (Vector3.Dot((v3PointOnSphere - v3PointOnBox),normal)) > 0f )
-		        {
-			        return 1f;
-		        }
+                if ((Vector3.Dot((v3PointOnSphere - v3PointOnBox), normal)) > 0f)
+                {
+                    return 1f;
+                }
 
-		        // transform back in world space
-		        tmp = Vector3.Transform(v3PointOnBox,m44T);
-		        v3PointOnBox   = tmp;
-		        tmp  = Vector3.Transform(v3PointOnSphere,m44T);		
-		        v3PointOnSphere = tmp;
-		        float fSeps2 = (v3PointOnBox-v3PointOnSphere).LengthSquared();
-        		
-		        //if this fails, fallback into deeper penetration case, below
-		        if (fSeps2 > MathUtil.SIMD_EPSILON)
-		        {
-			        fSep = (float)-Math.Sqrt(fSeps2);
-			        normal = (v3PointOnBox-v3PointOnSphere);
-			        normal *= 1f/fSep;
-		        }
-                    
-		        return fSep;
-	        }
+                // transform back in world space
+                tmp = Vector3.Transform(v3PointOnBox, m44T);
+                v3PointOnBox = tmp;
+                tmp = Vector3.Transform(v3PointOnSphere, m44T);
+                v3PointOnSphere = tmp;
+                float fSeps2 = (v3PointOnBox - v3PointOnSphere).LengthSquared();
 
-	        //////////////////////////////////////////////////
-	        // Deep penetration case
+                //if this fails, fallback into deeper penetration case, below
+                if (fSeps2 > MathUtil.SIMD_EPSILON)
+                {
+                    fSep = (float)-Math.Sqrt(fSeps2);
+                    normal = (v3PointOnBox - v3PointOnSphere);
+                    normal *= 1f / fSep;
+                }
+
+                return fSep;
+            }
+
+            //////////////////////////////////////////////////
+            // Deep penetration case
 
             fPenetration = GetSpherePenetration(boxObj, ref v3PointOnBox, ref v3PointOnSphere, ref v3SphereCenter, fRadius, ref bounds[0], ref bounds[1]);
 
-	        bounds[0] = boundsVec[0];
-	        bounds[1] = boundsVec[1];
+            bounds[0] = boundsVec[0];
+            bounds[1] = boundsVec[1];
 
-	        if ( fPenetration <= 0f)
+            if (fPenetration <= 0f)
             {
-		        return (fPenetration-margins);
+                return (fPenetration - margins);
             }
-	        else
+            else
             {
-		        return 1f;
+                return 1f;
             }
         }
 
         public float GetSpherePenetration(CollisionObject boxObj, ref Vector3 v3PointOnBox, ref Vector3 v3PointOnSphere, ref Vector3 v3SphereCenter, float fRadius, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
-	        Vector3[] bounds = new Vector3[2];
+            Vector3[] bounds = new Vector3[2];
 
             bounds[0] = aabbMin;
             bounds[1] = aabbMax;
 
-            Vector3	p0, tmp, prel, normal; 
+            Vector3 p0, tmp, prel, normal;
             Vector3[] n = new Vector3[6];
             float fSep = -10000000.0f;
             float fSepThis;
@@ -239,54 +240,54 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             p0 = Vector3.Zero;
             normal = Vector3.Zero;
 
-            n[0] = new Vector3(-1,0,0);
-            n[1] = new Vector3(0,-1,0);
-            n[2] = new Vector3(0,0,-1);
-            n[3] = new Vector3(1,0,0);
-            n[4] = new Vector3(0,1,0);
-            n[5] = new Vector3(0,0,1);
+            n[0] = new Vector3(-1, 0, 0);
+            n[1] = new Vector3(0, -1, 0);
+            n[2] = new Vector3(0, 0, -1);
+            n[3] = new Vector3(1, 0, 0);
+            n[4] = new Vector3(0, 1, 0);
+            n[5] = new Vector3(0, 0, 1);
 
             Matrix m44T = boxObj.GetWorldTransform();
 
             // convert  point in local space
 
-            prel = MathUtil.InverseTransform(ref m44T,ref v3SphereCenter);
+            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
 
             ///////////
 
-            for (int i=0;i<6;i++)
+            for (int i = 0; i < 6; i++)
             {
-	            int j = i<3 ? 0:1;
-	            if ( (fSepThis = (Vector3.Dot((prel-bounds[j]),n[i]))-fRadius) > 0f)
+                int j = i < 3 ? 0 : 1;
+                if ((fSepThis = (Vector3.Dot((prel - bounds[j]), n[i])) - fRadius) > 0f)
                 {
                     return 1f;
                 }
-	            if ( fSepThis > fSep )
-	            {
-		            p0 = bounds[j];	
+                if (fSepThis > fSep)
+                {
+                    p0 = bounds[j];
                     normal = n[i];
-		            fSep = fSepThis;
-	            }
+                    fSep = fSepThis;
+                }
             }
 
-            v3PointOnBox = prel - normal*(Vector3.Dot(normal,(prel-p0)));
-            v3PointOnSphere = v3PointOnBox + normal*fSep;
+            v3PointOnBox = prel - normal * (Vector3.Dot(normal, (prel - p0)));
+            v3PointOnSphere = v3PointOnBox + normal * fSep;
 
             // transform back in world space
-            tmp  = Vector3.Transform(v3PointOnBox,m44T );		
-            v3PointOnBox    = tmp;
-            tmp  = Vector3.Transform(v3PointOnSphere,m44T);
+            tmp = Vector3.Transform(v3PointOnBox, m44T);
+            v3PointOnBox = tmp;
+            tmp = Vector3.Transform(v3PointOnSphere, m44T);
             v3PointOnSphere = tmp;
-            normal = (v3PointOnBox-v3PointOnSphere);
+            normal = (v3PointOnBox - v3PointOnSphere);
             normal.Normalize();
 
             return fSep;
 
         }
 
-	    private bool	m_ownManifold;
-	    private PersistentManifold	m_manifoldPtr;
-	    private bool	m_isSwapped;
+        private bool m_ownManifold;
+        private PersistentManifold m_manifoldPtr;
+        private bool m_isSwapped;
 
     }
 }

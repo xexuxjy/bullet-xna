@@ -31,22 +31,23 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class ConvexPlaneCollisionAlgorithm : CollisionAlgorithm
     {
-        public ConvexPlaneCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0,CollisionObject col1,bool isSwapped,int numPerturbationIterations,int minimumPointsPerturbationThreshold) : base(ci)
+        public ConvexPlaneCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+            : base(ci)
         {
             m_manifoldPtr = mf;
             m_ownManifold = false;
             m_isSwapped = isSwapped;
             m_numPerturbationIterations = numPerturbationIterations;
             m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
-            
-            CollisionObject convexObj = m_isSwapped? col1 : col0;
-	        CollisionObject planeObj = m_isSwapped? col0 : col1;
 
-	        if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(convexObj,planeObj))
-	        {
-		        m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj,planeObj);
-		        m_ownManifold = true;
-	        }
+            CollisionObject convexObj = m_isSwapped ? col1 : col0;
+            CollisionObject planeObj = m_isSwapped ? col0 : col1;
+
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(convexObj, planeObj))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj, planeObj);
+                m_ownManifold = true;
+            }
 
         }
 
@@ -62,152 +63,152 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 m_ownManifold = false;
             }
         }
-        
-        public override void ProcessCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+
+        public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-	        if (m_manifoldPtr == null)
+            if (m_manifoldPtr == null)
             {
-		        return;
+                return;
             }
 
-            CollisionObject convexObj = m_isSwapped? body1 : body0;
-	        CollisionObject planeObj = m_isSwapped? body0: body1;
+            CollisionObject convexObj = m_isSwapped ? body1 : body0;
+            CollisionObject planeObj = m_isSwapped ? body0 : body1;
 
-	        ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
-	        StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
+            ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
+            StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             //bool hasCollision = false;
-	        Vector3 planeNormal = planeShape.GetPlaneNormal();
+            Vector3 planeNormal = planeShape.GetPlaneNormal();
             //float planeConstant = planeShape.getPlaneConstant();
 
-	        //first perform a collision query with the non-perturbated collision objects
-	        {
-		        Quaternion rotq = Quaternion.Identity;
-		        CollideSingleContact(ref rotq,body0,body1,dispatchInfo,resultOut);
-	        }
+            //first perform a collision query with the non-perturbated collision objects
+            {
+                Quaternion rotq = Quaternion.Identity;
+                CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
+            }
 
-	        if (resultOut.GetPersistentManifold().GetNumContacts()<m_minimumPointsPerturbationThreshold)
-	        {
-		        Vector3 v0;
+            if (resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
+            {
+                Vector3 v0;
                 Vector3 v1;
-		        TransformUtil.PlaneSpace1(ref planeNormal, out v0, out v1);
-		        //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
+                TransformUtil.PlaneSpace1(ref planeNormal, out v0, out v1);
+                //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
 
                 float angleLimit = 0.125f * MathUtil.SIMD_PI;
-		        float perturbeAngle;
-		        float radius = convexShape.GetAngularMotionDisc();
-		        perturbeAngle = BulletGlobals.gContactBreakingThreshold / radius;
-		        if ( perturbeAngle > angleLimit ) 
+                float perturbeAngle;
+                float radius = convexShape.GetAngularMotionDisc();
+                perturbeAngle = BulletGlobals.gContactBreakingThreshold / radius;
+                if (perturbeAngle > angleLimit)
                 {
                     perturbeAngle = angleLimit;
                 }
-		        Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0,perturbeAngle);
-		        for (int i=0;i<m_numPerturbationIterations;i++)
-		        {
-			        float iterationAngle = i*(MathUtil.SIMD_2_PI/(float)m_numPerturbationIterations);
-			        Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal,iterationAngle);
-                    rotq = MathUtil.QuaternionMultiply(Quaternion.Inverse(rotq),MathUtil.QuaternionMultiply(perturbeRot,rotq));
-			        CollideSingleContact(ref rotq,body0,body1,dispatchInfo,resultOut);
-		        }
-	        }
+                Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0, perturbeAngle);
+                for (int i = 0; i < m_numPerturbationIterations; i++)
+                {
+                    float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
+                    Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal, iterationAngle);
+                    rotq = MathUtil.QuaternionMultiply(Quaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
+                    CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
+                }
+            }
 
-	        if (m_ownManifold)
-	        {
-		        if (m_manifoldPtr.GetNumContacts() > 0)
-		        {
-			        resultOut.RefreshContactPoints();
-		        }
-	        }
+            if (m_ownManifold)
+            {
+                if (m_manifoldPtr.GetNumContacts() > 0)
+                {
+                    resultOut.RefreshContactPoints();
+                }
+            }
         }
 
-	    public virtual void CollideSingleContact(ref Quaternion perturbeRot, CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public virtual void CollideSingleContact(ref Quaternion perturbeRot, CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-            CollisionObject convexObj = m_isSwapped? body1 : body0;
-	        CollisionObject planeObj = m_isSwapped? body0: body1;
+            CollisionObject convexObj = m_isSwapped ? body1 : body0;
+            CollisionObject planeObj = m_isSwapped ? body0 : body1;
 
-	        ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
+            ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
             StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             bool hasCollision = false;
-	        Vector3 planeNormal = planeShape.GetPlaneNormal();
-	        float planeConstant = planeShape.GetPlaneConstant();
-        	
-	        Matrix convexWorldTransform = convexObj.GetWorldTransform();
-	        Matrix convexInPlaneTrans = Matrix.Identity;
+            Vector3 planeNormal = planeShape.GetPlaneNormal();
+            float planeConstant = planeShape.GetPlaneConstant();
 
-			convexInPlaneTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(planeObj.GetWorldTransform()), convexWorldTransform);
+            Matrix convexWorldTransform = convexObj.GetWorldTransform();
+            Matrix convexInPlaneTrans = Matrix.Identity;
 
-	        //now perturbe the convex-world transform
-            
+            convexInPlaneTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(planeObj.GetWorldTransform()), convexWorldTransform);
+
+            //now perturbe the convex-world transform
+
             // MAN - CHECKTHIS
             Matrix rotMatrix = Matrix.CreateFromQuaternion(perturbeRot);
-	        convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(convexWorldTransform,rotMatrix);
+            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(convexWorldTransform, rotMatrix);
 
             Matrix planeInConvex = Matrix.Identity;
-	        planeInConvex= MathUtil.BulletMatrixMultiply(Matrix.Invert(convexWorldTransform),planeObj.GetWorldTransform());
-        	
-	        Vector3 tmp = Vector3.TransformNormal(-planeNormal,planeInConvex);
+            planeInConvex = MathUtil.BulletMatrixMultiply(Matrix.Invert(convexWorldTransform), planeObj.GetWorldTransform());
+
+            Vector3 tmp = Vector3.TransformNormal(-planeNormal, planeInConvex);
             Vector3 vtx = convexShape.LocalGetSupportingVertex(ref tmp);
 
-	        Vector3 vtxInPlane = Vector3.Transform(vtx,convexInPlaneTrans);
-	        float distance = (Vector3.Dot(planeNormal,vtxInPlane) - planeConstant);
+            Vector3 vtxInPlane = Vector3.Transform(vtx, convexInPlaneTrans);
+            float distance = (Vector3.Dot(planeNormal, vtxInPlane) - planeConstant);
 
-	        Vector3 vtxInPlaneProjected = vtxInPlane - (distance*planeNormal);
-	        Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected,planeObj.GetWorldTransform());
+            Vector3 vtxInPlaneProjected = vtxInPlane - (distance * planeNormal);
+            Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected, planeObj.GetWorldTransform());
 
-	        hasCollision = distance < m_manifoldPtr.GetContactBreakingThreshold();
+            hasCollision = distance < m_manifoldPtr.GetContactBreakingThreshold();
 
-	        resultOut.SetPersistentManifold(m_manifoldPtr);
-	        if (hasCollision)
-	        {
-		        /// report a contact. internally this will be kept persistent, and contact reduction is done
-		        Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal,planeObj.GetWorldTransform());
-		        Vector3 pOnB = vtxInPlaneWorld;
-		        resultOut.AddContactPoint(ref normalOnSurfaceB,ref pOnB,distance);
-	        }
+            resultOut.SetPersistentManifold(m_manifoldPtr);
+            if (hasCollision)
+            {
+                /// report a contact. internally this will be kept persistent, and contact reduction is done
+                Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal, planeObj.GetWorldTransform());
+                Vector3 pOnB = vtxInPlaneWorld;
+                resultOut.AddContactPoint(ref normalOnSurfaceB, ref pOnB, distance);
+            }
         }
-	    
-        public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-	        return 1f;
+            return 1f;
         }
 
-	    public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-		    if (m_manifoldPtr != null && m_ownManifold)
-		    {
-			    manifoldArray.Add(m_manifoldPtr);
-		    }
-	    }
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        {
+            if (m_manifoldPtr != null && m_ownManifold)
+            {
+                manifoldArray.Add(m_manifoldPtr);
+            }
+        }
 
         private bool m_ownManifold;
         private PersistentManifold m_manifoldPtr;
         private bool m_isSwapped;
         private int m_numPerturbationIterations;
-	    private int	m_minimumPointsPerturbationThreshold;
+        private int m_minimumPointsPerturbationThreshold;
 
     }
 
     public class ConvexPlaneCreateFunc : CollisionAlgorithmCreateFunc
     {
-        public int	m_numPerturbationIterations;
+        public int m_numPerturbationIterations;
         public int m_minimumPointsPerturbationThreshold;
-			
+
         public ConvexPlaneCreateFunc()
         {
             m_numPerturbationIterations = 1;
             m_minimumPointsPerturbationThreshold = 1;
         }
-		
-        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0,CollisionObject body1)
+
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
             if (!m_swapped)
             {
-                return new ConvexPlaneCollisionAlgorithm(null,ci,body0,body1,false,m_numPerturbationIterations,m_minimumPointsPerturbationThreshold);
-            } 
+                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            }
             else
             {
-                return new ConvexPlaneCollisionAlgorithm(null,ci,body0,body1,true,m_numPerturbationIterations,m_minimumPointsPerturbationThreshold);
+                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
         }
     };

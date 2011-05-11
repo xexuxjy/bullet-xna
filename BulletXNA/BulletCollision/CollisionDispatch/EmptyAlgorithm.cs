@@ -30,35 +30,35 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class EmptyAlgorithm : CollisionAlgorithm
     {
-	    public EmptyAlgorithm(CollisionAlgorithmConstructionInfo ci)
+        public EmptyAlgorithm(CollisionAlgorithmConstructionInfo ci)
         {
         }
 
-	    public override void ProcessCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
         }
 
-    	public override float CalculateTimeOfImpact(CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
+        public override float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             return 1f;
         }
 
-	    public override	void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
-	    {
-	    }
+        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        {
+        }
 
         public override void Cleanup()
         {
-            
+
         }
     }
 
-	public class EmptyCreateFunc :CollisionAlgorithmCreateFunc
-	{
-		public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0,CollisionObject body1)
-		{
-			return new EmptyAlgorithm(ci);
-		}
-	}
+    public class EmptyCreateFunc : CollisionAlgorithmCreateFunc
+    {
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            return new EmptyAlgorithm(ci);
+        }
+    }
 
 }

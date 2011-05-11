@@ -29,42 +29,42 @@ using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
-        [Flags]
-        public enum CollisionFlags
-        {
-            CF_STATIC_OBJECT=1,
-            CF_KINEMATIC_OBJECT=2,
-            CF_NO_CONTACT_RESPONSE=4,
-            CF_CUSTOM_MATERIAL_CALLBACK=8,
-            CF_CHARACTER_OBJECT=16,
-		    CF_DISABLE_VISUALIZE_OBJECT = 32, //disable debug drawing
-		    CF_DISABLE_SPU_COLLISION_PROCESSING = 64//disable parallel/SPU processing
-        }
+    [Flags]
+    public enum CollisionFlags
+    {
+        CF_STATIC_OBJECT = 1,
+        CF_KINEMATIC_OBJECT = 2,
+        CF_NO_CONTACT_RESPONSE = 4,
+        CF_CUSTOM_MATERIAL_CALLBACK = 8,
+        CF_CHARACTER_OBJECT = 16,
+        CF_DISABLE_VISUALIZE_OBJECT = 32, //disable debug drawing
+        CF_DISABLE_SPU_COLLISION_PROCESSING = 64//disable parallel/SPU processing
+    }
 
 
 
-        public enum CollisionObjectTypes
-        {
-            CO_COLLISION_OBJECT=1,
-            CO_RIGID_BODY,
-		    ///CO_GHOST_OBJECT keeps track of all objects overlapping its AABB and that pass its collision filter
-		    ///It is useful for collision sensors, explosion objects, character controller etc.
-		    CO_GHOST_OBJECT,
-		    CO_SOFT_BODY,
-		    CO_HF_FLUID
-        }
+    public enum CollisionObjectTypes
+    {
+        CO_COLLISION_OBJECT = 1,
+        CO_RIGID_BODY,
+        ///CO_GHOST_OBJECT keeps track of all objects overlapping its AABB and that pass its collision filter
+        ///It is useful for collision sensors, explosion objects, character controller etc.
+        CO_GHOST_OBJECT,
+        CO_SOFT_BODY,
+        CO_HF_FLUID
+    }
 
 
 
-        public enum ActivationState
-        {
-            UNDEFINED=0,
-            ACTIVE_TAG=1,
-            ISLAND_SLEEPING=2,
-            WANTS_DEACTIVATION=3,
-            DISABLE_DEACTIVATION=4,
-            DISABLE_SIMULATION=5
-        }
+    public enum ActivationState
+    {
+        UNDEFINED = 0,
+        ACTIVE_TAG = 1,
+        ISLAND_SLEEPING = 2,
+        WANTS_DEACTIVATION = 3,
+        DISABLE_DEACTIVATION = 4,
+        DISABLE_SIMULATION = 5
+    }
 
 
 
@@ -73,7 +73,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public CollisionObject()
         {
-            m_anisotropicFriction = new Vector3(1f,1f,1f);
+            m_anisotropicFriction = new Vector3(1f, 1f, 1f);
             m_hasAnisotropicFriction = false;
             m_contactProcessingThreshold = MathUtil.BT_LARGE_FLOAT;
             m_broadphaseHandle = null;
@@ -98,15 +98,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             return true;
         }
-        
 
 
-        public bool MergesSimulationIslands() 
-	    {
+
+        public bool MergesSimulationIslands()
+        {
             CollisionFlags collisionMask = CollisionFlags.CF_STATIC_OBJECT | CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_NO_CONTACT_RESPONSE;
-		    ///static objects, kinematic and object without contact response don't merge islands
+            ///static objects, kinematic and object without contact response don't merge islands
             return ((m_collisionFlags & collisionMask) == 0);
-	    }
+        }
 
 
 
@@ -120,98 +120,98 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         public void SetAnisotropicFriction(ref Vector3 anisotropicFriction)
         {
             m_anisotropicFriction = anisotropicFriction;
-		    m_hasAnisotropicFriction = (anisotropicFriction.X!=1f) || (anisotropicFriction.Y!=1f) || (anisotropicFriction.Z!=1f);
+            m_hasAnisotropicFriction = (anisotropicFriction.X != 1f) || (anisotropicFriction.Y != 1f) || (anisotropicFriction.Z != 1f);
         }
-    
 
 
-        public bool	HasAnisotropicFriction() 
+
+        public bool HasAnisotropicFriction()
         {
             return m_hasAnisotropicFriction;
         }
 
 
 
-	    public void	SetContactProcessingThreshold(float contactProcessingThreshold)
-	    {
-		    m_contactProcessingThreshold = contactProcessingThreshold;
-	    }
-
-
-	    
-        public float GetContactProcessingThreshold()
-	    {
-		    return m_contactProcessingThreshold;
-	    }
-
-
-
-	    public bool	IsStaticObject() 
+        public void SetContactProcessingThreshold(float contactProcessingThreshold)
         {
-		    return (m_collisionFlags & CollisionFlags.CF_STATIC_OBJECT) != 0;
-	    }
+            m_contactProcessingThreshold = contactProcessingThreshold;
+        }
 
 
 
-	    public bool IsKinematicObject() 
-	    {
-		    return (m_collisionFlags & CollisionFlags.CF_KINEMATIC_OBJECT) != 0;
-	    }
+        public float GetContactProcessingThreshold()
+        {
+            return m_contactProcessingThreshold;
+        }
+
+
+
+        public bool IsStaticObject()
+        {
+            return (m_collisionFlags & CollisionFlags.CF_STATIC_OBJECT) != 0;
+        }
+
+
+
+        public bool IsKinematicObject()
+        {
+            return (m_collisionFlags & CollisionFlags.CF_KINEMATIC_OBJECT) != 0;
+        }
 
 
 
         public bool IsStaticOrKinematicObject()
-	    {
-		    return (m_collisionFlags & (CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_STATIC_OBJECT)) != 0 ;
-	    }
-
-
-
-        public bool	HasContactResponse() 
         {
-		    return (m_collisionFlags & CollisionFlags.CF_NO_CONTACT_RESPONSE)==0;
-	    }
-            
-
-
-        public virtual void	SetCollisionShape(CollisionShape collisionShape)
-	    {
-		    m_collisionShape = collisionShape;
-		    m_rootCollisionShape = collisionShape;
-	    }
+            return (m_collisionFlags & (CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_STATIC_OBJECT)) != 0;
+        }
 
 
 
-	    public CollisionShape GetCollisionShape()
-	    {
-		    return m_collisionShape;
-	    }
+        public bool HasContactResponse()
+        {
+            return (m_collisionFlags & CollisionFlags.CF_NO_CONTACT_RESPONSE) == 0;
+        }
 
 
-        
+
+        public virtual void SetCollisionShape(CollisionShape collisionShape)
+        {
+            m_collisionShape = collisionShape;
+            m_rootCollisionShape = collisionShape;
+        }
+
+
+
+        public CollisionShape GetCollisionShape()
+        {
+            return m_collisionShape;
+        }
+
+
+
         public CollisionShape GetRootCollisionShape()
-	    {
-		    return m_rootCollisionShape;
-	    }
+        {
+            return m_rootCollisionShape;
+        }
 
 
-	    ///Avoid using this internal API call
-	    ///internalSetTemporaryCollisionShape is used to temporary replace the actual collision shape by a child collision shape.
-	    public void InternalSetTemporaryCollisionShape(CollisionShape collisionShape)
-	    {
-		    m_collisionShape = collisionShape;
-	    }
+        ///Avoid using this internal API call
+        ///internalSetTemporaryCollisionShape is used to temporary replace the actual collision shape by a child collision shape.
+        public void InternalSetTemporaryCollisionShape(CollisionShape collisionShape)
+        {
+            m_collisionShape = collisionShape;
+        }
 
 
 
-	    public ActivationState GetActivationState() 
-        { 
+        public ActivationState GetActivationState()
+        {
             return m_activationState1;
         }
-        
 
 
-	    public void SetActivationState(ActivationState newState)
+
+        public void SetActivationState(ActivationState newState)
         {
             if ((m_activationState1 != ActivationState.DISABLE_DEACTIVATION) && (m_activationState1 != ActivationState.DISABLE_SIMULATION))
             {
@@ -221,84 +221,84 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        public void	SetDeactivationTime(float time)
-	    {
-		    m_deactivationTime = time;
-	    }
+        public void SetDeactivationTime(float time)
+        {
+            m_deactivationTime = time;
+        }
 
 
 
-	    public float GetDeactivationTime()
-	    {
-		    return m_deactivationTime;
-	    }
+        public float GetDeactivationTime()
+        {
+            return m_deactivationTime;
+        }
 
 
 
-	    public void ForceActivationState(ActivationState newState)
+        public void ForceActivationState(ActivationState newState)
         {
             m_activationState1 = newState;
         }
 
 
-        
+
         public void Activate()
         {
             Activate(false);
         }
-	    public void	Activate(bool forceActivation)
+        public void Activate(bool forceActivation)
         {
             CollisionFlags collMask = CollisionFlags.CF_STATIC_OBJECT | CollisionFlags.CF_KINEMATIC_OBJECT;
-	        if (forceActivation || ((m_collisionFlags & collMask) == 0))
-	        {
-		        SetActivationState(ActivationState.ACTIVE_TAG);
+            if (forceActivation || ((m_collisionFlags & collMask) == 0))
+            {
+                SetActivationState(ActivationState.ACTIVE_TAG);
                 m_deactivationTime = 0f;
-	        }
+            }
         }
 
 
 
-	    public bool IsActive() 
-	    {
+        public bool IsActive()
+        {
             ActivationState activationState = GetActivationState();
             return (activationState != ActivationState.ISLAND_SLEEPING && activationState != ActivationState.DISABLE_SIMULATION);
-	    }
+        }
 
 
 
-	    public void SetRestitution(float rest)
-	    {
-		    m_restitution = rest;
-	    }
+        public void SetRestitution(float rest)
+        {
+            m_restitution = rest;
+        }
 
 
 
-	    public float GetRestitution()
-	    {
-		    return m_restitution;
-	    }
+        public float GetRestitution()
+        {
+            return m_restitution;
+        }
 
 
 
-	    public void SetFriction(float frict)
-	    {
-		    m_friction = frict;
-	    }
+        public void SetFriction(float frict)
+        {
+            m_friction = frict;
+        }
 
 
-	    
+
         public float GetFriction()
-	    {
-		    return m_friction;
-	    }
+        {
+            return m_friction;
+        }
 
 
 
-	    ///reserved for Bullet internal usage
+        ///reserved for Bullet internal usage
         public CollisionObjectTypes GetInternalType()
-	    {
-		    return m_internalType;
-	    }
+        {
+            return m_internalType;
+        }
 
 
 
@@ -308,72 +308,72 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
-        
+
         public Matrix GetWorldTransform()
-	    {
-		    return m_worldTransform;
-	    }
+        {
+            return m_worldTransform;
+        }
 
 
 
-	    public void SetWorldTransform(ref Matrix worldTrans)
-	    {
-		    m_worldTransform = worldTrans;
-	    }
+        public void SetWorldTransform(ref Matrix worldTrans)
+        {
+            m_worldTransform = worldTrans;
+        }
 
 
 
-	    public BroadphaseProxy GetBroadphaseHandle()
-	    {
-		    return m_broadphaseHandle;
-	    }
+        public BroadphaseProxy GetBroadphaseHandle()
+        {
+            return m_broadphaseHandle;
+        }
 
 
 
-        public void	SetBroadphaseHandle(BroadphaseProxy handle)
-	    {
-		    m_broadphaseHandle = handle;
-	    }
+        public void SetBroadphaseHandle(BroadphaseProxy handle)
+        {
+            m_broadphaseHandle = handle;
+        }
 
 
 
-	    public Matrix GetInterpolationWorldTransform() 
-	    {
-		    return m_interpolationWorldTransform;
-	    }
+        public Matrix GetInterpolationWorldTransform()
+        {
+            return m_interpolationWorldTransform;
+        }
 
 
 
-        public void	SetInterpolationWorldTransform(ref Matrix trans)
-	    {
-		    m_interpolationWorldTransform = trans;
-	    }
+        public void SetInterpolationWorldTransform(ref Matrix trans)
+        {
+            m_interpolationWorldTransform = trans;
+        }
 
 
 
-	    public void SetInterpolationLinearVelocity(ref Vector3 linvel)
-	    {
-		    m_interpolationLinearVelocity = linvel;
-	    }
+        public void SetInterpolationLinearVelocity(ref Vector3 linvel)
+        {
+            m_interpolationLinearVelocity = linvel;
+        }
 
-	    public void	SetInterpolationAngularVelocity(ref Vector3 angvel)
-	    {
-		    m_interpolationAngularVelocity = angvel;
-	    }
-
-
-
-	    public Vector3	SetInterpolationLinearVelocity() 
-	    {
-		    return m_interpolationLinearVelocity;
-	    }
+        public void SetInterpolationAngularVelocity(ref Vector3 angvel)
+        {
+            m_interpolationAngularVelocity = angvel;
+        }
 
 
 
-	    public Vector3 GetInterpolationAngularVelocity()
-	    {
-		    return m_interpolationAngularVelocity;
-	    }
+        public Vector3 SetInterpolationLinearVelocity()
+        {
+            return m_interpolationLinearVelocity;
+        }
+
+
+
+        public Vector3 GetInterpolationAngularVelocity()
+        {
+            return m_interpolationAngularVelocity;
+        }
 
         public Vector3 GetInterpolationLinearVelocity()
         {
@@ -381,121 +381,121 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
-	    public int GetIslandTag() 
-	    {
-		    return	m_islandTag1;
-	    }
+        public int GetIslandTag()
+        {
+            return m_islandTag1;
+        }
 
 
-	    public void	SetIslandTag(int tag)
-	    {
-		    m_islandTag1 = tag;
-	    }
-        
-
-
-        public int GetCompanionId() 
-	    {
-		    return	m_companionId;
-	    }
+        public void SetIslandTag(int tag)
+        {
+            m_islandTag1 = tag;
+        }
 
 
 
-	    public void	SetCompanionId(int id)
-	    {
-		    m_companionId = id;
-	    }
+        public int GetCompanionId()
+        {
+            return m_companionId;
+        }
 
 
 
-	    public float GetHitFraction()
-	    {
-		    return m_hitFraction; 
-	    }
+        public void SetCompanionId(int id)
+        {
+            m_companionId = id;
+        }
 
 
 
-	    public void	SetHitFraction(float hitFraction)
-	    {
-		    m_hitFraction = hitFraction;
-	    }
+        public float GetHitFraction()
+        {
+            return m_hitFraction;
+        }
 
 
-	
-	    public CollisionFlags GetCollisionFlags() 
-	    {
-		    return m_collisionFlags;
-	    }
+
+        public void SetHitFraction(float hitFraction)
+        {
+            m_hitFraction = hitFraction;
+        }
+
+
+
+        public CollisionFlags GetCollisionFlags()
+        {
+            return m_collisionFlags;
+        }
 
 
 
         public void SetCollisionFlags(CollisionFlags flags)
-	    {
-		    m_collisionFlags = flags;
-	    }
-
-
-
-	    ///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
-	    public float GetCcdSweptSphereRadius()
         {
-		    return m_ccdSweptSphereRadius;
-	    }
+            m_collisionFlags = flags;
+        }
 
 
 
-	    ///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
-	    public void	SetCcdSweptSphereRadius(float radius)
-	    {
-		    m_ccdSweptSphereRadius = radius;
-	    }
+        ///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
+        public float GetCcdSweptSphereRadius()
+        {
+            return m_ccdSweptSphereRadius;
+        }
 
 
 
-	    public float GetCcdMotionThreshold()
-	    {
-		    return m_ccdMotionThreshold;
-	    }
+        ///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
+        public void SetCcdSweptSphereRadius(float radius)
+        {
+            m_ccdSweptSphereRadius = radius;
+        }
 
 
 
-	    public float GetCcdSquareMotionThreshold() 
-	    {
-		    return m_ccdMotionThreshold*m_ccdMotionThreshold;
-	    }
+        public float GetCcdMotionThreshold()
+        {
+            return m_ccdMotionThreshold;
+        }
 
 
 
-	    /// Don't do continuous collision detection if the motion (in one step) is less then m_ccdMotionThreshold
-	    public void	SetCcdMotionThreshold(float ccdMotionThreshold)
-	    {
-		    m_ccdMotionThreshold = ccdMotionThreshold;
-	    }
+        public float GetCcdSquareMotionThreshold()
+        {
+            return m_ccdMotionThreshold * m_ccdMotionThreshold;
+        }
 
 
 
-	    ///users can point to their objects, userPointer is not used by Bullet
-	    public Object GetUserPointer() 
-	    {
-		    return m_userObjectPointer;
-	    }
-    	
-	    ///users can point to their objects, userPointer is not used by Bullet
-	    public void SetUserPointer(Object userPointer)
-	    {
-		    m_userObjectPointer = userPointer;
-	    }
+        /// Don't do continuous collision detection if the motion (in one step) is less then m_ccdMotionThreshold
+        public void SetCcdMotionThreshold(float ccdMotionThreshold)
+        {
+            m_ccdMotionThreshold = ccdMotionThreshold;
+        }
 
 
 
-	    public bool CheckCollideWith(CollisionObject co)
-	    {
-		    if (m_checkCollideWith)
+        ///users can point to their objects, userPointer is not used by Bullet
+        public Object GetUserPointer()
+        {
+            return m_userObjectPointer;
+        }
+
+        ///users can point to their objects, userPointer is not used by Bullet
+        public void SetUserPointer(Object userPointer)
+        {
+            m_userObjectPointer = userPointer;
+        }
+
+
+
+        public bool CheckCollideWith(CollisionObject co)
+        {
+            if (m_checkCollideWith)
             {
-			    return CheckCollideWithOverride(co);
+                return CheckCollideWithOverride(co);
             }
-		    return true;
-	    }
+            return true;
+        }
 
 
 
@@ -505,9 +505,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        
-        protected Matrix m_worldTransform= Matrix.Identity;
-        protected Matrix m_interpolationWorldTransform= Matrix.Identity; 
+
+        protected Matrix m_worldTransform = Matrix.Identity;
+        protected Matrix m_interpolationWorldTransform = Matrix.Identity;
         protected Vector3 m_interpolationAngularVelocity;
         protected Vector3 m_interpolationLinearVelocity;
         protected Vector3 m_anisotropicFriction;

@@ -28,8 +28,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     public abstract class CollisionAlgorithmCreateFunc
     {
 
-	    public virtual CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo  caci, CollisionObject body0,CollisionObject body1)
-	    {
+        public virtual CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo caci, CollisionObject body0, CollisionObject body1)
+        {
             return null;
         }
 

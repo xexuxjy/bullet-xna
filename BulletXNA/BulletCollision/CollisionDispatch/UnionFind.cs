@@ -47,21 +47,21 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
     public class UnionFind
     {
-		public UnionFind()
+        public UnionFind()
         {
             m_elements = new ObjectArray<Element>();
         }
 
 
-		public virtual void Cleanup()
+        public virtual void Cleanup()
         {
             Free();
         }
 
-	
-		//this is a special operation, destroying the content of btUnionFind.
-		//it sorts the elements, based on island id, in order to make it easy to iterate over islands
-		public void	sortIslands()
+
+        //this is a special operation, destroying the content of btUnionFind.
+        //it sorts the elements, based on island id, in order to make it easy to iterate over islands
+        public void sortIslands()
         {
             //first store the original body index, and islandId
             int numElements = m_elements.Count;
@@ -75,16 +75,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_elements.Sort();
         }
 
-	    public void	Reset(int N)
+        public void Reset(int N)
         {
             Allocate(N);
 
             Element[] raw = m_elements.GetRawArray();
             for (int i = 0; i < N; i++)
             {
-                raw[i].m_id = i; 
+                raw[i].m_id = i;
                 raw[i].m_sz = 1;
-            } 
+            }
         }
 
         public int GetNumElements()
@@ -92,20 +92,20 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return m_elements.Count;
         }
 
-        public bool  IsRoot(int x)
+        public bool IsRoot(int x)
         {
-          return (x == m_elements[x].m_id);
+            return (x == m_elements[x].m_id);
         }
 
-        public Element	GetElement(int index)
+        public Element GetElement(int index)
         {
-          return m_elements[index];
+            return m_elements[index];
         }
 
-   
-        public void	Allocate(int N)
+
+        public void Allocate(int N)
         {
-            m_elements.Resize(N,true);
+            m_elements.Resize(N, true);
         }
         public void Free()
         {
@@ -113,16 +113,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
         public bool Find(int p, int q)
-        { 
-            return (Find(p) == Find(q)); 
+        {
+            return (Find(p) == Find(q));
         }
 
-		public void Unite(int p, int q)
-		{
-			int i = Find(p), j = Find(q);
-			if (i == j) 
+        public void Unite(int p, int q)
+        {
+            int i = Find(p), j = Find(q);
+            if (i == j)
             {
-				return;
+                return;
             }
 
 #if !USE_PATH_COMPRESSION
@@ -140,34 +140,34 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 m_elements[i].m_sz += m_elements[j].m_sz; 
 			}
 #else
-			m_elements[i].m_id = j; m_elements[j].m_sz += m_elements[i].m_sz; 
+            m_elements[i].m_id = j; m_elements[j].m_sz += m_elements[i].m_sz;
 #endif //USE_PATH_COMPRESSION
-		}
+        }
 
-		public int Find(int x)
-		{ 
-			//btAssert(x < m_N);
-			//btAssert(x >= 0);
+        public int Find(int x)
+        {
+            //btAssert(x < m_N);
+            //btAssert(x >= 0);
             Element[] rawElements = m_elements.GetRawArray();
-            while (x != rawElements[x].m_id) 
-			{
-		//not really a reason not to use path compression, and it flattens the trees/improves find performance dramatically
-	
-		#if USE_PATH_COMPRESSION
+            while (x != rawElements[x].m_id)
+            {
+                //not really a reason not to use path compression, and it flattens the trees/improves find performance dramatically
+
+#if USE_PATH_COMPRESSION
                 //m_elements[x].m_id = m_elements[m_elements[x].m_id].m_id;
                 Element elementPtr = rawElements[rawElements[x].m_id];
                 rawElements[x].m_id = elementPtr.m_id;
-                x = elementPtr.m_id;			
-        #else
+                x = elementPtr.m_id;
+#else
             x = rawElements[x].m_id;
 #endif
                 x = rawElements[x].m_id;
-				//btAssert(x < m_N);
-				//btAssert(x >= 0);
+                //btAssert(x < m_N);
+                //btAssert(x >= 0);
 
-			}
-			return x; 
-		}
+            }
+            return x;
+        }
         private ObjectArray<Element> m_elements;
     }
 }

@@ -26,6 +26,7 @@ using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
@@ -211,7 +212,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return resultFraction;
         }
 
-        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
         {
             ///should we use m_ownManifold to avoid adding duplicates?
             if (m_manifoldPtr != null && m_ownManifold)

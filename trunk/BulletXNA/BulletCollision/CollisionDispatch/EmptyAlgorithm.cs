@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
@@ -43,7 +44,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return 1f;
         }
 
-        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
         {
         }
 

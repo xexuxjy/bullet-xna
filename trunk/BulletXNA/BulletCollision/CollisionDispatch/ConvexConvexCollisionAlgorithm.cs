@@ -373,7 +373,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return resultFraction;
         }
 
-        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
         {
             ///should we use m_ownManifold to avoid adding duplicates?
             if (m_manifoldPtr != null && m_ownManifold)

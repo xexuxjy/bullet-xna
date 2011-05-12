@@ -209,7 +209,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         {
 						    meshInterface.UnLockReadOnlyVertexBase(curNodeSubPart);
                         }
-					    meshInterface.getLockedReadOnlyVertexIndexBase(out vertexBaseObject,out numverts,out type,out stride,out indexBaseObject,out indexstride,out numfaces,out indicestype,nodeSubPart);
+					    meshInterface.GetLockedReadOnlyVertexIndexBase(out vertexBaseObject,out numverts,out type,out stride,out indexBaseObject,out indexstride,out numfaces,out indicestype,nodeSubPart);
 
 					    curNodeSubPart = nodeSubPart;
 					    Debug.Assert(indicestype==PHY_ScalarType.PHY_INTEGER||indicestype==PHY_ScalarType.PHY_SHORT);

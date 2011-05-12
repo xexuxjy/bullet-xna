@@ -251,7 +251,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             int numfaces;
             PHY_ScalarType indicesType;
 
-            m_meshInterface.getLockedReadOnlyVertexIndexBase(
+            m_meshInterface.GetLockedReadOnlyVertexIndexBase(
                 out vertexBase,
                 out numVerts,
                 out type,

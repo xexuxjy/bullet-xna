@@ -244,7 +244,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        public override void GetAllContactManifolds(IList<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
         {
             if (m_convexTriangleCallback.m_manifoldPtr != null)
             {

@@ -94,7 +94,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        indicestype = mesh.m_indexType;
         }
 
-        public override void getLockedReadOnlyVertexIndexBase(out Object vertexbase, out int numverts, out PHY_ScalarType type, out int vertexStride, out Object indexbase, out int indexstride, out int numfaces, out PHY_ScalarType indicestype, int subpart)
+        public override void GetLockedReadOnlyVertexIndexBase(out Object vertexbase, out int numverts, out PHY_ScalarType type, out int vertexStride, out Object indexbase, out int indexstride, out int numfaces, out PHY_ScalarType indicestype, int subpart)
         {
             Debug.Assert(subpart< GetNumSubParts() );
 

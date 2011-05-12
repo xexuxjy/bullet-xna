@@ -315,6 +315,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         }
 
 
+        public void SetWorldTransform(Matrix worldTrans)
+        {
+            m_worldTransform = worldTrans;
+        }
 
         public void SetWorldTransform(ref Matrix worldTrans)
         {

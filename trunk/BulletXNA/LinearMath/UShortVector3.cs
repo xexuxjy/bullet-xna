@@ -22,6 +22,7 @@
  */
 
 
+using System.Diagnostics;
 namespace BulletXNA.LinearMath
 {
     public struct UShortVector3
@@ -43,6 +44,26 @@ namespace BulletXNA.LinearMath
             if (Y < a.Y) Y = a.Y;
             if (Z < a.Z) Z = a.Z;
         }
+
+		public ushort this[int i]
+		{
+			get
+			{
+				if (i == 0) return X;
+				if (i == 1) return Y;
+				if (i == 2) return Z;
+				Debug.Assert(false);
+				return 0;
+			}
+			set
+			{
+				if (i == 0) { X = value; return; }
+				if (i == 1) { Y = value; return; }
+				if (i == 2) { Z = value; return; }
+				Debug.Assert(false);
+			}
+		}
+
     }
 
 }

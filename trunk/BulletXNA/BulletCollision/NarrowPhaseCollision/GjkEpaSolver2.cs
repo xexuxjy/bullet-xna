@@ -31,6 +31,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class GjkEpaSolver2
     {
         public static bool debugGJK = false;
+        static EPA epa = new EPA();
 
         public static void Initialize(ConvexShape shape0,ref Matrix wtrs0,
             ConvexShape shape1,ref Matrix wtrs1,
@@ -115,7 +116,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             {
             case GJKStatus.Inside:
                 {
-                    EPA	epa = new EPA();
+                    //EPA	epa = new EPA();
                     eStatus	epa_status=epa.Evaluate(gjk,ref minusGuess);
                     if(epa_status!=eStatus.Failed)
                     {

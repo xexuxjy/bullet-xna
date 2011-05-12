@@ -512,7 +512,7 @@ namespace BulletXNA.BulletDynamics.Character
         protected Vector3 m_targetPosition;
 
         ///keep track of the contact manifolds
-        protected IList<PersistentManifold> m_manifoldArray;
+        protected ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
 
         protected bool m_touchingContact;
         protected Vector3 m_touchingNormal;

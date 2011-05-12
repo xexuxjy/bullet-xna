@@ -24,6 +24,7 @@ using System.Collections.Generic;
 
 using BulletXNA.BulletCollision.CollisionDispatch;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.BroadphaseCollision
 {
@@ -92,7 +93,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public abstract float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
-        public abstract void GetAllContactManifolds(IList<PersistentManifold> manifoldArray);
+        public abstract void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray);
 
         public virtual void Cleanup()
         {

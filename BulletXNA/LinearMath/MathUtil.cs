@@ -31,6 +31,37 @@ namespace BulletXNA
 {
     public static class MathUtil
     {
+        public static float[,] BasisMatrixToFloatArray(ref Matrix m)
+        {
+            float[,] result = new float[3, 3];
+            result[0, 0] = m.M11;
+            result[0, 1] = m.M12;
+            result[0, 2] = m.M13;
+            result[1, 0] = m.M21;
+            result[1, 1] = m.M22;
+            result[1, 2] = m.M23;
+            result[2, 0] = m.M31;
+            result[2, 1] = m.M32;
+            result[2, 2] = m.M33;
+            return result;
+        }
+
+        public static void FloatArrayToBasisMatrix(float[,] f, ref Matrix m)
+        {
+            m.M11 = f[0,0];
+            m.M12 = f[0, 1];
+            m.M13 = f[0, 2];
+            m.M21 = f[1, 0];
+            m.M22 = f[1, 1];
+            m.M23 = f[1, 2];
+            m.M31 = f[2, 0];
+            m.M32 = f[2, 1];
+            m.M33 = f[2, 2];
+        }
+
+
+
+
         public static void SetBasis(ref Matrix m, ref Vector3 right, ref Vector3 up, ref Vector3 backward)
         {
             m.M11 = right.X;
@@ -310,6 +341,8 @@ namespace BulletXNA
             Debug.Assert(false);
             return 0.0f;
         }
+
+
 
         public static void VectorComponent(ref Vector4 v, int i, float f)
         {
@@ -1207,6 +1240,10 @@ namespace BulletXNA
         }
 
 
+        public static Vector3 Vector4ToVector3(Vector4 v4)
+        {
+            return new Vector3(v4.X, v4.Y, v4.Z);
+        }
 
 		public static Vector3 TransposeTransformNormal(Vector3 v,Matrix m)
 		{

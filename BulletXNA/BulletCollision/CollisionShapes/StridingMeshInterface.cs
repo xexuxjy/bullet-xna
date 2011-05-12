@@ -59,7 +59,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        ///if the number of parts is big, the performance might drop due to the innerloop switch on indextype
 	        for (part=0;part<graphicssubparts ;part++)
 	        {
-		        getLockedReadOnlyVertexIndexBase(out vertexbase,out numverts,out type,out stride,out indexbase,out indexstride,out numtriangles,out gfxindextype,part);
+		        GetLockedReadOnlyVertexIndexBase(out vertexbase,out numverts,out type,out stride,out indexbase,out indexstride,out numtriangles,out gfxindextype,part);
 		        numtotalphysicsverts+=numtriangles*3; //upper bound
 
 		        switch (gfxindextype)
@@ -73,12 +73,16 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 						if (vertexbase is ObjectArray<Vector3>)
 						{
-                            ObjectArray<Vector3> vertexList = (ObjectArray<Vector3>)vertexbase;
+                            ObjectArray<Vector3> vertexList = vertexbase as ObjectArray<Vector3>;
 							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 							{
 								// FIXME - Work ref the properindexing on this.
 								int index = gfxindex * indexstride;
 								int triIndex = (gfxindex * indexstride);
+
+								int index1 = indexList[triIndex];
+								int index2 = indexList[triIndex+1];
+								int index3 = indexList[triIndex+2];
 
 								triangle[0] = vertexList[indexList[triIndex]] * meshScaling;
 								triangle[1] = vertexList[indexList[triIndex+1]] * meshScaling;
@@ -202,7 +206,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		/// make a call to unLockVertexBase when the read and write access is finished	
         public abstract void GetLockedVertexIndexBase(out Object vertexbase, out int numverts, out PHY_ScalarType type, out int stride, out Object indexbase, out int indexstride, out int numfaces, out PHY_ScalarType indicestype, int subpart);
 
-        public abstract void getLockedReadOnlyVertexIndexBase(out Object vertexbase, out int numverts, out PHY_ScalarType type, out int stride, out Object indexbase, out int indexstride, out int numfaces, out PHY_ScalarType indicestype, int subpart);
+        public abstract void GetLockedReadOnlyVertexIndexBase(out Object vertexbase, out int numverts, out PHY_ScalarType type, out int stride, out Object indexbase, out int indexstride, out int numfaces, out PHY_ScalarType indicestype, int subpart);
 	
 		/// unLockVertexBase finishes the access to a subpart of the triangle mesh
 		/// make a call to unLockVertexBase when the read and write access (using getLockedVertexIndexBase) is finished

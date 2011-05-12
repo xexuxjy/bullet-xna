@@ -116,7 +116,14 @@ namespace BulletXNA.LinearMath
 			return new ReadOnlyCollection<T>(this);
 		}
 
-	    public void	Resize(int newsize,bool allocate)
+        public void Swap(int index0, int index1)
+        {
+            T temp = _items[index0];
+            _items[index0] = _items[index1];
+            _items[index1] = temp;
+        }
+
+	    public void	Resize(int newsize,bool allocate=true)
 		{
 			int curSize = Count;
 

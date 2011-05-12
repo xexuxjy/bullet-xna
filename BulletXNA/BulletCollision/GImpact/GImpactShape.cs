@@ -384,7 +384,13 @@ namespace BulletXNA.BulletCollision.GImpact
         protected List<CollisionShape> m_childShapes = new List<CollisionShape>();
 
 
-        public GImpactCompoundShape(bool children_has_transform = true)
+        public GImpactCompoundShape()
+            : this(true)
+        {
+
+        }
+
+        public GImpactCompoundShape(bool children_has_transform)
         {
             m_primitive_manager.m_compoundShape = this;
             m_box_set.SetPrimitiveManager(m_primitive_manager);

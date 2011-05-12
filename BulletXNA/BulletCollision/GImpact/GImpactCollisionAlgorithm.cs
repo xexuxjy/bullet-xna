@@ -46,6 +46,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public void GetPlaneEquation(out Vector4 equation)
         {
+            equation = new Vector4();
             equation.X = m_planeNormal.X;
             equation.Y = m_planeNormal.Y;
             equation.Z = m_planeNormal.Z;
@@ -55,6 +56,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public void GetPlaneEquationTransformed(ref Matrix trans, out Vector4 equation)
         {
+            equation = new Vector4();
             equation.X = Vector3.Dot(MathUtil.MatrixRow(ref trans, 0), m_planeNormal);
             equation.Y = Vector3.Dot(MathUtil.MatrixRow(ref trans, 1), m_planeNormal);
             equation.Z = Vector3.Dot(MathUtil.MatrixRow(ref trans, 2), m_planeNormal);

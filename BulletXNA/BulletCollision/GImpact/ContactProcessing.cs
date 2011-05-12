@@ -137,7 +137,12 @@ namespace BulletXNA.BulletCollision.GImpact
             }
         }
 
-        public void MergeContacts(ContactArray contacts, bool normal_contact_average = true)
+        public void MergeContacts(ContactArray contacts)
+        {
+            MergeContacts(contacts, true);
+        }
+
+        public void MergeContacts(ContactArray contacts, bool normal_contact_average)
         {
             Clear();
 

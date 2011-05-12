@@ -216,6 +216,9 @@ namespace BulletXNA.BulletCollision.GImpact
                  ref Vector3 V2,
                  ref Vector3 V3)
         {
+            m_min = new Vector3();
+            m_max = new Vector3();
+
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
             m_min.Z = BoxCollision.BT_MIN3(V1.Z, V2.Z, V3.Z);
@@ -227,6 +230,8 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public AABB(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3, float margin)
         {
+            m_min = new Vector3();
+            m_max = new Vector3();
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
             m_min.Z = BoxCollision.BT_MIN3(V1.Z, V2.Z, V3.Z);

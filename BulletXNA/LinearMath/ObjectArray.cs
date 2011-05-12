@@ -123,7 +123,12 @@ namespace BulletXNA.LinearMath
             _items[index1] = temp;
         }
 
-	    public void	Resize(int newsize,bool allocate=true)
+        public void Resize(int newsize)
+        {
+            Resize(newsize, true);
+        }
+
+        public void	Resize(int newsize,bool allocate)
 		{
 			int curSize = Count;
 

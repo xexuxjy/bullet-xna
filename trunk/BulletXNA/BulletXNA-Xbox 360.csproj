@@ -62,7 +62,9 @@
     <DefineConstants>TRACE;XBOX;XBOX360</DefineConstants>
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="BulletMultiThreaded\" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicProfiler.cs" />
     <Compile Include="BulletCollision\CollisionDispatch\Box2dBox2dCollisionAlgorithm.cs" />
@@ -72,12 +74,18 @@
     <Compile Include="BulletCollision\CollisionDispatch\SimulationIslandManager.cs" />
     <Compile Include="BulletCollision\CollisionShapes\Box2dShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\Convex2dShape.cs" />
-    <Compile Include="BulletCollision\CollisionShapes\GImpact\GeometeryOperations.cs" />
-    <Compile Include="BulletCollision\CollisionShapes\GImpact\GImpactBvh.cs" />
-    <Compile Include="BulletCollision\CollisionShapes\GImpact\GImpactShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\ShapeHull.cs" />
     <Compile Include="BulletCollision\CollisionShapes\TriangleInfoMap.cs" />
-    <Compile Include="BulletCollision\CollisionShapes\GImpact\TriangleShapeEx.cs" />
+    <Compile Include="BulletCollision\GImpact\BoxCollision.cs" />
+    <Compile Include="BulletCollision\GImpact\ClipPolygon.cs" />
+    <Compile Include="BulletCollision\GImpact\ContactProcessing.cs" />
+    <Compile Include="BulletCollision\GImpact\GeometeryOperations.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactBvh.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactQuantization.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactQuantizedBvh.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactShape.cs" />
+    <Compile Include="BulletCollision\GImpact\TriangleShapeEx.cs" />
     <Compile Include="BulletDynamics\Character\ICharacterControllerInterface.cs" />
     <Compile Include="BulletDynamics\Character\KinematicCharacterController.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\Generic6DofConstraint.cs" />

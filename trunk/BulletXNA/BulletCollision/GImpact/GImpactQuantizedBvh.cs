@@ -511,7 +511,12 @@ namespace BulletXNA.BulletCollision.GImpact
         protected GIM_QUANTIZED_BVH_NODE_ARRAY m_node_array = new GIM_QUANTIZED_BVH_NODE_ARRAY();
         protected AABB m_global_bound;
         protected Vector3 m_bvhQuantization;
-        protected void CalcQuantization(GIM_BVH_DATA_ARRAY primitive_boxes, float boundMargin = 1.0f)
+
+        protected void CalcQuantization(GIM_BVH_DATA_ARRAY primitive_boxes)
+        {
+            CalcQuantization(primitive_boxes, 1.0f);
+        }
+        protected void CalcQuantization(GIM_BVH_DATA_ARRAY primitive_boxes, float boundMargin)
         {
             //calc globa box
             AABB global_bound = new AABB();

@@ -34,7 +34,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 {
     public class RigidBody : CollisionObject
     {
-        public static bool debugRigidBody = false;
+        public static bool debugRigidBody = true;
         private const float MAX_ANGVEL = MathUtil.SIMD_HALF_PI;
         private static int uniqueId = 0;
         private static int s_counter = 0;

@@ -34,13 +34,13 @@ namespace BulletXNA
 {
     public static class DrawHelper
     {
-        public static void DebugDrawObject(ref Matrix worldTransform, CollisionShape shape, ref Vector3 color,IDebugDraw debugDraw)
+        public static void DebugDrawObject(ref Matrix worldTransform, CollisionShape shape, ref Vector3 color, IDebugDraw debugDraw)
         {
             // Draw a small simplex at the center of the object
             {
                 Vector3 start = worldTransform.Translation;
                 float scale = 10f;
-                debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Right, worldTransform)*scale), Vector3.Right);
+                debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Right, worldTransform) * scale), Vector3.Right);
                 debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Up, worldTransform) * scale), Vector3.Up);
                 debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Backward, worldTransform) * scale), Vector3.Backward);
             }
@@ -52,8 +52,8 @@ namespace BulletXNA
                 {
                     Matrix childTrans = compoundShape.GetChildTransform(i);
                     CollisionShape colShape = compoundShape.GetChildShape(i);
-                    Matrix temp = MathUtil.BulletMatrixMultiply(worldTransform,childTrans);
-                    DebugDrawObject(ref temp, colShape, ref color,debugDraw);
+                    Matrix temp = MathUtil.BulletMatrixMultiply(worldTransform, childTrans);
+                    DebugDrawObject(ref temp, colShape, ref color, debugDraw);
                 }
             }
             else
@@ -65,7 +65,7 @@ namespace BulletXNA
                         {
                             SphereShape sphereShape = shape as SphereShape;
                             float radius = sphereShape.GetMargin();//radius doesn't include the margin, so draw with margin
-                            DebugDrawSphere(radius, ref worldTransform, ref color,debugDraw);
+                            DebugDrawSphere(radius, ref worldTransform, ref color, debugDraw);
                             break;
                         }
                     case BroadphaseNativeTypes.MULTI_SPHERE_SHAPE_PROXYTYPE:
@@ -76,7 +76,7 @@ namespace BulletXNA
                             {
                                 Matrix childTransform = worldTransform;
                                 childTransform.Translation += multiSphereShape.GetSpherePosition(i);
-                                DebugDrawSphere(multiSphereShape.GetSphereRadius(i), ref childTransform, ref color,debugDraw);
+                                DebugDrawSphere(multiSphereShape.GetSphereRadius(i), ref childTransform, ref color, debugDraw);
                             }
 
                             break;
@@ -101,13 +101,13 @@ namespace BulletXNA
 
                                 Matrix childTransform = worldTransform;
                                 childTransform.Translation = Vector3.Transform(capStart, worldTransform);
-                                DebugDrawSphere(radius, ref childTransform, ref color,debugDraw);
+                                DebugDrawSphere(radius, ref childTransform, ref color, debugDraw);
                             }
 
                             {
                                 Matrix childTransform = worldTransform;
                                 childTransform.Translation = Vector3.Transform(capEnd, worldTransform);
-                                DebugDrawSphere(radius, ref childTransform, ref color,debugDraw);
+                                DebugDrawSphere(radius, ref childTransform, ref color, debugDraw);
                             }
 
                             // Draw some additional lines
@@ -253,7 +253,7 @@ namespace BulletXNA
             }
         }
 
-        public static void DebugDrawConstraint(TypedConstraint constraint,IDebugDraw debugDraw)
+        public static void DebugDrawConstraint(TypedConstraint constraint, IDebugDraw debugDraw)
         {
             bool drawFrames = (debugDraw.GetDebugMode() & DebugDrawModes.DBG_DrawConstraints) != 0;
             bool drawLimits = (debugDraw.GetDebugMode() & DebugDrawModes.DBG_DrawConstraintLimits) != 0;
@@ -283,12 +283,12 @@ namespace BulletXNA
                 case TypedConstraintType.HINGE_CONSTRAINT_TYPE:
                     {
                         HingeConstraint pHinge = constraint as HingeConstraint;
-                        Matrix tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyA().GetCenterOfMassTransform(),pHinge.GetAFrame());
+                        Matrix tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyA().GetCenterOfMassTransform(), pHinge.GetAFrame());
                         if (drawFrames)
                         {
                             debugDraw.DrawTransform(ref tr, dbgDrawSize);
                         }
-                        tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyB().GetCenterOfMassTransform() ,pHinge.GetBFrame());
+                        tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyB().GetCenterOfMassTransform(), pHinge.GetBFrame());
                         if (drawFrames)
                         {
                             debugDraw.DrawTransform(ref tr, dbgDrawSize);
@@ -319,9 +319,9 @@ namespace BulletXNA
                 case TypedConstraintType.CONETWIST_CONSTRAINT_TYPE:
                     {
                         ConeTwistConstraint pCT = constraint as ConeTwistConstraint;
-                        Matrix tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(),pCT.GetAFrame());
+                        Matrix tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(), pCT.GetAFrame());
                         if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
-                        tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform() ,pCT.GetBFrame());
+                        tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform(), pCT.GetBFrame());
                         if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
                         Vector3 zero = Vector3.Zero;
 
@@ -353,11 +353,11 @@ namespace BulletXNA
                             bool useFrameB = (pCT.GetRigidBodyB().GetInvMass() > 0f);
                             if (useFrameB)
                             {
-                                tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform() ,pCT.GetBFrame());
+                                tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform(), pCT.GetBFrame());
                             }
                             else
                             {
-                                tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform() ,pCT.GetAFrame());
+                                tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(), pCT.GetAFrame());
                             }
                             Vector3 pivot = tr.Translation;
                             Vector3 normal = MathUtil.MatrixColumn(ref tr, 0);
@@ -371,21 +371,21 @@ namespace BulletXNA
                     {
                         Generic6DofConstraint p6DOF = constraint as Generic6DofConstraint;
                         Matrix tr = p6DOF.GetCalculatedTransformA();
-						if (drawFrames)
-						{
-							debugDraw.DrawTransform(ref tr, dbgDrawSize);
-						}
+                        if (drawFrames)
+                        {
+                            debugDraw.DrawTransform(ref tr, dbgDrawSize);
+                        }
                         tr = p6DOF.GetCalculatedTransformB();
-						if (drawFrames)
-						{
-							debugDraw.DrawTransform(ref tr, dbgDrawSize);
-						}
+                        if (drawFrames)
+                        {
+                            debugDraw.DrawTransform(ref tr, dbgDrawSize);
+                        }
                         Vector3 zero = Vector3.Zero;
                         if (drawLimits)
                         {
                             tr = p6DOF.GetCalculatedTransformA();
                             Vector3 center = p6DOF.GetCalculatedTransformB().Translation;
-							// up is axis 1 not 2 ?
+                            // up is axis 1 not 2 ?
                             Vector3 up = MathUtil.MatrixColumn(ref tr, 1);
                             Vector3 axis = MathUtil.MatrixColumn(ref tr, 0);
                             float minTh = p6DOF.GetRotationalLimitMotor(1).m_loLimit;
@@ -453,7 +453,7 @@ namespace BulletXNA
         }
 
 
-        private static void DebugDrawSphere(float radius, ref Matrix transform, ref Vector3 color,IDebugDraw debugDraw)
+        private static void DebugDrawSphere(float radius, ref Matrix transform, ref Vector3 color, IDebugDraw debugDraw)
         {
             Vector3 start = transform.Translation;
 
@@ -485,10 +485,10 @@ namespace BulletXNA
         public static ShapeData CreateCube()
         {
             Matrix identity = Matrix.Identity;
-            return CreateBox(Vector3.Zero,new Vector3(1,1,1),Color.Yellow,ref identity);
+            return CreateBox(Vector3.Zero, new Vector3(1, 1, 1), Color.Yellow, ref identity);
         }
 
-        public static ShapeData CreateBox(Vector3 position, Vector3 sideLength, Color color,ref Matrix transform)
+        public static ShapeData CreateBox(Vector3 position, Vector3 sideLength, Color color, ref Matrix transform)
         {
             ShapeData shapeData = new ShapeData(8, 36);
             int index = 0;
@@ -592,9 +592,9 @@ namespace BulletXNA
             //(void)triangleIndex;
 
             Vector3 wv0, wv1, wv2;
-            Vector3.Transform(ref triangle[0], ref m_worldTrans,out wv0);
-            Vector3.Transform(ref triangle[1], ref m_worldTrans,out wv1);
-            Vector3.Transform(ref triangle[2], ref m_worldTrans,out wv2);
+            Vector3.Transform(ref triangle[0], ref m_worldTrans, out wv0);
+            Vector3.Transform(ref triangle[1], ref m_worldTrans, out wv1);
+            Vector3.Transform(ref triangle[2], ref m_worldTrans, out wv2);
 
             m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
             m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);

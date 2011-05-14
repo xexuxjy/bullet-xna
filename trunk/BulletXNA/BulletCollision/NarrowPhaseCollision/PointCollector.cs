@@ -28,15 +28,15 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class PointCollector : IDiscreteCollisionDetectorInterfaceResult
     {
 
-	    public PointCollector () 
-	    {
+        public PointCollector()
+        {
             m_distance = float.MaxValue;
             m_hasResult = false;
-	    }
+        }
 
         public virtual void SetShapeIdentifiersA(int partId0, int index0)
-	    {
-	    }
+        {
+        }
 
         public virtual void SetShapeIdentifiersB(int partId1, int index1)
         {
@@ -48,18 +48,18 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         }
 
         public virtual void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
-	    {
-		    if (depth< m_distance)
-		    {
-			    m_hasResult = true;
-			    m_normalOnBInWorld = normalOnBInWorld;
-			    m_pointInWorld = pointInWorld;
-			    //negative means penetration
-			    m_distance = depth;
-		    }
-	    }
+        {
+            if (depth < m_distance)
+            {
+                m_hasResult = true;
+                m_normalOnBInWorld = normalOnBInWorld;
+                m_pointInWorld = pointInWorld;
+                //negative means penetration
+                m_distance = depth;
+            }
+        }
 
-	    public Vector3 m_normalOnBInWorld;
+        public Vector3 m_normalOnBInWorld;
         public Vector3 m_pointInWorld;
         public float m_distance;//negative means penetration
         public bool m_hasResult;

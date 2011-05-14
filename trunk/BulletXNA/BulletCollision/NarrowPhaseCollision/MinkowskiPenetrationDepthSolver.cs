@@ -57,8 +57,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             for (int i = 0; i < numSampleDirections; i++)
             {
                 Vector3 norm = sPenetrationDirections[i];
-				seperatingAxisInABatch[i] = MathUtil.TransposeTransformNormal(-norm, transA);
-				seperatingAxisInBBatch[i] = MathUtil.TransposeTransformNormal(norm, transB);
+                seperatingAxisInABatch[i] = MathUtil.TransposeTransformNormal(-norm, transA);
+                seperatingAxisInBBatch[i] = MathUtil.TransposeTransformNormal(norm, transB);
             }
 
             {
@@ -248,7 +248,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             MinkowskiIntermediateResult res = new MinkowskiIntermediateResult();
             gjkdet.SetCachedSeperatingAxis(-minNorm);
 
-            gjkdet.GetClosestPoints(input, res, debugDraw,false);
+            gjkdet.GetClosestPoints(input, res, debugDraw, false);
 
             float correctedMinNorm = minProj - res.m_depth;
 
@@ -344,14 +344,14 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
     public class MinkowskiIntermediateResult : IDiscreteCollisionDetectorInterfaceResult
     {
-		public MinkowskiIntermediateResult()
-		{
+        public MinkowskiIntermediateResult()
+        {
             m_hasResult = false;
-		}
+        }
 
-        public virtual void SetShapeIdentifiersA(int partId0,int index0)
-		{
-		}
+        public virtual void SetShapeIdentifiersA(int partId0, int index0)
+        {
+        }
 
         public virtual void SetShapeIdentifiersB(int partId1, int index1)
         {
@@ -362,18 +362,18 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             AddContactPoint(ref normalOnBInWorld, ref pointInWorld, depth);
         }
 
-        public void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth)
-		{
-			m_normalOnBInWorld = normalOnBInWorld;
-			m_pointInWorld = pointInWorld;
-			m_depth = depth;
-			m_hasResult = true;
-		}
-		
-		public Vector3 m_normalOnBInWorld;
-		public Vector3 m_pointInWorld;
-		public float m_depth;
-		public bool	m_hasResult;
+        public void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        {
+            m_normalOnBInWorld = normalOnBInWorld;
+            m_pointInWorld = pointInWorld;
+            m_depth = depth;
+            m_hasResult = true;
+        }
 
-	}
+        public Vector3 m_normalOnBInWorld;
+        public Vector3 m_pointInWorld;
+        public float m_depth;
+        public bool m_hasResult;
+
+    }
 }

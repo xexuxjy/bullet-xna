@@ -43,7 +43,7 @@ namespace BulletXNA
 
         public static Matrix IdentityMatrix = Matrix.Identity;
 
-		public static IContactAddedCallback gContactAddedCallback;
+        public static IContactAddedCallback gContactAddedCallback;
 
         public static IDebugDraw gDebugDraw;
 

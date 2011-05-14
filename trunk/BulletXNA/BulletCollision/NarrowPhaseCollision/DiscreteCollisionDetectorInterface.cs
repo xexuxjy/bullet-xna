@@ -33,40 +33,40 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
     public interface IDiscreteCollisionDetectorInterfaceResult
     {
-		void SetShapeIdentifiersA(int partId0,int index0);
+        void SetShapeIdentifiersA(int partId0, int index0);
         void SetShapeIdentifiersB(int partId1, int index1);
         void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth);
-		void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth);
+        void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth);
     }
 
     public struct ClosestPointInput
-	{
-		public Matrix m_transformA;
+    {
+        public Matrix m_transformA;
         public Matrix m_transformB;
         public float m_maximumDistanceSquared;
-	}
+    }
 
     public class StorageResult : IDiscreteCollisionDetectorInterfaceResult
     {
-		public StorageResult() 
-		{
+        public StorageResult()
+        {
             m_distance = float.MaxValue;
-		}
+        }
 
         public virtual void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
         {
             AddContactPoint(ref normalOnBInWorld, ref pointInWorld, depth);
         }
 
-		public virtual void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth)
-		{
-			if (depth < m_distance)
-			{
-				m_normalOnSurfaceB = normalOnBInWorld;
-				m_closestPointInB = pointInWorld;
-				m_distance = depth;
-			}
-		}
+        public virtual void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        {
+            if (depth < m_distance)
+            {
+                m_normalOnSurfaceB = normalOnBInWorld;
+                m_closestPointInB = pointInWorld;
+                m_distance = depth;
+            }
+        }
 
         public virtual void SetShapeIdentifiersA(int partId0, int index0)
         {
@@ -76,9 +76,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         {
         }
 
-        Vector3	m_normalOnSurfaceB;
-		Vector3	m_closestPointInB;
-		float	m_distance; //negative means penetration !
+        Vector3 m_normalOnSurfaceB;
+        Vector3 m_closestPointInB;
+        float m_distance; //negative means penetration !
 
     }
 }

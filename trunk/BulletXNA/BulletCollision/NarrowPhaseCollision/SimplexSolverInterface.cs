@@ -28,27 +28,27 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     public interface ISimplexSolverInterface
     {
-	     void Reset();
+        void Reset();
 
-	     void AddVertex(ref Vector3 w, ref Vector3 p, ref Vector3 q);
-    	
-	     bool Closest(out Vector3 v);
+        void AddVertex(ref Vector3 w, ref Vector3 p, ref Vector3 q);
 
-	     float MaxVertex();
+        bool Closest(out Vector3 v);
 
-	     bool FullSimplex() ;
+        float MaxVertex();
 
-	     int GetSimplex(IList<Vector3> pBuf, IList<Vector3> qBuf, IList<Vector3> yBuf) ;
+        bool FullSimplex();
 
-	     bool InSimplex(ref Vector3 w);
-    	
-	     void BackupClosest(ref Vector3 v);
+        int GetSimplex(IList<Vector3> pBuf, IList<Vector3> qBuf, IList<Vector3> yBuf);
 
-	     bool EmptySimplex() ;
+        bool InSimplex(ref Vector3 w);
 
-	     void ComputePoints(out Vector3 p1, out Vector3 p2);
+        void BackupClosest(ref Vector3 v);
 
-	     int NumVertices();
+        bool EmptySimplex();
+
+        void ComputePoints(out Vector3 p1, out Vector3 p2);
+
+        int NumVertices();
 
     }
 }

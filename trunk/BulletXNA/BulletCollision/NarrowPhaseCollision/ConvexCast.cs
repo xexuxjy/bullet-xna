@@ -28,30 +28,30 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     public interface IConvexCast
     {
-	/// cast a convex against another convex object
-	    bool CalcTimeOfImpact(ref Matrix fromA,ref Matrix toA,ref Matrix fromB, ref Matrix toB,CastResult result);
+        /// cast a convex against another convex object
+        bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result);
     }
 
 
-	///RayResult stores the closest result
-	/// alternatively, add a callback method to decide about closest/all results
-	public class CastResult
-	{
-		public virtual void	DebugDraw(float	fraction) {}
-		public virtual void	drawCoordSystem(ref Matrix trans) {}
+    ///RayResult stores the closest result
+    /// alternatively, add a callback method to decide about closest/all results
+    public class CastResult
+    {
+        public virtual void DebugDraw(float fraction) { }
+        public virtual void drawCoordSystem(ref Matrix trans) { }
 
-		public CastResult()
-		{
+        public CastResult()
+        {
             m_fraction = float.MaxValue;
-			m_debugDrawer = null;
-			m_allowedPenetration = 0f;
-		}
+            m_debugDrawer = null;
+            m_allowedPenetration = 0f;
+        }
 
         public virtual void Cleanup()
         {
         }
 
-		public Matrix m_hitTransformA;
+        public Matrix m_hitTransformA;
         public Matrix m_hitTransformB;
         public Vector3 m_normal;
         public Vector3 m_hitPoint;
@@ -59,5 +59,5 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public IDebugDraw m_debugDrawer;
         public float m_allowedPenetration;
 
-	}
+    }
 }

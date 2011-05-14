@@ -231,44 +231,44 @@ namespace BulletXNA
             return overlap;
         }
 
-		public static void TransformAabb(Vector3 halfExtents, float margin,ref Matrix t,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
-		{
-			TransformAabb(ref halfExtents, margin, ref t, out aabbMinOut, out aabbMaxOut);
-		}
-
-        public static void TransformAabb(ref Vector3 halfExtents, float margin,ref Matrix t,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
+        public static void TransformAabb(Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-	        Vector3 halfExtentsWithMargin = halfExtents+ new Vector3(margin,margin,margin);
-	        Matrix abs_b = MathUtil.AbsoluteMatrix(ref t);  
-	        Vector3 center = t.Translation;
+            TransformAabb(ref halfExtents, margin, ref t, out aabbMinOut, out aabbMaxOut);
+        }
+
+        public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        {
+            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin, margin, margin);
+            Matrix abs_b = MathUtil.AbsoluteMatrix(ref t);
+            Vector3 center = t.Translation;
 
             Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), halfExtentsWithMargin),
                                         Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), halfExtentsWithMargin),
                                         Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), halfExtentsWithMargin));
 
-	        aabbMinOut = center - extent;
-	        aabbMaxOut = center + extent;
+            aabbMinOut = center - extent;
+            aabbMaxOut = center + extent;
         }
 
 
-        public static void TransformAabb(ref Vector3 localAabbMin,ref Vector3 localAabbMax, float margin,ref Matrix trans,out Vector3 aabbMinOut,out Vector3 aabbMaxOut)
+        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-	        Debug.Assert(localAabbMin.X <= localAabbMax.X);
+            Debug.Assert(localAabbMin.X <= localAabbMax.X);
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
             Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
-	        Vector3 localHalfExtents = -.5f*(localAabbMax-localAabbMin);
-	        localHalfExtents+=new Vector3(margin,margin,margin);
+            Vector3 localHalfExtents = -.5f * (localAabbMax - localAabbMin);
+            localHalfExtents += new Vector3(margin, margin, margin);
 
-	        Vector3 localCenter = 0.5f *(localAabbMax+localAabbMin);
-            Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans); 
-	        Vector3 center = Vector3.Transform(localCenter,trans);
+            Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
+            Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans);
+            Vector3 center = Vector3.Transform(localCenter, trans);
 
             Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), localHalfExtents),
                             Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), localHalfExtents),
                             Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), localHalfExtents));
 
             aabbMinOut = center - extent;
-	        aabbMaxOut = center+extent;
+            aabbMaxOut = center + extent;
         }
     }
 }

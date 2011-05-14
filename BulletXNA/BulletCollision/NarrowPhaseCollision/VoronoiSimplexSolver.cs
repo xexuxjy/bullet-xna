@@ -418,7 +418,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
 #endif
             // Points on opposite sides if expression signs are opposite
-            return (signp * signd) < 0f ?1:0;
+            return (signp * signd) < 0f ? 1 : 0;
         }
 
         public bool ClosestPtPointTriangle(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref SubSimplexClosestResult result)

@@ -26,15 +26,15 @@ namespace BulletXNA
 {
     public class TypedObject
     {
-	    public TypedObject(int objectType)
-    	{
+        public TypedObject(int objectType)
+        {
             m_objectType = objectType;
-	    }
+        }
 
         public int GetObjectType()
-	    {
-		    return m_objectType;
-	    }
-    	private int	m_objectType;
+        {
+            return m_objectType;
+        }
+        private int m_objectType;
     }
 }

@@ -400,7 +400,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     //contact also becomes invalid when relative movement orthogonal to normal exceeds margin
                     projectedPoint = manifoldPoint.GetPositionWorldOnA() - manifoldPoint.GetNormalWorldOnB() * manifoldPoint.GetDistance();
                     projectedDifference = manifoldPoint.GetPositionWorldOnB() - projectedPoint;
-                    distance2d = Vector3.Dot(projectedDifference,projectedDifference);
+                    distance2d = Vector3.Dot(projectedDifference, projectedDifference);
                     if (distance2d > GetContactBreakingThreshold() * GetContactBreakingThreshold())
                     {
                         RemoveContactPoint(i);

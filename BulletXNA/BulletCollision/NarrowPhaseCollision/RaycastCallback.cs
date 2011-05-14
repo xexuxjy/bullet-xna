@@ -61,15 +61,15 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             Vector3.Subtract(ref triangle[2], ref triangle[0], out v20);
 
             Vector3 triangleNormal;
-            Vector3.Cross(ref v10,ref v20,out triangleNormal);
+            Vector3.Cross(ref v10, ref v20, out triangleNormal);
 
             float dist;
             Vector3.Dot(ref triangle[0], ref triangleNormal, out dist);
             float dist_a;
-            Vector3.Dot(ref triangleNormal,ref m_from,out dist_a);
+            Vector3.Dot(ref triangleNormal, ref m_from, out dist_a);
             dist_a -= dist;
             float dist_b;
-            Vector3.Dot(ref triangleNormal,ref m_to,out dist_b);
+            Vector3.Dot(ref triangleNormal, ref m_to, out dist_b);
             dist_b -= dist;
 
             if (dist_a * dist_b >= 0f)
@@ -94,7 +94,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             {
                 float edge_tolerance = triangleNormal.LengthSquared();
                 edge_tolerance *= -0.0001f;
-                Vector3 point; 
+                Vector3 point;
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
                     Vector3 v0p;
@@ -103,7 +103,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     Vector3.Subtract(ref triangle[1], ref point, out v1p);
 
                     Vector3 cp0;
-                    Vector3.Cross(ref v0p,ref v1p,out cp0);
+                    Vector3.Cross(ref v0p, ref v1p, out cp0);
 
                     float dot;
                     Vector3.Dot(ref cp0, ref triangleNormal, out dot);
@@ -147,7 +147,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
         }
 
-	    public abstract float ReportHit(ref Vector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex );
+        public abstract float ReportHit(ref Vector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex);
 
         public virtual void Cleanup()
         {
@@ -179,30 +179,30 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
-	        TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
+            TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
             triangleShape.SetMargin(m_triangleCollisionMargin);
 
-	        VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-	        GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
+            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+            GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
 
             //#define  USE_SUBSIMPLEX_CONVEX_CAST 1
             //if you reenable USE_SUBSIMPLEX_CONVEX_CAST see commented ref code below
-            #if USE_SUBSIMPLEX_CONVEX_CAST
+#if USE_SUBSIMPLEX_CONVEX_CAST
 	        SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(m_convexShape, triangleShape, simplexSolver);
-            #else
-	        //btGjkConvexCast	convexCaster(m_convexShape,&triangleShape,&simplexSolver);
-	        ContinuousConvexCollision convexCaster = new ContinuousConvexCollision(m_convexShape,triangleShape,simplexSolver,gjkEpaPenetrationSolver);
-            #endif //#USE_SUBSIMPLEX_CONVEX_CAST
-	
-	        CastResult castResult = new CastResult();
-	        castResult.m_fraction = 1f;
-	        if (convexCaster.CalcTimeOfImpact(ref m_convexShapeFrom,ref m_convexShapeTo,ref m_triangleToWorld, ref m_triangleToWorld, castResult))
-	        {
-		        //add hit
-		        if (castResult.m_normal.LengthSquared() > 0.0001f)
-		        {					
-			        if (castResult.m_fraction < m_hitFraction)
-			        {
+#else
+            //btGjkConvexCast	convexCaster(m_convexShape,&triangleShape,&simplexSolver);
+            ContinuousConvexCollision convexCaster = new ContinuousConvexCollision(m_convexShape, triangleShape, simplexSolver, gjkEpaPenetrationSolver);
+#endif //#USE_SUBSIMPLEX_CONVEX_CAST
+
+            CastResult castResult = new CastResult();
+            castResult.m_fraction = 1f;
+            if (convexCaster.CalcTimeOfImpact(ref m_convexShapeFrom, ref m_convexShapeTo, ref m_triangleToWorld, ref m_triangleToWorld, castResult))
+            {
+                //add hit
+                if (castResult.m_normal.LengthSquared() > 0.0001f)
+                {
+                    if (castResult.m_fraction < m_hitFraction)
+                    {
                         /* btContinuousConvexCast's normal is already in world space */
                         /*
                         #ifdef USE_SUBSIMPLEX_CONVEX_CAST
@@ -210,25 +210,25 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 				                        castResult.m_normal = m_convexShapeFrom.getBasis() * castResult.m_normal;
                         #endif //USE_SUBSIMPLEX_CONVEX_CAST
                         */
-				        castResult.m_normal.Normalize();
+                        castResult.m_normal.Normalize();
 
-				        ReportHit (ref castResult.m_normal,ref castResult.m_hitPoint,castResult.m_fraction,partId,triangleIndex);
-			        }
-		        }
-	        }
+                        ReportHit(ref castResult.m_normal, ref castResult.m_hitPoint, castResult.m_fraction, partId, triangleIndex);
+                    }
+                }
+            }
         }
 
         public virtual void Cleanup()
         {
         }
 
-	    public abstract float ReportHit (ref Vector3 hitNormalLocal, ref Vector3 hitPointLocal, float hitFraction, int partId, int triangleIndex);
-	    
+        public abstract float ReportHit(ref Vector3 hitNormalLocal, ref Vector3 hitPointLocal, float hitFraction, int partId, int triangleIndex);
+
         public ConvexShape m_convexShape;
-	    public Matrix m_convexShapeFrom;
-	    public Matrix m_convexShapeTo;
-	    public Matrix m_triangleToWorld;
-	    public float m_hitFraction;
+        public Matrix m_convexShapeFrom;
+        public Matrix m_convexShapeTo;
+        public Matrix m_triangleToWorld;
+        public float m_hitFraction;
         public float m_triangleCollisionMargin;
     }
 }

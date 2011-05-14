@@ -42,130 +42,130 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
         {
-	        m_simplexSolver.Reset();
+            m_simplexSolver.Reset();
 
-	        /// compute linear velocity for this interval, to interpolate
-	        //assume no rotation/angular velocity, assert here?
-	        Vector3 linVelA,linVelB;
-	        linVelA = toA.Translation-fromA.Translation;
-	        linVelB = toB.Translation-fromB.Translation;
+            /// compute linear velocity for this interval, to interpolate
+            //assume no rotation/angular velocity, assert here?
+            Vector3 linVelA, linVelB;
+            linVelA = toA.Translation - fromA.Translation;
+            linVelB = toB.Translation - fromB.Translation;
 
-	        float radius = 0.001f;
-	        float lambda = 0f;
-	        Vector3 v = new Vector3(1,0,0);
+            float radius = 0.001f;
+            float lambda = 0f;
+            Vector3 v = new Vector3(1, 0, 0);
 
-	        int maxIter = MAX_ITERATIONS;
+            int maxIter = MAX_ITERATIONS;
 
-	        Vector3 n = Vector3.Zero;
-	        bool hasResult = false;
-	        Vector3 c;
-	        Vector3 r = (linVelA-linVelB);
+            Vector3 n = Vector3.Zero;
+            bool hasResult = false;
+            Vector3 c;
+            Vector3 r = (linVelA - linVelB);
 
-	        float lastLambda = lambda;
-	        //btScalar epsilon = btScalar(0.001);
+            float lastLambda = lambda;
+            //btScalar epsilon = btScalar(0.001);
 
-	        int numIter = 0;
-	        //first solution, using GJK
+            int numIter = 0;
+            //first solution, using GJK
 
 
-	        Matrix identityTrans = Matrix.Identity;
+            Matrix identityTrans = Matrix.Identity;
 
         //	result.drawCoordSystem(sphereTr);
 
-	        PointCollector	pointCollector = new PointCollector();
+            PointCollector pointCollector = new PointCollector();
 
-        		
-	        GjkPairDetector gjk = new GjkPairDetector(m_convexA,m_convexB,m_simplexSolver,null);//m_penetrationDepthSolver);		
-	        ClosestPointInput input = new ClosestPointInput();
 
-	        //we don't use margins during CCD
-	        //	gjk.setIgnoreMargin(true);
+            GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB, m_simplexSolver, null);//m_penetrationDepthSolver);		
+            ClosestPointInput input = new ClosestPointInput();
 
-	        input.m_transformA = fromA;
-	        input.m_transformB = fromB;
-	        gjk.GetClosestPoints(input,pointCollector,null,false);
+            //we don't use margins during CCD
+            //	gjk.setIgnoreMargin(true);
 
-	        hasResult = pointCollector.m_hasResult;
-	        c = pointCollector.m_pointInWorld;
+            input.m_transformA = fromA;
+            input.m_transformB = fromB;
+            gjk.GetClosestPoints(input, pointCollector, null, false);
 
-	        if (hasResult)
-	        {
-		        float dist = pointCollector.m_distance;
-		        n = pointCollector.m_normalOnBInWorld;
+            hasResult = pointCollector.m_hasResult;
+            c = pointCollector.m_pointInWorld;
 
-		        //not close enough
-		        while (dist > radius)
-		        {
-			        numIter++;
-			        if (numIter > maxIter)
-			        {
-				        return false; //todo: report a failure
-			        }
-			        float dLambda = 0f;
+            if (hasResult)
+            {
+                float dist = pointCollector.m_distance;
+                n = pointCollector.m_normalOnBInWorld;
 
-			        float projectedLinearVelocity = Vector3.Dot(r,n);
-        			
-			        dLambda = dist / (projectedLinearVelocity);
+                //not close enough
+                while (dist > radius)
+                {
+                    numIter++;
+                    if (numIter > maxIter)
+                    {
+                        return false; //todo: report a failure
+                    }
+                    float dLambda = 0f;
 
-			        lambda = lambda - dLambda;
+                    float projectedLinearVelocity = Vector3.Dot(r, n);
 
-			        if (lambda > 1f || lambda < 0f)
-				        return false;
+                    dLambda = dist / (projectedLinearVelocity);
 
-			        //todo: next check with relative epsilon
-			        if (lambda <= lastLambda)
-			        {
-				        return false;
-				        //n.setValue(0,0,0);
+                    lambda = lambda - dLambda;
+
+                    if (lambda > 1f || lambda < 0f)
+                        return false;
+
+                    //todo: next check with relative epsilon
+                    if (lambda <= lastLambda)
+                    {
+                        return false;
+                        //n.setValue(0,0,0);
                         //break;
-			        }
-			        lastLambda = lambda;
+                    }
+                    lastLambda = lambda;
 
-			        //interpolate to next lambda
-			        result.DebugDraw( lambda );
-			        input.m_transformA.Translation = MathUtil.Interpolate3(fromA.Translation,toA.Translation,lambda);
+                    //interpolate to next lambda
+                    result.DebugDraw(lambda);
+                    input.m_transformA.Translation = MathUtil.Interpolate3(fromA.Translation, toA.Translation, lambda);
                     input.m_transformB.Translation = MathUtil.Interpolate3(fromB.Translation, toB.Translation, lambda);
-        			
-			        gjk.GetClosestPoints(input,pointCollector,null,false);
-			        if (pointCollector.m_hasResult)
-			        {
-				        if (pointCollector.m_distance < 0f)
-				        {
-					        result.m_fraction = lastLambda;
-					        n = pointCollector.m_normalOnBInWorld;
-					        result.m_normal=n;
-					        result.m_hitPoint = pointCollector.m_pointInWorld;
-					        return true;
-				        }
-				        c = pointCollector.m_pointInWorld;		
-				        n = pointCollector.m_normalOnBInWorld;
-				        dist = pointCollector.m_distance;
-			        } 
-                    else
-			        {
-				        //??
-				        return false;
-			        }
-		        }
 
-		        //is n normalized?
-		        //don't report time of impact for motion away from the contact normal (or causes minor penetration)
+                    gjk.GetClosestPoints(input, pointCollector, null, false);
+                    if (pointCollector.m_hasResult)
+                    {
+                        if (pointCollector.m_distance < 0f)
+                        {
+                            result.m_fraction = lastLambda;
+                            n = pointCollector.m_normalOnBInWorld;
+                            result.m_normal = n;
+                            result.m_hitPoint = pointCollector.m_pointInWorld;
+                            return true;
+                        }
+                        c = pointCollector.m_pointInWorld;
+                        n = pointCollector.m_normalOnBInWorld;
+                        dist = pointCollector.m_distance;
+                    }
+                    else
+                    {
+                        //??
+                        return false;
+                    }
+                }
+
+                //is n normalized?
+                //don't report time of impact for motion away from the contact normal (or causes minor penetration)
                 if (Vector3.Dot(n, r) >= -result.m_allowedPenetration)
                 {
                     return false;
                 }
 
-		        result.m_fraction = lambda;
-		        result.m_normal = n;
-		        result.m_hitPoint = c;
-		        return true;
-	        }
+                result.m_fraction = lambda;
+                result.m_normal = n;
+                result.m_hitPoint = c;
+                return true;
+            }
 
-	        return false;
+            return false;
         }
 
         private ISimplexSolverInterface m_simplexSolver;
-	    private ConvexShape	m_convexA;
+        private ConvexShape m_convexA;
         private ConvexShape m_convexB;
         public const int MAX_ITERATIONS = 32;
     }

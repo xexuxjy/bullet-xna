@@ -29,7 +29,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     public interface IConvexPenetrationDepthSolver
     {
-        bool CalcPenDepth( ISimplexSolverInterface simplexSolver,ConvexShape convexA,ConvexShape convexB,ref Matrix transA,ref Matrix transB,
-				ref Vector3 v, ref Vector3 pa, ref Vector3 pb,IDebugDraw debugDraw);
+        bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref Matrix transA, ref Matrix transB,
+                ref Vector3 v, ref Vector3 pa, ref Vector3 pb, IDebugDraw debugDraw);
     }
 }

@@ -26,20 +26,20 @@ using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
-/// ManifoldContactPoint collects and maintains persistent contactpoints.
-/// used to improve stability and performance of rigidbody dynamics response.
+    /// ManifoldContactPoint collects and maintains persistent contactpoints.
+    /// used to improve stability and performance of rigidbody dynamics response.
     public class ManifoldPoint
     {
 
         public ManifoldPoint()
         {
         }
-        public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance )
+        public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
         {
-			m_localPointA =  pointA; 
-			m_localPointB = pointB; 
-			m_normalWorldOnB = normal; 
-			m_distance1 = distance;
+            m_localPointA = pointA;
+            m_localPointB = pointB;
+            m_normalWorldOnB = normal;
+            m_distance1 = distance;
 
             /* Don't initialize default values twice in C#
             m_lateralFrictionDir1 = Vector3.Zero;
@@ -64,22 +64,22 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_positionWorldOnA = Vector3.Zero;
             m_positionWorldOnB = Vector3.Zero;
             */
-		}
-			
-		public float GetDistance()
-		{
-			return m_distance1;
-		}
+        }
+
+        public float GetDistance()
+        {
+            return m_distance1;
+        }
 
         public void SetDistance(float value)
         {
             m_distance1 = value;
         }
 
-		public int GetLifeTime()
-		{
-			return m_lifeTime;
-		}
+        public int GetLifeTime()
+        {
+            return m_lifeTime;
+        }
 
         public void SetLifeTime(int value)
         {
@@ -95,12 +95,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         {
             m_positionWorldOnA = value;
         }
-        
-        public Vector3 GetPositionWorldOnA() 
+
+        public Vector3 GetPositionWorldOnA()
         {
-			return m_positionWorldOnA;
-//				return m_positionWorldOnB + m_normalWorldOnB * m_distance1;
-		}
+            return m_positionWorldOnA;
+            //				return m_positionWorldOnB + m_normalWorldOnB * m_distance1;
+        }
 
         public void SetPositionWorldOnB(Vector3 value)
         {
@@ -112,16 +112,16 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_positionWorldOnB = value;
         }
 
-		public Vector3 GetPositionWorldOnB()
-		{
-			return m_positionWorldOnB;
-		}
+        public Vector3 GetPositionWorldOnB()
+        {
+            return m_positionWorldOnB;
+        }
 
-		///this returns the most recent applied impulse, to satisfy contact constraints by the constraint solver
-		public float GetAppliedImpulse()
-		{
-			return m_appliedImpulse;
-		}
+        ///this returns the most recent applied impulse, to satisfy contact constraints by the constraint solver
+        public float GetAppliedImpulse()
+        {
+            return m_appliedImpulse;
+        }
 
         public Vector3 GetLocalPointA()
         {
@@ -318,33 +318,33 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         ///m_positionWorldOnA is redundant information, see getPositionWorldOnA(), but for clarity
         public Vector3 m_positionWorldOnA;
         public Vector3 m_positionWorldOnB;
-		public Vector3 m_normalWorldOnB;
-	
-		public float m_distance1;
-		public float m_combinedFriction;
-		public float m_combinedRestitution;
+        public Vector3 m_normalWorldOnB;
+
+        public float m_distance1;
+        public float m_combinedFriction;
+        public float m_combinedRestitution;
 
         //BP mod, store contact triangles.
-        public int	m_partId0;
+        public int m_partId0;
         public int m_partId1;
         public int m_index0;
         public int m_index1;
 
-		public Object m_userPersistentData;
-		public float m_appliedImpulse;
+        public Object m_userPersistentData;
+        public float m_appliedImpulse;
 
-		public bool m_lateralFrictionInitialized;
-		public float m_appliedImpulseLateral1;
-		public float m_appliedImpulseLateral2;
+        public bool m_lateralFrictionInitialized;
+        public float m_appliedImpulseLateral1;
+        public float m_appliedImpulseLateral2;
         public float m_contactMotion1;
         public float m_contactMotion2;
         public float m_contactCFM1;
         public float m_contactCFM2;
 
-        
+
         public int m_lifeTime;//lifetime of the contactpoint in frames
-		
-		public Vector3	m_lateralFrictionDir1;
-		public Vector3	m_lateralFrictionDir2;
+
+        public Vector3 m_lateralFrictionDir1;
+        public Vector3 m_lateralFrictionDir2;
     }
 }

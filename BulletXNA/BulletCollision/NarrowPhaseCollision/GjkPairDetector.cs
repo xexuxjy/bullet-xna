@@ -348,7 +348,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     if (lenSqr > MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
                     {
                         //float rlen = 1 / normalInB.Length();
-                        float rlen = 1.0f / (float)Math.Sqrt((float)lenSqr );
+                        float rlen = 1.0f / (float)Math.Sqrt((float)lenSqr);
                         //normalInB.Normalize();
                         normalInB *= rlen;
                         float s = (float)Math.Sqrt((float)squaredDistance);
@@ -395,14 +395,14 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         if (BulletGlobals.g_streamWriter != null && debugGJK)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("calcPenDepthResult");
-                            BulletGlobals.g_streamWriter.WriteLine("lastMethodUsed : "+m_lastUsedMethod);
-                            
+                            BulletGlobals.g_streamWriter.WriteLine("lastMethodUsed : " + m_lastUsedMethod);
+
                             MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "localTransA", localTransA);
                             MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "localTransB", localTransB);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sepAxis", m_cachedSeparatingAxis);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "tmpA", tmpPointOnA);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "tmpB", tmpPointOnB);
-                            
+
                         }
 
 

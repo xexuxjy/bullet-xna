@@ -29,19 +29,19 @@ namespace BulletXNA.LinearMath
     public interface IDebugDraw
     {
         void DrawLine(Vector3 from, Vector3 to, Vector3 fromColor);
-        void DrawLine(ref Vector3 from,ref Vector3 to, ref Vector3 fromColor);
-	    void DrawLine(ref Vector3 from,ref Vector3 to, ref Vector3 fromColor, ref Vector3 toColor);
+        void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor);
+        void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor, ref Vector3 toColor);
         //void drawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Vector3 color);
         void DrawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Matrix trans, ref Vector3 color);
-        void DrawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Matrix transform,ref Vector3 color, float alpha);
+        void DrawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Matrix transform, ref Vector3 color, float alpha);
         void DrawSphere(Vector3 p, float radius, Vector3 color);
         void DrawSphere(ref Vector3 p, float radius, ref Vector3 color);
-	    void DrawTriangle(ref Vector3 v0,ref Vector3 v1,ref Vector3 v2,ref Vector3 n0,ref Vector3 n1,ref Vector3 n2,ref Vector3 color, float alpha);
-	    void DrawTriangle(ref Vector3 v0,ref Vector3 v1,ref Vector3 v2,ref Vector3 color, float alpha);
+        void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 color, float alpha);
+        void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 color, float alpha);
         void DrawContactPoint(Vector3 pointOnB, Vector3 normalOnB, float distance, int lifeTime, Vector3 color);
-	    void DrawContactPoint(ref Vector3 pointOnB,ref Vector3 normalOnB,float distance,int lifeTime,ref Vector3 color);
-	    void ReportErrorWarning(String warningString);
-	    void Draw3dText(ref Vector3 location,String textString);
+        void DrawContactPoint(ref Vector3 pointOnB, ref Vector3 normalOnB, float distance, int lifeTime, ref Vector3 color);
+        void ReportErrorWarning(String warningString);
+        void Draw3dText(ref Vector3 location, String textString);
         void SetDebugMode(DebugDrawModes debugMode);
 
         DebugDrawModes GetDebugMode();
@@ -58,8 +58,8 @@ namespace BulletXNA.LinearMath
         //    drawArc(ref center,ref normal,ref axis,radiusA,radiusB,minAngle,maxAngle,ref color,drawSect,10f);
         //}
 
-        void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, 
-		    ref Vector3 color, bool drawSect, float stepDegrees);
+        void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
+            ref Vector3 color, bool drawSect, float stepDegrees);
 
         void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius,
             float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color);
@@ -68,8 +68,8 @@ namespace BulletXNA.LinearMath
         //}
 
 
-        void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius, 
-		    float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color, float stepDegrees);
+        void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius,
+            float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color, float stepDegrees);
     }
 
     /*-------------------------------------------------------------------------------------*/

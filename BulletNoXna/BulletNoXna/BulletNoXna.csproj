@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9A5FC26B-5C96-4300-8E09-4070F071C957}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BulletNoXna</RootNamespace>
+    <AssemblyName>BulletNoXna</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="BulletCollision\BroadphaseCollision\AxisSweep3.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\BroadphaseInterface.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\BroadphaseProxy.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\CollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\Dbvt.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\DbvtBroadphase.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\Dispatcher.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\MultiSapBroadphase.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\OverlappingPairCache.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\OverlappingPairCallback.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\QuantizedBvh.cs" />
+    <Compile Include="BulletCollision\BroadphaseCollision\SimpleBroadphase.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\ActivatingCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\Box2dBox2dCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\BoxBoxCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\BoxBoxDetector.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\BoxBoxDetector2.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CollisionAlgorithmCreateFunc.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CollisionConfiguration.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CollisionDispatcher.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CollisionObject.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CollisionWorld.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\CompoundCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\Convex2dConvex2dAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\ConvexConcaveCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\ConvexConvexCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\ConvexPlaneCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\DefaultCollisionConfiguration.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\EmptyAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\GhostObject.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\InternalEdgeUtility.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\ManifoldResult.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\SimulationIslandManager.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\SphereBoxCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\SphereSphereCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\SphereTriangleCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\SphereTriangleDetector.cs" />
+    <Compile Include="BulletCollision\CollisionDispatch\UnionFind.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\Box2dShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\BoxShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\BvhTriangleMeshShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\CapsuleShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\CollisionMargin.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\CollisionShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\CompoundShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConcaveShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConeShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\Convex2dShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexHullShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexInternalShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexPointCloudShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexTriangleMeshShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\CylinderShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\EmptyShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\HeightfieldTerrainShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\Material.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\MinkowskiSumShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\MultiSphereShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\OptimizedBvh.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\PolyhedralConvexShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ShapeHull.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\SphereShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\StaticPlaneShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\StridingMeshInterface.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TetrahedronShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleCallback.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleIndexVertexArray.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleInfoMap.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleMesh.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleMeshShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\TriangleShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\UniformScalingShape.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\ContinuousConvexCollision.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\ConvexCast.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\ConvexPenetrationDepthSolver.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\DiscreteCollisionDetectorInterface.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\GjkConvexCast.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\GjkEpaPenetrationDepthSolver.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\GjkEpaSolver2.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\GjkPairDetector.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\ManifoldPoint.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\MinkowskiPenetrationDepthSolver.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\PersistentManifold.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\PointCollector.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\RaycastCallback.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\SimplexSolverInterface.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\SubSimplexConvexCast.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\ConeTwistConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\ContactConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\ContactSolverInfo.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\Generic6DofConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\Generic6DofSpringConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\Hinge2Constraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\HingeConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\IConstraintSolver.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\JacobianEntry.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\Point2PointConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\SequentialImpulseConstraintSolver.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\SliderConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\Solve2LinearConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\SolverBody.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\SolverConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\TypedConstraint.cs" />
+    <Compile Include="BulletDynamics\ConstraintSolver\UniversalConstraint.cs" />
+    <Compile Include="BulletDynamics\Dynamics\ContinuousDynamicsWorld.cs" />
+    <Compile Include="BulletDynamics\Dynamics\DiscreteDynamicsWorld.cs" />
+    <Compile Include="BulletDynamics\Dynamics\DynamicsWorld.cs" />
+    <Compile Include="BulletDynamics\Dynamics\IActionInterface.cs" />
+    <Compile Include="BulletDynamics\Dynamics\RigidBody.cs" />
+    <Compile Include="BulletDynamics\Dynamics\SimpleDynamicsWorld.cs" />
+    <Compile Include="BulletGlobals.cs" />
+    <Compile Include="DefaultMotionState.cs" />
+    <Compile Include="IMotionState.cs" />
+    <Compile Include="IProfile.cs" />
+    <Compile Include="LinearMath\BoundingBox.cs" />
+    <Compile Include="LinearMath\BoundingSphere.cs" />
+    <Compile Include="LinearMath\BoundingFrustum.cs" />
+    <Compile Include="LinearMath\Design\BoundingBoxConverter.cs" />
+    <Compile Include="LinearMath\Design\BoundingSphereConverter.cs" />
+    <Compile Include="LinearMath\Design\FieldDescriptor.cs" />
+    <Compile Include="LinearMath\Design\MathTypeConverter.cs" />
+    <Compile Include="LinearMath\Design\PlaneConverter.cs" />
+    <Compile Include="LinearMath\Design\RayConverter.cs" />
+    <Compile Include="LinearMath\Enums.cs" />
+    <Compile Include="LinearMath\HelperCode\PlaneHelper.cs" />
+    <Compile Include="LinearMath\MathHelper.cs" />
+    <Compile Include="TypedObject.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\VoronoiSimplexSolver.cs" />
+    <Compile Include="LinearMath\AabbUtil2.cs" />
+    <Compile Include="LinearMath\ConvexHull.cs" />
+    <Compile Include="LinearMath\Design\MatrixConverter.cs" />
+    <Compile Include="LinearMath\Design\QuaternionConverter.cs" />
+    <Compile Include="LinearMath\Design\Vector2Converter.cs" />
+    <Compile Include="LinearMath\Design\Vector3Converter.cs" />
+    <Compile Include="LinearMath\Design\Vector4Converter.cs" />
+    <Compile Include="LinearMath\IDebugDraw.cs" />
+    <Compile Include="LinearMath\IndexedVector3.cs" />
+    <Compile Include="LinearMath\MathUtil.cs" />
+    <Compile Include="LinearMath\Matrix.cs" />
+    <Compile Include="LinearMath\ObjectArray.cs" />
+    <Compile Include="LinearMath\Plane.cs" />
+    <Compile Include="LinearMath\Quaternion.cs" />
+    <Compile Include="LinearMath\Ray.cs" />
+    <Compile Include="LinearMath\TransformUtil.cs" />
+    <Compile Include="LinearMath\UShortVector3.cs" />
+    <Compile Include="LinearMath\Vector2.cs" />
+    <Compile Include="LinearMath\Vector3.cs" />
+    <Compile Include="LinearMath\Vector4.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

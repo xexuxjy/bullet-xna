@@ -139,7 +139,7 @@ namespace BulletXNA.BulletCollision
 
             // MAN - CHECKTHIS
             Matrix rotMatrix = Matrix.CreateFromQuaternion(perturbeRot);
-            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(convexWorldTransform, rotMatrix);
+            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(ref convexWorldTransform, ref rotMatrix);
 
             Matrix planeInConvex = Matrix.Identity;
             planeInConvex = MathUtil.BulletMatrixMultiply(Matrix.Invert(convexWorldTransform), planeObj.GetWorldTransform());

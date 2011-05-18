@@ -489,8 +489,8 @@ namespace BulletXNA.BulletDynamics
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transB", transB);
 			}
 
-            Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
-            Matrix trB = MathUtil.BulletMatrixMultiply(transB, m_rbBFrame);
+            Matrix trA = MathUtil.BulletMatrixMultiply(ref transA, ref m_rbAFrame);
+            Matrix trB = MathUtil.BulletMatrixMultiply(ref transB, ref m_rbBFrame);
 
 			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
 			{

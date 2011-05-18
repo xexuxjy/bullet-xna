@@ -116,11 +116,11 @@ namespace DemoFramework
         [StructLayout(LayoutKind.Sequential)]
         struct ShaderSceneConstants
         {
-            public Matrix View;
-            public Matrix Projection;
-            public Matrix ViewInverse;
-            public Matrix LightViewProjection;
-            public Vector4 LightPosition;
+            public SharpDX.Matrix View;
+            public SharpDX.Matrix Projection;
+            public SharpDX.Matrix ViewInverse;
+            public SharpDX.Matrix LightViewProjection;
+            public SharpDX.Vector4 LightPosition;
         }
 
         /// <summary>
@@ -404,15 +404,15 @@ namespace DemoFramework
 
         protected void SetSceneConstants()
         {
-            sceneConstants.View = MathHelper.Matrix(Freelook.View);
-            sceneConstants.Projection = Matrix.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, NearPlane, FarPlane);
-            sceneConstants.ViewInverse = Matrix.Invert(MathHelper.Matrix(Freelook.View));
+            sceneConstants.View = Freelook.View;
+            sceneConstants.Projection = SharpDX.Matrix.PerspectiveFovLH(FieldOfView, AspectRatio, NearPlane, FarPlane);
+            sceneConstants.ViewInverse = SharpDX.Matrix.Invert(Freelook.View);
 
-            Vector3 light = new Vector3(20, 30, 10);
-            sceneConstants.LightPosition = new Vector4(light, 1);
+            SharpDX.Vector3 light = new SharpDX.Vector3(20, 30, 10);
+            sceneConstants.LightPosition = new SharpDX.Vector4(light, 1);
             Texture2DDescription depthBuffer = lightDepthTexture.Description;
-            Matrix lightView = Matrix.CreateLookAt(light, Vector3.Zero, MathHelper.Vector3(Freelook.Up));
-            Matrix lightProjection = Matrix.CreateOrthographic(depthBuffer.Width / 8, depthBuffer.Height / 8, NearPlane, FarPlane);
+            SharpDX.Matrix lightView = SharpDX.Matrix.LookAtLH(light, SharpDX.Vector3.Zero, Freelook.Up);
+            SharpDX.Matrix lightProjection = SharpDX.Matrix.OrthoLH(depthBuffer.Width / 8, depthBuffer.Height / 8, NearPlane, FarPlane);
             sceneConstants.LightViewProjection = lightView * lightProjection;
 
             using (var data = sceneConstantsBuffer.Map(MapMode.WriteDiscard))
@@ -421,10 +421,10 @@ namespace DemoFramework
                 sceneConstantsBuffer.Unmap();
             }
 
-            Effect2.GetVariableByName("InverseProjection").AsMatrix().SetMatrix(MathHelper.Matrix(Matrix.Invert(sceneConstants.View * sceneConstants.Projection)));
-            Effect2.GetVariableByName("InverseView").AsMatrix().SetMatrix(MathHelper.Matrix(sceneConstants.ViewInverse));
-            Effect2.GetVariableByName("LightInverseViewProjection").AsMatrix().SetMatrix(MathHelper.Matrix(Matrix.Invert(sceneConstants.LightViewProjection)));
-            Effect2.GetVariableByName("LightPosition").AsVector().Set(MathHelper.Vector4(sceneConstants.LightPosition));
+            Effect2.GetVariableByName("InverseProjection").AsMatrix().SetMatrix(SharpDX.Matrix.Invert(sceneConstants.View * sceneConstants.Projection));
+            Effect2.GetVariableByName("InverseView").AsMatrix().SetMatrix(sceneConstants.ViewInverse);
+            Effect2.GetVariableByName("LightInverseViewProjection").AsMatrix().SetMatrix(SharpDX.Matrix.Invert(sceneConstants.LightViewProjection));
+            Effect2.GetVariableByName("LightPosition").AsVector().Set(sceneConstants.LightPosition);
         }
 
         void Render()

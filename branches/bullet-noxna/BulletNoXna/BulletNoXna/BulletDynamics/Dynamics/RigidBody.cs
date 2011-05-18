@@ -188,7 +188,7 @@ namespace BulletXNA.BulletDynamics
 	    }
 
 	    /// continuous collision detection needs prediction
-	    public void	PredictIntegratedTransform(float timeStep, ref Matrix predictedTransform) 
+	    public void	PredictIntegratedTransform(float timeStep, out Matrix predictedTransform) 
         {
 			if (BulletGlobals.g_streamWriter != null && debugRigidBody)
 			{
@@ -198,7 +198,7 @@ namespace BulletXNA.BulletDynamics
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"AngularVel",m_angularVelocity);
 
 			}
-            TransformUtil.IntegrateTransform(m_worldTransform,m_linearVelocity,m_angularVelocity,timeStep,ref predictedTransform);
+            TransformUtil.IntegrateTransform(m_worldTransform,m_linearVelocity,m_angularVelocity,timeStep, out predictedTransform);
             MathUtil.SanityCheckVector(m_worldTransform.Up);
 			if (BulletGlobals.g_streamWriter != null && debugRigidBody)
 			{
@@ -943,8 +943,8 @@ namespace BulletXNA.BulletDynamics
 		        SetAngularVelocity(GetAngularVelocity()+m_deltaAngularVelocity);
         		
 		        //correct the position/orientation based on push/turn recovery
-		        Matrix newTransform = Matrix.Identity;
-		        TransformUtil.IntegrateTransform(GetWorldTransform(),m_pushVelocity,m_turnVelocity,timeStep,ref newTransform);
+		        Matrix newTransform;
+		        TransformUtil.IntegrateTransform(GetWorldTransform(),m_pushVelocity,m_turnVelocity,timeStep, out newTransform);
 		        SetWorldTransform(ref newTransform);
 		        //m_originalBody->setCompanionId(-1);
 	        }

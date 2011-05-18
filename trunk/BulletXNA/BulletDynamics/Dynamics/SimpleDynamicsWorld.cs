@@ -226,8 +226,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 					        body.ApplyGravity();
 					        body.IntegrateVelocities( timeStep);
 					        body.ApplyDamping(timeStep);
-                            Matrix temp = body.GetInterpolationWorldTransform();
-					        body.PredictIntegratedTransform(timeStep,ref temp);
+                            Matrix temp;// = body.GetInterpolationWorldTransform();
+					        body.PredictIntegratedTransform(timeStep, out temp);
                             body.SetInterpolationWorldTransform(ref temp);
 				        }
 			        }
@@ -237,7 +237,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
         protected void IntegrateTransforms(float timeStep)
         {
-            Matrix predictedTrans = Matrix.Identity;
+            Matrix predictedTrans;
             foreach (CollisionObject colObj in m_collisionObjects)
             {
                 RigidBody body = RigidBody.Upcast(colObj);
@@ -245,7 +245,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        {
 			        if (body.IsActive() && (!body.IsStaticObject()))
 			        {
-				        body.PredictIntegratedTransform(timeStep, ref predictedTrans);
+				        body.PredictIntegratedTransform(timeStep, out predictedTrans);
 				        body.ProceedToTransform(ref predictedTrans);
 			        }
 		        }

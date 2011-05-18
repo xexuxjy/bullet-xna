@@ -66,7 +66,7 @@ namespace BulletXNADemos.TestDebug
 			Matrix m2 = MathUtil.SetEulerZYX(0,0,MathUtil.SIMD_HALF_PI);
 			m2.Translation = new Vector3(-10,10,0);
 
-			Matrix m3 = MathUtil.BulletMatrixMultiply(m, m2);
+			Matrix m3 = MathUtil.BulletMatrixMultiply(ref m, ref m2);
 			MathUtil.PrintMatrix(streamWriter,m3);
 
             streamWriter.WriteLine("Broken axis comparison");
@@ -82,7 +82,7 @@ namespace BulletXNADemos.TestDebug
             m2.Backward = new Vector3(0, 0, 1);
             m2.Translation = new Vector3(1, -1, -1);
 
-            m3 = MathUtil.BulletMatrixMultiply(m, m2);
+            m3 = MathUtil.BulletMatrixMultiply(ref m, ref m2);
             MathUtil.PrintMatrix(streamWriter, m3);
 
             
@@ -93,7 +93,7 @@ namespace BulletXNADemos.TestDebug
             m2 = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
             m2.Translation = new Vector3(-10, 10, 0);
 
-            m3 = MathUtil.BulletMatrixMultiply(m, m2);
+            m3 = MathUtil.BulletMatrixMultiply(ref m, ref m2);
             MathUtil.PrintMatrix(streamWriter, m3);
 
             streamWriter.WriteLine("setEuler 0.25*PI,0,0 Trans 33,0,0 MULTIPLIED BY setEuler 0,0,0.5*PI Trans 0,0,0");
@@ -103,7 +103,7 @@ namespace BulletXNADemos.TestDebug
             m2 = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
             m2.Translation = new Vector3(0, 0, 0);
 
-            m3 = MathUtil.BulletMatrixMultiply(m, m2);
+            m3 = MathUtil.BulletMatrixMultiply(ref m, ref m2);
             MathUtil.PrintMatrix(streamWriter, m3);
 
 

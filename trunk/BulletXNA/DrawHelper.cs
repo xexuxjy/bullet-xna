@@ -52,7 +52,7 @@ namespace BulletXNA
                 {
                     Matrix childTrans = compoundShape.GetChildTransform(i);
                     CollisionShape colShape = compoundShape.GetChildShape(i);
-                    Matrix temp = MathUtil.BulletMatrixMultiply(worldTransform, childTrans);
+                    Matrix temp = MathUtil.BulletMatrixMultiply(ref worldTransform, ref childTrans);
                     DebugDrawObject(ref temp, colShape, ref color, debugDraw);
                 }
             }

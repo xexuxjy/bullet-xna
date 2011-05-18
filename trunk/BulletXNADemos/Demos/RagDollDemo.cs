@@ -111,61 +111,61 @@ namespace BulletXNADemos.Demos
 
 		        Matrix transform = Matrix.CreateTranslation(new Vector3(0,1,0));
 
-				Matrix adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				Matrix adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 
                 m_bodies[(int)BODYPART.PELVIS] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.PELVIS],true);
 				m_bodies[(int)BODYPART.PELVIS].SetUserPointer("PELVIS");
                 transform = Matrix.CreateTranslation(new Vector3(0,1.2f,0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.SPINE] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.SPINE], true);
 				m_bodies[(int)BODYPART.SPINE].SetUserPointer("SPINE");
 
                 transform = Matrix.CreateTranslation(new Vector3(0,1.6f,0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.HEAD] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.HEAD], true);
 				m_bodies[(int)BODYPART.HEAD].SetUserPointer("HEAD");
 
 				transform = Matrix.CreateTranslation(new Vector3(-0.18f, 0.65f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.LEFT_UPPER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_UPPER_LEG], true);
 				m_bodies[(int)BODYPART.LEFT_UPPER_LEG].SetUserPointer("LEFTUPPERLEG");
 
 				transform = Matrix.CreateTranslation(new Vector3(-0.18f, 0.2f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.LEFT_LOWER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_LOWER_LEG], true);
 				m_bodies[(int)BODYPART.LEFT_LOWER_LEG].SetUserPointer("LEFTLOWERLEG");
 
 				transform = Matrix.CreateTranslation(new Vector3(0.18f, 0.65f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_UPPER_LEG], true);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_LEG].SetUserPointer("RIGHTUPPERLEG");
 
 				transform = Matrix.CreateTranslation(new Vector3(0.18f, 0.2f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_LOWER_LEG], true);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_LEG].SetUserPointer("RIGHTLOWERLEG");
 
 				transform = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
 				transform.Translation = new Vector3(-0.35f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.LEFT_UPPER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_UPPER_ARM], true);
 				m_bodies[(int)BODYPART.LEFT_UPPER_ARM].SetUserPointer("LEFTUPPERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
 				transform.Translation = new Vector3(-0.7f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.LEFT_LOWER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_LOWER_ARM], true);
 				m_bodies[(int)BODYPART.LEFT_LOWER_ARM].SetUserPointer("LEFTLOWERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_HALF_PI);
 				transform.Translation = new Vector3(0.35f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_UPPER_ARM], true);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_ARM].SetUserPointer("RIGHTUPPERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_HALF_PI);
 				transform.Translation = new Vector3(0.7f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(offset, transform);
+				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_LOWER_ARM], true);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_ARM].SetUserPointer("RIGHTLOWERARM");
 

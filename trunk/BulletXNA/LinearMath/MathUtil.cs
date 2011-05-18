@@ -110,7 +110,7 @@ namespace BulletXNA
         {
             Matrix ba = MathUtil.BasisMatrix(ref mA);
             Matrix bb = MathUtil.BasisMatrix(ref mB);
-            return BulletMatrixMultiply(ba, bb);
+            return BulletMatrixMultiply(ref ba, ref bb);
         }
 
         public static Matrix InverseTimes(Matrix a, Matrix b)

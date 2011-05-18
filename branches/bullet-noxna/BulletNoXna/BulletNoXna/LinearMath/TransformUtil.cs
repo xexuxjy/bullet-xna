@@ -97,12 +97,12 @@ namespace BulletXNA
               supportDir.Z < 0f ? -halfExtents.Z : halfExtents.Z); 
         }
 
-        public static void IntegrateTransform(Matrix curTrans, Vector3 linvel, Vector3 angvel, float timeStep, ref Matrix predictedTransform)
+        public static void IntegrateTransform(Matrix curTrans, Vector3 linvel, Vector3 angvel, float timeStep, out Matrix predictedTransform)
         {
-            IntegrateTransform(ref curTrans, ref linvel, ref angvel, timeStep, ref predictedTransform);
+            IntegrateTransform(ref curTrans, ref linvel, ref angvel, timeStep, out predictedTransform);
         }
 
-	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep,ref Matrix predictedTransform)
+	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep, out Matrix predictedTransform)
 	    {
             predictedTransform = Matrix.Identity;
             predictedTransform.Translation = (curTrans.Translation + linvel * timeStep);

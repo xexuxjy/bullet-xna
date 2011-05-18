@@ -220,7 +220,7 @@ namespace BulletXNA.BulletDynamics
 			{
 				if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
 				{
-					Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
+					Matrix trA = MathUtil.BulletMatrixMultiply(ref transA, ref m_rbAFrame);
 
 					Vector3 p = MathUtil.MatrixColumn(ref trA, 1);
 					Vector3 q = MathUtil.MatrixColumn(ref trA, 2);

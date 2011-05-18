@@ -235,8 +235,8 @@ namespace BulletXNA.BulletDynamics
 
         public virtual void CalculateTransforms(ref Matrix transA,ref Matrix transB)
         {
-	        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transA,m_frameInA);
-	        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transB,m_frameInB);
+	        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(ref transA, ref m_frameInA);
+	        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(ref transB, ref m_frameInB);
 	        CalculateLinearInfo();
 	        CalculateAngleInfo();
 	        if(m_useOffsetForConstraintFrame)

@@ -507,7 +507,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                         {
                             Matrix childTrans = compoundShape.GetChildTransform(i);
                             CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
-                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform, childTrans);
+                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(ref colObjWorldTransform, ref childTrans);
                             // replace collision shape so that callback can determine the triangle
                             CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
                             collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
@@ -643,7 +643,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                         {
                             Matrix childTrans = compoundShape.GetChildTransform(i);
                             CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
-                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform, childTrans);
+                            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(ref colObjWorldTransform, ref childTrans);
                             // replace collision shape so that callback can determine the triangle
                             CollisionShape saveCollisionShape = collisionObject.GetCollisionShape();
                             collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);

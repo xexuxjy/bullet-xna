@@ -205,10 +205,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        ///@todo: add 'dirty' flag
 		        //if (body.getActivationState() != ISLAND_SLEEPING)
 		        {
-			        Matrix interpolatedTransform = Matrix.Identity;
+			        Matrix interpolatedTransform;
 			        TransformUtil.IntegrateTransform(body.GetInterpolationWorldTransform(),
 				        body.SetInterpolationLinearVelocity(),body.GetInterpolationAngularVelocity(),
-                        m_localTime*body.GetHitFraction(),ref interpolatedTransform);
+                        m_localTime*body.GetHitFraction(), out interpolatedTransform);
 			        body.GetMotionState().SetWorldTransform(ref interpolatedTransform);
 		        }
 	        }
@@ -582,8 +582,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				        body.IntegrateVelocities( timeStep);
 				        //damping
 				        body.ApplyDamping(timeStep);
-                        Matrix temp = body.GetInterpolationWorldTransform();
-				        body.PredictIntegratedTransform(timeStep,ref temp);
+                        Matrix temp;
+				        body.PredictIntegratedTransform(timeStep, out temp);
                         body.SetInterpolationWorldTransform(ref temp);
 			        }
 		        }
@@ -599,7 +599,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
                 BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms");
             }
 
-	        Matrix predictedTrans = Matrix.Identity;
+	        Matrix predictedTrans;
 			int length = m_nonStaticRigidBodies.Count;
 			for (int i = 0; i < length; ++i)
 			{
@@ -610,7 +610,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 			        if (body.IsActive() && (!body.IsStaticOrKinematicObject()))
 			        {
-				        body.PredictIntegratedTransform(timeStep, ref predictedTrans);
+				        body.PredictIntegratedTransform(timeStep, out predictedTrans);
 				        float squareMotion = (predictedTrans.Translation-body.GetWorldTransform().Translation).LengthSquared();
 
 				        if (body.GetCcdSquareMotionThreshold() != 0 && body.GetCcdSquareMotionThreshold() < squareMotion)
@@ -631,7 +631,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 						        if (sweepResults.hasHit() && (sweepResults.m_closestHitFraction < 1f))
 						        {
 							        body.SetHitFraction(sweepResults.m_closestHitFraction);
-							        body.PredictIntegratedTransform(timeStep*body.GetHitFraction(), ref predictedTrans);
+							        body.PredictIntegratedTransform(timeStep*body.GetHitFraction(), out predictedTrans);
 							        body.SetHitFraction(0f);
         //							printf("clamped integration to hit fraction = %f\n",fraction);
 						        }

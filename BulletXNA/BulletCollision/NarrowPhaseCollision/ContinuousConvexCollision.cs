@@ -158,10 +158,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     lastLambda = lambda;
 
                     //interpolate to next lambda
-                    Matrix interpolatedTransA = Matrix.Identity, interpolatedTransB = Matrix.Identity, relativeTrans = Matrix.Identity;
+                    Matrix interpolatedTransA, interpolatedTransB, relativeTrans;
 
-                    TransformUtil.IntegrateTransform(ref fromA, ref linVelA, ref angVelA, lambda, ref interpolatedTransA);
-                    TransformUtil.IntegrateTransform(ref fromB, ref linVelB, ref angVelB, lambda, ref interpolatedTransB);
+                    TransformUtil.IntegrateTransform(ref fromA, ref linVelA, ref angVelA, lambda, out interpolatedTransA);
+                    TransformUtil.IntegrateTransform(ref fromB, ref linVelB, ref angVelB, lambda, out interpolatedTransB);
                     //relativeTrans = interpolatedTransB.inverseTimes(interpolatedTransA);
                     relativeTrans = MathUtil.InverseTimes(ref interpolatedTransB, ref interpolatedTransA);
                     if (result.m_debugDrawer != null)

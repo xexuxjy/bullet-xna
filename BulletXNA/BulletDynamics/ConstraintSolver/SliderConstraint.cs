@@ -718,13 +718,13 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         {
 	        if(m_useLinearReferenceFrameA || (!m_useSolveConstraintObsolete))
 	        {
-		        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transA,m_frameInA);
-		        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transB,m_frameInB);
+		        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(ref transA, ref m_frameInA);
+		        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(ref transB, ref m_frameInB);
 	        }
 	        else
 	        {
-		        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transB,m_frameInB);
-		        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transA,m_frameInA);
+		        m_calculatedTransformA = MathUtil.BulletMatrixMultiply(ref transB, ref m_frameInB);
+		        m_calculatedTransformB = MathUtil.BulletMatrixMultiply(ref transA, ref m_frameInA);
 	        }
 	        m_realPivotAInW = m_calculatedTransformA.Translation;
 	        m_realPivotBInW = m_calculatedTransformB.Translation;

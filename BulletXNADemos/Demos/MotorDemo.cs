@@ -83,7 +83,7 @@ namespace BulletXNADemos.Demos
 				// shin
 				transform = Matrix.Identity;
 				transform.Translation = new Vector3(fCos*(fBodySize+fLegLength), fHeight-0.5f*fForeLegLength, fSin*(fBodySize+fLegLength));
-				m_bodies[2+2*i] = demoApplication.LocalCreateRigidBody(1.0f, MathUtil.BulletMatrixMultiply(offset,transform), m_shapes[2+2*i]);
+				m_bodies[2+2*i] = demoApplication.LocalCreateRigidBody(1.0f, MathUtil.BulletMatrixMultiply(ref offset, ref transform), m_shapes[2+2*i]);
 			}
 
 			// Setup some damping on the m_bodies

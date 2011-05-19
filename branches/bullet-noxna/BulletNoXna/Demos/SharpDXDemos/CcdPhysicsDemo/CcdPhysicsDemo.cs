@@ -3,16 +3,16 @@ using System.Windows.Forms;
 using DemoFramework;
 using SharpDX;
 
-namespace BasicDemo
+namespace CcdPhysicsDemo
 {
-    class BasicDemo : Demo
+    class CcdPhysicsDemo : Demo
     {
         Vector3 eye = new Vector3(30, 20, 10);
         Vector3 target = new Vector3(0, 5, -4);
 
         protected override void OnInitializeDevice()
         {
-            Form.Text = "Bullet - Basic Demo";
+            Form.Text = "Bullet - Ccd Physics Demo";
             base.OnInitializeDevice();
         }
 
@@ -44,7 +44,7 @@ namespace BasicDemo
 
         static void RunDemo()
         {
-            using (Demo demo = new BasicDemo())
+            using (Demo demo = new CcdPhysicsDemo())
             {
                 demo.Run();
             }

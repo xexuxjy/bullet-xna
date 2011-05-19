@@ -325,6 +325,10 @@ namespace BulletXNA.BulletCollision
             return m_worldTransform;
         }
 
+        public void GetWorldTransform(out Matrix outTransform)
+        {
+            outTransform = m_worldTransform;
+        }
 
         public void SetWorldTransform(Matrix worldTrans)
         {

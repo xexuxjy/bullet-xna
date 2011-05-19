@@ -13,10 +13,7 @@ using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D10.Buffer;
 using Device = SharpDX.Direct3D10.Device;
 using DriverType = SharpDX.Direct3D10.DriverType;
-using Matrix = BulletXNA.LinearMath.Matrix;
 using Quaternion = BulletXNA.LinearMath.Quaternion;
-using Vector3 = BulletXNA.LinearMath.Vector3;
-using Vector4 = BulletXNA.LinearMath.Vector4;
 
 namespace DemoFramework
 {
@@ -116,11 +113,11 @@ namespace DemoFramework
         [StructLayout(LayoutKind.Sequential)]
         struct ShaderSceneConstants
         {
-            public SharpDX.Matrix View;
-            public SharpDX.Matrix Projection;
-            public SharpDX.Matrix ViewInverse;
-            public SharpDX.Matrix LightViewProjection;
-            public SharpDX.Vector4 LightPosition;
+            public Matrix View;
+            public Matrix Projection;
+            public Matrix ViewInverse;
+            public Matrix LightViewProjection;
+            public Vector4 LightPosition;
         }
 
         /// <summary>
@@ -383,7 +380,7 @@ namespace DemoFramework
 
             Buffer quad = MeshFactory.CreateScreenQuad(Device);
             quadBinding = new VertexBufferBinding(quad, 20, 0);
-            SharpDX.Matrix quadProjection = SharpDX.Matrix.OrthoLH(1, 1, 0.1f, 1.0f);
+            Matrix quadProjection = Matrix.OrthoLH(1, 1, 0.1f, 1.0f);
             Effect2.GetVariableByName("ViewProjection").AsMatrix().SetMatrix(quadProjection);
 
             InputElement[] elements = new InputElement[]
@@ -405,14 +402,14 @@ namespace DemoFramework
         protected void SetSceneConstants()
         {
             sceneConstants.View = Freelook.View;
-            sceneConstants.Projection = SharpDX.Matrix.PerspectiveFovLH(FieldOfView, AspectRatio, NearPlane, FarPlane);
-            sceneConstants.ViewInverse = SharpDX.Matrix.Invert(Freelook.View);
+            sceneConstants.Projection = Matrix.PerspectiveFovLH(FieldOfView, AspectRatio, NearPlane, FarPlane);
+            sceneConstants.ViewInverse = Matrix.Invert(Freelook.View);
 
-            SharpDX.Vector3 light = new SharpDX.Vector3(20, 30, 10);
-            sceneConstants.LightPosition = new SharpDX.Vector4(light, 1);
+            Vector3 light = new Vector3(20, 30, 10);
+            sceneConstants.LightPosition = new Vector4(light, 1);
             Texture2DDescription depthBuffer = lightDepthTexture.Description;
-            SharpDX.Matrix lightView = SharpDX.Matrix.LookAtLH(light, SharpDX.Vector3.Zero, Freelook.Up);
-            SharpDX.Matrix lightProjection = SharpDX.Matrix.OrthoLH(depthBuffer.Width / 8, depthBuffer.Height / 8, NearPlane, FarPlane);
+            Matrix lightView = Matrix.LookAtLH(light, Vector3.Zero, Freelook.Up);
+            Matrix lightProjection = Matrix.OrthoLH(depthBuffer.Width / 8, depthBuffer.Height / 8, NearPlane, FarPlane);
             sceneConstants.LightViewProjection = lightView * lightProjection;
 
             using (var data = sceneConstantsBuffer.Map(MapMode.WriteDiscard))
@@ -421,9 +418,9 @@ namespace DemoFramework
                 sceneConstantsBuffer.Unmap();
             }
 
-            Effect2.GetVariableByName("InverseProjection").AsMatrix().SetMatrix(SharpDX.Matrix.Invert(sceneConstants.View * sceneConstants.Projection));
+            Effect2.GetVariableByName("InverseProjection").AsMatrix().SetMatrix(Matrix.Invert(sceneConstants.View * sceneConstants.Projection));
             Effect2.GetVariableByName("InverseView").AsMatrix().SetMatrix(sceneConstants.ViewInverse);
-            Effect2.GetVariableByName("LightInverseViewProjection").AsMatrix().SetMatrix(SharpDX.Matrix.Invert(sceneConstants.LightViewProjection));
+            Effect2.GetVariableByName("LightInverseViewProjection").AsMatrix().SetMatrix(Matrix.Invert(sceneConstants.LightViewProjection));
             Effect2.GetVariableByName("LightPosition").AsVector().Set(sceneConstants.LightPosition);
         }
 
@@ -601,20 +598,20 @@ namespace DemoFramework
                         break;
                     case Keys.Space:
                         PhysicsContext.ShootBox(MathHelper.Vector3(Freelook.Eye),
-                            GetRayTo(Input.MousePoint, MathHelper.Vector3(Freelook.Eye), MathHelper.Vector3(Freelook.Target), FieldOfView));
+                            MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView)));
                         break;
                 }
             }
 
             if (Input.MousePressed != MouseButtons.None)
             {
-                Vector3 rayTo = GetRayTo(Input.MousePoint, MathHelper.Vector3(Freelook.Eye), MathHelper.Vector3(Freelook.Target), FieldOfView);
+                BulletXNA.LinearMath.Vector3 rayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
 
                 if (Input.MousePressed == MouseButtons.Right)
                 {
                     if (PhysicsContext.World != null)
                     {
-                        Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
+                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
 
                         ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(rayFrom, rayTo);
                         PhysicsContext.World.RayTest(ref rayFrom, ref rayTo, rayCallback);
@@ -628,16 +625,16 @@ namespace DemoFramework
                                     pickedBody = body;
                                     pickedBody.ActivationState = ActivationState.DisableDeactivation;
 
-                                    Vector3 pickPos = rayCallback.m_hitPointWorld;
-                                    Vector3 localPivot = Vector3.Transform(pickPos, Matrix.Invert(body.GetCenterOfMassTransform()));
+                                    BulletXNA.LinearMath.Vector3 pickPos = rayCallback.m_hitPointWorld;
+                                    BulletXNA.LinearMath.Vector3 localPivot = BulletXNA.LinearMath.Vector3.Transform(pickPos, BulletXNA.LinearMath.Matrix.Invert(body.GetCenterOfMassTransform()));
 
                                     if (use6Dof)
                                     {
                                         Generic6DofConstraint dof6 = null;// new Generic6DofConstraint(body, Matrix.CreateTranslation(localPivot), false);
-                                        dof6.SetLinearLowerLimit(Vector3.Zero);
-                                        dof6.SetLinearUpperLimit(Vector3.Zero);
-                                        dof6.SetAngularLowerLimit(Vector3.Zero);
-                                        dof6.SetAngularUpperLimit(Vector3.Zero);
+                                        dof6.SetLinearLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
+                                        dof6.SetLinearUpperLimit(BulletXNA.LinearMath.Vector3.Zero);
+                                        dof6.SetAngularLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
+                                        dof6.SetAngularUpperLimit(BulletXNA.LinearMath.Vector3.Zero);
 
                                         PhysicsContext.World.AddConstraint(dof6);
                                         pickConstraint = dof6;
@@ -701,25 +698,25 @@ namespace DemoFramework
             {
                 if (pickConstraint != null)
                 {
-                    Vector3 newRayTo = GetRayTo(Input.MousePoint, MathHelper.Vector3(Freelook.Eye), MathHelper.Vector3(Freelook.Target), FieldOfView);
+                    BulletXNA.LinearMath.Vector3 newRayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
 
                     if (pickConstraint.ConstraintType == TypedConstraintType.D6)
                     {
                         Generic6DofConstraint pickCon = (Generic6DofConstraint)pickConstraint;
 
                         //keep it at the same picking distance
-                        Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
-                        Vector3 scale;
+                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
+                        BulletXNA.LinearMath.Vector3 scale;
                         Quaternion rotation;
-                        Vector3 oldPivotInB;
+                        BulletXNA.LinearMath.Vector3 oldPivotInB;
                         pickCon.GetFrameOffsetA().Decompose(out scale, out rotation, out oldPivotInB);
 
-                        Vector3 dir = newRayTo - rayFrom;
+                        BulletXNA.LinearMath.Vector3 dir = newRayTo - rayFrom;
                         dir.Normalize();
                         dir *= oldPickingDist;
-                        Vector3 newPivotB = rayFrom + dir;
+                        BulletXNA.LinearMath.Vector3 newPivotB = rayFrom + dir;
 
-                        Matrix tempFrameOffsetA = pickCon.GetFrameOffsetA();
+                        BulletXNA.LinearMath.Matrix tempFrameOffsetA = pickCon.GetFrameOffsetA();
                         tempFrameOffsetA.Translation = newPivotB;
                         //pickCon.FrameOffsetA = tempFrameOffsetA;
                     }
@@ -728,13 +725,13 @@ namespace DemoFramework
                         Point2PointConstraint pickCon = (Point2PointConstraint)pickConstraint;
 
                         //keep it at the same picking distance
-                        Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
-                        Vector3 oldPivotInB = pickCon.GetPivotInB();
+                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
+                        BulletXNA.LinearMath.Vector3 oldPivotInB = pickCon.GetPivotInB();
 
-                        Vector3 dir = newRayTo - rayFrom;
+                        BulletXNA.LinearMath.Vector3 dir = newRayTo - rayFrom;
                         dir.Normalize();
                         dir *= oldPickingDist;
-                        Vector3 newPivotB = rayFrom + dir;
+                        BulletXNA.LinearMath.Vector3 newPivotB = rayFrom + dir;
 
                         pickCon.SetPivotB(ref newPivotB);
                     }

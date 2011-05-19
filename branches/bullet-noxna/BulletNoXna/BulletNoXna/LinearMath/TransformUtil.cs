@@ -232,7 +232,7 @@ namespace BulletXNA
 
         public static void CopyMatrixRotation(ref Matrix from, ref Matrix to)
         {
-            to.Left = from.Left;
+            to.Right = from.Right;
             to.Up = from.Up;
             to.Backward = from.Backward;
         }

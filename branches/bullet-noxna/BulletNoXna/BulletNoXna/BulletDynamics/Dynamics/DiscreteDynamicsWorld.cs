@@ -211,8 +211,8 @@ namespace BulletXNA.BulletDynamics
 
 	    public override void AddConstraint(TypedConstraint constraint, bool disableCollisionsBetweenLinkedBodies)
         {
-            //if (constraint is ConeTwist)
-			//if (constraint is Hinge)
+            //if (constraint is ConeTwistConstraint)
+			//if (constraint is HingeConstraint)
 			//{
 			//    return;
 			//}

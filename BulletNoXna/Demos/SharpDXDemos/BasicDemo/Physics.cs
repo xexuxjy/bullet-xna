@@ -1,9 +1,7 @@
 ﻿using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
-using BulletXNA.LinearMath;
 using DemoFramework;
-using SharpDX;
 using Matrix = BulletXNA.LinearMath.Matrix;
 using Vector3 = BulletXNA.LinearMath.Vector3;
 

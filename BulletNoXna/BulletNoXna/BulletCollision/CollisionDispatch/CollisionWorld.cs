@@ -225,8 +225,8 @@ namespace BulletXNA.BulletCollision
             /// and for each object with ray-aabb overlap, perform an exact ray test
             /// unfortunately the implementation for rayTest and convexSweepTest duplicated, albeit practically identical
 
-            Matrix convexFromTrans = new Matrix();
-            Matrix convexToTrans = new Matrix();
+            Matrix convexFromTrans;
+            Matrix convexToTrans;
             convexFromTrans = convexFromWorld;
             convexToTrans = convexToWorld;
             Vector3 castShapeAabbMin;

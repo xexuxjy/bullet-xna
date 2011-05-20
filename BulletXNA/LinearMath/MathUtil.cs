@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
@@ -110,7 +111,7 @@ namespace BulletXNA
         {
             Matrix ba = MathUtil.BasisMatrix(ref mA);
             Matrix bb = MathUtil.BasisMatrix(ref mB);
-            return BulletMatrixMultiply(ref ba, ref bb);
+            return BulletMatrixMultiply(ba, bb);
         }
 
         public static Matrix InverseTimes(Matrix a, Matrix b)
@@ -1185,6 +1186,12 @@ namespace BulletXNA
             }
         }
 
+		public static float DegToRadians(float degrees)
+		{
+			return (degrees / 360.0f) * SIMD_2_PI;
+		}
+
+
         public static Vector3 Interpolate3(Vector3 v0, Vector3 v1, float rt)
         {
             return Interpolate3(ref v0, ref v1, rt);
@@ -1256,6 +1263,14 @@ namespace BulletXNA
 			return Vector3.TransformNormal(v, mt);
 		}
 
+        public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v, ref Matrix m)
+        {
+            Matrix mt = TransposeBasis(ref m);
+            return IndexedVector3.TransformNormal(ref v, ref mt);
+        }
+
+
+
 		public static void PrintQuaternion(TextWriter writer, Quaternion q)
 		{
             writer.Write(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000} W:{3:0.000000000000}}}", q.X, q.Y, q.Z, q.W));
@@ -1316,6 +1331,42 @@ namespace BulletXNA
 				PrintVector3(streamWriter, "normalWorldB", mp.m_normalWorldOnB);
 			}
 		}
+
+        public static bool IsAlmostZero(Vector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+
+        }
+
+        public static bool IsAlmostZero(ref Vector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+        }
+
+        public static bool IsAlmostZero(IndexedVector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+
+        }
+
+        public static bool IsAlmostZero(ref IndexedVector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+        }
+
+
+		public static Vector3 Vector3Lerp(ref Vector3 a, ref Vector3 b, float t)
+		{
+			return new Vector3(
+				a.X + (b.X - a.X) * t,
+				a.Y + (b.Y - a.Y) * t,
+				a.Z + (b.Z - a.Z) * t);
+		}
+
 
         //public const float SIMD_EPSILON = 0.0000001f;
         public const float SIMD_EPSILON = 1.192092896e-07f;

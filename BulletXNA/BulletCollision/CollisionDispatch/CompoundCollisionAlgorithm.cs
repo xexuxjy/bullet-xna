@@ -174,19 +174,24 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 //iterate over all children, perform an AABB check inside ProcessChildShape
                 int numChildren = m_childCollisionAlgorithms.Count;
 
-                IList<PersistentManifold> manifoldArray = new List<PersistentManifold>();
+                ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
+                CollisionShape childShape = null;
+                Matrix orgTrans;
+                Matrix orgInterpolationTrans;
+                Matrix newChildWorldTrans;
+
 
                 for (int i = 0; i < numChildren; i++)
                 {
                     if (m_childCollisionAlgorithms[i] != null)
                     {
-                        CollisionShape childShape = compoundShape.GetChildShape(i);
+                        childShape = compoundShape.GetChildShape(i);
                         //if not longer overlapping, remove the algorithm
-                        Matrix orgTrans = colObj.GetWorldTransform();
-                        Matrix orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
+                        orgTrans = colObj.GetWorldTransform();
+                        orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
                         Matrix childTrans = compoundShape.GetChildTransform(i);
 
-                        Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+                        newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
 
                         //perform an AABB check first
                         Vector3 aabbMin0;
@@ -238,13 +243,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             float hitFraction = 1f;
 
             int numChildren = m_childCollisionAlgorithms.Count;
+            Matrix orgTrans;
+            float frac;
+
             for (int i = 0; i < numChildren; i++)
             {
                 //temporarily exchange parent btCollisionShape with childShape, and recurse
                 CollisionShape childShape = compoundShape.GetChildShape(i);
 
                 //backup
-                Matrix orgTrans = colObj.GetWorldTransform();
+                orgTrans = colObj.GetWorldTransform();
 
                 Matrix childTrans = compoundShape.GetChildTransform(i);
                 Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
@@ -254,7 +262,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 CollisionShape tmpShape = colObj.GetCollisionShape();
                 colObj.InternalSetTemporaryCollisionShape(childShape);
 
-                float frac = m_childCollisionAlgorithms[i].CalculateTimeOfImpact(colObj, otherObj, dispatchInfo, resultOut);
+                frac = m_childCollisionAlgorithms[i].CalculateTimeOfImpact(colObj, otherObj, dispatchInfo, resultOut);
                 if (frac < hitFraction)
                 {
                     hitFraction = frac;
@@ -302,8 +310,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public void ProcessChildShape(CollisionShape childShape, int index)
         {
+            Debug.Assert(index >= 0);
             CompoundShape compoundShape = (CompoundShape)(m_compoundColObj.GetCollisionShape());
-
+            Debug.Assert(index < compoundShape.GetNumChildShapes());
 
             //backup
             Matrix orgTrans = m_compoundColObj.GetWorldTransform();

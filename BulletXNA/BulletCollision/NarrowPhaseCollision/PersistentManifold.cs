@@ -325,9 +325,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 #if MAINTAIN_PERSISTENCY
             int lifeTime = m_pointCache[insertIndex].GetLifeTime();
-            float appliedImpulse = m_pointCache[insertIndex].GetAppliedImpulse();
-            float appliedLateralImpulse1 = m_pointCache[insertIndex].GetAppliedImpulseLateral1();
-            float appliedLateralImpulse2 = m_pointCache[insertIndex].GetAppliedImpulseLateral2();
+            float appliedImpulse = m_pointCache[insertIndex].m_appliedImpulse;
+            float appliedLateralImpulse1 = m_pointCache[insertIndex].m_appliedImpulseLateral1;
+            float appliedLateralImpulse2 = m_pointCache[insertIndex].m_appliedImpulseLateral2;
 
             Debug.Assert(lifeTime >= 0);
             Object cache = m_pointCache[insertIndex].GetUserPersistentData();
@@ -339,6 +339,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_pointCache[insertIndex].SetAppliedImpulseLateral1(appliedLateralImpulse1);
             m_pointCache[insertIndex].SetAppliedImpulseLateral2(appliedLateralImpulse2);
 
+            m_pointCache[insertIndex].m_constraintRow[0].m_accumImpulse = appliedImpulse;
+            m_pointCache[insertIndex].m_constraintRow[1].m_accumImpulse = appliedLateralImpulse1;
+            m_pointCache[insertIndex].m_constraintRow[2].m_accumImpulse = appliedLateralImpulse2;
+
             m_pointCache[insertIndex].SetLifeTime(lifeTime);
 #else
 		    ClearUserCache(ref m_pointCache[insertIndex]);
@@ -348,7 +352,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public bool ValidContactDistance(ManifoldPoint pt)
         {
-            return pt.GetDistance() <= GetContactBreakingThreshold();
+            if (pt.m_lifeTime > 1)
+            {
+                return pt.GetDistance() <= GetContactBreakingThreshold();
+            }
+            return pt.m_distance1 <= GetContactProcessingThreshold();
+
         }
         /// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
         public void RefreshContactPoints(ref Matrix trA, ref Matrix trB)
@@ -441,6 +450,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         private Object m_body0;
         private Object m_body1;
         private int m_cachedPoints;
+
+        public int m_companionIdA;
+        public int m_companionIdB;
+	 
         public int m_index1a;
 
         private float m_contactBreakingThreshold;
@@ -494,7 +507,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
     public enum ContactManifoldTypes
     {
-        BT_PERSISTENT_MANIFOLD_TYPE = 1,
-        MAX_CONTACT_MANIFOLD_TYPE
+        MIN_CONTACT_MANIFOLD_TYPE = 1024,
+        BT_PERSISTENT_MANIFOLD_TYPE 
     }
 }

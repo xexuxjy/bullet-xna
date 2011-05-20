@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -58,7 +59,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
         //notice that the vectors should be unit length
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors) 
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors) 
         {
 	        for (int i=0;i<numVectors;i++)
 	        {

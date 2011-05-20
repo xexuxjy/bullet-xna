@@ -338,7 +338,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 if (checkSimplex)
                 {
                     m_simplexSolver.ComputePoints(out pointOnA, out pointOnB);
-                    normalInB = pointOnA - pointOnB;
+                    normalInB = m_cachedSeparatingAxis;
                     float lenSqr = m_cachedSeparatingAxis.LengthSquared();
                     //valid normal
                     if (lenSqr < 0.0001f)
@@ -558,4 +558,5 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         private static int gNumGjkChecks = 0;
         public static bool debugGJK = true;
     }
-}
+    }
+

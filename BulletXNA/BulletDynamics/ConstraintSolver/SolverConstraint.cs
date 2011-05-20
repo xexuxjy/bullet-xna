@@ -42,9 +42,14 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         public float m_jacDiagABInv;
         public int m_numConsecutiveRowsPerKernel;
         public int m_frictionIndex;
+		// warning - these are unioned in the c++ version
         public RigidBody m_solverBodyA;
-        public RigidBody m_solverBodyB;
-        public Object m_originalContactPoint;
+		public int m_companionIdA;
+		// warning - these are unioned in the c++ version
+		public RigidBody m_solverBodyB;
+		public int m_companionIdB;
+		
+		public Object m_originalContactPoint;
 
         public float m_rhs;
         public float m_cfm;

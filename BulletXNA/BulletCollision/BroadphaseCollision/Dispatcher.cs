@@ -71,7 +71,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_stepCount = 0;
             m_dispatchFunc = DispatchFunc.DISPATCH_DISCRETE;
             m_timeOfImpact = 1f;
-            m_useContinuous = false;
+            m_useContinuous = true;
             m_debugDraw = null;
             m_enableSatConvex = false;
             m_enableSPU = true;
@@ -145,9 +145,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         int m_stepCount;
         DispatchFunc m_dispatchFunc;
         float m_timeOfImpact;
-        bool m_useContinuous;
+        public bool m_useContinuous;
         public IDebugDraw m_debugDraw;
-        bool m_enableSatConvex;
+        public bool m_enableSatConvex;
         bool m_enableSPU;
         bool m_useEpa;
         float m_allowedCcdPenetration;

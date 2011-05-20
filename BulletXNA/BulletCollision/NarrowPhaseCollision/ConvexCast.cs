@@ -38,7 +38,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class CastResult
     {
         public virtual void DebugDraw(float fraction) { }
-        public virtual void drawCoordSystem(ref Matrix trans) { }
+        public virtual void DrawCoordSystem(ref Matrix trans) { }
+        public virtual void	ReportFailure(int errNo, int numIterations) {}
 
         public CastResult()
         {

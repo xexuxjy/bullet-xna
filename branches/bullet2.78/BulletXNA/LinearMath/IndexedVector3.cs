@@ -49,6 +49,11 @@ namespace BulletXNA.LinearMath
             result.Z = Math.Abs(Z);
         }
 
+        public static float Dot(IndexedVector3 a, IndexedVector3 b)
+        {
+            return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
+        }
+
         public static float Dot(ref IndexedVector3 a, ref IndexedVector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
@@ -168,7 +173,22 @@ namespace BulletXNA.LinearMath
             return new float[] { X, Y, Z };
         }
 
- 
+        public static void Lerp(ref IndexedVector3 a, ref IndexedVector3 b, float t,out IndexedVector3 c)
+        {
+            c = new IndexedVector3(
+                a.X + (b.X - a.X) * t,
+                a.Y + (b.Y - a.Y) * t,
+                a.Z + (b.Z - a.Z) * t);
+        }
+
+        public static IndexedVector3 Lerp(ref IndexedVector3 a, ref IndexedVector3 b, float t)
+        {
+            return  new IndexedVector3(
+                a.X + (b.X - a.X) * t,
+                a.Y + (b.Y - a.Y) * t,
+                a.Z + (b.Z - a.Z) * t);
+        }
+
 
 
         public float this[int i]

@@ -127,8 +127,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	        m_gravity_acceleration = Vector3.Zero;
 	        m_totalForce = Vector3.Zero;
 	        m_totalTorque = Vector3.Zero;
-            m_linearDamping = 0f;
-            m_angularDamping = 0.5f;
+			SetDamping(constructionInfo.m_linearDamping, constructionInfo.m_angularDamping);
 	        m_linearSleepingThreshold = constructionInfo.m_linearSleepingThreshold;
 	        m_angularSleepingThreshold = constructionInfo.m_angularSleepingThreshold;
 	        m_optionalMotionState = constructionInfo.m_motionState;
@@ -161,7 +160,6 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	        m_debugBodyId = uniqueId++;
         	
 	        SetMassProps(constructionInfo.m_mass, constructionInfo.m_localInertia);
-            SetDamping(constructionInfo.m_linearDamping, constructionInfo.m_angularDamping);
 	        UpdateInertiaTensor();
             m_rigidbodyFlags = RigidBodyFlags.BT_NONE;
             m_constraintRefs = new List<TypedConstraint>();
@@ -183,7 +181,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	    ///but a rigidbody is derived from btCollisionObject, so we can safely perform an upcast
 	    public static RigidBody	Upcast(CollisionObject colObj)
 	    {
-		    if (colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
+		    if ((colObj.GetInternalType()&CollisionObjectTypes.CO_RIGID_BODY) != 0)
             {
 			    return colObj as RigidBody;
             }
@@ -201,7 +199,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"AngularVel",m_angularVelocity);
 
 			}
-            TransformUtil.IntegrateTransform(m_worldTransform,m_linearVelocity,m_angularVelocity,timeStep, out predictedTransform);
+            TransformUtil.IntegrateTransform(m_worldTransform,m_linearVelocity,m_angularVelocity,timeStep,out predictedTransform);
             MathUtil.SanityCheckVector(m_worldTransform.Up);
 			if (BulletGlobals.g_streamWriter != null && debugRigidBody)
 			{
@@ -370,6 +368,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        m_collisionFlags &= (~CollisionFlags.CF_STATIC_OBJECT);
 		        m_inverseMass = 1.0f / mass;
 	        }
+
+			m_gravity = mass * m_gravity_acceleration;
 
             m_invInertiaLocal = new Vector3(
                             (inertia.X != 0f) ? 1f / inertia.X : 0f,
@@ -767,6 +767,27 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		    return m_rigidbodyFlags;
 	    }
 
+	public Vector3 GetDeltaLinearVelocity()
+	{
+		return m_deltaLinearVelocity;
+	}
+
+	public Vector3 GetDeltaAngularVelocity() 
+	{
+		return m_deltaAngularVelocity;
+	}
+
+	public Vector3 GetPushVelocity()
+	{
+		return m_pushVelocity;
+	}
+
+	public Vector3 GetTurnVelocity() 
+	{
+		return m_turnVelocity;
+	}
+
+
 	    //is this rigidbody added to a btCollisionWorld/btDynamicsWorld/btBroadphase?
 	    public bool IsInWorld()
 	    {
@@ -943,7 +964,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
         		
 		        //correct the position/orientation based on push/turn recovery
 		        Matrix newTransform;
-		        TransformUtil.IntegrateTransform(GetWorldTransform(),m_pushVelocity,m_turnVelocity,timeStep, out newTransform);
+		        TransformUtil.IntegrateTransform(GetWorldTransform(),m_pushVelocity,m_turnVelocity,timeStep,out newTransform);
 		        SetWorldTransform(ref newTransform);
 		        //m_originalBody->setCompanionId(-1);
 	        }
@@ -954,10 +975,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, GetWorldTransform());
             }
 
-            m_deltaLinearVelocity = Vector3.Zero;
-            m_deltaAngularVelocity = Vector3.Zero;
-            m_pushVelocity = Vector3.Zero;
-            m_turnVelocity = Vector3.Zero;
+			//m_deltaLinearVelocity = Vector3.Zero;
+			//m_deltaAngularVelocity = Vector3.Zero;
+			//m_pushVelocity = Vector3.Zero;
+			//m_turnVelocity = Vector3.Zero;
         }
     }
 

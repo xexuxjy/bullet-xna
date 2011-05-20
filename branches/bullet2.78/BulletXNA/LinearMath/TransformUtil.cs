@@ -103,7 +103,7 @@ namespace BulletXNA
             IntegrateTransform(ref curTrans, ref linvel, ref angvel, timeStep, out predictedTransform);
         }
 
-	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep, out Matrix predictedTransform)
+	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep,out Matrix predictedTransform)
 	    {
             predictedTransform = Matrix.Identity;
 		    predictedTransform.Translation = (curTrans.Translation + linvel * timeStep);

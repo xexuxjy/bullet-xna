@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -208,14 +209,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         	
 	        #if true
             //fixme - make a static list.
-            IList<Vector3> localDirections = new List<Vector3>();
-            for (int i = 0; i < _directions.Length; ++i)
-            {
-                localDirections.Add(_directions[i]);
-            }
-            IList<Vector4> _supporting = new List<Vector4>();
-        	
-	        BatchedUnitVectorGetSupportingVertexWithoutMargin(localDirections, _supporting, 6);
+            Vector4[] _supporting = new Vector4[6];
+	        BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
         	
 	        for ( int i = 0; i < 3; ++i )
 	        {
@@ -239,7 +234,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        #endif
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
         }
 

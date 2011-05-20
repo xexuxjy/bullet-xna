@@ -110,9 +110,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             {
                 m_dynamicAabbTree.Remove(m_children[childShapeIndex].m_treeNode);
             }
-			m_children.RemoveAt(childShapeIndex);
-			//m_children[childShapeIndex] = m_children[m_children.Count - 1];
-			//m_children.RemoveAt(m_children.Count - 1);
+            m_children.RemoveAt(childShapeIndex);
+            if (m_dynamicAabbTree != null)
+            {
+                m_children[childShapeIndex].m_treeNode.dataAsInt = childShapeIndex;
+            }
+
+            //m_children[childShapeIndex] = m_children[m_children.Count - 1];
+            //m_children.RemoveAt(m_children.Count - 1);
             //m_children.pop_back();
         }
 
@@ -134,6 +139,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         ///set a new transform for a child, and update internal data structures (local aabb and dynamic tree)
         public void UpdateChildTransform(int childIndex, ref Matrix newChildTransform)
         {
+            UpdateChildTransform(childIndex, ref newChildTransform, true);
+        }
+
+        public void UpdateChildTransform(int childIndex, ref Matrix newChildTransform, bool shouldRecalculateLocalAabb)
+        {
             m_children[childIndex].m_transform = newChildTransform;
 
             if (m_dynamicAabbTree != null)
@@ -147,26 +157,48 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 m_dynamicAabbTree.Update(m_children[childIndex].m_treeNode, ref bounds);
             }
 
-            RecalculateLocalAabb();
+            if (shouldRecalculateLocalAabb)
+            {
+                RecalculateLocalAabb();
+            }
         }
 
         public override void SetLocalScaling(ref Vector3 scaling)
         {
 
-	        for(int i = 0; i < m_children.Count; i++)
-	        {
-		        Matrix childTrans = GetChildTransform(i);
-		        Vector3 childScale = m_children[i].m_childShape.GetLocalScaling();
-        //		childScale = childScale * (childTrans.getBasis() * scaling);
-		        childScale = childScale * scaling / m_localScaling;
-		        m_children[i].m_childShape.SetLocalScaling(ref childScale);
-		        childTrans.Translation = ((childTrans.Translation)*scaling);
-		        UpdateChildTransform(i, ref childTrans);
-		        RecalculateLocalAabb();
-	        }
-	        m_localScaling = scaling;
+            for (int i = 0; i < m_children.Count; i++)
+            {
+                Matrix childTrans = GetChildTransform(i);
+                Vector3 childScale = m_children[i].m_childShape.GetLocalScaling();
+                //		childScale = childScale * (childTrans.getBasis() * scaling);
+                childScale = childScale * scaling / m_localScaling;
+                m_children[i].m_childShape.SetLocalScaling(ref childScale);
+                childTrans.Translation = ((childTrans.Translation) * scaling);
+                UpdateChildTransform(i, ref childTrans, false);
+            }
+            m_localScaling = scaling;
+            RecalculateLocalAabb();
         }
 
+        public void CreateAabbTreeFromChildren()
+        {
+            if (m_dynamicAabbTree == null)
+            {
+                m_dynamicAabbTree = new Dbvt();
+
+                for (int index = 0; index < m_children.Count; index++)
+                {
+                    CompoundShapeChild child = m_children[index];
+
+                    //extend the local aabbMin/aabbMax
+                    Vector3 localAabbMin, localAabbMax;
+                    child.m_childShape.GetAabb(ref child.m_transform, out localAabbMin, out localAabbMax);
+
+                    DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
+                    child.m_treeNode = m_dynamicAabbTree.Insert(bounds, (object)index);
+                }
+            }
+        }
 
 
         public IList<CompoundShapeChild> GetChildList()
@@ -191,10 +223,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
             Matrix abs_b;
             MathUtil.AbsoluteMatrix(ref trans, out abs_b);
-            
-			
-			//Vector3 center = trans.Translation;
-			Vector3 center = Vector3.Transform(localCenter, trans);
+
+
+            //Vector3 center = trans.Translation;
+            Vector3 center = Vector3.Transform(localCenter, trans);
 
 
             Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
@@ -218,10 +250,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             Vector3 localAabbMax;
             for (int j = 0; j < m_children.Count; j++)
             {
-				Matrix foo = m_children[j].m_transform;
+                Matrix foo = m_children[j].m_transform;
                 m_children[j].m_childShape.GetAabb(ref foo, out localAabbMin, out localAabbMax);
-				MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
-				MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
+                MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
+                MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
             }
         }
 
@@ -285,9 +317,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
             for (int k = 0; k < n; k++)
             {
+                Debug.Assert(masses[k] > 0f);
                 center += m_children[k].m_transform.Translation * masses[k];
                 totalMass += masses[k];
             }
+
+            Debug.Assert(totalMass > 0f);
             center /= totalMass;
             principal.Translation = center;
 

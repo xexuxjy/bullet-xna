@@ -205,6 +205,20 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             IndexedVector3 normalC = new IndexedVector3();
 
+            float fudge2 = 1.0e-5f;
+
+            Q11 += fudge2;
+            Q12 += fudge2;
+            Q13 += fudge2;
+
+            Q21 += fudge2;
+            Q22 += fudge2;
+            Q23 += fudge2;
+
+            Q31 += fudge2;
+            Q32 += fudge2;
+            Q33 += fudge2;
+
             // separating axis = u1 x (v1,v2,v3)
             if (TST2(pp[2] * R21 - pp[1] * R31, (A[1] * Q31 + A[2] * Q21 + B[1] * Q13 + B[2] * Q12), 0, -R31, R21, ref normalC, ref normalR, 7, ref code, ref s, ref invert_normal)) return 0;
             if (TST2(pp[2] * R22 - pp[1] * R32, (A[1] * Q32 + A[2] * Q22 + B[0] * Q13 + B[2] * Q11), 0, -R32, R22, ref normalC, ref normalR, 8, ref code, ref s, ref invert_normal)) return 0;

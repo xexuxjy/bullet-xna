@@ -230,5 +230,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public Matrix m_triangleToWorld;
         public float m_hitFraction;
         public float m_triangleCollisionMargin;
+        public float m_allowedPenetration;
     }
 }

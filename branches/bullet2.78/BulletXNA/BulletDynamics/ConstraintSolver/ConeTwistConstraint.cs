@@ -142,7 +142,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		{
 			info.m_numConstraintRows = 3;
 			info.nub = 3;
-			if(BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && debugConstraint)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -185,18 +185,18 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			Vector3 a1 = Vector3.TransformNormal(m_rbAFrame.Translation, transA);
 			{
 				Vector3 a1neg = -a1;
-                MathUtil.GetSkewSymmetricMatrix(ref a1neg,
-                    out info.m_solverConstraints[0].m_relpos1CrossNormal,
-                    out info.m_solverConstraints[1].m_relpos1CrossNormal,
-                    out info.m_solverConstraints[2].m_relpos1CrossNormal);
+				MathUtil.GetSkewSymmetricMatrix(ref a1neg,
+					out info.m_solverConstraints[0].m_relpos1CrossNormal,
+					out info.m_solverConstraints[1].m_relpos1CrossNormal,
+					out info.m_solverConstraints[2].m_relpos1CrossNormal);
 			}
 
 			Vector3 a2 = Vector3.TransformNormal(m_rbBFrame.Translation, transB);
 			{
-                MathUtil.GetSkewSymmetricMatrix(ref a2,
-                    out info.m_solverConstraints[0].m_relpos2CrossNormal,
-                    out info.m_solverConstraints[1].m_relpos2CrossNormal,
-                    out info.m_solverConstraints[2].m_relpos2CrossNormal);
+				MathUtil.GetSkewSymmetricMatrix(ref a2,
+					out info.m_solverConstraints[0].m_relpos2CrossNormal,
+					out info.m_solverConstraints[1].m_relpos2CrossNormal,
+					out info.m_solverConstraints[2].m_relpos2CrossNormal);
 			}
 
 			// set right hand side
@@ -221,7 +221,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 				if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
 				{
-					Matrix trA = MathUtil.BulletMatrixMultiply(ref transA, ref m_rbAFrame);
+					Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
 
 					Vector3 p = MathUtil.MatrixColumn(ref trA, 1);
 					Vector3 q = MathUtil.MatrixColumn(ref trA, 2);
@@ -686,34 +686,34 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			return m_solveSwingLimit;
 		}
 
-		public void SetDamping(float damping) 
-		{ 
-			m_damping = damping; 
+		public void SetDamping(float damping)
+		{
+			m_damping = damping;
 		}
 
-		public void EnableMotor(bool b) 
-		{ 
-			m_bMotorEnabled = b; 
+		public void EnableMotor(bool b)
+		{
+			m_bMotorEnabled = b;
 		}
-		public void SetMaxMotorImpulse(float maxMotorImpulse) 
-		{ 
-			m_maxMotorImpulse = maxMotorImpulse; 
-			m_bNormalizedMotorStrength = false; 
+		public void SetMaxMotorImpulse(float maxMotorImpulse)
+		{
+			m_maxMotorImpulse = maxMotorImpulse;
+			m_bNormalizedMotorStrength = false;
 		}
-		public void SetMaxMotorImpulseNormalized(float maxMotorImpulse) 
-		{ 
-			m_maxMotorImpulse = maxMotorImpulse; 
-			m_bNormalizedMotorStrength = true; 
+		public void SetMaxMotorImpulseNormalized(float maxMotorImpulse)
+		{
+			m_maxMotorImpulse = maxMotorImpulse;
+			m_bNormalizedMotorStrength = true;
 		}
 
-		public float GetFixThresh() 
-		{ 
-			return m_fixThresh; 
+		public float GetFixThresh()
+		{
+			return m_fixThresh;
 		}
-		
-		public void SetFixThresh(float fixThresh) 
-		{ 
-			m_fixThresh = fixThresh; 
+
+		public void SetFixThresh(float fixThresh)
+		{
+			m_fixThresh = fixThresh;
 		}
 
 		// setMotorTarget:
@@ -744,9 +744,9 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				// split into twist and cone
 				Vector3 vTwisted = MathUtil.QuatRotate(ref m_qTarget, ref vTwist);
-				Quaternion qTargetCone = MathUtil.ShortestArcQuat(ref vTwist, ref vTwisted); 
+				Quaternion qTargetCone = MathUtil.ShortestArcQuat(ref vTwist, ref vTwisted);
 				qTargetCone.Normalize();
-				Quaternion qTargetTwist = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(qTargetCone), m_qTarget); 
+				Quaternion qTargetTwist = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(qTargetCone), m_qTarget);
 				qTargetTwist.Normalize();
 
 				// clamp cone
@@ -947,6 +947,29 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				vSwingAxis.Normalize();
 			}
 		}
+
+
+		public Matrix GetFrameOffsetA()
+		{
+			return m_rbAFrame;
+		}
+
+		public Matrix GetFrameOffsetB()
+		{
+			return m_rbBFrame;
+		}
+
+
+		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
+		{
+			m_rbAFrame = frameA;
+			m_rbBFrame = frameB;
+			// obsolete
+			//BuildJacobian();
+			//calculateTransforms();
+		}
+
+
 	}
 
 	[Flags]

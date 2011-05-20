@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
@@ -286,6 +287,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_appliedImpulseLateral1 = 0f;
             m_appliedImpulseLateral2 = 0f;
             m_lifeTime = 0;
+            m_constraintRow[0].m_accumImpulse = 0.0f;
+            m_constraintRow[1].m_accumImpulse = 0.0f;
+            m_constraintRow[2].m_accumImpulse = 0.0f;
+
         }
 
         public void Copy(ManifoldPoint other)
@@ -346,5 +351,19 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public Vector3 m_lateralFrictionDir1;
         public Vector3 m_lateralFrictionDir2;
+
+        public ConstraintRow[] m_constraintRow = new ConstraintRow[3];
+
     }
+
+    public struct ConstraintRow
+    {
+        public IndexedVector3 m_normal;
+        public float m_rhs;
+        public float m_jacDiagInv;
+        public float m_lowerLimit;
+        public float m_upperLimit;
+        public float m_accumImpulse;
+    }
+
 }

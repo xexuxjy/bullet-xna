@@ -115,6 +115,7 @@
     <Compile Include="BulletCollision\CollisionDispatch\SimulationIslandManager.cs" />
     <Compile Include="BulletCollision\CollisionShapes\Box2dShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\Convex2dShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexPolyhedron.cs" />
     <Compile Include="BulletCollision\CollisionShapes\ShapeHull.cs" />
     <Compile Include="BulletCollision\CollisionShapes\TriangleInfoMap.cs" />
     <Compile Include="BulletCollision\GImpact\BoxCollision.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="BulletCollision\GImpact\GImpactQuantizedBvh.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactShape.cs" />
     <Compile Include="BulletCollision\GImpact\TriangleShapeEx.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\PolyhedralContactClipping.cs" />
     <Compile Include="BulletDynamics\Character\ICharacterControllerInterface.cs" />
     <Compile Include="BulletDynamics\Character\KinematicCharacterController.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\Generic6DofConstraint.cs" />

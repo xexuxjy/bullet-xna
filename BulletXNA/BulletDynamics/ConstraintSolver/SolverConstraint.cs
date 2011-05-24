@@ -24,6 +24,7 @@
 using System;
 using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.BulletCollision.NarrowPhaseCollision;
 
 namespace BulletXNA.BulletDynamics.ConstraintSolver
 {
@@ -49,8 +50,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		public RigidBody m_solverBodyB;
 		public int m_companionIdB;
 		
-		public Object m_originalContactPoint;
-
+        public TypedConstraint m_originalContactPointConstraint;
+        public ManifoldPoint m_originalContactPoint;
         public float m_rhs;
         public float m_cfm;
         public float m_lowerLimit;

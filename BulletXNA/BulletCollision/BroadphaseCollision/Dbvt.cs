@@ -451,7 +451,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 rayDir.Normalize();
 
                 ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
-                Vector3 rayDirectionInverse;
+                Vector3 rayDirectionInverse = Vector3.Zero;
                 rayDirectionInverse.X = rayDir.X == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X;
                 rayDirectionInverse.Y = rayDir.Y == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y;
                 rayDirectionInverse.Z = rayDir.Z == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z;

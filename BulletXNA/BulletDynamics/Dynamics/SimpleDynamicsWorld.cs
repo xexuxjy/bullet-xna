@@ -123,7 +123,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		}
 
 
-		public virtual void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask)
+		public override void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask)
 		{
 			body.SetGravity(ref m_gravity);
 

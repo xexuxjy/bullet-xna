@@ -43,139 +43,146 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             base.Cleanup();
         }
 
-
+#if USE_CONVEX_HULL_COMPUTER
         ///optional method mainly used to generate multiple contact points by clipping polyhedral features (faces/edges)
         public virtual bool InitializePolyhedralFeatures()
         {
-	if (m_polyhedron != null)
-    {
-        m_polyhedron = null;
-    }
-	
-	m_polyhedron = new ConvexPolyhedron();
+            if (m_polyhedron != null)
+            {
+                m_polyhedron = null;
+            }
 
-	ObjectArray<Vector3> tmpVertices = new ObjectArray<Vector3>();
-	for (int i=0;i<GetNumVertices();i++)
-	{
-		Vector3 newVertex = tmpVertices.expand();
-		GetVertex(i,newVertex);
-	}
+            m_polyhedron = new ConvexPolyhedron();
 
-	ConvexHullComputer conv = new ConvexHullComputer();
-	conv.compute(&tmpVertices[0].getX(), sizeof(btVector3),tmpVertices.Count,0.0f,0.0f);
+            ObjectArray<Vector3> tmpVertices = new ObjectArray<Vector3>();
+            for (int i = 0; i < GetNumVertices(); i++)
+            {
+                Vector3 newVertex;
+                GetVertex(i, out newVertex);
+                tmpVertices.Add(newVertex);
+            }
 
-	
-
-	ObjectArray<Vector3> faceNormals = new ObjectArray<Vector3>();
-	int numFaces = conv.faces.size();
-	faceNormals.Resize(numFaces);
-	ConvexHullComputer convexUtil = conv;
-
-	
-	
-	m_polyhedron.m_faces.Resize(numFaces);
-	int numVertices = convexUtil.vertices.size();
-	m_polyhedron.m_vertices.Resize(numVertices);
-	for (int p=0;p<numVertices;p++)
-	{
-		m_polyhedron.m_vertices[p] = convexUtil.vertices[p];
-	}
-
-	for (int i=0;i<numFaces;i++)
-	{
-		int face = convexUtil.faces[i];
-		//printf("face=%d\n",face);
-		const btConvexHullComputer::Edge*  firstEdge = &convexUtil.edges[face];
-		const btConvexHullComputer::Edge*  edge = firstEdge;
-
-		btVector3 edges[3];
-		int numEdges = 0;
-		//compute face normals
-
-		btScalar maxCross2 = 0.f;
-		int chosenEdge = -1;
-
-		do
-		{
-			
-			int src = edge.getSourceVertex();
-			m_polyhedron.m_faces[i].m_indices.push_back(src);
-			int targ = edge.getTargetVertex();
-			btVector3 wa = convexUtil.vertices[src];
-
-			btVector3 wb = convexUtil.vertices[targ];
-			btVector3 newEdge = wb-wa;
-			newEdge.normalize();
-			if (numEdges<2)
-				edges[numEdges++] = newEdge;
-
-			edge = edge.getNextEdgeOfFace();
-		} while (edge!=firstEdge);
-
-		btScalar planeEq = 1e30f;
-
-		
-		if (numEdges==2)
-		{
-			faceNormals[i] = edges[0].cross(edges[1]);
-			faceNormals[i].normalize();
-			m_polyhedron.m_faces[i].m_plane[0] = -faceNormals[i].getX();
-			m_polyhedron.m_faces[i].m_plane[1] = -faceNormals[i].getY();
-			m_polyhedron.m_faces[i].m_plane[2] = -faceNormals[i].getZ();
-			m_polyhedron.m_faces[i].m_plane[3] = planeEq;
-
-		}
-		else
-		{
-			btAssert(0);//degenerate?
-			faceNormals[i].setZero();
-		}
-
-		for (int v=0;v<m_polyhedron.m_faces[i].m_indices.size();v++)
-		{
-			btScalar eq = m_polyhedron.m_vertices[m_polyhedron.m_faces[i].m_indices[v]].dot(faceNormals[i]);
-			if (planeEq>eq)
-			{
-				planeEq=eq;
-			}
-		}
-		m_polyhedron.m_faces[i].m_plane[3] = planeEq;
-	}
+            ConvexHullComputer conv = new ConvexHullComputer();
+            //conv.compute(&tmpVertices[0].getX(), sizeof(Vector3),tmpVertices.Count,0.0f,0.0f);
+            conv.compute(tmpVertices, 0, tmpVertices.Count, 0.0f, 0.0f);
 
 
-	if (m_polyhedron.m_faces.Count && conv.vertices.size())
-	{
 
-		for (int f=0;f<m_polyhedron.m_faces.Count;f++)
-		{
-			
-			Vector3 planeNormal  = new Vector3(m_polyhedron.m_faces[f].m_plane[0],m_polyhedron.m_faces[f].m_plane[1],m_polyhedron.m_faces[f].m_plane[2]);
-			btScalar planeEq = m_polyhedron.m_faces[f].m_plane[3];
+            ObjectArray<Vector3> faceNormals = new ObjectArray<Vector3>();
+            int numFaces = conv.faces.size();
+            faceNormals.Resize(numFaces);
+            ConvexHullComputer convexUtil = conv;
 
-			btVector3 supVec = localGetSupportingVertex(-planeNormal);
 
-			if (supVec.dot(planeNormal)<planeEq)
-			{
-				m_polyhedron.m_faces[f].m_plane[0] *= -1;
-				m_polyhedron.m_faces[f].m_plane[1] *= -1;
-				m_polyhedron.m_faces[f].m_plane[2] *= -1;
-				m_polyhedron.m_faces[f].m_plane[3] *= -1;
-				int numVerts = m_polyhedron.m_faces[f].m_indices.size();
-				for (int v=0;v<numVerts/2;v++)
-				{
-					btSwap(m_polyhedron.m_faces[f].m_indices[v],m_polyhedron.m_faces[f].m_indices[numVerts-1-v]);
-				}
-			}
-		}
-	}
 
-	
+            m_polyhedron.m_faces.Resize(numFaces);
+            int numVertices = convexUtil.vertices.size();
+            m_polyhedron.m_vertices.Resize(numVertices);
+            for (int p = 0; p < numVertices; p++)
+            {
+                m_polyhedron.m_vertices[p] = convexUtil.vertices[p];
+            }
 
-	m_polyhedron.Initialize();
+            for (int i = 0; i < numFaces; i++)
+            {
+                int face = convexUtil.faces[i];
+                //printf("face=%d\n",face);
+                Edge firstEdge = convexUtil.edges[face];
+                Edge edge = firstEdge;
 
-	return true;
+                Vector3[] edges = new Vector3[3];
+                int numEdges = 0;
+                //compute face normals
+
+                float maxCross2 = 0.f;
+                int chosenEdge = -1;
+
+                do
+                {
+
+                    int src = edge.getSourceVertex();
+                    m_polyhedron.m_faces[i].m_indices.Add(src);
+                    int targ = edge.getTargetVertex();
+                    Vector3 wa = convexUtil.vertices[src];
+
+                    Vector3 wb = convexUtil.vertices[targ];
+                    Vector3 newEdge = wb - wa;
+                    newEdge.Normalize();
+                    if (numEdges < 2)
+                    {
+                        edges[numEdges++] = newEdge;
+                    }
+
+                    edge = edge.getNextEdgeOfFace();
+                } while (edge != firstEdge);
+
+                float planeEq = 1e30f;
+
+
+                if (numEdges == 2)
+                {
+                    faceNormals[i] = Vector3.Cross(edges[0], edges[1]);
+                    faceNormals[i].Normalize();
+                    m_polyhedron.m_faces[i].m_plane[0] = -faceNormals[i].X;
+                    m_polyhedron.m_faces[i].m_plane[1] = -faceNormals[i].Y;
+                    m_polyhedron.m_faces[i].m_plane[2] = -faceNormals[i].Z;
+                    m_polyhedron.m_faces[i].m_plane[3] = planeEq;
+
+                }
+                else
+                {
+                    Debug.Assert(false);//degenerate?
+                    faceNormals[i] = Vector3.Zero;
+                }
+
+                for (int v = 0; v < m_polyhedron.m_faces[i].m_indices.Count; v++)
+                {
+                    float eq = Vector3.Dot(m_polyhedron.m_vertices[m_polyhedron.m_faces[i].m_indices[v]], faceNormals[i]);
+                    if (planeEq > eq)
+                    {
+                        planeEq = eq;
+                    }
+                }
+                m_polyhedron.m_faces[i].m_plane[3] = planeEq;
+            }
+
+
+            if (m_polyhedron.m_faces.Count && conv.vertices.size())
+            {
+
+                for (int f = 0; f < m_polyhedron.m_faces.Count; f++)
+                {
+
+                    Vector3 planeNormal = new Vector3(m_polyhedron.m_faces[f].m_plane[0], m_polyhedron.m_faces[f].m_plane[1], m_polyhedron.m_faces[f].m_plane[2]);
+                    float planeEq = m_polyhedron.m_faces[f].m_plane[3];
+
+                    Vector3 supVec = LocalGetSupportingVertex(-planeNormal);
+
+                    if (Vector3.Dot(supVec, planeNormal) < planeEq)
+                    {
+                        m_polyhedron.m_faces[f].m_plane[0] *= -1;
+                        m_polyhedron.m_faces[f].m_plane[1] *= -1;
+                        m_polyhedron.m_faces[f].m_plane[2] *= -1;
+                        m_polyhedron.m_faces[f].m_plane[3] *= -1;
+                        int numVerts = m_polyhedron.m_faces[f].m_indices.Count;
+                        for (int v = 0; v < numVerts / 2; v++)
+                        {
+                            int temp = m_polyhedron.m_faces[f].m_indices[v];
+                            m_polyhedron.m_faces[f].m_indices[v] = m_polyhedron.m_faces[f].m_indices[numVerts - 1 - v];
+                            m_polyhedron.m_faces[f].m_indices[numVerts - 1 - v] = temp;
+                        }
+                    }
+                }
+            }
+
+
+
+            m_polyhedron.Initialize();
+
+            return true;
 
         }
+#endif
 
         public ConvexPolyhedron GetConvexPolyhedron()
         {
@@ -305,21 +312,15 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             m_isLocalAabbValid = true;
 
 #if TRUE
-            IList<Vector3> _directions = new List<Vector3>();
-            _directions.Add(Vector3.Right);
-            _directions.Add(Vector3.Up);
-            _directions.Add(Vector3.Backward);
-            _directions.Add(Vector3.Left);
-            _directions.Add(Vector3.Down);
-            _directions.Add(Vector3.Forward);
+            Vector3[] _directions = new Vector3[6];
+            _directions[0] = (Vector3.Right);
+            _directions[1] = (Vector3.Up);
+            _directions[2] = (Vector3.Backward);
+            _directions[3] = (Vector3.Left);
+            _directions[4] = (Vector3.Down);
+            _directions[5] = (Vector3.Forward);
 
-            IList<Vector4> _supporting = new List<Vector4>();
-            _supporting.Add(new Vector4());
-            _supporting.Add(new Vector4());
-            _supporting.Add(new Vector4());
-            _supporting.Add(new Vector4());
-            _supporting.Add(new Vector4());
-            _supporting.Add(new Vector4());
+            Vector4[] _supporting = new Vector4[6];
 
             BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
 
@@ -333,18 +334,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             int ibreak = 0;
 #else
 
-	        for (int i=0;i<3;i++)
-	        {
-		        Vector3 vec = new Vector3();
-		        MathUtil.vectorComponent(ref vec,i,1f);
-		        Vector3 tmp = localGetSupportingVertex(ref vec);
+            for (int i=0;i<3;i++)
+            {
+                Vector3 vec = new Vector3();
+                MathUtil.vectorComponent(ref vec,i,1f);
+                Vector3 tmp = localGetSupportingVertex(ref vec);
                 MathUtil.vectorComponent(ref m_localAabbMax,i,(MathUtil.vectorComponent(ref tmp,i) + m_collisionMargin));
 
                 MathUtil.vectorComponent(ref vec,i,-1f);
-		        Vector3 tmp = localGetSupportingVertex(ref vec);
+                Vector3 tmp = localGetSupportingVertex(ref vec);
                 MathUtil.vectorComponent(ref m_localAabbMin,i,(MathUtil.vectorComponent(ref tmp,i) - m_collisionMargin));
 
-	        }
+            }
 #endif
 
         }

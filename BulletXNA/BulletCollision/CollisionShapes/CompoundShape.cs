@@ -195,7 +195,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     child.m_childShape.GetAabb(ref child.m_transform, out localAabbMin, out localAabbMax);
 
                     DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
-                    child.m_treeNode = m_dynamicAabbTree.Insert(bounds, (object)index);
+                    child.m_treeNode = m_dynamicAabbTree.Insert(ref bounds, (object)index);
                 }
             }
         }

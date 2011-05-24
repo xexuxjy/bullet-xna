@@ -72,7 +72,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		private bool m_needsFeedback;
 
-		TypedConstraintType m_constraintType;
+		protected TypedConstraintType m_constraintType;
 
 		protected RigidBody m_rbA;
 		protected RigidBody m_rbB;

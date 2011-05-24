@@ -334,7 +334,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 	        }
         }
 
-        public virtual void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask)
+        public override void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask)
         {
 	        if (!body.IsStaticOrKinematicObject()  && 0 == (body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY))
 	        {

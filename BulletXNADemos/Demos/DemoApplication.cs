@@ -859,11 +859,18 @@ namespace BulletXNADemos.Demos
             if (keyInt >= 0x31 && keyInt <= 0x39)
             {
                 int child = keyInt - 0x31;
-                m_profileIterator.Enter_Child(child);
+                if (m_profileIterator != null)
+                {
+                    m_profileIterator.Enter_Child(child);
+
+                }
             }
             if (keyInt == 0x30)
             {
-                m_profileIterator.Enter_Parent();
+                if (m_profileIterator != null)
+                {
+                    m_profileIterator.Enter_Parent();
+                }
             }
 #endif //BT_NO_PROFILE
 

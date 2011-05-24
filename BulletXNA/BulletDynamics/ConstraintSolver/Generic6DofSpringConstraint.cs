@@ -48,7 +48,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         
         public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, ref Matrix frameInA, ref Matrix frameInB ,bool useLinearReferenceFrameA) : base(rbA,rbB,ref frameInA,ref frameInB,useLinearReferenceFrameA)
         {
-			m_objectType = D6_SPRING_CONSTRAINT_TYPE;
+            m_constraintType = TypedConstraintType.D6_SPRING_CONSTRAINT_TYPE;
 			for (int i = 0; i < s_degreesOfFreedom; ++i)
             {
                 m_springEnabled[i] = false;

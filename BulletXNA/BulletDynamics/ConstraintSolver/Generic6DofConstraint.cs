@@ -719,16 +719,17 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		public void GetAngularLowerLimit(out Vector3 angularLower)
 		{
-			angularLower.X = m_angularLimits[0].m_loLimit;
-			angularLower.Y = m_angularLimits[1].m_loLimit;
-			angularLower.Z = m_angularLimits[2].m_loLimit;
+			angularLower = new Vector3(m_angularLimits[0].m_loLimit,
+			angularLower.Y = m_angularLimits[1].m_loLimit,
+			angularLower.Z = m_angularLimits[2].m_loLimit);
 		}
 
 		public void GetAngularUpperLimit(out Vector3 angularUpper)
 		{
-			angularUpper.X = m_angularLimits[0].m_hiLimit;
-			angularUpper.Y = m_angularLimits[1].m_hiLimit;
-			angularUpper.Z = m_angularLimits[2].m_hiLimit;
+            angularUpper = new Vector3(
+			m_angularLimits[0].m_hiLimit,
+			m_angularLimits[1].m_hiLimit,
+			m_angularLimits[2].m_hiLimit);
 
 		}
 

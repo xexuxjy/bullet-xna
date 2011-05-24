@@ -18,9 +18,9 @@ namespace BulletXNADemos.Demos
 			base.InitializeDemo();
 			SetCameraDistance(SCALING * 50f);
 
-            string filename = @"C:\users\man\bullett\xna-largemesh-output.txt";
-            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            //string filename = @"C:\users\man\bullett\xna-largemesh-output.txt";
+            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 			///collision configuration contains default setup for memory, collision setup
 			m_collisionConfiguration = new DefaultCollisionConfiguration();

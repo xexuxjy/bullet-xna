@@ -71,7 +71,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 {
                     // Inside the contact wedge - touches a point on the shell plane
                     hasContact = true;
-                    contactPoint = c - normal * distanceFromPlane;
+                    contactPoint = sphereCenter - normal * distanceFromPlane;
                 }
                 else
                 {
@@ -121,6 +121,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     return true;
                 }
             }
+            resultNormal = Vector3.Up;
+            point = Vector3.Zero;
             return false;
         }
 

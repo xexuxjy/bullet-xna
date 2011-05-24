@@ -889,14 +889,14 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 							info2.m_damping = infoGlobal.m_damping;
 							constraint.GetInfo2(info2);
 
-							if (currentConstraintRow.m_upperLimit > constraints[i].GetBreakingImpulseThreshold())
+                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit > constraints[i].GetBreakingImpulseThreshold())
 							{
-								currentConstraintRow.m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
+                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
 							}
 
-							if (currentConstraintRow.m_lowerLimit < -constraints[i].GetBreakingImpulseThreshold())
+                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit < -constraints[i].GetBreakingImpulseThreshold())
 							{
-								currentConstraintRow.m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
+                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
 							}
 
 

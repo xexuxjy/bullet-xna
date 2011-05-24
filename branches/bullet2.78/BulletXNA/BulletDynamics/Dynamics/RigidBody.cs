@@ -884,6 +884,17 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		    return m_turnVelocity;
 	    }
 
+        public void InternalSetTurnVelocity(ref Vector3 velocity)
+        {
+            m_turnVelocity = velocity;
+        }
+
+        public void InternalSetPushVelocity(ref Vector3 velocity)
+        {
+            m_pushVelocity = velocity;
+        }
+
+
 	    public void	InternalGetVelocityInLocalPointObsolete(ref Vector3 rel_pos, ref Vector3 velocity )
 	    {
 		    velocity = GetLinearVelocity()+m_deltaLinearVelocity + Vector3.Cross((GetAngularVelocity()+m_deltaAngularVelocity),rel_pos);

@@ -204,6 +204,7 @@
     <Compile Include="IDebugDraw.cs" />
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
+    <Compile Include="LinearMath\ConvexHullComputer.cs" />
     <Compile Include="LinearMath\IndexedVector3.cs" />
     <Compile Include="LinearMath\ObjectArray.cs" />
     <Compile Include="LinearMath\ConvexHull.cs" />

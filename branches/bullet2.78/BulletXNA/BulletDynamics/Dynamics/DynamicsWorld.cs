@@ -98,8 +98,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
         //public abstract  void addRigidBody(RigidBody body,short mask1,short mask2);
         public abstract  void AddRigidBody(RigidBody body);
-		
-		public abstract  void AddRigidBody(RigidBody body, short group, short mask);
+
+        public abstract void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask);
 
 		public abstract  void	RemoveRigidBody(RigidBody body);
 

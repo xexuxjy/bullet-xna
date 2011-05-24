@@ -29,12 +29,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     /// ManifoldContactPoint collects and maintains persistent contactpoints.
     /// used to improve stability and performance of rigidbody dynamics response.
-    public class ManifoldPoint
+    public struct ManifoldPoint
     {
 
-        public ManifoldPoint()
-        {
-        }
+        //public ManifoldPoint()
+        //{
+        //}
         public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
         {
             m_localPointA = pointA;
@@ -42,7 +42,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_normalWorldOnB = normal;
             m_distance1 = distance;
 
-            /* Don't initialize default values twice in C#
+            /* Don't initialize default values twice in C# */
             m_lateralFrictionDir1 = Vector3.Zero;
             m_lateralFrictionDir2 = Vector3.Zero;
             m_lifeTime = 0;
@@ -64,7 +64,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_combinedFriction = 0f;
             m_positionWorldOnA = Vector3.Zero;
             m_positionWorldOnB = Vector3.Zero;
-            */
+
+            m_constraintRow = new ConstraintRow[3];
+
         }
 
         public float GetDistance()
@@ -352,7 +354,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         public Vector3 m_lateralFrictionDir1;
         public Vector3 m_lateralFrictionDir2;
 
-        public ConstraintRow[] m_constraintRow = new ConstraintRow[3];
+        public ConstraintRow[] m_constraintRow;
 
     }
 

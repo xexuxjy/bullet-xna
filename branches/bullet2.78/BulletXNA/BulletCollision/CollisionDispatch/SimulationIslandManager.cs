@@ -38,8 +38,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         private bool m_splitIslands;
 
-        private static bool debugIslands = false;
-
         public SimulationIslandManager()
         {
             m_splitIslands = true;
@@ -234,7 +232,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 {
                     int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
-                    if (BulletGlobals.g_streamWriter != null && debugIslands)
+                    if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                     {
                         BulletGlobals.g_streamWriter.WriteLine(String.Format("buildAndProcessIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                     }
@@ -319,7 +317,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
             {
                 int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
-                if (BulletGlobals.g_streamWriter != null && debugIslands)
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                 {
                     BulletGlobals.g_streamWriter.WriteLine(String.Format("buildIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                 }

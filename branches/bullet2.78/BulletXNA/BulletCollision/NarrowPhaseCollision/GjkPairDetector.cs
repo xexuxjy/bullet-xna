@@ -53,7 +53,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
 
-            if (BulletGlobals.g_streamWriter != null && debugGJK)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
             }
@@ -76,7 +76,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
-            if (BulletGlobals.g_streamWriter != null && debugGJK)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector-alt [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
             }
@@ -143,7 +143,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
             m_lastUsedMethod = -1;
 
-            if (BulletGlobals.g_streamWriter != null && debugGJK)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transA", localTransA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transB", localTransB);
@@ -186,7 +186,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     Vector3 w = pWorld - qWorld;
                     delta = Vector3.Dot(m_cachedSeparatingAxis, w);
 
-                    if (BulletGlobals.g_streamWriter != null && debugGJK)
+					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "m_cachedSeparatingAxis", m_cachedSeparatingAxis);
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "w", w);
@@ -266,7 +266,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     float previousSquaredDistance = squaredDistance;
                     squaredDistance = newCachedSeparatingAxis.LengthSquared();
 
-                    if (BulletGlobals.g_streamWriter != null && debugGJK)
+					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sepAxisA", seperatingAxisInA);
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sepAxisB", seperatingAxisInB);
@@ -392,7 +392,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                             );
 
 
-                        if (BulletGlobals.g_streamWriter != null && debugGJK)
+						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("calcPenDepthResult");
                             BulletGlobals.g_streamWriter.WriteLine("lastMethodUsed : " + m_lastUsedMethod);
@@ -556,7 +556,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         //temp globals, to improve GJK/EPA/penetration calculations
         private static int gNumDeepPenetrationChecks = 0;
         private static int gNumGjkChecks = 0;
-        public static bool debugGJK = true;
+        
     }
     }
 

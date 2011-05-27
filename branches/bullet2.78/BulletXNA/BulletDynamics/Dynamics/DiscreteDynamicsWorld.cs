@@ -132,7 +132,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		        //clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
 		        int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps)? maxSubSteps : numSimulationSubSteps;
 
-                if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
                 {
                     BulletGlobals.g_streamWriter.WriteLine(String.Format("Stepsimulation numClamped[{0}] timestep[{1:0.00000}]", clampedSimulationSteps, fixedTimeStep));
                 }
@@ -594,7 +594,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		protected virtual void IntegrateTransforms(float timeStep)
 		{
 			BulletGlobals.StartProfile("integrateTransforms");
-			if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms");
 			}
@@ -860,7 +860,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
                 sortedConstraints = null;
             }
 
-            if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("solveConstraints");
             }
@@ -870,14 +870,14 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
             InplaceSolverIslandCallback solverCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, sortedConstraints, GetNumConstraints(), m_debugDrawer, m_dispatcher1);
 
-            if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("prepareSolve");
             }
 
 	        m_constraintSolver.PrepareSolve(GetCollisionWorld().GetNumCollisionObjects(), GetCollisionWorld().GetDispatcher().GetNumManifolds());
 
-            if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("buildAndProcessIslands");
             }
@@ -951,7 +951,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
         {
             BulletGlobals.StartProfile("internalSingleStepSimulation");
 
-            if (BulletGlobals.g_streamWriter != null && debugDiscreteDynamicsWorld)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("internalSingleStepSimulation");
             }
@@ -1063,7 +1063,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
         //protected float s_fixedTimeStep3 = (float)(1.0 / 60.0);
         //protected float s_fixedTimeStep4 = 0.016666668f;
 
-        public static bool debugDiscreteDynamicsWorld = true;
+        
     }
 
     public class InplaceSolverIslandCallback : IIslandCallback

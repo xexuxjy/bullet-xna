@@ -31,7 +31,6 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 {
 	public class HingeConstraint : TypedConstraint
 	{
-		public static bool debugHingeConstrainst = false;
 		private const bool HINGE_USE_FRAME_OFFSET = true;
 
 		private static Vector3 vHinge = new Vector3(0, 0, 1);
@@ -279,7 +278,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				info.m_numConstraintRows++; // limit 3rd anguar as well
 				info.nub--;
 			}
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -291,7 +290,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			//always add the 'limit' row, to avoid computation (data is not available yet)
 			info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
 			info.nub = 0;
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -537,7 +536,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				} // if(limit)
 			} // if angular limit or powered
-			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -560,7 +559,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref Matrix transA, ref Matrix transB, ref Vector3 angVelA, ref Vector3 angVelB)
 		{
 			// transforms in world space
-			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbAFrame", m_rbAFrame);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbBFrame", m_rbBFrame);
@@ -571,7 +570,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
 			Matrix trB = MathUtil.BulletMatrixMultiply(transB, m_rbBFrame);
 
-			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trA", trA);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trB", trB);
@@ -838,7 +837,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				} // if(limit)
 			} // if angular limit or powered
-			if (BulletGlobals.g_streamWriter != null && debugHingeConstrainst)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}

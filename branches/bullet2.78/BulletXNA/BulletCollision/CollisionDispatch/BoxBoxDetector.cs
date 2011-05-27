@@ -50,7 +50,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             Matrix transformA = input.m_transformA;
             Matrix transformB = input.m_transformB;
 
-            if (BulletGlobals.g_streamWriter != null && debugBoxBox)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "BoxBox:GCP:transformA", transformA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "BoxBox:GCP:transformB", transformB);
@@ -552,7 +552,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                             pointInWorldFA[i] = point[j * 3 + i] + pa[i];
                         }
                         Vector3 pointInWorld = pointInWorldFA.ToVector3();
-                        if (BulletGlobals.g_streamWriter != null && debugBoxBox)
+						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                         }
@@ -572,7 +572,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                         }
 
-                        if (BulletGlobals.g_streamWriter != null && debugBoxBox)
+						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld.ToVector3());
                         }
@@ -610,7 +610,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     }
                     Vector3 pointInWorld = posInWorldFA.ToVector3();
 
-                    if (BulletGlobals.g_streamWriter != null && debugBoxBox)
+					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                     }
@@ -950,7 +950,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         private BoxShape m_box1;
         private BoxShape m_box2;
         private static float fudge_factor = 1.05f;
-        private static bool debugBoxBox = false;
 
         private static float[] s_buffer = new float[12];
         private static float[] s_quadBuffer = new float[16];

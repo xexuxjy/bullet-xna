@@ -142,7 +142,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		{
 			info.m_numConstraintRows = 3;
 			info.nub = 3;
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -291,7 +291,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				++row;
 			}
 
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}

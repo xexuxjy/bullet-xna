@@ -30,7 +30,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     public class GjkEpaSolver2
     {
-        public static bool debugGJK = false;
         static EPA epa = new EPA();
 
         public static void Initialize(ConvexShape shape0,ref Matrix wtrs0,
@@ -53,7 +52,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 
 
-            if (BulletGlobals.g_streamWriter != null && debugGJK)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJK)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::shape0", shapeR.m_toshape0);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::WTRS0", wtrs0);
@@ -488,7 +487,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
 
 
-            if (BulletGlobals.g_streamWriter != null && GjkEpaSolver2.debugGJK)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJK)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("gjk eval dist[{0}]", m_distance));
             }

@@ -80,7 +80,6 @@ namespace BulletXNA
 		public const bool debugRigidBody = false;
 		public const bool debugCollisionWorld = false;
 		public const bool debugConstraints = false;
-		public const bool debugGjk = false;
 		public const bool debugDiscreteDynamicsWorld = false;
 		public const bool debugBoxBoxDetector = false;
 		public const bool debugIslands = false;
@@ -90,8 +89,8 @@ namespace BulletXNA
 		public const bool debugShapeHull = false;
 		public const bool debugStridingMesh = false;
 		public const bool debugGJK = false;
-		public const bool debugGJKDetector = false;
-		public const bool debugPersistentManifold = false;
+		public const bool debugGJKDetector = true;
+		public const bool debugPersistentManifold = true;
 		public const bool debugVoronoiSimplex = false;
 		public const bool debugSolver = false;
 

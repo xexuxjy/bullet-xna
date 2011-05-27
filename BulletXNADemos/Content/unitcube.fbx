@@ -9,11 +9,11 @@ FBXHeaderExtension:  {
 	CreationTimeStamp:  {
 		Version: 1000
 		Year: 2011
-		Month: 03
-		Day: 04
+		Month: 05
+		Day: 27
 		Hour: 15
-		Minute: 30
-		Second: 58
+		Minute: 43
+		Second: 15
 		Millisecond: 0
 	}
 	Creator: "FBX SDK/FBX Plugins build 20070228"
@@ -21,7 +21,7 @@ FBXHeaderExtension:  {
 		FlagPLE: 0
 	}
 }
-CreationTime: "2011-03-04 15:30:58:000"
+CreationTime: "2011-05-27 15:43:15:000"
 Creator: "Blender3D version 249.00"
 
 ; Object definitions
@@ -29,7 +29,7 @@ Creator: "Blender3D version 249.00"
 
 Definitions:  {
 	Version: 100
-	Count: 13
+	Count: 12
 	ObjectType: "Model" {
 		Count: 10
 	}
@@ -37,7 +37,7 @@ Definitions:  {
 		Count: 1
 	}
 	ObjectType: "Material" {
-		Count: 2
+		Count: 1
 	}
 	ObjectType: "Pose" {
 		Count: 1
@@ -322,6 +322,26 @@ Objects:  {
 			ReferenceInformationType: "Direct"
 			Smoothing: 0,0,0,0,0,0,0,0,0,0,0,0
 		}
+		LayerElementUV: 0 {
+			Version: 101
+			Name: "white"
+			MappingInformationType: "ByPolygonVertex"
+			ReferenceInformationType: "IndexToDirect"
+			UV: 0.000000,0.000000,1.000000,0.000000,1.000000,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000,1.000000,1.000000
+			 ,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000,1.000000,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000
+			 ,1.000000,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000,1.000000,1.000000,0.000000,1.000000,0.000000,0.000000
+			 ,1.000000,0.000000,1.000000,1.000000,0.000000,1.000000
+			UVIndex: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+		}
+		LayerElementTexture: 0 {
+			Version: 101
+			Name: ""
+			MappingInformationType: "NoMappingInformation"
+			ReferenceInformationType: "IndexToDirect"
+			BlendMode: "Translucent"
+			TextureAlpha: 1
+			TextureId: 
+		}
 		LayerElementMaterial: 0 {
 			Version: 101
 			Name: ""
@@ -337,6 +357,10 @@ Objects:  {
 			}
 			LayerElement:  {
 				Type: "LayerElementMaterial"
+				TypedIndex: 0
+			}
+			LayerElement:  {
+				Type: "LayerElementUV"
 				TypedIndex: 0
 			}
 		}
@@ -1426,11 +1450,11 @@ Objects:  {
 		Properties60:  {
 			Property: "ShadingModel", "KString", "", "Lambert"
 			Property: "MultiLayer", "bool", "",0
-			Property: "EmissiveColor", "ColorRGB", "",0.8000,0.8000,0.8000
+			Property: "EmissiveColor", "ColorRGB", "",0.3243,0.6070,0.7800
 			Property: "EmissiveFactor", "double", "",0.0000
 			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "AmbientFactor", "double", "",0.5000
-			Property: "DiffuseColor", "ColorRGB", "",0.8000,0.8000,0.8000
+			Property: "DiffuseColor", "ColorRGB", "",0.3243,0.6070,0.7800
 			Property: "DiffuseFactor", "double", "",0.8000
 			Property: "Bump", "Vector3D", "",0,0,0
 			Property: "TransparentColor", "ColorRGB", "",1,1,1
@@ -1442,39 +1466,9 @@ Objects:  {
 			Property: "ReflectionFactor", "double", "",1
 			Property: "Emissive", "ColorRGB", "",0,0,0
 			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
-			Property: "Diffuse", "ColorRGB", "",0.8,0.8,0.8
+			Property: "Diffuse", "ColorRGB", "",0.3,0.6,0.8
 			Property: "Specular", "ColorRGB", "",1.0,1.0,1.0
 			Property: "Shininess", "double", "",9.6
-			Property: "Opacity", "double", "",1.0
-			Property: "Reflectivity", "double", "",0
-		}
-	}
-	Material: "Material::unnamed", "" {
-		Version: 102
-		ShadingModel: "phong"
-		MultiLayer: 0
-		Properties60:  {
-			Property: "ShadingModel", "KString", "", "Phong"
-			Property: "MultiLayer", "bool", "",0
-			Property: "EmissiveColor", "ColorRGB", "",0.8000,0.8000,0.8000
-			Property: "EmissiveFactor", "double", "",0.0000
-			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
-			Property: "AmbientFactor", "double", "",0.5000
-			Property: "DiffuseColor", "ColorRGB", "",0.8000,0.8000,0.8000
-			Property: "DiffuseFactor", "double", "",1.0000
-			Property: "Bump", "Vector3D", "",0,0,0
-			Property: "TransparentColor", "ColorRGB", "",1,1,1
-			Property: "TransparencyFactor", "double", "",0.0000
-			Property: "SpecularColor", "ColorRGB", "",0.8000,0.8000,0.8000
-			Property: "SpecularFactor", "double", "",0.2000
-			Property: "ShininessExponent", "double", "",80.0
-			Property: "ReflectionColor", "ColorRGB", "",0,0,0
-			Property: "ReflectionFactor", "double", "",1
-			Property: "Emissive", "ColorRGB", "",0,0,0
-			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
-			Property: "Diffuse", "ColorRGB", "",0.8,0.8,0.8
-			Property: "Specular", "ColorRGB", "",0.8,0.8,0.8
-			Property: "Shininess", "double", "",20.0
 			Property: "Opacity", "double", "",1.0
 			Property: "Reflectivity", "double", "",0
 		}
@@ -1533,8 +1527,6 @@ Relations:  {
 	Model: "Model::Camera Switcher", "CameraSwitcher" {
 	}
 	Material: "Material::Material", "" {
-	}
-	Material: "Material::unnamed", "" {
 	}
 }
 

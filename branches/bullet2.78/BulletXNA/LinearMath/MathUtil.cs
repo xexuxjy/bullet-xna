@@ -1273,17 +1273,17 @@ namespace BulletXNA
 
 		public static void PrintQuaternion(TextWriter writer, Quaternion q)
 		{
-            writer.Write(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000} W:{3:0.000000000000}}}", q.X, q.Y, q.Z, q.W));
+            writer.Write(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000} W:{3:0.00000000}}}", q.X, q.Y, q.Z, q.W));
 		}
 
 		public static void PrintVector3(TextWriter writer, Vector3 v)
 		{
-            writer.WriteLine(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000}}}", v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000}}}", v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector3(TextWriter writer, String name ,Vector3 v)
 		{
-            writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000}}}", name, v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector4(TextWriter writer, Vector4 v)
@@ -1293,7 +1293,7 @@ namespace BulletXNA
 
 		public static void PrintVector4(TextWriter writer, String name, Vector4 v)
 		{
-			writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000} W:{4:0.000000000000}}}", name, v.X, v.Y, v.Z,v.W));
+			writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000} W:{4:0.00000000}}}", name, v.X, v.Y, v.Z,v.W));
 		}
 
 

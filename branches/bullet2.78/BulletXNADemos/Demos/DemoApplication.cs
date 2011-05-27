@@ -59,6 +59,8 @@ namespace BulletXNADemos.Demos
 
         public static int gPickingConstraintId = 0;
         public static Vector3 gOldPickingPos;
+		public static Vector3 gHitPos = new Vector3(-1f);
+
         public static float gOldPickingDist = 0f;
         public static RigidBody pickedBody = null;//for deactivation state
 
@@ -89,6 +91,8 @@ namespace BulletXNADemos.Demos
 
         protected Vector3 m_cameraPosition;
         protected Vector3 m_cameraTargetPosition;//look at
+		protected Boolean m_ortho = false;
+
 
         protected float m_scaleBottom;
         protected float m_scaleFactor;
@@ -633,10 +637,10 @@ namespace BulletXNADemos.Demos
 
         public virtual void ClientResetScene()
         {
-            if (BulletGlobals.g_streamWriter != null)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("ClientResetScene");
-            }
+			//if (BulletGlobals.g_streamWriter != null)
+			//{
+			//    BulletGlobals.g_streamWriter.WriteLine("ClientResetScene");
+			//}
 
         //#ifdef SHOW_NUM_DEEP_PENETRATIONS
 	        gNumDeepPenetrationChecks = 0;
@@ -1117,7 +1121,20 @@ namespace BulletXNADemos.Demos
                 //add a point to point constraint for picking
                 if (m_dynamicsWorld != null)
                 {
-                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(m_cameraPosition, rayTo);
+
+					Vector3 rayFrom;
+					if (m_ortho)
+					{
+						rayFrom = rayTo;
+						rayFrom.Z = -100.0f;
+					}
+					else
+					{
+						rayFrom = m_cameraPosition;
+					}
+
+
+                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(ref rayFrom, ref rayTo);
                     m_dynamicsWorld.RayTest(ref m_cameraPosition, ref rayTo, rayCallback);
                     if (rayCallback.HasHit())
                     {
@@ -1136,20 +1153,20 @@ namespace BulletXNADemos.Demos
                                 Vector3 localPivot = Vector3.Transform(pickPos, Matrix.Invert(body.GetCenterOfMassTransform()));
 
                                 Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
-                                p2p.m_setting.m_impulseClamp = mousePickClamping;
+								m_dynamicsWorld.AddConstraint(p2p, false);
 
-                                m_dynamicsWorld.AddConstraint(p2p,true);
+                                p2p.m_setting.m_impulseClamp = mousePickClamping;
+								p2p.m_setting.m_tau = 0.001f;
+
                                 m_pickConstraint = p2p;
 
                                 //save mouse position for dragging
                                 gOldPickingPos = rayTo;
+								gHitPos = pickPos;
 
-                                Vector3 eyePos = m_cameraPosition;
-
-                                gOldPickingDist = (pickPos - eyePos).Length();
+								gOldPickingDist = (pickPos - rayFrom).Length();
 
                                 //very weak constraint for picking
-                                p2p.m_setting.m_tau = 0.1f;
                             }
                         }
                     }
@@ -1178,19 +1195,31 @@ namespace BulletXNADemos.Demos
             if (m_pickConstraint != null)
             {
                 //move the constraint pivot
-                Point2PointConstraint p2p = (Point2PointConstraint)(m_pickConstraint);
+				Point2PointConstraint p2p = m_pickConstraint as Point2PointConstraint;
                 if (p2p != null)
                 {
                     //keep it at the same picking distance
 
                     Vector3 newRayTo = GetRayTo(mouseState.X, mouseState.Y);
-                    Vector3 eyePos = m_cameraPosition;
-                    Vector3 dir = newRayTo - eyePos;
-                    dir.Normalize();
-                    dir *= gOldPickingDist;
+					Vector3 rayFrom;
+					Vector3 oldPivotInB = p2p.GetPivotInB();
+					Vector3 newPivotB;
+					if (m_ortho)
+					{
+						newPivotB = oldPivotInB;
+						newPivotB.X = newRayTo.X;
+						newPivotB.Y = newRayTo.Y;
+					}
+					else
+					{
+						rayFrom = m_cameraPosition;
+						Vector3 dir = newRayTo - rayFrom;
+						dir.Normalize();
+						dir *= gOldPickingDist;
+						newPivotB = rayFrom + dir;
+					}
 
-                    Vector3 newPos = eyePos + dir;
-                    p2p.SetPivotB(ref newPos);
+                    p2p.SetPivotB(ref newPivotB);
                 }
             }
         }
@@ -1448,6 +1477,7 @@ namespace BulletXNADemos.Demos
         public void GenerateMouseEvents(ref MouseState oldState, ref MouseState newState)
         {
             MouseFunc(ref oldState, ref newState);
+			MouseMotionFunc(ref newState);
         }
         
         

@@ -35,8 +35,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
     public class RigidBody : CollisionObject
     {
         private const float MAX_ANGVEL = MathUtil.SIMD_HALF_PI;
-        private static int uniqueId = 0;
-        private static int s_counter = 0;
+        public static int uniqueId = 0;
 
         private Matrix	m_invInertiaTensorWorld= Matrix.Identity;
 	    private Vector3		m_linearVelocity;
@@ -572,8 +571,6 @@ namespace BulletXNA.BulletDynamics.Dynamics
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter,m_invInertiaTensorWorld);
             }
-
-            ++s_counter;
 
         }
 	

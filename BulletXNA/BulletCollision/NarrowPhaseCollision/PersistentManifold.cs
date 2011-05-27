@@ -23,7 +23,7 @@
 
 #define MAINTAIN_PERSISTENCY
 #define KEEP_DEEPEST_POINT
-//#define DEBUG_PERSISTENCY
+#define DEBUG_PERSISTENCY
 
 using System;
 using System.Collections.Generic;
@@ -97,7 +97,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             Vector4 maxvec = new Vector4(res0, res1, res2, res3);
             int biggestarea = MathUtil.ClosestAxis(ref maxvec);
 
-            if (BulletGlobals.g_streamWriter != null && debugPersistentManifold)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("sortCachedPoints [{0}]", biggestarea);
             }
@@ -172,9 +172,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     if (m_pointCache[i].m_userPersistentData == oldPtr)
                     {
                         occurance++;
-                        if (occurance > 1)
+                        if (occurance > 1 && BulletGlobals.g_streamWriter != null)
                         {
-                            System.Console.WriteLine("error in clearUserCache\n");
+							BulletGlobals.g_streamWriter.WriteLine("error in clearUserCache\n");
                         }
                     }
                 }
@@ -196,21 +196,17 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 #if DEBUG_PERSISTENCY
 	    public void	DebugPersistency()
         {
-	        System.Console.WriteLine("DebugPersistency : numPoints {0}\n",m_cachedPoints);
-	        for (int i=0;i<m_cachedPoints;i++)
-	        {
-                System.Console.WriteLine("m_pointCache[{0}] WorldA[{1}][{2}][{3}] WorldB[{4}][{5}][{6}] NormalB[{7}][{8}][{9}]", i,
-                    m_pointCache[i].getPositionWorldOnA().X,
-                    m_pointCache[i].getPositionWorldOnA().Y,
-                    m_pointCache[i].getPositionWorldOnA().Z,
-                    m_pointCache[i].getPositionWorldOnB().X,
-                    m_pointCache[i].getPositionWorldOnB().Y,
-                    m_pointCache[i].getPositionWorldOnB().Z,
-                    m_pointCache[i].getNormalWorldOnB().X,
-                    m_pointCache[i].getNormalWorldOnB().Y,
-                    m_pointCache[i].getNormalWorldOnB().Z
-                    );
-	        }
+			if (BulletGlobals.g_streamWriter != null)
+			{
+				BulletGlobals.g_streamWriter.WriteLine("DebugPersistency : numPoints {0}\n", m_cachedPoints);
+				for (int i = 0; i < m_cachedPoints; i++)
+				{
+					BulletGlobals.g_streamWriter.WriteLine(String.Format("m_pointCache[{0}]", i));
+					MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "WorldA", m_pointCache[i].GetPositionWorldOnA());
+					MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "WorldB", m_pointCache[i].GetPositionWorldOnB());
+					MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "NormalB", m_pointCache[i].GetNormalWorldOnB());
+				}
+			}
         }
 #endif //
 
@@ -254,7 +250,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     nearestPoint = i;
                 }
             }
-            if (BulletGlobals.g_streamWriter != null && debugPersistentManifold)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("getCacheEntry [{0}]", nearestPoint);
             }
@@ -267,7 +263,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         {
             Debug.Assert(ValidContactDistance(newPoint));
 
-            if (BulletGlobals.g_streamWriter != null && debugPersistentManifold)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("addManifoldPoint");
                 MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, newPoint);
@@ -363,22 +359,21 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         /// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
         public void RefreshContactPoints(ref Matrix trA, ref Matrix trB)
         {
-            if (BulletGlobals.g_streamWriter != null && debugPersistentManifold)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "refreshContactPoints trA", trA.Translation);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "refreshContactPoints trB", trB.Translation);
             }
 
 
-            //#ifdef DEBUG_PERSISTENCY
-            //    printf("refreshContactPoints posA = (%f,%f,%f) posB = (%f,%f,%f)\n",
-            //        trA.getOrigin().getX(),
-            //        trA.getOrigin().getY(),
-            //        trA.getOrigin().getZ(),
-            //        trB.getOrigin().getX(),
-            //        trB.getOrigin().getY(),
-            //        trB.getOrigin().getZ());
-            //#endif //DEBUG_PERSISTENCY
+#if DEBUG_PERSISTENCY
+    if(BulletGlobals.g_streamWriter != null)
+	{
+		BulletGlobals.g_streamWriter.WriteLine("refreshContactPoints");
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posA",trA.Translation);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posB",trB.Translation);
+	}
+#endif //DEBUG_PERSISTENCY
             /// first refresh worldspace positions and distance
             int numContacts = GetNumContacts() - 1;
             for (int i = numContacts; i >= 0; i--)
@@ -438,7 +433,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 ClearUserCache(ref m_pointCache[i]);
             }
             m_cachedPoints = 0;
-            if (BulletGlobals.g_streamWriter != null && debugPersistentManifold)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("clearManifold");
             }
@@ -463,9 +458,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public static IContactDestroyedCallback gContactDestroyedCallback = null;
         public static IContactProcessedCallback gContactProcessedCallback = null;
-
-
-        public static bool debugPersistentManifold = true;
 
         #region IComparable Members
 

@@ -83,7 +83,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        Vector3 supVec = Vector3.Zero;
 	        float newDot,maxDot = float.MinValue;
 
-			if (BulletGlobals.g_streamWriter != null && debugConvexHull)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexHull)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("localGetSupportingVertexWithoutMargin");
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "vec", vec);
@@ -209,7 +209,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
         private IList<Vector3> m_unscaledPoints;
-		public static bool debugConvexHull = true;
     }
 
 }

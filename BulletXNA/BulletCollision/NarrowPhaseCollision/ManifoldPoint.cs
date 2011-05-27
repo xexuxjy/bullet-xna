@@ -29,7 +29,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
     /// ManifoldContactPoint collects and maintains persistent contactpoints.
     /// used to improve stability and performance of rigidbody dynamics response.
-    public struct ManifoldPoint
+    public class ManifoldPoint
     {
 
         //public ManifoldPoint()

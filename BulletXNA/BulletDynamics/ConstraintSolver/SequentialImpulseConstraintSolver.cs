@@ -50,8 +50,6 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		protected int m_counter;
 
-		public static bool debugSolver = false;
-
 		public SequentialImpulseConstraintSolver()
 		{
 
@@ -447,7 +445,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 					RigidBody rb0 = RigidBody.Upcast(colObj0);
 					RigidBody rb1 = RigidBody.Upcast(colObj1);
-					if (BulletGlobals.g_streamWriter != null && rb0 != null && debugSolver)
+					if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
 					{
 						MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
 					}
@@ -458,7 +456,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
                     SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, out rel_pos1, out rel_pos2);
 
-					if (BulletGlobals.g_streamWriter != null && debugSolver)
+					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
 					{
 						TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, 99);
 					}
@@ -960,7 +958,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 									solverConstraint.m_appliedImpulse = 0f;
 
 								}
-								if (BulletGlobals.g_streamWriter != null && debugSolver)
+								if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
 								{
 									TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, j);
 								}

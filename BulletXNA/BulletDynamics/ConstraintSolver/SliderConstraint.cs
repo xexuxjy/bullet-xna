@@ -194,7 +194,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				info.m_numConstraintRows++; // limit 3rd angular as well
 				info.nub--;
 			}
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
@@ -628,7 +628,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 					info.m_solverConstraints[nrow].m_rhs *= GetSoftnessLimAng();
 				} // if(limit)
 			} // if angular limit or powered
-			if (BulletGlobals.g_streamWriter != null && debugConstraint)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}

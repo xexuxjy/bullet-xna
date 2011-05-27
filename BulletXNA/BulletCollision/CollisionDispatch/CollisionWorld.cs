@@ -106,7 +106,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 MathUtil.VectorMax(ref maxAabb2, ref maxAabb);
             }
 
-            if (BulletGlobals.g_streamWriter != null && debugCollisionWorld)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugCollisionWorld)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMin", minAabb);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMax", maxAabb);
@@ -830,10 +830,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         ///it is true by default, because it is error-prone (setting the position of static objects wouldn't update their AABB)
         protected bool m_forceUpdateAllAabbs;
 
-        public static bool debugCollisionWorld = true;
-
-
-        protected IProfileManager m_profileManager;
+	       protected IProfileManager m_profileManager;
     }
 
 
@@ -1602,8 +1599,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         public IDebugDraw m_debugDrawer;
         public Vector3 m_color;
         public Matrix m_worldTrans;
-
-        public static bool debugCollisionWorld = true;
 
         public DebugDrawcallback(IDebugDraw debugDrawer, ref Matrix worldTrans, ref Vector3 color)
         {

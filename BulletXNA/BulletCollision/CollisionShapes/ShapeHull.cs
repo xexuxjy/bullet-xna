@@ -91,7 +91,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        hl.ReleaseResult (hr);
 
 
-            if (BulletGlobals.g_streamWriter != null && debugShapeHull)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugShapeHull)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("buildHull");
 				BulletGlobals.g_streamWriter.WriteLine("Vertices");
@@ -133,8 +133,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public ConvexShape m_shape;
 
         const int NUM_UNITSPHERE_POINTS = 42;
-
-        static bool debugShapeHull = true;
 
         //static Vector3[] UnitSpherePoints = new Vector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];  
         static Vector3[] UnitSpherePoints = new Vector3[]  

@@ -31,7 +31,7 @@ namespace BulletXNA.BulletCollision
     {
 		public StridingMeshInterface()
 		{
-            m_scaling = new Vector3(1f,1f,1f);
+            m_scaling = new Vector3(1f);
 		}
 
         public virtual void Cleanup()

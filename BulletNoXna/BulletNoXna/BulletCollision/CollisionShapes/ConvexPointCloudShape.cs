@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision
     {
         public ConvexPointCloudShape()
 	    {
-            m_localScaling = new Vector3(1, 1, 1);
+            m_localScaling = new Vector3(1);
 		    m_shapeType = BroadphaseNativeType.CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
 		    m_unscaledPoints = null;
 		    m_numPoints = 0;
@@ -53,7 +53,7 @@ namespace BulletXNA.BulletCollision
 
         public void SetPoints(IList<Vector3> points, int numPoints, bool computeAabb)
         {
-            Vector3 localScaling = new Vector3(1, 1, 1);
+            Vector3 localScaling = new Vector3(1);
             SetPoints(points, numPoints, computeAabb, ref localScaling);
         }
 
@@ -94,7 +94,7 @@ namespace BulletXNA.BulletCollision
                 Vector3 vecnorm = vec;
                 if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                 {
-                    vecnorm = new Vector3(-1f, -1f, -1f);
+                    vecnorm = new Vector3(-1f);
                 }
                 vecnorm.Normalize();
                 supVertex += Margin * vecnorm;

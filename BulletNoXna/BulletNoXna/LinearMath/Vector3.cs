@@ -42,8 +42,8 @@ namespace BulletXNA.LinearMath
     {
         #region Private Fields
 
-        private static  Vector3 zero = new Vector3(0f, 0f, 0f);
-        private static  Vector3 one = new Vector3(1f, 1f, 1f);
+        private static  Vector3 zero = new Vector3(0f);
+        private static  Vector3 one = new Vector3(1f);
         private static  Vector3 unitX = new Vector3(1f, 0f, 0f);
         private static  Vector3 unitY = new Vector3(0f, 1f, 0f);
         private static  Vector3 unitZ = new Vector3(0f, 0f, 1f);
@@ -346,7 +346,7 @@ namespace BulletXNA.LinearMath
 
         public static Vector3 Hermite(Vector3 value1, Vector3 tangent1, Vector3 value2, Vector3 tangent2, float amount)
         {
-            Vector3 result = new Vector3();
+            Vector3 result;
             Hermite(ref value1, ref tangent1, ref value2, ref tangent2, amount, out result);
             return result;
         }
@@ -452,8 +452,7 @@ namespace BulletXNA.LinearMath
 
         public static Vector3 Negate(Vector3 value)
         {
-            value = new Vector3(-value.X, -value.Y, -value.Z);
-            return value;
+            return new Vector3(-value.X, -value.Y, -value.Z);
         }
 
         public static void Negate(ref Vector3 value, out Vector3 result)

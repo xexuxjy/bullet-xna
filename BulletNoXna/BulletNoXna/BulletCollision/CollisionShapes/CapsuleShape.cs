@@ -46,7 +46,7 @@ namespace BulletXNA.BulletCollision
         	
 	        float radius = Radius;
 
-	        Vector3 halfExtents = new Vector3(radius,radius,radius);
+	        Vector3 halfExtents = new Vector3(radius);
             float val = MathUtil.VectorComponent(ref halfExtents,GetUpAxis());
 	        MathUtil.VectorComponent(ref halfExtents,GetUpAxis(),val +getHalfHeight());
 
@@ -79,7 +79,7 @@ namespace BulletXNA.BulletCollision
 
 	    public override void SetLocalScaling(ref Vector3 scaling)
 	    {
-		    Vector3 oldMargin = new Vector3(Margin,Margin,Margin);
+		    Vector3 oldMargin = new Vector3(Margin);
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		    Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -182,9 +182,9 @@ namespace BulletXNA.BulletCollision
 	
 	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
-	        Vector3 halfExtents = new Vector3(Radius,Radius,Radius);
+	        Vector3 halfExtents = new Vector3(Radius);
 	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, Radius + getHalfHeight());
-	        halfExtents += new Vector3(Margin,Margin,Margin);
+	        halfExtents += new Vector3(Margin);
             Matrix abs_b;
             MathUtil.AbsoluteMatrix(ref trans, out abs_b);
             Vector3 center = trans.Translation;

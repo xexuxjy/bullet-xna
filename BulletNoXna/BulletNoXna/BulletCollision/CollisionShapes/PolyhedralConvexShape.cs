@@ -112,8 +112,8 @@ namespace BulletXNA.BulletCollision
     {
         public PolyhedralConvexAabbCachingShape()
         {
-            m_localAabbMin = new Vector3(1,1,1);
-            m_localAabbMax = new Vector3(-1,-1,-1);
+            m_localAabbMin = new Vector3(1);
+            m_localAabbMax = new Vector3(-1);
             m_isLocalAabbValid = false;
             //m_optionalHull = null;
         }

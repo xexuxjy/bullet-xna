@@ -106,8 +106,7 @@ namespace BulletXNA.BulletCollision
         public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
         {
             Vector3 localHalfExtents = 0.5f * (m_localAabbMax - m_localAabbMin);
-            float margin = Margin;
-            localHalfExtents += new Vector3(margin, margin, margin);
+            localHalfExtents += new Vector3(Margin);
             Vector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
 
             Matrix abs_b;

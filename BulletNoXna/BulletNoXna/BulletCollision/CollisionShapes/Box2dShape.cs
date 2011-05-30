@@ -121,7 +121,7 @@ namespace BulletXNA.BulletCollision
 		}
 		public override void SetLocalScaling(ref Vector3 scaling)
 		{
-			Vector3 oldMargin= new Vector3(Margin,Margin,Margin);
+			Vector3 oldMargin= new Vector3(Margin);
 			Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 			Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 

@@ -256,7 +256,7 @@ namespace BulletXNA.BulletCollision
             m_flipQuadEdges = flipQuadEdges;
             m_useDiamondSubdivision = false;
             m_upAxis = upAxis;
-            m_localScaling = new Vector3(1f, 1f, 1f);
+            m_localScaling = new Vector3(1f);
 
             // determine min/max axis-aligned bounding box (aabb) values
             switch (m_upAxis)
@@ -353,7 +353,7 @@ namespace BulletXNA.BulletCollision
                                             Vector3.Dot(abs_b.Up, halfExtents),
                                             Vector3.Dot(abs_b.Backward, halfExtents));
 
-            extent += new Vector3(Margin, Margin, Margin);
+            extent += new Vector3(Margin);
 
             aabbMin = center - extent;
             aabbMax = center + extent;
@@ -370,8 +370,7 @@ namespace BulletXNA.BulletCollision
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
             // scale down the input aabb's so they are in local (non-scaled) coordinates
-            Vector3 invScale = new Vector3(1f, 1f, 1f);
-            invScale /= m_localScaling;
+            Vector3 invScale = new Vector3(1f) / m_localScaling;
 
             Vector3 localAabbMin = aabbMin * invScale;
             Vector3 localAabbMax = aabbMax * invScale;

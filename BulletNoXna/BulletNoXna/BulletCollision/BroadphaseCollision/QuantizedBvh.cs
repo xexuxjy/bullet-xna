@@ -183,8 +183,8 @@ namespace BulletXNA.BulletCollision
             //m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS;
             //m_traversalMode = TraversalMode.TRAVERSAL_RECURSIVE;
             m_subtreeHeaderCount = 0; //PCK: add this line
-            m_bvhAabbMin = new Vector3(-MathUtil.SIMD_INFINITY, -MathUtil.SIMD_INFINITY, -MathUtil.SIMD_INFINITY);
-            m_bvhAabbMax = new Vector3(MathUtil.SIMD_INFINITY, MathUtil.SIMD_INFINITY, MathUtil.SIMD_INFINITY);
+            m_bvhAabbMin = new Vector3(-MathUtil.SIMD_INFINITY);
+            m_bvhAabbMax = new Vector3(MathUtil.SIMD_INFINITY);
         }
 
 
@@ -940,11 +940,11 @@ namespace BulletXNA.BulletCollision
         public void SetQuantizationValues(ref Vector3 bvhAabbMin, ref Vector3 bvhAabbMax, float quantizationMargin)
         {
             //enlarge the AABB to avoid division by zero when initializing the quantization values
-            Vector3 clampValue = new Vector3(quantizationMargin, quantizationMargin, quantizationMargin);
+            Vector3 clampValue = new Vector3(quantizationMargin);
             m_bvhAabbMin = bvhAabbMin - clampValue;
             m_bvhAabbMax = bvhAabbMax + clampValue;
             Vector3 aabbSize = m_bvhAabbMax - m_bvhAabbMin;
-            m_bvhQuantization = new Vector3(65533.000f, 65533.000f, 65533.000f) / aabbSize;
+            m_bvhQuantization = new Vector3(65533.000f) / aabbSize;
             m_useQuantization = true;
         }
 

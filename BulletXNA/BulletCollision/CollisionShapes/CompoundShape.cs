@@ -35,10 +35,10 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public CompoundShape(bool enableDynamicAabbTree)
         {
             m_children = new List<CompoundShapeChild>();
-            m_localAabbMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            m_localAabbMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            m_localAabbMax = new Vector3(float.MinValue);
+            m_localAabbMin = new Vector3(float.MaxValue);
             m_collisionMargin = 0f;
-            m_localScaling = new Vector3(1f, 1f, 1f);
+            m_localScaling = new Vector3(1f);
             m_dynamicAabbTree = null;
             m_updateRevision = 1;
             m_shapeType = BroadphaseNativeTypes.COMPOUND_SHAPE_PROXYTYPE;
@@ -187,7 +187,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 localCenter = Vector3.Zero;
             }
             float margin = GetMargin();
-            localHalfExtents += new Vector3(margin, margin, margin);
+            localHalfExtents += new Vector3(margin);
 
             Matrix abs_b;
             MathUtil.AbsoluteMatrix(ref trans, out abs_b);
@@ -210,8 +210,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             // Recalculate the local aabb
             // Brute force, it iterates over all the shapes left.
 
-            m_localAabbMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            m_localAabbMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            m_localAabbMin = new Vector3(float.MaxValue);
+            m_localAabbMax = new Vector3(float.MinValue);
 
             //extend the local aabbMin/aabbMax
             Vector3 localAabbMin;

@@ -40,14 +40,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             m_upAxis = 1;
             m_shapeType = BroadphaseNativeTypes.CYLINDER_SHAPE_PROXYTYPE;
-	        Vector3 margin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+	        Vector3 margin = new Vector3(GetMargin());
 	        m_implicitShapeDimensions = (halfExtents * m_localScaling) - margin;
         }
 
 	    public virtual Vector3 GetHalfExtentsWithMargin()
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-		    Vector3 margin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 margin = new Vector3(GetMargin());
 		    halfExtents += margin;
 		    return halfExtents;
 	    }
@@ -69,11 +69,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public override void SetMargin(float collisionMargin)
 	    {
 		    //correct the m_implicitShapeDimensions for the margin
-		    Vector3 oldMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 oldMargin = new Vector3(GetMargin());
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
     		
 		    base.SetMargin(collisionMargin);
-		    Vector3 newMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 newMargin = new Vector3(GetMargin());
 		    m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 	    }
 
@@ -117,7 +117,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 			    Vector3 vecnorm = vec;
 			    if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 			    {
-				    vecnorm = new Vector3(-1f,-1f,-1f);
+				    vecnorm = new Vector3(-1f);
 			    } 
 			    vecnorm.Normalize();
 			    supVertex += GetMargin() * vecnorm;

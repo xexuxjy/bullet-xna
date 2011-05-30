@@ -213,9 +213,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 MathUtil.VectorMin(convexToLocal.Translation, ref rayAabbMin);
                 Vector3 rayAabbMax = convexFromLocal.Translation;
                 MathUtil.VectorMax(convexToLocal.Translation, ref rayAabbMax);
-                float ccdRadius0 = convexbody.GetCcdSweptSphereRadius();
-                rayAabbMin -= new Vector3(ccdRadius0, ccdRadius0, ccdRadius0);
-                rayAabbMax += new Vector3(ccdRadius0, ccdRadius0, ccdRadius0);
+                Vector3 ccdRadius0 = new Vector3(convexbody.GetCcdSweptSphereRadius());
+                rayAabbMin -= ccdRadius0;
+                rayAabbMax += ccdRadius0;
 
                 float curHitFraction = 1f; //is this available?
                 LocalTriangleSphereCastCallback raycastCallback = new LocalTriangleSphereCastCallback(ref convexFromLocal, ref convexToLocal,
@@ -366,7 +366,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             CollisionShape convexShape = m_convexBody.GetCollisionShape();
             convexShape.GetAabb(ref convexInTriangleSpace, out m_aabbMin, out m_aabbMax);
             float extraMargin = collisionMarginTriangle;
-            Vector3 extra = new Vector3(extraMargin, extraMargin, extraMargin);
+            Vector3 extra = new Vector3(extraMargin);
 
             m_aabbMax += extra;
             m_aabbMin -= extra;

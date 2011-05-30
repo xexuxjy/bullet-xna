@@ -426,7 +426,7 @@ namespace BulletXNA
 
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin, margin, margin);
+            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
             Vector3 center = Vector3.Zero, extent;
             AbsoluteExtents(ref trans, ref halfExtentsWithMargin, ref center, out extent);
             aabbMinOut = center - extent;
@@ -1322,8 +1322,8 @@ namespace BulletXNA
         public const float SIMDSQRT12 = 0.7071067811865475244008443621048490f;
 
         public const float BT_LARGE_FLOAT = 1e18f;
-        public static Vector3 MAX_VECTOR = new Vector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
-        public static Vector3 MIN_VECTOR = new Vector3(-BT_LARGE_FLOAT, -BT_LARGE_FLOAT, -BT_LARGE_FLOAT);
+        public static Vector3 MAX_VECTOR = new Vector3(BT_LARGE_FLOAT);
+        public static Vector3 MIN_VECTOR = new Vector3(-BT_LARGE_FLOAT);
         public const float SIMD_2_PI = 6.283185307179586232f;
         public const float SIMD_PI = SIMD_2_PI * 0.5f;
         public const float SIMD_HALF_PI = SIMD_PI * 0.5f;

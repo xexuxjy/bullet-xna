@@ -31,7 +31,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
     {
         public ConvexInternalShape()
         {
-            m_localScaling = new Vector3(1, 1, 1);
+            m_localScaling = new Vector3(1);
             m_collisionMargin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
         }
 
@@ -49,7 +49,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		        Vector3 vecnorm = vec;
 		        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 		        {
-			        vecnorm = new Vector3(-1,-1,-1);
+			        vecnorm = new Vector3(-1);
 		        } 
 		        vecnorm.Normalize();
 		        supVertex+= GetMargin() * vecnorm;
@@ -186,8 +186,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         public ConvexInternalAabbCachingShape()
         {
-            m_localAabbMin = new Vector3(1, 1, 1);
-            m_localAabbMax = new Vector3(-1, -1, -1);
+            m_localAabbMin = new Vector3(1);
+            m_localAabbMax = new Vector3(-1);
             m_isLocalAabbValid = false;
         }
 

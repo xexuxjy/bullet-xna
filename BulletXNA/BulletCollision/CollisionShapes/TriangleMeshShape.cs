@@ -108,7 +108,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             Vector3 localHalfExtents = 0.5f * (m_localAabbMax - m_localAabbMin);
             float margin = GetMargin();
-            localHalfExtents += new Vector3(margin, margin, margin);
+            localHalfExtents += new Vector3(margin);
             Vector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
 
             Matrix abs_b;

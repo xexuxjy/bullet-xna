@@ -152,7 +152,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 	        
             Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
             GJK	gjk = new GJK();	
-            Vector3 guess = new Vector3(1,1,1);
+            Vector3 guess = new Vector3(1);
             GJKStatus	gjk_status=gjk.Evaluate(shape,ref guess);
             if(gjk_status==GJKStatus.Valid)
             {

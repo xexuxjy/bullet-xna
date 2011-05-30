@@ -33,10 +33,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
     {
 	    public virtual Vector3 GetHalfExtentsWithMargin()
 	    {
-		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-		    Vector3 margin = new Vector3(GetMargin(),GetMargin(),GetMargin());
-		    halfExtents += margin;
-		    return halfExtents;
+            return GetHalfExtentsWithoutMargin() + new Vector3(GetMargin());
+		    //Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+		    //Vector3 margin = new Vector3(GetMargin());
+		    //halfExtents += margin;
+		    //return halfExtents;
 	    }
 	
 	    public virtual Vector3 GetHalfExtentsWithoutMargin()
@@ -48,7 +49,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-		    Vector3 margin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 margin = new Vector3(GetMargin());
 		    halfExtents += margin;
     		
 		    return new Vector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
@@ -85,7 +86,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    : base()
 	    {
 		    m_shapeType = BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE;
-		    Vector3 margin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+            Vector3 margin = new Vector3(GetMargin());
 		    m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
             int ibreak = 0;
 	    }
@@ -93,18 +94,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public override void SetMargin(float collisionMargin)
 	    {
 		    //correct the m_implicitShapeDimensions for the margin
-		    Vector3 oldMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 oldMargin = new Vector3(GetMargin());
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
     		
             base.SetMargin(collisionMargin);
-		    Vector3 newMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 newMargin = new Vector3(GetMargin());
 		    m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	    }
 
 	    public override void SetLocalScaling(ref Vector3 scaling)
 	    {
-		    Vector3 oldMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 oldMargin = new Vector3(GetMargin());
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		    Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 

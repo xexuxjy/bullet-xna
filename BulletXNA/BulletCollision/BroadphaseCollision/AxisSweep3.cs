@@ -473,7 +473,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
             int maxInt = m_handleSentinel;
 
-            m_quantize = new Vector3((float)maxInt, (float)maxInt, (float)maxInt) / aabbSize;
+            m_quantize = new Vector3((float)maxInt) / aabbSize;
 
             // allocate handles buffer, using btAlignedAlloc, and put all handles on free list
             m_pHandles = new Handle[maxHandles];

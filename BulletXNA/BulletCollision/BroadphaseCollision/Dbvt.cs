@@ -259,7 +259,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             {
                 return (false);
             }
-            volume.Expand(new Vector3(margin, margin, margin));
+            volume.Expand(new Vector3(margin));
             volume.SignedExpand(velocity);
             Update(leaf, ref volume);
             return (true);
@@ -286,7 +286,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             {
                 return (false);
             }
-            volume.Expand(new Vector3(margin, margin, margin));
+            volume.Expand(new Vector3(margin));
             Update(leaf, ref volume);
             return (true);
         }
@@ -1145,7 +1145,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
         public static DbvtAabbMm FromCR(ref Vector3 c, float r)
         {
-            Vector3 temp = new Vector3(r, r, r);
+            Vector3 temp = new Vector3(r);
             return (FromCE(ref c, ref temp));
         }
         public static DbvtAabbMm FromMM(ref Vector3 mi, ref Vector3 mx)

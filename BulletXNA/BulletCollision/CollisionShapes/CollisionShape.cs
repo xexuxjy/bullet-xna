@@ -112,7 +112,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	        //add conservative angular motion
 	        float angularMotion = angvel.Length() * GetAngularMotionDisc() * timeStep;
-	        Vector3 angularMotion3d = new Vector3(angularMotion,angularMotion,angularMotion);
+            Vector3 angularMotion3d = new Vector3(angularMotion);
 	        temporalAabbMin = new Vector3(temporalAabbMinx,temporalAabbMiny,temporalAabbMinz);
 	        temporalAabbMax = new Vector3(temporalAabbMaxx,temporalAabbMaxy,temporalAabbMaxz);
 
@@ -167,7 +167,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
         public virtual Vector3 GetLocalScaling()
         {
-            return new Vector3(1, 1, 1);
+            return new Vector3(1);
         }
         public virtual void CalculateLocalInertia(float mass, out Vector3 inertia)
         {

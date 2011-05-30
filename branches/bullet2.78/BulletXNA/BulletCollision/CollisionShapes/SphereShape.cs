@@ -46,7 +46,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        Vector3 vecnorm = vec;
 	        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 	        {
-		        vecnorm = new Vector3(-1f,-1f,-1f);
+		        vecnorm = new Vector3(-1f);
 	        } 
 	        vecnorm.Normalize();
 	        supVertex+= GetMargin() * vecnorm;
@@ -78,7 +78,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
 	        Vector3 center = t.Translation;
             float margin = GetMargin();
-	        Vector3 extent = new Vector3(margin,margin,margin);
+	        Vector3 extent = new Vector3(margin);
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;
         }

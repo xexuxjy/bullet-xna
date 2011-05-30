@@ -238,7 +238,7 @@ namespace BulletXNA
 
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin, margin, margin);
+            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
             Matrix abs_b = MathUtil.AbsoluteMatrix(ref t);
             Vector3 center = t.Translation;
 
@@ -257,7 +257,7 @@ namespace BulletXNA
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
             Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
             Vector3 localHalfExtents = -.5f * (localAabbMax - localAabbMin);
-            localHalfExtents += new Vector3(margin, margin, margin);
+            localHalfExtents += new Vector3(margin);
 
             Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
             Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans);

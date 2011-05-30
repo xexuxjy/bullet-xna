@@ -48,7 +48,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         	
 	        float radius = getRadius();
 
-	        Vector3 halfExtents = new Vector3(radius,radius,radius);
+	        Vector3 halfExtents = new Vector3(radius);
             float val = MathUtil.VectorComponent(ref halfExtents,GetUpAxis());
 	        MathUtil.VectorComponent(ref halfExtents,GetUpAxis(),val +getHalfHeight());
 
@@ -68,18 +68,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public override void SetMargin(float collisionMargin)
 	    {
 		    //correct the m_implicitShapeDimensions for the margin
-		    Vector3 oldMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 oldMargin = new Vector3(GetMargin());
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
     		
 		    base.SetMargin(collisionMargin);
-		    Vector3 newMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 newMargin = new Vector3(GetMargin());
 		    m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	    }
 
 	    public override void SetLocalScaling(ref Vector3 scaling)
 	    {
-		    Vector3 oldMargin = new Vector3(GetMargin(),GetMargin(),GetMargin());
+		    Vector3 oldMargin = new Vector3(GetMargin());
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		    Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -182,9 +182,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	
 	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
-	        Vector3 halfExtents = new Vector3(getRadius(),getRadius(),getRadius());
+	        Vector3 halfExtents = new Vector3(getRadius());
 	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, getRadius() + getHalfHeight());
-	        halfExtents += new Vector3(GetMargin(),GetMargin(),GetMargin());
+	        halfExtents += new Vector3(GetMargin());
             Matrix abs_b;
             MathUtil.AbsoluteMatrix(ref trans, out abs_b);
             Vector3 center = trans.Translation;

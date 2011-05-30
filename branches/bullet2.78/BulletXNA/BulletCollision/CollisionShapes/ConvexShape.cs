@@ -281,7 +281,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             Vector3 localDirNorm = localDir;
             if (localDirNorm.LengthSquared() < (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
             {
-                localDirNorm = new Vector3(-1f, -1f, -1f);
+                localDirNorm = new Vector3(-1f);
             }
             localDirNorm = Vector3.Normalize(localDirNorm);
 
@@ -343,7 +343,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         float radius = sphereShape.GetImplicitShapeDimensions().X;// * convexShape->getLocalScaling().getX();
                         float margin = radius + sphereShape.GetMarginNonVirtual();
                         Vector3 center = t.Translation;
-                        Vector3 extent = new Vector3(margin, margin, margin);
+                        Vector3 extent = new Vector3(margin);
                         aabbMin = center - extent;
                         aabbMax = center + extent;
                     }
@@ -355,7 +355,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         BoxShape convexShape = this as BoxShape;
                         float margin = convexShape.GetMarginNonVirtual();
                         Vector3 halfExtents = convexShape.GetImplicitShapeDimensions();
-                        halfExtents += new Vector3(margin, margin, margin);
+                        halfExtents += new Vector3(margin);
                         Matrix abs_b;
                         MathUtil.AbsoluteMatrix(ref t, out abs_b);
                         Vector3 center = t.Translation;
@@ -389,7 +389,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                     {
                         CapsuleShape capsuleShape = this as CapsuleShape;
                         float r = capsuleShape.getRadius();
-                        Vector3 halfExtents = new Vector3(r, r, r);
+                        Vector3 halfExtents = new Vector3(r);
                         int m_upAxis = capsuleShape.GetUpAxis();
                         MathUtil.VectorComponent(ref halfExtents, m_upAxis, r + capsuleShape.getHalfHeight());
                         float nvMargin = capsuleShape.GetMarginNonVirtual();

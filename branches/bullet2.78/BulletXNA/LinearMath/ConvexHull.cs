@@ -883,7 +883,7 @@ public class HullTriangle : int3
             }
 
 
-            Vector3 scale = new Vector3(1, 1, 1);
+            Vector3 scale = new Vector3(1);
 
             int ovcount = 0;
 
@@ -1069,7 +1069,7 @@ public class HullTriangle : int3
 
 	        Vector3 recip = new Vector3();
 
-            scale = new Vector3(1, 1, 1);
+            scale = new Vector3(1);
 
             Vector3 bmin = MathUtil.MAX_VECTOR;
             Vector3 bmax = MathUtil.MIN_VECTOR;
@@ -1102,7 +1102,7 @@ public class HullTriangle : int3
 
 		        if ( len == float.MaxValue)
 		        {
-                    diff = new Vector3(0.01f,0.01f,0.01f);
+                    diff = new Vector3(0.01f);
 		        }
 		        else
 		        {

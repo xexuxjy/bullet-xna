@@ -73,7 +73,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public CollisionObject()
         {
-            m_anisotropicFriction = new Vector3(1f, 1f, 1f);
+            m_anisotropicFriction = new Vector3(1f);
             m_hasAnisotropicFriction = false;
             m_contactProcessingThreshold = MathUtil.BT_LARGE_FLOAT;
             m_broadphaseHandle = null;

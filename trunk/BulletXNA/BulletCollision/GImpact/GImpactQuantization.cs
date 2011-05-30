@@ -60,11 +60,11 @@ namespace BulletXNA.BulletCollision.GImpact
         float quantizationMargin)
         {
             //enlarge the AABB to avoid division by zero when initializing the quantization values
-            Vector3 clampValue = new Vector3(quantizationMargin, quantizationMargin, quantizationMargin);
+            Vector3 clampValue = new Vector3(quantizationMargin);
             outMinBound = srcMinBound - clampValue;
             outMaxBound = srcMaxBound + clampValue;
             Vector3 aabbSize = outMaxBound - outMinBound;
-            bvhQuantization = new Vector3(65535.0f, 65535.0f, 65535.0f) / aabbSize;
+            bvhQuantization = new Vector3(65535.0f) / aabbSize;
         }
 
 

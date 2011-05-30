@@ -512,7 +512,7 @@ namespace BulletXNA
 		public static ShapeData CreateCube()
 		{
 			Matrix identity = Matrix.Identity;
-			return CreateBox(Vector3.Zero, new Vector3(1, 1, 1), Color.Yellow, ref identity);
+			return CreateBox(Vector3.Zero, new Vector3(1), Color.Yellow, ref identity);
 		}
 
 		public static ShapeData CreateBox(Vector3 position, Vector3 sideLength, Color color, ref Matrix transform)

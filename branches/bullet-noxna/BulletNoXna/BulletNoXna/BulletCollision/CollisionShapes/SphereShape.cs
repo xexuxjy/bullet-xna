@@ -44,7 +44,7 @@ namespace BulletXNA.BulletCollision
 	        Vector3 vecnorm = vec;
 	        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 	        {
-		        vecnorm = new Vector3(-1f,-1f,-1f);
+		        vecnorm = new Vector3(-1f);
 	        } 
 	        vecnorm.Normalize();
 	        supVertex+= Margin * vecnorm;

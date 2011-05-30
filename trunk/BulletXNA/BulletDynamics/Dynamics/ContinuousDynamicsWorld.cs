@@ -71,7 +71,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 			        //add conservative angular motion
 			        float angularMotion = 0f;// = angvel.length() * GetAngularMotionDisc() * timeStep;
-			        Vector3 angularMotion3d = new Vector3(angularMotion,angularMotion,angularMotion);
+			        Vector3 angularMotion3d = new Vector3(angularMotion);
 
 			        temporalAabbMin -= angularMotion3d;
 			        temporalAabbMax += angularMotion3d;

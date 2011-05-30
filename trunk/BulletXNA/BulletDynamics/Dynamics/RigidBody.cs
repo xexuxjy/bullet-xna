@@ -739,7 +739,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 	    public void	SetAngularFactor(float angFac)
 	    {
-		    m_angularFactor = new Vector3(angFac,angFac,angFac);
+		    m_angularFactor = new Vector3(angFac);
 	    }
 
         public void SetAngularFactor(Vector3 angFac)
@@ -997,7 +997,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		public float			m_additionalAngularDampingThresholdSqr;
 		public float			m_additionalAngularDampingFactor;
 
-        public RigidBodyConstructionInfo(float mass, IMotionState motionState, CollisionShape collisionShape): this(mass,motionState,collisionShape,new Vector3(0,0,0))
+        public RigidBodyConstructionInfo(float mass, IMotionState motionState, CollisionShape collisionShape): this(mass,motionState,collisionShape,new Vector3(0))
         {
 
         }

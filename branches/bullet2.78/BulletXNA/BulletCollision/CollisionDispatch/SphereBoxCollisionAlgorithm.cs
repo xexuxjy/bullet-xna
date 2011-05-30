@@ -133,7 +133,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             boundsVec[0] = bounds[0];
             boundsVec[1] = bounds[1];
 
-            Vector3 marginsVec = new Vector3(margins, margins, margins);
+            Vector3 marginsVec = new Vector3(margins);
 
             // add margins
             bounds[0] += marginsVec;

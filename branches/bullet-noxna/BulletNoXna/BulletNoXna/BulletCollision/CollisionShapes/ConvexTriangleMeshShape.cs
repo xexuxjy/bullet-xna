@@ -59,7 +59,7 @@ namespace BulletXNA.BulletCollision
 		        Vector3 vecnorm = vec;
 		        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 		        {
-			        vecnorm = new Vector3(-1f,-1f,-1f);
+			        vecnorm = new Vector3(-1f);
 		        } 
 		        vecnorm.Normalize();
 		        supVertex+= Margin * vecnorm;
@@ -86,7 +86,7 @@ namespace BulletXNA.BulletCollision
             }
 
 	        LocalSupportVertexCallback supportCallback = new LocalSupportVertexCallback(ref vec);
-	        Vector3 aabbMax = new Vector3(float.MaxValue,float.MaxValue,float.MaxValue);
+	        Vector3 aabbMax = new Vector3(float.MaxValue);
             Vector3 aabbMin = -aabbMax;
 	        m_stridingMesh.InternalProcessAllTriangles(supportCallback,ref aabbMin,ref aabbMax);
 	        supVec = supportCallback.GetSupportVertexLocal();

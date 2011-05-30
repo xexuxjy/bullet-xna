@@ -78,7 +78,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             IndexedVector3 translationA = new IndexedVector3(transformA.Translation);
             IndexedVector3 translationB = new IndexedVector3(transformB.Translation);
 
-            Vector3 debugExtents = new Vector3(2f, 2f, 2f);
+            //Vector3 debugExtents = new Vector3(2f, 2f, 2f);
 
             IndexedVector3 box1Margin = new IndexedVector3(2f * m_box1.GetHalfExtentsWithMargin());
             IndexedVector3 box2Margin = new IndexedVector3(2f * m_box2.GetHalfExtentsWithMargin());

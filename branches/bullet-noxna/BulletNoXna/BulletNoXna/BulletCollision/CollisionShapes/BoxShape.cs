@@ -84,7 +84,7 @@ namespace BulletXNA.BulletCollision
 		    : base()
 	    {
 		    m_shapeType = BroadphaseNativeType.BoxShape;
-		    Vector3 margin = new Vector3(Margin,Margin,Margin);
+		    Vector3 margin = new Vector3(Margin);
 		    m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
             int ibreak = 0;
 	    }

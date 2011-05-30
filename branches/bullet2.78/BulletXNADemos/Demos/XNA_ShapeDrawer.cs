@@ -286,7 +286,7 @@ namespace BulletXNADemos.Demos
         public void DrawSolidSphere(float radius, int slices, int stacks, ref Matrix matrix, ref Matrix view, ref Matrix projection,ref Vector3 color)
         {
 
-			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new Vector3(radius,radius,radius),matrix);
+			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new Vector3(radius),matrix);
 			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }

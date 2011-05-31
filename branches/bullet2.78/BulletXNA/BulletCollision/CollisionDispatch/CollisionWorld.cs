@@ -1417,7 +1417,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return collides;
         }
 
-        public abstract float AddSingleResult(ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1);
+        public abstract float AddSingleResult(ref ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1);
     }
 
 
@@ -1543,7 +1543,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             //experimental feature info, for per-triangle material etc.
             CollisionObject obj0 = isSwapped ? m_body1 : m_body0;
             CollisionObject obj1 = isSwapped ? m_body0 : m_body1;
-            m_resultCallback.AddSingleResult(newPt, obj0, newPt.m_partId0, newPt.m_index0, obj1, newPt.m_partId1, newPt.m_index1);
+            m_resultCallback.AddSingleResult(ref newPt, obj0, newPt.m_partId0, newPt.m_index0, obj1, newPt.m_partId1, newPt.m_index1);
         }
     }
 

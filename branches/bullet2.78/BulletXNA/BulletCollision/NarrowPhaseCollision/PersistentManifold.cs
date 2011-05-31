@@ -21,8 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#define MAINTAIN_PERSISTENCY
-#define KEEP_DEEPEST_POINT
+//#define MAINTAIN_PERSISTENCY
+//#define KEEP_DEEPEST_POINT
 #define DEBUG_PERSISTENCY
 
 using System;
@@ -44,7 +44,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class PersistentManifold : TypedObject, IComparable
     {
         /// sort cached points so most isolated points come first
-        private int SortCachedPoints(ManifoldPoint pt)
+        private int SortCachedPoints(ref ManifoldPoint pt)
         {
             //calculate 4 possible cases areas, and take biggest area
             //also need to keep 'deepest'
@@ -107,7 +107,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         }
 
-        public int FindContactPoint(ManifoldPoint unUsed, int numUnused, ManifoldPoint pt)
+        public int FindContactPoint(ref ManifoldPoint unUsed, int numUnused, ref ManifoldPoint pt)
         {
             return 0;
         }
@@ -183,7 +183,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
                 if (pt.m_userPersistentData != null && gContactDestroyedCallback != null)
                 {
-                    gContactDestroyedCallback.callback(pt.m_userPersistentData);
+                    gContactDestroyedCallback.Callback(pt.m_userPersistentData);
                     pt.m_userPersistentData = null;
                 }
 
@@ -232,17 +232,16 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             return m_contactProcessingThreshold;
         }
 
-        public int GetCacheEntry(ManifoldPoint newPoint)
+        public int GetCacheEntry(ref ManifoldPoint newPoint)
         {
             //float shortestDist = GetContactBreakingThreshold() * GetContactBreakingThreshold();
-            float shortestDist = GetContactBreakingThreshold(); shortestDist *= shortestDist;
+            float shortestDist = GetContactBreakingThreshold(); 
+            shortestDist *= shortestDist;
             int size = GetNumContacts();
             int nearestPoint = -1;
             for (int i = 0; i < size; i++)
             {
-                ManifoldPoint mp = m_pointCache[i];
-
-                Vector3 diffA = mp.GetLocalPointA() - newPoint.GetLocalPointA();
+                Vector3 diffA = m_pointCache[i].GetLocalPointA() - newPoint.GetLocalPointA();
                 float distToManiPoint = diffA.LengthSquared();
                 if (distToManiPoint < shortestDist)
                 {
@@ -259,9 +258,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             return nearestPoint;
         }
 
-        public int AddManifoldPoint(ManifoldPoint newPoint)
+        public int AddManifoldPoint(ref ManifoldPoint newPoint)
         {
-            Debug.Assert(ValidContactDistance(newPoint));
+            Debug.Assert(ValidContactDistance(ref newPoint));
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
@@ -275,7 +274,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 if (MANIFOLD_CACHE_SIZE >= 4)
                 {
                     //sort cache so best points come first, based on area
-                    insertIndex = SortCachedPoints(newPoint);
+                    insertIndex = SortCachedPoints(ref newPoint);
                 }
                 else
                 {
@@ -306,7 +305,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             //		m_pointCache[index] = m_pointCache[lastUsedIndex];
             if (index != lastUsedIndex)
             {
-                m_pointCache[index].Copy(m_pointCache[lastUsedIndex]);
+                //m_pointCache[index].Copy(m_pointCache[lastUsedIndex]);
+                m_pointCache[index] = m_pointCache[lastUsedIndex];
                 //get rid of duplicated userPersistentData pointer
                 m_pointCache[lastUsedIndex].Reset();
             }
@@ -315,9 +315,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_cachedPoints--;
         }
 
-        public void ReplaceContactPoint(ManifoldPoint newPoint, int insertIndex)
+        public void ReplaceContactPoint(ref ManifoldPoint newPoint, int insertIndex)
         {
-            Debug.Assert(ValidContactDistance(newPoint));
+            Debug.Assert(ValidContactDistance(ref newPoint));
 
 
 #if MAINTAIN_PERSISTENCY
@@ -347,7 +347,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 #endif
         }
 
-        public bool ValidContactDistance(ManifoldPoint pt)
+        public bool ValidContactDistance(ref ManifoldPoint pt)
         {
             if (pt.m_lifeTime > 1)
             {
@@ -396,7 +396,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             {
                 ManifoldPoint manifoldPoint = m_pointCache[i];
                 //contact becomes invalid when signed distance exceeds margin (projected on contactnormal direction)
-                if (!ValidContactDistance(manifoldPoint))
+                if (!ValidContactDistance(ref manifoldPoint))
                 {
                     RemoveContactPoint(i);
                 }
@@ -415,7 +415,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         //contact point processed callback
                         if (gContactProcessedCallback != null)
                         {
-                            gContactProcessedCallback.callback(manifoldPoint, m_body0, m_body1);
+                            gContactProcessedCallback.Callback(manifoldPoint, m_body0, m_body1);
                         }
                     }
                 }
@@ -490,12 +490,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
     public interface IContactDestroyedCallback
     {
-        bool callback(Object userPersistentData);
+        bool Callback(Object userPersistentData);
     }
 
     public interface IContactProcessedCallback
     {
-        bool callback(ManifoldPoint point, Object body0, Object body1);
+        bool Callback(ManifoldPoint point, Object body0, Object body1);
     }
 
     public enum ContactManifoldTypes

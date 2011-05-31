@@ -295,7 +295,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         }
 
-        public void Copy(ManifoldPoint other)
+        public void Copy(ref ManifoldPoint other)
         {
             m_localPointA = other.m_localPointA;
             m_localPointB = other.m_localPointB;

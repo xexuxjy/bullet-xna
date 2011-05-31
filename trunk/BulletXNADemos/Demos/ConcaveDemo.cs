@@ -281,7 +281,7 @@ namespace BulletXNADemos.Demos
 		{
 			#region IContactAddedCallback Members
 
-			public bool Callback(ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1)
+			public bool Callback(ref ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1)
 			{
 				float friction0 = colObj0.GetFriction();
 				float friction1 = colObj1.GetFriction();

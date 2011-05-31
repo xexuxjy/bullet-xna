@@ -137,7 +137,7 @@ namespace BulletXNADemos.Demos
 
             /// Create Dynamic Boxes
             {
-                int numBoxes = 0;
+                int numBoxes = 6;
                 for (int i = 0; i < numBoxes; i++)
                 {
                     CollisionShape boxShape = new BoxShape(new Vector3(1, 1, 1));

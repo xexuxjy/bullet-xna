@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -51,7 +52,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return supVertexA - supVertexB;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             ///@todo: could make recursive use of batching. probably this shape is not used frequently.
             for (int i = 0; i < numVectors; i++)

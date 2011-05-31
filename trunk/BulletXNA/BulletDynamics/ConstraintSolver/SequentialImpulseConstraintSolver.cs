@@ -50,8 +50,6 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		protected int m_counter;
 
-		public static bool debugSolver = false;
-
 		public SequentialImpulseConstraintSolver()
 		{
 
@@ -283,8 +281,19 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				rel_vel2 = vel1Dotn + vel2Dotn;
 
 				float positionalError = 0f;
-				positionalError = -penetration * infoGlobal.m_erp / infoGlobal.m_timeStep;
+
 				float velocityError = restitution - rel_vel2;// * damping;
+
+				if (penetration > 0f)
+				{
+					positionalError = 0f;
+					velocityError -= penetration / infoGlobal.m_timeStep;
+				}
+				else
+				{
+					positionalError = -penetration * infoGlobal.m_erp / infoGlobal.m_timeStep;
+				}
+				
 				float penetrationImpulse = positionalError * solverConstraint.m_jacDiagABInv;
 				float velocityImpulse = velocityError * solverConstraint.m_jacDiagABInv;
 				if (!infoGlobal.m_splitImpulse || (penetration > infoGlobal.m_splitImpulsePenetrationThreshold))
@@ -436,7 +445,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 					RigidBody rb0 = RigidBody.Upcast(colObj0);
 					RigidBody rb1 = RigidBody.Upcast(colObj1);
-					if (BulletGlobals.g_streamWriter != null && rb0 != null && debugSolver)
+					if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
 					{
 						MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
 					}
@@ -447,7 +456,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
                     SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, out rel_pos1, out rel_pos2);
 
-					if (BulletGlobals.g_streamWriter != null && debugSolver)
+					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
 					{
 						TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, 99);
 					}
@@ -700,14 +709,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 
 				SolverConstraint solveManifold = m_tmpSolverContactConstraintPool[j];
-				ManifoldPoint pt = solveManifold.m_originalContactPoint as ManifoldPoint;
-				pt.SetAppliedImpulse(solveManifold.m_appliedImpulse);
+                solveManifold.m_originalContactPoint.SetAppliedImpulse(solveManifold.m_appliedImpulse);
 				if ((infoGlobal.m_solverMode & SolverMode.SOLVER_USE_FRICTION_WARMSTARTING) != 0)
 				{
-					pt.SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
-					pt.SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
+                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
+                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
 				}
-
 
 				//do a callback here?
 			}
@@ -716,10 +723,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			for (int j = 0; j < numPoolConstraints; j++)
 			{
 				SolverConstraint solverConstr = m_tmpSolverNonContactConstraintPool[j];
-				TypedConstraint constr = solverConstr.m_originalContactPoint as TypedConstraint;
-				float sum = constr.InternalGetAppliedImpulse();
-				sum += solverConstr.m_appliedImpulse;
-				constr.InternalSetAppliedImpulse(sum);
+				TypedConstraint constr = solverConstr.m_originalContactPointConstraint ;
+				constr.InternalSetAppliedImpulse(solverConstr.m_appliedImpulse);
+				if (solverConstr.m_appliedImpulse > constr.GetBreakingImpulseThreshold())
+				{
+					constr.SetEnabled(false);
+				}
 				m_tmpSolverNonContactConstraintPool[j] = solverConstr;
 
 			}
@@ -771,17 +780,35 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
             int lastConstraint = startConstraint + numConstraints;
 
-			//if (true)
-			//{
-            //    for (int j=startConstraint;j<lastConstraint;j++)
-			//    {
-			//        TypedConstraint constraint = constraints[j];
-			//        constraint.buildJacobian();
-			//    }
-			//}
+			Vector3 zero = Vector3.Zero;
 
+			if (infoGlobal.m_splitImpulse)
+			{
+				for (int i = 0; i < numBodies; i++)
+				{
+					RigidBody body = RigidBody.Upcast(bodies[i]);
+					if (body != null)
+					{	
+						body.InternalSetDeltaLinearVelocity(ref zero);
+						body.InternalSetDeltaAngularVelocity(ref zero);
+						body.InternalSetPushVelocity(ref zero);
+						body.InternalSetTurnVelocity(ref zero);
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < numBodies; i++)
+				{
+					RigidBody body = RigidBody.Upcast(bodies[i]);
+					if (body != null)
+					{	
+						body.InternalSetDeltaLinearVelocity(ref zero);
+						body.InternalSetDeltaAngularVelocity(ref zero);
+					}
+				}
+			}
 
-			//btRigidBody* rb0=0,*rb1=0;
 
 			//if (1)
 			{
@@ -794,7 +821,16 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 					{
 						ConstraintInfo1 info1 = new ConstraintInfo1();
 						m_tmpConstraintSizesPool.Add(info1);
-						constraints[i].GetInfo1(info1);
+						if (constraints[i].IsEnabled())
+						{
+							constraints[i].GetInfo1(info1);
+						}
+						else
+						{
+							info1.m_numConstraintRows = 0;
+							info1.nub = 0;
+						}
+
 						totalNumRows += info1.m_numConstraintRows;
 					}
 
@@ -830,7 +866,6 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 								m_tmpSolverNonContactConstraintPool[j] = solverConstraint;
 							}
 
-							Vector3 zero = Vector3.Zero;
 							rbA.InternalSetDeltaLinearVelocity(ref zero);
 							rbA.InternalSetDeltaAngularVelocity(ref zero);
 							rbB.InternalSetDeltaLinearVelocity(ref zero);
@@ -847,7 +882,19 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 							info2.fps = 1f / infoGlobal.m_timeStep;
 							info2.erp = infoGlobal.m_erp;
 							info2.m_numIterations = infoGlobal.m_numIterations;
+							info2.m_damping = infoGlobal.m_damping;
 							constraint.GetInfo2(info2);
+
+                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit > constraints[i].GetBreakingImpulseThreshold())
+							{
+                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
+							}
+
+                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit < -constraints[i].GetBreakingImpulseThreshold())
+							{
+                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
+							}
+
 
 							///finalize the constraint setup
 							///
@@ -862,7 +909,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 							for (int j = 0; j < (info1a.m_numConstraintRows); j++)
 							{
 								SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[currentRow + j];
-								solverConstraint.m_originalContactPoint = constraint;
+								solverConstraint.m_originalContactPointConstraint = constraint;
 
 								{
 									Vector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;
@@ -904,14 +951,14 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 									float restitution = 0f;
 									float positionalError = solverConstraint.m_rhs;//already filled in by getConstraintInfo2
-									float velocityError = restitution - rel_vel;// * damping;
+									float velocityError = restitution - rel_vel * info2.m_damping;
 									float penetrationImpulse = positionalError * solverConstraint.m_jacDiagABInv;
 									float velocityImpulse = velocityError * solverConstraint.m_jacDiagABInv;
 									solverConstraint.m_rhs = penetrationImpulse + velocityImpulse;
 									solverConstraint.m_appliedImpulse = 0f;
 
 								}
-								if (BulletGlobals.g_streamWriter != null && debugSolver)
+								if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
 								{
 									TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, j);
 								}
@@ -972,12 +1019,13 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 			//should traverse the contacts random order...
 			{
+				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
+
 				for (int iteration = 0; iteration < infoGlobal.m_numIterations; iteration++)
 				{
                     SolveSingleIteration(iteration, bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 				}
 
-				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 			}
             BulletGlobals.StopProfile();
 			return 0.0f;

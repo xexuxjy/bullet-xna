@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -74,7 +75,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 				MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z));
 		}
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
 		{
 			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 		

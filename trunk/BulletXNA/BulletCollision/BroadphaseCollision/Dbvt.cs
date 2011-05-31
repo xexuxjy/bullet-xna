@@ -1,25 +1,25 @@
 ﻿/*
- * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
- *
- * Bullet Continuous Collision Detection and Physics Library
- * Copyright (c) 2003-2008 Erwin Coumans  http://www.bulletphysics.com/
- *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose, 
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
+* C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
+*
+* Bullet Continuous Collision Detection and Physics Library
+* Copyright (c) 2003-2008 Erwin Coumans  http://www.bulletphysics.com/
+*
+* This software is provided 'as-is', without any express or implied warranty.
+* In no event will the authors be held liable for any damages arising from
+* the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose, 
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+* 
+* 1. The origin of this software must not be misrepresented; you must not
+*    claim that you wrote the original software. If you use this software
+*    in a product, an acknowledgment in the product documentation would be
+*    appreciated but is not required.
+* 2. Altered source versions must be plainly marked as such, and must not be
+*    misrepresented as being the original software.
+* 3. This notice may not be removed or altered from any source distribution.
+*/
 
 
 using System;
@@ -340,6 +340,18 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
         }
 
+        public static void GetMaxDepth(DbvtNode node, int depth, ref int maxDepth)
+        {
+            if (node.IsInternal())
+            {
+                GetMaxDepth(node._children[0], depth + 1, ref maxDepth);
+                GetMaxDepth(node._children[1], depth + 1, ref maxDepth);
+            }
+            else
+            {
+                maxDepth = Math.Max(depth, maxDepth);
+            }
+        }
 
 
 
@@ -426,6 +438,75 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 } while (stack.Count > 0);
             }
         }
+
+
+        public static void RayTest(DbvtNode root,
+                                ref Vector3 rayFrom,
+                                ref Vector3 rayTo,
+                                Collide policy)
+        {
+            if (root != null)
+            {
+                Vector3 rayDir = (rayTo - rayFrom);
+                rayDir.Normalize();
+
+                ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
+                Vector3 rayDirectionInverse = Vector3.Zero;
+                rayDirectionInverse.X = rayDir.X == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X;
+                rayDirectionInverse.Y = rayDir.Y == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y;
+                rayDirectionInverse.Z = rayDir.Z == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z;
+                bool[] signs = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
+
+                float lambda_max = Vector3.Dot(rayDir, (rayTo - rayFrom));
+
+                Vector3 resultNormal;
+
+                ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
+
+                int depth = 1;
+                int treshold = DOUBLE_STACKSIZE - 2;
+
+                stack.Resize(DOUBLE_STACKSIZE);
+                stack[0] = root;
+                Vector3[] bounds = new Vector3[2];
+                do
+                {
+                    DbvtNode node = stack[--depth];
+
+                    bounds[0] = node.volume.Mins();
+                    bounds[1] = node.volume.Maxs();
+
+                    float tmin = 1.0f, lambda_min = 0.0f;
+                    bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, signs, bounds, out tmin, lambda_min, lambda_max);
+
+#if COMPARE_BTRAY_AABB2
+				float param=1.0f;
+				bool result2 = AabbUtil.RayAabb(ref rayFrom,ref rayTo,node.volume.Mins(),node.volume.Maxs(),param,resultNormal);
+				Debug.Assert(result1 == result2);
+#endif //TEST_BTRAY_AABB2
+
+                    if (result1)
+                    {
+                        if (node.IsInternal())
+                        {
+                            if (depth > treshold)
+                            {
+                                stack.Resize(stack.Count * 2);
+                                treshold = stack.Count - 2;
+                            }
+                            stack[depth++] = node._children[0];
+                            stack[depth++] = node._children[1];
+                        }
+                        else
+                        {
+                            policy.Process(node);
+                        }
+                    }
+                } while (depth != 0);
+
+            }
+        }
+
 
 
         public void RayTestInternal(DbvtNode root,

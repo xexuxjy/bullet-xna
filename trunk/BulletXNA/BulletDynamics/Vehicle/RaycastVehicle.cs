@@ -21,6 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#define ROLLING_INFLUENCE_FIX
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -401,11 +403,6 @@ namespace BulletXNA.BulletDynamics.Vehicle
        
         }
 
-        public void SetRaycastWheelInfo(int wheelIndex, bool isInContact, ref Vector3 hitPoint, ref Vector3 hitNormal, float depth)
-        {
-            Debug.Assert(false);
-        }
-
         public WheelInfo AddWheel(ref Vector3 connectionPointCS0, ref Vector3 wheelDirectionCS0, ref Vector3 wheelAxleCS, float suspensionRestLength, float wheelRadius, VehicleTuning tuning, bool isFrontWheel)
         {
             WheelInfoConstructionInfo ci = new WheelInfoConstructionInfo();
@@ -695,12 +692,17 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
                         Vector3 sideImp = m_axle[wheel] * m_sideImpulse[wheel];
 
+#if ROLLING_INFLUENCE_FIX // fix. It only worked if car's up was along Y - VT.
+					Vector3 vChassisWorldUp = MathUtil.MatrixColumn(GetRigidBody().GetCenterOfMassTransform(),m_indexUpAxis);
+					rel_pos -= vChassisWorldUp * (Vector3.Dot(vChassisWorldUp,rel_pos) * (1.0f-wheelInfo.m_rollInfluence));
+#else
+					rel_pos[m_indexUpAxis] *= wheelInfo.m_rollInfluence;
+#endif
+
+
                         MathUtil.VectorComponentMultiplyAssign(ref rel_pos, m_indexUpAxis, wheelInfo.m_rollInfluence);
 
-                        if (sideImp.LengthSquared() > 1f)
-                        {
-                            int ibreak = 0;
-                        }
+                        
 
                         m_chassisBody.ApplyImpulse(ref sideImp, ref rel_pos);
 

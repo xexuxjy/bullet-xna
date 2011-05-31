@@ -55,13 +55,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bitmap1.bmp">
-      <Name>Bitmap1</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="DebugFont.spritefont">
       <Name>DebugFont</Name>
       <Importer>FontDescriptionImporter</Importer>

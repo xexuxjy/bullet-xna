@@ -56,7 +56,7 @@ namespace BulletXNA
 
         public virtual void SetWorldTransform(ref Matrix centerOfMassWorldTrans)
         {
-            m_graphicsWorldTrans = MathUtil.BulletMatrixMultiply(ref centerOfMassWorldTrans, ref m_centerOfMassOffset);
+            m_graphicsWorldTrans = MathUtil.BulletMatrixMultiply(centerOfMassWorldTrans, m_centerOfMassOffset);
         }
         public Matrix m_graphicsWorldTrans;
         public Matrix m_centerOfMassOffset;

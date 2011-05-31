@@ -93,5 +93,22 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 	    public void SetUpperLimit(float ang1max, float ang2max) { SetAngularUpperLimit(new Vector3(0.0f, ang1max, ang2max)); }
 	    public void SetLowerLimit(float ang1min, float ang2min) { SetAngularLowerLimit(new Vector3(0.0f, ang1min, ang2min)); }
 
+		public void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		{
+			Vector3 zAxis = Vector3.Normalize(axis1);
+			Vector3 yAxis = Vector3.Normalize(axis2);
+			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
+
+			Matrix frameInW = Matrix.Identity;
+			MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+
+			// now get constraint frame in local coordinate systems
+			m_frameInA = MathUtil.InverseTimes(m_rbA.GetCenterOfMassTransform(), frameInW);
+			m_frameInB = MathUtil.InverseTimes(m_rbB.GetCenterOfMassTransform(), frameInW);
+
+			CalculateTransforms();
+		}
+
+
     }
 }

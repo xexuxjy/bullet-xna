@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 {
@@ -31,9 +32,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class ManifoldPoint
     {
 
-        public ManifoldPoint()
-        {
-        }
+        //public ManifoldPoint()
+        //{
+        //}
         public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
         {
             m_localPointA = pointA;
@@ -41,7 +42,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_normalWorldOnB = normal;
             m_distance1 = distance;
 
-            /* Don't initialize default values twice in C#
+            /* Don't initialize default values twice in C# */
             m_lateralFrictionDir1 = Vector3.Zero;
             m_lateralFrictionDir2 = Vector3.Zero;
             m_lifeTime = 0;
@@ -63,7 +64,9 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_combinedFriction = 0f;
             m_positionWorldOnA = Vector3.Zero;
             m_positionWorldOnB = Vector3.Zero;
-            */
+
+            m_constraintRow = new ConstraintRow[3];
+
         }
 
         public float GetDistance()
@@ -286,9 +289,13 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_appliedImpulseLateral1 = 0f;
             m_appliedImpulseLateral2 = 0f;
             m_lifeTime = 0;
+            m_constraintRow[0].m_accumImpulse = 0.0f;
+            m_constraintRow[1].m_accumImpulse = 0.0f;
+            m_constraintRow[2].m_accumImpulse = 0.0f;
+
         }
 
-        public void Copy(ManifoldPoint other)
+        public void Copy(ref ManifoldPoint other)
         {
             m_localPointA = other.m_localPointA;
             m_localPointB = other.m_localPointB;
@@ -346,5 +353,19 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public Vector3 m_lateralFrictionDir1;
         public Vector3 m_lateralFrictionDir2;
+
+        public ConstraintRow[] m_constraintRow;
+
     }
+
+    public struct ConstraintRow
+    {
+        public IndexedVector3 m_normal;
+        public float m_rhs;
+        public float m_jacDiagInv;
+        public float m_lowerLimit;
+        public float m_upperLimit;
+        public float m_accumImpulse;
+    }
+
 }

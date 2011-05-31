@@ -853,7 +853,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
                 sortedConstraints = new ObjectArray<TypedConstraint>(m_constraints);
 
                 //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
-                sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
+                //sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
             }
             else
             {

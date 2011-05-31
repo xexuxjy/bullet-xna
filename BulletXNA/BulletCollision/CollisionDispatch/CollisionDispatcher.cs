@@ -59,8 +59,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public void SetDispatcherFlags(DispatcherFlags flags)
         {
-            //(void) flags;
-            m_dispatcherFlags = 0;
+            m_dispatcherFlags = flags;
         }
 
 
@@ -154,11 +153,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         	if ((m_dispatcherFlags & DispatcherFlags.CD_STATIC_STATIC_REPORTED == 0))
 	        {
 		        //broadphase filtering already deals with this
-		        if ((body0.isStaticObject() || body0.isKinematicObject()) &&
-			        (body1.isStaticObject() || body1.isKinematicObject()))
+		        if ((body0.IsStaticOrKinematicObject()) && body1.isStaticOrKinematicObject())
 		        {
                     m_dispatcherFlags |= DispatcherFlags.CD_STATIC_STATIC_REPORTED;
-			        System.ref.printline("warning btCollisionDispatcher::needsCollision: static-static collision!\n");
+			        System.err.Writeline("warning CollisionDispatcher::needsCollision: static-static collision!\n");
 		        }
 	        }
 #endif //BT_DEBUG
@@ -379,7 +377,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
     public enum DispatcherFlags
     {
         CD_STATIC_STATIC_REPORTED = 1,
-        CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD = 2
+        CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD = 2,
+        CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION = 4
+
     }
 
 }

@@ -386,9 +386,9 @@ namespace BulletXNADemos.Demos
 	        Vector3 startOffset = new Vector3(1,0.5f,0);
 
 
-			string filename = @"C:\users\man\xna-ragdoll-constraints-output.txt";
-            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+			string filename = @"E:\users\man\bullet\xna-ragdoll-constraints-output.txt";
+            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 
 			SpawnRagdoll(ref startOffset, BulletGlobals.g_streamWriter);

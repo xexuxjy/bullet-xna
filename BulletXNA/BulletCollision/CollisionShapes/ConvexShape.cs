@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -59,7 +60,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public Vector3 LocalGetSupportVertexWithoutMarginNonVirtual(ref Vector3 localDir)
         {
             Vector3 result = Vector3.Zero;
-            if (BulletGlobals.g_streamWriter != null && debugConvexShape)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
             {
                 BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual " + GetName());
             }
@@ -79,7 +80,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         result = new Vector3(MathUtil.FSel(localDir.X, halfExtents.X, -halfExtents.X),
                             MathUtil.FSel(localDir.Y, halfExtents.Y, -halfExtents.Y),
                             MathUtil.FSel(localDir.Z, halfExtents.Z, -halfExtents.Z));
-                        if (BulletGlobals.g_streamWriter != null && debugConvexShape)
+						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual::Box");
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "halfEx", halfExtents);
@@ -97,7 +98,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                         Vector3 dots = new Vector3(Vector3.Dot(dir, vertices[0]), Vector3.Dot(dir, vertices[1]), Vector3.Dot(dir, vertices[2]));
                         int maxAxis = MathUtil.MaxAxis(ref dots);
                         Vector3 sup = vertices[maxAxis];
-                        if (BulletGlobals.g_streamWriter != null && debugConvexShape)
+						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual::Triangle");
                             BulletGlobals.g_streamWriter.WriteLine(String.Format("MaxAxis [{0}]", maxAxis));
@@ -265,7 +266,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
             // should never reach here
             //Debug.Assert(false);
-            if (BulletGlobals.g_streamWriter != null && debugConvexShape)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
             {
                 BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual");
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "localDir", localDir);
@@ -423,7 +424,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 
         //notice that the vectors should be unit length
-        public abstract void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors);
+		public abstract void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors);
 
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
@@ -456,6 +457,5 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
         public const int MAX_PREFERRED_PENETRATION_DIRECTIONS = 10;
-        public static bool debugConvexShape = true;
     }
 }

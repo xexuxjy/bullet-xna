@@ -482,8 +482,13 @@
 //                return;
 //            }
 
-//            BvhTriangleMeshShape* trimesh = (btBvhTriangleMeshShape*)colObj0.getRootCollisionShape();
-//            TriangleInfoMap* triangleInfoMapPtr = (btTriangleInfoMap*) trimesh.getTriangleInfoMap();
+   //             BvhTriangleMeshShape* trimesh = null;
+	
+   //             if( colObj0.GetRootCollisionShape().GetShapeType() == BroadphaseNativeTypes.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE )
+   //    trimesh = (colObj0.GetRootCollisionShape() as btScaledBvhTriangleMeshShape).GetChildShape();
+   //else	   
+   //    trimesh = olObj0.GetRootCollisionShape() asBvhTriangleMeshShape;
+	   //            TriangleInfoMap* triangleInfoMapPtr = (btTriangleInfoMap*) trimesh.getTriangleInfoMap();
 //            if (triangleInfoMapPtr == null)
 //            {
 //                return;
@@ -529,6 +534,59 @@
 
 //            Vector3 localContactNormalOnB = Vector3.TransformNormal(cp.m_normalWorldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
 //            localContactNormalOnB.Normalize();//is this necessary?
+
+	// Get closest edge
+//    int      bestedge=-1;
+//    float    disttobestedge=BT_LARGE_FLOAT;
+//    //
+//    // Edge 0 -> 1
+//    if (btFabs(info->m_edgeV0V1Angle)< triangleInfoMapPtr->m_maxEdgeAngleThreshold)
+//    {	
+//       btVector3 nearest;
+//       btNearestPointInLineSegment( cp.m_localPointB, v0, v1, nearest );
+//       float     len=(contact-nearest).length();
+//       //
+//       if( len < disttobestedge )
+//       {
+//          bestedge=0;
+//          disttobestedge=len;
+//      }	      
+//   }	   
+//    // Edge 1 -> 2
+//    if (btFabs(info->m_edgeV1V2Angle)< triangleInfoMapPtr->m_maxEdgeAngleThreshold)
+//    {	
+//       btVector3 nearest;
+//       btNearestPointInLineSegment( cp.m_localPointB, v1, v2, nearest );
+//       float     len=(contact-nearest).length();
+//       //
+//       if( len < disttobestedge )
+//       {
+//          bestedge=1;
+//          disttobestedge=len;
+//      }	      
+//   }	   
+//    // Edge 2 -> 0
+//    if (btFabs(info->m_edgeV2V0Angle)< triangleInfoMapPtr->m_maxEdgeAngleThreshold)
+//    {	
+//       btVector3 nearest;
+//       btNearestPointInLineSegment( cp.m_localPointB, v2, v0, nearest );
+//       float     len=(contact-nearest).length();
+//       //
+//       if( len < disttobestedge )
+//       {
+//          bestedge=2;
+//          disttobestedge=len;
+//      }	      
+//   }   	      	
+	
+//#ifdef BT_INTERNAL_EDGE_DEBUG_DRAW
+//   btVector3 upfix=tri_normal * btVector3(0.1f,0.1f,0.1f);
+//   btDebugDrawLine(tr * v0 + upfix, tr * v1 + upfix, red );
+//#endif   
+//    if (btFabs(info->m_edgeV0V1Angle)< triangleInfoMapPtr->m_maxEdgeAngleThreshold)
+//    {
+
+
 
 //            if ((info.m_edgeV0V1Angle)< MathUtil.SIMD_2_PI)
 //            {
@@ -615,6 +673,7 @@
 
 //                float len = (contact-nearest).length();
 //                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
+        //if( bestedge==0 )
 //                {
 //                    isNearEdge = true;
 //        #if BT_INTERNAL_EDGE_DEBUG_DRAW
@@ -689,15 +748,20 @@
 //            btDebugDrawLine(tr*nearest,tr*cp.m_localPointB,blue);
 //        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//            if ((info.m_edgeV2V0Angle)< MathUtil.SIMD_2_PI)
-//            {
 
+//#ifdef BT_INTERNAL_EDGE_DEBUG_DRAW
+//   btDebugDrawLine(tr * v1 + upfix, tr * v2 + upfix , green );
+//#endif   
+
+//    if (btFabs(info->m_edgeV1V2Angle)< triangleInfoMapPtr->m_maxEdgeAngleThreshold)
+//    {
 //        #if BT_INTERNAL_EDGE_DEBUG_DRAW
 //                btDebugDrawLine(tr*contact,tr*(contact+cp.m_normalWorldOnB*10),black);
 //        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
 //                float len = (contact-nearest).Length();
 //                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
+        //if( bestedge==1 )
 //                {
 //                    isNearEdge = true;
 //        #if BT_INTERNAL_EDGE_DEBUG_DRAW
@@ -791,6 +855,14 @@
 //                    } 
 //                    else
 //                    {
+                //btVector3 newNormal = tri_normal *frontFacing;
+                ////if the tri_normal is pointing opposite direction as the current local contact normal, skip it
+                //btScalar d = newNormal.dot(localContactNormalOnB) ;
+                //if (d< 0)
+                //{
+                //    return;
+                //}
+
 //                        //modify the normal to be the triangle normal (or backfacing normal)
 //                        cp.m_normalWorldOnB = MathUtil.transformNormal((tri_normal *frontFacing),colObj0.getWorldTransform());
 //                    }

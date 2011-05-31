@@ -656,7 +656,12 @@ namespace BulletXNA.BulletCollision.GImpact
                         i0 = ushortArray[index];
                         i1 = ushortArray[index + 1];
                         i2 = ushortArray[index + 2];
-
+                    }
+                    else
+                    {
+                        i0 = 0;
+                        i1 = 1;
+                        i2 = 2;
                     }
                 }
                 else
@@ -669,36 +674,37 @@ namespace BulletXNA.BulletCollision.GImpact
                         i1 = intArray[index + 1];
                         i2 = intArray[index + 2];
                     }
+                    else
+                    {
+                        i0 = 0;
+                        i1 = 1;
+                        i2 = 2;
+                    }
                 }
-                //Debug.Assert(false);
-                i0 = 0;
-                i1 = 0;
-                i2 = 0;
 
             }
 
             public void GetVertex(int vertex_index, out Vector3 vertex)
             {
-                //if(type == PHY_ScalarType.PHY_DOUBLE)
-                //{
-                //    double * dvertices = (double *)(vertexbase + vertex_index*stride);
-                //    vertex.X = dvertices[0]*m_scale[0];
-                //    vertex.Y = dvertices[1]*m_scale[1];
-                //    vertex.Z = dvertices[2]*m_scale[2];
-                //}
-                //else
+                ObjectArray<Vector3> svertices = vertexbase as ObjectArray<Vector3>;
+                vertex = Vector3.Zero;
+                if (svertices != null)
                 {
-                    ObjectArray<float> svertices = indexbase as ObjectArray<float>;
+                    int index = vertex_index * stride;
+                    vertex = svertices[index] * m_scale.X;
+                }
+                else
+                {
+                    ObjectArray<float> fvertices = vertexbase as ObjectArray<float>;
                     if (svertices != null)
                     {
                         int index = vertex_index * stride;
-                        vertex.X = svertices[0] * m_scale.X;
-                        vertex.Y = svertices[1] * m_scale.Y;
-                        vertex.Z = svertices[2] * m_scale.Z;
+                        vertex.X = fvertices[index] * m_scale.X;
+                        vertex.Y = fvertices[index + 1] * m_scale.Y;
+                        vertex.Z = fvertices[index + 2] * m_scale.Z;
                     }
+
                 }
-                //Debug.Assert(false);
-                vertex = Vector3.Zero;
             }
 
             public virtual void GetPrimitiveBox(int prim_index, out AABB primbox)

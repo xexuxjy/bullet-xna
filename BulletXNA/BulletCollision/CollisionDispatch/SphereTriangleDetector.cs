@@ -42,17 +42,14 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public bool Collide(ref Vector3 sphereCenter, out Vector3 point, out Vector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
         {
-            IList<Vector3> vertices = m_triangle.GetVertexPtr(0);
-            Vector3 c = sphereCenter;
-            float r = m_sphere.GetRadius();
-            point = Vector3.Zero;
-            resultNormal = Vector3.Up;
+            Vector3[] vertices = m_triangle.GetVertexPtr(0);
 
-            Vector3 delta = Vector3.Zero;
+            float radius = m_sphere.GetRadius();
+            float radiusWithThreshold = radius + contactBreakingThreshold;
 
             Vector3 normal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
             normal.Normalize();
-            Vector3 p1ToCentre = c - vertices[0];
+            Vector3 p1ToCentre = sphereCenter - vertices[0];
             float distanceFromPlane = Vector3.Dot(p1ToCentre, normal);
 
             if (distanceFromPlane < 0f)
@@ -62,29 +59,24 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 normal *= -1f;
             }
 
-            float contactMargin = contactBreakingThreshold;
-            bool isInsideContactPlane = distanceFromPlane < r + contactMargin;
-            bool isInsideShellPlane = distanceFromPlane < r;
+            bool isInsideContactPlane = distanceFromPlane < radiusWithThreshold;
 
-            float deltaDotNormal = Vector3.Dot(delta, normal);
-            if (!isInsideShellPlane && deltaDotNormal >= 0f)
-                return false;
 
             // Check for contact / intersection
             bool hasContact = false;
             Vector3 contactPoint = Vector3.Zero;
             if (isInsideContactPlane)
             {
-                if (facecontains(ref c, vertices, ref normal))
+                if (FaceContains(ref sphereCenter, vertices, ref normal))
                 {
                     // Inside the contact wedge - touches a point on the shell plane
                     hasContact = true;
-                    contactPoint = c - normal * distanceFromPlane;
+                    contactPoint = sphereCenter - normal * distanceFromPlane;
                 }
                 else
                 {
                     // Could be inside one of the contact capsules
-                    float contactCapsuleRadiusSqr = (r + contactMargin) * (r + contactMargin);
+                    float contactCapsuleRadiusSqr = (radiusWithThreshold) * (radiusWithThreshold);
                     Vector3 nearestOnEdge;
                     for (int i = 0; i < m_triangle.GetNumEdges(); i++)
                     {
@@ -94,7 +86,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                         m_triangle.GetEdge(i, out pa, out pb);
 
-                        float distanceSqr = SegmentSqrDistance(ref pa, ref pb, ref c, out nearestOnEdge);
+                        float distanceSqr = SegmentSqrDistance(ref pa, ref pb, ref sphereCenter, out nearestOnEdge);
                         if (distanceSqr < contactCapsuleRadiusSqr)
                         {
                             // Yep, we're inside a capsule
@@ -107,30 +99,34 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (hasContact)
             {
-                Vector3 contactToCentre = c - contactPoint;
+                Vector3 contactToCentre = sphereCenter - contactPoint;
                 float distanceSqr = contactToCentre.LengthSquared();
-                if (distanceSqr < (r - MAX_OVERLAP) * (r - MAX_OVERLAP))
+                if (distanceSqr < (radiusWithThreshold) * (radiusWithThreshold))
                 {
-                    float distance = (float)Math.Sqrt(distanceSqr);
-                    resultNormal = contactToCentre;
-                    resultNormal.Normalize();
-                    point = contactPoint;
-                    depth = -(r - distance);
+                    if (distanceSqr > MathUtil.SIMD_EPSILON)
+                    {
+                        float distance = (float)Math.Sqrt(distanceSqr);
+                        resultNormal = contactToCentre;
+                        resultNormal.Normalize();
+                        point = contactPoint;
+                        depth = -(radius - distance);
+                    }
+                    else
+                    {
+                        float distance = 0.0f;
+                        resultNormal = normal;
+                        point = contactPoint;
+                        depth = -radius;
+                    }
                     return true;
                 }
-
-                if (Vector3.Dot(delta, contactToCentre) >= 0f)
-                    return false;
-
-                // Moving towards the contact point -> collision
-                point = contactPoint;
-                timeOfImpact = 0f;
-                return true;
             }
+            resultNormal = Vector3.Up;
+            point = Vector3.Zero;
             return false;
         }
 
-        private bool PointInTriangle(IList<Vector3> vertices, ref Vector3 normal, ref Vector3 p)
+        private bool PointInTriangle(Vector3[] vertices, ref Vector3 normal, ref Vector3 p)
         {
             Vector3 p1 = vertices[0];
             Vector3 p2 = vertices[1];
@@ -157,7 +153,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 return true;
             return false;
         }
-        private bool facecontains(ref Vector3 p, IList<Vector3> vertices, ref Vector3 normal)
+
+        private bool FaceContains(ref Vector3 p, Vector3[] vertices, ref Vector3 normal)
         {
             return PointInTriangle(vertices, ref normal, ref p);
 

@@ -78,7 +78,12 @@ namespace BulletXNADemos.Demos
 			m_cubeModel = m_game.Content.Load<Model>("unitcube");
 			m_sphereModel = m_game.Content.Load<Model>("unitsphere");
 			m_cylinderModel = m_game.Content.Load<Model>("unitcylinder");
-			m_coneModel = m_game.Content.Load<Model>("unitcone");
+			//m_coneModel = m_game.Content.Load<Model>("unitcone");
+
+			m_coneModel = m_game.Content.Load<Model>("unitcube");
+
+			m_modelEffect.TextureEnabled = true;
+			m_modelEffect.EnableDefaultLighting();
 
 			RemapModel(m_cubeModel, m_modelEffect);
             RemapModel(m_sphereModel, m_modelEffect);
@@ -227,9 +232,10 @@ namespace BulletXNADemos.Demos
 
         }
 
-        public void DrawSolidCube(ref Vector3 halfExtents, ref Matrix matrix, ref Matrix view, ref Matrix projection)
+        public void DrawSolidCube(ref Vector3 halfExtents, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
         {
 			ModelScalingData modelScalingData = new ModelScalingData(m_cubeModel,halfExtents,matrix);
+			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }
 
@@ -277,30 +283,32 @@ namespace BulletXNADemos.Demos
         //}
 
 
-        public void DrawSolidSphere(float radius, int slices, int stacks, ref Matrix matrix, ref Matrix view, ref Matrix projection)
+        public void DrawSolidSphere(float radius, int slices, int stacks, ref Matrix matrix, ref Matrix view, ref Matrix projection,ref Vector3 color)
         {
 
-			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new Vector3(radius,radius,radius),matrix);
+			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new Vector3(radius),matrix);
+			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }
 
 
-        public void DrawSolidCone(float height, float radius, ref Matrix matrix, ref Matrix view, ref Matrix projection)
+		public void DrawSolidCone(float height, float radius, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
         {
 			Vector3 scale = new Vector3(radius, height, radius);
 			ModelScalingData modelScalingData = new ModelScalingData(m_coneModel, scale, matrix);
+			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }
 
 
 
-        public void DrawCylinder(float radius, float halfHeight, int upAxis, ref Matrix matrix, ref Matrix view, ref Matrix projection)
+		public void DrawCylinder(float radius, float halfHeight, int upAxis, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
         {
-            DrawCylinder(radius, radius, halfHeight, upAxis, ref matrix, ref view, ref projection);
+            DrawCylinder(radius, radius, halfHeight, upAxis, ref matrix, ref view, ref projection,ref color);
         }
 
 
-        public void DrawCylinder(float topRadius,float bottomRadius,float halfHeight, int upAxis,ref Matrix matrix, ref Matrix view, ref Matrix projection)
+		public void DrawCylinder(float topRadius, float bottomRadius, float halfHeight, int upAxis, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
         {
 			Vector3 scale = new Vector3(topRadius, halfHeight, bottomRadius);
 			Matrix rotate = Matrix.Identity;
@@ -324,6 +332,7 @@ namespace BulletXNADemos.Demos
 			copy.Translation = matrix.Translation;
 
 			ModelScalingData modelScalingData = new ModelScalingData(m_cylinderModel, scale, copy);
+			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
 		}
         
@@ -386,7 +395,7 @@ namespace BulletXNADemos.Demos
                                 BoxShape boxShape = shape as BoxShape;
                                 Vector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
 
-                                DrawSolidCube(ref halfExtents, ref m, ref view, ref projection);
+                                DrawSolidCube(ref halfExtents, ref m, ref view, ref projection,ref color);
                                 //drawSolidSphere(halfExtents.X, 10, 10, ref m, ref view, ref projection);
                                 //drawCylinder(halfExtents.X, halfExtents.Y, 1, ref m, ref view, ref projection);
                                 //drawSolidCone(halfExtents.Y, halfExtents.X, ref m, ref view, ref projection);
@@ -401,7 +410,7 @@ namespace BulletXNADemos.Demos
                             {
                                 SphereShape sphereShape = shape as SphereShape;
                                 float radius = sphereShape.GetMargin();//radius doesn't include the margin, so draw with margin
-                                DrawSolidSphere(radius,10,10,ref m,ref view, ref projection);
+								DrawSolidSphere(radius, 10, 10, ref m, ref view, ref projection, ref color);
                                 //glutSolidSphere(radius,10,10);
                                 useWireframeFallback = false;
                                 break;
@@ -426,16 +435,16 @@ namespace BulletXNADemos.Demos
 
 				                    Matrix childTransform = Matrix.Identity;
 				                    childTransform.Translation = Vector3.Transform(capStart,m);
-				                    DrawSolidSphere(radius,5,5, ref childTransform, ref view,ref projection);
+									DrawSolidSphere(radius, 5, 5, ref childTransform, ref view, ref projection, ref color);
 			                    }
 
 			                    {
                                     Matrix childTransform = Matrix.Identity;
                                     childTransform.Translation = Vector3.Transform(capEnd, m);
-                                    DrawSolidSphere(radius, 5, 5, ref childTransform, ref view, ref projection);
+									DrawSolidSphere(radius, 5, 5, ref childTransform, ref view, ref projection, ref color);
                                 }
 
-                                DrawCylinder(radius, halfHeight, upAxis, ref m, ref view, ref projection);
+                                DrawCylinder(radius, halfHeight, upAxis, ref m, ref view, ref projection,ref color);
                                 break;
 		                    }
                         case BroadphaseNativeTypes.CONE_SHAPE_PROXYTYPE:
@@ -466,7 +475,7 @@ namespace BulletXNADemos.Demos
                                 Matrix translationMatrix = Matrix.CreateTranslation(0f, 0f, -0.5f * height);
 
                                 Matrix resultant = translationMatrix * rotateMatrix * m;
-                                DrawSolidCone(radius, height,ref resultant,ref view, ref projection);
+								DrawSolidCone(radius, height, ref resultant, ref view, ref projection, ref color);
                                 useWireframeFallback = false;
                                 break;
 
@@ -505,7 +514,7 @@ namespace BulletXNADemos.Demos
 
                                 float radius = cylinder.GetRadius();
                                 float halfHeight = MathUtil.VectorComponent(cylinder.GetHalfExtentsWithMargin(), upAxis);
-                                DrawCylinder(radius, halfHeight, upAxis,ref m,ref view,ref projection);
+								DrawCylinder(radius, halfHeight, upAxis, ref m, ref view, ref projection, ref color);
                                 break;
                             }
 
@@ -686,6 +695,12 @@ namespace BulletXNADemos.Demos
             {
                 m_spriteBatch.DrawString(m_spriteFont, m_textPositionColours[i].m_text, m_textPositionColours[i].m_position, m_textPositionColours[i].m_color);
             }
+
+			// set mouse cursor to true so we can see where we're aiming/picking.
+			m_game.IsMouseVisible = true;
+			//if(m_game.Mou
+
+
             m_spriteBatch.End();
             m_textPositionColours.Clear();
 			// restore from sprite batch changes.
@@ -718,7 +733,7 @@ namespace BulletXNADemos.Demos
                     modelScalingData.model.CopyAbsoluteBoneTransformsTo(transforms);
                     foreach (BasicEffect effect in mesh.Effects)
                     {
-                        effect.EnableDefaultLighting();
+						effect.Texture = GetTexture(ref modelScalingData.color);
                         effect.View = view;
                         effect.Projection = projection;
                         effect.World = transforms[mesh.ParentBone.Index] * modelScalingData.transform;
@@ -1086,6 +1101,25 @@ namespace BulletXNADemos.Demos
         private Model m_lightModel;
         private Texture2D m_lightTexture;
 
+		private Texture2D GetTexture(ref Vector3 color)
+		{
+			if(!m_colorMap.ContainsKey(color))
+			{
+				Texture2D newTexture = new Texture2D(m_game.GraphicsDevice,1,1);
+				Color[] colorData = new Color[1];
+				newTexture.GetData<Color>(colorData);
+				colorData[0] = new Color(color);
+				newTexture.SetData(colorData);
+				m_colorMap[color] = newTexture;
+			}
+			return m_colorMap[color];
+		}
+
+		private Dictionary<Vector3, Texture2D> m_colorMap = new Dictionary<Vector3, Texture2D>();
+
+
+
+
 		private Model m_cubeModel;
 		private Model m_sphereModel;
 		private Model m_cylinderModel;
@@ -1114,10 +1148,12 @@ namespace BulletXNADemos.Demos
 			copy.Translation = _transform.Translation;
 			model = _model;
 			transform = copy;
+			color = Vector3.One;
 		}
 
 		public Model model;
 		public Matrix transform;
+		public Vector3 color;
 	}
 
 
@@ -1217,5 +1253,8 @@ namespace BulletXNADemos.Demos
         }
 
         private XNA_ShapeDrawer m_shapeDrawer;
+
+
+
     }
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision.CollisionShapes
 {
@@ -77,25 +78,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_unscaledPoints.Count;
 	    }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec0)
+        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
         {
 	        Vector3 supVec = Vector3.Zero;
 	        float newDot,maxDot = float.MinValue;
 
-	        Vector3 vec = vec0;
-	        float lenSqr = vec.LengthSquared();
-	        if (lenSqr < 0.0001f)
-	        {
-		        vec = Vector3.Right;
-	        } else
-	        {
-                float rlen = (1.0f) / (float)Math.Sqrt(lenSqr);
-                vec *= rlen;
-
-                vec.Normalize();
-            }
-
-			if (BulletGlobals.g_streamWriter != null && debugConvexHull)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexHull)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("localGetSupportingVertexWithoutMargin");
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "vec", vec);
@@ -137,7 +125,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return supVertex;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        float newDot;
 	        //use 'w' component of supportVerticesOut?
@@ -221,7 +209,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
         private IList<Vector3> m_unscaledPoints;
-		public static bool debugConvexHull = true;
     }
 
 }

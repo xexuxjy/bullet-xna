@@ -130,6 +130,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
                     info.m_solverConstraints[j].m_upperLimit = impulseClamp;
                 }
             }
+			info.m_damping = m_setting.m_damping;
         }
 
 

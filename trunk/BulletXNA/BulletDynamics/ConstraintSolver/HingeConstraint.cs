@@ -264,6 +264,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		public void setFrames(ref Matrix frameA, ref Matrix frameB)
 		{
+            m_rbAFrame = frameA;
+            m_rbBFrame = frameB;
 		}
 
 

@@ -93,7 +93,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 	    public void SetUpperLimit(float ang1max, float ang2max) { SetAngularUpperLimit(new Vector3(0.0f, ang1max, ang2max)); }
 	    public void SetLowerLimit(float ang1min, float ang2min) { SetAngularLowerLimit(new Vector3(0.0f, ang1min, ang2min)); }
 
-		public void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public override void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
 		{
 			Vector3 zAxis = Vector3.Normalize(axis1);
 			Vector3 yAxis = Vector3.Normalize(axis2);

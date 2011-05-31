@@ -50,6 +50,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_overlappingPairs.SetOverlapFilterCallback(m_filterCallback);
             //	mem = btAlignedAlloc(sizeof(btSimpleBroadphase),16);
             //	m_simpleBroadphase = new (mem) btSimpleBroadphase(maxProxies,m_overlappingPairs);
+            m_simpleBroadphase = new SimpleBroadphase(maxProxies, m_overlappingPairs);
         }
 
 
@@ -389,7 +390,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        private IList<IBroadphaseInterface> m_sapBroadphases;
+        private IList<IBroadphaseInterface> m_sapBroadphases = new List<IBroadphaseInterface>();
         private SimpleBroadphase m_simpleBroadphase;
 
         private IOverlappingPairCache m_overlappingPairs;
@@ -439,8 +440,6 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
     public class MultiSapOverlapFilterCallback : IOverlapFilterCallback
     {
-        ~MultiSapOverlapFilterCallback()
-        { }
         // return true when pairs need collision
         public virtual bool NeedBroadphaseCollision(BroadphaseProxy childProxy0, BroadphaseProxy childProxy1)
         {

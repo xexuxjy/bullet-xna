@@ -459,8 +459,6 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
                 float lambda_max = Vector3.Dot(rayDir, (rayTo - rayFrom));
 
-                Vector3 resultNormal;
-
                 ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
 
                 int depth = 1;

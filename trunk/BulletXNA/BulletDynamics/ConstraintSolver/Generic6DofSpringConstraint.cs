@@ -165,7 +165,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             base.GetInfo2(info);
         }
 
-		public void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public override void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
 		{
 			Vector3 zAxis = Vector3.Normalize(axis1);
 			Vector3 yAxis = Vector3.Normalize(axis2);

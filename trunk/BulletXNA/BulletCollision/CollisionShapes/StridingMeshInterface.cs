@@ -52,8 +52,6 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
             Vector3[] triangle = new Vector3[3];
 
-	        float graphicsBase = 0f;
-
 	        Vector3 meshScaling = GetScaling();
 
 	        ///if the number of parts is big, the performance might drop due to the innerloop switch on indextype

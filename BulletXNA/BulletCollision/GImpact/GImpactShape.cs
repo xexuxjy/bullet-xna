@@ -871,13 +871,13 @@ namespace BulletXNA.BulletCollision.GImpact
             m_primitive_manager.GetVertex(vertex_index, out vertex);
         }
 
-        public void SetMargin(float margin)
+        public override void SetMargin(float margin)
         {
             m_primitive_manager.m_margin = margin;
             PostUpdate();
         }
 
-        public float GetMargin()
+        public override float GetMargin()
         {
             return m_primitive_manager.m_margin;
         }

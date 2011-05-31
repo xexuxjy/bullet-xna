@@ -66,7 +66,10 @@ namespace BulletXNA.BulletDynamics.Dynamics
         public abstract int StepSimulation(float timeStep, int maxSubSteps);
         public abstract int StepSimulation(float timeStep, int maxSubSteps, float fixedTimeStep);
 
-        public abstract void DebugDrawWorld();
+        public override void DebugDrawWorld()
+        {
+            base.DebugDrawWorld();
+        }
 
         public virtual void AddConstraint(TypedConstraint constraint)
         {

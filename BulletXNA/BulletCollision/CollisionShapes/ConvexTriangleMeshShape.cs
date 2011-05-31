@@ -36,6 +36,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public ConvexTriangleMeshShape(StridingMeshInterface meshInterface, bool calcAabb)
         {
 	        m_shapeType = BroadphaseNativeTypes.CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE;
+            m_stridingMesh = meshInterface;
 	        if ( calcAabb )
             {
 		        RecalcLocalAabb();

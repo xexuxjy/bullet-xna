@@ -1130,8 +1130,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return m_resultCallback.AddSingleResult(rayResult, normalInWorldSpace);
         }
 
-        public virtual void Cleanup()
+        public override void Cleanup()
         {
+            base.Cleanup();
         }
     }
 
@@ -1691,7 +1692,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_collisionObject.InternalSetTemporaryCollisionShape(saveCollisionShape);
         }
 
-        public void Process(DbvtNode leaf)
+        public override void Process(DbvtNode leaf)
         {
             Process(leaf.dataAsInt);
         }

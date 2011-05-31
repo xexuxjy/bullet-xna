@@ -472,7 +472,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 		//first 3 are linear, next 3 are angular
-		void SetLimit(int axis, float lo, float hi)
+		public void SetLimit(int axis, float lo, float hi)
 		{
 			if (axis < 3)
 			{
@@ -734,7 +734,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 
-		public void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public virtual void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
 		{
 			Vector3 zAxis = Vector3.Normalize(axis1);
 			Vector3 yAxis = Vector3.Normalize(axis2);

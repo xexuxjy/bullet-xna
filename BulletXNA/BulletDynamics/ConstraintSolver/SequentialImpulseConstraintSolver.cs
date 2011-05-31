@@ -975,7 +975,6 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				{
 					PersistentManifold manifold2 = null;
-					CollisionObject colObj0 = null, colObj1 = null;
 
 					for (int i = 0; i < numManifolds; i++)
 					{

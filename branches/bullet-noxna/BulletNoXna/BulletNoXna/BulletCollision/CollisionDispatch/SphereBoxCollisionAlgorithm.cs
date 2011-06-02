@@ -32,9 +32,10 @@ namespace BulletXNA.BulletCollision
         public SphereBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
             : base(ci, col0, col1)
         {
+            m_isSwapped = isSwapped;
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
-
+            
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(sphereObj, boxObj))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(sphereObj, boxObj);

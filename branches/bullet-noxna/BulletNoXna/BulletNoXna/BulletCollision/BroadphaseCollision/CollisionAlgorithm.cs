@@ -39,10 +39,10 @@ namespace BulletXNA.BulletCollision
             //(void)temp;
         }
 
-        public int GetDispatcherId()
-        {
-            return 0;
-        }
+        //public int GetDispatcherId()
+        //{
+        //    return 0;
+        //}
 
         public void SetManifold(PersistentManifold manifold)
         {

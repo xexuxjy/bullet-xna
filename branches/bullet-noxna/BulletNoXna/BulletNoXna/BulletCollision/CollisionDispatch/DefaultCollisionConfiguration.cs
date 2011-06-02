@@ -187,9 +187,6 @@ namespace BulletXNA.BulletCollision
 
     public virtual CollisionAlgorithmCreateFunc GetCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
     {
-
-        CollisionAlgorithmConstructionInfo caci;
-
 	    if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1==BroadphaseNativeType.SphereShape))
 	    {
 		    return	m_sphereSphereCF;

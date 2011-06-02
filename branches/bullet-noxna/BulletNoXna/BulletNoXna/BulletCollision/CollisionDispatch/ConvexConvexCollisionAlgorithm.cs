@@ -160,6 +160,89 @@ namespace BulletXNA.BulletCollision
                 input.m_transformA = body0.GetWorldTransform();
                 input.m_transformB = body1.GetWorldTransform();
 
+
+if (min0.IsPolyhedral() && min1.IsPolyhedral())
+	{
+
+
+		DummyResult dummy = new DummyResult();
+
+
+		PolyhedralConvexShape polyhedronA = min0 as PolyhedralConvexShape;
+		PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
+		if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
+		{
+			gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+			
+
+			float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+
+			float minDist = 0.0f;
+			Vector3 sepNormalWorldSpace;
+			bool foundSepAxis  = true;
+
+			if (dispatchInfo.m_enableSatConvex)
+			{
+				foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+					body0.GetWorldTransform(), 
+					body1.GetWorldTransform(),
+					out sepNormalWorldSpace);
+			} else
+			{
+				sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
+				minDist = gjkPairDetector.GetCachedSeparatingDistance();
+			}
+			if (foundSepAxis)
+			{
+//				printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+
+				PolyhedralContactClipping.ClipHullAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+					body0.GetWorldTransform(), 
+					body1.GetWorldTransform(), minDist-threshold, threshold, resultOut);
+ 				
+			}
+			if (m_ownManifold)
+			{
+				resultOut.RefreshContactPoints();
+			}
+			return;
+
+		} else
+		{
+			//we can also deal with convex versus triangle (without connectivity data)
+			if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.ShapeType==BroadphaseNativeType.TriangleShape)
+			{
+				gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+		
+				Vector3 sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
+
+				ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
+				TriangleShape tri = polyhedronB as TriangleShape;
+				vertices.Add(Vector3.Transform(tri.m_vertices1[0],body1.GetWorldTransform()));
+				vertices.Add(Vector3.Transform(tri.m_vertices1[1],body1.GetWorldTransform()));
+				vertices.Add(Vector3.Transform(tri.m_vertices1[2],body1.GetWorldTransform()));
+
+				float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+				float minDist = gjkPairDetector.GetCachedSeparatingDistance();
+				PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), 
+					body0.GetWorldTransform(), vertices, minDist-threshold, threshold, resultOut);
+				
+				
+				if (m_ownManifold)
+				{
+					resultOut.RefreshContactPoints();
+				}
+				
+				return;
+			}
+			
+		}
+
+
+	}
+
+
                 gjkPairDetector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
 #if USE_SEPDISTANCE_UTIL2
 	float sepDist = 0.f;
@@ -615,4 +698,21 @@ namespace BulletXNA.BulletCollision
         }
 
     }
+
+    	public struct DummyResult : IDiscreteCollisionDetectorInterfaceResult
+		{
+			public void SetShapeIdentifiersA(int partId0,int index0){}
+			public void SetShapeIdentifiersB(int partId1,int index1){}
+
+			public void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+			{
+			}
+
+			public void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth) 
+			{
+			}
+		}
+		
+
+
 }

@@ -32,10 +32,11 @@ namespace BulletXNA.BulletCollision
     {
 	    public virtual Vector3 GetHalfExtentsWithMargin()
 	    {
-		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-		    Vector3 margin = new Vector3(Margin);
-		    halfExtents += margin;
-		    return halfExtents;
+            return GetHalfExtentsWithoutMargin() + new Vector3(Margin);
+		    //Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+		    //Vector3 margin = new Vector3(GetMargin());
+		    //halfExtents += margin;
+		    //return halfExtents;
 	    }
 	
 	    public virtual Vector3 GetHalfExtentsWithoutMargin()
@@ -65,7 +66,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors,IList<Vector4> supportVerticesOut,int numVectors)
+	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
     	

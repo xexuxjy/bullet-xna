@@ -1185,6 +1185,12 @@ namespace BulletXNA
             }
         }
 
+		public static float DegToRadians(float degrees)
+		{
+			return (degrees / 360.0f) * SIMD_2_PI;
+		}
+
+
         public static Vector3 Interpolate3(Vector3 v0, Vector3 v1, float rt)
         {
             return Interpolate3(ref v0, ref v1, rt);
@@ -1256,19 +1262,27 @@ namespace BulletXNA
 			return Vector3.TransformNormal(v, mt);
 		}
 
+        public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v, ref Matrix m)
+        {
+            Matrix mt = TransposeBasis(ref m);
+            return IndexedVector3.TransformNormal(ref v, ref mt);
+        }
+
+
+
 		public static void PrintQuaternion(TextWriter writer, Quaternion q)
 		{
-            writer.Write(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000} W:{3:0.000000000000}}}", q.X, q.Y, q.Z, q.W));
+            writer.Write(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000} W:{3:0.00000000}}}", q.X, q.Y, q.Z, q.W));
 		}
 
 		public static void PrintVector3(TextWriter writer, Vector3 v)
 		{
-            writer.WriteLine(String.Format("{{X:{0:0.000000000000} Y:{1:0.000000000000} Z:{2:0.000000000000}}}", v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000}}}", v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector3(TextWriter writer, String name ,Vector3 v)
 		{
-            writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000}}}", name, v.X, v.Y, v.Z));
+            writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
 		}
 
 		public static void PrintVector4(TextWriter writer, Vector4 v)
@@ -1278,7 +1292,7 @@ namespace BulletXNA
 
 		public static void PrintVector4(TextWriter writer, String name, Vector4 v)
 		{
-			writer.WriteLine(String.Format("[{0}] {{X:{1:0.000000000000} Y:{2:0.000000000000} Z:{3:0.000000000000} W:{4:0.000000000000}}}", name, v.X, v.Y, v.Z,v.W));
+			writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000} W:{4:0.00000000}}}", name, v.X, v.Y, v.Z,v.W));
 		}
 
 
@@ -1295,10 +1309,10 @@ namespace BulletXNA
 				{
 					writer.WriteLine(name);
 				}
-				PrintVector3(writer, "Right       ", m.Right);
-				PrintVector3(writer, "Up          ", m.Up);
-				PrintVector3(writer, "Backward    ", m.Backward);
-                PrintVector3(writer, "Translation ", m.Translation);
+				PrintVector3(writer, "Right       ",m.Right);
+				PrintVector3(writer, "Up          ",m.Up);
+				PrintVector3(writer, "Backward    ",m.Backward);
+				PrintVector3(writer, "Translation ",m.Translation);
 			}
 		}
 
@@ -1316,6 +1330,42 @@ namespace BulletXNA
 				PrintVector3(streamWriter, "normalWorldB", mp.m_normalWorldOnB);
 			}
 		}
+
+        public static bool IsAlmostZero(Vector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+
+        }
+
+        public static bool IsAlmostZero(ref Vector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+        }
+
+        public static bool IsAlmostZero(IndexedVector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+
+        }
+
+        public static bool IsAlmostZero(ref IndexedVector3 v)
+        {
+            if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
+            return true;
+        }
+
+
+		public static Vector3 Vector3Lerp(ref Vector3 a, ref Vector3 b, float t)
+		{
+			return new Vector3(
+				a.X + (b.X - a.X) * t,
+				a.Y + (b.Y - a.Y) * t,
+				a.Z + (b.Z - a.Z) * t);
+		}
+
 
         //public const float SIMD_EPSILON = 0.0000001f;
         public const float SIMD_EPSILON = 1.192092896e-07f;

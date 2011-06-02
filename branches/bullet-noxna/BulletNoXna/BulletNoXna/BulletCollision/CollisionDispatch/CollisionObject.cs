@@ -43,12 +43,13 @@ namespace BulletXNA.BulletCollision
     public enum CollisionObjectTypes
     {
         CO_COLLISION_OBJECT = 1,
-        CO_RIGID_BODY,
+        CO_RIGID_BODY=2,
         ///CO_GHOST_OBJECT keeps track of all objects overlapping its AABB and that pass its collision filter
         ///It is useful for collision sensors, explosion objects, character controller etc.
-        CO_GHOST_OBJECT,
-        CO_SOFT_BODY,
-        CO_HF_FLUID
+        CO_GHOST_OBJECT=4,
+        CO_SOFT_BODY=8,
+        CO_HF_FLUID=16,
+        CO_USER_TYPE=32
     }
 
 
@@ -215,6 +216,18 @@ namespace BulletXNA.BulletCollision
         }
 
 
+	    ///Avoid using this internal API call, the extension pointer is used by some Bullet extensions. 
+	    ///If you need to store your own user pointer, use 'setUserPointer/getUserPointer' instead.
+	    protected Object InternalGetExtensionPointer()
+	    {
+		    return m_extensionPointer;
+	    }
+	    ///Avoid using this internal API call, the extension pointer is used by some Bullet extensions
+	    ///If you need to store your own user pointer, use 'setUserPointer/getUserPointer' instead.
+	    protected void InternalSetExtensionPointer(Object pointer)
+	    {
+		    m_extensionPointer = pointer;
+	    }
 
         public ActivationState ActivationState
         {
@@ -243,8 +256,6 @@ namespace BulletXNA.BulletCollision
                 m_deactivationTime = value;
             }
         }
-
-
 
         public void ForceActivationState(ActivationState newState)
         {
@@ -541,6 +552,8 @@ namespace BulletXNA.BulletCollision
         protected float m_friction;
         protected float m_restitution;
         protected Object m_userObjectPointer;
+        protected Object m_extensionPointer;
+
         protected CollisionObjectTypes m_internalType;
         protected float m_hitFraction;
         protected float m_ccdSweptSphereRadius;

@@ -32,7 +32,9 @@ namespace BulletXNA.BulletDynamics
     {
         BT_SIMPLE_DYNAMICS_WORLD = 1,
         BT_DISCRETE_DYNAMICS_WORLD = 2,
-        BT_CONTINUOUS_DYNAMICS_WORLD = 3
+        BT_CONTINUOUS_DYNAMICS_WORLD = 3,
+		BT_SOFT_RIGID_DYNAMICS_WORLD = 4
+
     }
 
     /// Type for the callback for each tick
@@ -62,7 +64,10 @@ namespace BulletXNA.BulletDynamics
         public abstract int StepSimulation(float timeStep, int maxSubSteps);
         public abstract int StepSimulation(float timeStep, int maxSubSteps, float fixedTimeStep);
 
-        public abstract void DebugDrawWorld();
+        public override void DebugDrawWorld()
+        {
+            base.DebugDrawWorld();
+        }
 
         public virtual void AddConstraint(TypedConstraint constraint)
         {
@@ -94,6 +99,9 @@ namespace BulletXNA.BulletDynamics
 
         //public abstract  void addRigidBody(RigidBody body,short mask1,short mask2);
         public abstract  void AddRigidBody(RigidBody body);
+
+        public abstract void AddRigidBody(RigidBody body, CollisionFilterGroups group, CollisionFilterGroups mask);
+
 		public abstract  void	RemoveRigidBody(RigidBody body);
 
 		public abstract  void	SetConstraintSolver(IConstraintSolver solver);

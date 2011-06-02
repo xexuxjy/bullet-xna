@@ -73,7 +73,7 @@ namespace BulletXNA.BulletCollision
 				MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z));
 		}
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
 		{
 			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 		

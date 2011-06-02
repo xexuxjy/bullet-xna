@@ -50,7 +50,7 @@ namespace BulletXNA.BulletCollision
         {
             return ConeLocalSupport(ref vec);
         }
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        for (int i=0;i<numVectors;i++)
 	        {
@@ -59,12 +59,19 @@ namespace BulletXNA.BulletCollision
 	        }
         }
 
-	    public float Radius  {
-            get
-            {
-                return m_radius;
-            }
+        public override void	SetLocalScaling(ref Vector3 scaling)
+        {
+	        int axis = m_coneIndices[1];
+	        int r1 = m_coneIndices[0];
+	        int r2 = m_coneIndices[2];
+	        m_height *= MathUtil.VectorComponent(ref scaling,axis) / MathUtil.VectorComponent(ref m_localScaling,axis);
+	        m_radius *= (MathUtil.VectorComponent(ref scaling,r1) / MathUtil.VectorComponent(ref m_localScaling,r1) + MathUtil.VectorComponent(ref scaling,r2) / MathUtil.VectorComponent(ref m_localScaling,r2)) / 2;
+	        m_sinAngle = (m_radius / (float)Math.Sqrt(m_radius * m_radius + m_height * m_height));
+	        base.SetLocalScaling(ref scaling);
         }
+
+
+	    public float GetRadius()  { return m_radius;}
 	    public float GetHeight()  { return m_height;}
 
 

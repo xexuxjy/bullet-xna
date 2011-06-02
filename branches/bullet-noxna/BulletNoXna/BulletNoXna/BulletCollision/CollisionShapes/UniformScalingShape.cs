@@ -47,7 +47,7 @@ namespace BulletXNA.BulletCollision
 	        return tmpVertex*m_uniformScalingFactor;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        m_childConvexShape.BatchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
 	        for (int i=0;i<numVectors;i++)
@@ -73,23 +73,69 @@ namespace BulletXNA.BulletCollision
 	        ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
         public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-	        m_childConvexShape.GetAabb(ref t,out aabbMin,out aabbMax);
-	        Vector3 aabbCenter = (aabbMax+aabbMin)*.5f;
-	        Vector3 scaledAabbHalfExtends = (aabbMax-aabbMin)*0.5f*m_uniformScalingFactor;
-
-	        aabbMin = aabbCenter - scaledAabbHalfExtends;
-	        aabbMax = aabbCenter + scaledAabbHalfExtends;
-
+            GetAabbSlow(ref t, out aabbMin, out aabbMax);
         }
 
         public override void GetAabbSlow(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
-	        m_childConvexShape.GetAabbSlow(ref t,out aabbMin,out aabbMax);
-	        Vector3 aabbCenter = (aabbMax+aabbMin)* 0.5f;
-	        Vector3 scaledAabbHalfExtends = (aabbMax-aabbMin)*0.5f*m_uniformScalingFactor;
+#if true
+	Vector3[] _directions = new Vector3[]
+	{
+		new Vector3( 1.0f,  0.0f,  0.0f),
+		new Vector3( 0.0f,  1.0f,  0.0f),
+		new Vector3( 0.0f,  0.0f,  1.0f),
+		new Vector3( -1.0f, 0.0f,  0.0f),
+		new Vector3( 0.0f, -1.0f,  0.0f),
+		new Vector3( 0.0f,  0.0f, -1.0f)
+	};
+	
+	Vector4[] _supporting = new Vector4[]
+	{
+		Vector4.Zero,
+		Vector4.Zero,
+		Vector4.Zero,
+		Vector4.Zero,
+		Vector4.Zero,
+		Vector4.Zero
+	};
+    
+    Vector3.TransformNormal(_directions,ref t,_directions);
+	ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
 
-	        aabbMin = aabbCenter - scaledAabbHalfExtends;
-	        aabbMax = aabbCenter + scaledAabbHalfExtends;
+	
+	BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
+	
+	Vector3 aabbMin1 = new Vector3(0,0,0),aabbMax1 = new Vector3(0,0,0);
+
+	for ( int i = 0; i < 3; ++i )
+	{
+		Vector3 temp = new Vector3(_supporting[i].X, _supporting[i].Y, _supporting[i].Z);
+		MathUtil.VectorComponent(ref aabbMax1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
+		temp = new Vector3(_supporting[i+3].X, _supporting[i+3].Y, _supporting[i+3].Z);
+		MathUtil.VectorComponent(ref aabbMin1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
+	}
+
+	Vector3 marginVec = new Vector3(Margin);
+	aabbMin = aabbMin1-marginVec;
+	aabbMax = aabbMax1+marginVec;
+	
+#else
+
+	btScalar margin = getMargin();
+	for (int i=0;i<3;i++)
+	{
+		Vector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+		vec[i] = btScalar(1.);
+		Vector3 sv = localGetSupportingVertex(vec*t.getBasis());
+		Vector3 tmp = t(sv);
+		aabbMax[i] = tmp[i]+margin;
+		vec[i] = btScalar(-1.);
+		sv = localGetSupportingVertex(vec*t.getBasis());
+		tmp = t(sv);
+		aabbMin[i] = tmp[i]-margin;
+	}
+
+#endif
         }
 
         public override void SetLocalScaling(ref Vector3 scaling) 

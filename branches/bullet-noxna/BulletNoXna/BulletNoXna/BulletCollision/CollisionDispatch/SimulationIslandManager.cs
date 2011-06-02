@@ -20,7 +20,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-
+#define STATIC_SIMULATION_ISLAND_OPTIMIZATION
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
@@ -35,8 +35,6 @@ namespace BulletXNA.BulletCollision
         private ObjectArray<CollisionObject> m_islandBodies;
 
         private bool m_splitIslands;
-
-        private static bool debugIslands = false;
 
         public SimulationIslandManager()
         {
@@ -59,6 +57,88 @@ namespace BulletXNA.BulletCollision
         {
             return m_unionFind;
         }
+
+        public void FindUnions(IDispatcher dispatcher, CollisionWorld collisionWorld)
+        {
+            ObjectArray<BroadphasePair> list = collisionWorld.GetPairCache().GetOverlappingPairArray();
+            int length = list.Count;
+            BroadphasePair[] rawList = list.GetRawArray();
+            for (int i = 0; i < length; ++i)
+            {
+                BroadphasePair collisionPair = rawList[i];
+                CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
+                CollisionObject colObj1 = collisionPair.m_pProxy1.m_clientObject as CollisionObject;
+
+                if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
+                    ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
+                {
+
+                    m_unionFind.Unite((colObj0).GetIslandTag(),
+                        (colObj1).GetIslandTag());
+                }
+            }
+        }
+
+#if STATIC_SIMULATION_ISLAND_OPTIMIZATION
+public void UpdateActivationState(CollisionWorld colWorld,IDispatcher dispatcher)
+{
+
+	// put the index into m_controllers into m_tag   
+	int index = 0;
+	{
+
+		int i;
+        
+        CollisionObject[] collisionObjects = colWorld.GetCollisionObjectArray().GetRawArray();
+        int length = colWorld.GetCollisionObjectArray().Count;
+		for (i=0;i<length; i++)
+		{
+			CollisionObject collisionObject= collisionObjects[i];
+			//Adding filtering here
+			if (!collisionObject.IsStaticOrKinematicObject)
+			{
+				collisionObject.SetIslandTag(index++);
+			}
+			collisionObject.SetCompanionId(-1);
+			collisionObject.SetHitFraction(1.0f);
+		}
+	}
+	// do the union find
+
+	InitUnionFind( index );
+
+	FindUnions(dispatcher,colWorld);
+}
+
+public void   StoreIslandActivationState(CollisionWorld colWorld)
+{
+	// put the islandId ('find' value) into m_tag   
+	{
+		int index = 0;
+		int i;
+        CollisionObject[] collisionObjects = colWorld.GetCollisionObjectArray().GetRawArray();
+        int length = colWorld.GetCollisionObjectArray().Count;
+		for (i=0;i<length; i++)
+		{
+			CollisionObject collisionObject= collisionObjects[i];
+			if (!collisionObject.IsStaticOrKinematicObject)
+			{
+				collisionObject.SetIslandTag( m_unionFind.Find(index) );
+				//Set the correct object offset in Collision Object Array
+				m_unionFind.GetElement(index).m_sz = i;
+				collisionObject.SetCompanionId(-1);
+				index++;
+			} else
+			{
+				collisionObject.SetIslandTag(-1);
+				collisionObject.SetCompanionId(-2);
+			}
+		}
+	}
+}
+
+
+#else //STATIC_SIMULATION_ISLAND_OPTIMIZATION
 
         public virtual void UpdateActivationState(CollisionWorld collisionWorld, IDispatcher dispatcher)
         {
@@ -108,27 +188,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public void FindUnions(IDispatcher dispatcher, CollisionWorld collisionWorld)
-        {
-            ObjectArray<BroadphasePair> list = collisionWorld.GetPairCache().GetOverlappingPairArray();
-            int length = list.Count;
-            BroadphasePair[] rawList = list.GetRawArray();
-            for (int i = 0; i < length; ++i)
-            {
-                BroadphasePair collisionPair = rawList[i];
-                CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
-                CollisionObject colObj1 = collisionPair.m_pProxy1.m_clientObject as CollisionObject;
-
-                if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
-                    ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
-                {
-
-                    m_unionFind.Unite((colObj0).GetIslandTag(),
-                        (colObj1).GetIslandTag());
-                }
-            }
-        }
-
+#endif
         static Comparison<PersistentManifold> sortPredicate = new Comparison<PersistentManifold>(PersistentManifoldSortPredicate);
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
@@ -170,7 +230,7 @@ namespace BulletXNA.BulletCollision
                 {
                     int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
-                    if (BulletGlobals.g_streamWriter != null && debugIslands)
+                    if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                     {
                         BulletGlobals.g_streamWriter.WriteLine(String.Format("buildAndProcessIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                     }
@@ -183,10 +243,9 @@ namespace BulletXNA.BulletCollision
                         int i = GetUnionFind().GetElement(endIslandIndex).m_sz;
                         CollisionObject colObj0 = collisionObjects[i];
                         m_islandBodies.Add(colObj0);
-                        if (!colObj0.IsActive())
+                        if (colObj0.IsActive())
                         {
-                            islandSleeping = true;
-                            //islandSleeping = false;
+                            islandSleeping = false;
                         }
                     }
 
@@ -256,7 +315,7 @@ namespace BulletXNA.BulletCollision
             {
                 int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
-                if (BulletGlobals.g_streamWriter != null && debugIslands)
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                 {
                     BulletGlobals.g_streamWriter.WriteLine(String.Format("buildIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                 }

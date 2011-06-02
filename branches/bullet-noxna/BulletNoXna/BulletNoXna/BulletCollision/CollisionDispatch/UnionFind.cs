@@ -22,6 +22,8 @@
  */
 
 #define USE_PATH_COMPRESSION
+#define STATIC_SIMULATION_ISLAND_OPTIMIZATION
+
 using System;
 using BulletXNA.LinearMath;
 
@@ -68,7 +70,9 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < numElements; i++)
             {
                 m_elements[i].m_id = Find(i);
+#if !STATIC_SIMULATION_ISLAND_OPTIMIZATION
                 m_elements[i].m_sz = i;
+#endif
             }
 
             m_elements.Sort();

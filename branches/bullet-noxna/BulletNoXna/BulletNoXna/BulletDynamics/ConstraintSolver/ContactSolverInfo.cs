@@ -28,7 +28,7 @@ namespace BulletXNA.BulletDynamics
     public class ContactSolverInfoData
     {
         public float m_tau;
-        public float m_damping;
+		public float m_damping; //global non-contact constraint damping, can be locally overridden by constraints during 'getInfo2'.
         public float m_friction;
         public float m_timeStep;
         public float m_restitution;

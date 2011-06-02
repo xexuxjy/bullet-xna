@@ -53,6 +53,69 @@ namespace BulletXNA.BulletCollision
     	
         public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
+
+
+//Until Bullet 2.77 a box approximation was used, so uncomment this if you need backwards compatibility
+//#define USE_BOX_INERTIA_APPROXIMATION 1
+#if  !USE_BOX_INERTIA_APPROXIMATION
+
+	/*
+	cylinder is defined as following:
+	*
+	* - principle axis aligned along y by default, radius in x, z-value not used
+	* - for btCylinderShapeX: principle axis aligned along x, radius in y direction, z-value not used
+	* - for btCylinderShapeZ: principle axis aligned along z, radius in x direction, y-value not used
+	*
+	*/
+
+	float radius2;	// square of cylinder radius
+	float height2;	// square of cylinder height
+	Vector3 halfExtents = GetHalfExtentsWithMargin();	// get cylinder dimension
+	float div12 = mass / 12.0f;
+	float div4 = mass / 4.0f;
+	float div2 = mass / 2.0f;
+	int idxRadius, idxHeight;
+
+	switch (m_upAxis)	// get indices of radius and height of cylinder
+	{
+		case 0:		// cylinder is aligned along x
+			idxRadius = 1;
+			idxHeight = 0;
+			break;
+		case 2:		// cylinder is aligned along z
+			idxRadius = 0;
+			idxHeight = 2;
+			break;
+		default:	// cylinder is aligned along y
+			idxRadius = 0;
+			idxHeight = 1;
+            break;
+	}
+
+	// calculate squares
+    float radiusExtent = MathUtil.VectorComponent(ref halfExtents,idxRadius);
+    float heightExtent = MathUtil.VectorComponent(ref halfExtents,idxHeight);
+
+	radius2 = radiusExtent * radiusExtent;
+	height2 = 4.0f * heightExtent * heightExtent;
+
+	// calculate tensor terms
+	float t1 = div12 * height2 + div4 * radius2;
+	float t2 = div2 * radius2;
+
+	switch (m_upAxis)	// set diagonal elements of inertia tensor
+	{
+		case 0:		// cylinder is aligned along x
+			inertia = new Vector3(t2,t1,t1);
+			break;
+		case 2:		// cylinder is aligned along z
+			inertia = new Vector3(t1,t1,t2);
+			break;
+		default:	// cylinder is aligned along y
+			inertia = new Vector3(t1,t2,t1);
+            break;
+	}
+#else
 	        //approximation of box shape, todo: implement cylinder shape inertia before people notice ;-)
 	        Vector3 halfExtents = GetHalfExtentsWithMargin();
 
@@ -63,6 +126,7 @@ namespace BulletXNA.BulletCollision
 	        inertia = new Vector3(mass/12.0f * (ly*ly + lz*lz),
 					        mass/12.0f * (lx*lx + lz*lz),
 					        mass/12.0f * (lx*lx + ly*ly));
+#endif //USE_BOX_INERTIA_APPROXIMATION
         }
 
 	    public override float Margin
@@ -100,7 +164,7 @@ namespace BulletXNA.BulletCollision
             return CylinderLocalSupportX(GetHalfExtentsWithoutMargin(), vec);
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
@@ -234,7 +298,7 @@ namespace BulletXNA.BulletCollision
             return CylinderLocalSupportX(GetHalfExtentsWithoutMargin(), vec);
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
@@ -275,7 +339,7 @@ namespace BulletXNA.BulletCollision
         {
             return CylinderLocalSupportZ(GetHalfExtentsWithoutMargin(), vec);
         }
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)

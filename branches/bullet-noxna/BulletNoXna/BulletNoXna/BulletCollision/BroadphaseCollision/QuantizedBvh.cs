@@ -179,8 +179,8 @@ namespace BulletXNA.BulletCollision
         {
             m_bulletVersion = BulletGlobals.BT_BULLET_VERSION;
             m_useQuantization = false;
-            m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS_CACHE_FRIENDLY;
-            //m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS;
+            //m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS_CACHE_FRIENDLY;
+            m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS;
             //m_traversalMode = TraversalMode.TRAVERSAL_RECURSIVE;
             m_subtreeHeaderCount = 0; //PCK: add this line
             m_bvhAabbMin = new Vector3(-MathUtil.SIMD_INFINITY);

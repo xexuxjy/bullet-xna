@@ -28,7 +28,7 @@ namespace BulletXNA.BulletCollision
 {
     public interface IContactAddedCallback
     {
-        bool Callback(ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1);
+        bool Callback(ref ManifoldPoint cp, CollisionObject colObj0, int partId0, int index0, CollisionObject colObj1, int partId1, int index1);
     }
 
     ///btManifoldResult is a helper class to manage  contact results.
@@ -129,7 +129,7 @@ namespace BulletXNA.BulletCollision
             newPt.SetPositionWorldOnA(ref pointA);
             newPt.SetPositionWorldOnB(ref pointInWorld);
 
-            int insertIndex = m_manifoldPtr.GetCacheEntry(newPt);
+            int insertIndex = m_manifoldPtr.GetCacheEntry(ref newPt);
 
             newPt.SetCombinedFriction(CalculateCombinedFriction(m_body0, m_body1));
             newPt.SetCombinedRestitution(CalculateCombinedRestitution(m_body0, m_body1));
@@ -155,11 +155,11 @@ namespace BulletXNA.BulletCollision
             if (insertIndex >= 0)
             {
                 //const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
-                m_manifoldPtr.ReplaceContactPoint(newPt, insertIndex);
+                m_manifoldPtr.ReplaceContactPoint(ref newPt, insertIndex);
             }
             else
             {
-                insertIndex = m_manifoldPtr.AddManifoldPoint(newPt);
+                insertIndex = m_manifoldPtr.AddManifoldPoint(ref newPt);
             }
 
             //User can override friction and/or restitution
@@ -172,7 +172,8 @@ namespace BulletXNA.BulletCollision
                 CollisionObject obj0 = isSwapped ? m_body1 : m_body0;
                 CollisionObject obj1 = isSwapped ? m_body0 : m_body1;
                 //gContactAddedCallback.callback(m_manifoldPtr.getContactPoint(insertIndex),obj0,m_partId0,m_index0,obj1,m_partId1,m_index1);
-                BulletGlobals.gContactAddedCallback.Callback(m_manifoldPtr.GetContactPoint(insertIndex), obj0, newPt.m_partId0, newPt.m_index0, obj1, newPt.m_partId1, newPt.m_index1);
+                ManifoldPoint point = m_manifoldPtr.GetContactPoint(insertIndex);
+                BulletGlobals.gContactAddedCallback.Callback(ref point, obj0, newPt.m_partId0, newPt.m_index0, obj1, newPt.m_partId1, newPt.m_index1);
             }
         }
 

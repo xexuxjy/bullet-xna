@@ -104,6 +104,7 @@
     <Compile Include="BulletCollision\CollisionShapes\TriangleMeshShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\TriangleShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\UniformScalingShape.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ConvexPolyhedron.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\ContinuousConvexCollision.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\ConvexCast.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\ConvexPenetrationDepthSolver.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="BulletCollision\NarrowPhaseCollision\MinkowskiPenetrationDepthSolver.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\PersistentManifold.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\PointCollector.cs" />
+    <Compile Include="BulletCollision\NarrowPhaseCollision\PolyhedralContactClipping.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\RaycastCallback.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\SimplexSolverInterface.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\SubSimplexConvexCast.cs" />
@@ -149,6 +151,7 @@
     <Compile Include="LinearMath\BoundingBox.cs" />
     <Compile Include="LinearMath\BoundingSphere.cs" />
     <Compile Include="LinearMath\BoundingFrustum.cs" />
+    <Compile Include="LinearMath\ConvexHullComputer.cs" />
     <Compile Include="LinearMath\Design\BoundingBoxConverter.cs" />
     <Compile Include="LinearMath\Design\BoundingSphereConverter.cs" />
     <Compile Include="LinearMath\Design\FieldDescriptor.cs" />

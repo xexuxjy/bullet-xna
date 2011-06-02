@@ -34,8 +34,6 @@ namespace BulletXNA.BulletCollision
 
     public class VoronoiSimplexSolver : ISimplexSolverInterface
     {
-        public static bool debugVoronoiSimplex = false;
-
         public VoronoiSimplexSolver()
         {
             m_equalVertexThreshold = VORONOI_DEFAULT_EQUAL_VERTEX_THRESHOLD;
@@ -166,7 +164,7 @@ namespace BulletXNA.BulletCollision
 
                             m_cachedV = m_cachedP1 - m_cachedP2;
 
-                            if (BulletGlobals.g_streamWriter != null && debugVoronoiSimplex)
+                            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
                             {
                                 BulletGlobals.g_streamWriter.WriteLine("voronoi update closest points case 3");
                                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "p", p);
@@ -242,7 +240,7 @@ namespace BulletXNA.BulletCollision
                 };
             }
 
-            if (BulletGlobals.g_streamWriter != null && debugVoronoiSimplex)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 BulletGlobals.g_streamWriter.WriteLine("voronoi update closest points");
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "cachedp1", m_cachedP1);
@@ -542,13 +540,13 @@ namespace BulletXNA.BulletCollision
 
         public bool Closest(out Vector3 v)
         {
-            if (BulletGlobals.g_streamWriter != null && debugVoronoiSimplex)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Voronoi closest pre.", m_cachedV);
             }
             bool succes = UpdateClosestVectorAndPoints();
             v = m_cachedV;
-            if (BulletGlobals.g_streamWriter != null && debugVoronoiSimplex)
+			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Voronoi closest post.", m_cachedV);
             }

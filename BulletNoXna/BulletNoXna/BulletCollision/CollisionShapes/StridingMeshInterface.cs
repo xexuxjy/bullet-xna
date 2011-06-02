@@ -51,8 +51,6 @@ namespace BulletXNA.BulletCollision
 
             Vector3[] triangle = new Vector3[3];
 
-	        float graphicsBase = 0f;
-
 	        Vector3 meshScaling = GetScaling();
 
 	        ///if the number of parts is big, the performance might drop due to the innerloop switch on indextype
@@ -87,7 +85,7 @@ namespace BulletXNA.BulletCollision
 								triangle[1] = vertexList[indexList[triIndex+1]] * meshScaling;
 								triangle[2] = vertexList[indexList[triIndex+2]] * meshScaling;
 
-						        if(BulletGlobals.g_streamWriter != null && debugStridingMesh && !callback.graphics())
+						        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
 						        {
 							        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
                                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
@@ -246,7 +244,6 @@ namespace BulletXNA.BulletCollision
 		}
 
         protected Vector3 m_scaling;
-        public static bool debugStridingMesh = false;
     }
 
 

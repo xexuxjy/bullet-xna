@@ -27,26 +27,37 @@ namespace BulletXNA.BulletCollision
 {
     public class ContinuousConvexCollision : IConvexCast
     {
+        public ContinuousConvexCollision(ConvexShape shapeA, ConvexShape shapeB)
+        {
+            m_convexA = shapeA;
+            m_convexB1 = shapeB;
+        }
+
         public ContinuousConvexCollision(ConvexShape shapeA, ConvexShape shapeB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             m_convexA = shapeA;
-            m_convexB = shapeB;
+            m_convexB1 = shapeB;
             m_simplexSolver = simplexSolver;
             m_penetrationDepthSolver = penetrationDepthSolver;
 
         }
 
+        public ContinuousConvexCollision(ConvexShape shapeA, StaticPlaneShape plane)
+        {
+            m_convexA = shapeA;
+            m_planeShape = plane;
+        }
+
+
         public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
         {
-            m_simplexSolver.Reset();
-
             /// compute linear and angular velocity for this interval, to interpolate
             Vector3 linVelA = Vector3.Zero, angVelA = Vector3.Zero, linVelB = Vector3.Zero, angVelB = Vector3.Zero;
             TransformUtil.CalculateVelocity(ref fromA, ref toA, 1f, ref linVelA, ref angVelA);
             TransformUtil.CalculateVelocity(ref fromB, ref toB, 1f, ref linVelB, ref angVelB);
 
             float boundingRadiusA = m_convexA.GetAngularMotionDisc();
-            float boundingRadiusB = m_convexB.GetAngularMotionDisc();
+            float boundingRadiusB = m_convexB1 != null ? m_convexB1.GetAngularMotionDisc() : 0.0f;
 
             float maxAngularProjectedVelocity = angVelA.Length() * boundingRadiusA + angVelB.Length() * boundingRadiusB;
             Vector3 relLinVel = (linVelB - linVelA);
@@ -58,8 +69,6 @@ namespace BulletXNA.BulletCollision
                 return false;
             }
 
-
-            float radius = 0.001f;
 
             float lambda = 0f;
             Vector3 v = new Vector3(1, 0, 0);
@@ -78,26 +87,14 @@ namespace BulletXNA.BulletCollision
             //first solution, using GJK
 
 
-            Matrix identityTrans = Matrix.Identity;
-
-            SphereShape raySphere = new SphereShape(0f);
-            raySphere.Margin = 0;
-
+            float radius = 0.001f;
 
             //	result.drawCoordSystem(sphereTr);
 
             PointCollector pointCollector1 = new PointCollector();
 
             {
-                GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB, m_simplexSolver, m_penetrationDepthSolver);
-                ClosestPointInput input = new ClosestPointInput();
-
-                //we don't use margins during CCD
-                //	gjk.setIgnoreMargin(true);
-
-                input.m_transformA = fromA;
-                input.m_transformB = fromB;
-                gjk.GetClosestPoints(input, pointCollector1, null, false);
+                ComputeClosestPoints(ref fromA, ref fromB, pointCollector1);
 
                 hasResult = pointCollector1.m_hasResult;
                 c = pointCollector1.m_pointInWorld;
@@ -105,10 +102,15 @@ namespace BulletXNA.BulletCollision
 
             if (hasResult)
             {
-                float dist = pointCollector1.m_distance;
+                float dist = pointCollector1.m_distance + result.m_allowedPenetration;
+ 
                 n = pointCollector1.m_normalOnBInWorld;
 
                 float projectedLinearVelocity = Vector3.Dot(relLinVel, n);
+                if ((projectedLinearVelocity + maxAngularProjectedVelocity) <= MathUtil.SIMD_EPSILON)
+                {
+                    return false;
+                }
 
                 //not close enough
                 while (dist > radius)
@@ -118,19 +120,9 @@ namespace BulletXNA.BulletCollision
                         Vector3 colour = new Vector3(1, 1, 1);
                         result.m_debugDrawer.DrawSphere(ref c, 0.2f, ref colour);
                     }
-                    numIter++;
-                    if (numIter > maxIter)
-                    {
-                        return false; //todo: report a failure
-                    }
                     float dLambda = 0f;
 
                     projectedLinearVelocity = Vector3.Dot(relLinVel, n);
-
-                    //calculate safe moving fraction from distance / (linear+rotational velocity)
-
-                    //btScalar clippedDist  = GEN_min(angularConservativeRadius,dist);
-                    //btScalar clippedDist  = dist;
 
                     //don't report time of impact for motion away from the contact normal (or causes minor penetration)
                     if ((projectedLinearVelocity + maxAngularProjectedVelocity) <= MathUtil.SIMD_EPSILON)
@@ -157,7 +149,7 @@ namespace BulletXNA.BulletCollision
                     lastLambda = lambda;
 
                     //interpolate to next lambda
-                    Matrix interpolatedTransA, interpolatedTransB, relativeTrans = Matrix.Identity;
+                    Matrix interpolatedTransA = Matrix.Identity, interpolatedTransB = Matrix.Identity, relativeTrans = Matrix.Identity;
 
                     TransformUtil.IntegrateTransform(ref fromA, ref linVelA, ref angVelA, lambda, out interpolatedTransA);
                     TransformUtil.IntegrateTransform(ref fromB, ref linVelB, ref angVelB, lambda, out interpolatedTransB);
@@ -170,37 +162,28 @@ namespace BulletXNA.BulletCollision
                     result.DebugDraw(lambda);
 
                     PointCollector pointCollector = new PointCollector();
-                    GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB, m_simplexSolver, m_penetrationDepthSolver);
-                    ClosestPointInput input = new ClosestPointInput();
-                    input.m_transformA = interpolatedTransA;
-                    input.m_transformB = interpolatedTransB;
-                    gjk.GetClosestPoints(input, pointCollector, null, false);
+                    ComputeClosestPoints(ref interpolatedTransA, ref interpolatedTransB, pointCollector);
                     if (pointCollector.m_hasResult)
                     {
-                        if (pointCollector.m_distance < 0f)
-                        {
-                            //degenerate ?!
-                            result.m_fraction = lastLambda;
-                            n = pointCollector.m_normalOnBInWorld;
-                            result.m_normal = n;//.setValue(1,1,1);// = n;
-                            result.m_hitPoint = pointCollector.m_pointInWorld;
-                            return true;
-                        }
+                        dist = pointCollector.m_distance + result.m_allowedPenetration;
+
                         c = pointCollector.m_pointInWorld;
                         n = pointCollector.m_normalOnBInWorld;
                         dist = pointCollector.m_distance;
                     }
                     else
                     {
-                        //??
+                        result.ReportFailure(-1, numIter);
+                        return false;
+                    }
+                    numIter++;
+                    if (numIter > maxIter)
+                    {
+                        result.ReportFailure(-2, numIter);
                         return false;
                     }
 
-                }
 
-                if ((projectedLinearVelocity + maxAngularProjectedVelocity) <= result.m_allowedPenetration)//SIMD_EPSILON)
-                {
-                    return false;
                 }
 
                 result.m_fraction = lambda;
@@ -211,25 +194,56 @@ namespace BulletXNA.BulletCollision
 
             return false;
 
-        /*
-        //todo:
-            //if movement away from normal, discard result
-            btVector3 move = transBLocalTo.getOrigin() - transBLocalFrom.getOrigin();
-            if (result.m_fraction < btScalar(1.))
-            {
-                if (move.dot(result.m_normal) <= btScalar(0.))
-                {
-                }
-            }
-        */
+        }
 
+        public void ComputeClosestPoints(ref Matrix transA, ref Matrix transB, PointCollector pointCollector)
+        {
+            if (m_convexB1 != null)
+            {
+                m_simplexSolver.Reset();
+                GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB1, m_convexA.ShapeType, m_convexB1.ShapeType, m_convexA.Margin, m_convexB1.Margin, m_simplexSolver, m_penetrationDepthSolver);
+                ClosestPointInput input = new ClosestPointInput();
+                input.m_transformA = transA;
+                input.m_transformB = transB;
+                gjk.GetClosestPoints(input, pointCollector, null);
+            }
+            else
+            {
+                //convex versus plane
+                ConvexShape convexShape = m_convexA;
+                StaticPlaneShape planeShape = m_planeShape;
+
+                bool hasCollision = false;
+                Vector3 planeNormal = planeShape.GetPlaneNormal();
+                float planeConstant = planeShape.GetPlaneConstant();
+
+                Matrix convexWorldTransform = transA;
+                Matrix convexInPlaneTrans = MathUtil.InverseTimes(ref transB, ref convexWorldTransform);
+                Matrix planeInConvex = MathUtil.InverseTimes(ref convexWorldTransform, ref transB);
+
+                Vector3 vtx = convexShape.LocalGetSupportingVertex(Vector3.TransformNormal(-planeNormal, planeInConvex));
+
+                Vector3 vtxInPlane = Vector3.Transform(vtx,convexInPlaneTrans);
+                float distance = Vector3.Dot(planeNormal, vtxInPlane) - planeConstant;
+
+                Vector3 vtxInPlaneProjected = vtxInPlane - distance * planeNormal;
+                Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected, transB);
+                Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal, transB);
+
+                pointCollector.AddContactPoint(
+                    ref normalOnSurfaceB,
+                    ref vtxInPlaneWorld,
+                    distance);
+            }
 
         }
+
 
         private ISimplexSolverInterface m_simplexSolver;
         private IConvexPenetrationDepthSolver m_penetrationDepthSolver;
         private ConvexShape m_convexA;
-        private ConvexShape m_convexB;
+        private ConvexShape m_convexB1;
+        private StaticPlaneShape m_planeShape;
         private static int MAX_ITERATIONS = 64;
     }
 }

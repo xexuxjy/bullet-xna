@@ -57,7 +57,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //notice that the vectors should be unit length
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IList<Vector3> vectors, IList<Vector4> supportVerticesOut, int numVectors) 
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors) 
         {
 	        for (int i=0;i<numVectors;i++)
 	        {

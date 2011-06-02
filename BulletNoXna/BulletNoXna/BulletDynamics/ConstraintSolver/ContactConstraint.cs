@@ -29,102 +29,152 @@ using BulletXNA.LinearMath;
 namespace BulletXNA.BulletDynamics
 {
 
-    public class ContactConstraint : TypedConstraint
-    {
+	public class ContactConstraint : TypedConstraint
+	{
 
-        public ContactConstraint(PersistentManifold contactManifold, RigidBody rbA, RigidBody rbB) : base(TypedConstraintType.Contact,rbA,rbB)
-        {
-            m_contactManifold = contactManifold;
-        }
-
-
-        public PersistentManifold GetContactManifold()
-        {
-            return m_contactManifold;
-        }
-
-        public void SetContactManifold(PersistentManifold contactManifold)
-        {
-            m_contactManifold = contactManifold;
-        }
-
-        public override void GetInfo1(ConstraintInfo1 info)
-        {
-        }
-
-        public override void GetInfo2(ConstraintInfo2 info)
-        {
-        }
+		public ContactConstraint(PersistentManifold contactManifold, RigidBody rbA, RigidBody rbB)
+			: base(TypedConstraintType.Contact, rbA, rbB)
+		{
+			m_contactManifold = contactManifold;
+		}
 
 
+		public PersistentManifold GetContactManifold()
+		{
+			return m_contactManifold;
+		}
 
-        ///bilateral constraint between two dynamic objects
-        ///positive distance = separation, negative distance = penetration
-        public static void ResolveSingleBilateral(RigidBody body1, ref Vector3 pos1,
-                              RigidBody body2, ref Vector3 pos2,
-                              float distance, ref Vector3 normal, ref float impulse, float timeStep)
-        {
-	        float normalLenSqr = normal.LengthSquared();
-	        Debug.Assert(Math.Abs(normalLenSqr) < 1.1f);
-	        if (normalLenSqr > 1.1f)
-	        {
-		        impulse = 0f;
-		        return;
-	        }
-	        Vector3 rel_pos1 = pos1 - body1.GetCenterOfMassPosition(); 
-	        Vector3 rel_pos2 = pos2 - body2.GetCenterOfMassPosition();
-	        //this jacobian entry could be re-used for all iterations
-        	
-	        Vector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
-	        Vector3 vel2 = body2.GetVelocityInLocalPoint(ref rel_pos2);
-	        Vector3 vel = vel1 - vel2;
+		public void SetContactManifold(PersistentManifold contactManifold)
+		{
+			m_contactManifold = contactManifold;
+		}
 
-            Matrix m1 = MathUtil.TransposeBasis(body1.GetCenterOfMassTransform());
-            Matrix m2 = MathUtil.TransposeBasis(body2.GetCenterOfMassTransform());
+		public override void GetInfo1(ConstraintInfo1 info)
+		{
+		}
+
+		public override void GetInfo2(ConstraintInfo2 info)
+		{
+		}
 
 
-            JacobianEntry jac = new JacobianEntry(m1,m2,rel_pos1,rel_pos2,normal,
-                body1.GetInvInertiaDiagLocal(),body1.GetInvMass(),
-		        body2.GetInvInertiaDiagLocal(),body2.GetInvMass());
+		//response  between two dynamic objects without friction, assuming 0 penetration depth
+		public static float ResolveSingleCollision(
+				RigidBody body1,
+				CollisionObject colObj2,
+				ref Vector3 contactPositionWorld,
+				ref Vector3 contactNormalOnB,
+				ContactSolverInfo solverInfo,
+				float distance)
+		{
+			RigidBody body2 = RigidBody.Upcast(colObj2);
 
-	        float jacDiagAB = jac.GetDiagonal();
-	        float jacDiagABInv = 1f / jacDiagAB;
 
-            
-            float rel_vel = jac.GetRelativeVelocity(
-                body1.LinearVelocity,Vector3.TransformNormal(body1.GetAngularVelocity(),m1),
-                body2.LinearVelocity,Vector3.TransformNormal(body2.GetAngularVelocity(),m2));
-	        float a = jacDiagABInv;
+			Vector3 normal = contactNormalOnB;
 
-            rel_vel = Vector3.Dot(normal,vel);
-        	
-	        //todo: move this into proper structure
-	        float contactDamping = 0.2f;
+			Vector3 rel_pos1 = contactPositionWorld - body1.GetWorldTransform().Translation;
+			Vector3 rel_pos2 = contactPositionWorld - colObj2.GetWorldTransform().Translation;
 
-            if(ONLY_USE_LINEAR_MASS)
-            {
-	            float massTerm = 1f / (body1.GetInvMass() + body2.GetInvMass());
-	            impulse = - contactDamping * rel_vel * massTerm;
-            }
-            else	
-            {
-	            float velocityImpulse = -contactDamping * rel_vel * jacDiagABInv;
-	            impulse = velocityImpulse;
-            }
-        }
+			Vector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
+			Vector3 vel2 = body2 != null ? body2.GetVelocityInLocalPoint(ref rel_pos2) : Vector3.Zero;
+			Vector3 vel = vel1 - vel2;
+			float rel_vel;
+			Vector3.Dot(ref normal, ref vel, out rel_vel);
+
+			float combinedRestitution = body1.GetRestitution() * colObj2.GetRestitution();
+			float restitution = combinedRestitution * -rel_vel;
+
+			float positionalError = solverInfo.m_erp * -distance / solverInfo.m_timeStep;
+			float velocityError = -(1.0f + restitution) * rel_vel;// * damping;
+			float denom0 = body1.ComputeImpulseDenominator(ref contactPositionWorld, ref normal);
+			float denom1 = body2 != null ? body2.ComputeImpulseDenominator(ref contactPositionWorld, ref normal) : 0.0f;
+			float relaxation = 1.0f;
+			float jacDiagABInv = relaxation / (denom0 + denom1);
+
+			float penetrationImpulse = positionalError * jacDiagABInv;
+			float velocityImpulse = velocityError * jacDiagABInv;
+
+			float normalImpulse = penetrationImpulse + velocityImpulse;
+			normalImpulse = 0.0f > normalImpulse ? 0.0f : normalImpulse;
+
+			body1.ApplyImpulse(normal * (normalImpulse), rel_pos1);
+			if (body2 != null)
+			{
+				body2.ApplyImpulse(-normal * (normalImpulse), rel_pos2);
+			}
+
+			return normalImpulse;
+		}
 
 
 
-        protected PersistentManifold m_contactManifold;
-        public const bool ONLY_USE_LINEAR_MASS = false;
-        public const bool USE_INTERNAL_APPLY_IMPULSE = true;
+		///bilateral constraint between two dynamic objects
+		///positive distance = separation, negative distance = penetration
+		public static void ResolveSingleBilateral(RigidBody body1, ref Vector3 pos1,
+							  RigidBody body2, ref Vector3 pos2,
+							  float distance, ref Vector3 normal, ref float impulse, float timeStep)
+		{
+			float normalLenSqr = normal.LengthSquared();
+			Debug.Assert(Math.Abs(normalLenSqr) < 1.1f);
+			if (normalLenSqr > 1.1f)
+			{
+				impulse = 0f;
+				return;
+			}
+			Vector3 rel_pos1 = pos1 - body1.GetCenterOfMassPosition();
+			Vector3 rel_pos2 = pos2 - body2.GetCenterOfMassPosition();
+			//this jacobian entry could be re-used for all iterations
 
-    }
+			Vector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
+			Vector3 vel2 = body2.GetVelocityInLocalPoint(ref rel_pos2);
+			Vector3 vel = vel1 - vel2;
+
+			Matrix m1 = MathUtil.TransposeBasis(body1.GetCenterOfMassTransform());
+			Matrix m2 = MathUtil.TransposeBasis(body2.GetCenterOfMassTransform());
 
 
-    public interface IContactSolverFunc
-    {
-        float ContactSolverFunc(RigidBody body1,RigidBody body2,ManifoldPoint contactPoint,
+			JacobianEntry jac = new JacobianEntry(m1, m2, rel_pos1, rel_pos2, normal,
+				body1.GetInvInertiaDiagLocal(), body1.GetInvMass(),
+				body2.GetInvInertiaDiagLocal(), body2.GetInvMass());
+
+			float jacDiagAB = jac.GetDiagonal();
+			float jacDiagABInv = 1f / jacDiagAB;
+
+
+			float rel_vel = jac.GetRelativeVelocity(
+				body1.LinearVelocity, Vector3.TransformNormal(body1.GetAngularVelocity(), m1),
+				body2.LinearVelocity, Vector3.TransformNormal(body2.GetAngularVelocity(), m2));
+			float a = jacDiagABInv;
+
+			rel_vel = Vector3.Dot(normal, vel);
+
+			//todo: move this into proper structure
+			float contactDamping = 0.2f;
+
+			if (ONLY_USE_LINEAR_MASS)
+			{
+				float massTerm = 1f / (body1.GetInvMass() + body2.GetInvMass());
+				impulse = -contactDamping * rel_vel * massTerm;
+			}
+			else
+			{
+				float velocityImpulse = -contactDamping * rel_vel * jacDiagABInv;
+				impulse = velocityImpulse;
+			}
+		}
+
+
+
+		protected PersistentManifold m_contactManifold;
+		public const bool ONLY_USE_LINEAR_MASS = false;
+		public const bool USE_INTERNAL_APPLY_IMPULSE = true;
+
+	}
+
+
+	public interface IContactSolverFunc
+	{
+		float ContactSolverFunc(RigidBody body1, RigidBody body2, ManifoldPoint contactPoint,
 									 ContactSolverInfo info);
-    }
+	}
 }

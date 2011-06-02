@@ -221,7 +221,6 @@ namespace BulletXNA.BulletCollision
         private bool m_useQuantizedAabbCompression;
         private bool m_ownsBvh;
         private TriangleInfoMap m_triangleInfoMap;
-        public static bool debugBVHTriangleMesh = false;
     }
 
     public class MyNodeOverlapCallback : INodeOverlapCallback
@@ -296,7 +295,7 @@ namespace BulletXNA.BulletCollision
 
 
             //FIXME - Debug here and on quantized Bvh walking
-            if (BulletGlobals.g_streamWriter != null && BvhTriangleMeshShape.debugBVHTriangleMesh)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBVHTriangleMesh)
             {
                 BulletGlobals.g_streamWriter.WriteLine("BVH Triangle");
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[0]);

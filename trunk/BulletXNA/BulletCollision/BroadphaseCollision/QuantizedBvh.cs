@@ -279,8 +279,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 Quantize(out quantizedAabbMax, ref newAabbMax, true);
 
                 QuantizedBvhNode node = m_quantizedContiguousNodes[nodeIndex];
-                node.m_quantizedAabbMin.min(ref quantizedAabbMin);
-                node.m_quantizedAabbMax.max(ref quantizedAabbMax);
+                node.m_quantizedAabbMin.Min(ref quantizedAabbMin);
+                node.m_quantizedAabbMax.Max(ref quantizedAabbMax);
                 m_quantizedContiguousNodes[nodeIndex] = node;
             }
             else

@@ -7,6 +7,9 @@ using BulletXNA.BulletCollision.GImpact;
 using BulletXNA.BulletDynamics.Dynamics;
 using BulletXNA.BulletDynamics.ConstraintSolver;
 using BulletXNA.BulletCollision.BroadphaseCollision;
+using Microsoft.Xna.Framework.Input;
+using System.IO;
+using BulletXNA;
 
 namespace BulletXNADemos.Demos
 {
@@ -26,6 +29,11 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
+
+            string filename = @"E:\users\man\bullet\gimpact-demo-xna.txt";
+            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+
             /// Init Bullet
             m_collisionConfiguration = new DefaultCollisionConfiguration();
 
@@ -36,7 +44,8 @@ namespace BulletXNADemos.Demos
             int maxProxies = 1024;
             Vector3 worldAabbMin = new Vector3(-10000, -10000, -10000);
             Vector3 worldAabbMax = new Vector3(10000, 10000, 10000);
-            m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, false);
+            //m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, false);
+            m_broadphase = new SimpleBroadphase(16384,null);
             m_constraintSolver = new SequentialImpulseConstraintSolver();
 
             m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
@@ -50,88 +59,45 @@ namespace BulletXNADemos.Demos
             float mass = 0.0f;
             Matrix startTransform = Matrix.Identity;
 
+
             CollisionShape staticboxShape1 = new BoxShape(new Vector3(200, 1, 200));//floor
-            m_collisionShapes.Add(staticboxShape1);
-            startTransform.Translation = new Vector3(0, -10, 0);
-            LocalCreateRigidBody(mass, startTransform, staticboxShape1);
-
             CollisionShape staticboxShape2 = new BoxShape(new Vector3(1, 50, 200));//left wall
-            m_collisionShapes.Add(staticboxShape2);
-            startTransform.Translation = new Vector3(-200, 15, 0);
-            LocalCreateRigidBody(mass, startTransform, staticboxShape2);
-
             CollisionShape staticboxShape3 = new BoxShape(new Vector3(1, 50, 200));//right wall
-            m_collisionShapes.Add(staticboxShape3);
-            startTransform.Translation = new Vector3(200, 15, 0);
-            LocalCreateRigidBody(mass, startTransform, staticboxShape3);
-
             CollisionShape staticboxShape4 = new BoxShape(new Vector3(200, 50, 1));//front wall
-            m_collisionShapes.Add(staticboxShape4);
-            startTransform.Translation = new Vector3(0, 15, 200);
-            LocalCreateRigidBody(mass, startTransform, staticboxShape4);
-
             CollisionShape staticboxShape5 = new BoxShape(new Vector3(200, 50, 1));//back wall
-            m_collisionShapes.Add(staticboxShape5);
-            startTransform.Translation = new Vector3(0, 15, -200);
-            LocalCreateRigidBody(mass, startTransform, staticboxShape5);
 
+            CompoundShape staticScenario = new CompoundShape();//static scenario
 
-            //static plane
+            startTransform.Translation = new Vector3(0, 0, 0);
+            staticScenario.AddChildShape(ref startTransform, staticboxShape1);
+            startTransform.Translation = new Vector3(-200, 25, 0);
+            staticScenario.AddChildShape(ref startTransform, staticboxShape2);
+            startTransform.Translation = new Vector3(200, 25, 0);
+            staticScenario.AddChildShape(ref startTransform, staticboxShape3);
+            startTransform.Translation = new Vector3(0, 25, 200);
+            staticScenario.AddChildShape(ref startTransform, staticboxShape4);
+            startTransform.Translation = new Vector3(0, 25, -200);
+            staticScenario.AddChildShape(ref startTransform, staticboxShape5);
 
-            Vector3 normal = new Vector3(-0.5f, 0.5f, 0.0f);
-            normal.Normalize();
-            CollisionShape staticplaneShape6 = new StaticPlaneShape(normal, 0.0f);// A plane
-            m_collisionShapes.Add(staticplaneShape6);
-            startTransform.Translation = new Vector3(0, -9, 0);
+            startTransform.Translation = new Vector3(0, 0, 0);
+
+            RigidBody staticBody = LocalCreateRigidBody(mass, startTransform, staticScenario);
+
+	        staticBody.SetCollisionFlags(staticBody.GetCollisionFlags()|CollisionFlags.CF_STATIC_OBJECT);
+
+	        //enable custom material callback
+	        staticBody.SetCollisionFlags(staticBody.GetCollisionFlags()|CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+
+	        //static plane
+	        Vector3 normal = new Vector3(0.4f,1.5f,-0.4f);
+	        normal.Normalize();
+	        CollisionShape staticplaneShape6 = new StaticPlaneShape(ref normal,0.0f);// A plane
+
+	        startTransform.Translation = Vector3.Zero;
 
             RigidBody staticBody2 = LocalCreateRigidBody(mass, startTransform, staticplaneShape6);
 
-            //another static plane
-
-            normal = new Vector3(0.5f, 0.7f, 0.0f);
-            //normal.normalize();
-            CollisionShape staticplaneShape7 = new StaticPlaneShape(normal, 0.0f);// A plane
-            m_collisionShapes.Add(staticplaneShape7);
-            startTransform.Translation = new Vector3(0, -10, 0);
-
-            staticBody2 = LocalCreateRigidBody(mass, startTransform, staticplaneShape7);
-
-            /// Create Static Torus
-            float height = 28;
-            float step = 2.5f;
-            float massT = 1.0f;
-
-            startTransform = Matrix.CreateFromQuaternion(Quaternion.CreateFromYawPitchRoll(3.14159265f * 0.5f, 0f, 3.14159265f * 0.5f));
-            startTransform.Translation = new Vector3(0, height, -5);
-
-            m_kinematicTorus = LocalCreateRigidBody(0.0f, startTransform, m_trimeshShape);
-
-            m_kinematicTorus.SetCollisionFlags(m_kinematicTorus.GetCollisionFlags() | CollisionFlags.CF_KINEMATIC_OBJECT);
-            m_kinematicTorus.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
-
-            /// Kinematic
-            m_kinTorusTran = new Vector3(-0.1f, 0, 0);
-            m_kinTorusRot = Quaternion.CreateFromYawPitchRoll(0f, 3.14159265f * 0.01f, 0f);
-
-#if TEST_GIMPACT_TORUS
-
-            /// Create dynamic Torus
-            int numToroids = 1;
-            for (int i = 0; i < numToroids; i++)
-            {
-                height -= step;
-                startTransform = Matrix.CreateFromQuaternion(Quaternion.CreateFromYawPitchRoll(0f, 0f, 3.14159265f * 0.5f));
-                startTransform.Translation = new Vector3(0, height, -5);
-
-                RigidBody bodyA = LocalCreateRigidBody(massT, startTransform, m_trimeshShape);
-
-                height -= step;
-                startTransform = Matrix.CreateFromQuaternion(Quaternion.CreateFromYawPitchRoll(3.14159265f * 0.5f, 0f, 3.14159265f * 0.5f));
-                startTransform.Translation = new Vector3(0, height, -5);
-                RigidBody bodyB = LocalCreateRigidBody(massT, startTransform, m_trimeshShape);
-
-            }
-#endif
+	        staticBody2.SetCollisionFlags(staticBody2.GetCollisionFlags()|CollisionFlags.CF_STATIC_OBJECT);
 
             startTransform = Matrix.Identity;
 
@@ -141,7 +107,6 @@ namespace BulletXNADemos.Demos
                 for (int i = 0; i < numBoxes; i++)
                 {
                     CollisionShape boxShape = new BoxShape(new Vector3(1, 1, 1));
-                    m_collisionShapes.Add(boxShape);
 
                     startTransform.Translation = new Vector3(2 * i - 5, 2, -3);
                     LocalCreateRigidBody(1, startTransform, boxShape);
@@ -202,11 +167,40 @@ namespace BulletXNADemos.Demos
             CollisionDispatcher dispatcher = m_dynamicsWorld.GetDispatcher() as CollisionDispatcher;
 
             GImpactCollisionAlgorithm.RegisterAlgorithm(dispatcher);
-
-
-
-
         }
+
+
+    public void ShootTrimesh(Vector3 startPosition,Vector3 destination)
+    {
+
+	    if (m_dynamicsWorld != null)
+	    {
+		    float mass = 4.0f;
+		    Matrix startTransform = Matrix.CreateTranslation(startPosition);
+
+		    RigidBody body = LocalCreateRigidBody(mass, startTransform,m_trimeshShape);
+
+		    Vector3 linVel = destination - startPosition;
+		    linVel.Normalize();
+		    linVel*=m_ShootBoxInitialSpeed*0.25f;
+
+		    body.SetLinearVelocity(ref linVel);
+		    body.SetAngularVelocity(Vector3.Zero);
+	    }
+    }
+
+    public override void KeyboardCallback(Keys key, int x, int y, GameTime gameTime, bool released, ref Microsoft.Xna.Framework.Input.KeyboardState newState, ref Microsoft.Xna.Framework.Input.KeyboardState oldState)
+    {
+        if (key == Keys.OemPeriod)
+        {
+            ShootTrimesh(GetCameraPosition(), GetCameraTargetPosition());
+        }
+        else
+        {
+            base.KeyboardCallback(key, x, y, gameTime, released, ref newState, ref oldState);
+        }
+    }
+
 
         static void Main(string[] args)
         {

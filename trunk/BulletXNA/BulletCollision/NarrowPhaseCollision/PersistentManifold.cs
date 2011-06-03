@@ -23,7 +23,7 @@
 
 //#define MAINTAIN_PERSISTENCY
 //#define KEEP_DEEPEST_POINT
-#define DEBUG_PERSISTENCY
+//#define DEBUG_PERSISTENCY
 
 using System;
 using System.Collections.Generic;
@@ -165,39 +165,37 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             Object oldPtr = pt.m_userPersistentData;
             if (oldPtr != null)
             {
-#if DEBUG_PERSISTENCY
-		        int occurance = 0;
-                for (int i = 0; i < m_cachedPoints; i++)
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
                 {
-                    if (m_pointCache[i].m_userPersistentData == oldPtr)
+
+                    int occurance = 0;
+                    for (int i = 0; i < m_cachedPoints; i++)
                     {
-                        occurance++;
-                        if (occurance > 1 && BulletGlobals.g_streamWriter != null)
+                        if (m_pointCache[i].m_userPersistentData == oldPtr)
                         {
-							BulletGlobals.g_streamWriter.WriteLine("error in clearUserCache\n");
+                            occurance++;
+                            if (occurance > 1)
+                            {
+                                BulletGlobals.g_streamWriter.WriteLine("error in clearUserCache\n");
+                            }
                         }
                     }
+                    //Debug.Assert(occurance<=0);
                 }
-                //Debug.Assert(occurance<=0);
-#endif //DEBUG_PERSISTENCY
-
                 if (pt.m_userPersistentData != null && gContactDestroyedCallback != null)
                 {
                     gContactDestroyedCallback.Callback(pt.m_userPersistentData);
                     pt.m_userPersistentData = null;
                 }
 
-#if DEBUG_PERSISTENCY
 		        DebugPersistency();
-#endif
             }
         }
 
-#if DEBUG_PERSISTENCY
 	    public void	DebugPersistency()
         {
-			if (BulletGlobals.g_streamWriter != null)
-			{
+                if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
+                {
 				BulletGlobals.g_streamWriter.WriteLine("DebugPersistency : numPoints {0}\n", m_cachedPoints);
 				for (int i = 0; i < m_cachedPoints; i++)
 				{
@@ -208,7 +206,6 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 				}
 			}
         }
-#endif //
 
         public int GetNumContacts()
         {
@@ -366,14 +363,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
 
 
-#if DEBUG_PERSISTENCY
-    if(BulletGlobals.g_streamWriter != null)
-	{
-		BulletGlobals.g_streamWriter.WriteLine("refreshContactPoints");
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("refreshContactPoints");
 		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posA",trA.Translation);
 		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posB",trB.Translation);
 	}
-#endif //DEBUG_PERSISTENCY
             /// first refresh worldspace positions and distance
             int numContacts = GetNumContacts() - 1;
             for (int i = numContacts; i >= 0; i--)
@@ -420,9 +415,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     }
                 }
             }
-#if DEBUG_PERSISTENCY
             DebugPersistency();
-#endif
         }
 
 

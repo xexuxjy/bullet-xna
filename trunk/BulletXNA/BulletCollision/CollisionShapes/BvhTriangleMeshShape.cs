@@ -262,6 +262,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 nodeSubPart);
 
             //unsigned int* gfxbase = (unsigned int*)(indexbase+nodeTriangleIndex*indexstride);
+            // force index stride to be 1 regardless.
+            indexStride = 3;
             int indexIndex = nodeTriangleIndex*indexStride;
             
             Debug.Assert(indicesType==PHY_ScalarType.PHY_INTEGER||indicesType==PHY_ScalarType.PHY_SHORT);
@@ -269,33 +271,34 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             
 
             Vector3 meshScaling = m_meshInterface.GetScaling();
-            Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
             int[] indexRaw = ((ObjectArray<int>)indexBase).GetRawArray();
-            for (int j=2;j>=0;j--)
+
+
+            if (vertexBase is ObjectArray<Vector3>)
             {
-                int graphicsIndex = indexRaw[indexIndex+j];
-				
-                if (type == PHY_ScalarType.PHY_FLOAT)
+                Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
+                for (int j = 2; j >= 0; j--)
                 {
-                    int floatIndex = graphicsIndex * stride;
-                    if (vertexBase is ObjectArray<Vector3>)
-                    {
-                        m_triangle[j] = vertexBaseRaw[floatIndex];
-                        Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
-                    }
-                    else if(vertexBase is ObjectArray<float>)
-                    {
-                        ObjectArray<float> floats = (ObjectArray<float>)vertexBase;
-                        m_triangle[j] = new Vector3(floats[floatIndex] * meshScaling.X, floats[floatIndex + 1] * meshScaling.Y, floats[floatIndex + 2] * meshScaling.Z);		
-                    }
-                    else
-                    {
-                        Debug.Assert(false,"Unsupported type.");
-                    }
+                    m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex+j]];
+                    Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
                 }
             }
+            else if (vertexBase is ObjectArray<float>)
+            {
+                float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();
+                for (int j=2;j>=0;j--)
+                {
+                    int offset = indexRaw[indexIndex+j]*3 ;
+                    m_triangle[j] = new Vector3(floats[offset] * meshScaling.X, floats[offset + 1] * meshScaling.Y, floats[offset + 2] * meshScaling.Z);
+                }
+            }
+            else
+            {
 
-
+                Debug.Assert(false, "Unsupported type.");
+            }
+            
+            
             //FIXME - Debug here and on quantized Bvh walking
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBVHTriangleMesh)
             {

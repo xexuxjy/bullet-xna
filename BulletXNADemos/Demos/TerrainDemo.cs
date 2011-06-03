@@ -649,13 +649,10 @@ namespace BulletXNADemos.Demos
             {
                 case PHY_ScalarType.PHY_FLOAT:
                     return PHY_ScalarType.PHY_SHORT;
-                    break;
                 case PHY_ScalarType.PHY_SHORT:
                     return PHY_ScalarType.PHY_UCHAR;
-                    break;
                 case PHY_ScalarType.PHY_UCHAR:
                     return PHY_ScalarType.PHY_FLOAT;
-                    break;
             }
             return PHY_ScalarType.PHY_FLOAT;
         }

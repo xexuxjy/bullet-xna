@@ -754,7 +754,6 @@ namespace BulletXNADemos.Demos
             float farPlane = 10000f;
             rayForward *= farPlane;
 
-            Vector3 rightOffset;
             Vector3 vertical = m_cameraUp;
 
             Vector3 hor = Vector3.Cross(rayForward, vertical);

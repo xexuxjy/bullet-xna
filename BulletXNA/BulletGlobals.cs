@@ -89,10 +89,11 @@ namespace BulletXNA
 		public const bool debugShapeHull = false;
 		public const bool debugStridingMesh = false;
 		public const bool debugGJK = false;
-		public const bool debugGJKDetector = true;
-		public const bool debugPersistentManifold = true;
+		public const bool debugGJKDetector = false;
+		public const bool debugPersistentManifold = false;
 		public const bool debugVoronoiSimplex = false;
 		public const bool debugSolver = false;
+        public const bool debugBroadphase = true;
 
 
 

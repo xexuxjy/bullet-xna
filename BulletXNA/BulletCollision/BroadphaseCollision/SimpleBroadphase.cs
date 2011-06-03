@@ -83,6 +83,18 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             Vector3 p1Min = proxy1.GetMinAABB();
             Vector3 p1Max = proxy1.GetMaxAABB();
 
+	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
+	{
+		BulletGlobals.g_streamWriter.WriteLine("simple aabOverlap");
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"0min",p0Min);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"0max",p0Max);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1min",p1Min);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1max",p1Max);
+	}
+
+
+
+
             return p0Min.X <= p1Max.X && p1Min.X <= p0Max.X &&
                p0Min.Y <= p1Max.Y && p1Min.Y <= p0Max.Y &&
                p0Min.Z <= p1Max.Z && p1Min.Z <= p0Max.Z;
@@ -140,6 +152,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public virtual void CalculateOverlappingPairs(IDispatcher dispatcher)
         {
+    	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
+	    {
+            BulletGlobals.g_streamWriter.WriteLine("simple calculateOverlappingPairs");
+        }
+
             //first check for new overlapping pairs
             if (m_numHandles > 0)
             {

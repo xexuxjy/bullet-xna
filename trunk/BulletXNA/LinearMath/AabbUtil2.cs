@@ -78,19 +78,19 @@ namespace BulletXNA
         }
 
 
-        public static bool TestTriangleAgainstAabb2(IList<Vector3> vertices,
-                                    ref Vector3 aabbMin, ref Vector3 aabbMax)
-        {
-            if (Math.Min(Math.Min(vertices[0].X, vertices[1].X), vertices[2].X) > aabbMax.X) return false;
-            if (Math.Max(Math.Max(vertices[0].X, vertices[1].X), vertices[2].X) < aabbMin.X) return false;
+        //public static bool TestTriangleAgainstAabb2(IList<Vector3> vertices,
+        //                            ref Vector3 aabbMin, ref Vector3 aabbMax)
+        //{
+        //    if (Math.Min(Math.Min(vertices[0].X, vertices[1].X), vertices[2].X) > aabbMax.X) return false;
+        //    if (Math.Max(Math.Max(vertices[0].X, vertices[1].X), vertices[2].X) < aabbMin.X) return false;
 
-            if (Math.Min(Math.Min(vertices[0].Z, vertices[1].Z), vertices[2].Z) > aabbMax.Z) return false;
-            if (Math.Max(Math.Max(vertices[0].Z, vertices[1].Z), vertices[2].Z) < aabbMin.Z) return false;
+        //    if (Math.Min(Math.Min(vertices[0].Z, vertices[1].Z), vertices[2].Z) > aabbMax.Z) return false;
+        //    if (Math.Max(Math.Max(vertices[0].Z, vertices[1].Z), vertices[2].Z) < aabbMin.Z) return false;
 
-            if (Math.Min(Math.Min(vertices[0].Y, vertices[1].Y), vertices[2].Y) > aabbMax.Y) return false;
-            if (Math.Max(Math.Max(vertices[0].Y, vertices[1].Y), vertices[2].Y) < aabbMin.Y) return false;
-            return true;
-        }
+        //    if (Math.Min(Math.Min(vertices[0].Y, vertices[1].Y), vertices[2].Y) > aabbMax.Y) return false;
+        //    if (Math.Max(Math.Max(vertices[0].Y, vertices[1].Y), vertices[2].Y) < aabbMin.Y) return false;
+        //    return true;
+        //}
 
 
 

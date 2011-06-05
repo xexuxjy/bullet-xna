@@ -110,6 +110,7 @@ namespace BulletXNA
 
         {
             Matrix ba = MathUtil.BasisMatrix(ref mA);
+            ba = Matrix.Transpose(ba);
             Matrix bb = MathUtil.BasisMatrix(ref mB);
             return BulletMatrixMultiply(ba, bb);
         }

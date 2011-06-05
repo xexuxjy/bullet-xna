@@ -259,11 +259,16 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 		public virtual void InternalProcessTriangleIndex(Vector3[] triangle,int partId,int triangleIndex)
 		{
-			if (AabbUtil2.TestTriangleAgainstAabb2(triangle,ref m_aabbMin,ref m_aabbMax))
-			{
-				//check aabb in triangle-space, before doing this
-				m_callback.ProcessTriangle(triangle,partId,triangleIndex);
-			}
+            if (AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax))
+            {
+                //check aabb in triangle-space, before doing this
+                m_callback.ProcessTriangle(triangle, partId, triangleIndex);
+            }
+            else
+            {
+                int ibreak = 0;
+                AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax);
+            }
 			
 		}
         public virtual void Cleanup()

@@ -510,6 +510,29 @@ namespace BulletXNA.BulletCollision.GImpact
         //! Calculates the exact inertia tensor for this shape
         public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
         {
+            LockChildShapes();
+            inertia = Vector3.Zero;
+
+            int i = GetNumChildShapes();
+            float shapemass = mass / ((float)i);
+
+            while (i-- != 0)
+            {
+                Vector3 temp_inertia;
+                m_childShapes[i].CalculateLocalInertia(shapemass, out temp_inertia);
+                if (ChildrenHasTransform())
+                {
+
+                    inertia = GImpactMassUtil.GimInertiaAddTransformed(ref inertia, ref temp_inertia, ref m_childTransforms.GetRawArray()[i]);
+                }
+                else
+                {
+                    Matrix identity = Matrix.Identity;
+                    inertia = GImpactMassUtil.GimInertiaAddTransformed(ref inertia, ref temp_inertia, ref identity);
+                }
+
+            }
+
 
         }
 
@@ -825,6 +848,24 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
         {
+            LockChildShapes();
+
+
+            inertia = Vector3.Zero;
+
+            int i = GetVertexCount();
+            float pointmass = mass / ((float)i);
+
+            while (i-- != 0)
+            {
+                Vector3 pointintertia;
+                GetVertex(i, out pointintertia);
+                pointintertia = GImpactMassUtil.GimGetPointInertia(ref pointintertia, pointmass);
+                inertia += pointintertia;
+            }
+
+            UnlockChildShapes();
+
         }
 
         public override String GetName()
@@ -900,11 +941,30 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
+            LockChildShapes();
+            AABB box = new AABB();
+            box.m_min = aabbMin;
+            box.m_max = aabbMax;
+
+            ObjectArray<int> collided = new ObjectArray<int>();
+            m_box_set.BoxQuery(ref box, collided);
+
+            if (collided.Count == 0)
+            {
+                UnlockChildShapes();
+                return;
+            }
+
+            int part = GetPart();
+            PrimitiveTriangle triangle = new PrimitiveTriangle();
+            int i = collided.Count;
+            while (i-- != 0)
+            {
+                GetPrimitiveTriangle(collided[i], triangle);
+                callback.ProcessTriangle(triangle.m_vertices, part, collided[i]);
+            }
+            UnlockChildShapes();
         }
-
-
-
-
     }
 
 
@@ -1015,6 +1075,18 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
         {
+            inertia = Vector3.Zero;
+
+            int i = GetMeshPartCount();
+            float partmass = mass / (float)i;
+
+            while (i-- != 0)
+            {
+                Vector3 partinertia = Vector3.Zero;
+                GetMeshPart(i).CalculateLocalInertia(partmass, ref partinertia);
+                inertia += partinertia;
+            }
+
         }
 
 
@@ -1133,6 +1205,12 @@ namespace BulletXNA.BulletCollision.GImpact
         */
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
+            int i = m_mesh_parts.Count;
+            while (i-- != 0)
+            {
+                m_mesh_parts[i].ProcessAllTriangles(callback, ref aabbMin, ref aabbMax);
+            }
+
         }
     }
 

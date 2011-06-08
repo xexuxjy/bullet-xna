@@ -69,6 +69,8 @@ namespace BulletXNADemos.Demos
 			//m_effect = m_game.Content.Load<Effect>("Standard");
 			m_modelEffect = new BasicEffect(m_game.GraphicsDevice);
             m_vertexEffect = new BasicEffect(m_game.GraphicsDevice);
+            
+
             m_spriteBatch = new SpriteBatch(m_game.GraphicsDevice);
             m_spriteFont = m_game.Content.Load<SpriteFont>("DebugFont8");
             m_vertexDeclaration = VertexPositionNormalTexture.VertexDeclaration;
@@ -131,10 +133,10 @@ namespace BulletXNADemos.Demos
                 m_game.GraphicsDevice.Viewport.Height - m_pipViewport.Height - 50;
 
 
-			//RasterizerState rasterizerState = new RasterizerState();
-			//rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
-			//m_game.GraphicsDevice.RasterizerState = rasterizerState;
-			//m_game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            //RasterizerState rasterizerState = new RasterizerState();
+            //rasterizerState.CullMode = CullMode.CullClockwiseFace;
+            //m_game.GraphicsDevice.RasterizerState = rasterizerState;
+            //m_game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
         
         }
         
@@ -267,13 +269,22 @@ namespace BulletXNADemos.Demos
             m_textPositionColours.Add(tpc);
         }
 
-        public void DrawSolidTriangle(IList<Vector3> points)
+        public void DrawSolidTriangle(Vector3[] points)
         {
-            Vector3 normal = Vector3.Cross(points[1] - points[0], points[2] - points[0]);
+            Vector3 d = points[1] - points[0];
+            Vector3 e = points[2] - points[0];
+            // Reverse the cross here to account for winding, shouldn't change the way rest of bullet works.
+            //Vector3 normal = Vector3.Cross(d, e);
+            Vector3 normal = Vector3.Cross(e, d);
+
             normal.Normalize();
-            AddVertex(points[0], normal,new Vector2(0,0));
-            AddVertex(points[1], normal, new Vector2(0, 1));
+            //AddVertex(points[0], normal,new Vector2(0,0));
+            //AddVertex(points[1], normal, new Vector2(0, 1));
+            //AddVertex(points[2], normal, new Vector2(1, 1));
+            AddVertex(points[0], normal, new Vector2(0, 0));
             AddVertex(points[2], normal, new Vector2(1, 1));
+            AddVertex(points[1], normal, new Vector2(0, 1));
+
         }
 
 
@@ -382,7 +393,7 @@ namespace BulletXNADemos.Demos
 
                 bool useWireframeFallback = true;
 
-                if ((debugMode & DebugDrawModes.DBG_DrawWireframe) != 0)
+                if ((debugMode & DebugDrawModes.DBG_DrawWireframe) == 0)
                 {
                     ///you can comment out any of the specific cases, and use the default
                     ///the benefit of 'default' is that it approximates the actual collision shape including collision margin
@@ -603,10 +614,10 @@ namespace BulletXNADemos.Demos
                         }
                     }
 
-                    if (shape.IsConcave())//>getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE||shape.getShapeType() == GIMPACT_SHAPE_PROXYTYPE)
+                    if (shape.IsConcave() && !shape.IsInfinite())//>getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE||shape.getShapeType() == GIMPACT_SHAPE_PROXYTYPE)
                     //		if (shape.getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
                     {
-                        ConcaveShape concaveMesh = (ConcaveShape)shape;
+                        ConcaveShape concaveMesh = shape as ConcaveShape;
 
                         XNADrawcallback drawCallback = new XNADrawcallback(this,ref m);
                         drawCallback.m_wireframe = (debugMode & DebugDrawModes.DBG_DrawWireframe) != 0;
@@ -1072,7 +1083,7 @@ namespace BulletXNADemos.Demos
 	    private IList<ShapeCache> m_shapecaches = new List<ShapeCache>();
 
         private const int m_textureVertexMaxSize = 10000;
-        private const int m_lineVertexMaxSize = 50000;
+        private const int m_lineVertexMaxSize = 500000;
 
         private int m_texturedVertexCount;
         private int m_lineIndex = 0;
@@ -1215,11 +1226,12 @@ namespace BulletXNADemos.Demos
                 Vector3 center = (triangle[0]+triangle[1]+triangle[2])*(1.0f/3.0f);
 
                 cross += center;
-				m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
+                //m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
 
 		    } 
             else
 		    {
+                Vector3.Transform(triangle, ref matrix, triangle);
                 m_shapeDrawer.DrawSolidTriangle(triangle);
 		    }
 	    }

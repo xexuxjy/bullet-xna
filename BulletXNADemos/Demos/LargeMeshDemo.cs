@@ -55,7 +55,7 @@ namespace BulletXNADemos.Demos
 			//Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0,-10,0));
             Matrix rotateMatrix = Matrix.CreateFromYawPitchRoll(0, MathUtil.SIMD_PI / 2.0f, 0);
             //Matrix rotateMatrix = Matrix.Identity;
-            //Matrix rotateMatrix = Matrix.CreateFromYawPitchRoll(0, 0, MathUtil.SIMD_PI*0.8f);
+            //Matrix rotateMatrix = Matrix.CreateFromYawPitchRoll(0, 0, MathUtil.SIMD_PI * 0.7f);
 
 
             rotateMatrix.Translation = Vector3.Zero;
@@ -63,15 +63,15 @@ namespace BulletXNADemos.Demos
 			LocalCreateRigidBody(mass, ref rotateMatrix, groundShape);
 
 
-            //CollisionShape boxShape = new BoxShape(new Vector3(0.2f, 0.2f, 0.2f));
+            CollisionShape boxShape = new BoxShape(new Vector3(0.2f, 0.2f, 0.2f));
             //CollisionShape boxShape = new SphereShape(0.2f);
-            CollisionShape boxShape = new CylinderShapeX(new Vector3(0.2f, 0.4f, 0.2f));
+            //CollisionShape boxShape = new CylinderShapeX(new Vector3(0.2f, 0.4f, 0.2f));
             //CollisionShape boxShape = new CapsuleShape(0.2f, 0.4f);
 			Matrix boxTransform = Matrix.Identity;
 			boxTransform.Translation = new Vector3(0.0f, 5.0f, 0.0f);
 
 
-			LocalCreateRigidBody(1.25f, boxTransform, boxShape);
+            LocalCreateRigidBody(1.25f, boxTransform, boxShape);
 
             ClientResetScene();
 
@@ -142,8 +142,9 @@ CollisionShape BuildLargeMesh()
 	{
 		intArray.Add(indices[i]);
 	}
+    //TriangleIndexVertexArray indexVertexArray = new TriangleIndexVertexArray(DemoMeshes.BUNNY_NUM_TRIANGLES, DemoMeshes.gBunnyIndices, 3, DemoMeshes.BUNNY_NUM_VERTICES, DemoMeshes.gBunnyVertices, 3);
 
-	TriangleIndexVertexArray indexVertexArray = new TriangleIndexVertexArray(numTriangles,intArray,indexStride,vertexArray.Count,vertexArray,vertStride);
+    TriangleIndexVertexArray indexVertexArray = new TriangleIndexVertexArray(numTriangles, intArray, indexStride, vertexArray.Count, vertexArray, vertStride);
     TriangleMeshShape triangleMesh = new TriangleMeshShape(indexVertexArray);
     //TriangleMeshShape triangleMesh = new BvhTriangleMeshShape(indexVertexArray,true,true);
 	return triangleMesh;

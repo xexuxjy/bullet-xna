@@ -1575,7 +1575,8 @@ namespace BulletXNADemos.Demos
             //BasicEffect basicEffect = new BasicEffect(GraphicsDevice, null);
             //m_debugDraw = new DefaultDebugDraw(vertexDeclaration,basicEffect);
 
-            m_debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            //m_debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            m_debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;
             BulletGlobals.gDebugDraw = m_debugDraw;

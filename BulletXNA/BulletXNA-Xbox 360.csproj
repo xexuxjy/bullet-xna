@@ -213,7 +213,7 @@
     <Compile Include="LinearMath\UShortVector3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LinearMath\TransformUtil.cs" />
-    <Compile Include="BulletCollision\NarrowPhaseCollision\TypedObject.cs" />
+    <Compile Include="TypedObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <NestedContentProject Include="Content\Content.contentproj">

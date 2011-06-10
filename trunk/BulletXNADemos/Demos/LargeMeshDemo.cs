@@ -1,10 +1,6 @@
-﻿using System.IO;
-using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+﻿using BulletXNA;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 

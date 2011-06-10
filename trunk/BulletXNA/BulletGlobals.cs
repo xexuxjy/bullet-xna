@@ -23,7 +23,7 @@
 
 using System;
 using System.IO;
-using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 

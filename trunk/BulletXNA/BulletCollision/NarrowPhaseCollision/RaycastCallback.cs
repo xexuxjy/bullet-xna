@@ -22,10 +22,9 @@
  */
 
 using System;
-using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     [Flags]
     public enum EFlags

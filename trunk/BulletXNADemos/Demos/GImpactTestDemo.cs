@@ -1,15 +1,11 @@
 ﻿#define TEST_GIMPACT_TORUS
 
-using BulletXNA.BulletCollision.CollisionShapes;
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.GImpact;
-using BulletXNA.BulletDynamics.Dynamics;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework.Input;
 using System.IO;
 using BulletXNA;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace BulletXNADemos.Demos
 {

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
 //#define DBVT_BP_SORTPAIRS				1
 //#define DBVT_BP_PREVENTFALSEUPDATE		0

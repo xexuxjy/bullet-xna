@@ -22,12 +22,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
 
 	///The btConvex2dShape allows to use arbitrary convex shapes are 2d convex shapes, with the Z component assumed to be 0.

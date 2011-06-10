@@ -21,11 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class DefaultCollisionConstructionInfo
     {

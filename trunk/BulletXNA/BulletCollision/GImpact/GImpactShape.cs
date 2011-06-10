@@ -47,17 +47,11 @@ subject to the following restrictions:
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
 using System.Diagnostics;
-using BulletXNA;
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.GImpact
+namespace BulletXNA.BulletCollision
 {
     public enum GIMPACT_SHAPE_TYPE
     {
@@ -1036,7 +1030,7 @@ namespace BulletXNA.BulletCollision.GImpact
         {
             localScaling = scaling;
 
-            int i = m_mesh_parts.Count();
+            int i = m_mesh_parts.Count;
             while (i-- != 0)
             {
                 GImpactMeshShapePart part = m_mesh_parts[i];

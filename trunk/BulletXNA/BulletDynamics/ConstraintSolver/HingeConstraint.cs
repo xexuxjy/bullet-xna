@@ -24,10 +24,9 @@
 #define _BT_USE_CENTER_LIMIT_
 
 using System;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 	public class HingeConstraint : TypedConstraint
 	{

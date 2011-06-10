@@ -21,15 +21,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
 	public class Box2dBox2dCollisionAlgorithm : ActivatingCollisionAlgorithm
 	{

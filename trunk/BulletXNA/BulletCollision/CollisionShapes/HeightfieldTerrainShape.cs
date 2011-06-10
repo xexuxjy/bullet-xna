@@ -23,10 +23,9 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
 
     ///btHeightfieldTerrainShape simulates a 2D heightfield terrain

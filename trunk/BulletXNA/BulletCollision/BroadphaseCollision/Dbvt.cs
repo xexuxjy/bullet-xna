@@ -21,14 +21,12 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class Dbvt
     {

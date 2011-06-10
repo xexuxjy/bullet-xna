@@ -1,6 +1,6 @@
-
 using Microsoft.Xna.Framework;
-namespace BulletXNA.BulletCollision.GImpact
+
+namespace BulletXNA.BulletCollision
 {
     public static class GImpactMassUtil
     {

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionShapes;
+﻿using System.Diagnostics;
 using BulletXNA.LinearMath;
-using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public static class PolyhedralContactClipping
     {

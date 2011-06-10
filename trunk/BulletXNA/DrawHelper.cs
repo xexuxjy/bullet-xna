@@ -23,9 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

@@ -23,12 +23,10 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionDispatch;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 
 	public class ContactConstraint : TypedConstraint

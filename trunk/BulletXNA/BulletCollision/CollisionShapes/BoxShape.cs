@@ -22,13 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class BoxShape : PolyhedralConvexShape
     {

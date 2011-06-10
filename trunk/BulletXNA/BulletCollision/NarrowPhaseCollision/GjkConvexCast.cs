@@ -21,10 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class GjkConvexCast : IConvexCast
     {

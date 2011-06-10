@@ -23,11 +23,9 @@
 #define STATIC_SIMULATION_ISLAND_OPTIMIZATION
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     ///SimulationIslandManager creates and handles simulation islands, using btUnionFind
     public class SimulationIslandManager

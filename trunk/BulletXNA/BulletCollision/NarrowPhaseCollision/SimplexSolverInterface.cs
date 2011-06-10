@@ -24,7 +24,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface ISimplexSolverInterface
     {

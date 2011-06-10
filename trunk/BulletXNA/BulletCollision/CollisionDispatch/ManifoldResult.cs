@@ -22,10 +22,9 @@
  */
 
 using System.Diagnostics;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public interface IContactAddedCallback
     {

@@ -26,13 +26,10 @@
 //#define DEBUG_PERSISTENCY
 
 using System;
-using System.Collections.Generic;
-
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionDispatch;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     ///btPersistentManifold is a contact point cache, it stays persistent as long as objects are overlapping in the broadphase.
     ///Those contact points are created by the collision narrow phase.

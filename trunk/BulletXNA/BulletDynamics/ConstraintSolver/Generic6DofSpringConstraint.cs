@@ -33,10 +33,9 @@
 /// 5 : rotation Z (1st Euler rotational around Z axis, range [-PI+epsilon, PI-epsilon] )
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     public class Generic6DofSpringConstraint : Generic6DofConstraint
     {

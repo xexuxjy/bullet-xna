@@ -28,11 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class AxisSweep3
     {

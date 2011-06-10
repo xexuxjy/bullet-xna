@@ -23,7 +23,7 @@
 
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public abstract class ConcaveShape : CollisionShape
     {

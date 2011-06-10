@@ -27,13 +27,11 @@
 #define RAYAABB2
 
 using System;
-using System.Collections.Generic;
-
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
 
 

@@ -25,7 +25,7 @@ using System;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     /// ManifoldContactPoint collects and maintains persistent contactpoints.
     /// used to improve stability and performance of rigidbody dynamics response.

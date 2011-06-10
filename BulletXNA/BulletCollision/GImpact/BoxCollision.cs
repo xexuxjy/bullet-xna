@@ -28,7 +28,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.GImpact
+namespace BulletXNA.BulletCollision
 {
     public enum BT_PLANE_INTERSECTION_TYPE
     {

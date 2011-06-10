@@ -26,13 +26,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public class RaycastVehicle : IActionInterface
     {

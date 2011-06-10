@@ -21,13 +21,11 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+using System.Diagnostics;
+using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
-using System.Diagnostics;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.GImpact;
-using System.Diagnostics;
-namespace BulletXNA.BulletCollision.GImpact
+
+namespace BulletXNA.BulletCollision
 {
     public class GImpactBvh
     {

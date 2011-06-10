@@ -21,11 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Character
+namespace BulletXNA.BulletDynamics
 {
     public interface ICharacterControllerInterface : IActionInterface
     {

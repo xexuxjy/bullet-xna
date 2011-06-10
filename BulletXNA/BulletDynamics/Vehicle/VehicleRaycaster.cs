@@ -24,7 +24,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public interface IVehicleRaycaster
     {

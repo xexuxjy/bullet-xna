@@ -22,10 +22,9 @@
  */
 
 using System;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public struct WheelInfoConstructionInfo
     {

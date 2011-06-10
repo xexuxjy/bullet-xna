@@ -21,10 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     // Constraint similar to ODE Hinge2 Joint
     // has 3 degrees of frredom:

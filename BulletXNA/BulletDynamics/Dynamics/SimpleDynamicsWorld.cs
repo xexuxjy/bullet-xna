@@ -21,14 +21,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Dynamics
+namespace BulletXNA.BulletDynamics
 {
 	public abstract class SimpleDynamicsWorld : DynamicsWorld
 	{

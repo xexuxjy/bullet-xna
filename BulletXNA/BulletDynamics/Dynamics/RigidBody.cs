@@ -24,13 +24,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Dynamics
+namespace BulletXNA.BulletDynamics
 {
     public class RigidBody : CollisionObject
     {

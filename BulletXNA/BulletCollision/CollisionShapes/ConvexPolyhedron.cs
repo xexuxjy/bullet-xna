@@ -21,15 +21,12 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
 
 

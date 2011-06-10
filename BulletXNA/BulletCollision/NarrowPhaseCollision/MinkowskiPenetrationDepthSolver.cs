@@ -22,12 +22,10 @@
  */
 
 #define USE_BATCHED_SUPPORT
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class MinkowskiPenetrationDepthSolver : IConvexPenetrationDepthSolver
     {

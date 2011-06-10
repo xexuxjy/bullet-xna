@@ -22,10 +22,9 @@
  */
 
 using System;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 	public class Generic6DofConstraint : TypedConstraint
 	{

@@ -23,12 +23,10 @@
 
 #define TRUE
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
 
     public abstract class PolyhedralConvexShape : ConvexInternalShape

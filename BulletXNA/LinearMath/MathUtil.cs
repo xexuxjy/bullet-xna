@@ -24,9 +24,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using Microsoft.Xna.Framework;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {

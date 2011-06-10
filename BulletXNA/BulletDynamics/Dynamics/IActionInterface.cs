@@ -21,10 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.Dynamics
+namespace BulletXNA.BulletDynamics
 {
     public interface IActionInterface
     {

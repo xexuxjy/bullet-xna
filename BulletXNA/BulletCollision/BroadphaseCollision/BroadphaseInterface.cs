@@ -24,7 +24,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface IBroadphaseInterface
     {

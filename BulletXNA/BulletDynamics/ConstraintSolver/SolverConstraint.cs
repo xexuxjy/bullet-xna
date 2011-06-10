@@ -21,12 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 
     public struct SolverConstraint

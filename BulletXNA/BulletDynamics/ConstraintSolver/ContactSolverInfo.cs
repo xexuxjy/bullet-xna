@@ -23,7 +23,7 @@
 
 using System;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     public class ContactSolverInfoData
     {

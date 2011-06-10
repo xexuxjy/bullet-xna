@@ -24,13 +24,9 @@
 #define USE_PERSISTENT_CONTACTS
 
 using System.Collections.Generic;
-
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class BoxBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {

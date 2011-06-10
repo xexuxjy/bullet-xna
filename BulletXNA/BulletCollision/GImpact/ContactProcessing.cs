@@ -22,13 +22,10 @@ subject to the following restrictions:
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.GImpact
+namespace BulletXNA.BulletCollision
 {
     public class ContactProcessing
     {
@@ -249,7 +246,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
             // can't see how this does anything....
             //divide
-            float divide_average = 1.0f / ((float)contacts.Count());
+            float divide_average = 1.0f / ((float)contacts.Count);
 
             average_contact.m_point *= divide_average;
 

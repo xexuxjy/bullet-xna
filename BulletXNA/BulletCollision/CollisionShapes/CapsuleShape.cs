@@ -22,13 +22,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class CapsuleShape : ConvexInternalShape
     {

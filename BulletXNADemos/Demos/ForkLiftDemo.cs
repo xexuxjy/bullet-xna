@@ -22,12 +22,8 @@
  */
 
 using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
-using BulletXNA.BulletDynamics.Vehicle;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 

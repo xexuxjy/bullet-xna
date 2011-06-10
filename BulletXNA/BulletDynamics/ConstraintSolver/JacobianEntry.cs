@@ -24,7 +24,7 @@
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     public class JacobianEntry
     {

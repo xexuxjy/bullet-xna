@@ -23,10 +23,9 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class GjkEpaSolver2
     {

@@ -22,16 +22,12 @@
  */
 
 
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using System;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using System;
 
-namespace BulletXNA.BulletDynamics.Character
+namespace BulletXNA.BulletDynamics
 {
 	public class KinematicCharacterController : ICharacterControllerInterface
 	{

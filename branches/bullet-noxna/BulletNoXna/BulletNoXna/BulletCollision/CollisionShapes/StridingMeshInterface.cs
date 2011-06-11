@@ -61,29 +61,24 @@ namespace BulletXNA.BulletCollision
 
 		        switch (gfxindextype)
 		        {
-		        case PHY_ScalarType.PHY_INTEGER:
+		            case PHY_ScalarType.PHY_INTEGER:
 			        {
-                        ObjectArray<int> indexList = (ObjectArray<int>)indexbase;
-						//ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
-
-						// hack for now - need to tidy this..
+                        int[] indexList = ((ObjectArray<int>)indexbase).GetRawArray();
 
 						if (vertexbase is ObjectArray<Vector3>)
 						{
-                            ObjectArray<Vector3> vertexList = vertexbase as ObjectArray<Vector3>;
+                            Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
 							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
 								int triIndex = (gfxindex * indexstride);
 
 								int index1 = indexList[triIndex];
 								int index2 = indexList[triIndex+1];
 								int index3 = indexList[triIndex+2];
 
-								triangle[0] = vertexList[indexList[triIndex]] * meshScaling;
-								triangle[1] = vertexList[indexList[triIndex+1]] * meshScaling;
-								triangle[2] = vertexList[indexList[triIndex+2]] * meshScaling;
+								triangle[0] = vertexList[index1] * meshScaling;
+                                triangle[1] = vertexList[index2] * meshScaling;
+                                triangle[2] = vertexList[index3] * meshScaling;
 
 						        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
 						        {
@@ -92,20 +87,14 @@ namespace BulletXNA.BulletCollision
                                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
 						        }
 
-
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
 						}
                         else if (vertexbase is ObjectArray<float>)
 						{
-							//triangle[0] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[1] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[2] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
+							float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();
 							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
 								int triIndex = (gfxindex * indexstride);
 
 								// ugly!!
@@ -114,8 +103,6 @@ namespace BulletXNA.BulletCollision
 								triangle[2] = new Vector3(vertexList[indexList[triIndex+2]], vertexList[indexList[triIndex+2] + 1], vertexList[indexList[triIndex+2] + 2]) * meshScaling;
 								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
-
-
 						}
 						else
 						{
@@ -123,58 +110,9 @@ namespace BulletXNA.BulletCollision
 						}
 				        break;
 			        }
-		        case PHY_ScalarType.PHY_SHORT:
-			        {
-                        ObjectArray<ushort> indexList = (ObjectArray<ushort>)indexbase;
-
-                        if (vertexbase is ObjectArray<Vector3>)
-						{
-							ObjectArray<Vector3> vertexList = (ObjectArray<Vector3>)vertexbase;
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
-								int triIndex = (gfxindex * indexstride);
-
-								triangle[0] = vertexList[indexList[triIndex]] * meshScaling;
-								triangle[1] = vertexList[indexList[triIndex + 1]] * meshScaling;
-								triangle[2] = vertexList[indexList[triIndex + 2]] * meshScaling;
-
-
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-						}
-						else if (vertexbase is ObjectArray<float>)
-						{
-							//triangle[0] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[1] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[2] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
-								int triIndex = (gfxindex * indexstride);
-
-								// ugly!!
-								triangle[0] = new Vector3(vertexList[indexList[triIndex]], vertexList[indexList[triIndex] + 1], vertexList[indexList[triIndex] + 2]) * meshScaling;
-								triangle[1] = new Vector3(vertexList[indexList[triIndex + 1]], vertexList[indexList[triIndex + 1] + 1], vertexList[indexList[triIndex + 1] + 2]) * meshScaling;
-								triangle[2] = new Vector3(vertexList[indexList[triIndex + 2]], vertexList[indexList[triIndex + 2] + 1], vertexList[indexList[triIndex + 2] + 2]) * meshScaling;
-
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-
-
-						}
-						else
-						{
-							Debug.Assert(false); // unsupported type ....
-						}
-						break;
-					}
                 default:
                     {
-                        Debug.Assert((gfxindextype == PHY_ScalarType.PHY_INTEGER) || (gfxindextype == PHY_ScalarType.PHY_SHORT));
+                        Debug.Assert(gfxindextype == PHY_ScalarType.PHY_INTEGER);
                         break;
                     }
 		        }

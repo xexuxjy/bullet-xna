@@ -210,16 +210,16 @@ namespace BulletXNA.BulletCollision
 					    meshInterface.GetLockedReadOnlyVertexIndexBase(out vertexBaseObject,out numverts,out type,out stride,out indexBaseObject,out indexstride,out numfaces,out indicestype,nodeSubPart);
 
 					    curNodeSubPart = nodeSubPart;
-					    Debug.Assert(indicestype==PHY_ScalarType.PHY_INTEGER||indicestype==PHY_ScalarType.PHY_SHORT);
+					    Debug.Assert(indicestype==PHY_ScalarType.PHY_INTEGER);
 				    }
 				    //triangles.getLockedReadOnlyVertexIndexBase(vertexBase,numVerts,
                     int gfxBaseIndex = nodeTriangleIndex*indexstride;
                     //unsigned int* gfxbase = (unsigned int*)(indexbase+nodeTriangleIndex*indexstride);
-                    IList<int> indexBase = (IList<int>)indexBaseObject;
+                    int[] indexBase = (indexBaseObject as ObjectArray<int>).GetRawArray();
 
                     if (vertexBaseObject is IList<Vector3>)
                     {
-                        IList<Vector3> vertexBase = (IList<Vector3>)vertexBaseObject;
+                        Vector3[] vertexBase = (vertexBaseObject as ObjectArray<Vector3>).GetRawArray();
                         for (int j = 2; j >= 0; j--)
                         {
                             int graphicsIndex = indexBase[gfxBaseIndex+j];
@@ -234,9 +234,9 @@ namespace BulletXNA.BulletCollision
                             }
                         }
                     }
-                    else if (vertexBaseObject is IList<float>)
+                    else if (vertexBaseObject is ObjectArray<float>)
                     {
-                        IList<float> vertexBase = (IList<float>)vertexBaseObject;
+                        float[] vertexBase = (vertexBaseObject as ObjectArray<float>).GetRawArray() ;
                         for (int j = 2; j >= 0; j--)
                         {
                             //int graphicsindex = indicestype==PHY_ScalarType.PHY_SHORT?((unsigned short*)gfxbase)[j]:gfxbase[j];
@@ -288,10 +288,10 @@ namespace BulletXNA.BulletCollision
 
 				    {
                         curNode.m_quantizedAabbMin = leftChildNode.m_quantizedAabbMin;
-                        curNode.m_quantizedAabbMin.min(ref rightChildNode.m_quantizedAabbMin);
+                        curNode.m_quantizedAabbMin.Min(ref rightChildNode.m_quantizedAabbMin);
 
                         curNode.m_quantizedAabbMax = leftChildNode.m_quantizedAabbMax;
-                        curNode.m_quantizedAabbMax.max(ref rightChildNode.m_quantizedAabbMax);
+                        curNode.m_quantizedAabbMax.Max(ref rightChildNode.m_quantizedAabbMax);
 				    }
 			    }
 

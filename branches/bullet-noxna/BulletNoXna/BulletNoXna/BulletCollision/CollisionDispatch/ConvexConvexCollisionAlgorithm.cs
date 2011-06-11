@@ -23,7 +23,6 @@
 #define DEBUG_CONTACTS
 //#define BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 

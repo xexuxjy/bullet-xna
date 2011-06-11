@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
         public ObjectArray<int> m_triangleIndexBase = new ObjectArray<int>();
         public int m_triangleIndexStride;
         public int m_numVertices;
-        public ObjectArray<Vector3> m_vertexBase = new ObjectArray<Vector3>();
+        public Object m_vertexBase = null;
         public int m_vertexStride;
         //// The index type is set when adding an indexed mesh to the
         //// btTriangleIndexVertexArray, do not set it manually
@@ -51,15 +51,28 @@ namespace BulletXNA.BulletCollision
 	    }
 
         //just to be backwards compatible
-	    public TriangleIndexVertexArray(int numTriangles,ObjectArray<int> triangleIndexBase,int triangleIndexStride,int numVertices,ObjectArray<Vector3> vertexBase,int vertexStride)
+	    public TriangleIndexVertexArray(int numTriangles,ObjectArray<int> triangleIndexBase,int triangleIndexStride,int numVertices,Object vertexBase,int vertexStride)
         {
+            // ignore the provided stride values as we infer them from the version of the ctor called...
             IndexedMesh indexedMesh = new IndexedMesh();
             indexedMesh.m_numTriangles = numTriangles;
             indexedMesh.m_triangleIndexBase = triangleIndexBase;
-	        indexedMesh.m_triangleIndexStride = triangleIndexStride;
+	        indexedMesh.m_triangleIndexStride = 3;
 	        indexedMesh.m_numVertices = numVertices;
 	        indexedMesh.m_vertexBase = vertexBase;
-	        indexedMesh.m_vertexStride = vertexStride;
+
+            if (vertexBase is ObjectArray<Vector3>)
+            {
+                indexedMesh.m_vertexStride = 1;
+            }
+            else if (vertexBase is ObjectArray<float>)
+            {
+                indexedMesh.m_vertexStride = 3;
+            }
+            else
+            {
+                Debug.Assert(false,"Unsupported vertex object base.");
+            }
 
 	        AddIndexedMesh(indexedMesh,PHY_ScalarType.PHY_INTEGER);
         }

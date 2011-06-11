@@ -31,14 +31,14 @@ namespace BulletXNA.LinearMath
         public ushort Y;
         public ushort Z;
 
-        public void min(ref UShortVector3 a)
+        public void Min(ref UShortVector3 a)
         {
             if (X > a.X) X = a.X;
             if (Y > a.Y) Y = a.Y;
             if (Z > a.Z) Z = a.Z;
         }
 
-        public void max(ref UShortVector3 a)
+        public void Max(ref UShortVector3 a)
         {
             if (X < a.X) X = a.X;
             if (Y < a.Y) Y = a.Y;

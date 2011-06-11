@@ -22,7 +22,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
@@ -120,6 +119,15 @@ namespace BulletXNA.BulletCollision
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
             AabbUtil2.TransformAabb(ref halfExtents, Margin, ref trans, out aabbMin, out aabbMax);
+            	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxShape)
+	    {
+		    BulletGlobals.g_streamWriter.WriteLine("box::getAabb");
+            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "halfExtentWithout", GetHalfExtentsWithoutMargin());
+            MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transform", trans);
+            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "outMin", aabbMin);
+            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "outMax", aabbMax);
+	    }
+
         }
 
         public override void CalculateLocalInertia(float mass, out Vector3 inertia)
@@ -334,6 +342,12 @@ namespace BulletXNA.BulletCollision
                 penetrationVector = Vector3.Zero;
                 break;
 		    }
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxShape)
+            {
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Box::GetPreferredPenetrationDirection", penetrationVector);
+            }
+
 	    }
 
     }

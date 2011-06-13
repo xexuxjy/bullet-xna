@@ -43,7 +43,7 @@ namespace BulletXNA.BulletDynamics
 			CalculateTransforms();
 		}
 
-		protected Generic6DofConstraint(RigidBody rbB, ref Matrix frameInB, bool useLinearReferenceFrameB)
+		public Generic6DofConstraint(RigidBody rbB, ref Matrix frameInB, bool useLinearReferenceFrameB)
 			: base(TypedConstraintType.D6, GetFixedBody(), rbB)
 		{
 			m_frameInB = frameInB;

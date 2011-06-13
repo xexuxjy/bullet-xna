@@ -630,7 +630,8 @@ namespace DemoFramework
 
                                     if (use6Dof)
                                     {
-                                        Generic6DofConstraint dof6 = null;// new Generic6DofConstraint(body, Matrix.CreateTranslation(localPivot), false);
+                                        BulletXNA.LinearMath.Matrix localPivotTransform = BulletXNA.LinearMath.Matrix.CreateTranslation(localPivot);
+                                        Generic6DofConstraint dof6 = new Generic6DofConstraint(body, ref localPivotTransform, false);
                                         dof6.SetLinearLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
                                         dof6.SetLinearUpperLimit(BulletXNA.LinearMath.Vector3.Zero);
                                         dof6.SetAngularLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
@@ -702,7 +703,7 @@ namespace DemoFramework
 
                     if (pickConstraint.ConstraintType == TypedConstraintType.D6)
                     {
-                        Generic6DofConstraint pickCon = (Generic6DofConstraint)pickConstraint;
+                        Generic6DofConstraint pickCon = pickConstraint as Generic6DofConstraint;
 
                         //keep it at the same picking distance
                         BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
@@ -719,10 +720,12 @@ namespace DemoFramework
                         BulletXNA.LinearMath.Matrix tempFrameOffsetA = pickCon.GetFrameOffsetA();
                         tempFrameOffsetA.Translation = newPivotB;
                         //pickCon.FrameOffsetA = tempFrameOffsetA;
+                        BulletXNA.LinearMath.Matrix tempFrameOffsetB = pickCon.GetFrameOffsetB();
+                        pickCon.SetFrames(ref tempFrameOffsetA, ref tempFrameOffsetB);
                     }
                     else
                     {
-                        Point2PointConstraint pickCon = (Point2PointConstraint)pickConstraint;
+                        Point2PointConstraint pickCon = pickConstraint as Point2PointConstraint;
 
                         //keep it at the same picking distance
                         BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);

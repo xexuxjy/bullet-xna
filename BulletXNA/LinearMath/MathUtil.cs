@@ -98,6 +98,13 @@ namespace BulletXNA
 
         }
 
+        public static void InverseTransform(ref Matrix m, ref Vector3 v, out Vector3 o)
+        {
+            Vector3 v1 = v - m.Translation;
+            Matrix m2 = TransposeBasis(ref m);
+            Vector3.TransformNormal(ref v1, ref m2, out o);
+        }
+
         public static Vector3 InverseTransform(ref Matrix m, ref Vector3 v)
         {
             Vector3 v1 = v - m.Translation;
@@ -112,7 +119,7 @@ namespace BulletXNA
             Matrix ba = MathUtil.BasisMatrix(ref mA);
             ba = Matrix.Transpose(ba);
             Matrix bb = MathUtil.BasisMatrix(ref mB);
-            return BulletMatrixMultiply(ba, bb);
+            return BulletMatrixMultiply(ref ba, ref bb);
         }
 
         public static Matrix InverseTimes(Matrix a, Matrix b)
@@ -198,7 +205,7 @@ namespace BulletXNA
             if (a.W > maxVal)
             {
                 maxIndex = 3;
-                maxVal = a.W;
+                //maxVal = a.W;
             }
             return maxIndex;
         }
@@ -221,109 +228,101 @@ namespace BulletXNA
 
         public static float VectorComponent(ref Vector3 v, int i)
         {
-            if (i == 0) return v.X;
-            if (i == 1) return v.Y;
-            if (i == 2) return v.Z;
-            Debug.Assert(false);
-            return 0.0f;
+            switch (i)
+            {
+                case 0:
+                    return v.X;
+                case 1:
+                    return v.Y;
+                case 2:
+                    return v.Z;
+                default:
+                    Debug.Assert(false);
+                    return 0.0f;
+            }
         }
 
         public static void VectorComponent(ref Vector3 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X = f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y = f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z = f;
-                return;
+                case 0:
+                    v.X = f;
+                    return;
+                case 1:
+                    v.Y = f;
+                    return;
+                case 2:
+                    v.Z = f;
+                    return;
             }
             Debug.Assert(false);
         }
 
         public static void VectorComponentAddAssign(ref Vector3 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X += f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y += f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z += f;
-                return;
+                case 0:
+                    v.X += f;
+                    return;
+                case 1:
+                    v.Y += f;
+                    return;
+                case 2:
+                    v.Z += f;
+                    return;
             }
             Debug.Assert(false);
         }
 
         public static void VectorComponentMinusAssign(ref Vector3 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X -= f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y -= f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z -= f;
-                return;
+                case 0:
+                    v.X -= f;
+                    return;
+                case 1:
+                    v.Y -= f;
+                    return;
+                case 2:
+                    v.Z -= f;
+                    return;
             }
             Debug.Assert(false);
         }
 
         public static void VectorComponentMultiplyAssign(ref Vector3 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X *= f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y *= f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z *= f;
-                return;
+                case 0:
+                    v.X *= f;
+                    return;
+                case 1:
+                    v.Y *= f;
+                    return;
+                case 2:
+                    v.Z *= f;
+                    return;
             }
             Debug.Assert(false);
         }
 
         public static void VectorComponentDivideAssign(ref Vector3 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X /= f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y /= f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z /= f;
-                return;
+                case 0:
+                    v.X /= f;
+                    return;
+                case 1:
+                    v.Y /= f;
+                    return;
+                case 2:
+                    v.Z /= f;
+                    return;
             }
             Debug.Assert(false);
         }
@@ -336,37 +335,40 @@ namespace BulletXNA
 
         public static float VectorComponent(ref Vector4 v, int i)
         {
-            if (i == 0) return v.X;
-            if (i == 1) return v.Y;
-            if (i == 2) return v.Z;
-            if (i == 3) return v.W;
-            Debug.Assert(false);
-            return 0.0f;
+            switch (i)
+            {
+                case 0:
+                    return v.X;
+                case 1:
+                    return v.Y;
+                case 2:
+                    return v.Z;
+                case 3:
+                    return v.W;
+                default:
+                    Debug.Assert(false);
+                    return 0.0f;
+            }
         }
 
 
 
         public static void VectorComponent(ref Vector4 v, int i, float f)
         {
-            if (i == 0)
+            switch (i)
             {
-                v.X = f;
-                return;
-            }
-            if (i == 1)
-            {
-                v.Y = f;
-                return;
-            }
-            if (i == 2)
-            {
-                v.Z = f;
-                return;
-            }
-            if (i == 3)
-            {
-                v.W = f;
-                return;
+                case 0:
+                    v.X = f;
+                    return;
+                case 1:
+                    v.Y = f;
+                    return;
+                case 2:
+                    v.Z = f;
+                    return;
+                case 3:
+                    v.W = f;
+                    return;
             }
             Debug.Assert(false);
         }
@@ -415,22 +417,26 @@ namespace BulletXNA
         public static void RotateVector(ref Vector3 vec, ref Matrix m, out Vector3 output)
         {
             Quaternion rotation;
-            Vector3 scale;
-            Vector3 translation;
-            m.Decompose(out scale, out rotation, out translation);
+            Vector3 component;
+            m.Decompose(out component, out rotation, out component);
             output = Vector3.Transform(vec, rotation);
         }
 
         public static void TransformAabb(Vector3 halfExtents, float margin, Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
-            TransformAabb(ref halfExtents,margin,ref trans,out aabbMinOut,out aabbMaxOut);
+            //TransformAabb(ref halfExtents,margin,ref trans,out aabbMinOut,out aabbMaxOut);
+            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
+            Vector3 center, extent;
+            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
+            aabbMinOut = center - extent;
+            aabbMaxOut = center + extent;
         }
 
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
-            Vector3 center = Vector3.Zero, extent;
-            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, ref center, out extent);
+            Vector3 center, extent;
+            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
         }
@@ -461,7 +467,7 @@ namespace BulletXNA
             aabbMaxOut = center + extent;
         }
 
-        public static void AbsoluteExtents(ref Matrix trans, ref Vector3 vec, ref Vector3 center, out Vector3 extent)
+        public static void AbsoluteExtents(ref Matrix trans, ref Vector3 vec, out Vector3 center, out Vector3 extent)
         {
             Matrix abs_b;
             AbsoluteMatrix(ref trans, out abs_b);
@@ -479,62 +485,58 @@ namespace BulletXNA
 
         public static void SetMatrixVector(ref Matrix matrix, int row, ref Vector3 vector)
         {
-            if (row == 0)
+            switch (row)
             {
-                matrix.M11 = vector.X;
-                matrix.M12 = vector.Y;
-                matrix.M13 = vector.Z;
+                case 0:
+                    matrix.M11 = vector.X;
+                    matrix.M12 = vector.Y;
+                    matrix.M13 = vector.Z;
+                    return;
+                case 1:
+                    matrix.M21 = vector.X;
+                    matrix.M22 = vector.Y;
+                    matrix.M23 = vector.Z;
+                    return;
+                case 2:
+                    matrix.M31 = vector.X;
+                    matrix.M32 = vector.Y;
+                    matrix.M33 = vector.Z;
+                    return;
+                case 3:
+                    matrix.M41 = vector.X;
+                    matrix.M42 = vector.Y;
+                    matrix.M43 = vector.Z;
+                    return;
             }
-            else if (row == 1)
-            {
-                matrix.M21 = vector.X;
-                matrix.M22 = vector.Y;
-                matrix.M23 = vector.Z;
-            }
-            else if (row == 2)
-            {
-                matrix.M31 = vector.X;
-                matrix.M32 = vector.Y;
-                matrix.M33 = vector.Z;
-            }
-            else if (row == 4)
-            {
-                matrix.M41 = vector.X;
-                matrix.M42 = vector.Y;
-                matrix.M43 = vector.Z;
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
+            Debug.Assert(false);
         }
 
         public static void AddMatrixVector(ref Matrix matrix, int row, ref Vector3 vector)
         {
-            if (row == 0)
+            switch (row)
             {
-                matrix.M11 += vector.X;
-                matrix.M12 += vector.Y;
-                matrix.M13 += vector.Z;
+                case 0:
+                    matrix.M11 += vector.X;
+                    matrix.M12 += vector.Y;
+                    matrix.M13 += vector.Z;
+                    return;
+                case 1:
+                    matrix.M21 += vector.X;
+                    matrix.M22 += vector.Y;
+                    matrix.M23 += vector.Z;
+                    return;
+                case 2:
+                    matrix.M31 += vector.X;
+                    matrix.M32 += vector.Y;
+                    matrix.M33 += vector.Z;
+                    return;
+                case 3:
+                    matrix.M41 += vector.X;
+                    matrix.M42 += vector.Y;
+                    matrix.M43 += vector.Z;
+                    return;
             }
-            else if (row == 1)
-            {
-                matrix.M21 += vector.X;
-                matrix.M22 += vector.Y;
-                matrix.M23 += vector.Z;
-            }
-            else if (row == 2)
-            {
-                matrix.M31 += vector.X;
-                matrix.M32 += vector.Y;
-                matrix.M33 += vector.Z;
-            }
-            else if (row == 3)
-            {
-                matrix.M41 += vector.X;
-                matrix.M42 += vector.Y;
-                matrix.M43 += vector.Z;
-            }
+            Debug.Assert(false);
         }
 
         public static float Vector3Triple(ref Vector3 a, ref Vector3 b, ref Vector3 c)
@@ -559,49 +561,65 @@ namespace BulletXNA
         
         public static float MatrixComponent(ref Matrix m, int row, int column)
         {
-            if (row == 0 && column == 0) return m.M11;
-            if (row == 0 && column == 1) return m.M12;
-            if (row == 0 && column == 2) return m.M13;
-            if (row == 0 && column == 3) return m.M14;
-
-            if (row == 1 && column == 0) return m.M21;
-            if (row == 1 && column == 1) return m.M22;
-            if (row == 1 && column == 2) return m.M23;
-            if (row == 1 && column == 3) return m.M24;
-
-            if (row == 2 && column == 0) return m.M31;
-            if (row == 2 && column == 1) return m.M32;
-            if (row == 2 && column == 2) return m.M33;
-            if (row == 2 && column == 3) return m.M34;
-
-            if (row == 3 && column == 0) return m.M41;
-            if (row == 3 && column == 1) return m.M42;
-            if (row == 3 && column == 2) return m.M43;
-            if (row == 3 && column == 3) return m.M44;
+            switch (row)
+            {
+                case 0:
+                    if (column == 0) return m.M11;
+                    if (column == 1) return m.M12;
+                    if (column == 2) return m.M13;
+                    if (column == 3) return m.M14;
+                    break;
+                case 1:
+                    if (column == 0) return m.M21;
+                    if (column == 1) return m.M22;
+                    if (column == 2) return m.M23;
+                    if (column == 3) return m.M24;
+                    break;
+                case 2:
+                    if (column == 0) return m.M31;
+                    if (column == 1) return m.M32;
+                    if (column == 2) return m.M33;
+                    if (column == 3) return m.M34;
+                    break;
+                case 3:
+                    if (column == 0) return m.M41;
+                    if (column == 1) return m.M42;
+                    if (column == 2) return m.M43;
+                    if (column == 3) return m.M44;
+                    break;
+            }
             return 0;
         }
 
         public static void MatrixComponent(ref Matrix m, int row, int column, float val)
         {
-            if (row == 0 && column == 0) { m.M11 = val; return; }
-            if (row == 0 && column == 1) {m.M12 = val; return;}
-            if (row == 0 && column == 2) {m.M13 = val; return;}
-            if (row == 0 && column == 3) {m.M14 = val; return;}
-
-            if (row == 1 && column == 0) {m.M21 = val; return;}
-            if (row == 1 && column == 1) {m.M22 = val; return;}
-            if (row == 1 && column == 2) {m.M23 = val; return;}
-            if (row == 1 && column == 3) {m.M24 = val; return;}
-
-            if (row == 2 && column == 0) {m.M31 = val; return;}
-            if (row == 2 && column == 1) {m.M32 = val; return;}
-            if (row == 2 && column == 2) {m.M33 = val; return;}
-            if (row == 2 && column == 3) {m.M34 = val; return;}
-
-            if (row == 3 && column == 0) {m.M41 = val; return;}
-            if (row == 3 && column == 1) {m.M42 = val; return;}
-            if (row == 3 && column == 2) {m.M43 = val; return;}
-            if (row == 3 && column == 3) {m.M44 = val; return;}
+            switch (row)
+            {
+                case 0:
+                    if (column == 0) m.M11 = val;
+                    if (column == 1) m.M12 = val;
+                    if (column == 2) m.M13 = val;
+                    if (column == 3) m.M14 = val;
+                    break;
+                case 1:
+                    if (column == 0) m.M21 = val;
+                    if (column == 1) m.M22 = val;
+                    if (column == 2) m.M23 = val;
+                    if (column == 3) m.M24 = val;
+                    break;
+                case 2:
+                    if (column == 0) m.M31 = val;
+                    if (column == 1) m.M32 = val;
+                    if (column == 2) m.M33 = val;
+                    if (column == 3) m.M34 = val;
+                    break;
+                case 3:
+                    if (column == 0) m.M41 = val;
+                    if (column == 1) m.M42 = val;
+                    if (column == 2) m.M43 = val;
+                    if (column == 3) m.M44 = val;
+                    break;
+            }
         }
 
         public static Vector3 MatrixColumn(Matrix matrix, int row)
@@ -623,56 +641,62 @@ namespace BulletXNA
 
         public static void MatrixColumn(ref Matrix matrix, int row, out Vector3 vectorRow)
         {
-            if (row == 0)
+            switch (row)
             {
-                vectorRow = new Vector3(matrix.M11,matrix.M12,matrix.M13);
-            }
-            else if (row == 1)
-            {
-                vectorRow = new Vector3(matrix.M21, matrix.M22, matrix.M23);
-            }
-            else if (row == 2)
-            {
-                vectorRow = new Vector3(matrix.M31, matrix.M32, matrix.M33);
-            }
-            else if (row == 3)
-            {
-                vectorRow = new Vector3(matrix.M41, matrix.M42, matrix.M43);
-            }
-            else
-            {
-                vectorRow = Vector3.Zero;
+                case 0:
+                    vectorRow = new Vector3(matrix.M11, matrix.M12, matrix.M13);
+                    break;
+                case 1:
+                    vectorRow = new Vector3(matrix.M21, matrix.M22, matrix.M23);
+                    break;
+                case 2:
+                    vectorRow = new Vector3(matrix.M31, matrix.M32, matrix.M33);
+                    break;
+                case 3:
+                    vectorRow = new Vector3(matrix.M41, matrix.M42, matrix.M43);
+                    break;
+                default:
+                    vectorRow = Vector3.Zero;
+                    break;
             }
         }
 
         public static Vector3 MatrixRow(ref Matrix matrix, int row)
         {
-            Vector3 result = Vector3.Zero;
-            MatrixRow(ref matrix, row, ref result);
-            return result;
+            switch (row)
+            {
+                case 0:
+                    return new Vector3(matrix.M11, matrix.M21, matrix.M31);
+                case 1:
+                    return new Vector3(matrix.M12, matrix.M22, matrix.M32);
+                case 2:
+                    return new Vector3(matrix.M13, matrix.M23, matrix.M33);
+                case 3:
+                    return new Vector3(matrix.M41, matrix.M42, matrix.M43);
+                default:
+                    return Vector3.Zero;
+            }
         }
 
-        public static void MatrixRow(ref Matrix matrix, int row, ref Vector3 vectorRow)
+        public static void MatrixRow(ref Matrix matrix, int row, out Vector3 vectorRow)
         {
-            if (row == 0)
+            switch (row)
             {
-                vectorRow = new Vector3(matrix.M11, matrix.M21, matrix.M31);
-            }
-            else if (row == 1)
-            {
-                vectorRow = new Vector3(matrix.M12, matrix.M22, matrix.M32);
-            }
-            else if (row == 2)
-            {
-                vectorRow = new Vector3(matrix.M13, matrix.M23, matrix.M33);
-            }
-            else if (row == 3)
-            {
-                vectorRow = new Vector3(matrix.M41, matrix.M42, matrix.M43);
-            }
-            else
-            {
-                vectorRow = Vector3.Zero;
+                case 0:
+                    vectorRow = new Vector3(matrix.M11, matrix.M21, matrix.M31);
+                    break;
+                case 1:
+                    vectorRow = new Vector3(matrix.M12, matrix.M22, matrix.M32);
+                    break;
+                case 2:
+                    vectorRow = new Vector3(matrix.M13, matrix.M23, matrix.M33);
+                    break;
+                case 3:
+                    vectorRow = new Vector3(matrix.M41, matrix.M42, matrix.M43);
+                    break;
+                default:
+                    vectorRow = Vector3.Zero;
+                    break;
             }
         }
 
@@ -755,8 +779,7 @@ namespace BulletXNA
 
         public static bool FuzzyZero(float val)
         {
-            float holder = Math.Abs(val);
-            return holder <= SIMD_EPSILON;
+            return Math.Abs(val) <= SIMD_EPSILON;
         }
 
         public static uint Select(uint condition, uint valueIfConditionNonZero, uint valueIfConditionZero) 
@@ -769,16 +792,18 @@ namespace BulletXNA
             uint testEqz = ~testNz;
             return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz)); 
         }
+
         public static void BasisMatrix(Matrix matrixIn, out Matrix matrixOut)
         {
             BasisMatrix(ref matrixIn, out matrixOut);
         }
         public static void BasisMatrix(ref Matrix matrixIn, out Matrix matrixOut)
         {
-            matrixOut = Matrix.Identity;
-            matrixOut.Right = matrixIn.Right;
-            matrixOut.Up = matrixIn.Up;
-            matrixOut.Backward = matrixIn.Backward;
+            matrixOut = matrixIn;
+            matrixOut.M41 = 0.0f;
+            matrixOut.M42 = 0.0f;
+            matrixOut.M43 = 0.0f;
+            matrixOut.M44 = 1.0f;
         }
 
         public static Matrix BasisMatrix(Matrix matrixIn)
@@ -787,10 +812,11 @@ namespace BulletXNA
         }
         public static Matrix BasisMatrix(ref Matrix matrixIn)
         {
-            Matrix matrixOut = Matrix.Identity;
-            matrixOut.Right = matrixIn.Right;
-            matrixOut.Up = matrixIn.Up;
-            matrixOut.Backward = matrixIn.Backward;
+            Matrix matrixOut = matrixIn;
+            matrixOut.M41 = 0.0f;
+            matrixOut.M42 = 0.0f;
+            matrixOut.M43 = 0.0f;
+            matrixOut.M44 = 1.0f;
             return matrixOut;
         }
 
@@ -1145,12 +1171,12 @@ namespace BulletXNA
 
         public static Matrix BulletMatrixMultiply(Matrix m1, Matrix m2)
         {
-            return BulletMatrixMultiply(ref m1, ref m2);
+            return Matrix.Multiply(m2, m1);
         }
 
         public static Matrix BulletMatrixMultiply(ref Matrix m1, ref Matrix m2)
         {
-            return m2 * m1;
+            return Matrix.Multiply(m2, m1);
         }
 
         public static Matrix BulletMatrixMultiplyBasis(Matrix m1, Matrix m2)
@@ -1195,19 +1221,21 @@ namespace BulletXNA
 
         public static Vector3 Interpolate3(Vector3 v0, Vector3 v1, float rt)
         {
-            return Interpolate3(ref v0, ref v1, rt);
+            float s = 1.0f - rt;
+            return new Vector3(
+                s * v0.X + rt * v1.X,
+                s * v0.Y + rt * v1.Y,
+                s * v0.Z + rt * v1.Z);
         }
 
 
         public static Vector3 Interpolate3(ref Vector3 v0, ref Vector3 v1, float rt)
         {
-            Vector3 result = Vector3.Zero;
             float s = 1.0f - rt;
-            result.X = s * v0.X + rt * v1.X;
-            result.Y = s * v0.Y + rt * v1.Y;
-            result.Z = s * v0.Z + rt * v1.Z;
-
-            return result;
+            return new Vector3(
+                s * v0.X + rt * v1.X,
+                s * v0.Y + rt * v1.Y,
+                s * v0.Z + rt * v1.Z);
         }
 
 		public static Matrix SetEulerZYX(float eulerX, float eulerY, float eulerZ)

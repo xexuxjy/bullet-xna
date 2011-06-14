@@ -52,9 +52,9 @@ namespace BulletXNA.BulletCollision
         public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
         {
             /// compute linear and angular velocity for this interval, to interpolate
-            Vector3 linVelA = Vector3.Zero, angVelA = Vector3.Zero, linVelB = Vector3.Zero, angVelB = Vector3.Zero;
-            TransformUtil.CalculateVelocity(ref fromA, ref toA, 1f, ref linVelA, ref angVelA);
-            TransformUtil.CalculateVelocity(ref fromB, ref toB, 1f, ref linVelB, ref angVelB);
+            Vector3 linVelA, angVelA, linVelB, angVelB;
+            TransformUtil.CalculateVelocity(ref fromA, ref toA, 1f, out linVelA, out angVelA);
+            TransformUtil.CalculateVelocity(ref fromB, ref toB, 1f, out linVelB, out angVelB);
 
             float boundingRadiusA = m_convexA.GetAngularMotionDisc();
             float boundingRadiusB = m_convexB1 != null ? m_convexB1.GetAngularMotionDisc() : 0.0f;

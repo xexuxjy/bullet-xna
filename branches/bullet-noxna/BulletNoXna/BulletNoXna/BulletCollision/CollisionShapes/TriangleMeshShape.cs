@@ -48,7 +48,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual Vector3 LocalGetSupportingVertex(ref Vector3 vec)
         {
-	        Vector3 supportVertex = new Vector3();
+	        Vector3 supportVertex;
 
             Matrix ident = Matrix.Identity;
 

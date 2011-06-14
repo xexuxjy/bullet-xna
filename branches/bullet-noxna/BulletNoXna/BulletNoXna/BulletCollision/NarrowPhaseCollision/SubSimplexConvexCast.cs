@@ -202,7 +202,7 @@ namespace BulletXNA.BulletCollision
             float dist2 = v.LengthSquared();
             float epsilon = 0.0001f;
 
-            Vector3 w = Vector3.Zero, p = Vector3.Zero;
+            Vector3 w, p;
             float VdotR;
 
             while ((dist2 > epsilon) && (maxIter-- != 0))

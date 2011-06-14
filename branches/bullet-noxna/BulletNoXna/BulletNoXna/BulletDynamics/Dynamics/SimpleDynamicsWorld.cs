@@ -167,7 +167,7 @@ namespace BulletXNA.BulletDynamics
 
 		public override void UpdateAabbs()
 		{
-			Matrix predictedTrans = Matrix.Identity;
+			//Matrix predictedTrans = Matrix.Identity;
 			foreach (CollisionObject colObj in m_collisionObjects)
 			{
 				RigidBody body = RigidBody.Upcast(colObj);

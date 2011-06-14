@@ -131,7 +131,7 @@ namespace BulletXNA.BulletCollision
             float planeConstant = planeShape.GetPlaneConstant();
 
             Matrix convexWorldTransform = convexObj.GetWorldTransform();
-            Matrix convexInPlaneTrans = Matrix.Identity;
+            Matrix convexInPlaneTrans;
 
             convexInPlaneTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(planeObj.GetWorldTransform()), convexWorldTransform);
 
@@ -139,9 +139,9 @@ namespace BulletXNA.BulletCollision
 
             // MAN - CHECKTHIS
             Matrix rotMatrix = Matrix.CreateFromQuaternion(perturbeRot);
-            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(convexWorldTransform, rotMatrix);
+            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(ref convexWorldTransform, ref rotMatrix);
 
-            Matrix planeInConvex = Matrix.Identity;
+            Matrix planeInConvex;
             planeInConvex = MathUtil.BulletMatrixMultiply(Matrix.Invert(convexWorldTransform), planeObj.GetWorldTransform());
 
             Vector3 tmp = Vector3.TransformNormal(-planeNormal, planeInConvex);

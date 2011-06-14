@@ -1271,10 +1271,8 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
             m_world = world;
             m_resultCallback = resultCallback;
-            m_rayFromTrans = Matrix.Identity;
-            m_rayFromTrans.Translation = m_rayFromWorld;
-            m_rayToTrans = Matrix.Identity;
-            m_rayToTrans.Translation = m_rayToWorld;
+            m_rayFromTrans = Matrix.CreateTranslation(m_rayFromWorld);
+            m_rayToTrans = Matrix.CreateTranslation(m_rayToWorld);
 
             Vector3 rayDir = (rayToWorld - rayFromWorld);
 

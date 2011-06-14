@@ -145,7 +145,7 @@ namespace BulletXNA.BulletCollision
 
                 Vector3 localAabbMin;
                 Vector3 localAabbMax;
-                Matrix otherInCompoundSpace = Matrix.Identity;
+                Matrix otherInCompoundSpace;
                 //otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
                 otherInCompoundSpace = MathUtil.InverseTimes(colObj.GetWorldTransform(), otherObj.GetWorldTransform());
 

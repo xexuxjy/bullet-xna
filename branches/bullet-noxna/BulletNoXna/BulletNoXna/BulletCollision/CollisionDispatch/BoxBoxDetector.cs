@@ -57,15 +57,6 @@ namespace BulletXNA.BulletCollision
 
             int skip = 0;
             Object contact = null;
-            Matrix rotateA = Matrix.Identity;
-            rotateA.Backward = transformA.Backward;
-            rotateA.Right = transformA.Right;
-            rotateA.Up = transformA.Up;
-
-            Matrix rotateB = Matrix.Identity;
-            rotateB.Backward = transformB.Backward;
-            rotateB.Right = transformB.Right;
-            rotateB.Up = transformB.Up;
 
             IndexedVector3 normal = new IndexedVector3();
             float depth = 0f;
@@ -82,42 +73,40 @@ namespace BulletXNA.BulletCollision
 
             //Vector3 box1Margin = 2f * debugExtents;
             //Vector3 box2Margin = 2f * debugExtents;
-            rotateA = Matrix.Transpose(rotateA);
-            rotateB = Matrix.Transpose(rotateB);
 
-            float[] temp1 = s_temp1;
-            float[] temp2 = s_temp2;
+            Matrix rotateA = MathUtil.TransposeBasis(ref transformA);
+            Matrix rotateB = MathUtil.TransposeBasis(ref transformB);
 
-            temp1[0] = rotateA.M11;
-            temp1[1] = rotateA.M12;
-            temp1[2] = rotateA.M13;
+            s_temp1[0] = rotateA.M11;
+            s_temp1[1] = rotateA.M12;
+            s_temp1[2] = rotateA.M13;
 
-            temp1[4] = rotateA.M21;
-            temp1[5] = rotateA.M22;
-            temp1[6] = rotateA.M23;
+            s_temp1[4] = rotateA.M21;
+            s_temp1[5] = rotateA.M22;
+            s_temp1[6] = rotateA.M23;
 
-            temp1[8] = rotateA.M31;
-            temp1[9] = rotateA.M32;
-            temp1[10] = rotateA.M33;
+            s_temp1[8] = rotateA.M31;
+            s_temp1[9] = rotateA.M32;
+            s_temp1[10] = rotateA.M33;
 
 
-            temp2[0] = rotateB.M11;
-            temp2[1] = rotateB.M12;
-            temp2[2] = rotateB.M13;
+            s_temp2[0] = rotateB.M11;
+            s_temp2[1] = rotateB.M12;
+            s_temp2[2] = rotateB.M13;
 
-            temp2[4] = rotateB.M21;
-            temp2[5] = rotateB.M22;
-            temp2[6] = rotateB.M23;
+            s_temp2[4] = rotateB.M21;
+            s_temp2[5] = rotateB.M22;
+            s_temp2[6] = rotateB.M23;
 
-            temp2[8] = rotateB.M31;
-            temp2[9] = rotateB.M32;
-            temp2[10] = rotateB.M33;
+            s_temp2[8] = rotateB.M31;
+            s_temp2[9] = rotateB.M32;
+            s_temp2[10] = rotateB.M33;
 
             DBoxBox2(ref translationA,
-            temp1,
+            s_temp1,
             ref box1Margin,
             ref translationB,
-            temp2,
+            s_temp2,
             ref box2Margin,
             ref normal, ref depth, ref return_code,
             maxc, contact, skip,
@@ -131,7 +120,7 @@ namespace BulletXNA.BulletCollision
         ref IndexedVector3 normal, ref float depth, ref int return_code,
         int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output)
         {
-            Vector3 centerDifference = Vector3.Zero, ppv = Vector3.Zero;
+            //Vector3 centerDifference = Vector3.Zero, ppv = Vector3.Zero;
             float[] normalR = null;
             int normalROffsetResult = 0;
 
@@ -879,47 +868,58 @@ namespace BulletXNA.BulletCollision
             return false;
         }
 
-        private static float DDOT(ref IndexedVector3 a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(ref a, ref b, aOffset, bOffset, 1, 1); }
+        //#define dDOTpq(a,b,p,q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
 
-        private static float DDOT(ref IndexedVector3 a, int aOffset, float[] b, int bOffset) { return DDOTpq(ref a, b, aOffset, bOffset, 1, 1); }
-
-        private static float DDOT(float[] a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(a, ref b, aOffset, bOffset, 1, 1); }
-
-
-        private static float DDOT44(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 4); }
-        private static float DDOT41(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 1); }
-        private static float DDOT41(float[] a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(a, ref b, aOffset, bOffset, 4, 1); }
-
-        private static float DDOT14(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 1, 4); }
-
-        private static float DDOT14(ref IndexedVector3 a, int aOffset, float[] b, int bOffset) { return DDOTpq(ref a, b, aOffset, bOffset, 1, 4); }
-
-
-        private static float DDOTpq(float[] a, ref IndexedVector3 b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(ref IndexedVector3 a, int aOffset, ref IndexedVector3 b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
+            //return DDOTpq(ref a, ref b, aOffset, bOffset, 1, 1);
+            return a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset];
         }
 
-        private static float DDOTpq(ref IndexedVector3 a, float[] b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(ref IndexedVector3 a, int aOffset, float[] b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(ref a, b, aOffset, bOffset, 1, 1);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset]);
         }
 
-        private static float DDOTpq(ref IndexedVector3 a, ref IndexedVector3 b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(float[] a, int aOffset, ref IndexedVector3 b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(a, ref b, aOffset, bOffset, 1, 1);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset]);
         }
 
 
-
-        private static float DDOTpq(float[] a, float[] b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT44(float[] a, int aOffset, float[] b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(a, b, aOffset, bOffset, 4, 4);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[4 + bOffset] + a[8 + aOffset] * b[8 + bOffset]);
         }
+
+        private static float DDOT41(float[] a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(a, b, aOffset, bOffset, 4, 1);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[1 + bOffset] + a[8 + aOffset] * b[2 + bOffset]);
+        }
+        
+        private static float DDOT41(float[] a, int aOffset, ref IndexedVector3 b, int bOffset)
+        {
+            //return DDOTpq(a, ref b, aOffset, bOffset, 4, 1);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[1 + bOffset] + a[8 + aOffset] * b[2 + bOffset]);
+        }
+
+        private static float DDOT14(float[] a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(a, b, aOffset, bOffset, 1, 4);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[4 + bOffset] + a[2 + aOffset] * b[8 + bOffset]);
+        }
+
+        private static float DDOT14(ref IndexedVector3 a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(ref a, b, aOffset, bOffset, 1, 4);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[4 + bOffset] + a[2 + aOffset] * b[8 + bOffset]);
+        }
+
 
         public static void DMULTIPLY1_331(ref IndexedVector3 A, float[] B, ref IndexedVector3 C)
         {

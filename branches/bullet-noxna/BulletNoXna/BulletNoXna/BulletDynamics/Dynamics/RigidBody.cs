@@ -1002,7 +1002,7 @@ namespace BulletXNA.BulletDynamics
 		///When a motionState is provided, the rigid body will initialize its world transform from the motion state
 		///In this case, m_startWorldTransform is ignored.
 		public IMotionState		m_motionState;
-		public Matrix	m_startWorldTransform= Matrix.Identity;
+		public Matrix	m_startWorldTransform;
 
 		public CollisionShape	m_collisionShape;
 		public Vector3			m_localInertia;

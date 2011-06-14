@@ -569,23 +569,19 @@ namespace BulletXNA.BulletDynamics
         {
             BulletGlobals.StartProfile("predictUnconstraintMotion");
 			int length = m_nonStaticRigidBodies.Count;
-			for (int i = 0; i < length; ++i)
-			{
-				RigidBody body = m_nonStaticRigidBodies[i];
-				if (body != null)
-		        {
-			        if (!body.IsStaticOrKinematicObject)
-			        {
-        				
-				        body.IntegrateVelocities( timeStep);
-				        //damping
-				        body.ApplyDamping(timeStep);
-                        Matrix temp;
-				        body.PredictIntegratedTransform(timeStep, out temp);
-                        body.SetInterpolationWorldTransform(ref temp);
-			        }
-		        }
-	        }
+            for (int i = 0; i < length; ++i)
+            {
+                RigidBody body = m_nonStaticRigidBodies[i];
+                if (!body.IsStaticOrKinematicObject)
+                {
+                    body.IntegrateVelocities(timeStep);
+                    //damping
+                    body.ApplyDamping(timeStep);
+                    Matrix temp;
+                    body.PredictIntegratedTransform(timeStep, out temp);
+                    body.SetInterpolationWorldTransform(ref temp);
+                }
+            }
             BulletGlobals.StopProfile();
         }
 

@@ -426,10 +426,10 @@ namespace BulletXNA
 							float sy = (float)Math.Sin(ay);
 							float cz = (float)Math.Cos(az);
 							float sz = (float)Math.Sin(az);
-							Vector3 ref1 = new Vector3();
-							ref1.X = cy * cz * axis.X + cy * sz * axis.Y - sy * axis.Z;
-							ref1.Y = -sz * axis.X + cz * axis.Y;
-							ref1.Z = cz * sy * axis.X + sz * sy * axis.Y + cy * axis.Z;
+							Vector3 ref1 = new Vector3(
+							    cy * cz * axis.X + cy * sz * axis.Y - sy * axis.Z,
+							    -sz * axis.X + cz * axis.Y,
+							    cz * sy * axis.X + sz * sy * axis.Y + cy * axis.Z);
 							tr = p6DOF.GetCalculatedTransformB();
 							Vector3 normal = -MathUtil.MatrixColumn(ref tr, 0);
 							float minFi = p6DOF.GetRotationalLimitMotor(0).m_loLimit;

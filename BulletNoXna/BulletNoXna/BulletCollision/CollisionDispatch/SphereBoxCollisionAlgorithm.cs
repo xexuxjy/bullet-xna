@@ -151,7 +151,7 @@ namespace BulletXNA.BulletCollision
             n[5] = new Vector3(0, 0, 1);
 
             // convert  point in local space
-            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
+            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
 
             bool bFound = false;
 
@@ -248,7 +248,7 @@ namespace BulletXNA.BulletCollision
 
             // convert  point in local space
 
-            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
+            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
 
             ///////////
 

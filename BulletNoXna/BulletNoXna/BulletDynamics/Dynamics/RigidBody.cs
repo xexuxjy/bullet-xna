@@ -205,11 +205,11 @@ namespace BulletXNA.BulletDynamics
 
         public void SaveKinematicState(float timeStep)
         {
-	        //todo: clamp to some (user definable) safe minimum timestep, to limit maximum angular/linear velocities
-	        if (timeStep != 0f)
-	        {
-		        //if we use motionstate to synchronize world transforms, get the new kinematic/animated world transform
-		        if (MotionState != null)
+            //todo: clamp to some (user definable) safe minimum timestep, to limit maximum angular/linear velocities
+            if (timeStep != 0f)
+            {
+                //if we use motionstate to synchronize world transforms, get the new kinematic/animated world transform
+                if (MotionState != null)
                 {
                     MotionState.GetWorldTransform(out m_worldTransform);
                 }
@@ -217,15 +217,14 @@ namespace BulletXNA.BulletDynamics
 
                 // debug steps to track NaN's
                 Matrix worldTransform = m_worldTransform;
-		        TransformUtil.CalculateVelocity(ref m_interpolationWorldTransform,ref worldTransform,timeStep,ref m_linearVelocity,ref m_angularVelocity);
+                TransformUtil.CalculateVelocity(ref m_interpolationWorldTransform, ref worldTransform, timeStep, out m_linearVelocity, out m_angularVelocity);
                 SetWorldTransform(ref worldTransform);
 
-		        m_interpolationLinearVelocity = m_linearVelocity;
-		        m_interpolationAngularVelocity = m_angularVelocity;
-		        SetInterpolationWorldTransform(ref m_worldTransform);
-		        //printf("angular = %f %f %f\n",m_angularVelocity.getX(),m_angularVelocity.getY(),m_angularVelocity.getZ());
-	        }
-
+                m_interpolationLinearVelocity = m_linearVelocity;
+                m_interpolationAngularVelocity = m_angularVelocity;
+                SetInterpolationWorldTransform(ref m_worldTransform);
+                //printf("angular = %f %f %f\n",m_angularVelocity.getX(),m_angularVelocity.getY(),m_angularVelocity.getZ());
+            }
         }
 
         public void ApplyGravity()

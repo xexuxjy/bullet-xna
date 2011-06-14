@@ -345,9 +345,9 @@ namespace BulletXNA.BulletCollision
             Vector3 castShapeAabbMax;
             /* Compute AABB that encompasses angular movement */
             {
-                Vector3 linVel = new Vector3();
-                Vector3 angVel = new Vector3();
-                TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, ref linVel, ref angVel);
+                Vector3 linVel;
+                Vector3 angVel;
+                TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
                 Vector3 zeroLinVel = new Vector3();
                 Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
                 castShape.CalculateTemporalAabb(ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);

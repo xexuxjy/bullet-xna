@@ -970,13 +970,10 @@ namespace BulletXNA.BulletDynamics
 				}
 
 				{
-					PersistentManifold manifold2 = null;
-
-					for (int i = 0; i < numManifolds; i++)
-					{
-						manifold2 = manifold[i];
-						ConvertContact(manifold2, infoGlobal);
-					}
+                    for (int i = 0; i < numManifolds; i++)
+                    {
+                        ConvertContact(manifold[i], infoGlobal);
+                    }
 				}
 			}
 

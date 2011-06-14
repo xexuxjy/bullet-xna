@@ -108,7 +108,7 @@ namespace BulletXNA.BulletCollision
               //vec.Normalize();
 	        }
 
-	        Vector3 vtx = new Vector3();
+	        Vector3 vtx;
 	        float newDot;
         	
 	        float radius = Radius;
@@ -150,7 +150,7 @@ namespace BulletXNA.BulletCollision
 		        float maxDot = float.MinValue;
 		        Vector3 vec = vectors[j];
 
-		        Vector3 vtx = new Vector3();
+		        Vector3 vtx;
 		        float newDot = 0f;
 	            {
 		            Vector3 pos = Vector3.Zero;

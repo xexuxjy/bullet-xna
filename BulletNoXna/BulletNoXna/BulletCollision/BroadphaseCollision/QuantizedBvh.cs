@@ -764,10 +764,10 @@ namespace BulletXNA.BulletCollision
             rayDir.Normalize();
             lambda_max = Vector3.Dot(rayDir, rayTarget - raySource);
             ///what about division by zero? --> just set rayDirection[i] to 1.0
-            Vector3 rayDirectionInverse = new Vector3();
-            rayDirectionInverse.X = MathUtil.FuzzyZero(rayDir.X) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X;
-            rayDirectionInverse.Y = MathUtil.FuzzyZero(rayDir.Y) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y;
-            rayDirectionInverse.Z = MathUtil.FuzzyZero(rayDir.Z) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z;
+            Vector3 rayDirectionInverse = new Vector3(
+                MathUtil.FuzzyZero(rayDir.X) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X,
+                MathUtil.FuzzyZero(rayDir.Y) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y,
+                MathUtil.FuzzyZero(rayDir.Z) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z);
             bool[] sign = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
 #endif
 

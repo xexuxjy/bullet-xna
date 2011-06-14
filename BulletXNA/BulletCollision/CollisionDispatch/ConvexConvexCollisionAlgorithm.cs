@@ -287,7 +287,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                         perturbeAngle = angleLimit;
                     }
 
-                    Matrix unPerturbedTransform = Matrix.Identity;
+                    Matrix unPerturbedTransform;
                     if (perturbeA)
                     {
                         unPerturbedTransform = input.m_transformA;

@@ -156,71 +156,71 @@ namespace BulletXNA
             CopyMatrixRotation(ref newMatrix, ref predictedTransform);
 	    }
 
-        public static void CalculateVelocityQuaternion(ref Vector3 pos0,ref Vector3 pos1,ref Quaternion orn0,ref Quaternion orn1,float timeStep,ref Vector3 linVel,ref Vector3 angVel)
-	    {
-		    linVel = (pos1 - pos0) / timeStep;
-		    Vector3 axis = Vector3.Zero;
-		    float angle = 0f;
-		    if (orn0 != orn1)
-		    {
-			    CalculateDiffAxisAngleQuaternion(ref orn0,ref orn1,ref axis,ref angle);
-			    angVel = axis * (angle / timeStep);
-		    } 
+        public static void CalculateVelocityQuaternion(ref Vector3 pos0, ref Vector3 pos1, ref Quaternion orn0, ref Quaternion orn1, float timeStep, out Vector3 linVel, out Vector3 angVel)
+        {
+            linVel = (pos1 - pos0) / timeStep;
+            if (orn0 != orn1)
+            {
+                Vector3 axis;
+                float angle;
+                CalculateDiffAxisAngleQuaternion(ref orn0, ref orn1, out axis, out angle);
+                angVel = axis * (angle / timeStep);
+            }
             else
-		    {
-			    angVel = Vector3.Zero;
-		    }
-	    }
+            {
+                angVel = Vector3.Zero;
+            }
+        }
 
-	    public static void CalculateDiffAxisAngleQuaternion(ref Quaternion orn0,ref Quaternion orn1a,ref Vector3 axis,ref float angle)
-	    {
-            Quaternion orn1 = MathUtil.QuatFurthest(ref orn0,ref orn1a);
+        public static void CalculateDiffAxisAngleQuaternion(ref Quaternion orn0, ref Quaternion orn1a, out Vector3 axis, out float angle)
+        {
+            Quaternion orn1 = MathUtil.QuatFurthest(ref orn0, ref orn1a);
             Quaternion dorn = orn1 * MathUtil.QuaternionInverse(ref orn0);
 
-		    ///floating point inaccuracy can lead to w component > 1..., which breaks 
-		    dorn.Normalize();
-		    angle = MathUtil.QuatAngle(ref dorn);
-		    axis = new Vector3(dorn.X,dorn.Y,dorn.Z);
+            ///floating point inaccuracy can lead to w component > 1..., which breaks 
+            dorn.Normalize();
+            angle = MathUtil.QuatAngle(ref dorn);
+            axis = new Vector3(dorn.X, dorn.Y, dorn.Z);
 
-		    //check for axis length
-		    float len = axis.LengthSquared();
-		    if (len < MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON)
+            //check for axis length
+            float len = axis.LengthSquared();
+            if (len < MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
             {
-			    axis = new Vector3(1f,0,0);
+                axis = new Vector3(1f, 0, 0);
             }
-		    else
+            else
             {
-			    axis.Normalize();
+                axis.Normalize();
             }
-	    }
+        }
 
-	    public static void CalculateVelocity(ref Matrix transform0,ref Matrix transform1,float timeStep,ref Vector3 linVel,ref Vector3 angVel)
-	    {
-		    linVel = (transform1.Translation - transform0.Translation) / timeStep;
+        public static void CalculateVelocity(ref Matrix transform0, ref Matrix transform1, float timeStep, out Vector3 linVel, out Vector3 angVel)
+        {
+            linVel = (transform1.Translation - transform0.Translation) / timeStep;
             MathUtil.SanityCheckVector(ref linVel);
-		    Vector3 axis = Vector3.Zero;
-		    float  angle = 0f;
-		    CalculateDiffAxisAngle(ref transform0,ref transform1,ref axis,ref angle);
-		    angVel = axis * (angle / timeStep);
+            Vector3 axis;
+            float angle;
+            CalculateDiffAxisAngle(ref transform0, ref transform1, out axis, out angle);
+            angVel = axis * (angle / timeStep);
             MathUtil.SanityCheckVector(ref angVel);
-	    }
+        }
 
-	    public static void CalculateDiffAxisAngle(ref Matrix transform0,ref Matrix transform1,ref Vector3 axis,ref float angle)
-	    {
+        public static void CalculateDiffAxisAngle(ref Matrix transform0, ref Matrix transform1, out Vector3 axis, out float angle)
+        {
             //Matrix dmat = GetRotateMatrix(ref transform1) * Matrix.Invert(GetRotateMatrix(ref transform0));
             Matrix dmat = MathUtil.BulletMatrixMultiplyBasis(transform1, Matrix.Invert(transform0));
-		    Quaternion dorn = Quaternion.Identity;
-		    GetRotation(ref dmat,out dorn);
+            Quaternion dorn = Quaternion.Identity;
+            GetRotation(ref dmat, out dorn);
 
-		    ///floating point inaccuracy can lead to w component > 1..., which breaks 
-		    dorn.Normalize();
-    		
-		    angle = MathUtil.QuatAngle(ref dorn);
-            
-		    axis = new Vector3(dorn.X,dorn.Y,dorn.Z);
+            ///floating point inaccuracy can lead to w component > 1..., which breaks 
+            dorn.Normalize();
+
+            angle = MathUtil.QuatAngle(ref dorn);
+
+            axis = new Vector3(dorn.X, dorn.Y, dorn.Z);
             //axis[3] = float(0.);
-		    //check for axis length
-		    float len = axis.LengthSquared();
+            //check for axis length
+            float len = axis.LengthSquared();
             if (len < MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
             {
                 axis = Vector3.Right;
@@ -229,11 +229,11 @@ namespace BulletXNA
             {
                 axis.Normalize();
             }
-	    }
+        }
 
         public static void CopyMatrixRotation(ref Matrix from, ref Matrix to)
         {
-            to.Left = from.Left;
+            to.Right = from.Right;
             to.Up = from.Up;
             to.Backward = from.Backward;
         }
@@ -257,18 +257,15 @@ namespace BulletXNA
 
         public static void GetRotation(ref Matrix a, out Quaternion rot)
         {
-            Vector3 pos;
-            Vector3 scale;
-
-            a.Decompose(out scale, out rot, out pos);
+            Vector3 component;
+            a.Decompose(out component, out rot, out component);
         }
 
         public static Quaternion GetRotation(ref Matrix a)
         {
-            Vector3 pos;
-            Vector3 scale;
+            Vector3 component;
             Quaternion rot;
-            a.Decompose(out scale, out rot, out pos);
+            a.Decompose(out component, out rot, out component);
             return rot;
         }
 
@@ -313,13 +310,13 @@ namespace BulletXNA
 
             if (m_separatingDistance > 0.0f)
             {
-                Vector3 linVelA = Vector3.Zero;
-                Vector3 angVelA = Vector3.Zero;
-                Vector3 linVelB = Vector3.Zero;
-                Vector3 angVelB = Vector3.Zero;
+                Vector3 linVelA;
+                Vector3 angVelA;
+                Vector3 linVelB;
+                Vector3 angVelB;
 
-                TransformUtil.CalculateVelocityQuaternion(ref m_posA, ref toPosA, ref m_ornA, ref toOrnA, 1f, ref linVelA, ref angVelA);
-                TransformUtil.CalculateVelocityQuaternion(ref m_posB, ref toPosB, ref m_ornB, ref toOrnB, 1f, ref linVelB, ref angVelB);
+                TransformUtil.CalculateVelocityQuaternion(ref m_posA, ref toPosA, ref m_ornA, ref toOrnA, 1f, out linVelA, out angVelA);
+                TransformUtil.CalculateVelocityQuaternion(ref m_posB, ref toPosB, ref m_ornB, ref toOrnB, 1f, out linVelB, out angVelB);
                 float maxAngularProjectedVelocity = angVelA.Length() * m_boundingRadiusA + angVelB.Length() * m_boundingRadiusB;
                 Vector3 relLinVel = (linVelB - linVelA);
                 float relLinVelocLength = Vector3.Dot((linVelB - linVelA), m_separatingNormal);

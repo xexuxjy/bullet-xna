@@ -67,7 +67,7 @@ namespace BulletXNA.BulletDynamics
 			int numManifolds = m_dispatcher1.GetNumManifolds();
 			if (numManifolds != 0)
 			{
-				ObjectArray<PersistentManifold> manifoldPtr = ((CollisionDispatcher)m_dispatcher1).GetInternalManifoldPointer();
+                ObjectArray<PersistentManifold> manifoldPtr = (m_dispatcher1 as CollisionDispatcher).GetInternalManifoldPointer();
 
 				ContactSolverInfo infoGlobal = new ContactSolverInfo();
 				infoGlobal.m_timeStep = timeStep;

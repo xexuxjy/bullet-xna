@@ -116,13 +116,13 @@ namespace BulletXNA.BulletCollision
 
             if (isSwapped)
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransB, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld, out localB);
             }
             else
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransA, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
             ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);

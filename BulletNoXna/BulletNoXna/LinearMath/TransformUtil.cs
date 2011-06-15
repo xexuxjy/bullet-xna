@@ -104,8 +104,7 @@ namespace BulletXNA
 
 	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep,out Matrix predictedTransform)
 	    {
-            predictedTransform = Matrix.Identity;
-		    predictedTransform.Translation = (curTrans.Translation + linvel * timeStep);
+            predictedTransform = Matrix.CreateTranslation(curTrans.Translation + linvel * timeStep);
     //	#define QUATERNION_DERIVATIVE
 	    #if QUATERNION_DERIVATIVE
             Vector3 pos;
@@ -140,12 +139,10 @@ namespace BulletXNA
 			    axis   = angvel*( (float)Math.Sin(0.5f*fAngle*timeStep)/fAngle );
 		    }
 		    Quaternion dorn = new Quaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
-            Vector3 pos;
-            Quaternion rot;
-            Vector3 scale;
 
-            curTrans.Decompose(out scale, out rot, out pos);
-            Quaternion orn0 = rot;
+            Quaternion orn0;
+            Vector3 component;
+            curTrans.Decompose(out component, out orn0, out component);
 
 		    Quaternion predictedOrn = dorn * orn0;
 		    predictedOrn.Normalize();

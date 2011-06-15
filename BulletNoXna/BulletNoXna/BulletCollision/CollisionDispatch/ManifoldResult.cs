@@ -102,7 +102,8 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(m_manifoldPtr != null);
             //order in manifold needs to match
 
-            if (depth > m_manifoldPtr.GetContactBreakingThreshold())
+            //if (depth > m_manifoldPtr.GetContactBreakingThreshold())
+            if (depth > m_manifoldPtr.GetContactProcessingThreshold())
             {
                 return;
             }

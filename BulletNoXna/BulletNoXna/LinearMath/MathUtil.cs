@@ -405,6 +405,22 @@ namespace BulletXNA
                 Math.Abs(input.M44));
         }
 
+        public static Matrix AbsoluteBasisMatrix(ref Matrix input)
+        {
+            Matrix output;
+            AbsoluteBasisMatrix(ref input, out output);
+            return output;
+        }
+
+        public static void AbsoluteBasisMatrix(ref Matrix input, out Matrix output)
+        {
+            output = new Matrix(
+                Math.Abs(input.M11), Math.Abs(input.M12), Math.Abs(input.M13), 0.0f,
+                Math.Abs(input.M21), Math.Abs(input.M22), Math.Abs(input.M23), 0.0f,
+                Math.Abs(input.M31), Math.Abs(input.M32), Math.Abs(input.M33), 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
+        }
+
         public static void AbsoluteVector(ref Vector3 input, out Vector3 output)
         {
             output = new Vector3(
@@ -454,7 +470,7 @@ namespace BulletXNA
             localHalfExtents += new Vector3(margin);
 
             Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
-            Matrix abs_b = MathUtil.AbsoluteMatrix(MathUtil.BasisMatrix(ref trans));
+            Matrix abs_b = MathUtil.AbsoluteBasisMatrix(ref trans);
 
             Vector3 center = Vector3.Transform(localCenter, trans);
 

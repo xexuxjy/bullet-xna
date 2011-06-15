@@ -337,7 +337,6 @@ void	applyAnisotropicFriction(btCollisionObject* colObj,btVector3& frictionDirec
 void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstraint& solverConstraint, const btVector3& normalAxis,btRigidBody* solverBodyA,btRigidBody* solverBodyB,btManifoldPoint& cp,const btVector3& rel_pos1,const btVector3& rel_pos2,btCollisionObject* colObj0,btCollisionObject* colObj1, btScalar relaxation, btScalar desiredVelocity, btScalar cfmSlip)
 {
 
-
 	btRigidBody* body0=btRigidBody::upcast(colObj0);
 	btRigidBody* body1=btRigidBody::upcast(colObj1);
 
@@ -352,7 +351,7 @@ void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstr
 	solverConstraint.m_appliedImpulse = 0.f;
 	solverConstraint.m_appliedPushImpulse = 0.f;
 
-	if(body0 && g_file && btBulletDebug::debugSolver)
+	if((body0 || body1)&& g_file && btBulletDebug::debugSolver)
 	{
 		fprintf(g_file,"SetupFrictionConstraint [%s][%s]\n", (char*)solverConstraint.m_solverBodyA->getUserPointer(), (char*)solverConstraint.m_solverBodyB->getUserPointer());
 		btManifoldPoint::PrintContactPoint(g_file,cp);
@@ -772,6 +771,12 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 	(void)stackAlloc;
 	(void)debugDrawer;
 
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"SolveGroupCacheFriendlySetup start.\n");
+	}
+
+
 
 	if (!(numConstraints + numManifolds))
 	{
@@ -1010,6 +1015,11 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 		}
 	}
 
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"SolveGroupCacheFriendlySetup stop.\n");
+	}
+
 	return 0.f;
 
 }
@@ -1121,6 +1131,7 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 
 void btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySplitImpulseIterations(btCollisionObject** bodies,int numBodies,btPersistentManifold** manifoldPtr, int numManifolds,btTypedConstraint** constraints,int numConstraints,const btContactSolverInfo& infoGlobal,btIDebugDraw* debugDrawer,btStackAlloc* stackAlloc)
 {
+
 	int iteration;
 	if (infoGlobal.m_splitImpulse)
 	{
@@ -1163,6 +1174,11 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyIterations(
 {
 	BT_PROFILE("solveGroupCacheFriendlyIterations");
 
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"solveGroupCacheFriendlyIterations start.\n");
+	}
+
 	
 	//should traverse the contacts random order...
 	int iteration;
@@ -1175,6 +1191,11 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyIterations(
 		}
 		
 	}
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"solveGroupCacheFriendlyIterations stop.\n");
+	}
+
 	return 0.f;
 }
 
@@ -1182,6 +1203,11 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 {
 	int numPoolConstraints = m_tmpSolverContactConstraintPool.size();
 	int i,j;
+
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"solveGroupCacheFriendlyFinish start [%d].\n",numPoolConstraints);
+	}
 
 	for (j=0;j<numPoolConstraints;j++)
 	{
@@ -1234,6 +1260,12 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 	m_tmpSolverContactConstraintPool.resize(0);
 	m_tmpSolverNonContactConstraintPool.resize(0);
 	m_tmpSolverContactFrictionConstraintPool.resize(0);
+
+	if (g_file && btBulletDebug::debugSolver)
+	{
+		fprintf(g_file,"solveGroupCacheFriendlyFinish stop.\n");
+	}
+
 
 	return 0.f;
 }

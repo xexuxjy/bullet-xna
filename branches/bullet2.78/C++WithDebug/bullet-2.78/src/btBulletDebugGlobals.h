@@ -5,7 +5,7 @@ struct btBulletDebug
 {
 		static const  bool debugRigidBody = false;
 		static const bool debugCollisionWorld = false;
-		static const bool debugConstraints = false;
+		static const bool debugConstraints = true;
 		static const bool debugDiscreteDynamicsWorld = false;
 		static const bool debugBoxBoxDetector = false;
 		static const bool debugIslands = false;
@@ -18,7 +18,7 @@ struct btBulletDebug
 		static const bool debugGJKDetector = false;
 		static const bool debugPersistentManifold = false;
 		static const bool debugVoronoiSimplex = false;
-		static const bool debugSolver = true;
+		static const bool debugSolver = false;
 		static const bool debugBroadphase = false;
 		static const bool debugBoxShape = false;
 

@@ -17,6 +17,10 @@ subject to the following restrictions:
 #include "btPersistentManifold.h"
 #include "LinearMath/btTransform.h"
 
+extern FILE* g_file;
+
+#include "btBulletDebugGlobals.h"
+
 
 btScalar					gContactBreakingThreshold = btScalar(0.02);
 ContactDestroyedCallback	gContactDestroyedCallback = 0;
@@ -36,18 +40,21 @@ m_index1a(0)
 
 
 
-#ifdef DEBUG_PERSISTENCY
+//#ifdef DEBUG_PERSISTENCY
 #include <stdio.h>
 void	btPersistentManifold::DebugPersistency()
 {
-	int i;
-	printf("DebugPersistency : numPoints %d\n",m_cachedPoints);
-	for (i=0;i<m_cachedPoints;i++)
+	if(g_file && btBulletDebug::debugPersistentManifold)
 	{
-		printf("m_pointCache[%d].m_userPersistentData = %x\n",i,m_pointCache[i].m_userPersistentData);
+		int i;
+		fprintf(g_file,"DebugPersistency : numPoints %d\n",m_cachedPoints);
+		for (i=0;i<m_cachedPoints;i++)
+		{
+			fprintf(g_file,"m_pointCache[%d].m_userPersistentData = %x\n",i,m_pointCache[i].m_userPersistentData);
+		}
 	}
 }
-#endif //DEBUG_PERSISTENCY
+//#endif //DEBUG_PERSISTENCY
 
 void btPersistentManifold::clearUserCache(btManifoldPoint& pt)
 {
@@ -55,7 +62,8 @@ void btPersistentManifold::clearUserCache(btManifoldPoint& pt)
 	void* oldPtr = pt.m_userPersistentData;
 	if (oldPtr)
 	{
-#ifdef DEBUG_PERSISTENCY
+		if(g_file && btBulletDebug::debugPersistentManifold)
+		{
 		int i;
 		int occurance = 0;
 		for (i=0;i<m_cachedPoints;i++)
@@ -64,21 +72,18 @@ void btPersistentManifold::clearUserCache(btManifoldPoint& pt)
 			{
 				occurance++;
 				if (occurance>1)
-					printf("error in clearUserCache\n");
+					fprintf(g_file,"error in clearUserCache\n");
 			}
 		}
 		btAssert(occurance<=0);
-#endif //DEBUG_PERSISTENCY
-
+		}
 		if (pt.m_userPersistentData && gContactDestroyedCallback)
 		{
 			(*gContactDestroyedCallback)(pt.m_userPersistentData);
 			pt.m_userPersistentData = 0;
 		}
 		
-#ifdef DEBUG_PERSISTENCY
 		DebugPersistency();
-#endif
 	}
 
 	
@@ -167,6 +172,15 @@ int btPersistentManifold::addManifoldPoint(const btManifoldPoint& newPoint)
 {
 	btAssert(validContactDistance(newPoint));
 
+
+	if (g_file && btBulletDebug::debugPersistentManifold)
+	{
+		fprintf(g_file,"addManifoldPoint\n");
+		btManifoldPoint::PrintContactPoint(g_file, newPoint);
+	}
+
+
+
 	int insertIndex = getNumContacts();
 	if (insertIndex == MANIFOLD_CACHE_SIZE)
 	{
@@ -202,15 +216,12 @@ btScalar	btPersistentManifold::getContactBreakingThreshold() const
 void btPersistentManifold::refreshContactPoints(const btTransform& trA,const btTransform& trB)
 {
 	int i;
-#ifdef DEBUG_PERSISTENCY
-	printf("refreshContactPoints posA = (%f,%f,%f) posB = (%f,%f,%f)\n",
-		trA.getOrigin().getX(),
-		trA.getOrigin().getY(),
-		trA.getOrigin().getZ(),
-		trB.getOrigin().getX(),
-		trB.getOrigin().getY(),
-		trB.getOrigin().getZ());
-#endif //DEBUG_PERSISTENCY
+	if(g_file && btBulletDebug::debugPersistentManifold)
+	{
+		btGeometryUtil::PrintVector(g_file,"refreshContactPoints trA",trA.getOrigin());
+		btGeometryUtil::PrintVector(g_file,"refreshContactPoints trB",trB.getOrigin());
+	}
+
 	/// first refresh worldspace positions and distance
 	for (i=getNumContacts()-1;i>=0;i--)
 	{
@@ -249,9 +260,8 @@ void btPersistentManifold::refreshContactPoints(const btTransform& trA,const btT
 			}
 		}
 	}
-#ifdef DEBUG_PERSISTENCY
 	DebugPersistency();
-#endif //
+
 }
 
 

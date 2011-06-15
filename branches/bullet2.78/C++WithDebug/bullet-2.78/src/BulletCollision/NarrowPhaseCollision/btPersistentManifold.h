@@ -105,9 +105,7 @@ public:
 
 	void clearUserCache(btManifoldPoint& pt);
 
-#ifdef DEBUG_PERSISTENCY
 	void	DebugPersistency();
-#endif //
 	
 	SIMD_FORCE_INLINE int	getNumContacts() const { return m_cachedPoints;}
 

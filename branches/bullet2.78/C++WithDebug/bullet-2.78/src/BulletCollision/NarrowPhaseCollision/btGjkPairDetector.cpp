@@ -17,8 +17,11 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionShapes/btConvexShape.h"
 #include "BulletCollision/NarrowPhaseCollision/btSimplexSolverInterface.h"
 #include "BulletCollision/NarrowPhaseCollision/btConvexPenetrationDepthSolver.h"
+#include "btBulletDebugGlobals.h"
+#include <stdio.h>
+#include "LinearMath/btGeometryUtil.h"
 
-
+extern FILE* g_file;
 
 #if defined(DEBUG) || defined (_DEBUG)
 //#define TEST_NON_VIRTUAL 1
@@ -52,6 +55,10 @@ m_ignoreMargin(false),
 m_lastUsedMethod(-1),
 m_catchDegeneracies(1)
 {
+	if (g_file && btBulletDebug::debugGJKDetector)
+	{
+		fprintf(g_file,"GjkPairDetector [%s] [%s]\n", objectA->getName(), objectB->getName());
+	}
 }
 btGjkPairDetector::btGjkPairDetector(const btConvexShape* objectA,const btConvexShape* objectB,int shapeTypeA,int shapeTypeB,btScalar marginA, btScalar marginB, btSimplexSolverInterface* simplexSolver,btConvexPenetrationDepthSolver*	penetrationDepthSolver)
 :m_cachedSeparatingAxis(btScalar(0.),btScalar(1.),btScalar(0.)),
@@ -67,6 +74,12 @@ m_ignoreMargin(false),
 m_lastUsedMethod(-1),
 m_catchDegeneracies(1)
 {
+	if (g_file && btBulletDebug::debugGJKDetector)
+	{
+		fprintf(g_file,"GjkPairDetector-alt [%s] [%s]\n", objectA->getName(), objectB->getName());
+	}
+
+
 }
 
 void	btGjkPairDetector::getClosestPoints(const ClosestPointInput& input,Result& output,class btIDebugDraw* debugDraw,bool swapResults)
@@ -123,6 +136,14 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 	m_degenerateSimplex = 0;
 
 	m_lastUsedMethod = -1;
+
+	if (g_file && btBulletDebug::debugGJKDetector)
+	{
+		btGeometryUtil::PrintMatrix(g_file, "gjk::getClosestPointsNonVirtual transA", localTransA);
+		btGeometryUtil::PrintMatrix(g_file, "gjk::getClosestPointsNonVirtual transB", localTransB);
+
+	}
+
 
 	{
 		btScalar squaredDistance = BT_LARGE_FLOAT;
@@ -182,6 +203,24 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			btVector3 w	= pWorld - qWorld;
 			delta = m_cachedSeparatingAxis.dot(w);
 
+
+			if (g_file && btBulletDebug::debugGJKDetector)
+			{
+				btGeometryUtil::PrintVector(g_file, "m_cachedSeparatingAxis", m_cachedSeparatingAxis);
+				btGeometryUtil::PrintVector(g_file, "w", w);
+				fprintf(g_file,"simplex num vertices [%d]\n",m_simplexSolver->numVertices());
+				btGeometryUtil::PrintVector(g_file, "sepAxisA", seperatingAxisInA);
+				btGeometryUtil::PrintVector(g_file, "sepAxisB", seperatingAxisInB);
+				btGeometryUtil::PrintVector(g_file, "pInA", pInA);
+				btGeometryUtil::PrintVector(g_file, "qInB", qInB);
+				btGeometryUtil::PrintMatrix(g_file, "localTransA", localTransA);
+				btGeometryUtil::PrintMatrix(g_file, "localTransB", localTransB);
+
+				btGeometryUtil::PrintVector(g_file, "pWorld", pWorld);
+				btGeometryUtil::PrintVector(g_file, "qWorld", qWorld);
+			}
+
+
 			// potential exit, they don't overlap
 			if ((delta > btScalar(0.0)) && (delta * delta > squaredDistance * input.m_maximumDistanceSquared)) 
 			{
@@ -240,6 +279,20 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
                 checkSimplex = true;
                 break;
             }
+
+			if (g_file && btBulletDebug::debugGJKDetector)
+			{
+				btGeometryUtil::PrintVector(g_file, "sepAxisA", seperatingAxisInA);
+				btGeometryUtil::PrintVector(g_file, "sepAxisB", seperatingAxisInB);
+				btGeometryUtil::PrintVector(g_file, "pInA", pInA);
+				btGeometryUtil::PrintVector(g_file, "qInB", qInB);
+				btGeometryUtil::PrintVector(g_file, "pWorld", pWorld);
+				btGeometryUtil::PrintVector(g_file, "qWorld", qWorld);
+				btGeometryUtil::PrintVector(g_file, "newSeperatingAxis", newCachedSeparatingAxis);
+
+				fprintf(g_file,"f0[%4.8f] f1[%4.8f] checkSimplex[%d] degen[%d]\n",f0,f1,checkSimplex,m_degenerateSimplex);
+			}
+
 
 			btScalar previousSquaredDistance = squaredDistance;
 			squaredDistance = newCachedSeparatingAxis.length2();
@@ -356,6 +409,16 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 					debugDraw,input.m_stackAlloc
 					);
 
+				if (g_file && btBulletDebug::debugGJKDetector)
+				{
+					fprintf(g_file,"calcPenDepthResult");
+					fprintf(g_file,"lastMethodUsed : %d\n",m_lastUsedMethod);
+					btGeometryUtil::PrintMatrix(g_file, "localTransA", localTransA);
+					btGeometryUtil::PrintMatrix(g_file,  "localTransB", localTransB);
+					btGeometryUtil::PrintVector(g_file, "sepAxis", m_cachedSeparatingAxis);
+					btGeometryUtil::PrintVector(g_file, "tmpA", tmpPointOnA);
+					btGeometryUtil::PrintVector(g_file, "tmpB", tmpPointOnB);
+				}
 
 				if (isValid2)
 				{
@@ -425,7 +488,10 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 		}
 	}
 
-	
+	if(g_file && btBulletDebug::debugGJKDetector)
+	{
+		fprintf(g_file,"valid [%d] distance[%4.8f][%4.8f] maxDistSq[%4.8f]\n",isValid,distance,distance*distance,input.m_maximumDistanceSquared);
+	}
 
 	if (isValid && ((distance < 0) || (distance*distance < input.m_maximumDistanceSquared)))
 	{

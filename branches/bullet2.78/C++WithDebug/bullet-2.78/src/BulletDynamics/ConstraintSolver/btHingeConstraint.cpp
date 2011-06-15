@@ -26,7 +26,7 @@ subject to the following restrictions:
 //#define HINGE_USE_OBSOLETE_SOLVER false
 #define HINGE_USE_OBSOLETE_SOLVER false
 
-#define HINGE_USE_FRAME_OFFSET true
+#define HINGE_USE_FRAME_OFFSET false
 
 #ifndef __SPU__
 
@@ -591,7 +591,7 @@ void btHingeConstraint::getInfo2Internal(btConstraintInfo2* info, const btTransf
 	} // if angular limit or powered
 	if(g_file && btBulletDebug::debugConstraints)
 	{
-		PrintInfo2(g_file,this,info);
+		//PrintInfo2(g_file,this,info);
 	}
 }
 

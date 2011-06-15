@@ -141,7 +141,8 @@ namespace BulletXNA.BulletCollision
             BulletGlobals.StartProfile("updateAabbs");
 
             //Matrix predictedTrans = new Matrix();
-            for (int i = 0; i < m_collisionObjects.Count; i++)
+            int count = m_collisionObjects.Count;
+            for (int i = 0; i < count; i++)
             {
                 CollisionObject colObj = m_collisionObjects[i];
 

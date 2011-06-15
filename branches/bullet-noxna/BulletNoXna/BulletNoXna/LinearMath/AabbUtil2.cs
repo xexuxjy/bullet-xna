@@ -237,7 +237,7 @@ namespace BulletXNA
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
-            Matrix abs_b = MathUtil.AbsoluteMatrix(ref t);
+            Matrix abs_b = MathUtil.AbsoluteBasisMatrix(ref t);
             Vector3 center = t.Translation;
 
             Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), halfExtentsWithMargin),

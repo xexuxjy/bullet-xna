@@ -140,7 +140,8 @@ namespace BulletXNA.BulletCollision
             BulletGlobals.StartProfile("updateAabbs");
 
             //Matrix predictedTrans = new Matrix();
-            for (int i = 0; i < m_collisionObjects.Count; i++)
+            int count = m_collisionObjects.Count;
+            for (int i = 0; i < count; i++)
             {
                 CollisionObject colObj = m_collisionObjects[i];
 
@@ -1515,13 +1516,13 @@ namespace BulletXNA.BulletCollision
             Vector3 localB;
             if (isSwapped)
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransB, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld, out localB);
             }
             else
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransA, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
             ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);

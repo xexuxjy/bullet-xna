@@ -260,7 +260,7 @@ void btConeTwistConstraint::getInfo2NonVirtual (btConstraintInfo2* info,const bt
 
 	if(g_file && btBulletDebug::debugConstraints)
 	{
-		PrintInfo2(g_file,this,info);
+		//PrintInfo2(g_file,this,info);
 	}
 }
 	

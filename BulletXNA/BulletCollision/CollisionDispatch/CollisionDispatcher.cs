@@ -83,7 +83,7 @@ namespace BulletXNA.BulletCollision
 
             // nothing in our pool so create a new one and return it.
             // need a way to flush the pool ideally
-            PersistentManifold manifold = null;
+            PersistentManifold manifold;
             if (m_persistentManifoldsPool.Count == 0)
             {
                 manifold = new PersistentManifold();
@@ -135,9 +135,7 @@ namespace BulletXNA.BulletCollision
             int index1 = (int)body0.GetCollisionShape().GetShapeType();
             int index2 = (int)body1.GetCollisionShape().GetShapeType();
 
-            CollisionAlgorithm algo = m_doubleDispatch[index1, index2].CreateCollisionAlgorithm(ci, body0, body1);
-            return algo;
-
+            return m_doubleDispatch[index1, index2].CreateCollisionAlgorithm(ci, body0, body1);
         }
 
         public virtual bool NeedsCollision(CollisionObject body0, CollisionObject body1)

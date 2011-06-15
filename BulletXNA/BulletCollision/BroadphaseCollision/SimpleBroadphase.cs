@@ -361,8 +361,7 @@ namespace BulletXNA.BulletCollision
 
         protected SimpleBroadphaseProxy GetSimpleProxyFromProxy(BroadphaseProxy proxy)
         {
-            SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
-            return proxy0;
+            return proxy as SimpleBroadphaseProxy;
         }
 
         ///reset broadphase internal structures, to ensure determinism/reproducability

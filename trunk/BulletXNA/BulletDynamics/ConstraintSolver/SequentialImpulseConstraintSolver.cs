@@ -86,6 +86,14 @@ namespace BulletXNA.BulletDynamics
 			solverConstraint.m_solverBodyB = body1 != null ? body1 : GetFixedBody();
 
 			solverConstraint.m_friction = cp.GetCombinedFriction();
+
+            if (BulletGlobals.g_streamWriter != null && (body0 != null  || body1 != null) && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SetupFrictionConstraint[{0}][{1}]", (String)solverConstraint.m_solverBodyA.GetUserPointer(), (String)solverConstraint.m_solverBodyB.GetUserPointer());
+                MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
+            }
+
+
 			//solverConstraint.m_originalContactPoint = 0;
 
 			solverConstraint.m_appliedImpulse = 0f;
@@ -413,7 +421,7 @@ namespace BulletXNA.BulletDynamics
 			RigidBody solverBodyB = RigidBody.Upcast(colObj1);
 
 			///avoid collision response between two static objects
-			if ((solverBodyA == null || solverBodyA.GetInvMass() <= 0f) && (solverBodyB == null || solverBodyB.GetInvMass() <= 0f))
+			if ((solverBodyA == null || solverBodyA.GetInvMass() == 0f) && (solverBodyB == null || solverBodyB.GetInvMass() == 0f))
 			{
 				return;
 			}
@@ -442,14 +450,18 @@ namespace BulletXNA.BulletDynamics
 
 					RigidBody rb0 = RigidBody.Upcast(colObj0);
 					RigidBody rb1 = RigidBody.Upcast(colObj1);
-					if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
-					{
-						MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
-					}
 					solverConstraint.m_solverBodyA = rb0 != null ? rb0 : GetFixedBody();
 					solverConstraint.m_solverBodyB = rb1 != null ? rb1 : GetFixedBody();
 
 					solverConstraint.m_originalContactPoint = cp;
+
+                    if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
+                    {
+                        BulletGlobals.g_streamWriter.WriteLine("ConvertContact [{0}][{1}]", (String)solverConstraint.m_solverBodyA.GetUserPointer(), (String)solverConstraint.m_solverBodyB.GetUserPointer());
+                        MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
+                    }
+
+
 
                     SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, out rel_pos1, out rel_pos2);
 
@@ -674,6 +686,7 @@ namespace BulletXNA.BulletDynamics
 			if (s_fixed == null)
 			{
 				s_fixed = new RigidBody(0f, null, null, Vector3.Zero);
+                s_fixed.SetUserPointer("SICS:Fixed");
 			}
 			s_fixed.SetMassProps(0f, Vector3.Zero);
 			return s_fixed;
@@ -701,6 +714,12 @@ namespace BulletXNA.BulletDynamics
 		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyFinish start [{0}]",numPoolConstraints);
+            }
+
 
 			for (int j = 0; j < numPoolConstraints; j++)
 			{
@@ -755,6 +774,12 @@ namespace BulletXNA.BulletDynamics
 			m_tmpSolverContactConstraintPool.Clear();
 			m_tmpSolverNonContactConstraintPool.Clear();
 			m_tmpSolverContactFrictionConstraintPool.Clear();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyFinish stop");
+            }
+
 			return 0f;
 		}
 		//protected float solveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
@@ -767,6 +792,12 @@ namespace BulletXNA.BulletDynamics
 		{
 			BulletGlobals.StartProfile("solveGroupCacheFriendlySetup");
 			m_counter++;
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlySetup start [{0}]", m_counter);
+            }
+
 
 			if ((numConstraints + numManifolds) == 0)
 			{
@@ -1000,6 +1031,13 @@ namespace BulletXNA.BulletDynamics
 			}
 
             BulletGlobals.StopProfile();
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlySetup stop");
+            }
+
 			return 0f;
 
 
@@ -1009,6 +1047,12 @@ namespace BulletXNA.BulletDynamics
 		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
             BulletGlobals.StartProfile("solveGroupCacheFriendlyIterations");
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyIterations start");
+            }
+
 
 			//should traverse the contacts random order...
 			{
@@ -1020,6 +1064,12 @@ namespace BulletXNA.BulletDynamics
 				}
 
 			}
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyIterations stop");
+            }
+
             BulletGlobals.StopProfile();
 			return 0.0f;
 		}

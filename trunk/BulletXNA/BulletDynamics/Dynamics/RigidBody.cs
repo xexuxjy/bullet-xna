@@ -188,7 +188,7 @@ namespace BulletXNA.BulletDynamics
         {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine("predictIntegratedTransform pre");
+                BulletGlobals.g_streamWriter.WriteLine("[{0}] predictIntegratedTransform pre", (String)m_userObjectPointer);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter,m_worldTransform);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"LinearVel", m_linearVelocity);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"AngularVel",m_angularVelocity);
@@ -198,7 +198,7 @@ namespace BulletXNA.BulletDynamics
             MathUtil.SanityCheckVector(m_worldTransform.Up);
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine("predictIntegratedTransform post");
+				BulletGlobals.g_streamWriter.WriteLine("[{0}] predictIntegratedTransform post", (String)m_userObjectPointer);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, predictedTransform);
 			}
         }
@@ -400,6 +400,7 @@ namespace BulletXNA.BulletDynamics
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] RigidBody integrateVelocities", (String)m_userObjectPointer));
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "integrate LinVel pre", m_linearVelocity);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "integrate AngVel pre", m_angularVelocity);
 			}
@@ -430,7 +431,7 @@ namespace BulletXNA.BulletDynamics
         {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine("RigidBody setCenterOfMassTransform");
+				BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] RigidBody setCenterOfMassTransform",(String)m_userObjectPointer));
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, xform);
 			}
 
@@ -554,7 +555,7 @@ namespace BulletXNA.BulletDynamics
         {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
             {
-                BulletGlobals.g_streamWriter.WriteLine("RigidBody updateInertiaTensor");
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] RigidBody updateInertiaTensor",(String)m_userObjectPointer));
 		        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"invInertiaLocal",m_invInertiaLocal);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, m_worldTransform);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, MathUtil.ScaleBasis(ref m_worldTransform, ref m_invInertiaLocal));
@@ -902,7 +903,7 @@ namespace BulletXNA.BulletDynamics
 	    {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine("{0} internalApplyImpule", (String)m_userObjectPointer);
+				BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] internalApplyImpule", (String)m_userObjectPointer));
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "linComponenet", linearComponent);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "angComponenet", angularComponent);
 				BulletGlobals.g_streamWriter.WriteLine("magnitude [{0:0.00000000}]", impulseMagnitude);
@@ -952,7 +953,7 @@ namespace BulletXNA.BulletDynamics
         {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine("internalWritebackVelocity ");
+				BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] internalWritebackVelocity ",(String)m_userObjectPointer));
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"LinearVelocity",GetLinearVelocity());
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "DeltaLinearVelocity", m_deltaLinearVelocity);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "AngularVelocity", GetAngularVelocity());

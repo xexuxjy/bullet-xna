@@ -362,7 +362,7 @@ namespace BulletXNA.BulletDynamics
 				writer.WriteLine(String.Format("numRows [{0}] fps[{1:0.00000000}] erp[{2:0.00000000}] findex[{3}] numIter[{4}]", info2.m_solverConstraints.Length, info2.fps, info2.erp, info2.findex, info2.m_numIterations));
 				for (int i = 0; i < info2.m_solverConstraints.Length; ++i)
 				{
-					writer.WriteLine(String.Format("SolverConstaint[{0}]", i));
+					writer.WriteLine(String.Format("TypedConstraint[{0}]", i));
 					writer.WriteLine("ContactNormal");
 					MathUtil.PrintVector3(writer, info2.m_solverConstraints[i].m_contactNormal);
 					writer.WriteLine("rel1pos1CrossNormal");
@@ -379,7 +379,7 @@ namespace BulletXNA.BulletDynamics
 		{
 			if (writer != null)
 			{
-				writer.WriteLine("solverConstraint[{0}]", index);
+				writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index,(String)constraint.m_solverBodyA.GetUserPointer(),(String)constraint.m_solverBodyB.GetUserPointer());
 				MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
 				MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
 				MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);

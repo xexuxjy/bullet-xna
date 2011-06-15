@@ -474,6 +474,13 @@ namespace BulletXNA.BulletCollision
                 }
             }
 
+
+	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
+	        {
+                BulletGlobals.g_streamWriter.WriteLine("valid [{0}] distance[{1:0000.00000000}][{2:0000.00000000}] maxDistSq[{3:0000.00000000}]", isValid, distance, distance * distance, input.m_maximumDistanceSquared);
+	        }
+
+
             if (isValid && ((distance < 0) || (distance * distance < input.m_maximumDistanceSquared)))
             {
                 m_cachedSeparatingAxis = normalInB;

@@ -360,12 +360,6 @@ namespace BulletXNA.BulletCollision
             }
 
 
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("refreshContactPoints");
-		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posA",trA.Translation);
-		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posB",trB.Translation);
-	}
             /// first refresh worldspace positions and distance
             int numContacts = GetNumContacts() - 1;
             for (int i = numContacts; i >= 0; i--)

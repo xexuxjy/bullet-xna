@@ -141,10 +141,6 @@ namespace BulletXNA.BulletDynamics
 		{
 			info.m_numConstraintRows = 3;
 			info.nub = 3;
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
-			{
-				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
-			}
 
 			CalcAngleInfo2(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform(), m_rbA.GetInvInertiaTensorWorld(), m_rbB.GetInvInertiaTensorWorld());
 			if (m_solveSwingLimit)
@@ -162,7 +158,11 @@ namespace BulletXNA.BulletDynamics
 				info.m_numConstraintRows++;
 				info.nub--;
 			}
-		}
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+            {
+                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
+            }
+        }
 
 		public override void GetInfo2(ConstraintInfo2 info)
 		{
@@ -292,7 +292,7 @@ namespace BulletXNA.BulletDynamics
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
-				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
+                //PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
 
 		}

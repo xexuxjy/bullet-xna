@@ -436,7 +436,7 @@ namespace BulletXNA.BulletCollision
         }
     }
 
-    public struct BT_QUANTIZED_BVH_NODE
+    public class BT_QUANTIZED_BVH_NODE
     {
         //12 bytes
         public UShortVector3 m_quantizedAabbMin;
@@ -661,7 +661,7 @@ namespace BulletXNA.BulletCollision
             //build right branch
             BuildSubTree(primitive_boxes, splitIndex, endIndex);
 
-            m_node_array[curIndex].SetEscapeIndex(m_num_nodes - curIndex);
+            m_node_array.GetRawArray()[curIndex].SetEscapeIndex(m_num_nodes - curIndex);
 
 
 
@@ -683,7 +683,7 @@ namespace BulletXNA.BulletCollision
             m_node_array.Resize(primitive_boxes.Count * 2);
 
             BuildSubTree(primitive_boxes, 0, primitive_boxes.Count);
-
+            int ibreak = 0;
         }
 
         public void QuantizePoint(out UShortVector3 quantizedpoint, ref Vector3 point)

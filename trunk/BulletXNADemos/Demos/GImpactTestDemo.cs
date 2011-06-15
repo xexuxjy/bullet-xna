@@ -103,9 +103,11 @@ namespace BulletXNADemos.Demos
                 for (int i = 0; i < numBoxes; i++)
                 {
                     CollisionShape boxShape = new BoxShape(new Vector3(1, 1, 1));
-
+                    //CollisionShape mesh = new BvhTriangleMeshShape(m_indexVertexArrays2,true,true);
                     startTransform.Translation = new Vector3(2 * i - 5, 2, -3);
-                    LocalCreateRigidBody(1, startTransform, boxShape);
+                    //startTransform.Translation = new Vector3(2 * i - 5, 10, -3);
+                    //LocalCreateRigidBody(1, startTransform, m_trimeshShape2);
+                    LocalCreateRigidBody(0, startTransform, boxShape);
                 }
             }
         }
@@ -127,14 +129,14 @@ namespace BulletXNADemos.Demos
 
 
 #else
-                GImpactMeshShape trimesh = new GImpactMeshShape(m_indexVertexArrays);
-                Vector3 scaling = Vector3.One;
-                trimesh.SetLocalScaling(ref scaling);
-                trimesh.SetMargin(0.07f); ///?????
-                trimesh.UpdateBound();
+                //GImpactMeshShape trimesh = new GImpactMeshShape(m_indexVertexArrays);
+                //Vector3 scaling = Vector3.One;
+                //trimesh.SetLocalScaling(ref scaling);
+                //trimesh.SetMargin(0.07f); ///?????
+                //trimesh.UpdateBound();
 #endif
 
-                m_trimeshShape = trimesh;
+                //m_trimeshShape = trimesh;
 
             }
 
@@ -174,7 +176,7 @@ namespace BulletXNADemos.Demos
 		    float mass = 4.0f;
 		    Matrix startTransform = Matrix.CreateTranslation(startPosition);
 
-		    RigidBody body = LocalCreateRigidBody(mass, startTransform,m_trimeshShape);
+		    RigidBody body = LocalCreateRigidBody(mass, startTransform,m_trimeshShape2);
 
 		    Vector3 linVel = destination - startPosition;
 		    linVel.Normalize();

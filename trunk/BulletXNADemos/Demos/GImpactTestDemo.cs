@@ -25,8 +25,8 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
-
-            string filename = @"E:\users\man\bullet\gimpact-demo-xna.txt";
+            m_cameraDistance = 10.0f;
+            string filename = @"c:\users\man\bullet\gimpact-demo-xna.txt";
             FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
             BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
@@ -57,10 +57,15 @@ namespace BulletXNADemos.Demos
 
 
             CollisionShape staticboxShape1 = new BoxShape(new Vector3(200, 1, 200));//floor
+            staticboxShape1.SetUserPointer("Floor");
             CollisionShape staticboxShape2 = new BoxShape(new Vector3(1, 50, 200));//left wall
+            staticboxShape1.SetUserPointer("LeftWall");
             CollisionShape staticboxShape3 = new BoxShape(new Vector3(1, 50, 200));//right wall
+            staticboxShape1.SetUserPointer("RightWall");
             CollisionShape staticboxShape4 = new BoxShape(new Vector3(200, 50, 1));//front wall
+            staticboxShape1.SetUserPointer("FrontWall");
             CollisionShape staticboxShape5 = new BoxShape(new Vector3(200, 50, 1));//back wall
+            staticboxShape1.SetUserPointer("BackWall");
 
             CompoundShape staticScenario = new CompoundShape();//static scenario
 
@@ -77,7 +82,9 @@ namespace BulletXNADemos.Demos
 
             startTransform.Translation = new Vector3(0, 0, 0);
 
-            RigidBody staticBody = LocalCreateRigidBody(mass, startTransform, staticScenario);
+            //RigidBody staticBody = LocalCreateRigidBody(mass, startTransform, staticScenario);
+            RigidBody staticBody = LocalCreateRigidBody(mass, startTransform, staticboxShape1);
+
 
 	        staticBody.SetCollisionFlags(staticBody.GetCollisionFlags()|CollisionFlags.CF_STATIC_OBJECT);
 
@@ -99,15 +106,15 @@ namespace BulletXNADemos.Demos
 
             /// Create Dynamic Boxes
             {
-                int numBoxes = 6;
+                int numBoxes = 1;
                 for (int i = 0; i < numBoxes; i++)
                 {
                     CollisionShape boxShape = new BoxShape(new Vector3(1, 1, 1));
                     //CollisionShape mesh = new BvhTriangleMeshShape(m_indexVertexArrays2,true,true);
-                    startTransform.Translation = new Vector3(2 * i - 5, 2, -3);
+                    startTransform.Translation = new Vector3(2 * i - (numBoxes-1), 2, -3);
                     //startTransform.Translation = new Vector3(2 * i - 5, 10, -3);
                     //LocalCreateRigidBody(1, startTransform, m_trimeshShape2);
-                    LocalCreateRigidBody(0, startTransform, boxShape);
+                    LocalCreateRigidBody(1, startTransform, boxShape);
                 }
             }
         }
@@ -153,7 +160,7 @@ namespace BulletXNADemos.Demos
                 GImpactMeshShape trimesh2 = new GImpactMeshShape(m_indexVertexArrays2);
                 Vector3 scaling = new Vector3(4.0f, 4.0f, 4.0f);
                 trimesh2.SetLocalScaling(ref scaling);
-                trimesh2.SetMargin(0.07f); ///?????
+                //trimesh2.SetMargin(0.07f); ///?????
                 trimesh2.UpdateBound();
 #endif
                 m_trimeshShape2 = trimesh2;

@@ -95,6 +95,8 @@ namespace BulletXNA
 		public const bool debugSolver = false;
         public const bool debugBroadphase = false;
         public const bool debugBoxShape = false;
+        public const bool debugGimpactShape= true;
+        public const bool debugGimpactAlgo = true;
 
 
 

@@ -921,6 +921,12 @@ protected:
     		m_mesh_parts[i]->updateBound();
     		m_localAABB.merge(m_mesh_parts[i]->getLocalBox());
     	}
+
+		if(g_file && btBulletDebug::debugGimpactShape)
+		{
+			btGeometryUtil::PrintVector(g_file,"GImpact CalcLocalAABB min ",m_localAABB.m_min);
+			btGeometryUtil::PrintVector(g_file,"GImpact CalcLocalAABB max ",m_localAABB.m_max);
+		}
     }
 
 public:

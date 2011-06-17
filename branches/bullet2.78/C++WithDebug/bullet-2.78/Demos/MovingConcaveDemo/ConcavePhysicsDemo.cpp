@@ -1474,7 +1474,7 @@ int main(int argc,char** argv)
 
 	ConcaveDemo* concaveDemo = new ConcaveDemo();
 	concaveDemo->initPhysics();
-	concaveDemo->setCameraDistance(30.f);
+	concaveDemo->setCameraDistance(10.f);
 //cannot run stepFront yet, the OpenGL context is not opened (stepFront updates camera...)
 //	concaveDemo->stepFront();
 //	concaveDemo->stepFront();
@@ -1646,7 +1646,7 @@ void	ConcaveDemo::initGImpactCollision()
 
 void	ConcaveDemo::initPhysics()
 {
-	g_file = fopen("e:/users/man/bullet/gimpact-demo-cpp.txt","w");
+	g_file = fopen("c:/users/man/bullet/gimpact-demo-cpp.txt","w");
 
 	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
 
@@ -1689,7 +1689,10 @@ void	ConcaveDemo::initPhysics()
 
 	startTransform.setOrigin(btVector3(0,0,0));
 
-	btRigidBody* staticBody = localCreateRigidBody(mass, startTransform,staticScenario);
+	//btRigidBody* staticBody = localCreateRigidBody(mass, startTransform,staticScenario);
+	btRigidBody* staticBody = localCreateRigidBody(mass, startTransform,staticboxShape1);
+
+	
 
 	staticBody->setCollisionFlags(staticBody->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
 
@@ -1709,11 +1712,11 @@ void	ConcaveDemo::initPhysics()
 	staticBody2->setCollisionFlags(staticBody2->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
 
 	{
-		int numboxes = 6;
+		int numboxes = 1;
 		for (int i=0;i<numboxes;i++)
 		{
 			btCollisionShape* boxShape = new btBoxShape(btVector3(1,1,1));
-			startTransform.setOrigin(btVector3(2*i-5,2,-3));
+			startTransform.setOrigin(btVector3(2*i-(numboxes-1),2,-3));
 			localCreateRigidBody(1, startTransform,boxShape);
 		}
 	}

@@ -32,6 +32,7 @@ Concave-Concave Collision
 #include "LinearMath/btQuickprof.h"
 
 
+
 //! Class for accessing the plane equation
 class btPlaneShape : public btStaticPlaneShape
 {
@@ -215,6 +216,14 @@ void btGImpactCollisionAlgorithm::addContactPoint(btCollisionObject * body0,
 				const btVector3 & normal,
 				btScalar distance)
 {
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAlgo::AddContactPoint\n");
+		btGeometryUtil::PrintVector(g_file, "point", point);
+		btGeometryUtil::PrintVector(g_file, "normal", normal);
+	}
+
+
 	m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
 	m_resultOut->setShapeIdentifiersB(m_part1,m_triface1);
 	checkManifold(body0,body1);
@@ -228,6 +237,11 @@ void btGImpactCollisionAlgorithm::shape_vs_shape_collision(
 					  btCollisionShape * shape0,
 					  btCollisionShape * shape1)
 {
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::ShapeVsShape\n");
+	}
 
 	btCollisionShape* tmpShape0 = body0->getCollisionShape();
 	btCollisionShape* tmpShape1 = body1->getCollisionShape();
@@ -264,6 +278,11 @@ void btGImpactCollisionAlgorithm::convex_vs_convex_collision(
 	
 	body0->internalSetTemporaryCollisionShape(shape0);
 	body1->internalSetTemporaryCollisionShape(shape1);
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::ConvexVsConvex\n");
+	}
 
 
 	m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
@@ -313,6 +332,10 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact_find_pairs(
 		}
 	}
 
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsGImpactFindPairs [%d]\n", pairset.size());
+	}
 
 }
 
@@ -373,6 +396,12 @@ void btGImpactCollisionAlgorithm::collide_gjk_triangles(btCollisionObject * body
 
 	const int * pair_pointer = pairs;
 
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::CollideGjkTriangles [%d]\n", pair_count);
+	}
+
+
 	while(pair_count--)
 	{
 
@@ -410,6 +439,12 @@ void btGImpactCollisionAlgorithm::collide_sat_triangles(btCollisionObject * body
 	btPrimitiveTriangle ptri0;
 	btPrimitiveTriangle ptri1;
 	GIM_TRIANGLE_CONTACT contact_data;
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::CollideSatTriangles [%d]\n", pair_count);
+	}
+
 
 	shape0->lockChildShapes();
 	shape1->lockChildShapes();
@@ -477,6 +512,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 					  	btGImpactShapeInterface * shape0,
 					  	btGImpactShapeInterface * shape1)
 {
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsGImpact\n");
+	}
+
 
 	if(shape0->getGImpactShapeType()==CONST_GIMPACT_TRIMESH_SHAPE)
 	{
@@ -586,6 +627,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(btCollisionObject * body0,
 				  btGImpactShapeInterface * shape0,
 				  btCollisionShape * shape1,bool swapped)
 {
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsShape\n");
+	}
+
 	if(shape0->getGImpactShapeType()==CONST_GIMPACT_TRIMESH_SHAPE)
 	{
 		btGImpactMeshShape * meshshape0 = static_cast<btGImpactMeshShape *>(shape0);
@@ -697,6 +744,11 @@ void btGImpactCollisionAlgorithm::gimpact_vs_compoundshape(btCollisionObject * b
 				  btCompoundShape * shape1,bool swapped)
 {
 	btTransform orgtrans1 = body1->getWorldTransform();
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsCompoundshape\n");
+	}
 
 	int i = shape1->getNumChildShapes();
 	while(i--)
@@ -842,6 +894,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_concave(
 void btGImpactCollisionAlgorithm::processCollision (btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
 {
     clearCache();
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::processCollision\n");
+	}
+
 
     m_resultOut = resultOut;
 	m_dispatchInfo = &dispatchInfo;

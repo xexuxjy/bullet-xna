@@ -21,7 +21,8 @@ struct btBulletDebug
 		static const bool debugSolver = false;
 		static const bool debugBroadphase = false;
 		static const bool debugBoxShape = false;
-
+		static const bool debugGimpactShape = true;
+		static const bool debugGimpactAlgo = true;
 };
 
 #endif

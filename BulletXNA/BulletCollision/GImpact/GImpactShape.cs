@@ -121,6 +121,8 @@ namespace BulletXNA.BulletCollision
             UnlockChildShapes();
 
             m_localAABB = m_box_set.GetGlobalBox();
+
+
         }
 
 
@@ -995,6 +997,13 @@ namespace BulletXNA.BulletCollision
                 m_mesh_parts[i].UpdateBound();
                 m_localAABB.Merge(m_mesh_parts[i].GetLocalBox());
             }
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactShape)
+            {
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalcLocalAABB min ", m_localAABB.m_min);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalcLocalAABB max ", m_localAABB.m_max);
+            }
+
         }
 
         public GImpactMeshShape(StridingMeshInterface meshInterface)
@@ -1067,7 +1076,7 @@ namespace BulletXNA.BulletCollision
             m_needs_update = true;
         }
 
-        public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
             inertia = Vector3.Zero;
 
@@ -1079,6 +1088,11 @@ namespace BulletXNA.BulletCollision
                 Vector3 partinertia = Vector3.Zero;
                 GetMeshPart(i).CalculateLocalInertia(partmass, ref partinertia);
                 inertia += partinertia;
+            }
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactShape)
+            {
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalculateLocalInertia", inertia);
             }
 
         }

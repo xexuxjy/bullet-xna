@@ -20,38 +20,33 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
+#define GIMPACT_VS_PLANE_COLLISION
 
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
 
     //! Class for accessing the plane equation
-    public class PlaneShape : StaticPlaneShape
+    public static class PlaneShape
     {
-        public PlaneShape(ref Vector3 v, float f)
-            : base(ref v, f)
+        public static void GetPlaneEquation(StaticPlaneShape plane,out Vector4 equation)
         {
-        }
+            equation = new Vector4(plane.GetPlaneNormal(),plane.GetPlaneConstant());
 
-        public void GetPlaneEquation(out Vector4 equation)
-        {
-            equation = new Vector4();
-            equation.X = m_planeNormal.X;
-            equation.Y = m_planeNormal.Y;
-            equation.Z = m_planeNormal.Z;
-            equation.W = m_planeConstant;
         }
 
 
-        public void GetPlaneEquationTransformed(ref Matrix trans, out Vector4 equation)
+        public static void GetPlaneEquationTransformed(StaticPlaneShape plane,ref Matrix trans, out Vector4 equation)
         {
             equation = new Vector4();
-            equation.X = Vector3.Dot(MathUtil.MatrixRow(ref trans, 0), m_planeNormal);
-            equation.Y = Vector3.Dot(MathUtil.MatrixRow(ref trans, 1), m_planeNormal);
-            equation.Z = Vector3.Dot(MathUtil.MatrixRow(ref trans, 2), m_planeNormal);
-            equation.W = Vector3.Dot(trans.Translation, m_planeNormal) + m_planeConstant;
+            Vector3 planeNormal = plane.GetPlaneNormal();
+            equation.X = Vector3.Dot(MathUtil.MatrixRow(ref trans, 0), planeNormal);
+            equation.Y = Vector3.Dot(MathUtil.MatrixRow(ref trans, 1), planeNormal);
+            equation.Z = Vector3.Dot(MathUtil.MatrixRow(ref trans, 2), planeNormal);
+            equation.W = Vector3.Dot(trans.Translation, planeNormal) + plane.GetPlaneConstant();
         }
     }
 
@@ -135,6 +130,11 @@ namespace BulletXNA.BulletCollision
         // Call before process collision
         protected void CheckConvexAlgorithm(CollisionObject body0, CollisionObject body1)
         {
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAlgo::CheckConvexAlgo");
+            }
+
             if (m_convex_algorithm != null)
             {
                 return;
@@ -159,6 +159,14 @@ namespace BulletXNA.BulletCollision
                         ref Vector3 normal,
                         float distance)
         {
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAlgo::AddContactPoint");
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "point", point);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "normal", normal);
+
+            }
+
             m_resultOut.SetShapeIdentifiersA(m_part0, m_triface0);
             m_resultOut.SetShapeIdentifiersB(m_part1, m_triface1);
             CheckManifold(body0, body1);
@@ -182,6 +190,11 @@ namespace BulletXNA.BulletCollision
             shape1.LockChildShapes();
 
             int pair_pointer = 0;
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::CollideGjkTriangles [{0}]", pair_count);
+            }
 
             while (pair_count-- != 0)
             {
@@ -221,6 +234,12 @@ namespace BulletXNA.BulletCollision
             PrimitiveTriangle ptri0 = new PrimitiveTriangle();
             PrimitiveTriangle ptri1 = new PrimitiveTriangle();
             GIM_TRIANGLE_CONTACT contact_data = new GIM_TRIANGLE_CONTACT();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::CollideSatTriangles [{0}]", pair_count);
+            }
+
 
             shape0.LockChildShapes();
             shape1.LockChildShapes();
@@ -295,6 +314,13 @@ namespace BulletXNA.BulletCollision
             body0.InternalSetTemporaryCollisionShape(shape0);
             body1.InternalSetTemporaryCollisionShape(shape1);
 
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ShapeVsShape");
+            }
+
+
+
             {
                 CollisionAlgorithm algor = NewAlgorithm(body0, body1);
                 // post :	checkManifold is called
@@ -323,6 +349,11 @@ namespace BulletXNA.BulletCollision
 
             body0.InternalSetTemporaryCollisionShape(shape0);
             body1.InternalSetTemporaryCollisionShape(shape1);
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ConvexVsConvex");
+            }
 
 
             m_resultOut.SetShapeIdentifiersA(m_part0, m_triface0);
@@ -370,8 +401,10 @@ namespace BulletXNA.BulletCollision
                     }
                 }
             }
-
-
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsGImpactFindPairs [{0}]", pairset.Count);
+            }
         }
 
         protected void GImpactVsShapeFindPairs(
@@ -424,21 +457,20 @@ namespace BulletXNA.BulletCollision
             Matrix orgtrans0 = body0.GetWorldTransform();
             Matrix orgtrans1 = body1.GetWorldTransform();
 
-            PlaneShape planeshape = shape1 as PlaneShape;
             Vector4 plane;
-            planeshape.GetPlaneEquationTransformed(ref orgtrans1, out plane);
+            PlaneShape.GetPlaneEquationTransformed(shape1,ref orgtrans1, out plane);
 
             //test box against plane
 
             AABB tribox = new AABB();
             shape0.GetAabb(ref orgtrans0, out tribox.m_min, out tribox.m_max);
-            tribox.IncrementMargin(planeshape.GetMargin());
+            tribox.IncrementMargin(shape1.GetMargin());
 
             if (tribox.PlaneClassify(ref plane) != BT_PLANE_INTERSECTION_TYPE.BT_CONST_COLLIDE_PLANE) return;
 
             shape0.LockChildShapes();
 
-            float margin = shape0.GetMargin() + planeshape.GetMargin();
+            float margin = shape0.GetMargin() + shape1.GetMargin();
 
             Vector3 vertex;
             int vi = shape0.GetVertexCount();
@@ -487,6 +519,12 @@ namespace BulletXNA.BulletCollision
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             ClearCache();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ProcessCollision");
+            }
+
 
             m_resultOut = resultOut;
             m_dispatchInfo = dispatchInfo;
@@ -693,6 +731,12 @@ namespace BulletXNA.BulletCollision
                           GImpactShapeInterface shape0,
                           CollisionShape shape1, bool swapped)
         {
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+	        {
+		        BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape");
+	        }
+
+
             if (shape0.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE)
             {
                 GImpactMeshShape meshshape0 = shape0 as GImpactMeshShape;
@@ -728,7 +772,7 @@ namespace BulletXNA.BulletCollision
 	{
 		GImpactMeshShapePart shapepart = shape0 as GImpactMeshShapePart;
 		StaticPlaneShape planeshape = shape1 as StaticPlaneShape;
-		GImpacttrimeshpartVsPlaneCollision(body0,body1,shapepart,planeshape,swapped);
+        GImpactTrimeshpartVsPlaneCollision(body0, body1, shapepart, planeshape, swapped);
 		return;
 	}
 
@@ -813,6 +857,12 @@ namespace BulletXNA.BulletCollision
                           CompoundShape shape1, bool swapped)
         {
             Matrix orgtrans1 = body1.GetWorldTransform();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsCompoundshape");
+            }
+
 
             int i = shape1.GetNumChildShapes();
             while (i-- != 0)

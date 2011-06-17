@@ -41,6 +41,10 @@ class btDispatcher;
 #include "BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h"
 #include "LinearMath/btIDebugDraw.h"
 
+#include "LinearMath/btGeometryUtil.h"
+#include <stdio.h>
+#include "btBulletDebugGlobals.h"
+extern FILE* g_file;
 
 
 //! Collision Algorithm for GImpact Shapes
@@ -129,6 +133,11 @@ protected:
 	// Call before process collision
 	SIMD_FORCE_INLINE void checkConvexAlgorithm(btCollisionObject* body0,btCollisionObject* body1)
 	{
+		if (g_file && btBulletDebug::debugGimpactAlgo)
+		{
+			fprintf(g_file,"GImpactAlgo::checConvexAlgo\n");
+		}
+
 		if(m_convex_algorithm) return;
 		m_convex_algorithm = newAlgorithm(body0,body1);
 	}

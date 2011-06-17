@@ -25,6 +25,11 @@ subject to the following restrictions:
 */
 
 #include "LinearMath/btTransform.h"
+#include "LinearMath/btGeometryUtil.h"
+#include <stdio.h>
+#include "btBulletDebugGlobals.h"
+
+extern FILE* g_file;
 
 
 ///Swap numbers
@@ -392,6 +397,13 @@ public:
 	//! Merges a Box
 	SIMD_FORCE_INLINE void merge(const btAABB & box)
 	{
+		//if (g_file && btBulletDebug::debugGimpactShape)
+		//{
+		//	btGeometryUtil::PrintVector(g_file, "Merge::Min", box.m_min);
+		//	btGeometryUtil::PrintVector(g_file, "Merge::Max", box.m_max);
+		//}
+
+
 		m_min[0] = BT_MIN(m_min[0],box.m_min[0]);
 		m_min[1] = BT_MIN(m_min[1],box.m_min[1]);
 		m_min[2] = BT_MIN(m_min[2],box.m_min[2]);

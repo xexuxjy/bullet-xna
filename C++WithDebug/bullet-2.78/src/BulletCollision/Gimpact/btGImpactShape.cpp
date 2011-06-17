@@ -21,6 +21,10 @@ subject to the following restrictions:
 
 #include "btGImpactShape.h"
 #include "btGImpactMassUtil.h"
+#include "LinearMath/btGeometryUtil.h"
+
+#include <stdio.h>
+extern FILE* g_file;
 
 
 #define CALC_EXACT_INERTIA 1
@@ -121,6 +125,11 @@ void btGImpactMeshShape::calculateLocalInertia(btScalar mass,btVector3& inertia)
 		btVector3 partinertia;
 		getMeshPart(i)->calculateLocalInertia(partmass,partinertia);
 		inertia+=partinertia;
+	}
+
+	if(g_file && btBulletDebug::debugGimpactShape)
+	{
+		btGeometryUtil::PrintVector(g_file, "GImpact CalculateLocalInertia", inertia);
 	}
 
 #else

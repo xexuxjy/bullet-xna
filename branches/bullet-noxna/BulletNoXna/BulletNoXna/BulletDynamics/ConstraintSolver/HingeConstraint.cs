@@ -675,19 +675,19 @@ namespace BulletXNA.BulletDynamics
 
 			if (!m_angularOnly)
 			{
-
 				info.m_solverConstraints[s0].m_contactNormal = p;
-
 				info.m_solverConstraints[s1].m_contactNormal = q;
 				info.m_solverConstraints[s2].m_contactNormal = ax1;
+
+				// compute three elements of right hand side
+				float rhs = k * Vector3.Dot(p, ofs);
+				info.m_solverConstraints[s0].m_rhs = rhs;
+				rhs = k * Vector3.Dot(q, ofs);
+				info.m_solverConstraints[s1].m_rhs = rhs;
+				rhs = k * Vector3.Dot(ax1, ofs);
+				info.m_solverConstraints[s2].m_rhs = rhs;
 			}
-			// compute three elements of right hand side
-			float rhs = k * Vector3.Dot(p, ofs);
-			info.m_solverConstraints[s0].m_rhs = rhs;
-			rhs = k * Vector3.Dot(q, ofs);
-			info.m_solverConstraints[s1].m_rhs = rhs;
-			rhs = k * Vector3.Dot(ax1, ofs);
-			info.m_solverConstraints[s2].m_rhs = rhs;
+
 			// the hinge axis should be the only unconstrained
 			// rotational axis, the angular velocity of the two bodies perpendicular to
 			// the hinge axis should be equal. thus the constraint equations are

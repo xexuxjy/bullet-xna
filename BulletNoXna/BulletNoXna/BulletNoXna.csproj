@@ -12,6 +12,7 @@
     <AssemblyName>BulletNoXna</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -148,45 +149,26 @@
     <Compile Include="DefaultMotionState.cs" />
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
-    <Compile Include="LinearMath\BoundingBox.cs" />
-    <Compile Include="LinearMath\BoundingSphere.cs" />
-    <Compile Include="LinearMath\BoundingFrustum.cs" />
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
-    <Compile Include="LinearMath\Design\BoundingBoxConverter.cs" />
-    <Compile Include="LinearMath\Design\BoundingSphereConverter.cs" />
-    <Compile Include="LinearMath\Design\FieldDescriptor.cs" />
-    <Compile Include="LinearMath\Design\MathTypeConverter.cs" />
-    <Compile Include="LinearMath\Design\PlaneConverter.cs" />
-    <Compile Include="LinearMath\Design\RayConverter.cs" />
-    <Compile Include="LinearMath\Enums.cs" />
-    <Compile Include="LinearMath\HelperCode\PlaneHelper.cs" />
     <Compile Include="LinearMath\MathHelper.cs" />
     <Compile Include="TypedObject.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\VoronoiSimplexSolver.cs" />
     <Compile Include="LinearMath\AabbUtil2.cs" />
     <Compile Include="LinearMath\ConvexHull.cs" />
-    <Compile Include="LinearMath\Design\MatrixConverter.cs" />
-    <Compile Include="LinearMath\Design\QuaternionConverter.cs" />
-    <Compile Include="LinearMath\Design\Vector2Converter.cs" />
-    <Compile Include="LinearMath\Design\Vector3Converter.cs" />
-    <Compile Include="LinearMath\Design\Vector4Converter.cs" />
     <Compile Include="LinearMath\IDebugDraw.cs" />
     <Compile Include="LinearMath\IndexedVector3.cs" />
     <Compile Include="LinearMath\MathUtil.cs" />
-    <Compile Include="LinearMath\Matrix.cs" />
     <Compile Include="LinearMath\ObjectArray.cs" />
-    <Compile Include="LinearMath\Plane.cs" />
-    <Compile Include="LinearMath\Quaternion.cs" />
-    <Compile Include="LinearMath\Ray.cs" />
     <Compile Include="LinearMath\TransformUtil.cs" />
     <Compile Include="LinearMath\UShortVector3.cs" />
-    <Compile Include="LinearMath\Vector2.cs" />
-    <Compile Include="LinearMath\Vector3.cs" />
-    <Compile Include="LinearMath\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Microsoft.Xna.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

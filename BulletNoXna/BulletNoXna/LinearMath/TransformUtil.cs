@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
@@ -141,8 +141,7 @@ namespace BulletXNA
 		    Quaternion dorn = new Quaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
 
             Quaternion orn0;
-            Vector3 component;
-            curTrans.Decompose(out component, out orn0, out component);
+            TransformUtil.GetRotation(ref curTrans, out orn0);
 
 		    Quaternion predictedOrn = dorn * orn0;
 		    predictedOrn.Normalize();
@@ -253,15 +252,47 @@ namespace BulletXNA
 
         public static void GetRotation(ref Matrix a, out Quaternion rot)
         {
-            Vector3 component;
-            a.Decompose(out component, out rot, out component);
+            float xs, ys, zs;
+
+            if (Math.Sign(a.M11 * a.M12 * a.M13 * a.M14) < 0)
+                xs = -1f;
+            else
+                xs = 1f;
+
+            if (Math.Sign(a.M21 * a.M22 * a.M23 * a.M24) < 0)
+                ys = -1f;
+            else
+                ys = 1f;
+
+            if (Math.Sign(a.M31 * a.M32 * a.M33 * a.M34) < 0)
+                zs = -1f;
+            else
+                zs = 1f;
+
+            Vector3 scale = new Vector3(
+                xs * (float)Math.Sqrt(a.M11 * a.M11 + a.M12 * a.M12 + a.M13 * a.M13),
+                ys * (float)Math.Sqrt(a.M21 * a.M21 + a.M22 * a.M22 + a.M23 * a.M23),
+                zs * (float)Math.Sqrt(a.M31 * a.M31 + a.M32 * a.M32 + a.M33 * a.M33)
+                );
+
+            if (scale.X == 0.0 || scale.Y == 0.0 || scale.Z == 0.0)
+            {
+                rot = Quaternion.Identity;
+                return;
+            }
+
+            Matrix m1 = new Matrix(a.M11 / scale.X, a.M12 / scale.X, a.M13 / scale.X, 0,
+                    a.M21 / scale.Y, a.M22 / scale.Y, a.M23 / scale.Y, 0,
+                    a.M31 / scale.Z, a.M32 / scale.Z, a.M33 / scale.Z, 0,
+                    0, 0, 0, 1);
+
+            rot = Quaternion.CreateFromRotationMatrix(m1);
         }
 
         public static Quaternion GetRotation(ref Matrix a)
         {
-            Vector3 component;
             Quaternion rot;
-            a.Decompose(out component, out rot, out component);
+            GetRotation(ref a, out rot);
             return rot;
         }
 

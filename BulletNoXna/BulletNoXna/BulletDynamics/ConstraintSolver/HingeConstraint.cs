@@ -24,7 +24,7 @@
 #define _BT_USE_CENTER_LIMIT_
 
 using System;
-using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics
 {

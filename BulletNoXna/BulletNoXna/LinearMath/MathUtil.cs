@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
@@ -427,14 +428,6 @@ namespace BulletXNA
                 Math.Abs(input.X),
                 Math.Abs(input.Y),
                 Math.Abs(input.Z));
-        }
-
-        public static void RotateVector(ref Vector3 vec, ref Matrix m, out Vector3 output)
-        {
-            Quaternion rotation;
-            Vector3 component;
-            m.Decompose(out component, out rotation, out component);
-            output = Vector3.Transform(vec, rotation);
         }
 
         public static void TransformAabb(Vector3 halfExtents, float margin, Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
@@ -1119,10 +1112,8 @@ namespace BulletXNA
 
         public static Vector3 MatrixToEuler(ref Matrix m)
         {
-            Vector3 translate;
-            Vector3 scale;
             Quaternion rotate;
-            m.Decompose(out scale, out rotate, out translate);
+            TransformUtil.GetRotation(ref m, out rotate);
             return quaternionToEuler(ref rotate);
         }
 

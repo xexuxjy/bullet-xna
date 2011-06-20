@@ -13,7 +13,7 @@ using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D10.Buffer;
 using Device = SharpDX.Direct3D10.Device;
 using DriverType = SharpDX.Direct3D10.DriverType;
-using Quaternion = BulletXNA.LinearMath.Quaternion;
+using Quaternion = Microsoft.Xna.Framework.Quaternion;
 
 namespace DemoFramework
 {
@@ -605,13 +605,13 @@ namespace DemoFramework
 
             if (Input.MousePressed != MouseButtons.None)
             {
-                BulletXNA.LinearMath.Vector3 rayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
+                Microsoft.Xna.Framework.Vector3 rayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
 
                 if (Input.MousePressed == MouseButtons.Right)
                 {
                     if (PhysicsContext.World != null)
                     {
-                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
+                        Microsoft.Xna.Framework.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
 
                         ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(rayFrom, rayTo);
                         PhysicsContext.World.RayTest(ref rayFrom, ref rayTo, rayCallback);
@@ -625,17 +625,17 @@ namespace DemoFramework
                                     pickedBody = body;
                                     pickedBody.ActivationState = ActivationState.DisableDeactivation;
 
-                                    BulletXNA.LinearMath.Vector3 pickPos = rayCallback.m_hitPointWorld;
-                                    BulletXNA.LinearMath.Vector3 localPivot = BulletXNA.LinearMath.Vector3.Transform(pickPos, BulletXNA.LinearMath.Matrix.Invert(body.GetCenterOfMassTransform()));
+                                    Microsoft.Xna.Framework.Vector3 pickPos = rayCallback.m_hitPointWorld;
+                                    Microsoft.Xna.Framework.Vector3 localPivot = Microsoft.Xna.Framework.Vector3.Transform(pickPos, Microsoft.Xna.Framework.Matrix.Invert(body.GetCenterOfMassTransform()));
 
                                     if (use6Dof)
                                     {
-                                        BulletXNA.LinearMath.Matrix localPivotTransform = BulletXNA.LinearMath.Matrix.CreateTranslation(localPivot);
+                                        Microsoft.Xna.Framework.Matrix localPivotTransform = Microsoft.Xna.Framework.Matrix.CreateTranslation(localPivot);
                                         Generic6DofConstraint dof6 = new Generic6DofConstraint(body, ref localPivotTransform, false);
-                                        dof6.SetLinearLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
-                                        dof6.SetLinearUpperLimit(BulletXNA.LinearMath.Vector3.Zero);
-                                        dof6.SetAngularLowerLimit(BulletXNA.LinearMath.Vector3.Zero);
-                                        dof6.SetAngularUpperLimit(BulletXNA.LinearMath.Vector3.Zero);
+                                        dof6.SetLinearLowerLimit(Microsoft.Xna.Framework.Vector3.Zero);
+                                        dof6.SetLinearUpperLimit(Microsoft.Xna.Framework.Vector3.Zero);
+                                        dof6.SetAngularLowerLimit(Microsoft.Xna.Framework.Vector3.Zero);
+                                        dof6.SetAngularUpperLimit(Microsoft.Xna.Framework.Vector3.Zero);
 
                                         PhysicsContext.World.AddConstraint(dof6);
                                         pickConstraint = dof6;
@@ -699,28 +699,23 @@ namespace DemoFramework
             {
                 if (pickConstraint != null)
                 {
-                    BulletXNA.LinearMath.Vector3 newRayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
+                    Microsoft.Xna.Framework.Vector3 newRayTo = MathHelper.Vector3(GetRayTo(Input.MousePoint, Freelook.Eye, Freelook.Target, FieldOfView));
 
                     if (pickConstraint.ConstraintType == TypedConstraintType.D6)
                     {
                         Generic6DofConstraint pickCon = pickConstraint as Generic6DofConstraint;
 
                         //keep it at the same picking distance
-                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
-                        BulletXNA.LinearMath.Vector3 scale;
-                        Quaternion rotation;
-                        BulletXNA.LinearMath.Vector3 oldPivotInB;
-                        pickCon.GetFrameOffsetA().Decompose(out scale, out rotation, out oldPivotInB);
+                        Microsoft.Xna.Framework.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
 
-                        BulletXNA.LinearMath.Vector3 dir = newRayTo - rayFrom;
+                        Microsoft.Xna.Framework.Vector3 dir = newRayTo - rayFrom;
                         dir.Normalize();
                         dir *= oldPickingDist;
-                        BulletXNA.LinearMath.Vector3 newPivotB = rayFrom + dir;
+                        Microsoft.Xna.Framework.Vector3 newPivotB = rayFrom + dir;
 
-                        BulletXNA.LinearMath.Matrix tempFrameOffsetA = pickCon.GetFrameOffsetA();
+                        Microsoft.Xna.Framework.Matrix tempFrameOffsetA = pickCon.GetFrameOffsetA();
                         tempFrameOffsetA.Translation = newPivotB;
-                        //pickCon.FrameOffsetA = tempFrameOffsetA;
-                        BulletXNA.LinearMath.Matrix tempFrameOffsetB = pickCon.GetFrameOffsetB();
+                        Microsoft.Xna.Framework.Matrix tempFrameOffsetB = pickCon.GetFrameOffsetB();
                         pickCon.SetFrames(ref tempFrameOffsetA, ref tempFrameOffsetB);
                     }
                     else
@@ -728,13 +723,12 @@ namespace DemoFramework
                         Point2PointConstraint pickCon = pickConstraint as Point2PointConstraint;
 
                         //keep it at the same picking distance
-                        BulletXNA.LinearMath.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
-                        BulletXNA.LinearMath.Vector3 oldPivotInB = pickCon.GetPivotInB();
+                        Microsoft.Xna.Framework.Vector3 rayFrom = MathHelper.Vector3(Freelook.Eye);
 
-                        BulletXNA.LinearMath.Vector3 dir = newRayTo - rayFrom;
+                        Microsoft.Xna.Framework.Vector3 dir = newRayTo - rayFrom;
                         dir.Normalize();
                         dir *= oldPickingDist;
-                        BulletXNA.LinearMath.Vector3 newPivotB = rayFrom + dir;
+                        Microsoft.Xna.Framework.Vector3 newPivotB = rayFrom + dir;
 
                         pickCon.SetPivotB(ref newPivotB);
                     }

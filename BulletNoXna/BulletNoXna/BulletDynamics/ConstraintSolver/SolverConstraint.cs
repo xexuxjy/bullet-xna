@@ -23,7 +23,7 @@
 
 using System;
 using BulletXNA.BulletCollision;
-using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics
 {

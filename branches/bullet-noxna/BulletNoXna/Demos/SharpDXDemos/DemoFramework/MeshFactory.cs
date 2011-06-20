@@ -14,9 +14,9 @@ using Buffer = SharpDX.Direct3D10.Buffer;
 using Device = SharpDX.Direct3D10.Device;
 //using Face = BulletXNA.SoftBody.Face;
 using Mesh = SharpDX.Direct3D10.Mesh;
-using Matrix = BulletXNA.LinearMath.Matrix;
-using Vector2 = BulletXNA.LinearMath.Vector2;
-using Vector3 = BulletXNA.LinearMath.Vector3;
+using Matrix = Microsoft.Xna.Framework.Matrix;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace DemoFramework
 {
@@ -315,7 +315,7 @@ namespace DemoFramework
         {
             int up = shape.UpAxis;
             float radius = shape.Radius;
-            float halfHeight = shape.GetHalfExtentsWithoutMargin()[up] + shape.Margin;
+            float halfHeight = new IndexedVector3(shape.GetHalfExtentsWithoutMargin())[up] + shape.Margin;
 
             int numSteps = 10;
             float angleStep = (2 * (float)Math.PI) / numSteps;

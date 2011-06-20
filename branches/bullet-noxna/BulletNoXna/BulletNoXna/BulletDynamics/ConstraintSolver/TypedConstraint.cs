@@ -24,8 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics
 {

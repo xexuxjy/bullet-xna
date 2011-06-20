@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {

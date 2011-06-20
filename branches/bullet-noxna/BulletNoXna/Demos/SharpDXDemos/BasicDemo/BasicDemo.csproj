@@ -44,6 +44,10 @@
     <Reference Include="BulletNoXna">
       <HintPath>..\..\..\BulletNoXna\bin\Release\BulletNoXna.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Microsoft.Xna.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>..\SharpDX.dll</HintPath>
     </Reference>
@@ -55,6 +59,9 @@
       <Project>{D9DA6187-CC7D-4A26-9E2A-0E1D71643577}</Project>
       <Name>DemoFramework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

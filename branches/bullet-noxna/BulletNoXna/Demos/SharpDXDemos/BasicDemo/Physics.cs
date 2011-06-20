@@ -2,8 +2,8 @@
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using DemoFramework;
-using Matrix = BulletXNA.LinearMath.Matrix;
-using Vector3 = BulletXNA.LinearMath.Vector3;
+using Matrix = Microsoft.Xna.Framework.Matrix;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace BasicDemo
 {

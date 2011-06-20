@@ -12,6 +12,7 @@
     <AssemblyName>DemoFramework</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,6 +34,10 @@
   <ItemGroup>
     <Reference Include="BulletNoXna">
       <HintPath>..\..\..\BulletNoXna\bin\Release\BulletNoXna.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Microsoft.Xna.Framework.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>..\SharpDX.dll</HintPath>

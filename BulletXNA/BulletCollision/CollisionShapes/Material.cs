@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class Material
     {

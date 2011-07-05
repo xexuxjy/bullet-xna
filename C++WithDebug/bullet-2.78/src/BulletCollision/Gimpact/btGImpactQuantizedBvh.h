@@ -277,7 +277,7 @@ public:
 	void buildSet();
 
 	//! returns the indices of the primitives in the m_primitive_manager
-	bool boxQuery(const btAABB & box, btAlignedObjectArray<int> & collided_results) const;
+	bool boxQuery(const btAABB & box, btAlignedObjectArray<int> & collided_results,bool graphics=false) const;
 
 	//! returns the indices of the primitives in the m_primitive_manager
 	SIMD_FORCE_INLINE bool boxQueryTrans(const btAABB & box,

@@ -22,8 +22,9 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class PointCollector : IDiscreteCollisionDetectorInterfaceResult
     {
@@ -42,12 +43,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         {
         }
 
-        public virtual void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(IndexedVector3 normalOnBInWorld, IndexedVector3 pointInWorld, float depth)
         {
             AddContactPoint(ref normalOnBInWorld, ref pointInWorld, depth);
         }
 
-        public virtual void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(ref IndexedVector3 normalOnBInWorld, ref IndexedVector3 pointInWorld, float depth)
         {
             if (depth < m_distance)
             {
@@ -59,8 +60,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             }
         }
 
-        public Vector3 m_normalOnBInWorld;
-        public Vector3 m_pointInWorld;
+        public IndexedVector3 m_normalOnBInWorld;
+        public IndexedVector3 m_pointInWorld;
         public float m_distance;//negative means penetration
         public bool m_hasResult;
     }

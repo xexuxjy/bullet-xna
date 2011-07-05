@@ -134,7 +134,7 @@ void LargeMeshDemo::displayCallback(void) {
 
 void	LargeMeshDemo::initPhysics()
 {
-	g_file = fopen("e:/users/man/bullet/cpp-largemesh-output.txt","wb");
+	//g_file = fopen("e:/users/man/bullet/cpp-largemesh-output.txt","wb");
 	setTexturing(true);
 	setShadows(true);
 
@@ -172,7 +172,7 @@ void	LargeMeshDemo::initPhysics()
 	groundTransform.setIdentity();
 	//groundTransform.getBasis().setEulerYPR(0,0,SIMD_PI/2.0f);
 	//Matrix rotateMatrix = Matrix.CreateFromYawPitchRoll(0, 0, MathUtil.SIMD_PI*0.8f);
-	groundTransform.getBasis().setEulerYPR(SIMD_PI*0.8f,0,0);
+	groundTransform.getBasis().setEulerYPR(0,SIMD_PI*0.5f,0);
 	groundTransform.setOrigin(btVector3(0,0,0));
 
 	//We can also use DemoApplication::localCreateRigidBody, but for clarity it is provided here:
@@ -199,6 +199,7 @@ void	LargeMeshDemo::initPhysics()
 
 	btTransform boxTransform;
 	boxTransform.setIdentity();
+	boxTransform.getBasis().setEulerYPR(SIMD_PI*0.2f,SIMD_PI*0.4f,SIMD_PI*0.7f);
 	boxTransform.setOrigin(btVector3(0,3,0));
 
 

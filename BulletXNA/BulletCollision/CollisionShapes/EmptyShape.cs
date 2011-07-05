@@ -23,10 +23,10 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class EmptyShape : ConcaveShape
     {
@@ -40,28 +40,28 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             base.Cleanup();
         }
 
-        public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)
         {
             float fmargin = GetMargin();
-            Vector3 margin = new Vector3(fmargin);
-	        aabbMin = t.Translation - margin;
-	        aabbMax = t.Translation + margin;
+            IndexedVector3 margin = new IndexedVector3(fmargin);
+	        aabbMin = t._origin - margin;
+	        aabbMax = t._origin + margin;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
 	    {
 		    m_localScaling = scaling;
 	    }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
 	    {
 		    return m_localScaling;
 	    }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
             Debug.Assert(false);
-            inertia = Vector3.Zero;
+            inertia = IndexedVector3.Zero;
         }
 	
 	    public override String GetName()
@@ -69,11 +69,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return "Empty";
 	    }
 
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 vec1, ref Vector3 vec2)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 vec1, ref IndexedVector3 vec2)
 	    {
 	    }
 
 
-        protected Vector3 m_localScaling;
+        protected IndexedVector3 m_localScaling;
     }
 }

@@ -26,13 +26,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public class RaycastVehicle : IActionInterface
     {
@@ -59,19 +57,22 @@ namespace BulletXNA.BulletDynamics.Vehicle
         {
 	        for (int v=0;v<GetNumWheels();v++)
 	        {
-		        Vector3 wheelColor = new Vector3(0,1,1);
+		        IndexedVector3 wheelColor = new IndexedVector3(0,1,1);
 		        if (GetWheelInfo(v).m_raycastInfo.m_isInContact)
 		        {
-			        wheelColor = new Vector3(0,0,1);
+			        wheelColor = new IndexedVector3(0,0,1);
 		        } else
 		        {
-			        wheelColor= new Vector3(1,0,1);
+			        wheelColor= new IndexedVector3(1,0,1);
 		        }
 
-		        Vector3 wheelPosWS = GetWheelInfo(v).m_worldTransform.Translation;
+		        IndexedVector3 wheelPosWS = GetWheelInfo(v).m_worldTransform._origin;
 
-                Matrix temp = GetWheelInfo(v).m_worldTransform;
-                Vector3 axle = MathUtil.MatrixColumn(ref temp, GetRightAxis());
+                IndexedMatrix temp = GetWheelInfo(v).m_worldTransform;
+                IndexedVector3 axle = new IndexedVector3(
+        GetWheelInfo(v).m_worldTransform._basis[0][GetRightAxis()],
+        GetWheelInfo(v).m_worldTransform._basis[1][GetRightAxis()],
+        GetWheelInfo(v).m_worldTransform._basis[2][GetRightAxis()]);
 
 		        //debug wheels (cylinders)
 		        debugDrawer.DrawLine(wheelPosWS,wheelPosWS+axle,wheelColor);
@@ -80,7 +81,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	        }
         }
 
-        public Matrix GetChassisWorldTransform()
+        public IndexedMatrix GetChassisWorldTransform()
         {
             /*if (getRigidBody()->getMotionState())
             {
@@ -101,10 +102,10 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
             float raylen = wheel.GetSuspensionRestLength() + wheel.m_wheelsRadius;
 
-            Vector3 rayvector = wheel.m_raycastInfo.m_wheelDirectionWS * (raylen);
-            Vector3 source = wheel.m_raycastInfo.m_hardPointWS;
+            IndexedVector3 rayvector = wheel.m_raycastInfo.m_wheelDirectionWS * (raylen);
+            IndexedVector3 source = wheel.m_raycastInfo.m_hardPointWS;
             wheel.m_raycastInfo.m_contactPointWS = source + rayvector;
-            Vector3 target = wheel.m_raycastInfo.m_contactPointWS;
+            IndexedVector3 target = wheel.m_raycastInfo.m_contactPointWS;
 
             float param = 0f;
 
@@ -120,13 +121,13 @@ namespace BulletXNA.BulletDynamics.Vehicle
             }
 
             //{
-            //    Vector3 from1 = new Vector3(0.7957098f, -9.13606f, 1.794605f);
-            //    Vector3 to1 = new Vector3(0.886791f, -10.23207f, 1.815941f);
+            //    IndexedVector3 from1 = new IndexedVector3(0.7957098f, -9.13606f, 1.794605f);
+            //    IndexedVector3 to1 = new IndexedVector3(0.886791f, -10.23207f, 1.815941f);
             //    VehicleRaycasterResult results1  = new VehicleRaycasterResult();
             //    Object o2 = m_vehicleRaycaster.castRay(ref from1, ref to1, ref results1);
 
-            //    Vector3 from2 = new Vector3(0.7957281f, -9.136093f, 1.794625f);
-            //    Vector3 to2 = new Vector3(0.8867911f, -10.23211f, 1.815956f);
+            //    IndexedVector3 from2 = new IndexedVector3(0.7957281f, -9.136093f, 1.794625f);
+            //    IndexedVector3 to2 = new IndexedVector3(0.8867911f, -10.23211f, 1.815956f);
             //    VehicleRaycasterResult results2 = new VehicleRaycasterResult();
             //    Object o3 = m_vehicleRaycaster.castRay(ref from2, ref to2, ref results2);
 
@@ -177,14 +178,14 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
                 wheel.m_raycastInfo.m_contactPointWS = rayResults.m_hitPointInWorld;
 
-                float denominator = Vector3.Dot(wheel.m_raycastInfo.m_contactNormalWS, wheel.m_raycastInfo.m_wheelDirectionWS);
+                float denominator = IndexedVector3.Dot(wheel.m_raycastInfo.m_contactNormalWS, wheel.m_raycastInfo.m_wheelDirectionWS);
 
-                Vector3 chassis_velocity_at_contactPoint;
-                Vector3 relpos = wheel.m_raycastInfo.m_contactPointWS - GetRigidBody().GetCenterOfMassPosition();
+                IndexedVector3 chassis_velocity_at_contactPoint;
+                IndexedVector3 relpos = wheel.m_raycastInfo.m_contactPointWS - GetRigidBody().GetCenterOfMassPosition();
 
                 chassis_velocity_at_contactPoint = GetRigidBody().GetVelocityInLocalPoint(ref relpos);
 
-                float projVel = Vector3.Dot(wheel.m_raycastInfo.m_contactNormalWS, chassis_velocity_at_contactPoint);
+                float projVel = IndexedVector3.Dot(wheel.m_raycastInfo.m_contactNormalWS, chassis_velocity_at_contactPoint);
 
                 if (projVel > 1f)
                 {
@@ -212,7 +213,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
                 wheel.m_raycastInfo.m_contactNormalWS = -wheel.m_raycastInfo.m_wheelDirectionWS;
                 wheel.m_clippedInvContactDotSuspension = 1.0f;
             }
-
+    
             return depth;
         }
 
@@ -229,16 +230,15 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
 	        m_currentVehicleSpeedKmHour = 3.6f * GetRigidBody().GetLinearVelocity().Length();
         	
-	        Matrix chassisTrans = GetChassisWorldTransform();
+	        IndexedMatrix chassisTrans = GetChassisWorldTransform();
 
-            //btVector3 forwardW (
-            //    chassisTrans.getBasis()[0][m_indexForwardAxis],
-            //    chassisTrans.getBasis()[1][m_indexForwardAxis],
-            //    chassisTrans.getBasis()[2][m_indexForwardAxis]);
+            IndexedVector3 forwardW = new IndexedVector3(
+                chassisTrans._basis[0,m_indexForwardAxis],
+                chassisTrans._basis[1,m_indexForwardAxis],
+                chassisTrans._basis[2,m_indexForwardAxis]);
 
-            Vector3 forwardW = MathUtil.MatrixColumn(ref chassisTrans,m_indexForwardAxis);
 
-	        if (Vector3.Dot(forwardW,GetRigidBody().GetLinearVelocity()) < 0f)
+	        if (IndexedVector3.Dot(forwardW,GetRigidBody().GetLinearVelocity()) < 0f)
 	        {
 		        m_currentVehicleSpeedKmHour *= -1f;
 	        }
@@ -276,13 +276,13 @@ namespace BulletXNA.BulletDynamics.Vehicle
                     suspensionForce = wheel.m_maxSuspensionForce;
                 }
 
-                Vector3 impulse = wheel.m_raycastInfo.m_contactNormalWS * suspensionForce * step;
-		        Vector3 relpos = wheel.m_raycastInfo.m_contactPointWS - GetRigidBody().GetCenterOfMassPosition();
+                IndexedVector3 impulse = wheel.m_raycastInfo.m_contactNormalWS * suspensionForce * step;
+		        IndexedVector3 relpos = wheel.m_raycastInfo.m_contactPointWS - GetRigidBody().GetCenterOfMassPosition();
                 if (impulse.Y < 30 || impulse.Y > 40)
                 {
                     int ibreak = 0;
                 }
-                //impulse = new Vector3(0f, 1f, 0f);
+                //impulse = new IndexedVector3(0f, 1f, 0f);
                 GetRigidBody().ApplyImpulse(ref impulse, ref relpos);
         	
 	        }
@@ -292,23 +292,22 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	        for(int i=0;i<numWheels;++i)
 	        {
                 WheelInfo wheel = m_wheelInfo[i];
-		        Vector3 relpos = wheel.m_raycastInfo.m_hardPointWS - GetRigidBody().GetCenterOfMassPosition();
-		        Vector3 vel = GetRigidBody().GetVelocityInLocalPoint( ref relpos );
+		        IndexedVector3 relpos = wheel.m_raycastInfo.m_hardPointWS - GetRigidBody().GetCenterOfMassPosition();
+		        IndexedVector3 vel = GetRigidBody().GetVelocityInLocalPoint( ref relpos );
 
 		        if (wheel.m_raycastInfo.m_isInContact)
 		        {
-			        Matrix chassisWorldTransform = GetChassisWorldTransform();
+			        IndexedMatrix chassisWorldTransform = GetChassisWorldTransform();
 
-                    //btVector3 fwd (
-                    //    chassisWorldTransform.getBasis()[0][m_indexForwardAxis],
-                    //    chassisWorldTransform.getBasis()[1][m_indexForwardAxis],
-                    //    chassisWorldTransform.getBasis()[2][m_indexForwardAxis]);
-                    Vector3 fwd = MathUtil.MatrixColumn(ref chassisTrans,m_indexForwardAxis);
+                    IndexedVector3 fwd = new IndexedVector3(
+                        chassisWorldTransform._basis[0,m_indexForwardAxis],
+                        chassisWorldTransform._basis[1,m_indexForwardAxis],
+                        chassisWorldTransform._basis[2,m_indexForwardAxis]);
 
-			        float proj = Vector3.Dot(fwd,wheel.m_raycastInfo.m_contactNormalWS);
+			        float proj = IndexedVector3.Dot(fwd,wheel.m_raycastInfo.m_contactNormalWS);
 			        fwd -= wheel.m_raycastInfo.m_contactNormalWS * proj;
 
-			        float proj2 = Vector3.Dot(fwd,vel);
+			        float proj2 = IndexedVector3.Dot(fwd,vel);
         			
 			        wheel.m_deltaRotation = (proj2 * step) / (wheel.m_wheelsRadius);
 			        wheel.m_rotation += wheel.m_deltaRotation;
@@ -356,7 +355,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
             wheelInfo.m_engineForce = force;
         }
 
-        public Matrix GetWheelTransformWS(int wheelIndex)
+        public IndexedMatrix GetWheelTransformWS(int wheelIndex)
         {
 	        Debug.Assert(wheelIndex < GetNumWheels());
 	        WheelInfo wheel = m_wheelInfo[wheelIndex];
@@ -368,9 +367,9 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	        WheelInfo wheel = m_wheelInfo[ wheelIndex ];
 
             UpdateWheelTransformsWS(wheel,interpolatedTransform);
-	        Vector3 up = -wheel.m_raycastInfo.m_wheelDirectionWS;
-	        Vector3 right = wheel.m_raycastInfo.m_wheelAxleWS;
-	        Vector3 fwd = Vector3.Cross(up,right);
+	        IndexedVector3 up = -wheel.m_raycastInfo.m_wheelDirectionWS;
+	        IndexedVector3 right = wheel.m_raycastInfo.m_wheelAxleWS;
+	        IndexedVector3 fwd = IndexedVector3.Cross(up,right);
 	        fwd.Normalize();
         //	up = right.cross(fwd);
         //	up.normalize();
@@ -378,32 +377,28 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	        //rotate around steering over de wheelAxleWS
 	        float steering = wheel.m_steering;
         	
-	        Quaternion steeringOrn = Quaternion.CreateFromAxisAngle(up,steering);//wheel.m_steering);
-	        Matrix steeringMat = Matrix.CreateFromQuaternion(steeringOrn);
+	        Quaternion steeringOrn = Quaternion.CreateFromAxisAngle(up.ToVector3(),steering);//wheel.m_steering);
+            IndexedBasisMatrix steeringMat = new IndexedBasisMatrix(ref steeringOrn);
 
-            Quaternion rotatingOrn = Quaternion.CreateFromAxisAngle(right, -wheel.m_rotation);
-	        Matrix rotatingMat = Matrix.CreateFromQuaternion(rotatingOrn);
+            Quaternion rotatingOrn = Quaternion.CreateFromAxisAngle(right.ToVector3(), -wheel.m_rotation);
+            IndexedBasisMatrix rotatingMat = new IndexedBasisMatrix(ref rotatingOrn);
 
-            Matrix basis2 = Matrix.Identity;
-            basis2.Up = up;
-            basis2.Forward = fwd;
-            basis2.Right = right;
 
-            //btMatrix3x3 basis2(
-            //    right[0],fwd[0],up[0],
-            //    right[1],fwd[1],up[1],
-            //    right[2],fwd[2],up[2]
-            //);
+            IndexedBasisMatrix basis2 = new IndexedBasisMatrix(
+                right[0],fwd[0],up[0],
+                right[1],fwd[1],up[1],
+                right[2],fwd[2],up[2]
+            );
         	
             // FIXME MAN - MATRIX ORDER
             //wheel.m_worldTransform = steeringMat * rotatingMat * basis2;
-            wheel.m_worldTransform = basis2 * rotatingMat * steeringMat;
-	        wheel.m_worldTransform.Translation = 
+            wheel.m_worldTransform._basis = basis2 * rotatingMat * steeringMat;
+	        wheel.m_worldTransform._origin = 
 		        wheel.m_raycastInfo.m_hardPointWS + (wheel.m_raycastInfo.m_wheelDirectionWS * wheel.m_raycastInfo.m_suspensionLength);
        
         }
 
-        public WheelInfo AddWheel(ref Vector3 connectionPointCS0, ref Vector3 wheelDirectionCS0, ref Vector3 wheelAxleCS, float suspensionRestLength, float wheelRadius, VehicleTuning tuning, bool isFrontWheel)
+        public WheelInfo AddWheel(ref IndexedVector3 connectionPointCS0, ref IndexedVector3 wheelDirectionCS0, ref IndexedVector3 wheelAxleCS, float suspensionRestLength, float wheelRadius, VehicleTuning tuning, bool isFrontWheel)
         {
             WheelInfoConstructionInfo ci = new WheelInfoConstructionInfo();
 
@@ -442,15 +437,15 @@ namespace BulletXNA.BulletDynamics.Vehicle
         {
             wheel.m_raycastInfo.m_isInContact = false;
 
-            Matrix chassisTrans = GetChassisWorldTransform();
+            IndexedMatrix chassisTrans = GetChassisWorldTransform();
             if (interpolatedTransform && (GetRigidBody().GetMotionState() != null))
             {
                 GetRigidBody().GetMotionState().GetWorldTransform(out chassisTrans);
             }
 
-            wheel.m_raycastInfo.m_hardPointWS = Vector3.Transform(wheel.m_chassisConnectionPointCS,chassisTrans);
-            wheel.m_raycastInfo.m_wheelDirectionWS = Vector3.TransformNormal(wheel.m_wheelDirectionCS,chassisTrans);
-            wheel.m_raycastInfo.m_wheelAxleWS = Vector3.TransformNormal(wheel.m_wheelAxleCS,chassisTrans);
+            wheel.m_raycastInfo.m_hardPointWS = chassisTrans * wheel.m_chassisConnectionPointCS;
+            wheel.m_raycastInfo.m_wheelDirectionWS = chassisTrans._basis * wheel.m_wheelDirectionCS;
+            wheel.m_raycastInfo.m_wheelAxleWS = chassisTrans._basis * wheel.m_wheelAxleCS;
         }
 
         public void SetBrake(float brake, int wheelIndex)
@@ -564,20 +559,23 @@ namespace BulletXNA.BulletDynamics.Vehicle
 			        if (groundObject != null)
 			        {
 
-				        Matrix wheelTrans = GetWheelTransformWS( i );
+				        IndexedMatrix wheelTrans = GetWheelTransformWS( i );
 
-				        Matrix wheelBasis0 = wheelTrans;
-				        m_axle[i] = MathUtil.MatrixColumn(ref wheelBasis0,m_indexRightAxis);
+				        IndexedBasisMatrix wheelBasis0 = wheelTrans._basis;
+                        m_axle[i] = new IndexedVector3(
+                        wheelBasis0[0][m_indexRightAxis],
+                        wheelBasis0[1][m_indexRightAxis],
+                        wheelBasis0[2][m_indexRightAxis]);
     					
-				        Vector3 surfNormalWS = wheelInfo.m_raycastInfo.m_contactNormalWS;
-				        float proj = Vector3.Dot(m_axle[i],surfNormalWS);
+				        IndexedVector3 surfNormalWS = wheelInfo.m_raycastInfo.m_contactNormalWS;
+				        float proj = IndexedVector3.Dot(m_axle[i],surfNormalWS);
 				        m_axle[i] -= surfNormalWS * proj;
 				        m_axle[i].Normalize();
     					
-				        m_forwardWS[i] = Vector3.Cross(surfNormalWS,m_axle[i]);
+				        m_forwardWS[i] = IndexedVector3.Cross(surfNormalWS,m_axle[i]);
 				        m_forwardWS[i].Normalize();
 
-                        Vector3 tempAxle = m_axle[i];
+                        IndexedVector3 tempAxle = m_axle[i];
                         float tempImpulse = m_sideImpulse[i];
                         ContactConstraint.ResolveSingleBilateral(m_chassisBody, ref wheelInfo.m_raycastInfo.m_contactPointWS,
                                   groundObject, ref wheelInfo.m_raycastInfo.m_contactPointWS,
@@ -609,7 +607,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 			            {
 				            float defaultRollingFrictionImpulse = 0f;
 				            float maxImpulse = (wheelInfo.m_brake != 0f) ? wheelInfo.m_brake : defaultRollingFrictionImpulse;
-                            Vector3 tempWheel = m_forwardWS[wheel];
+                            IndexedVector3 tempWheel = m_forwardWS[wheel];
 				            WheelContactPoint contactPt = new WheelContactPoint(m_chassisBody,groundObject,ref wheelInfo.m_raycastInfo.m_contactPointWS,ref tempWheel,maxImpulse);
                             m_forwardWS[wheel] = tempWheel;
 				            rollingFriction = CalcRollingFriction(contactPt);
@@ -670,7 +668,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	            {
 		            WheelInfo wheelInfo = m_wheelInfo[wheel];
 
-		            Vector3 rel_pos = wheelInfo.m_raycastInfo.m_contactPointWS - 
+		            IndexedVector3 rel_pos = wheelInfo.m_raycastInfo.m_contactPointWS - 
 				            m_chassisBody.GetCenterOfMassPosition();
 
 
@@ -687,27 +685,23 @@ namespace BulletXNA.BulletDynamics.Vehicle
                     {
                         RigidBody groundObject = m_wheelInfo[wheel].m_raycastInfo.m_groundObject as RigidBody;
 
-                        Vector3 rel_pos2 = wheelInfo.m_raycastInfo.m_contactPointWS -
+                        IndexedVector3 rel_pos2 = wheelInfo.m_raycastInfo.m_contactPointWS -
                             groundObject.GetCenterOfMassPosition();
 
-                        Vector3 sideImp = m_axle[wheel] * m_sideImpulse[wheel];
+                        IndexedVector3 sideImp = m_axle[wheel] * m_sideImpulse[wheel];
 
 #if ROLLING_INFLUENCE_FIX // fix. It only worked if car's up was along Y - VT.
-					Vector3 vChassisWorldUp = MathUtil.MatrixColumn(GetRigidBody().GetCenterOfMassTransform(),m_indexUpAxis);
-					rel_pos -= vChassisWorldUp * (Vector3.Dot(vChassisWorldUp,rel_pos) * (1.0f-wheelInfo.m_rollInfluence));
+                        IndexedVector3 vChassisWorldUp = GetRigidBody().GetCenterOfMassTransform()._basis.GetColumn(m_indexUpAxis);
+                        rel_pos -= vChassisWorldUp * (IndexedVector3.Dot(vChassisWorldUp, rel_pos) * (1.0f - wheelInfo.m_rollInfluence));
 #else
 					rel_pos[m_indexUpAxis] *= wheelInfo.m_rollInfluence;
 #endif
 
 
-                        MathUtil.VectorComponentMultiplyAssign(ref rel_pos, m_indexUpAxis, wheelInfo.m_rollInfluence);
-
-                        
-
                         m_chassisBody.ApplyImpulse(ref sideImp, ref rel_pos);
 
                         //apply friction impulse on the ground
-                        Vector3 temp = -sideImp;
+                        IndexedVector3 temp = -sideImp;
                         groundObject.ApplyImpulse(ref temp, ref rel_pos2);
                     }
 	            }
@@ -735,14 +729,14 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	    }
     	
 	    ///Worldspace forward vector
-	    public Vector3 GetForwardVector() 
+	    public IndexedVector3 GetForwardVector() 
 	    {
-		    Matrix chassisTrans = GetChassisWorldTransform();
+		    IndexedMatrix chassisTrans = GetChassisWorldTransform();
 
-            Vector3 forwardW = MathUtil.MatrixColumn(ref chassisTrans, m_indexForwardAxis);
-                  //chassisTrans.getBasis()[0][m_indexForwardAxis], 
-                  //chassisTrans.getBasis()[1][m_indexForwardAxis], 
-                  //chassisTrans.getBasis()[2][m_indexForwardAxis]); 
+            IndexedVector3 forwardW = new IndexedVector3( 
+                  chassisTrans._basis[0,m_indexForwardAxis], 
+                  chassisTrans._basis[1,m_indexForwardAxis], 
+                  chassisTrans._basis[2,m_indexForwardAxis]); 
 
 		    return forwardW;
 	    }
@@ -785,18 +779,18 @@ namespace BulletXNA.BulletDynamics.Vehicle
         {
 	        float j1=0f;
 
-	        Vector3 contactPosWorld = contactPoint.m_frictionPositionWorld;
+	        IndexedVector3 contactPosWorld = contactPoint.m_frictionPositionWorld;
 
-	        Vector3 rel_pos1 = contactPosWorld - contactPoint.m_body0.GetCenterOfMassPosition(); 
-	        Vector3 rel_pos2 = contactPosWorld - contactPoint.m_body1.GetCenterOfMassPosition();
+	        IndexedVector3 rel_pos1 = contactPosWorld - contactPoint.m_body0.GetCenterOfMassPosition(); 
+	        IndexedVector3 rel_pos2 = contactPosWorld - contactPoint.m_body1.GetCenterOfMassPosition();
         	
 	        float maxImpulse  = contactPoint.m_maxImpulse;
         	
-	        Vector3 vel1 = contactPoint.m_body0.GetVelocityInLocalPoint(ref rel_pos1);
-	        Vector3 vel2 = contactPoint.m_body1.GetVelocityInLocalPoint(ref rel_pos2);
-	        Vector3 vel = vel1 - vel2;
+	        IndexedVector3 vel1 = contactPoint.m_body0.GetVelocityInLocalPoint(ref rel_pos1);
+	        IndexedVector3 vel2 = contactPoint.m_body1.GetVelocityInLocalPoint(ref rel_pos2);
+	        IndexedVector3 vel = vel1 - vel2;
 
-	        float vrel = Vector3.Dot(contactPoint.m_frictionDirectionWorld,vel);
+	        float vrel = IndexedVector3.Dot(contactPoint.m_frictionDirectionWorld,vel);
 
 	        // calculate j that moves us to zero relative velocity
 	        j1 = -vrel * contactPoint.m_jacDiagABInv;
@@ -828,12 +822,12 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	    private int	m_indexForwardAxis;
 
 
-        //private IList<Vector3> m_forwardWS = new List<Vector3>();
-        //private IList<Vector3> m_axle = new List<Vector3>();
+        //private IList<IndexedVector3> m_forwardWS = new List<IndexedVector3>();
+        //private IList<IndexedVector3> m_axle = new List<IndexedVector3>();
         //private IList<float> m_forwardImpulse = new List<float>();
         //private IList<float> m_sideImpulse = new List<float>();
-        private Vector3[] m_axle = new Vector3[4];
-        private Vector3[] m_forwardWS = new Vector3[4];
+        private IndexedVector3[] m_axle = new IndexedVector3[4];
+        private IndexedVector3[] m_forwardWS = new IndexedVector3[4];
 
         private float[] m_forwardImpulse = new float[4];
         private float[] m_sideImpulse = new float[4];
@@ -845,7 +839,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
 	    private IList<WheelInfo>	m_wheelInfo = new List<WheelInfo>();
 
         public const float sideFrictionStiffness2 = 1.0f;
-        public static RigidBody s_fixedObject = new RigidBody(0f, null, null,Vector3.Zero);
+        public static RigidBody s_fixedObject = new RigidBody(0f, null, null,IndexedVector3.Zero);
     }
 
 	public class VehicleTuning
@@ -875,11 +869,11 @@ namespace BulletXNA.BulletDynamics.Vehicle
 
         private struct DataCopy
         {
-            Vector3 m_from;
-            Vector3 m_to;
+            IndexedVector3 m_from;
+            IndexedVector3 m_to;
             VehicleRaycasterResult m_result;
 
-            public DataCopy(Vector3 from,Vector3 to,VehicleRaycasterResult result)
+            public DataCopy(IndexedVector3 from,IndexedVector3 to,VehicleRaycasterResult result)
             {
                 m_from = from;
                 m_to = to;
@@ -892,7 +886,7 @@ namespace BulletXNA.BulletDynamics.Vehicle
             m_dynamicsWorld = world;
 	    }
 
-	    public virtual Object CastRay(ref Vector3 from,ref Vector3 to, ref VehicleRaycasterResult result)
+	    public virtual Object CastRay(ref IndexedVector3 from,ref IndexedVector3 to, ref VehicleRaycasterResult result)
         {
             //	RayResultCallback& resultCallback;
 	        ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(ref from,ref to);
@@ -929,12 +923,12 @@ namespace BulletXNA.BulletDynamics.Vehicle
     {
 	    public RigidBody m_body0;
         public RigidBody m_body1;
-        public Vector3 m_frictionPositionWorld;
-        public Vector3 m_frictionDirectionWorld;
+        public IndexedVector3 m_frictionPositionWorld;
+        public IndexedVector3 m_frictionDirectionWorld;
         public float m_jacDiagABInv;
         public float m_maxImpulse;
 
-	    public WheelContactPoint(RigidBody body0,RigidBody body1,ref Vector3 frictionPosWorld,ref Vector3 frictionDirectionWorld, float maxImpulse)
+	    public WheelContactPoint(RigidBody body0,RigidBody body1,ref IndexedVector3 frictionPosWorld,ref IndexedVector3 frictionDirectionWorld, float maxImpulse)
 	    {
             m_body0 = body0;
             m_body1 = body1;

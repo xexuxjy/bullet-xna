@@ -45,41 +45,42 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-namespace BulletXNA.BulletCollision.GImpact
+using Microsoft.Xna.Framework;
+
+namespace BulletXNA.BulletCollision
 {
     public class GImpactQuantization
     {
 
         public static void CalcQuantizationParameters(
-        out Vector3 outMinBound,
-        out Vector3 outMaxBound,
-        out Vector3 bvhQuantization,
-        ref Vector3 srcMinBound, ref Vector3 srcMaxBound,
+        out IndexedVector3 outMinBound,
+        out IndexedVector3 outMaxBound,
+        out IndexedVector3 bvhQuantization,
+        ref IndexedVector3 srcMinBound, ref IndexedVector3 srcMaxBound,
         float quantizationMargin)
         {
             //enlarge the AABB to avoid division by zero when initializing the quantization values
-            Vector3 clampValue = new Vector3(quantizationMargin);
+            IndexedVector3 clampValue = new IndexedVector3(quantizationMargin);
             outMinBound = srcMinBound - clampValue;
             outMaxBound = srcMaxBound + clampValue;
-            Vector3 aabbSize = outMaxBound - outMinBound;
-            bvhQuantization = new Vector3(65535.0f) / aabbSize;
+            IndexedVector3 aabbSize = outMaxBound - outMinBound;
+            bvhQuantization = new IndexedVector3(65535.0f) / aabbSize;
         }
 
 
         public static void QuantizeClamp(out UShortVector3 output,
-            ref Vector3 point,
-            ref Vector3 min_bound,
-            ref Vector3 max_bound,
-            ref Vector3 bvhQuantization)
+            ref IndexedVector3 point,
+            ref IndexedVector3 min_bound,
+            ref IndexedVector3 max_bound,
+            ref IndexedVector3 bvhQuantization)
         {
 
-            Vector3 clampedPoint = point;
+            IndexedVector3 clampedPoint = point;
             MathUtil.VectorMax(ref min_bound, ref clampedPoint);
             MathUtil.VectorMin(ref max_bound, ref clampedPoint);
 
-            Vector3 v = (clampedPoint - min_bound) * bvhQuantization;
+            IndexedVector3 v = (clampedPoint - min_bound) * bvhQuantization;
             output = new UShortVector3();
             output[0] = (ushort)(v.X + 0.5f);
             output[1] = (ushort)(v.Y + 0.5f);
@@ -87,12 +88,12 @@ namespace BulletXNA.BulletCollision.GImpact
         }
 
 
-        public static Vector3 Unquantize(
+        public static IndexedVector3 Unquantize(
         ref UShortVector3 vecIn,
-        ref Vector3 offset,
-        ref Vector3 bvhQuantization)
+        ref IndexedVector3 offset,
+        ref IndexedVector3 bvhQuantization)
         {
-            Vector3 vecOut = new Vector3(
+            IndexedVector3 vecOut = new IndexedVector3(
                 (float)(vecIn[0]) / (bvhQuantization.X),
                 (float)(vecIn[1]) / (bvhQuantization.Y),
                 (float)(vecIn[2]) / (bvhQuantization.Z));

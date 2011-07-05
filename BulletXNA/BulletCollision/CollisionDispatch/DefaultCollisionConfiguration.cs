@@ -21,11 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class DefaultCollisionConstructionInfo
     {
@@ -191,8 +187,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
     public virtual CollisionAlgorithmCreateFunc GetCollisionAlgorithmCreateFunc(BroadphaseNativeTypes proxyType0, BroadphaseNativeTypes proxyType1)
     {
-
-        CollisionAlgorithmConstructionInfo caci;
 
 	    if ((proxyType0 == BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE) && (proxyType1==BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE))
 	    {

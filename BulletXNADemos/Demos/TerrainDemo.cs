@@ -24,13 +24,11 @@
 using System;
 using System.Diagnostics;
 using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {
@@ -64,7 +62,7 @@ namespace BulletXNADemos.Demos
             m_farClip = 1000f;
 
             m_aspect = m_glutScreenWidth / m_glutScreenHeight;
-            m_perspective = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
+            m_perspective = IndexedMatrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
 
 
 	        // set up basic state
@@ -76,8 +74,8 @@ namespace BulletXNADemos.Demos
 	        // set up the physics world
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
-	        Vector3 worldMin = new Vector3(-1000,-1000,-1000);
-            Vector3 worldMax = new Vector3(1000, 1000, 1000);
+	        IndexedVector3 worldMin = new IndexedVector3(-1000,-1000,-1000);
+            IndexedVector3 worldMax = new IndexedVector3(1000, 1000, 1000);
             //m_broadphase = new AxisSweep3Internal(ref worldMin,ref worldMax);
             m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
 
@@ -128,21 +126,21 @@ namespace BulletXNADemos.Demos
 	        Debug.Assert(m_terrainShape != null, "null heightfield");
 
 	        // scale the shape
-	        Vector3 localScaling = GetUpVector(m_upAxis, s_gridSpacing, 1.0f);
+	        IndexedVector3 localScaling = GetUpVector(m_upAxis, s_gridSpacing, 1.0f);
             m_terrainShape.SetLocalScaling(ref localScaling);
 
 	        // stash this shape away
 	        m_collisionShapes.Add(m_terrainShape);
 
 	        // set origin to middle of heightfield
-	        Matrix tr = Matrix.CreateTranslation(new Vector3(0,-20,0));
+	        IndexedMatrix tr = IndexedMatrix.CreateTranslation(new IndexedVector3(0,-20,0));
 
 	        // create ground object
 	        float mass = 0.0f;
             m_terrainRigidBody = LocalCreateRigidBody(mass, ref tr, m_terrainShape);
 
             CollisionShape sphere = new SphereShape(0.5f);
-            tr = Matrix.CreateTranslation(new Vector3(0, 0, 0));
+            tr = IndexedMatrix.CreateTranslation(new IndexedVector3(0, 0, 0));
 
             LocalCreateRigidBody(1f,ref tr,sphere);
 
@@ -216,12 +214,12 @@ namespace BulletXNADemos.Demos
             return null ;
         }
 
-        public Vector3 GetUpVector(int upAxis,float regularValue,float upValue)
+        public IndexedVector3 GetUpVector(int upAxis,float regularValue,float upValue)
         {
 	        Debug.Assert(upAxis >= 0 && upAxis <= 2,  "bad up axis");
 
-	        Vector3 v = new Vector3(regularValue, regularValue, regularValue);
-            MathUtil.VectorComponent(ref v, upAxis, upValue);
+	        IndexedVector3 v = new IndexedVector3(regularValue, regularValue, regularValue);
+            v[upAxis] = upValue;
 
 	        return v;
         }
@@ -649,13 +647,10 @@ namespace BulletXNADemos.Demos
             {
                 case PHY_ScalarType.PHY_FLOAT:
                     return PHY_ScalarType.PHY_SHORT;
-                    break;
                 case PHY_ScalarType.PHY_SHORT:
                     return PHY_ScalarType.PHY_UCHAR;
-                    break;
                 case PHY_ScalarType.PHY_UCHAR:
                     return PHY_ScalarType.PHY_FLOAT;
-                    break;
             }
             return PHY_ScalarType.PHY_FLOAT;
         }

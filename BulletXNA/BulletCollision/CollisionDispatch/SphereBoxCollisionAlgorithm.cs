@@ -22,23 +22,20 @@
  */
 
 using System;
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class SphereBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
         public SphereBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
             : base(ci, col0, col1)
         {
+            m_isSwapped = isSwapped;
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
-
+            
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(sphereObj, boxObj))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(sphereObj, boxObj);
@@ -74,9 +71,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             SphereShape sphere0 = sphereObj.GetCollisionShape() as SphereShape;
 
-            //Vector3 normalOnSurfaceB;
-            Vector3 pOnBox = Vector3.Zero, pOnSphere = Vector3.Zero;
-            Vector3 sphereCenter = sphereObj.GetWorldTransform().Translation;
+            //IndexedVector3 normalOnSurfaceB;
+            IndexedVector3 pOnBox = IndexedVector3.Zero, pOnSphere = IndexedVector3.Zero;
+            IndexedVector3 sphereCenter = sphereObj.GetWorldTransform()._origin;
             float radius = sphere0.GetRadius();
 
             float dist = GetSphereDistance(boxObj, ref pOnBox, ref pOnSphere, ref sphereCenter, radius);
@@ -84,7 +81,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (dist < MathUtil.SIMD_EPSILON)
             {
-                Vector3 normalOnSurfaceB = (pOnBox - pOnSphere);
+                IndexedVector3 normalOnSurfaceB = (pOnBox - pOnSphere);
                 normalOnSurfaceB.Normalize();
 
                 /// report a contact. internally this will be kept persistent, and contact reduction is done
@@ -114,10 +111,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
         }
 
-        public float GetSphereDistance(CollisionObject boxObj, ref Vector3 v3PointOnBox, ref Vector3 v3PointOnSphere, ref Vector3 v3SphereCenter, float fRadius)
+        public float GetSphereDistance(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius)
         {
             float margins;
-            Vector3[] bounds = new Vector3[2];
+            IndexedVector3[] bounds = new IndexedVector3[2];
             BoxShape boxShape = boxObj.GetCollisionShape() as BoxShape;
 
             bounds[0] = -boxShape.GetHalfExtentsWithoutMargin();
@@ -125,15 +122,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             margins = boxShape.GetMargin();//also add sphereShape margin?
 
-            Matrix m44T = boxObj.GetWorldTransform();
+            IndexedMatrix m44T = boxObj.GetWorldTransform();
 
-            Vector3[] boundsVec = new Vector3[2];
+            IndexedVector3[] boundsVec = new IndexedVector3[2];
             float fPenetration;
 
             boundsVec[0] = bounds[0];
             boundsVec[1] = bounds[1];
 
-            Vector3 marginsVec = new Vector3(margins);
+            IndexedVector3 marginsVec = new IndexedVector3(margins);
 
             // add margins
             bounds[0] += marginsVec;
@@ -141,21 +138,21 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             /////////////////////////////////////////////////
 
-            Vector3 tmp, prel, normal, v3P;
-            Vector3[] n = new Vector3[6];
+            IndexedVector3 tmp, prel, normal, v3P;
+            IndexedVector3[] n = new IndexedVector3[6];
 
             float fSep = 10000000.0f;
             float fSepThis;
 
-            n[0] = new Vector3(-1, 0, 0);
-            n[1] = new Vector3(0, -1, 0);
-            n[2] = new Vector3(0, 0, -1);
-            n[3] = new Vector3(1, 0, 0);
-            n[4] = new Vector3(0, 1, 0);
-            n[5] = new Vector3(0, 0, 1);
+            n[0] = new IndexedVector3(-1, 0, 0);
+            n[1] = new IndexedVector3(0, -1, 0);
+            n[2] = new IndexedVector3(0, 0, -1);
+            n[3] = new IndexedVector3(1, 0, 0);
+            n[4] = new IndexedVector3(0, 1, 0);
+            n[5] = new IndexedVector3(0, 0, 1);
 
             // convert  point in local space
-            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
+            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
 
             bool bFound = false;
 
@@ -164,7 +161,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             for (int i = 0; i < 6; i++)
             {
                 int j = i < 3 ? 0 : 1;
-                fSepThis = Vector3.Dot((v3P - bounds[j]), n[i]);
+                fSepThis = IndexedVector3.Dot((v3P - bounds[j]), n[i]);
                 if (fSepThis != 0f)
                 {
                     v3P = v3P - n[i] * fSepThis;
@@ -184,15 +181,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 v3PointOnBox = v3P + normal * margins;
                 v3PointOnSphere = prel - normal * fRadius;
 
-                if ((Vector3.Dot((v3PointOnSphere - v3PointOnBox), normal)) > 0f)
+                if ((IndexedVector3.Dot((v3PointOnSphere - v3PointOnBox), normal)) > 0f)
                 {
                     return 1f;
                 }
 
                 // transform back in world space
-                tmp = Vector3.Transform(v3PointOnBox, m44T);
+                tmp = m44T * v3PointOnBox;
                 v3PointOnBox = tmp;
-                tmp = Vector3.Transform(v3PointOnSphere, m44T);
+                tmp = m44T * v3PointOnSphere;
                 v3PointOnSphere = tmp;
                 float fSeps2 = (v3PointOnBox - v3PointOnSphere).LengthSquared();
 
@@ -225,41 +222,41 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
         }
 
-        public float GetSpherePenetration(CollisionObject boxObj, ref Vector3 v3PointOnBox, ref Vector3 v3PointOnSphere, ref Vector3 v3SphereCenter, float fRadius, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public float GetSpherePenetration(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-            Vector3[] bounds = new Vector3[2];
+            IndexedVector3[] bounds = new IndexedVector3[2];
 
             bounds[0] = aabbMin;
             bounds[1] = aabbMax;
 
-            Vector3 p0, tmp, prel, normal;
-            Vector3[] n = new Vector3[6];
+            IndexedVector3 p0, tmp, prel, normal;
+            IndexedVector3[] n = new IndexedVector3[6];
             float fSep = -10000000.0f;
             float fSepThis;
 
             // set p0 and normal to a default value to shup up GCC
-            p0 = Vector3.Zero;
-            normal = Vector3.Zero;
+            p0 = IndexedVector3.Zero;
+            normal = IndexedVector3.Zero;
 
-            n[0] = new Vector3(-1, 0, 0);
-            n[1] = new Vector3(0, -1, 0);
-            n[2] = new Vector3(0, 0, -1);
-            n[3] = new Vector3(1, 0, 0);
-            n[4] = new Vector3(0, 1, 0);
-            n[5] = new Vector3(0, 0, 1);
+            n[0] = new IndexedVector3(-1, 0, 0);
+            n[1] = new IndexedVector3(0, -1, 0);
+            n[2] = new IndexedVector3(0, 0, -1);
+            n[3] = new IndexedVector3(1, 0, 0);
+            n[4] = new IndexedVector3(0, 1, 0);
+            n[5] = new IndexedVector3(0, 0, 1);
 
-            Matrix m44T = boxObj.GetWorldTransform();
+            IndexedMatrix m44T = boxObj.GetWorldTransform();
 
             // convert  point in local space
 
-            prel = MathUtil.InverseTransform(ref m44T, ref v3SphereCenter);
+            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
 
             ///////////
 
             for (int i = 0; i < 6; i++)
             {
                 int j = i < 3 ? 0 : 1;
-                if ((fSepThis = (Vector3.Dot((prel - bounds[j]), n[i])) - fRadius) > 0f)
+                if ((fSepThis = (IndexedVector3.Dot((prel - bounds[j]), n[i])) - fRadius) > 0f)
                 {
                     return 1f;
                 }
@@ -271,13 +268,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 }
             }
 
-            v3PointOnBox = prel - normal * (Vector3.Dot(normal, (prel - p0)));
+            v3PointOnBox = prel - normal * (IndexedVector3.Dot(normal, (prel - p0)));
             v3PointOnSphere = v3PointOnBox + normal * fSep;
 
             // transform back in world space
-            tmp = Vector3.Transform(v3PointOnBox, m44T);
+            tmp = m44T * v3PointOnBox;
             v3PointOnBox = tmp;
-            tmp = Vector3.Transform(v3PointOnSphere, m44T);
+            tmp = m44T * v3PointOnSphere;
             v3PointOnSphere = tmp;
             normal = (v3PointOnBox - v3PointOnSphere);
             normal.Normalize();

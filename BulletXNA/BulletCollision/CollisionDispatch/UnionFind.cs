@@ -27,8 +27,7 @@
 using System;
 using BulletXNA.LinearMath;
 
-
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     // first pass I'm not going to worry too much about performance so this has become a class.
     public class Element : IComparable<Element>

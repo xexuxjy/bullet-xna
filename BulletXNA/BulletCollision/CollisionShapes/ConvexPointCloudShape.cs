@@ -24,23 +24,22 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class ConvexPointCloudShape : PolyhedralConvexAabbCachingShape
     {
         public ConvexPointCloudShape()
 	    {
-            m_localScaling = new Vector3(1);
+            m_localScaling = new IndexedVector3(1);
 		    m_shapeType = BroadphaseNativeTypes.CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
 		    m_unscaledPoints = null;
 		    m_numPoints = 0;
 	    }
 
-	    public ConvexPointCloudShape(IList<Vector3> points,int numPoints, ref Vector3 localScaling,bool computeAabb)
+	    public ConvexPointCloudShape(IList<IndexedVector3> points,int numPoints, ref IndexedVector3 localScaling,bool computeAabb)
 	    {
 		    m_localScaling = localScaling;
 		    m_shapeType = BroadphaseNativeTypes.CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
@@ -53,13 +52,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
 	    }
 
-        public void SetPoints(IList<Vector3> points, int numPoints, bool computeAabb)
+        public void SetPoints(IList<IndexedVector3> points, int numPoints, bool computeAabb)
         {
-            Vector3 localScaling = new Vector3(1);
+            IndexedVector3 localScaling = new IndexedVector3(1);
             SetPoints(points, numPoints, computeAabb, ref localScaling);
         }
 
-	    public void SetPoints (IList<Vector3> points, int numPoints, bool computeAabb,ref Vector3 localScaling)
+	    public void SetPoints (IList<IndexedVector3> points, int numPoints, bool computeAabb,ref IndexedVector3 localScaling)
 	    {
 		    m_unscaledPoints = points;
 		    m_numPoints = numPoints;
@@ -71,7 +70,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
 	    }
 
-	    public IList<Vector3> GetUnscaledPoints()
+	    public IList<IndexedVector3> GetUnscaledPoints()
 	    {
 		    return m_unscaledPoints;
 	    }
@@ -81,22 +80,22 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_numPoints;
 	    }
 
-	    public Vector3 GetScaledPoint(int index)
+	    public IndexedVector3 GetScaledPoint(int index)
 	    {
 		    return m_unscaledPoints[index] * m_localScaling;
 	    }
 
 
-        public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-            Vector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
+            IndexedVector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
 
             if (GetMargin() != 0f)
             {
-                Vector3 vecnorm = vec;
+                IndexedVector3 vecnorm = vec;
                 if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                 {
-                    vecnorm = new Vector3(-1f);
+                    vecnorm = new IndexedVector3(-1f);
                 }
                 vecnorm.Normalize();
                 supVertex += GetMargin() * vecnorm;
@@ -104,16 +103,16 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return supVertex;
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec0)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec0)
         {
-	        Vector3 supVec = Vector3.Zero;
+	        IndexedVector3 supVec = IndexedVector3.Zero;
 	        float newDot,maxDot = float.MinValue;
 
-	        Vector3 vec = vec0;
+	        IndexedVector3 vec = vec0;
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+                vec = new IndexedVector3(1, 0, 0);
 	        } else
 	        {
                 vec.Normalize();
@@ -122,9 +121,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 	        for (int i=0;i<m_numPoints;i++)
 	        {
-		        Vector3 vtx = GetScaledPoint(i);
+		        IndexedVector3 vtx = GetScaledPoint(i);
 
-		        newDot = Vector3.Dot(vec,vtx);
+		        newDot = IndexedVector3.Dot(vec,vtx);
 		        if (newDot > maxDot)
 		        {
 			        maxDot = newDot;
@@ -135,7 +134,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
         }
         
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             float newDot;
             //use 'w' component of supportVerticesOut?
@@ -149,17 +148,17 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
             for (int i = 0; i < m_unscaledPoints.Count; i++)
             {
-                Vector3 vtx = GetScaledPoint(i);
+                IndexedVector3 vtx = GetScaledPoint(i);
 
                 for (int j = 0; j < numVectors; j++)
                 {
-                    Vector3 vec = vectors[j];
+                    IndexedVector3 vec = vectors[j];
 
-                    newDot = Vector3.Dot(vec, vtx);
+                    newDot = IndexedVector3.Dot(vec, vtx);
                     if (newDot > supportVerticesOut[j].W)
                     {
                         //WARNING: don't swap next lines, the w component would get overwritten!
-                        supportVerticesOut[j] = new Vector4(vtx, newDot);
+                        supportVerticesOut[j] = new Vector4(vtx.ToVector3(), newDot);
                     }
                 }
             }
@@ -181,14 +180,14 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 0;
         }
 
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
         {
             Debug.Assert(false);
-            pa = Vector3.Zero;
-            pb = Vector3.Zero;
+            pa = IndexedVector3.Zero;
+            pb = IndexedVector3.Zero;
         }
 
-        public override void GetVertex(int i, out Vector3 vtx)
+        public override void GetVertex(int i, out IndexedVector3 vtx)
         {
             vtx = m_unscaledPoints[i] * m_localScaling;
         }
@@ -197,27 +196,27 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return 0;
         }
 
-        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
+        public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
         {
             Debug.Assert(false);
-            planeNormal = Vector3.Zero;
-            planeSupport = Vector3.Zero;
+            planeNormal = IndexedVector3.Zero;
+            planeSupport = IndexedVector3.Zero;
         }
 
-        public override bool IsInside(ref Vector3 pt, float tolerance)
+        public override bool IsInside(ref IndexedVector3 pt, float tolerance)
         {
             Debug.Assert(false);
             return false;
         }
 
 	    ///in case we receive negative scaling
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_localScaling = scaling;
             RecalcLocalAabb();
         }
 
-	    private IList<Vector3> m_unscaledPoints;
+	    private IList<IndexedVector3> m_unscaledPoints;
 	    int m_numPoints;
 
     }

@@ -162,7 +162,7 @@ void btGImpactMeshShapePart::processAllTriangles(btTriangleCallback* callback,co
 	box.m_max = aabbMax;
 
 	btAlignedObjectArray<int> collided;
-	m_box_set.boxQuery(box,collided);
+	m_box_set.boxQuery(box,collided,callback->graphics());
 
 	if(collided.size()==0)
 	{

@@ -21,14 +21,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.Dynamics
+namespace BulletXNA.BulletDynamics
 {
 	public abstract class SimpleDynamicsWorld : DynamicsWorld
 	{
@@ -38,7 +35,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 		{
 			m_constraintSolver = constraintSolver;
 			m_ownsConstraintSolver = false;
-			Vector3 gravity = new Vector3(0, 0, -10f);
+			IndexedVector3 gravity = new IndexedVector3(0, 0, -10f);
 			SetGravity(ref gravity);
 
 		}
@@ -71,7 +68,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 			int numManifolds = m_dispatcher1.GetNumManifolds();
 			if (numManifolds != 0)
 			{
-				ObjectArray<PersistentManifold> manifoldPtr = ((CollisionDispatcher)m_dispatcher1).GetInternalManifoldPointer();
+                ObjectArray<PersistentManifold> manifoldPtr = (m_dispatcher1 as CollisionDispatcher).GetInternalManifoldPointer();
 
 				ContactSolverInfo infoGlobal = new ContactSolverInfo();
 				infoGlobal.m_timeStep = timeStep;
@@ -93,7 +90,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 		}
 
-		public override void SetGravity(ref Vector3 gravity)
+		public override void SetGravity(ref IndexedVector3 gravity)
 		{
 			m_gravity = gravity;
 			foreach (CollisionObject colObj in m_collisionObjects)
@@ -106,7 +103,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 			}
 		}
 
-		public override Vector3 GetGravity()
+		public override IndexedVector3 GetGravity()
 		{
 			return m_gravity;
 		}
@@ -171,7 +168,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 		public override void UpdateAabbs()
 		{
-			Matrix predictedTrans = Matrix.Identity;
+			//IndexedMatrix predictedTrans = IndexedMatrix.Identity;
 			foreach (CollisionObject colObj in m_collisionObjects)
 			{
 				RigidBody body = RigidBody.Upcast(colObj);
@@ -179,8 +176,8 @@ namespace BulletXNA.BulletDynamics.Dynamics
 				{
 					if (body.IsActive() && (!body.IsStaticObject()))
 					{
-						Vector3 minAabb;
-						Vector3 maxAabb;
+						IndexedVector3 minAabb;
+						IndexedVector3 maxAabb;
 						colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), out minAabb, out maxAabb);
 						IBroadphaseInterface bp = GetBroadphase();
 						bp.SetAabb(body.GetBroadphaseHandle(), ref minAabb, ref maxAabb, m_dispatcher1);
@@ -255,7 +252,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 							body.ApplyGravity();
 							body.IntegrateVelocities(timeStep);
 							body.ApplyDamping(timeStep);
-							Matrix temp = body.GetInterpolationWorldTransform();
+							IndexedMatrix temp = body.GetInterpolationWorldTransform();
 							body.PredictIntegratedTransform(timeStep, out temp);
 							body.SetInterpolationWorldTransform(ref temp);
 						}
@@ -266,7 +263,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 		protected void IntegrateTransforms(float timeStep)
 		{
-			Matrix predictedTrans;
+			IndexedMatrix predictedTrans;
 			foreach (CollisionObject colObj in m_collisionObjects)
 			{
 				RigidBody body = RigidBody.Upcast(colObj);
@@ -283,7 +280,7 @@ namespace BulletXNA.BulletDynamics.Dynamics
 
 		protected IConstraintSolver m_constraintSolver;
 		protected bool m_ownsConstraintSolver;
-		protected Vector3 m_gravity;
+		protected IndexedVector3 m_gravity;
 
 	}
 }

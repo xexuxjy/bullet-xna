@@ -23,22 +23,23 @@
 
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     public class JacobianEntry
     {
 
 	public JacobianEntry() {}
 	//constraint between two different rigidbodies
-    public JacobianEntry(Matrix world2A,
-        Matrix world2B,
-        Vector3 rel_pos1,
-        Vector3 rel_pos2,
-        Vector3 jointAxis,
-        Vector3 inertiaInvA,
+    public JacobianEntry(IndexedBasisMatrix world2A,
+        IndexedBasisMatrix world2B,
+        IndexedVector3 rel_pos1,
+        IndexedVector3 rel_pos2,
+        IndexedVector3 jointAxis,
+        IndexedVector3 inertiaInvA,
         float massInvA,
-        Vector3 inertiaInvB,
+        IndexedVector3 inertiaInvB,
         float massInvB) : this(ref world2A,ref world2B,ref rel_pos1,ref rel_pos2,
                     ref jointAxis, ref inertiaInvA,massInvA,ref inertiaInvB,massInvB)
     {
@@ -46,97 +47,97 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
     }
         
         public JacobianEntry(
-		ref Matrix world2A,
-		ref Matrix world2B,
-		ref Vector3 rel_pos1,ref Vector3 rel_pos2,
-		ref Vector3 jointAxis,
-		ref Vector3 inertiaInvA, 
+        ref IndexedBasisMatrix world2A,
+        ref IndexedBasisMatrix world2B,
+		ref IndexedVector3 rel_pos1,ref IndexedVector3 rel_pos2,
+		ref IndexedVector3 jointAxis,
+		ref IndexedVector3 inertiaInvA, 
 		float massInvA,
-		ref Vector3 inertiaInvB,
+		ref IndexedVector3 inertiaInvB,
 		float massInvB)
 	    {
             m_linearJointAxis = jointAxis;
-		    m_aJ = Vector3.TransformNormal(Vector3.Cross(rel_pos1,m_linearJointAxis),world2A);
-            m_bJ = Vector3.TransformNormal(Vector3.Cross(rel_pos2,-m_linearJointAxis),world2B);
-		    m_0MinvJt	= inertiaInvA * m_aJ;
+            m_aJ = world2A * (rel_pos1.Cross(ref m_linearJointAxis));
+            m_bJ = world2B * (rel_pos2.Cross(-m_linearJointAxis));
+            m_0MinvJt = inertiaInvA * m_aJ;
 		    m_1MinvJt = inertiaInvB * m_bJ;
-		    m_Adiag = massInvA + Vector3.Dot(m_0MinvJt,m_aJ) + massInvB + Vector3.Dot(m_1MinvJt,m_bJ);
+		    m_Adiag = massInvA + IndexedVector3.Dot(m_0MinvJt,m_aJ) + massInvB + IndexedVector3.Dot(m_1MinvJt,m_bJ);
 
 		    Debug.Assert(m_Adiag > 0.0f);
 	    }
 
 	//angular constraint between two different rigidbodies
 
-        public JacobianEntry(Vector3 jointAxis,
-        Matrix world2A,
-        Matrix world2B,
-        Vector3 inertiaInvA,
-        Vector3 inertiaInvB) : this(ref jointAxis,ref world2A,ref world2B,ref inertiaInvA,ref inertiaInvB)
+        public JacobianEntry(IndexedVector3 jointAxis,
+        IndexedBasisMatrix world2A,
+        IndexedBasisMatrix world2B,
+        IndexedVector3 inertiaInvA,
+        IndexedVector3 inertiaInvB) : this(ref jointAxis,ref world2A,ref world2B,ref inertiaInvA,ref inertiaInvB)
         {
 
         }
-        public JacobianEntry(ref Vector3 jointAxis,
-		ref Matrix world2A,
-		ref Matrix world2B,
-		ref Vector3 inertiaInvA,
-		ref Vector3 inertiaInvB)
+        public JacobianEntry(ref IndexedVector3 jointAxis,
+        ref IndexedBasisMatrix world2A,
+        ref IndexedBasisMatrix world2B,
+		ref IndexedVector3 inertiaInvA,
+		ref IndexedVector3 inertiaInvB)
 	    {
-            m_linearJointAxis = Vector3.Zero;
-		    m_aJ= Vector3.TransformNormal(jointAxis,world2A);
-		    m_bJ = Vector3.TransformNormal(-jointAxis,world2B);
-		    m_0MinvJt	= inertiaInvA * m_aJ;
+            m_linearJointAxis = IndexedVector3.Zero;
+            m_aJ = world2A * jointAxis;
+            m_bJ = world2B * -jointAxis;
+            m_0MinvJt = inertiaInvA * m_aJ;
 		    m_1MinvJt = inertiaInvB * m_bJ;
-		    m_Adiag =  Vector3.Dot(m_0MinvJt,m_aJ) + Vector3.Dot(m_1MinvJt,m_bJ);
+		    m_Adiag =  IndexedVector3.Dot(m_0MinvJt,m_aJ) + IndexedVector3.Dot(m_1MinvJt,m_bJ);
 
 		    Debug.Assert(m_Adiag > 0.0f);
 	    }
 
-        public JacobianEntry(Vector3 axisInA,
-            Vector3 axisInB,
-            Vector3 inertiaInvA,
-            Vector3 inertiaInvB) : this(ref axisInA,ref axisInB,ref inertiaInvA,ref inertiaInvB)
+        public JacobianEntry(IndexedVector3 axisInA,
+            IndexedVector3 axisInB,
+            IndexedVector3 inertiaInvA,
+            IndexedVector3 inertiaInvB) : this(ref axisInA,ref axisInB,ref inertiaInvA,ref inertiaInvB)
         {
 
         }
 	    //angular constraint between two different rigidbodies
-	    public JacobianEntry(ref Vector3 axisInA,
-		    ref Vector3 axisInB,
-		    ref Vector3 inertiaInvA,
-		    ref Vector3 inertiaInvB)
+	    public JacobianEntry(ref IndexedVector3 axisInA,
+		    ref IndexedVector3 axisInB,
+		    ref IndexedVector3 inertiaInvA,
+		    ref IndexedVector3 inertiaInvB)
 	    {
-            m_linearJointAxis = Vector3.Zero;
+            m_linearJointAxis = IndexedVector3.Zero;
             m_aJ = axisInA;
             m_bJ = -axisInB;
 		    m_0MinvJt	= inertiaInvA * m_aJ;
 		    m_1MinvJt = inertiaInvB * m_bJ;
-		    m_Adiag =  Vector3.Dot(m_0MinvJt,m_aJ) + Vector3.Dot(m_1MinvJt,m_bJ);
+		    m_Adiag =  IndexedVector3.Dot(m_0MinvJt,m_aJ) + IndexedVector3.Dot(m_1MinvJt,m_bJ);
 
 		    Debug.Assert(m_Adiag > 0.0f);
 	    }
 
 	//constraint on one rigidbody
         public JacobianEntry(
-            Matrix world2A,
-            Vector3 rel_pos1, Vector3 rel_pos2,
-            Vector3 jointAxis,
-            Vector3 inertiaInvA,
+            IndexedBasisMatrix world2A,
+            IndexedVector3 rel_pos1, IndexedVector3 rel_pos2,
+            IndexedVector3 jointAxis,
+            IndexedVector3 inertiaInvA,
             float massInvA) : this(ref world2A,ref rel_pos1,ref rel_pos2,ref jointAxis,ref inertiaInvA,massInvA)
         {
         }
 
         public JacobianEntry(
-		ref Matrix world2A,
-		ref Vector3 rel_pos1,ref Vector3 rel_pos2,
-		ref Vector3 jointAxis,
-		ref Vector3 inertiaInvA, 
+        ref IndexedBasisMatrix world2A,
+		ref IndexedVector3 rel_pos1,ref IndexedVector3 rel_pos2,
+		ref IndexedVector3 jointAxis,
+		ref IndexedVector3 inertiaInvA, 
 		float massInvA)
 	{
         m_linearJointAxis = jointAxis;
-        m_aJ = Vector3.TransformNormal(Vector3.Cross(rel_pos1,jointAxis), world2A);
-        m_bJ = Vector3.TransformNormal(Vector3.Cross(rel_pos2,-jointAxis), world2A);
-		m_0MinvJt	= inertiaInvA * m_aJ;
-		m_1MinvJt = Vector3.Zero;
-		m_Adiag = massInvA + Vector3.Dot(m_0MinvJt,m_aJ);
+        m_aJ = world2A * (rel_pos1.Cross(ref jointAxis));
+        m_bJ = world2A * (rel_pos2.Cross(-jointAxis));
+        m_0MinvJt = inertiaInvA * m_aJ;
+		m_1MinvJt = IndexedVector3.Zero;
+		m_Adiag = massInvA + IndexedVector3.Dot(m_0MinvJt,m_aJ);
 
 		Debug.Assert(m_Adiag > 0.0f);
 	}
@@ -150,8 +151,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 	public float GetNonDiagonal(JacobianEntry jacB, float massInvA)
 	{
 		JacobianEntry jacA = this;
-		float lin = massInvA * Vector3.Dot(jacA.m_linearJointAxis,jacB.m_linearJointAxis);
-		float ang = Vector3.Dot(jacA.m_0MinvJt,jacB.m_aJ);
+		float lin = massInvA * IndexedVector3.Dot(jacA.m_linearJointAxis,jacB.m_linearJointAxis);
+		float ang = IndexedVector3.Dot(jacA.m_0MinvJt,jacB.m_aJ);
 		return lin + ang;
 	}
 
@@ -159,24 +160,24 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 	public float GetNonDiagonal(JacobianEntry jacB,float massInvA,float massInvB)
 	{
 		JacobianEntry jacA = this;
-		Vector3 lin = jacA.m_linearJointAxis * jacB.m_linearJointAxis;
-		Vector3 ang0 = jacA.m_0MinvJt * jacB.m_aJ;
-		Vector3 ang1 = jacA.m_1MinvJt * jacB.m_bJ;
-		Vector3 lin0 = massInvA * lin ;
-		Vector3 lin1 = massInvB * lin;
-		Vector3 sum = ang0+ang1+lin0+lin1;
+		IndexedVector3 lin = jacA.m_linearJointAxis * jacB.m_linearJointAxis;
+		IndexedVector3 ang0 = jacA.m_0MinvJt * jacB.m_aJ;
+		IndexedVector3 ang1 = jacA.m_1MinvJt * jacB.m_bJ;
+		IndexedVector3 lin0 = massInvA * lin ;
+		IndexedVector3 lin1 = massInvB * lin;
+		IndexedVector3 sum = ang0+ang1+lin0+lin1;
 		return sum.X+sum.Y+sum.Z;
 	}
 
-    public float GetRelativeVelocity(Vector3 linvelA, Vector3 angvelA, Vector3 linvelB, Vector3 angvelB)
+    public float GetRelativeVelocity(IndexedVector3 linvelA, IndexedVector3 angvelA, IndexedVector3 linvelB, IndexedVector3 angvelB)
     {
         return GetRelativeVelocity(ref linvelA, ref angvelA, ref linvelB, ref angvelB);
     }
-	public float GetRelativeVelocity(ref Vector3 linvelA,ref Vector3 angvelA,ref Vector3 linvelB,ref Vector3 angvelB)
+	public float GetRelativeVelocity(ref IndexedVector3 linvelA,ref IndexedVector3 angvelA,ref IndexedVector3 linvelB,ref IndexedVector3 angvelB)
 	{
-		Vector3 linrel = linvelA - linvelB;
-		Vector3 angvela  = angvelA * m_aJ;
-		Vector3 angvelb  = angvelB * m_bJ;
+		IndexedVector3 linrel = linvelA - linvelB;
+		IndexedVector3 angvela  = angvelA * m_aJ;
+		IndexedVector3 angvelb  = angvelB * m_bJ;
 		linrel *= m_linearJointAxis;
 		angvela += angvelb;
 		angvela += linrel;
@@ -184,11 +185,11 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		return rel_vel2 + MathUtil.SIMD_EPSILON;
 	}
 
-	    public Vector3	m_linearJointAxis;
-        public Vector3 m_aJ;
-        public Vector3 m_bJ;
-        public Vector3 m_0MinvJt;
-        public Vector3 m_1MinvJt;
+	    public IndexedVector3	m_linearJointAxis;
+        public IndexedVector3 m_aJ;
+        public IndexedVector3 m_bJ;
+        public IndexedVector3 m_0MinvJt;
+        public IndexedVector3 m_1MinvJt;
 	    //Optimization: can be stored in the w/last component of one of the vectors
         public float m_Adiag;
     }

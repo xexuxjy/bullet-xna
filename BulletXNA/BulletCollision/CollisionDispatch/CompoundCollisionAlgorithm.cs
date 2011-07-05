@@ -23,13 +23,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class CompoundCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
@@ -147,11 +144,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             if (tree != null)
             {
 
-                Vector3 localAabbMin;
-                Vector3 localAabbMax;
-                Matrix otherInCompoundSpace = Matrix.Identity;
+                IndexedVector3 localAabbMin;
+                IndexedVector3 localAabbMax;
+                IndexedMatrix otherInCompoundSpace;
                 //otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
-                otherInCompoundSpace = MathUtil.InverseTimes(colObj.GetWorldTransform(), otherObj.GetWorldTransform());
+                otherInCompoundSpace = colObj.GetWorldTransform().Inverse() * otherObj.GetWorldTransform();
 
                 otherObj.GetCollisionShape().GetAabb(ref otherInCompoundSpace, out localAabbMin, out localAabbMax);
 
@@ -176,9 +173,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                 ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
                 CollisionShape childShape = null;
-                Matrix orgTrans;
-                Matrix orgInterpolationTrans;
-                Matrix newChildWorldTrans;
+                IndexedMatrix orgTrans;
+                IndexedMatrix orgInterpolationTrans;
+                IndexedMatrix newChildWorldTrans;
 
 
                 for (int i = 0; i < numChildren; i++)
@@ -189,15 +186,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                         //if not longer overlapping, remove the algorithm
                         orgTrans = colObj.GetWorldTransform();
                         orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
-                        Matrix childTrans = compoundShape.GetChildTransform(i);
+                        IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
 
-                        newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+                        newChildWorldTrans = orgTrans * childTrans;
 
                         //perform an AABB check first
-                        Vector3 aabbMin0;
-                        Vector3 aabbMax0;
-                        Vector3 aabbMin1;
-                        Vector3 aabbMax1;
+                        IndexedVector3 aabbMin0;
+                        IndexedVector3 aabbMax0;
+                        IndexedVector3 aabbMin1;
+                        IndexedVector3 aabbMax1;
 
                         childShape.GetAabb(ref newChildWorldTrans, out aabbMin0, out aabbMax0);
                         otherObj.GetCollisionShape().GetAabb(otherObj.GetWorldTransform(), out aabbMin1, out aabbMax1);
@@ -243,7 +240,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             float hitFraction = 1f;
 
             int numChildren = m_childCollisionAlgorithms.Count;
-            Matrix orgTrans;
+            IndexedMatrix orgTrans;
             float frac;
 
             for (int i = 0; i < numChildren; i++)
@@ -254,8 +251,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 //backup
                 orgTrans = colObj.GetWorldTransform();
 
-                Matrix childTrans = compoundShape.GetChildTransform(i);
-                Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+                IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
+                IndexedMatrix newChildWorldTrans = orgTrans * childTrans;
 
                 colObj.SetWorldTransform(ref newChildWorldTrans);
 
@@ -315,16 +312,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             Debug.Assert(index < compoundShape.GetNumChildShapes());
 
             //backup
-            Matrix orgTrans = m_compoundColObj.GetWorldTransform();
-            Matrix orgInterpolationTrans = m_compoundColObj.GetInterpolationWorldTransform();
-            Matrix childTrans = compoundShape.GetChildTransform(index);
-            Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+            IndexedMatrix orgTrans = m_compoundColObj.GetWorldTransform();
+            IndexedMatrix orgInterpolationTrans = m_compoundColObj.GetInterpolationWorldTransform();
+            IndexedMatrix childTrans = compoundShape.GetChildTransform(index);
+            IndexedMatrix newChildWorldTrans = orgTrans * childTrans;
 
             //perform an AABB check first
-            Vector3 aabbMin0;
-            Vector3 aabbMax0;
-            Vector3 aabbMin1;
-            Vector3 aabbMax1;
+            IndexedVector3 aabbMin0;
+            IndexedVector3 aabbMax0;
+            IndexedVector3 aabbMin1;
+            IndexedVector3 aabbMax1;
 
             childShape.GetAabb(ref newChildWorldTrans, out aabbMin0, out aabbMax0);
             m_otherObj.GetCollisionShape().GetAabb(m_otherObj.GetWorldTransform(), out aabbMin1, out aabbMax1);
@@ -357,9 +354,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 m_childCollisionAlgorithms[index].ProcessCollision(m_compoundColObj, m_otherObj, m_dispatchInfo, m_resultOut);
                 if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawAabb)) != 0))
                 {
-                    Vector3 worldAabbMin = Vector3.Zero, worldAabbMax = Vector3.Zero;
-                    m_dispatchInfo.getDebugDraw().DrawAabb(aabbMin0, aabbMax0, new Vector3(1, 1, 1));
-                    m_dispatchInfo.getDebugDraw().DrawAabb(aabbMin1, aabbMax1, new Vector3(1, 1, 1));
+                    IndexedVector3 worldAabbMin = IndexedVector3.Zero, worldAabbMax = IndexedVector3.Zero;
+                    m_dispatchInfo.getDebugDraw().DrawAabb(aabbMin0, aabbMax0, new IndexedVector3(1, 1, 1));
+                    m_dispatchInfo.getDebugDraw().DrawAabb(aabbMin1, aabbMax1, new IndexedVector3(1, 1, 1));
                 }
 
                 //revert back transform 
@@ -377,11 +374,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             CollisionShape childShape = compoundShape.GetChildShape(index);
             if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawAabb)) != 0))
             {
-                Vector3 worldAabbMin;
-                Vector3 worldAabbMax;
-                Matrix orgTrans = m_compoundColObj.GetWorldTransform();
-                MathUtil.TransformAabb(leaf.volume.Mins(), leaf.volume.Maxs(), 0f, orgTrans, out worldAabbMin, out worldAabbMax);
-                m_dispatchInfo.getDebugDraw().DrawAabb(worldAabbMin, worldAabbMax, new Vector3(1, 0, 0));
+                IndexedVector3 worldAabbMin;
+                IndexedVector3 worldAabbMax;
+                IndexedMatrix orgTrans = m_compoundColObj.GetWorldTransform();
+
+                AabbUtil2.TransformAabb(leaf.volume.Mins(), leaf.volume.Maxs(), 0f, ref orgTrans, out worldAabbMin, out worldAabbMax);
+                m_dispatchInfo.getDebugDraw().DrawAabb(worldAabbMin, worldAabbMax, new IndexedVector3(1, 0, 0));
             }
             ProcessChildShape(childShape, index);
         }

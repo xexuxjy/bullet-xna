@@ -26,12 +26,10 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class GjkPairDetector : IDiscreteCollisionDetectorInterface
     {
@@ -44,7 +42,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_marginA = objectA.GetMargin();
             m_marginB = objectB.GetMargin();
 
-            m_cachedSeparatingAxis = new Vector3(0, 1, 0);
+            m_cachedSeparatingAxis = new IndexedVector3(0, 1, 0);
 
 
             m_simplexSolver = simplexSolver;
@@ -69,7 +67,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_marginA = marginA;
             m_marginB = marginB;
 
-            m_cachedSeparatingAxis = new Vector3(0, 1, 0);
+            m_cachedSeparatingAxis = new IndexedVector3(0, 1, 0);
 
             m_simplexSolver = simplexSolver;
             m_penetrationDepthSolver = penetrationDepthSolver;
@@ -97,13 +95,13 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_cachedSeparatingDistance = 0f;
 
             float distance = 0f;
-            Vector3 normalInB = Vector3.Zero;
-            Vector3 pointOnA = Vector3.Zero, pointOnB = Vector3.Zero;
-            Matrix localTransA = input.m_transformA;
-            Matrix localTransB = input.m_transformB;
-            Vector3 positionOffset = (localTransA.Translation + localTransB.Translation) * .5f;
-            localTransA.Translation -= positionOffset;
-            localTransB.Translation -= positionOffset;
+            IndexedVector3 normalInB = IndexedVector3.Zero;
+            IndexedVector3 pointOnA = IndexedVector3.Zero, pointOnB = IndexedVector3.Zero;
+            IndexedMatrix localTransA = input.m_transformA;
+            IndexedMatrix localTransB = input.m_transformB;
+            IndexedVector3 positionOffset = (localTransA._origin + localTransB._origin) * .5f;
+            localTransA._origin -= positionOffset;
+            localTransB._origin -= positionOffset;
 
             bool check2d = m_minkowskiA.IsConvex2d() && m_minkowskiB.IsConvex2d();
 
@@ -134,7 +132,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
             m_curIter = 0;
             int gGjkMaxIter = 1000;//this is to catch invalid input, perhaps check for #NaN?
-            m_cachedSeparatingAxis = new Vector3(0, 1, 0);
+            m_cachedSeparatingAxis = new IndexedVector3(0, 1, 0);
 
             bool isValid = false;
             bool checkSimplex = false;
@@ -168,14 +166,16 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     {
                         int ibreak = 0;
                     }
-                    Vector3 seperatingAxisInA = MathUtil.TransposeTransformNormal(-m_cachedSeparatingAxis, input.m_transformA);
-                    Vector3 seperatingAxisInB = MathUtil.TransposeTransformNormal(ref m_cachedSeparatingAxis, ref input.m_transformB);
 
-                    Vector3 pInA = m_minkowskiA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
-                    Vector3 qInB = m_minkowskiB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
+                    IndexedVector3 seperatingAxisInA = (-m_cachedSeparatingAxis) * input.m_transformA._basis;
+                    IndexedVector3 seperatingAxisInB = m_cachedSeparatingAxis * input.m_transformB._basis;
 
-                    Vector3 pWorld = Vector3.Transform(pInA, localTransA);
-                    Vector3 qWorld = Vector3.Transform(qInB, localTransB);
+
+                    IndexedVector3 pInA = m_minkowskiA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
+                    IndexedVector3 qInB = m_minkowskiB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
+
+                    IndexedVector3 pWorld = localTransA * pInA;
+                    IndexedVector3 qWorld = localTransB * qInB;
 
                     if (check2d)
                     {
@@ -183,8 +183,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                         qWorld.Z = 0.0f;
                     }
 
-                    Vector3 w = pWorld - qWorld;
-                    delta = Vector3.Dot(m_cachedSeparatingAxis, w);
+                    IndexedVector3 w = pWorld - qWorld;
+                    delta = IndexedVector3.Dot(m_cachedSeparatingAxis, w);
 
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     m_simplexSolver.AddVertex(ref w, ref pWorld, ref qWorld);
 
                     //calculate the closest point to the origin (update vector v)
-                    Vector3 newCachedSeparatingAxis;
+                    IndexedVector3 newCachedSeparatingAxis;
 
                     if (!m_simplexSolver.Closest(out newCachedSeparatingAxis))
                     {
@@ -379,10 +379,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                     if (m_penetrationDepthSolver != null)
                     {
                         // Penetration depth case.
-                        Vector3 tmpPointOnA = Vector3.Zero, tmpPointOnB = Vector3.Zero;
+                        IndexedVector3 tmpPointOnA = IndexedVector3.Zero, tmpPointOnB = IndexedVector3.Zero;
 
                         gNumDeepPenetrationChecks++;
-                        m_cachedSeparatingAxis = Vector3.Zero;
+                        m_cachedSeparatingAxis = IndexedVector3.Zero;
                         bool isValid2 = m_penetrationDepthSolver.CalcPenDepth(
                             m_simplexSolver,
                             m_minkowskiA, m_minkowskiB,
@@ -408,7 +408,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
                         if (isValid2)
                         {
-                            Vector3 tmpNormalInB = tmpPointOnB - tmpPointOnA;
+                            IndexedVector3 tmpNormalInB = tmpPointOnB - tmpPointOnA;
                             float lenSqr = tmpNormalInB.LengthSquared();
                             if (lenSqr <= (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                             {
@@ -476,11 +476,18 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 }
             }
 
+
+	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
+	        {
+                BulletGlobals.g_streamWriter.WriteLine("valid [{0}] distance[{1:0000.00000000}][{2:0000.00000000}] maxDistSq[{3:0000.00000000}]", isValid, distance, distance * distance, input.m_maximumDistanceSquared);
+	        }
+
+
             if (isValid && ((distance < 0) || (distance * distance < input.m_maximumDistanceSquared)))
             {
                 m_cachedSeparatingAxis = normalInB;
                 m_cachedSeparatingDistance = distance;
-                Vector3 temp = pointOnB + positionOffset;
+                IndexedVector3 temp = pointOnB + positionOffset;
                 output.AddContactPoint(
                     ref normalInB,
                     ref temp,
@@ -498,17 +505,17 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_minkowskiB = minkB;
         }
 
-        public void SetCachedSeperatingAxis(Vector3 seperatingAxis)
+        public void SetCachedSeperatingAxis(IndexedVector3 seperatingAxis)
         {
             SetCachedSeperatingAxis(ref seperatingAxis);
         }
 
-        public void SetCachedSeperatingAxis(ref Vector3 seperatingAxis)
+        public void SetCachedSeperatingAxis(ref IndexedVector3 seperatingAxis)
         {
             m_cachedSeparatingAxis = seperatingAxis;
         }
 
-        public Vector3 GetCachedSeparatingAxis()
+        public IndexedVector3 GetCachedSeparatingAxis()
         {
             return m_cachedSeparatingAxis;
         }
@@ -536,7 +543,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 
 
-        private Vector3 m_cachedSeparatingAxis;
+        private IndexedVector3 m_cachedSeparatingAxis;
         private IConvexPenetrationDepthSolver m_penetrationDepthSolver;
         private ISimplexSolverInterface m_simplexSolver;
         private ConvexShape m_minkowskiA;

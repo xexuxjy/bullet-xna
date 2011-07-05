@@ -1646,7 +1646,7 @@ void	ConcaveDemo::initGImpactCollision()
 
 void	ConcaveDemo::initPhysics()
 {
-	g_file = fopen("c:/users/man/bullet/gimpact-demo-cpp.txt","w");
+	g_file = fopen("e:/users/man/bullet/gimpact-demo-cpp.txt","w");
 
 	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
 

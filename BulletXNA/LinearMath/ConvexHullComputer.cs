@@ -14,7 +14,6 @@
 
 //using System;
 //using System.Collections.Generic;
-//using System.Linq;
 //using System.Text;
 //using Microsoft.Xna.Framework;
 //using System.Diagnostics;
@@ -33,7 +32,7 @@
 
 
 //        // Vertices of the output hull
-//        ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
+//        ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
 
 //        // Edges of the output hull
 //        ObjectArray<Edge> edges = new ObjectArray<Edge>;
@@ -147,19 +146,19 @@
 //                        : Rational128(point128.x * b.x + point128.y * b.y + point128.z * b.z, point128.denominator);
 //                }
 
-//                btScalar xvalue() const
+//                float xvalue() const
 //                {
-//                    return (point.index >= 0) ? btScalar(point.x) : point128.xvalue();
+//                    return (point.index >= 0) ? float(point.x) : point128.xvalue();
 //                }
 
-//                btScalar yvalue() const
+//                float yvalue() const
 //                {
-//                    return (point.index >= 0) ? btScalar(point.y) : point128.yvalue();
+//                    return (point.index >= 0) ? float(point.y) : point128.yvalue();
 //                }
 
-//                btScalar zvalue() const
+//                float zvalue() const
 //                {
-//                    return (point.index >= 0) ? btScalar(point.z) : point128.zvalue();
+//                    return (point.index >= 0) ? float(point.z) : point128.zvalue();
 //                }
 
 //                void receiveNearbyFaces(Vertex* src)

@@ -1,6 +1,5 @@
 ﻿//using System;
 //using System.Collections.Generic;
-//using System.Linq;
 //using System.Text;
 //using Microsoft.Xna.Framework;
 
@@ -34,7 +33,7 @@
 //        gDebugDrawer = debugDrawer;
 //    }
 
-//    public static void debugDrawLine(ref Vector3 from,ref Vector3 to, ref Vector3 color)
+//    public static void debugDrawLine(ref IndexedVector3 from,ref IndexedVector3 to, ref IndexedVector3 color)
 //    {
 //        if (gDebugDrawer != null)
 //        {
@@ -50,12 +49,12 @@
 //            return hash;
 //        }
 
-//        public static float getAngle(ref Vector3 edgeA, ref Vector3 normalA,ref Vector3 normalB)
+//        public static float getAngle(ref IndexedVector3 edgeA, ref IndexedVector3 normalA,ref IndexedVector3 normalB)
 //        {
-//            Vector3 refAxis0  = edgeA;
-//            Vector3 refAxis1  = normalA;
-//            Vector3 swingAxis = normalB;
-//            float angle = Math.Atan2(Vector3.Dot(swingAxis,refAxis0), Vector3.Dot(swingAxis,refAxis1));
+//            IndexedVector3 refAxis0  = edgeA;
+//            IndexedVector3 refAxis1  = normalA;
+//            IndexedVector3 swingAxis = normalB;
+//            float angle = Math.Atan2(IndexedVector3.Dot(swingAxis,refAxis0), IndexedVector3.Dot(swingAxis,refAxis1));
 //            return  angle;
 //        }
 
@@ -64,10 +63,10 @@
 //        {
 //            public int m_partIdA;
 //            public int	m_triangleIndexA;
-//            public IList<Vector3>   m_triangleVerticesA;
+//            public IList<IndexedVector3>   m_triangleVerticesA;
 //            public TriangleInfoMap	m_triangleInfoMap;
 
-//            public virtual void processTriangle(IList<Vector3> triangle, int partId, int triangleIndex)
+//            public virtual void processTriangle(IList<IndexedVector3> triangle, int partId, int triangleIndex)
 //            {
 //                //skip self-collisions
 //                if ((m_partIdA == partId) && (m_triangleIndexA == triangleIndex))
@@ -85,13 +84,13 @@
 //                int[] sharedVertsB = new int[]{-1,-1,-1};
 
 //                ///skip degenerate triangles
-//                float crossBSqr = (Vector3.Cross((triangle[1]-triangle[0]),(triangle[2]-triangle[0])).LengthSquared();
+//                float crossBSqr = (IndexedVector3.Cross((triangle[1]-triangle[0]),(triangle[2]-triangle[0])).LengthSquared();
 //                if (crossBSqr < m_triangleInfoMap.m_equalVertexThreshold)
 //                {
 //                    return;
 //                }
 
-//                float crossASqr = Vector3.Cross((m_triangleVerticesA[1]-m_triangleVerticesA[0]),(m_triangleVerticesA[2]-m_triangleVerticesA[0])).LengthSquared();
+//                float crossASqr = IndexedVector3.Cross((m_triangleVerticesA[1]-m_triangleVerticesA[0]),(m_triangleVerticesA[2]-m_triangleVerticesA[0])).LengthSquared();
 //                ///skip degenerate triangles
 //                if (crossASqr< m_triangleInfoMap.m_equalVertexThreshold)
 //                {
@@ -171,7 +170,7 @@
 //                        int otherIndexA = 3-sumvertsA;
 
         				
-//                        Vector3 edge = new Vector3(m_triangleVerticesA[sharedVertsA[1]]-m_triangleVerticesA[sharedVertsA[0]]);
+//                        IndexedVector3 edge = new IndexedVector3(m_triangleVerticesA[sharedVertsA[1]]-m_triangleVerticesA[sharedVertsA[0]]);
 
 //                        TriangleShape tA = new TriangleShape(m_triangleVerticesA[0],m_triangleVerticesA[1],m_triangleVerticesA[2]);
 //                        int otherIndexB = 3-(sharedVertsB[0]+sharedVertsB[1]);
@@ -179,26 +178,26 @@
 //                        TriangleShape tB = new TriangleShape(triangle[sharedVertsB[1]],triangle[sharedVertsB[0]],triangle[otherIndexB]);
 //                        //btTriangleShape tB(triangle[0],triangle[1],triangle[2]);
 
-//                        Vector3 normalA;
-//                        Vector3 normalB;
+//                        IndexedVector3 normalA;
+//                        IndexedVector3 normalB;
 //                        tA.calcNormal(normalA);
 //                        tB.calcNormal(normalB);
 //                        edge.Normalize();
-//                        Vector3 edgeCrossA = Vector3.Normalize(Vector3.Cross(edge,normalA));
+//                        IndexedVector3 edgeCrossA = IndexedVector3.Normalize(IndexedVector3.Cross(edge,normalA));
 
 //                        {
-//                            Vector3 tmp = m_triangleVerticesA[otherIndexA]-m_triangleVerticesA[sharedVertsA[0]];
-//                            if (Vector3.Dot(edgeCrossA,tmp) < 0)
+//                            IndexedVector3 tmp = m_triangleVerticesA[otherIndexA]-m_triangleVerticesA[sharedVertsA[0]];
+//                            if (IndexedVector3.Dot(edgeCrossA,tmp) < 0)
 //                            {
 //                                edgeCrossA*=-1;
 //                            }
 //                        }
 
-//                        Vector3 edgeCrossB = Vector3.Normalise(Vector3.Cross(edge,normalB));
+//                        IndexedVector3 edgeCrossB = IndexedVector3.Normalise(IndexedVector3.Cross(edge,normalB));
 
 //                        {
-//                            Vector3 tmp = triangle[otherIndexB]-triangle[sharedVertsB[0]];
-//                            if (Vector3.Dot(edgeCrossB,tmp) < 0)
+//                            IndexedVector3 tmp = triangle[otherIndexB]-triangle[sharedVertsB[0]];
+//                            if (IndexedVector3.Dot(edgeCrossB,tmp) < 0)
 //                            {
 //                                edgeCrossB*=-1;
 //                            }
@@ -207,11 +206,11 @@
 //                        float	angle2 = 0;
 //                        float	ang4 = 0.f;
 
-//                        Vector3 calculatedEdge = Vector3.Cross(edgeCrossA,edgeCrossB);
+//                        IndexedVector3 calculatedEdge = IndexedVector3.Cross(edgeCrossA,edgeCrossB);
 //                        float len2 = calculatedEdge.LengthSquared();
 
 //                        float correctedAngle = 0f;
-//                        Vector3 calculatedNormalB = normalA;
+//                        IndexedVector3 calculatedNormalB = normalA;
 //                        bool isConvex = false;
 
 //                        if (len2<m_triangleInfoMap.m_planarEpsilon)
@@ -222,33 +221,33 @@
 //                        else
 //                        {
 //                            calculatedEdge.Normalize();
-//                            Vector3 calculatedNormalA = Vector3.Cross(calculatedEdge,edgeCrossA);
+//                            IndexedVector3 calculatedNormalA = IndexedVector3.Cross(calculatedEdge,edgeCrossA);
 //                            calculatedNormalA.Normalize();
 //                            angle2 = getAngle(ref calculatedNormalA,ref edgeCrossA,ref edgeCrossB);
 //                            ang4 = MathUtil.SIMD_PI-angle2;
-//                            float dotA = Vector3.Dot(normalA,edgeCrossB);
+//                            float dotA = IndexedVector3.Dot(normalA,edgeCrossB);
 //                            ///@todo: check if we need some epsilon, due to floating point imprecision
 //                            isConvex = (dotA<0f);
 
 //                            correctedAngle = isConvex ? ang4 : -ang4;
 //                            Quaternion orn2 = Quaternion.CreateFromAxisAngle(calculatedEdge,-correctedAngle);
-//                            Matrix rotateMatrix = Matrix.CreateFromQuaternion(orn2);
-//                            calculatedNormalB = Vector3.TransformNormal(normalA,rotateMatrix);
+//                            IndexedMatrix rotateMatrix = IndexedMatrix.CreateFromQuaternion(orn2);
+//                            calculatedNormalB = IndexedVector3.TransformNormal(normalA,rotateMatrix);
 //                        }
 
         							
 //                        //alternatively use 
-//                        //Vector3 calculatedNormalB2 = quatRotate(orn,normalA);
+//                        //IndexedVector3 calculatedNormalB2 = quatRotate(orn,normalA);
 
 
 //                        switch (sumvertsA)
 //                        {
 //                        case 1:
 //                            {
-//                                Vector3 edge = m_triangleVerticesA[0]-m_triangleVerticesA[1];
+//                                IndexedVector3 edge = m_triangleVerticesA[0]-m_triangleVerticesA[1];
 //                                Quaternion orn = Quaternion.CreateFromAxisAngle(edge,-correctedAngle);
-//                                Vector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
-//                                float bla = Vector3.Dot(computedNormalB,normalB);
+//                                IndexedVector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
+//                                float bla = IndexedVector3.Dot(computedNormalB,normalB);
 //                                if (bla<0)
 //                                {
 //                                    computedNormalB*=-1;
@@ -271,10 +270,10 @@
 //                            }
 //                        case 2:
 //                            {
-//                                Vector3 edge = m_triangleVerticesA[2]-m_triangleVerticesA[0];
+//                                IndexedVector3 edge = m_triangleVerticesA[2]-m_triangleVerticesA[0];
 //                                Quaternion orn = Quaternion.CreateFromAxisAngle(edge,-correctedAngle);
-//                                Vector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
-//                                if (Vector3.Dot(computedNormalB,normalB)<0)
+//                                IndexedVector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
+//                                if (IndexedVector3.Dot(computedNormalB,normalB)<0)
 //                                {
 //                                    computedNormalB*=-1;
 //                                    info.m_flags |= TRI_INFO_V2V0_SWAP_NORMALB;
@@ -293,10 +292,10 @@
 //                            }
 //                        case 3:
 //                            {
-//                                Vector3 edge = m_triangleVerticesA[1]-m_triangleVerticesA[2];
+//                                IndexedVector3 edge = m_triangleVerticesA[1]-m_triangleVerticesA[2];
 //                                Quaternion orn = Quaternion.CreateFromAxisAngle(edge,-correctedAngle);
-//                                Vector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
-//                                if (Vector3.Dot(computedNormalB,normalB)<0)
+//                                IndexedVector3 computedNormalB = MathUtil.quatRotate(orn,normalA);
+//                                if (IndexedVector3.Dot(computedNormalB,normalB)<0)
 //                                {
 //                                    info.m_flags |= TRI_INFO_V1V2_SWAP_NORMALB;
 //                                    computedNormalB*=-1;
@@ -342,7 +341,7 @@
 //            trimeshShape.setTriangleInfoMap(triangleInfoMap);
 
 //            StridingMeshInterface meshInterface = trimeshShape.getMeshInterface();
-//            Vector3 meshScaling = meshInterface.getScaling();
+//            IndexedVector3 meshScaling = meshInterface.getScaling();
 
 //            for (int partId = 0; partId< meshInterface.getNumSubParts();partId++)
 //            {
@@ -356,9 +355,9 @@
 //                PHY_ScalarType indicestype = PHY_INTEGER;
 //                //PHY_ScalarType indexType=0;
 
-//                Vector3[] triangleVerts = new Vector3[3];
+//                IndexedVector3[] triangleVerts = new IndexedVector3[3];
 //                meshInterface.getLockedReadOnlyVertexIndexBase(vertexbase,numverts, type,stride,indexbase,indexstride,numfaces,indicestype,partId);
-//                Vector3 aabbMin,aabbMax;
+//                IndexedVector3 aabbMin,aabbMax;
 
 //                for (int triangleIndex = 0 ; triangleIndex < numfaces;triangleIndex++)
 //                {
@@ -371,7 +370,7 @@
 //                        if (type == PHY_FLOAT)
 //                        {
 //                            float* graphicsbase = (float*)(vertexbase+graphicsindex*stride);
-//                            triangleVerts[j] = Vector3(
+//                            triangleVerts[j] = IndexedVector3(
 //                                graphicsbase[0]*meshScaling.getX(),
 //                                graphicsbase[1]*meshScaling.getY(),
 //                                graphicsbase[2]*meshScaling.getZ());
@@ -379,7 +378,7 @@
 //                        else
 //                        {
 //                            double* graphicsbase = (double*)(vertexbase+graphicsindex*stride);
-//                            triangleVerts[j] = Vector3( float(graphicsbase[0]*meshScaling.getX()), float(graphicsbase[1]*meshScaling.getY()), float(graphicsbase[2]*meshScaling.getZ()));
+//                            triangleVerts[j] = IndexedVector3( float(graphicsbase[0]*meshScaling.getX()), float(graphicsbase[1]*meshScaling.getY()), float(graphicsbase[2]*meshScaling.getZ()));
 //                        }
 //                    }
 //                    aabbMin.setValue(float(BT_LARGE_FLOAT),float(BT_LARGE_FLOAT),float(BT_LARGE_FLOAT));
@@ -407,9 +406,9 @@
 
 //        // Given a point and a line segment (defined by two points), compute the closest point
 //        // in the line.  Cap the point at the endpoints of the line segment.
-//        public void NearestPointInLineSegment(ref Vector3 point, ref Vector3 line0, ref Vector3 line1, ref Vector3 nearestPoint)
+//        public void NearestPointInLineSegment(ref IndexedVector3 point, ref IndexedVector3 line0, ref IndexedVector3 line1, ref IndexedVector3 nearestPoint)
 //        {
-//            Vector3 lineDelta = line1 - line0;
+//            IndexedVector3 lineDelta = line1 - line0;
 
 //            // Handle degenerate lines
 //            if ( MathUtil.fuzzyZero(lineDelta.LengthSquared())
@@ -418,7 +417,7 @@
 //            }
 //            else
 //            {
-//                float delta = Vector3.Dot((point-line0),(lineDelta)) / Vector3.Dot((lineDelta),(lineDelta));
+//                float delta = IndexedVector3.Dot((point-line0),(lineDelta)) / IndexedVector3.Dot((lineDelta),(lineDelta));
 
 //                // Clamp the point to conform to the segment's endpoints
 //                if ( delta < 0 )
@@ -435,13 +434,13 @@
 //        }
 
 
-//        public bool	ClampNormal(ref Vector3 edge,ref Vector3 tri_normal_org,ref Vector3 localContactNormalOnB, float correctedEdgeAngle, ref Vector3 clampedLocalNormal)
+//        public bool	ClampNormal(ref IndexedVector3 edge,ref IndexedVector3 tri_normal_org,ref IndexedVector3 localContactNormalOnB, float correctedEdgeAngle, ref IndexedVector3 clampedLocalNormal)
 //        {
-//            Vector3 tri_normal = tri_normal_org;
+//            IndexedVector3 tri_normal = tri_normal_org;
 //            //we only have a local triangle normal, not a local contact normal . only normal in world space...
 //            //either compute the current angle all in local space, or all in world space
 
-//            Vector3 edgeCross = Vector3.Cross(edge,tri_normal).Normalize();
+//            IndexedVector3 edgeCross = IndexedVector3.Cross(edge,tri_normal).Normalize();
 //            float curAngle = getAngle(ref edgeCross,ref tri_normal,ref localContactNormalOnB);
 
 //            if (correctedEdgeAngle<0)
@@ -450,8 +449,8 @@
 //                {
 //                    float diffAngle = correctedEdgeAngle-curAngle;
 //                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge,diffAngle);
-//                    Matrix rotMtx = Matrix.CreateFromQuaternion(rotation);
-//                    clampedLocalNormal = Vector3.TransformNormal(localContactNormalOnB,rotMtx);
+//                    IndexedMatrix rotMtx = IndexedMatrix.CreateFromQuaternion(rotation);
+//                    clampedLocalNormal = IndexedVector3.TransformNormal(localContactNormalOnB,rotMtx);
 //                    return true;
 //                }
 //            }
@@ -462,9 +461,9 @@
 //                {
 //                    float diffAngle = correctedEdgeAngle-curAngle;
 //                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge,diffAngle);
-//                    Matrix rotMtx = Matrix.CreateFromQuaternion(rotation);
+//                    IndexedMatrix rotMtx = IndexedMatrix.CreateFromQuaternion(rotation);
 
-//                    clampedLocalNormal = Vector3.TransformNormal(localContactNormalOnB,rotation);
+//                    clampedLocalNormal = IndexedVector3.TransformNormal(localContactNormalOnB,rotation);
 //                    return true;
 //                }
 //            }
@@ -506,22 +505,22 @@
 //            float frontFacing = (normalAdjustFlags & BT_TRIANGLE_CONVEX_BACKFACE_MODE)==0? 1.f : -1.f;
         	
 //            TriangleShape tri_shape = (TriangleShape)(colObj0.getCollisionShape());
-//            Vector3 v0,v1,v2;
+//            IndexedVector3 v0,v1,v2;
 //            tri_shape.getVertex(0,ref v0);
 //            tri_shape.getVertex(1,ref v1);
 //            tri_shape.getVertex(2,ref v2);
 
-//            Vector3 center = (v0+v1+v2)*(1f/3f);
+//            IndexedVector3 center = (v0+v1+v2)*(1f/3f);
 
-//            Vector3 red = new Vector3(1,0,0), green = new Vector3(0,1,0),blue = new Vector3(0,0,1),white = new Vector3(1,1,1),black = new Vector3(0,0,0);
-//            Vector3 tri_normal;
+//            IndexedVector3 red = new IndexedVector3(1,0,0), green = new IndexedVector3(0,1,0),blue = new IndexedVector3(0,0,1),white = new IndexedVector3(1,1,1),black = new IndexedVector3(0,0,0);
+//            IndexedVector3 tri_normal;
 //            tri_shape.calcNormal(ref tri_normal);
 
 //            //float dot = tri_normal.dot(cp.m_normalWorldOnB);
-//            Vector3 nearest;
+//            IndexedVector3 nearest;
 //            nearestPointInLineSegment(ref cp.m_localPointB,ref v0,ref v1,ref nearest);
 
-//            Vector3 contact = cp.m_localPointB;
+//            IndexedVector3 contact = cp.m_localPointB;
 //        #if BT_INTERNAL_EDGE_DEBUG_DRAW
 //            const btTransform& tr = colObj0.getWorldTransform();
 //            btDebugDrawLine(tr*nearest,tr*cp.m_localPointB,red);
@@ -532,7 +531,7 @@
 //            int numConcaveEdgeHits = 0;
 //            int numConvexEdgeHits = 0;
 
-//            Vector3 localContactNormalOnB = Vector3.TransformNormal(cp.m_normalWorldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
+//            IndexedVector3 localContactNormalOnB = IndexedVector3.TransformNormal(cp.m_normalWorldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
 //            localContactNormalOnB.Normalize();//is this necessary?
 
 	// Get closest edge
@@ -596,7 +595,7 @@
 //                float len = (contact-nearest).Length();
 //                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
 //                {
-//                    Vector3 edge = new Vector3(v0-v1);
+//                    IndexedVector3 edge = new IndexedVector3(v0-v1);
 //                    isNearEdge = true;
 
 //                    if (info.m_edgeV0V1Angle==0f)
@@ -611,15 +610,15 @@
 //                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
 //            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//                        Vector3 nA = swapFactor * tri_normal;
+//                        IndexedVector3 nA = swapFactor * tri_normal;
 
 //                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge,info.m_edgeV0V1Angle);
-//                        Vector3 computedNormalB = MathUtil.quatRotate(orn,tri_normal);
+//                        IndexedVector3 computedNormalB = MathUtil.quatRotate(orn,tri_normal);
 //                        if (info.m_flags & TRI_INFO_V0V1_SWAP_NORMALB)
 //                        {
 //                            computedNormalB*=-1;
 //                        }
-//                        Vector3 nB = swapFactor*computedNormalB;
+//                        IndexedVector3 nB = swapFactor*computedNormalB;
 
 //                        float	NdotA = localContactNormalOnB.dot(nA);
 //                        float	NdotB = localContactNormalOnB.dot(nB);
@@ -640,13 +639,13 @@
 //                        else
 //                        {
 //                            numConvexEdgeHits++;
-//                            Vector3 clampedLocalNormal;
+//                            IndexedVector3 clampedLocalNormal;
 //                            bool isClamped = btClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB, info.m_edgeV0V1Angle,clampedLocalNormal);
 //                            if (isClamped)
 //                            {
-//                                if (((normalAdjustFlags & BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (Vector3.Dot(clampedLocalNormal.dot(frontFacing*tri_normal)>0)))
+//                                if (((normalAdjustFlags & BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (IndexedVector3.Dot(clampedLocalNormal.dot(frontFacing*tri_normal)>0)))
 //                                {
-//                                    Vector3 newNormal = Vector3.TransformNormal(clampedLocalNormal,colObj0.getWorldTransform());
+//                                    IndexedVector3 newNormal = IndexedVector3.TransformNormal(clampedLocalNormal,colObj0.getWorldTransform());
 //                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
 //                                    cp.m_normalWorldOnB = newNormal;
 //                                    // Reproject collision point along normal. (what about cp.m_distance1?)
@@ -680,7 +679,7 @@
 //                    btDebugDrawLine(tr*nearest,tr*(nearest+tri_normal*10),white);
 //        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//                    Vector3 edge = (v1-v2);
+//                    IndexedVector3 edge = (v1-v2);
 
 //                    isNearEdge = true;
 
@@ -695,15 +694,15 @@
 //                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
 //            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//                        Vector3 nA = swapFactor * tri_normal;
+//                        IndexedVector3 nA = swapFactor * tri_normal;
         				
 //                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge,info.m_edgeV1V2Angle);
-//                        Vector3 computedNormalB = quatRotate(orn,tri_normal);
+//                        IndexedVector3 computedNormalB = quatRotate(orn,tri_normal);
 //                        if (info.m_flags & TRI_INFO_V1V2_SWAP_NORMALB)
 //                        {
 //                            computedNormalB*=-1;
 //                        }
-//                        Vector3 nB = swapFactor*computedNormalB;
+//                        IndexedVector3 nB = swapFactor*computedNormalB;
 
 //        #if DEBUG_INTERNAL_EDGE
 //                        {
@@ -723,14 +722,14 @@
 //                        else
 //                        {
 //                            numConvexEdgeHits++;
-//                            Vector3 localContactNormalOnB = Vector3.TransformNormal(cp.m_normalOnWOrldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
-//                            Vector3 clampedLocalNormal;
+//                            IndexedVector3 localContactNormalOnB = IndexedVector3.TransformNormal(cp.m_normalOnWOrldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
+//                            IndexedVector3 clampedLocalNormal;
 //                            bool isClamped = btClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB, info.m_edgeV1V2Angle,clampedLocalNormal);
 //                            if (isClamped)
 //                            {
 //                                if (((normalAdjustFlags & BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (clampedLocalNormal.dot(frontFacing*tri_normal)>0))
 //                                {
-//                                    Vector3 newNormal = Vector3.TransformNormal(clampedLocalNormal,colObj0.getWorldTransform());
+//                                    IndexedVector3 newNormal = IndexedVector3.TransformNormal(clampedLocalNormal,colObj0.getWorldTransform());
 //                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
 //                                    cp.m_normalWorldOnB = newNormal;
 //                                    // Reproject collision point along normal.
@@ -768,7 +767,7 @@
 //                    btDebugDrawLine(tr*nearest,tr*(nearest+tri_normal*10),white);
 //        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//                    Vector3 edge = (v2-v0);
+//                    IndexedVector3 edge = (v2-v0);
 
 //                    if (info.m_edgeV2V0Angle==0f)
 //                    {
@@ -783,14 +782,14 @@
 //                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
 //            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-//                        Vector3 nA = swapFactor * tri_normal;
+//                        IndexedVector3 nA = swapFactor * tri_normal;
 //                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge,info.m_edgeV2V0Angle);
-//                        Vector3 computedNormalB = MathUtil.quatRotate(orn,tri_normal);
+//                        IndexedVector3 computedNormalB = MathUtil.quatRotate(orn,tri_normal);
 //                        if (info.m_flags & TRI_INFO_V2V0_SWAP_NORMALB)
 //                        {
 //                            computedNormalB*=-1;
 //                        }
-//                        Vector3 nB = swapFactor*computedNormalB;
+//                        IndexedVector3 nB = swapFactor*computedNormalB;
 
 //        #if DEBUG_INTERNAL_EDGE
 //                        {
@@ -798,8 +797,8 @@
 //                        }
 //        #endif //DEBUG_INTERNAL_EDGE
 
-//                        float	NdotA = Vector3.Dot(localContactNormalOnB,nA);
-//                        float	NdotB = Vector3.Dot(localContactNormalOnB,nB);
+//                        float	NdotA = IndexedVector3.Dot(localContactNormalOnB,nA);
+//                        float	NdotB = IndexedVector3.Dot(localContactNormalOnB,nB);
 //                        bool backFacingNormal = (NdotA< triangleInfoMapPtr.m_convexEpsilon) && (NdotB<triangleInfoMapPtr.m_convexEpsilon);
 
 //                        if (backFacingNormal)
@@ -812,14 +811,14 @@
 //                            //				printf("hitting convex edge\n");
 
 
-//                            Vector3 localContactNormalOnB = Vector3.TransformNormal(cp.m_normalWorldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
-//                            Vector3 clampedLocalNormal;
+//                            IndexedVector3 localContactNormalOnB = IndexedVector3.TransformNormal(cp.m_normalWorldOnB,MathUtil.transposeBasis(colObj0.getWorldTransform());
+//                            IndexedVector3 clampedLocalNormal;
 //                            bool isClamped = btClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB,info.m_edgeV2V0Angle,clampedLocalNormal);
 //                            if (isClamped)
 //                            {
 //                                if (((normalAdjustFlags & BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (clampedLocalNormal.dot(frontFacing*tri_normal)>0))
 //                                {
-//                                    Vector3 newNormal = MathUtil.transformNormal(clampedLocalNormal,colObj0.getWorldTransform());
+//                                    IndexedVector3 newNormal = MathUtil.transformNormal(clampedLocalNormal,colObj0.getWorldTransform());
 //                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
 //                                    cp.m_normalWorldOnB = newNormal;
 //                                    // Reproject collision point along normal.
@@ -834,7 +833,7 @@
 
 //        #if DEBUG_INTERNAL_EDGE
 //            {
-//                Vector3 color(0,1,1);
+//                IndexedVector3 color(0,1,1);
 //                btDebugDrawLine(cp.getPositionWorldOnB(),cp.getPositionWorldOnB()+cp.m_normalWorldOnB*10,color);
 //            }
 //        #endif //DEBUG_INTERNAL_EDGE
@@ -847,7 +846,7 @@
 //                    if ((normalAdjustFlags & BT_TRIANGLE_CONCAVE_DOUBLE_SIDED)!=0)
 //                    {
 //                        //fix tri_normal so it pointing the same direction as the current local contact normal
-//                        if (Vector3.Dot(tri_normal,localContactNormalOnB) < 0)
+//                        if (IndexedVector3.Dot(tri_normal,localContactNormalOnB) < 0)
 //                        {
 //                            tri_normal *= -1;
 //                        }
@@ -857,7 +856,7 @@
 //                    {
                 //btVector3 newNormal = tri_normal *frontFacing;
                 ////if the tri_normal is pointing opposite direction as the current local contact normal, skip it
-                //btScalar d = newNormal.dot(localContactNormalOnB) ;
+                //float d = newNormal.dot(localContactNormalOnB) ;
                 //if (d< 0)
                 //{
                 //    return;

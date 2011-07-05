@@ -21,14 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class ConvexPlaneCollisionAlgorithm : CollisionAlgorithm
     {
@@ -79,7 +75,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             //bool hasCollision = false;
-            Vector3 planeNormal = planeShape.GetPlaneNormal();
+            IndexedVector3 planeNormal = planeShape.GetPlaneNormal();
             //float planeConstant = planeShape.getPlaneConstant();
 
             //first perform a collision query with the non-perturbated collision objects
@@ -90,8 +86,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
             {
-                Vector3 v0;
-                Vector3 v1;
+                IndexedVector3 v0;
+                IndexedVector3 v1;
                 TransformUtil.PlaneSpace1(ref planeNormal, out v0, out v1);
                 //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
 
@@ -103,11 +99,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 {
                     perturbeAngle = angleLimit;
                 }
-                Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0, perturbeAngle);
+                Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
                 for (int i = 0; i < m_numPerturbationIterations; i++)
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                    Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal, iterationAngle);
+                    Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal.ToVector3(), iterationAngle);
                     rotq = MathUtil.QuaternionMultiply(Quaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
                     CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
                 }
@@ -131,31 +127,25 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
             bool hasCollision = false;
-            Vector3 planeNormal = planeShape.GetPlaneNormal();
+            IndexedVector3 planeNormal = planeShape.GetPlaneNormal();
             float planeConstant = planeShape.GetPlaneConstant();
 
-            Matrix convexWorldTransform = convexObj.GetWorldTransform();
-            Matrix convexInPlaneTrans = Matrix.Identity;
-
-            convexInPlaneTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(planeObj.GetWorldTransform()), convexWorldTransform);
+            IndexedMatrix convexWorldTransform = convexObj.GetWorldTransform();
+            IndexedMatrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform; ;
 
             //now perturbe the convex-world transform
 
-            // MAN - CHECKTHIS
-            Matrix rotMatrix = Matrix.CreateFromQuaternion(perturbeRot);
-            convexWorldTransform = MathUtil.BulletMatrixMultiplyBasis(convexWorldTransform, rotMatrix);
+            convexWorldTransform._basis *= new IndexedBasisMatrix(ref perturbeRot);
 
-            Matrix planeInConvex = Matrix.Identity;
-            planeInConvex = MathUtil.BulletMatrixMultiply(Matrix.Invert(convexWorldTransform), planeObj.GetWorldTransform());
+            IndexedMatrix planeInConvex = convexWorldTransform.Inverse() * planeObj.GetWorldTransform(); ;
 
-            Vector3 tmp = Vector3.TransformNormal(-planeNormal, planeInConvex);
-            Vector3 vtx = convexShape.LocalGetSupportingVertex(ref tmp);
+            IndexedVector3 vtx = convexShape.LocalGetSupportingVertex(planeInConvex._basis * -planeNormal);
 
-            Vector3 vtxInPlane = Vector3.Transform(vtx, convexInPlaneTrans);
-            float distance = (Vector3.Dot(planeNormal, vtxInPlane) - planeConstant);
+            IndexedVector3 vtxInPlane = vtxInPlane = convexInPlaneTrans * vtx;
+            float distance = (IndexedVector3.Dot(planeNormal, vtxInPlane) - planeConstant);
 
-            Vector3 vtxInPlaneProjected = vtxInPlane - (distance * planeNormal);
-            Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected, planeObj.GetWorldTransform());
+            IndexedVector3 vtxInPlaneProjected = vtxInPlane - (distance * planeNormal);
+            IndexedVector3 vtxInPlaneWorld = planeObj.GetWorldTransform() * vtxInPlaneProjected;
 
             hasCollision = distance < m_manifoldPtr.GetContactBreakingThreshold();
 
@@ -163,8 +153,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             if (hasCollision)
             {
                 /// report a contact. internally this will be kept persistent, and contact reduction is done
-                Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal, planeObj.GetWorldTransform());
-                Vector3 pOnB = vtxInPlaneWorld;
+                IndexedVector3 normalOnSurfaceB = planeObj.GetWorldTransform()._basis * planeNormal;
+                IndexedVector3 pOnB = vtxInPlaneWorld;
                 resultOut.AddContactPoint(ref normalOnSurfaceB, ref pOnB, distance);
             }
         }

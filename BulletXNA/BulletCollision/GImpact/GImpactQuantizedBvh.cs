@@ -21,16 +21,11 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.GImpact;
-using System.Diagnostics;
 
-namespace BulletXNA.BulletCollision.GImpact
+namespace BulletXNA.BulletCollision
 {
     public class GImpactQuantizedBvh
     {
@@ -158,8 +153,17 @@ namespace BulletXNA.BulletCollision.GImpact
         //! returns the indices of the primitives in the m_primitive_manager
         public bool BoxQuery(ref AABB box, ObjectArray<int> collided_results)
         {
+            return BoxQuery(ref box, collided_results, false);
+        }
+        public bool BoxQuery(ref AABB box, ObjectArray<int> collided_results,bool graphics)
+        {
             int curIndex = 0;
             int numNodes = GetNodeCount();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH && !graphics)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("QIQBVH BoxQuery [{0}]", numNodes);
+            }
 
             //quantize box
 
@@ -175,8 +179,14 @@ namespace BulletXNA.BulletCollision.GImpact
 
                 //catch bugs in tree data
 
-                bool aabbOverlap = m_box_tree.TestQuantizedBoxOverlapp(curIndex, ref quantizedMin, ref quantizedMax);
+                bool aabbOverlap = m_box_tree.TestQuantizedBoxOverlap(curIndex, ref quantizedMin, ref quantizedMax);
                 bool isLeafNode = IsLeafNode(curIndex);
+
+
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH && !graphics)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("QIQBVH BoxQuery [{0}] o[{1}] l[{2}]", curIndex,aabbOverlap?1:0,isLeafNode?1:0);
+                }
 
                 if (isLeafNode && aabbOverlap)
                 {
@@ -200,7 +210,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
         //! returns the indices of the primitives in the m_primitive_manager
         public bool BoxQueryTrans(ref AABB box,
-             ref Matrix transform, ObjectArray<int> collided_results)
+             ref IndexedMatrix transform, ObjectArray<int> collided_results)
         {
             AABB transbox = box;
             transbox.ApplyTransform(ref transform);
@@ -208,7 +218,7 @@ namespace BulletXNA.BulletCollision.GImpact
         }
 
         //! returns the indices of the primitives in the m_primitive_manager
-        public bool RayQuery(ref Vector3 ray_dir, ref Vector3 ray_origin,
+        public bool RayQuery(ref IndexedVector3 ray_dir, ref IndexedVector3 ray_origin,
             ObjectArray<int> collided_results)
         {
             int curIndex = 0;
@@ -416,8 +426,8 @@ namespace BulletXNA.BulletCollision.GImpact
         }
 
 
-        public static void FindCollision(GImpactQuantizedBvh boxset0, ref Matrix trans0,
-        GImpactQuantizedBvh boxset1, ref Matrix trans1,
+        public static void FindCollision(GImpactQuantizedBvh boxset0, ref IndexedMatrix trans0,
+        GImpactQuantizedBvh boxset1, ref IndexedMatrix trans1,
         PairSet collision_pairs)
         {
             if (boxset0.GetNodeCount() == 0 || boxset1.GetNodeCount() == 0)
@@ -441,7 +451,7 @@ namespace BulletXNA.BulletCollision.GImpact
         }
     }
 
-    public struct BT_QUANTIZED_BVH_NODE
+    public class BT_QUANTIZED_BVH_NODE
     {
         //12 bytes
         public UShortVector3 m_quantizedAabbMin;
@@ -510,7 +520,7 @@ namespace BulletXNA.BulletCollision.GImpact
         protected int m_num_nodes;
         protected GIM_QUANTIZED_BVH_NODE_ARRAY m_node_array = new GIM_QUANTIZED_BVH_NODE_ARRAY();
         protected AABB m_global_bound;
-        protected Vector3 m_bvhQuantization;
+        protected IndexedVector3 m_bvhQuantization;
 
         protected void CalcQuantization(GIM_BVH_DATA_ARRAY primitive_boxes)
         {
@@ -541,24 +551,24 @@ namespace BulletXNA.BulletCollision.GImpact
             // average of centers
             float splitValue = 0.0f;
 
-            Vector3 means = Vector3.Zero;
+            IndexedVector3 means = IndexedVector3.Zero;
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
                 means += center;
             }
             means *= ((1.0f) / (float)numIndices);
 
-            splitValue = MathUtil.VectorComponent(ref means, splitAxis);
+            splitValue = means[splitAxis];
 
 
             //sort leafNodes so all values larger then splitValue comes first, and smaller values start from 'splitIndex'.
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
-                if (MathUtil.VectorComponent(ref center, splitAxis) > splitValue)
+                if (center[splitAxis] > splitValue)
                 {
                     //swap
                     primitive_boxes.Swap(i, splitIndex);
@@ -595,13 +605,13 @@ namespace BulletXNA.BulletCollision.GImpact
         {
             int i;
 
-            Vector3 means = Vector3.Zero;
-            Vector3 variance = Vector3.Zero;
+            IndexedVector3 means = IndexedVector3.Zero;
+            IndexedVector3 variance = IndexedVector3.Zero;
             int numIndices = endIndex - startIndex;
 
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
                 means += center;
             }
@@ -609,9 +619,9 @@ namespace BulletXNA.BulletCollision.GImpact
 
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
-                Vector3 diff2 = center - means;
+                IndexedVector3 diff2 = center - means;
                 diff2 = diff2 * diff2;
                 variance += diff2;
             }
@@ -632,6 +642,14 @@ namespace BulletXNA.BulletCollision.GImpact
                 //We have a leaf node
                 SetNodeBound(curIndex, ref primitive_boxes.GetRawArray()[startIndex].m_bound);
                 m_node_array[curIndex].SetDataIndex(primitive_boxes[startIndex].m_data);
+
+		        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH)
+		        {
+			        BulletGlobals.g_streamWriter.WriteLine("bst curIndex[{0}] dataIndex[{1}]",curIndex,primitive_boxes[startIndex].m_data);
+			        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"bst min",primitive_boxes[startIndex].m_bound.m_min);
+                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"bst max", primitive_boxes[startIndex].m_bound.m_max);
+		        }
+
 
                 return;
             }
@@ -666,8 +684,14 @@ namespace BulletXNA.BulletCollision.GImpact
             //build right branch
             BuildSubTree(primitive_boxes, splitIndex, endIndex);
 
-            m_node_array[curIndex].SetEscapeIndex(m_num_nodes - curIndex);
+            m_node_array.GetRawArray()[curIndex].SetEscapeIndex(m_num_nodes - curIndex);
 
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("bst curIndex[{0}] escapeIndex[{1}]", curIndex, m_node_array.GetRawArray()[curIndex].GetEscapeIndex());
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "bst node min", node_bound.m_min);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "bst node max", node_bound.m_max);
+            }
 
 
         }
@@ -688,16 +712,16 @@ namespace BulletXNA.BulletCollision.GImpact
             m_node_array.Resize(primitive_boxes.Count * 2);
 
             BuildSubTree(primitive_boxes, 0, primitive_boxes.Count);
-
+            int ibreak = 0;
         }
 
-        public void QuantizePoint(out UShortVector3 quantizedpoint, ref Vector3 point)
+        public void QuantizePoint(out UShortVector3 quantizedpoint, ref IndexedVector3 point)
         {
             GImpactQuantization.QuantizeClamp(out quantizedpoint, ref point, ref m_global_bound.m_min, ref m_global_bound.m_max, ref m_bvhQuantization);
         }
 
 
-        public bool TestQuantizedBoxOverlapp(int node_index, ref UShortVector3 quantizedMin, ref UShortVector3 quantizedMax)
+        public bool TestQuantizedBoxOverlap(int node_index, ref UShortVector3 quantizedMin, ref UShortVector3 quantizedMax)
         {
             return m_node_array[node_index].TestQuantizedBoxOverlapp(ref quantizedMin, ref quantizedMax);
         }

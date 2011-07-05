@@ -22,16 +22,16 @@
  */
 
 using System;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public struct WheelInfoConstructionInfo
     {
-	    public Vector3 m_chassisConnectionCS;
-	    public Vector3 m_wheelDirectionCS;
-	    public Vector3 m_wheelAxleCS;
+	    public IndexedVector3 m_chassisConnectionCS;
+	    public IndexedVector3 m_wheelDirectionCS;
+	    public IndexedVector3 m_wheelAxleCS;
 	    public float m_suspensionRestLength;
 	    public float m_maxSuspensionTravelCm;
 	    public float m_wheelRadius;
@@ -49,19 +49,19 @@ namespace BulletXNA.BulletDynamics.Vehicle
     public struct WheelRaycastInfo
     {
 	    //set by raycaster
-	    public Vector3	m_contactNormalWS;//contactnormal
-	    public Vector3	m_contactPointWS;//raycast hitpoint
+	    public IndexedVector3	m_contactNormalWS;//contactnormal
+	    public IndexedVector3	m_contactPointWS;//raycast hitpoint
 	    public float	m_suspensionLength;
         public float m_suspensionLengthBak;
 
-        public Vector3	m_hardPointWS;//raycast starting point
-        public Vector3 m_hardPointWSBak;//raycast starting point
+        public IndexedVector3	m_hardPointWS;//raycast starting point
+        public IndexedVector3 m_hardPointWSBak;//raycast starting point
 
-	    public Vector3	m_wheelDirectionWS; //direction in worldspace
-        public Vector3 m_wheelDirectionWSBak; //direction in worldspace
+	    public IndexedVector3	m_wheelDirectionWS; //direction in worldspace
+        public IndexedVector3 m_wheelDirectionWSBak; //direction in worldspace
 
-	    public Vector3	m_wheelAxleWS; // axle in worldspace
-        public Vector3 m_wheelAxleWSBak; // axle in worldspace
+	    public IndexedVector3	m_wheelAxleWS; // axle in worldspace
+        public IndexedVector3 m_wheelAxleWSBak; // axle in worldspace
 
 	    public bool		m_isInContact;
 	    public Object		m_groundObject; //could be general void* ptr
@@ -73,13 +73,13 @@ namespace BulletXNA.BulletDynamics.Vehicle
     {
 	    public WheelRaycastInfo m_raycastInfo;
 
-        public Matrix m_worldTransform;
+        public IndexedMatrix m_worldTransform;
 
-        public Vector3 m_chassisConnectionPointCS; //const
+        public IndexedVector3 m_chassisConnectionPointCS; //const
 
-        public Vector3 m_wheelDirectionCS;//const
+        public IndexedVector3 m_wheelDirectionCS;//const
         
-        public Vector3 m_wheelAxleCS; // const or modified by steering
+        public IndexedVector3 m_wheelAxleCS; // const or modified by steering
 
 
         public float m_suspensionRestLength1;//const
@@ -136,11 +136,11 @@ namespace BulletXNA.BulletDynamics.Vehicle
         {
 	        if (m_raycastInfo.m_isInContact)
 	        {
-		        float project= Vector3.Dot(m_raycastInfo.m_contactNormalWS,m_raycastInfo.m_wheelDirectionWS );
-		        Vector3	chassis_velocity_at_contactPoint;
-		        Vector3 relpos = m_raycastInfo.m_contactPointWS - chassis.GetCenterOfMassPosition();
+		        float project= IndexedVector3.Dot(m_raycastInfo.m_contactNormalWS,m_raycastInfo.m_wheelDirectionWS );
+		        IndexedVector3	chassis_velocity_at_contactPoint;
+		        IndexedVector3 relpos = m_raycastInfo.m_contactPointWS - chassis.GetCenterOfMassPosition();
 		        chassis_velocity_at_contactPoint = chassis.GetVelocityInLocalPoint( ref relpos );
-		        float projVel = Vector3.Dot(m_raycastInfo.m_contactNormalWS,chassis_velocity_at_contactPoint );
+		        float projVel = IndexedVector3.Dot(m_raycastInfo.m_contactNormalWS,chassis_velocity_at_contactPoint );
 		        if ( project >= -0.1f)
 		        {
 			        m_suspensionRelativeVelocity = 0f;

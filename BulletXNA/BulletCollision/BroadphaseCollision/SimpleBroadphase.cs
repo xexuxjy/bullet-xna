@@ -26,8 +26,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class SimpleBroadphase : IBroadphaseInterface
     {
@@ -78,10 +79,22 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public static bool AabbOverlap(SimpleBroadphaseProxy proxy0, SimpleBroadphaseProxy proxy1)
         {
-            Vector3 p0Min = proxy0.GetMinAABB();
-            Vector3 p0Max = proxy0.GetMaxAABB();
-            Vector3 p1Min = proxy1.GetMinAABB();
-            Vector3 p1Max = proxy1.GetMaxAABB();
+            IndexedVector3 p0Min = proxy0.GetMinAABB();
+            IndexedVector3 p0Max = proxy0.GetMaxAABB();
+            IndexedVector3 p1Min = proxy1.GetMinAABB();
+            IndexedVector3 p1Max = proxy1.GetMaxAABB();
+
+	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
+	{
+		BulletGlobals.g_streamWriter.WriteLine("simple aabOverlap");
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"0min",p0Min);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"0max",p0Max);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1min",p1Min);
+		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1max",p1Max);
+	}
+
+
+
 
             return p0Min.X <= p1Max.X && p1Min.X <= p0Max.X &&
                p0Min.Y <= p1Max.Y && p1Min.Y <= p0Max.Y &&
@@ -119,12 +132,12 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        public virtual BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(IndexedVector3 aabbMin, IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             return CreateProxy(ref aabbMin, ref aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, dispatcher, multiSapProxy);
         }
 
-        public virtual BroadphaseProxy CreateProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             if (m_numHandles >= m_maxHandles)
             {
@@ -140,6 +153,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         public virtual void CalculateOverlappingPairs(IDispatcher dispatcher)
         {
+    	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
+	    {
+            BulletGlobals.g_streamWriter.WriteLine("simple calculateOverlappingPairs");
+        }
+
             //first check for new overlapping pairs
             if (m_numHandles > 0)
             {
@@ -262,29 +280,29 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_pairCache.RemoveOverlappingPairsContainingProxy(proxy, dispatcher);
         }
 
-        public virtual void SetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public virtual void SetAabb(BroadphaseProxy proxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
             sbp.SetMinAABB(ref aabbMin);
             sbp.SetMaxAABB(ref aabbMax);
         }
 
-        public virtual void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy proxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             SimpleBroadphaseProxy sbp = GetSimpleProxyFromProxy(proxy);
             aabbMin = sbp.GetMinAABB();
             aabbMax = sbp.GetMaxAABB();
         }
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback)
         {
-            Vector3 min = MathUtil.MIN_VECTOR;
-            Vector3 max = MathUtil.MAX_VECTOR;
+            IndexedVector3 min = MathUtil.MIN_VECTOR;
+            IndexedVector3 max = MathUtil.MAX_VECTOR;
             RayTest(ref rayFrom, ref rayTo, rayCallback, ref min, ref max);
         }
 
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             for (int i = 0; i <= m_LastHandleIndex; i++)
             {
@@ -298,7 +316,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        public virtual void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback callback)
+        public virtual void AabbTest(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IBroadphaseAabbCallback callback)
         {
             for (int i = 0; i <= m_LastHandleIndex; i++)
             {
@@ -329,7 +347,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
         ///will add some transform later
-        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetBroadphaseAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             aabbMin = MathUtil.MIN_VECTOR;
             aabbMax = MathUtil.MAX_VECTOR;
@@ -344,8 +362,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         protected SimpleBroadphaseProxy GetSimpleProxyFromProxy(BroadphaseProxy proxy)
         {
-            SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
-            return proxy0;
+            return proxy as SimpleBroadphaseProxy;
         }
 
         ///reset broadphase internal structures, to ensure determinism/reproducability
@@ -393,7 +410,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_position = position;
         }
 
-        public SimpleBroadphaseProxy(int position, ref Vector3 minpt, ref Vector3 maxpt, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapProxy)
+        public SimpleBroadphaseProxy(int position, ref IndexedVector3 minpt, ref IndexedVector3 maxpt, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapProxy)
             : base(ref minpt, ref maxpt, userPtr, collisionFilterGroup, collisionFilterMask, multiSapProxy)
         {
             // bit of a cheat/hack - store the position in the array as we can't find it for freehandle otherwise.

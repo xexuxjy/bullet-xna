@@ -211,6 +211,8 @@ public:
 	{
 	}
 
+	virtual bool graphics(){return true;}
+
 	virtual void processTriangle(btVector3* triangle,int partId, int triangleIndex)
 	{
 

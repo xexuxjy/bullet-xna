@@ -24,12 +24,8 @@
 #define USE_TRIMESH_SHAPE
 using System;
 using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
@@ -51,7 +47,7 @@ namespace BulletXNADemos.Demos
 			base.InitializeDemo();
 			int totalTriangles = 2 * (NUM_VERTS_X - 1) * (NUM_VERTS_Y - 1);
 
-            gVertices = new ObjectArray<Vector3>(totalVerts);
+            gVertices = new ObjectArray<IndexedVector3>(totalVerts);
 			int indicesTotal = totalTriangles * 3;
             gIndices = new ObjectArray<int>(indicesTotal);
 
@@ -95,13 +91,13 @@ namespace BulletXNADemos.Demos
 
 
             OptimizedBvh bvh = new OptimizedBvh();
-	        Vector3 aabbMin = new Vector3(-1000,-1000,-1000);
-	        Vector3 aabbMax = new Vector3(1000,1000,1000);
+	        IndexedVector3 aabbMin = new IndexedVector3(-1000,-1000,-1000);
+	        IndexedVector3 aabbMax = new IndexedVector3(1000,1000,1000);
 
             m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression, ref aabbMin, ref aabbMax, true);
             //CollisionShape trimeshShape = new TriangleMeshShape(indexVertexArrays);
 
-            Vector3 scaling = Vector3.One;
+            IndexedVector3 scaling = IndexedVector3.One;
             //m_trimeshShape.SetOptimizedBvh(bvh, ref scaling);
             
 			//BulletWorldImporter import = new BulletWorldImporter(0);//don't store info into the world
@@ -111,11 +107,11 @@ namespace BulletXNADemos.Demos
 			//    if (numBvh != 0)
 			//    {
 			//        OptimizedBvh bvh = import.getBvhByIndex(0);
-			//        Vector3 aabbMin = new Vector3(-1000,-1000,-1000);
-			//        Vector3 aabbMax = new Vector3(1000,1000,1000);
+			//        IndexedVector3 aabbMin = new IndexedVector3(-1000,-1000,-1000);
+			//        IndexedVector3 aabbMax = new IndexedVector3(1000,1000,1000);
 			
 			//        trimeshShape = new indexVertexArrays,useQuantizedAabbCompression,ref aabbMin,ref aabbMax,false);
-			//        Vector3 scaling = Vector3.One;
+			//        IndexedVector3 scaling = IndexedVector3.One;
 			//        trimeshShape.setOptimizedBvh(bvh, ref scaling);
 			//        //trimeshShape  = new btBvhTriangleMeshShape(m_indexVertexArrays,useQuantizedAabbCompression,aabbMin,aabbMax);
 			//        //trimeshShape.setOptimizedBvh(bvh);
@@ -140,10 +136,10 @@ namespace BulletXNADemos.Demos
             //CollisionShape groundShape = trimeshShape;//m_trimeshShape;
             CollisionShape groundShape = m_trimeshShape;//m_trimeshShape;
 
-            //groundShape = new TriangleShape(new Vector3(0,` 0, 100), new Vector3(100, 0, 0),new Vector3(-100, 0, -100));
-            //groundShape = new StaticPlaneShape(Vector3.Up, 0f);
-            //groundShape = new BoxShape(new Vector3(100f, 0.1f, 100f));
-            Vector3 up = new Vector3(0.4f,1,0);
+            //groundShape = new TriangleShape(new IndexedVector3(0,` 0, 100), new IndexedVector3(100, 0, 0),new IndexedVector3(-100, 0, -100));
+            //groundShape = new StaticPlaneShape(IndexedVector3.Up, 0f);
+            //groundShape = new BoxShape(new IndexedVector3(100f, 0.1f, 100f));
+            IndexedVector3 up = new IndexedVector3(0.4f,1,0);
             up.Normalize();
             //groundShape = new StaticPlaneShape(up, 0f);
             //groundShape = new TriangleMeshShape(indexVertexArrays);
@@ -151,27 +147,27 @@ namespace BulletXNADemos.Demos
 			m_collisionConfiguration = new DefaultCollisionConfiguration();
 			m_dispatcher = new	CollisionDispatcher(m_collisionConfiguration);
 
-			Vector3 worldMin = new Vector3(-1000,-1000,-1000);
-			Vector3 worldMax = new Vector3(1000,1000,1000);
+			IndexedVector3 worldMin = new IndexedVector3(-1000,-1000,-1000);
+			IndexedVector3 worldMax = new IndexedVector3(1000,1000,1000);
             //m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
             m_broadphase = new DbvtBroadphase();
 			m_constraintSolver = new SequentialImpulseConstraintSolver();
 			m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
 			float mass = 0f;
-			Matrix startTransform = Matrix.CreateTranslation(new Vector3(2,-2,0));
+			IndexedMatrix startTransform = IndexedMatrix.CreateTranslation(new IndexedVector3(2,-2,0));
 
             //CompoundShape colShape = new CompoundShape();
-            //Vector3 halfExtents = new Vector3(4, 1, 1);
+            //IndexedVector3 halfExtents = new IndexedVector3(4, 1, 1);
             //CollisionShape cylinderShape = new CylinderShapeX(ref halfExtents);
-            //CollisionShape boxShape = new BoxShape(new Vector3(4, 1, 1));
-            //Matrix localTransform = Matrix.Identity;
+            //CollisionShape boxShape = new BoxShape(new IndexedVector3(4, 1, 1));
+            //IndexedMatrix localTransform = IndexedMatrix.Identity;
             //colShape.addChildShape(ref localTransform, boxShape);
             //Quaternion orn = Quaternion.CreateFromYawPitchRoll(MathUtil.SIMD_HALF_PI, 0f, 0f);
-            //localTransform = Matrix.CreateFromQuaternion(orn);
+            //localTransform = IndexedMatrix.CreateFromQuaternion(orn);
             //colShape.addChildShape(ref localTransform, cylinderShape);
 
-            ////BoxShape colShape = new BoxShape(new Vector3(1, 1, 1));
+            ////BoxShape colShape = new BoxShape(new IndexedVector3(1, 1, 1));
 
 
             //int numCollideObjects = 1;
@@ -179,24 +175,24 @@ namespace BulletXNADemos.Demos
             //{
             //    for (int i = 0; i < numCollideObjects; i++)
             //    {
-            //        startTransform.Translation = new Vector3(4,10+i*2,1);
+            //        startTransform._origin = new IndexedVector3(4,10+i*2,1);
             //        localCreateRigidBody(1, ref startTransform,colShape);
             //    }
             //}
 
-			CollisionShape boxShape = new BoxShape(new Vector3(1, 1, 1));
+			CollisionShape boxShape = new BoxShape(new IndexedVector3(1, 1, 1));
 			//CollisionShape boxShape = new SphereShape(1);
             //CollisionShape boxShape = new SphereShape(1);
             //CollisionShape boxShape = new CapsuleShapeZ(0.5f, 1);
             m_collisionShapes.Add(boxShape);
             for (int i = 0; i < 1; i++)
             {
-                startTransform.Translation = new Vector3(2f * i, 5, 1);
+                startTransform._origin = new IndexedVector3(2f * i, 5, 1);
                 LocalCreateRigidBody(1, ref startTransform, boxShape);
             }
 
 
-			startTransform = Matrix.Identity;
+			startTransform = IndexedMatrix.Identity;
 			staticBody = LocalCreateRigidBody(mass, ref startTransform,groundShape);
 
 			staticBody.SetCollisionFlags(staticBody.GetCollisionFlags() | CollisionFlags.CF_KINEMATIC_OBJECT);//STATIC_OBJECT);
@@ -222,8 +218,8 @@ namespace BulletXNADemos.Demos
 				
 				int i;
 				int j;
-				Vector3 aabbMin = MathUtil.MAX_VECTOR;
-				Vector3 aabbMax = MathUtil.MIN_VECTOR;
+				IndexedVector3 aabbMin = MathUtil.MAX_VECTOR;
+				IndexedVector3 aabbMax = MathUtil.MIN_VECTOR;
 
 				for ( i=NUM_VERTS_X/2-3;i<NUM_VERTS_X/2+2;i++)
 				{
@@ -237,7 +233,7 @@ namespace BulletXNADemos.Demos
                         float cos = (float)Math.Cos((float)j + m_offset);
 
 
-						gVertices[i+j*NUM_VERTS_X] = new Vector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+						gVertices[i+j*NUM_VERTS_X] = new IndexedVector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
 							//0.f,
 							waveheight * sin * cos,
 							(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
@@ -324,7 +320,7 @@ namespace BulletXNADemos.Demos
 			{
 				for (int j=0;j<NUM_VERTS_Y;j++)
 				{
-					gVertices[i+j*NUM_VERTS_X] = new Vector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+					gVertices[i+j*NUM_VERTS_X] = new IndexedVector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
 						//0.f,
 						waveheight*(float)Math.Sin((float)i+offset)*(float)Math.Cos((float)j+offset),
 						(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
@@ -342,7 +338,7 @@ namespace BulletXNADemos.Demos
 		
 		//-----------------------------------------------------------------------------------------------
 
-		public static ObjectArray<Vector3> gVertices = null;
+		public static ObjectArray<IndexedVector3> gVertices = null;
         public static ObjectArray<int> gIndices = null;
 		public static BvhTriangleMeshShape m_trimeshShape = null;
 		public static RigidBody staticBody = null;

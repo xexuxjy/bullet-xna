@@ -23,12 +23,13 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.Vehicle
+namespace BulletXNA.BulletDynamics
 {
     public interface IVehicleRaycaster
     {
-        Object CastRay(ref Vector3 from,ref Vector3 to, ref VehicleRaycasterResult result);
+        Object CastRay(ref IndexedVector3 from,ref IndexedVector3 to, ref VehicleRaycasterResult result);
     }
 
     public class VehicleRaycasterResult
@@ -36,12 +37,12 @@ namespace BulletXNA.BulletDynamics.Vehicle
         public VehicleRaycasterResult() 
         {
             m_distFraction = -1f;
-            m_hitNormalInWorld = Vector3.Zero;
-            m_hitPointInWorld = Vector3.Zero;
+            m_hitNormalInWorld = IndexedVector3.Zero;
+            m_hitPointInWorld = IndexedVector3.Zero;
         }
 
-        public Vector3	m_hitPointInWorld;
-		public Vector3	m_hitNormalInWorld;
+        public IndexedVector3	m_hitPointInWorld;
+		public IndexedVector3	m_hitNormalInWorld;
 		public float m_distFraction;
 	}
 }

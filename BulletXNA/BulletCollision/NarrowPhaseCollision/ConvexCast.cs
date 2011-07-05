@@ -24,12 +24,12 @@
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface IConvexCast
     {
         /// cast a convex against another convex object
-        bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result);
+        bool CalcTimeOfImpact(ref IndexedMatrix fromA, ref IndexedMatrix toA, ref IndexedMatrix fromB, ref IndexedMatrix toB, CastResult result);
     }
 
 
@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
     public class CastResult
     {
         public virtual void DebugDraw(float fraction) { }
-        public virtual void DrawCoordSystem(ref Matrix trans) { }
+        public virtual void DrawCoordSystem(ref IndexedMatrix trans) { }
         public virtual void	ReportFailure(int errNo, int numIterations) {}
 
         public CastResult()
@@ -52,10 +52,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         {
         }
 
-        public Matrix m_hitTransformA;
-        public Matrix m_hitTransformB;
-        public Vector3 m_normal;
-        public Vector3 m_hitPoint;
+        public IndexedMatrix m_hitTransformA;
+        public IndexedMatrix m_hitTransformB;
+        public IndexedVector3 m_normal;
+        public IndexedVector3 m_hitPoint;
         public float m_fraction; //input and output
         public IDebugDraw m_debugDrawer;
         public float m_allowedPenetration;

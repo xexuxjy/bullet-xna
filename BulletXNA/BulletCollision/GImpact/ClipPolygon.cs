@@ -21,32 +21,33 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-namespace BulletXNA.BulletCollision.GImpact
+using Microsoft.Xna.Framework;
+
+namespace BulletXNA.BulletCollision
 {
     public class ClipPolygon
     {
 
-        public static float DistancePointPlane(ref Vector4 plane, ref Vector3 point)
+        public static float DistancePointPlane(ref Vector4 plane, ref IndexedVector3 point)
         {
-            return Vector3.Dot(point, new Vector3(plane.X, plane.Y, plane.Z)) - plane.W;
+            return point.Dot(new IndexedVector3(plane.X, plane.Y, plane.Z)) - plane.W;
         }
 
         /*! Vector blending
         Takes two vectors a, b, blends them together*/
-        public static void VecBlend(ref Vector3 vr, ref Vector3 va, ref Vector3 vb, float blend_factor)
+        public static void VecBlend(ref IndexedVector3 vr, ref IndexedVector3 va, ref IndexedVector3 vb, float blend_factor)
         {
             vr = (1 - blend_factor) * va + blend_factor * vb;
         }
 
         //! This function calcs the distance from a 3D plane
         public static void PlaneClipPolygonCollect(
-                               ref Vector3 point0,
-                               ref Vector3 point1,
+                               ref IndexedVector3 point0,
+                               ref IndexedVector3 point1,
                                float dist0,
                                float dist1,
-                               ObjectArray<Vector3> clipped,
+                               ObjectArray<IndexedVector3> clipped,
                                ref int clipped_count)
         {
             bool _prevclassif = (dist0 > MathUtil.SIMD_EPSILON);
@@ -71,13 +72,13 @@ namespace BulletXNA.BulletCollision.GImpact
         */
         public static int PlaneClipPolygon(
                                ref Vector4 plane,
-                               ObjectArray<Vector3> polygon_points,
+                               ObjectArray<IndexedVector3> polygon_points,
                                int polygon_point_count,
-                               ObjectArray<Vector3> clipped)
+                               ObjectArray<IndexedVector3> clipped)
         {
             int clipped_count = 0;
 
-            Vector3[] rawPoints = polygon_points.GetRawArray();
+            IndexedVector3[] rawPoints = polygon_points.GetRawArray();
 
             //clip first point
             float firstdist = DistancePointPlane(ref plane, ref rawPoints[0]); ;
@@ -122,10 +123,10 @@ namespace BulletXNA.BulletCollision.GImpact
         */
         public static int PlaneClipTriangle(
                                ref Vector4 plane,
-                               ref Vector3 point0,
-                               ref Vector3 point1,
-                               ref Vector3 point2,
-                               ObjectArray<Vector3> clipped // an allocated array of 16 points at least
+                               ref IndexedVector3 point0,
+                               ref IndexedVector3 point1,
+                               ref IndexedVector3 point2,
+                               ObjectArray<IndexedVector3> clipped // an allocated array of 16 points at least
                                )
         {
             int clipped_count = 0;

@@ -22,12 +22,10 @@
  */
 
 using System;
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     [Flags]
     public enum CollisionFlags
@@ -74,7 +72,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public CollisionObject()
         {
-            m_anisotropicFriction = new Vector3(1f);
+            m_anisotropicFriction = new IndexedVector3(1f);
             m_hasAnisotropicFriction = false;
             m_contactProcessingThreshold = MathUtil.BT_LARGE_FLOAT;
             m_broadphaseHandle = null;
@@ -92,7 +90,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_ccdSweptSphereRadius = 0f;
             m_ccdMotionThreshold = 0f;
             m_checkCollideWith = false;
-            m_worldTransform = Matrix.Identity;
+            m_worldTransform = IndexedMatrix.Identity;
         }
 
         public virtual bool CheckCollideWithOverride(CollisionObject obj)
@@ -111,14 +109,14 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        public Vector3 GetAnisotropicFriction()
+        public IndexedVector3 GetAnisotropicFriction()
         {
             return m_anisotropicFriction;
         }
 
 
 
-        public void SetAnisotropicFriction(ref Vector3 anisotropicFriction)
+        public void SetAnisotropicFriction(ref IndexedVector3 anisotropicFriction)
         {
             m_anisotropicFriction = anisotropicFriction;
             m_hasAnisotropicFriction = (anisotropicFriction.X != 1f) || (anisotropicFriction.Y != 1f) || (anisotropicFriction.Z != 1f);
@@ -323,18 +321,18 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        public Matrix GetWorldTransform()
+        public IndexedMatrix GetWorldTransform()
         {
             return m_worldTransform;
         }
 
 
-        public void SetWorldTransform(Matrix worldTrans)
+        public void SetWorldTransform(IndexedMatrix worldTrans)
         {
             m_worldTransform = worldTrans;
         }
 
-        public void SetWorldTransform(ref Matrix worldTrans)
+        public void SetWorldTransform(ref IndexedMatrix worldTrans)
         {
             m_worldTransform = worldTrans;
         }
@@ -355,45 +353,45 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        public Matrix GetInterpolationWorldTransform()
+        public IndexedMatrix GetInterpolationWorldTransform()
         {
             return m_interpolationWorldTransform;
         }
 
 
 
-        public void SetInterpolationWorldTransform(ref Matrix trans)
+        public void SetInterpolationWorldTransform(ref IndexedMatrix trans)
         {
             m_interpolationWorldTransform = trans;
         }
 
 
 
-        public void SetInterpolationLinearVelocity(ref Vector3 linvel)
+        public void SetInterpolationLinearVelocity(ref IndexedVector3 linvel)
         {
             m_interpolationLinearVelocity = linvel;
         }
 
-        public void SetInterpolationAngularVelocity(ref Vector3 angvel)
+        public void SetInterpolationAngularVelocity(ref IndexedVector3 angvel)
         {
             m_interpolationAngularVelocity = angvel;
         }
 
 
 
-        public Vector3 SetInterpolationLinearVelocity()
+        public IndexedVector3 SetInterpolationLinearVelocity()
         {
             return m_interpolationLinearVelocity;
         }
 
 
 
-        public Vector3 GetInterpolationAngularVelocity()
+        public IndexedVector3 GetInterpolationAngularVelocity()
         {
             return m_interpolationAngularVelocity;
         }
 
-        public Vector3 GetInterpolationLinearVelocity()
+        public IndexedVector3 GetInterpolationLinearVelocity()
         {
             return m_interpolationLinearVelocity;
         }
@@ -524,11 +522,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 
 
-        protected Matrix m_worldTransform = Matrix.Identity;
-        protected Matrix m_interpolationWorldTransform = Matrix.Identity;
-        protected Vector3 m_interpolationAngularVelocity;
-        protected Vector3 m_interpolationLinearVelocity;
-        protected Vector3 m_anisotropicFriction;
+        protected IndexedMatrix m_worldTransform;
+        protected IndexedMatrix m_interpolationWorldTransform = IndexedMatrix.Identity;
+        protected IndexedVector3 m_interpolationAngularVelocity;
+        protected IndexedVector3 m_interpolationLinearVelocity;
+        protected IndexedVector3 m_anisotropicFriction;
         protected bool m_hasAnisotropicFriction;
         protected float m_contactProcessingThreshold;
         protected BroadphaseProxy m_broadphaseHandle;

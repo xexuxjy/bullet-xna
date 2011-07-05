@@ -24,11 +24,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 	public enum TypedConstraintType
 	{
@@ -87,7 +86,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		//    m_appliedImpulse = 0f;
 		//    m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 		//    {
-		//        s_fixed.setMassProps(0f,Vector3.Zero);
+		//        s_fixed.setMassProps(0f,IndexedVector3.Zero);
 		//    }
 
 		//}
@@ -111,7 +110,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			m_isEnabled = true;
 			m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 			{
-				s_fixed.SetMassProps(0f, Vector3.Zero);
+				s_fixed.SetMassProps(0f, IndexedVector3.Zero);
 			}
 		}
 
@@ -128,7 +127,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			m_isEnabled = true;
 			m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 			{
-				GetFixedBody().SetMassProps(0f, Vector3.Zero);
+				GetFixedBody().SetMassProps(0f, IndexedVector3.Zero);
 			}
 
 		}
@@ -217,9 +216,9 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			//s_fixed.setMassProps(float(0.),btVector3(float(0.),float(0.),float(0.)));
 			if (s_fixed == null)
 			{
-				s_fixed = new RigidBody(0f, null, null, Vector3.Zero);
+				s_fixed = new RigidBody(0f, null, null, IndexedVector3.Zero);
 			}
-			Vector3 inertia = Vector3.Zero;
+			IndexedVector3 inertia = IndexedVector3.Zero;
 			s_fixed.SetMassProps(0f, ref inertia);
 			return s_fixed;
 		}
@@ -364,7 +363,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				writer.WriteLine(String.Format("numRows [{0}] fps[{1:0.00000000}] erp[{2:0.00000000}] findex[{3}] numIter[{4}]", info2.m_solverConstraints.Length, info2.fps, info2.erp, info2.findex, info2.m_numIterations));
 				for (int i = 0; i < info2.m_solverConstraints.Length; ++i)
 				{
-					writer.WriteLine(String.Format("SolverConstaint[{0}]", i));
+					writer.WriteLine(String.Format("TypedConstraint[{0}]", i));
 					writer.WriteLine("ContactNormal");
 					MathUtil.PrintVector3(writer, info2.m_solverConstraints[i].m_contactNormal);
 					writer.WriteLine("rel1pos1CrossNormal");
@@ -381,7 +380,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		{
 			if (writer != null)
 			{
-				writer.WriteLine("solverConstraint[{0}]", index);
+				writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index,(String)constraint.m_solverBodyA.GetUserPointer(),(String)constraint.m_solverBodyB.GetUserPointer());
 				MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
 				MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
 				MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);

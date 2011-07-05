@@ -21,9 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.BroadphaseCollision;
-
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public abstract class CollisionAlgorithmCreateFunc
     {

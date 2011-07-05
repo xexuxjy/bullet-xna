@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.CollisionShapes;
+﻿using System.Diagnostics;
 using BulletXNA.LinearMath;
-using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public static class PolyhedralContactClipping
     {
         public static int gActualSATPairTests = 0;
 
 
-		public static void ClipHullAgainstHull(Vector3 separatingNormal, ConvexPolyhedron hullA, ConvexPolyhedron hullB, Matrix transA, Matrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
+		public static void ClipHullAgainstHull(IndexedVector3 separatingNormal, ConvexPolyhedron hullA, ConvexPolyhedron hullB, IndexedMatrix transA, IndexedMatrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
 		{
 			ClipHullAgainstHull(ref separatingNormal, hullA, hullB, ref transA, ref transB, minDist, maxDist, resultOut);
 		}
 		
-		public static void ClipHullAgainstHull(ref Vector3 separatingNormal, ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref Matrix transA, ref Matrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
+		public static void ClipHullAgainstHull(ref IndexedVector3 separatingNormal, ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref IndexedMatrix transA, ref IndexedMatrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
         {
 	float curMaxDist=maxDist;
 	int closestFaceB=-1;
@@ -28,10 +23,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 		float dmax = float.MinValue;
 		for(int face=0;face<hullB.m_faces.Count;face++)
 		{
-			Vector3 Normal = new Vector3(hullB.m_faces[face].m_plane[0], hullB.m_faces[face].m_plane[1], hullB.m_faces[face].m_plane[2]);
-			Vector3 WorldNormal = Vector3.TransformNormal(Normal,transB);
+			IndexedVector3 Normal = new IndexedVector3(hullB.m_faces[face].m_plane[0], hullB.m_faces[face].m_plane[1], hullB.m_faces[face].m_plane[2]);
+            IndexedVector3 WorldNormal = transB._basis * Normal;
 
-			float d = Vector3.Dot(WorldNormal,separatingNormal);
+			float d = IndexedVector3.Dot(WorldNormal,separatingNormal);
 			if (d > dmax)
 			{
 				dmax = d;
@@ -50,15 +45,15 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 
 	// setup initial clip face (minimizing face from hull B)
-	ObjectArray<Vector3> worldVertsB1 = new ObjectArray<Vector3>();
+	ObjectArray<IndexedVector3> worldVertsB1 = new ObjectArray<IndexedVector3>();
 	{
 		Face polyB = hullB.m_faces[closestFaceB];
 		int numVertices = polyB.m_indices.Count;
 		for(int e0=0;e0<numVertices;e0++)
 		{
-			Vector3 b = hullB.m_vertices[polyB.m_indices[e0]];
+			IndexedVector3 b = hullB.m_vertices[polyB.m_indices[e0]];
             // check this to see if it is transposed version
-			worldVertsB1.Add(MathUtil.TransposeTransformNormal(ref b,ref transB));
+			worldVertsB1.Add(transB * b);
 		}
 	}
 
@@ -66,17 +61,17 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         }
 
-		public static void ClipFaceAgainstHull(Vector3 separatingNormal, ConvexPolyhedron hullA, Matrix transA, ObjectArray<Vector3> worldVertsB1, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
+		public static void ClipFaceAgainstHull(IndexedVector3 separatingNormal, ConvexPolyhedron hullA, IndexedMatrix transA, ObjectArray<IndexedVector3> worldVertsB1, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
 		{
 			ClipFaceAgainstHull(ref separatingNormal, hullA, ref transA, worldVertsB1, minDist, maxDist, resultOut);
 		}
 
 		
-		public static void ClipFaceAgainstHull(ref Vector3 separatingNormal, ConvexPolyhedron hullA, ref Matrix transA, ObjectArray<Vector3> worldVertsB1, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
+		public static void ClipFaceAgainstHull(ref IndexedVector3 separatingNormal, ConvexPolyhedron hullA, ref IndexedMatrix transA, ObjectArray<IndexedVector3> worldVertsB1, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
         {
-	ObjectArray<Vector3> worldVertsB2 = new ObjectArray<Vector3>();
-	ObjectArray<Vector3> pVtxIn = worldVertsB1;
-	ObjectArray<Vector3> pVtxOut = worldVertsB2;
+	ObjectArray<IndexedVector3> worldVertsB2 = new ObjectArray<IndexedVector3>();
+	ObjectArray<IndexedVector3> pVtxIn = worldVertsB1;
+	ObjectArray<IndexedVector3> pVtxOut = worldVertsB2;
 	pVtxOut.Capacity = pVtxIn.Count;
 
 	int closestFaceA=-1;
@@ -84,10 +79,10 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 		float dmin = float.MaxValue;
 		for(int face=0;face<hullA.m_faces.Count;face++)
 		{
-			Vector3 Normal = new Vector3(hullA.m_faces[face].m_plane[0], hullA.m_faces[face].m_plane[1], hullA.m_faces[face].m_plane[2]);
-			Vector3 faceANormalWS = Vector3.TransformNormal(Normal,transA);
+			IndexedVector3 Normal = new IndexedVector3(hullA.m_faces[face].m_plane[0], hullA.m_faces[face].m_plane[1], hullA.m_faces[face].m_plane[2]);
+			IndexedVector3 faceANormalWS = transA._basis * Normal;
 		
-			float d = Vector3.Dot(faceANormalWS,separatingNormal);
+			float d = IndexedVector3.Dot(faceANormalWS,separatingNormal);
 			if (d < dmin)
 			{
 				dmin = d;
@@ -105,24 +100,24 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 	int numVerticesA = polyA.m_indices.Count;
 	for(int e0=0;e0<numVerticesA;e0++)
 	{
-		/*const Vector3& a = hullA.m_vertices[polyA.m_indices[e0]];
-		const Vector3& b = hullA.m_vertices[polyA.m_indices[(e0+1)%numVerticesA]];
-		const Vector3 edge0 = a - b;
-		const Vector3 WorldEdge0 = transA.getBasis() * edge0;
+		/*const IndexedVector3& a = hullA.m_vertices[polyA.m_indices[e0]];
+		const IndexedVector3& b = hullA.m_vertices[polyA.m_indices[(e0+1)%numVerticesA]];
+		const IndexedVector3 edge0 = a - b;
+		const IndexedVector3 WorldEdge0 = transA.getBasis() * edge0;
 		*/
 
 		int otherFace = polyA.m_connectedFaces[e0];
-		Vector3 localPlaneNormal = new Vector3(hullA.m_faces[otherFace].m_plane[0],hullA.m_faces[otherFace].m_plane[1],hullA.m_faces[otherFace].m_plane[2]);
+		IndexedVector3 localPlaneNormal = new IndexedVector3(hullA.m_faces[otherFace].m_plane[0],hullA.m_faces[otherFace].m_plane[1],hullA.m_faces[otherFace].m_plane[2]);
 		float localPlaneEq = hullA.m_faces[otherFace].m_plane[3];
 
-		Vector3 planeNormalWS = Vector3.TransformNormal(localPlaneNormal,transA);
-		float planeEqWS=localPlaneEq-Vector3.Dot(planeNormalWS,transA.Translation);
+		IndexedVector3 planeNormalWS = transA._basis * localPlaneNormal;
+		float planeEqWS=localPlaneEq-IndexedVector3.Dot(planeNormalWS,transA._origin);
 		//clip face
 
 		ClipFace(pVtxIn, pVtxOut,ref planeNormalWS,planeEqWS);
 
         //btSwap(pVtxIn,pVtxOut);
-        ObjectArray<Vector3> temp = pVtxIn;
+        ObjectArray<IndexedVector3> temp = pVtxIn;
         pVtxIn = pVtxOut;
         pVtxOut = temp;
 
@@ -133,22 +128,22 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 //#define ONLY_REPORT_DEEPEST_POINT
 
-	Vector3 point;
+	IndexedVector3 point;
 	
 
 	// only keep points that are behind the witness face
 	{
-		Vector3 localPlaneNormal = new Vector3(polyA.m_plane[0],polyA.m_plane[1],polyA.m_plane[2]);
+		IndexedVector3 localPlaneNormal = new IndexedVector3(polyA.m_plane[0],polyA.m_plane[1],polyA.m_plane[2]);
 		float localPlaneEq = polyA.m_plane[3];
-		Vector3 planeNormalWS = Vector3.TransformNormal(localPlaneNormal,transA);
-		float planeEqWS=localPlaneEq-Vector3.Dot(planeNormalWS,transA.Translation);
+		IndexedVector3 planeNormalWS = transA._basis * localPlaneNormal;
+		float planeEqWS=localPlaneEq-IndexedVector3.Dot(planeNormalWS,transA._origin);
 		for (int i=0;i<pVtxIn.Count;i++)
 		{
 			
-			float depth = Vector3.Dot(planeNormalWS,pVtxIn[i])+planeEqWS;
+			float depth = IndexedVector3.Dot(planeNormalWS,pVtxIn[i])+planeEqWS;
 			if (depth <=maxDist && depth >=minDist)
 			{
-				Vector3 point2 = pVtxIn[i];
+				IndexedVector3 point2 = pVtxIn[i];
 #if ONLY_REPORT_DEEPEST_POINT
 				curMaxDist = depth;
 #else
@@ -174,20 +169,20 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         }
 
-		public static bool FindSeparatingAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, Matrix transA, Matrix transB, out Vector3 sep)
+		public static bool FindSeparatingAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, IndexedMatrix transA, IndexedMatrix transB, out IndexedVector3 sep)
 		{
 			return FindSeparatingAxis(hullA,hullB,ref transA,ref transB,out sep);
 		}
 
-        public static bool FindSeparatingAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref Matrix transA, ref Matrix transB, out Vector3 sep)
+        public static bool FindSeparatingAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref IndexedMatrix transA, ref IndexedMatrix transB, out IndexedVector3 sep)
         {
             gActualSATPairTests++;
 			// dummy value to satisfy exit points.
-			sep = Vector3.Up;
+            sep = new IndexedVector3(0, 1, 0);
 #if TEST_INTERNAL_OBJECTS
-	Vector3 c0 = Vector3.Transform(hullA.mLocalCenter,transA);
-	Vector3 c1 = Vector3.Transform(hullB.mLocalCenter,transB);
-	Vector3 DeltaC2 = c0 - c1;
+	IndexedVector3 c0 = IndexedVector3.Transform(hullA.mLocalCenter,transA);
+	IndexedVector3 c1 = IndexedVector3.Transform(hullB.mLocalCenter,transB);
+	IndexedVector3 DeltaC2 = c0 - c1;
 #endif
 
             float dmin = float.MaxValue;
@@ -197,8 +192,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             // Test normals from hullA
             for (int i = 0; i < numFacesA; i++)
             {
-                Vector3 Normal = new Vector3(hullA.m_faces[i].m_plane[0], hullA.m_faces[i].m_plane[1], hullA.m_faces[i].m_plane[2]);
-                Vector3 faceANormalWS = Vector3.TransformNormal(Normal, transA);
+                IndexedVector3 Normal = new IndexedVector3(hullA.m_faces[i].m_plane[0], hullA.m_faces[i].m_plane[1], hullA.m_faces[i].m_plane[2]);
+                IndexedVector3 faceANormalWS = transA._basis * Normal;
 
                 curPlaneTests++;
 #if TEST_INTERNAL_OBJECTS
@@ -223,8 +218,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             // Test normals from hullB
             for (int i = 0; i < numFacesB; i++)
             {
-                Vector3 Normal = new Vector3(hullB.m_faces[i].m_plane[0], hullB.m_faces[i].m_plane[1], hullB.m_faces[i].m_plane[2]);
-                Vector3 WorldNormal = Vector3.TransformNormal(Normal, transB);
+                IndexedVector3 Normal = new IndexedVector3(hullB.m_faces[i].m_plane[0], hullB.m_faces[i].m_plane[1], hullB.m_faces[i].m_plane[2]);
+                IndexedVector3 WorldNormal = transB._basis * Normal;
 
                 curPlaneTests++;
 #if TEST_INTERNAL_OBJECTS
@@ -245,20 +240,20 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
                 }
             }
 
-            Vector3 edgeAstart, edgeAend, edgeBstart, edgeBend;
+            IndexedVector3 edgeAstart, edgeAend, edgeBstart, edgeBend;
 
             int curEdgeEdge = 0;
             // Test edges
             for (int e0 = 0; e0 < hullA.m_uniqueEdges.Count; e0++)
             {
-                Vector3 edge0 = hullA.m_uniqueEdges[e0];
-                Vector3 WorldEdge0 = Vector3.TransformNormal(edge0, transA);
+                IndexedVector3 edge0 = hullA.m_uniqueEdges[e0];
+                IndexedVector3 WorldEdge0 = transA._basis * edge0;
                 for (int e1 = 0; e1 < hullB.m_uniqueEdges.Count; e1++)
                 {
-                    Vector3 edge1 = hullB.m_uniqueEdges[e1];
-                    Vector3 WorldEdge1 = Vector3.TransformNormal(edge1, transB);
+                    IndexedVector3 edge1 = hullB.m_uniqueEdges[e1];
+                    IndexedVector3 WorldEdge1 = transB._basis * edge1;
 
-                    Vector3 Cross = Vector3.Cross(WorldEdge0, WorldEdge1);
+                    IndexedVector3 Cross = IndexedVector3.Cross(WorldEdge0, WorldEdge1);
                     curEdgeEdge++;
                     if (!MathUtil.IsAlmostZero(ref Cross))
                     {
@@ -287,8 +282,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
             }
 
-            Vector3 deltaC = transB.Translation - transA.Translation;
-            if ((Vector3.Dot(deltaC, sep)) > 0.0f)
+            IndexedVector3 deltaC = transB._origin - transA._origin;
+            if ((IndexedVector3.Dot(deltaC, sep)) > 0.0f)
             {
                 sep = -sep;
             }
@@ -298,7 +293,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         }
 
         ///the clipFace method is used internally
-        public static void ClipFace(ObjectArray<Vector3> pVtxIn, ObjectArray<Vector3> ppVtxOut, ref Vector3 planeNormalWS, float planeEqWS)
+        public static void ClipFace(ObjectArray<IndexedVector3> pVtxIn, ObjectArray<IndexedVector3> ppVtxOut, ref IndexedVector3 planeNormalWS, float planeEqWS)
         {
             int ve;
             float ds, de;
@@ -306,17 +301,17 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             if (numVerts < 2)
                 return;
 
-            Vector3 firstVertex = pVtxIn[pVtxIn.Count - 1];
-            Vector3 endVertex = pVtxIn[0];
+            IndexedVector3 firstVertex = pVtxIn[pVtxIn.Count - 1];
+            IndexedVector3 endVertex = pVtxIn[0];
 
-            Vector3.Dot(ref planeNormalWS, ref firstVertex, out ds);
+            IndexedVector3.Dot(ref planeNormalWS, ref firstVertex, out ds);
             ds += planeEqWS;
 
             for (ve = 0; ve < numVerts; ve++)
             {
                 endVertex = pVtxIn[ve];
 
-                Vector3.Dot(ref planeNormalWS, ref endVertex, out de);
+                IndexedVector3.Dot(ref planeNormalWS, ref endVertex, out de);
                 de += planeEqWS;
 
                 if (ds < 0)
@@ -347,7 +342,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         }
 
-        public static bool TestSepAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref Matrix transA, ref Matrix transB, ref Vector3 sep_axis, out float depth)
+        public static bool TestSepAxis(ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 sep_axis, out float depth)
         {
             float Min0, Max0;
             float Min1, Max1;

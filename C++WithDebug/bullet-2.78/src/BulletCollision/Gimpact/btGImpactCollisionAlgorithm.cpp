@@ -357,6 +357,14 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape_find_pairs(
 		trans1to0 *= trans1;
 
 		shape1->getAabb(trans1to0,boxshape.m_min,boxshape.m_max);
+		if (g_file && btBulletDebug::debugGimpactAlgo)
+		{
+			btGeometryUtil::PrintMatrix(g_file, "GImpactAglo::GImpactVsShapeFindPairs trans1to0", trans1to0);
+			btGeometryUtil::PrintVector(g_file, "box min", boxshape.m_min);
+			btGeometryUtil::PrintVector(g_file, "box max", boxshape.m_max);
+
+		}
+
 
 		shape0->getBoxSet()->boxQuery(boxshape, collided_primitives);
 	}
@@ -557,6 +565,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 
 	if(pairset.size()== 0) return;
 
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsGImpact [%d]\n",pairset.size());
+	}
+
+
 	if(shape0->getGImpactShapeType() == CONST_GIMPACT_TRIMESH_SHAPE_PART &&
 		shape1->getGImpactShapeType() == CONST_GIMPACT_TRIMESH_SHAPE_PART)
 	{
@@ -700,6 +714,13 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(btCollisionObject * body0,
 
 
 	int i = collided_results.size();
+
+
+	if (g_file && btBulletDebug::debugGimpactAlgo)
+	{
+		fprintf(g_file,"GImpactAglo::GImpactVsShape [%d]\n",collided_results.size());
+	}
+
 
 	while(i--)
 	{

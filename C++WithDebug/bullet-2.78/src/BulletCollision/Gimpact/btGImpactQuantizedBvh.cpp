@@ -23,6 +23,11 @@ subject to the following restrictions:
 
 #include "btGImpactQuantizedBvh.h"
 #include "LinearMath/btQuickprof.h"
+#include "btBulletDebugGlobals.h"
+#include <stdio.h>
+#include "LinearMath/btGeometryUtil.h"
+
+extern FILE* g_file;
 
 #ifdef TRI_COLLISION_PROFILING
 btClock g_q_tree_clock;
@@ -191,6 +196,13 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 	    setNodeBound(curIndex,primitive_boxes[startIndex].m_bound);
 		m_node_array[curIndex].setDataIndex(primitive_boxes[startIndex].m_data);
 
+		if(g_file && btBulletDebug::debugGimpactBVH)
+		{
+			fprintf(g_file,"bst curIndex[%d] dataIndex[%d]\n",curIndex,primitive_boxes[startIndex].m_data);
+			btGeometryUtil::PrintVector(g_file,"bst min",primitive_boxes[startIndex].m_bound.m_min);
+			btGeometryUtil::PrintVector(g_file,"bst max",primitive_boxes[startIndex].m_bound.m_max);
+		}
+
 		return;
 	}
 	//calculate Best Splitting Axis and where to split it. Sort the incoming 'leafNodes' array within range 'startIndex/endIndex'.
@@ -226,6 +238,12 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 
 	m_node_array[curIndex].setEscapeIndex(m_num_nodes - curIndex);
 
+	if(g_file && btBulletDebug::debugGimpactBVH)
+	{
+		fprintf(g_file,"bst curIndex[%d] escapeIndex[%d]\n",curIndex,m_node_array[curIndex].getEscapeIndex());
+		btGeometryUtil::PrintVector(g_file,"bst min",node_bound.m_min);
+		btGeometryUtil::PrintVector(g_file,"bst max",node_bound.m_max);
+	}
 
 }
 
@@ -300,10 +318,16 @@ void btGImpactQuantizedBvh::buildSet()
 }
 
 //! returns the indices of the primitives in the m_primitive_manager
-bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<int> & collided_results) const
+bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<int> & collided_results,bool graphics) const
 {
 	int curIndex = 0;
 	int numNodes = getNodeCount();
+
+	if (g_file&& btBulletDebug::debugGimpactBVH && !graphics)
+	{
+		fprintf(g_file,"QIQBVH BoxQuery [%d]\n", numNodes);
+	}
+
 
 	//quantize box
 
@@ -321,6 +345,11 @@ bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<in
 
 		bool aabbOverlap = m_box_tree.testQuantizedBoxOverlapp(curIndex, quantizedMin,quantizedMax);
 		bool isleafnode = isLeafNode(curIndex);
+
+		if (g_file&& btBulletDebug::debugGimpactBVH && !graphics)
+		{
+			fprintf(g_file,"QIQBVH BoxQuery [%d] o[%d] l[%d]\n", curIndex,aabbOverlap,isleafnode);
+		}
 
 		if (isleafnode && aabbOverlap)
 		{

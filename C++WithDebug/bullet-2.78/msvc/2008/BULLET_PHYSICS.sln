@@ -342,6 +342,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLSupport", "Demos\Open
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppLargeMeshDemo", "Demos\LargeMeshDemo\AppLargeMeshDemo.vcproj", "{B01C7494-5756-4FE7-A2E7-F9944B27E711}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletMathDebug2", "Demos\BulletMathDebug2\BulletMathDebug2.vcproj", "{825A7730-A5A8-4353-9C11-77FB94B509B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -750,6 +752,14 @@ Global
 		{B01C7494-5756-4FE7-A2E7-F9944B27E711}.Release|Win32.Build.0 = Release|Win32
 		{B01C7494-5756-4FE7-A2E7-F9944B27E711}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
 		{B01C7494-5756-4FE7-A2E7-F9944B27E711}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.Debug|Win32.Build.0 = Debug|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.MinSizeRel|Win32.ActiveCfg = Release|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.MinSizeRel|Win32.Build.0 = Release|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.Release|Win32.ActiveCfg = Release|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.Release|Win32.Build.0 = Release|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{825A7730-A5A8-4353-9C11-77FB94B509B6}.RelWithDebInfo|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

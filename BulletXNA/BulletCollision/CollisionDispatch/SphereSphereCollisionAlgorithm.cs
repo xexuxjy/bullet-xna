@@ -21,14 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class SphereSphereCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
@@ -70,7 +66,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             SphereShape sphere0 = body0.GetCollisionShape() as SphereShape;
             SphereShape sphere1 = body1.GetCollisionShape() as SphereShape;
 
-            Vector3 diff = body0.GetWorldTransform().Translation - body1.GetWorldTransform().Translation;
+            IndexedVector3 diff = body0.GetWorldTransform()._origin - body1.GetWorldTransform()._origin;
             float len = diff.Length();
             float radius0 = sphere0.GetRadius();
             float radius1 = sphere1.GetRadius();
@@ -90,7 +86,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             ///distance (negative means penetration)
             float dist = len - (radius0 + radius1);
 
-            Vector3 normalOnSurfaceB = new Vector3(1, 0, 0);
+            IndexedVector3 normalOnSurfaceB = new IndexedVector3(1, 0, 0);
             if (len > MathUtil.SIMD_EPSILON)
             {
                 normalOnSurfaceB = diff / len;
@@ -99,7 +95,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             ///point on A (worldspace)
             ///btVector3 pos0 = col0->getWorldTransform().getOrigin() - radius0 * normalOnSurfaceB;
             ///point on B (worldspace)
-            Vector3 pos1 = body1.GetWorldTransform().Translation + radius1 * normalOnSurfaceB;
+            IndexedVector3 pos1 = body1.GetWorldTransform()._origin + radius1 * normalOnSurfaceB;
 
             /// report a contact. internally this will be kept persistent, and contact reduction is done
 

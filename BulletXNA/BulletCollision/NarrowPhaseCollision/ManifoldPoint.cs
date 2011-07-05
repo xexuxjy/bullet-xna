@@ -25,7 +25,7 @@ using System;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     /// ManifoldContactPoint collects and maintains persistent contactpoints.
     /// used to improve stability and performance of rigidbody dynamics response.
@@ -35,7 +35,7 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
         //public ManifoldPoint()
         //{
         //}
-        public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
+        public ManifoldPoint(ref IndexedVector3 pointA, ref IndexedVector3 pointB, ref IndexedVector3 normal, float distance)
         {
             m_localPointA = pointA;
             m_localPointB = pointB;
@@ -43,8 +43,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_distance1 = distance;
 
             /* Don't initialize default values twice in C# */
-            m_lateralFrictionDir1 = Vector3.Zero;
-            m_lateralFrictionDir2 = Vector3.Zero;
+            m_lateralFrictionDir1 = IndexedVector3.Zero;
+            m_lateralFrictionDir2 = IndexedVector3.Zero;
             m_lifeTime = 0;
             m_appliedImpulseLateral1 = 0f;
             m_appliedImpulseLateral2 = 0f;
@@ -62,8 +62,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_index1 = 0;
             m_combinedRestitution = 0f;
             m_combinedFriction = 0f;
-            m_positionWorldOnA = Vector3.Zero;
-            m_positionWorldOnB = Vector3.Zero;
+            m_positionWorldOnA = IndexedVector3.Zero;
+            m_positionWorldOnB = IndexedVector3.Zero;
 
             m_constraintRow = new ConstraintRow[3];
 
@@ -89,33 +89,33 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_lifeTime = value;
         }
 
-        public void SetPositionWorldOnA(Vector3 value)
+        public void SetPositionWorldOnA(IndexedVector3 value)
         {
             m_positionWorldOnA = value;
         }
 
-        public void SetPositionWorldOnA(ref Vector3 value)
+        public void SetPositionWorldOnA(ref IndexedVector3 value)
         {
             m_positionWorldOnA = value;
         }
 
-        public Vector3 GetPositionWorldOnA()
+        public IndexedVector3 GetPositionWorldOnA()
         {
             return m_positionWorldOnA;
             //				return m_positionWorldOnB + m_normalWorldOnB * m_distance1;
         }
 
-        public void SetPositionWorldOnB(Vector3 value)
+        public void SetPositionWorldOnB(IndexedVector3 value)
         {
             m_positionWorldOnB = value;
         }
 
-        public void SetPositionWorldOnB(ref Vector3 value)
+        public void SetPositionWorldOnB(ref IndexedVector3 value)
         {
             m_positionWorldOnB = value;
         }
 
-        public Vector3 GetPositionWorldOnB()
+        public IndexedVector3 GetPositionWorldOnB()
         {
             return m_positionWorldOnB;
         }
@@ -126,22 +126,22 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             return m_appliedImpulse;
         }
 
-        public Vector3 GetLocalPointA()
+        public IndexedVector3 GetLocalPointA()
         {
             return m_localPointA;
         }
 
-        public void SetLocalPointA(ref Vector3 value)
+        public void SetLocalPointA(ref IndexedVector3 value)
         {
             m_localPointA = value;
         }
 
-        public Vector3 GetLocalPointB()
+        public IndexedVector3 GetLocalPointB()
         {
             return m_localPointB;
         }
 
-        public void SetLocalPointB(ref Vector3 value)
+        public void SetLocalPointB(ref IndexedVector3 value)
         {
             m_localPointB = value;
         }
@@ -161,12 +161,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_appliedImpulse = value;
         }
 
-        public Vector3 GetNormalWorldOnB()
+        public IndexedVector3 GetNormalWorldOnB()
         {
             return m_normalWorldOnB;
         }
 
-        public void SetNormalWorldOnB(ref Vector3 value)
+        public void SetNormalWorldOnB(ref IndexedVector3 value)
         {
             m_normalWorldOnB = value;
         }
@@ -221,22 +221,22 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
             m_appliedImpulseLateral2 = value;
         }
 
-        public Vector3 GetLateralFrictionDir1()
+        public IndexedVector3 GetLateralFrictionDir1()
         {
             return m_lateralFrictionDir1;
         }
 
-        public void SetLateralFrictionDir1(ref Vector3 value)
+        public void SetLateralFrictionDir1(ref IndexedVector3 value)
         {
             m_lateralFrictionDir1 = value;
         }
 
-        public Vector3 GetLateralFrictionDir2()
+        public IndexedVector3 GetLateralFrictionDir2()
         {
             return m_lateralFrictionDir2;
         }
 
-        public void SetLateralFrictionDir2(ref Vector3 value)
+        public void SetLateralFrictionDir2(ref IndexedVector3 value)
         {
             m_lateralFrictionDir2 = value;
         }
@@ -320,12 +320,12 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
 
 
-        public Vector3 m_localPointA;
-        public Vector3 m_localPointB;
+        public IndexedVector3 m_localPointA;
+        public IndexedVector3 m_localPointB;
         ///m_positionWorldOnA is redundant information, see getPositionWorldOnA(), but for clarity
-        public Vector3 m_positionWorldOnA;
-        public Vector3 m_positionWorldOnB;
-        public Vector3 m_normalWorldOnB;
+        public IndexedVector3 m_positionWorldOnA;
+        public IndexedVector3 m_positionWorldOnB;
+        public IndexedVector3 m_normalWorldOnB;
 
         public float m_distance1;
         public float m_combinedFriction;
@@ -351,8 +351,8 @@ namespace BulletXNA.BulletCollision.NarrowPhaseCollision
 
         public int m_lifeTime;//lifetime of the contactpoint in frames
 
-        public Vector3 m_lateralFrictionDir1;
-        public Vector3 m_lateralFrictionDir2;
+        public IndexedVector3 m_lateralFrictionDir1;
+        public IndexedVector3 m_lateralFrictionDir2;
 
         public ConstraintRow[] m_constraintRow;
 

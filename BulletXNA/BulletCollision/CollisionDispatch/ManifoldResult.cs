@@ -22,10 +22,10 @@
  */
 
 using System.Diagnostics;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public interface IContactAddedCallback
     {
@@ -93,37 +93,38 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return m_body1;
         }
 
-        public virtual void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(IndexedVector3 normalOnBInWorld, IndexedVector3 pointInWorld, float depth)
         {
             AddContactPoint(ref normalOnBInWorld, ref pointInWorld, depth);
         }
 
-        public virtual void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(ref IndexedVector3 normalOnBInWorld, ref IndexedVector3 pointInWorld, float depth)
         {
             Debug.Assert(m_manifoldPtr != null);
             //order in manifold needs to match
 
-            if (depth > m_manifoldPtr.GetContactBreakingThreshold())
+            //if (depth > m_manifoldPtr.GetContactBreakingThreshold())
+            if (depth > m_manifoldPtr.GetContactProcessingThreshold())
             {
                 return;
             }
 
             bool isSwapped = m_manifoldPtr.GetBody0() != m_body0;
 
-            Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
+            IndexedVector3 pointA = pointInWorld + normalOnBInWorld * depth;
 
-            Vector3 localA;
-            Vector3 localB;
+            IndexedVector3 localA;
+            IndexedVector3 localB;
 
             if (isSwapped)
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransB, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointInWorld, out localB);
             }
             else
             {
-                localA = MathUtil.InverseTransform(ref m_rootTransA, ref pointA);
-                localB = MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld);
+                MathUtil.InverseTransform(ref m_rootTransA, ref pointA, out localA);
+                MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
             ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);
@@ -220,8 +221,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         protected PersistentManifold m_manifoldPtr;
 
         //we need this for compounds
-        protected Matrix m_rootTransA;
-        protected Matrix m_rootTransB;
+        protected IndexedMatrix m_rootTransA;
+        protected IndexedMatrix m_rootTransB;
 
         protected CollisionObject m_body0;
         protected CollisionObject m_body1;

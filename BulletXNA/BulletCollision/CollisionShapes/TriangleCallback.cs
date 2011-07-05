@@ -22,12 +22,13 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public interface ITriangleCallback
     {
-	    void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex);
+	    void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex);
         void Cleanup();
         bool graphics();
 
@@ -35,7 +36,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
     public interface IInternalTriangleIndexCallback
     {
-        void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex);
+        void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex);
         void Cleanup();
         bool graphics();
     }

@@ -26,7 +26,7 @@ using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class IndexedMesh
     {
@@ -34,7 +34,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public ObjectArray<int> m_triangleIndexBase = new ObjectArray<int>();
         public int m_triangleIndexStride;
         public int m_numVertices;
-        public ObjectArray<Vector3> m_vertexBase = new ObjectArray<Vector3>();
+        public Object m_vertexBase = null;
         public int m_vertexStride;
         //// The index type is set when adding an indexed mesh to the
         //// btTriangleIndexVertexArray, do not set it manually
@@ -52,15 +52,28 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    }
 
         //just to be backwards compatible
-	    public TriangleIndexVertexArray(int numTriangles,ObjectArray<int> triangleIndexBase,int triangleIndexStride,int numVertices,ObjectArray<Vector3> vertexBase,int vertexStride)
+	    public TriangleIndexVertexArray(int numTriangles,ObjectArray<int> triangleIndexBase,int triangleIndexStride,int numVertices,Object vertexBase,int vertexStride)
         {
+            // ignore the provided stride values as we infer them from the version of the ctor called...
             IndexedMesh indexedMesh = new IndexedMesh();
             indexedMesh.m_numTriangles = numTriangles;
             indexedMesh.m_triangleIndexBase = triangleIndexBase;
-	        indexedMesh.m_triangleIndexStride = triangleIndexStride;
+	        indexedMesh.m_triangleIndexStride = 3;
 	        indexedMesh.m_numVertices = numVertices;
 	        indexedMesh.m_vertexBase = vertexBase;
-	        indexedMesh.m_vertexStride = vertexStride;
+
+            if (vertexBase is ObjectArray<IndexedVector3> || vertexBase is ObjectArray<Vector3>)
+            {
+                indexedMesh.m_vertexStride = 1;
+            }
+            else if (vertexBase is ObjectArray<float>)
+            {
+                indexedMesh.m_vertexStride = 3;
+            }
+            else
+            {
+                Debug.Assert(false,"Unsupported vertex object base.");
+            }
 
 	        AddIndexedMesh(indexedMesh,PHY_ScalarType.PHY_INTEGER);
         }
@@ -152,21 +165,21 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return m_hasAabb;
         }
 
-        public override void SetPremadeAabb(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void SetPremadeAabb(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
 	        m_aabbMin = aabbMin;
 	        m_aabbMax = aabbMax;
 	        m_hasAabb = true; // this is intentionally an int see notes in header
 
         }
-        public override void GetPremadeAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetPremadeAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             aabbMin = m_aabbMin;
             aabbMax = m_aabbMax;
         }
 	    protected ObjectArray<IndexedMesh>	m_indexedMeshes = new ObjectArray<IndexedMesh>();
     	protected bool m_hasAabb;
-	    protected Vector3 m_aabbMin;
-	    protected Vector3 m_aabbMax;
+	    protected IndexedVector3 m_aabbMin;
+	    protected IndexedVector3 m_aabbMax;
     }
 }

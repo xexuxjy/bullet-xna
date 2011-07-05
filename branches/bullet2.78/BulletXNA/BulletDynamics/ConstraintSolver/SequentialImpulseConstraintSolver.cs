@@ -23,14 +23,11 @@
 
 using System;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 	public class SequentialImpulseConstraintSolver : IConstraintSolver
 	{
@@ -68,15 +65,15 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 		}
 
-		public void SetupFrictionConstraint(ref SolverConstraint solverConstraint, ref Vector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB,
-						ManifoldPoint cp, ref Vector3 rel_pos1, ref Vector3 rel_pos2,
+		public void SetupFrictionConstraint(ref SolverConstraint solverConstraint, ref IndexedVector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB,
+						ManifoldPoint cp, ref IndexedVector3 rel_pos1, ref IndexedVector3 rel_pos2,
 						CollisionObject colObj0, CollisionObject colObj1, float relaxation)
 		{
 			SetupFrictionConstraint(ref solverConstraint, ref normalAxis, solverBodyA, solverBodyB, cp, ref rel_pos1, ref rel_pos2, colObj0, colObj1, relaxation, 0f, 0f);
 		}
 
-		public void SetupFrictionConstraint(ref SolverConstraint solverConstraint, ref Vector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB,
-								ManifoldPoint cp, ref Vector3 rel_pos1, ref Vector3 rel_pos2,
+		public void SetupFrictionConstraint(ref SolverConstraint solverConstraint, ref IndexedVector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB,
+								ManifoldPoint cp, ref IndexedVector3 rel_pos1, ref IndexedVector3 rel_pos2,
 								CollisionObject colObj0, CollisionObject colObj1, float relaxation,
 								float desiredVelocity, float cfmSlip)
 		{
@@ -89,38 +86,46 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			solverConstraint.m_solverBodyB = body1 != null ? body1 : GetFixedBody();
 
 			solverConstraint.m_friction = cp.GetCombinedFriction();
+
+            if (BulletGlobals.g_streamWriter != null && (body0 != null  || body1 != null) && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SetupFrictionConstraint[{0}][{1}]", (String)solverConstraint.m_solverBodyA.GetUserPointer(), (String)solverConstraint.m_solverBodyB.GetUserPointer());
+                MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
+            }
+
+
 			//solverConstraint.m_originalContactPoint = 0;
 
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
 
 			{
-				Vector3 ftorqueAxis1 = Vector3.Cross(rel_pos1, solverConstraint.m_contactNormal);
+				IndexedVector3 ftorqueAxis1 = IndexedVector3.Cross(rel_pos1, solverConstraint.m_contactNormal);
 				solverConstraint.m_relpos1CrossNormal = ftorqueAxis1;
-				solverConstraint.m_angularComponentA = body0 != null ? Vector3.TransformNormal(ftorqueAxis1, body0.GetInvInertiaTensorWorld()) * body0.GetAngularFactor() : Vector3.Zero;
-			}
+                solverConstraint.m_angularComponentA = body0 != null ? body0.GetInvInertiaTensorWorld() * ftorqueAxis1 * body0.GetAngularFactor() : IndexedVector3.Zero;
+            }
 			{
-				Vector3 ftorqueAxis1 = Vector3.Cross(rel_pos2, -solverConstraint.m_contactNormal);
+				IndexedVector3 ftorqueAxis1 = IndexedVector3.Cross(rel_pos2, -solverConstraint.m_contactNormal);
 				solverConstraint.m_relpos2CrossNormal = ftorqueAxis1;
-				solverConstraint.m_angularComponentB = body1 != null ? Vector3.TransformNormal(ftorqueAxis1, body1.GetInvInertiaTensorWorld()) * body1.GetAngularFactor() : Vector3.Zero;
-			}
+                solverConstraint.m_angularComponentB = body1 != null ? body1.GetInvInertiaTensorWorld() * ftorqueAxis1 * body1.GetAngularFactor() : IndexedVector3.Zero;
+            }
 
 #if COMPUTE_IMPULSE_DENOM
 	        float denom0 = rb0.computeImpulseDenominator(pos1,solverConstraint.m_contactNormal);
 	        float denom1 = rb1.computeImpulseDenominator(pos2,solverConstraint.m_contactNormal);
 #else
-			Vector3 vec;
+			IndexedVector3 vec;
 			float denom0 = 0f;
 			float denom1 = 0f;
 			if (body0 != null)
 			{
-				vec = Vector3.Cross(solverConstraint.m_angularComponentA, rel_pos1);
-				denom0 = body0.GetInvMass() + Vector3.Dot(normalAxis, vec);
+				vec = IndexedVector3.Cross(solverConstraint.m_angularComponentA, rel_pos1);
+				denom0 = body0.GetInvMass() + IndexedVector3.Dot(normalAxis, vec);
 			}
 			if (body1 != null)
 			{
-				vec = Vector3.Cross(-solverConstraint.m_angularComponentB, rel_pos2);
-				denom1 = body1.GetInvMass() + Vector3.Dot(normalAxis, vec);
+				vec = IndexedVector3.Cross(-solverConstraint.m_angularComponentB, rel_pos2);
+				denom1 = body1.GetInvMass() + IndexedVector3.Dot(normalAxis, vec);
 			}
 
 
@@ -140,10 +145,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 			{
 				float rel_vel;
-				float vel1Dotn = Vector3.Dot(solverConstraint.m_contactNormal, body0 != null ? body0.GetLinearVelocity() : Vector3.Zero)
-					+ Vector3.Dot(solverConstraint.m_relpos1CrossNormal, body0 != null ? body0.GetAngularVelocity() : Vector3.Zero);
-				float vel2Dotn = -Vector3.Dot(solverConstraint.m_contactNormal, body1 != null ? body1.GetLinearVelocity() : Vector3.Zero)
-					+ Vector3.Dot(solverConstraint.m_relpos2CrossNormal, body1 != null ? body1.GetAngularVelocity() : Vector3.Zero);
+				float vel1Dotn = IndexedVector3.Dot(solverConstraint.m_contactNormal, body0 != null ? body0.GetLinearVelocity() : IndexedVector3.Zero)
+					+ IndexedVector3.Dot(solverConstraint.m_relpos1CrossNormal, body0 != null ? body0.GetAngularVelocity() : IndexedVector3.Zero);
+				float vel2Dotn = -IndexedVector3.Dot(solverConstraint.m_contactNormal, body1 != null ? body1.GetLinearVelocity() : IndexedVector3.Zero)
+					+ IndexedVector3.Dot(solverConstraint.m_relpos2CrossNormal, body1 != null ? body1.GetAngularVelocity() : IndexedVector3.Zero);
 
 				rel_vel = vel1Dotn + vel2Dotn;
 
@@ -159,7 +164,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			}
 		}
 
-		public SolverConstraint AddFrictionConstraint(ref Vector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB, int frictionIndex, ManifoldPoint cp, ref Vector3 rel_pos1, ref Vector3 rel_pos2, CollisionObject colObj0, CollisionObject colObj1, float relaxation, float desiredVelocity, float cfmSlip)
+		public SolverConstraint AddFrictionConstraint(ref IndexedVector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB, int frictionIndex, ManifoldPoint cp, ref IndexedVector3 rel_pos1, ref IndexedVector3 rel_pos2, CollisionObject colObj0, CollisionObject colObj1, float relaxation, float desiredVelocity, float cfmSlip)
 		{
 			SolverConstraint solverConstraint = new SolverConstraint();
 
@@ -171,42 +176,42 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		}
 
 		protected void SetupContactConstraint(ref SolverConstraint solverConstraint, CollisionObject colObj0, CollisionObject colObj1, ManifoldPoint cp,
-								ContactSolverInfo infoGlobal, ref Vector3 vel, ref float rel_vel, ref float relaxation,
-								out Vector3 rel_pos1, out Vector3 rel_pos2)
+								ContactSolverInfo infoGlobal, ref IndexedVector3 vel, ref float rel_vel, ref float relaxation,
+								out IndexedVector3 rel_pos1, out IndexedVector3 rel_pos2)
 		{
 			RigidBody rb0 = RigidBody.Upcast(colObj0);
 			RigidBody rb1 = RigidBody.Upcast(colObj1);
 
-			Vector3 pos1 = cp.GetPositionWorldOnA();
-			Vector3 pos2 = cp.GetPositionWorldOnB();
+			IndexedVector3 pos1 = cp.GetPositionWorldOnA();
+			IndexedVector3 pos2 = cp.GetPositionWorldOnB();
 
-			rel_pos1 = pos1 - colObj0.GetWorldTransform().Translation;
-			rel_pos2 = pos2 - colObj1.GetWorldTransform().Translation;
+			rel_pos1 = pos1 - colObj0.GetWorldTransform()._origin;
+			rel_pos2 = pos2 - colObj1.GetWorldTransform()._origin;
 
 			relaxation = 1f;
 
-			Vector3 torqueAxis0 = Vector3.Cross(rel_pos1, cp.m_normalWorldOnB);
-			solverConstraint.m_angularComponentA = rb0 != null ? Vector3.TransformNormal(torqueAxis0, rb0.GetInvInertiaTensorWorld()) * rb0.GetAngularFactor() : Vector3.Zero;
-			Vector3 torqueAxis1 = Vector3.Cross(rel_pos2, cp.GetNormalWorldOnB());
-			solverConstraint.m_angularComponentB = rb1 != null ? Vector3.TransformNormal(-torqueAxis1, rb1.GetInvInertiaTensorWorld()) * rb1.GetAngularFactor() : Vector3.Zero;
+			IndexedVector3 torqueAxis0 = IndexedVector3.Cross(rel_pos1, cp.m_normalWorldOnB);
+            solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : IndexedVector3.Zero;
+            IndexedVector3 torqueAxis1 = IndexedVector3.Cross(rel_pos2, cp.GetNormalWorldOnB());
+            solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : IndexedVector3.Zero;
 
 			{
 #if COMPUTE_IMPULSE_DENOM
 		        float denom0 = rb0.computeImpulseDenominator(pos1,cp.m_normalWorldOnB);
 		        float denom1 = rb1.computeImpulseDenominator(pos2,cp.m_normalWorldOnB);
 #else
-				Vector3 vec;
+				IndexedVector3 vec;
 				float denom0 = 0f;
 				float denom1 = 0f;
 				if (rb0 != null)
 				{
-					vec = Vector3.Cross((solverConstraint.m_angularComponentA), rel_pos1);
-					denom0 = rb0.GetInvMass() + Vector3.Dot(cp.GetNormalWorldOnB(), vec);
+					vec = IndexedVector3.Cross((solverConstraint.m_angularComponentA), rel_pos1);
+					denom0 = rb0.GetInvMass() + IndexedVector3.Dot(cp.GetNormalWorldOnB(), vec);
 				}
 				if (rb1 != null)
 				{
-					vec = Vector3.Cross((-solverConstraint.m_angularComponentB), rel_pos2);
-					denom1 = rb1.GetInvMass() + Vector3.Dot(cp.GetNormalWorldOnB(), vec);
+					vec = IndexedVector3.Cross((-solverConstraint.m_angularComponentB), rel_pos2);
+					denom1 = rb1.GetInvMass() + IndexedVector3.Dot(cp.GetNormalWorldOnB(), vec);
 				}
 #endif //COMPUTE_IMPULSE_DENOM
 
@@ -216,17 +221,17 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			}
 
 			solverConstraint.m_contactNormal = cp.m_normalWorldOnB;
-			solverConstraint.m_relpos1CrossNormal = Vector3.Cross(rel_pos1, cp.m_normalWorldOnB);
-			solverConstraint.m_relpos2CrossNormal = Vector3.Cross(rel_pos2, -cp.m_normalWorldOnB);
+			solverConstraint.m_relpos1CrossNormal = IndexedVector3.Cross(rel_pos1, cp.m_normalWorldOnB);
+			solverConstraint.m_relpos2CrossNormal = IndexedVector3.Cross(rel_pos2, -cp.m_normalWorldOnB);
 
 
 
-			Vector3 vel1 = rb0 != null ? rb0.GetVelocityInLocalPoint(ref rel_pos1) : Vector3.Zero;
-			Vector3 vel2 = rb1 != null ? rb1.GetVelocityInLocalPoint(ref rel_pos2) : Vector3.Zero;
+			IndexedVector3 vel1 = rb0 != null ? rb0.GetVelocityInLocalPoint(ref rel_pos1) : IndexedVector3.Zero;
+			IndexedVector3 vel2 = rb1 != null ? rb1.GetVelocityInLocalPoint(ref rel_pos2) : IndexedVector3.Zero;
 
 			vel = vel1 - vel2;
 
-			rel_vel = Vector3.Dot(cp.GetNormalWorldOnB(), vel);
+			rel_vel = IndexedVector3.Dot(cp.GetNormalWorldOnB(), vel);
 
 			float penetration = cp.GetDistance() + infoGlobal.m_linearSlop;
 
@@ -254,17 +259,13 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				solverConstraint.m_appliedImpulse = cp.GetAppliedImpulse() * infoGlobal.m_warmstartingFactor;
 				if (rb0 != null)
 				{
-					Vector3 contactNormalTemp = solverConstraint.m_contactNormal;
-					Vector3.Multiply(ref contactNormalTemp, rb0.GetInvMass(), out contactNormalTemp);
-					rb0.InternalApplyImpulse(ref contactNormalTemp, ref solverConstraint.m_angularComponentA, solverConstraint.m_appliedImpulse);
-				}
+					IndexedVector3 contactNormalTemp = solverConstraint.m_contactNormal;
+                    rb0.InternalApplyImpulse(solverConstraint.m_contactNormal * rb0.GetInvMass() * rb0.GetLinearFactor(), solverConstraint.m_angularComponentA, solverConstraint.m_appliedImpulse);
+                }
 				if (rb1 != null)
 				{
-					Vector3 contactNormalTemp = solverConstraint.m_contactNormal;
-					Vector3.Multiply(ref contactNormalTemp, rb1.GetInvMass(), out contactNormalTemp);
-					Vector3 negAngular = -solverConstraint.m_angularComponentB;
-					rb1.InternalApplyImpulse(ref contactNormalTemp, ref negAngular, -solverConstraint.m_appliedImpulse);
-				}
+                    rb1.InternalApplyImpulse(solverConstraint.m_contactNormal * rb1.GetInvMass() * rb1.GetLinearFactor(), -solverConstraint.m_angularComponentB, -solverConstraint.m_appliedImpulse);
+                }
 			}
 			else
 			{
@@ -273,10 +274,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			solverConstraint.m_appliedPushImpulse = 0f;
 			{
 				float rel_vel2 = 0f;
-				float vel1Dotn = Vector3.Dot(solverConstraint.m_contactNormal, (rb0 != null ? rb0.GetLinearVelocity() : Vector3.Zero))
-					+ Vector3.Dot(solverConstraint.m_relpos1CrossNormal, (rb0 != null ? rb0.GetAngularVelocity() : Vector3.Zero));
-				float vel2Dotn = -Vector3.Dot(solverConstraint.m_contactNormal, (rb1 != null ? rb1.GetLinearVelocity() : Vector3.Zero))
-					+ Vector3.Dot(solverConstraint.m_relpos2CrossNormal, (rb1 != null ? rb1.GetAngularVelocity() : Vector3.Zero));
+				float vel1Dotn = IndexedVector3.Dot(solverConstraint.m_contactNormal, (rb0 != null ? rb0.GetLinearVelocity() : IndexedVector3.Zero))
+					+ IndexedVector3.Dot(solverConstraint.m_relpos1CrossNormal, (rb0 != null ? rb0.GetAngularVelocity() : IndexedVector3.Zero));
+				float vel2Dotn = -IndexedVector3.Dot(solverConstraint.m_contactNormal, (rb1 != null ? rb1.GetLinearVelocity() : IndexedVector3.Zero))
+					+ IndexedVector3.Dot(solverConstraint.m_relpos2CrossNormal, (rb1 != null ? rb1.GetAngularVelocity() : IndexedVector3.Zero));
 
 				rel_vel2 = vel1Dotn + vel2Dotn;
 
@@ -382,8 +383,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		//{
 		//    RigidBody rb = collisionObject != null ? RigidBody.upcast(collisionObject) : null;
 
-		//    solverBody.setDeltaLinearVelocity(Vector3.Zero);
-		//    solverBody.setDeltaLinearVelocity(Vector3.Zero);
+		//    solverBody.setDeltaLinearVelocity(IndexedVector3.Zero);
+		//    solverBody.setDeltaLinearVelocity(IndexedVector3.Zero);
 
 		//    if (rb != null)
 		//    {
@@ -416,7 +417,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			RigidBody solverBodyB = RigidBody.Upcast(colObj1);
 
 			///avoid collision response between two static objects
-			if ((solverBodyA == null || solverBodyA.GetInvMass() <= 0f) && (solverBodyB == null || solverBodyB.GetInvMass() <= 0f))
+			if ((solverBodyA == null || solverBodyA.GetInvMass() == 0f) && (solverBodyB == null || solverBodyB.GetInvMass() == 0f))
 			{
 				return;
 			}
@@ -427,16 +428,16 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 				if (cp.GetDistance() <= manifold.GetContactProcessingThreshold())
 				{
-					//                    Vector3 pos1 = cp.getPositionWorldOnA();
-					//                    Vector3 pos2 = cp.getPositionWorldOnB();
+					//                    IndexedVector3 pos1 = cp.getPositionWorldOnA();
+					//                    IndexedVector3 pos2 = cp.getPositionWorldOnB();
 
-					Vector3 rel_pos1;
-					Vector3 rel_pos2;
+					IndexedVector3 rel_pos1;
+					IndexedVector3 rel_pos2;
 					//;
 
 					float relaxation = 1f;
 					float rel_vel = 0f;
-					Vector3 vel = Vector3.Zero;
+					IndexedVector3 vel = IndexedVector3.Zero;
 
 					int frictionIndex = m_tmpSolverContactConstraintPool.Count;
 
@@ -445,14 +446,18 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 					RigidBody rb0 = RigidBody.Upcast(colObj0);
 					RigidBody rb1 = RigidBody.Upcast(colObj1);
-					if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
-					{
-						MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
-					}
 					solverConstraint.m_solverBodyA = rb0 != null ? rb0 : GetFixedBody();
 					solverConstraint.m_solverBodyB = rb1 != null ? rb1 : GetFixedBody();
 
 					solverConstraint.m_originalContactPoint = cp;
+
+                    if (BulletGlobals.g_streamWriter != null && rb0 != null && BulletGlobals.debugSolver)
+                    {
+                        BulletGlobals.g_streamWriter.WriteLine("ConvertContact [{0}][{1}]", (String)solverConstraint.m_solverBodyA.GetUserPointer(), (String)solverConstraint.m_solverBodyB.GetUserPointer());
+                        MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
+                    }
+
+
 
                     SetupContactConstraint(ref solverConstraint, colObj0, colObj1, cp, infoGlobal, ref vel, ref rel_vel, ref relaxation, out rel_pos1, out rel_pos2);
 
@@ -475,7 +480,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
 							{
-								cp.m_lateralFrictionDir2 = Vector3.Cross(cp.m_lateralFrictionDir1, cp.m_normalWorldOnB);
+								cp.m_lateralFrictionDir2 = IndexedVector3.Cross(cp.m_lateralFrictionDir1, cp.m_normalWorldOnB);
 								cp.m_lateralFrictionDir2.Normalize();//??
 								ApplyAnisotropicFriction(colObj0, ref cp.m_lateralFrictionDir2);
 								ApplyAnisotropicFriction(colObj1, ref cp.m_lateralFrictionDir2);
@@ -555,8 +560,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		protected void ResolveSingleConstraintRowGeneric(RigidBody body1, RigidBody body2, ref SolverConstraint c)
 		{
 			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
-			float deltaVel1Dotn = Vector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
-			float deltaVel2Dotn = -Vector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
+			float deltaVel1Dotn = IndexedVector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
+			float deltaVel2Dotn = -IndexedVector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
 
 			//float delta_rel_vel	= deltaVel1Dotn-deltaVel2Dotn;
 			deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
@@ -577,7 +582,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 				c.m_appliedImpulse = sum;
 			}
-			Vector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
+			IndexedVector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
 			body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse);
 
 
@@ -590,8 +595,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
 			//check magniture of applied impulse from SolverConstraint 
 			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
-			float deltaVel1Dotn = Vector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
-			float deltaVel2Dotn = -Vector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
+			float deltaVel1Dotn = IndexedVector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
+			float deltaVel2Dotn = -IndexedVector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
 
 			deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
 			deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;
@@ -607,7 +612,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 				c.m_appliedImpulse = sum;
 			}
-			Vector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
+			IndexedVector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
 			body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse);
 
 			temp = -c.m_contactNormal * body2.InternalGetInvMass();
@@ -624,8 +629,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			{
 				gNumSplitImpulseRecoveries++;
 				float deltaImpulse = c.m_rhsPenetration - (c.m_appliedPushImpulse * c.m_cfm);
-				float deltaVel1Dotn = Vector3.Dot(c.m_contactNormal, body1.InternalGetPushVelocity()) + Vector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetTurnVelocity());
-				float deltaVel2Dotn = -Vector3.Dot(c.m_contactNormal, body2.InternalGetPushVelocity()) + Vector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetTurnVelocity());
+				float deltaVel1Dotn = IndexedVector3.Dot(c.m_contactNormal, body1.InternalGetPushVelocity()) + IndexedVector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetTurnVelocity());
+				float deltaVel2Dotn = -IndexedVector3.Dot(c.m_contactNormal, body2.InternalGetPushVelocity()) + IndexedVector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetTurnVelocity());
 
 				deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
 				deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;
@@ -676,9 +681,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		{
 			if (s_fixed == null)
 			{
-				s_fixed = new RigidBody(0f, null, null, Vector3.Zero);
+				s_fixed = new RigidBody(0f, null, null, IndexedVector3.Zero);
+                s_fixed.SetUserPointer("SICS:Fixed");
 			}
-			s_fixed.SetMassProps(0f, Vector3.Zero);
+			s_fixed.SetMassProps(0f, IndexedVector3.Zero);
 			return s_fixed;
 		}
 
@@ -704,6 +710,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyFinish start [{0}]",numPoolConstraints);
+            }
+
 
 			for (int j = 0; j < numPoolConstraints; j++)
 			{
@@ -758,6 +770,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			m_tmpSolverContactConstraintPool.Clear();
 			m_tmpSolverNonContactConstraintPool.Clear();
 			m_tmpSolverContactFrictionConstraintPool.Clear();
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyFinish stop");
+            }
+
 			return 0f;
 		}
 		//protected float solveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
@@ -771,6 +789,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			BulletGlobals.StartProfile("solveGroupCacheFriendlySetup");
 			m_counter++;
 
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlySetup start [{0}]", m_counter);
+            }
+
+
 			if ((numConstraints + numManifolds) == 0)
 			{
 				//		printf("empty\n");
@@ -780,7 +804,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 
             int lastConstraint = startConstraint + numConstraints;
 
-			Vector3 zero = Vector3.Zero;
+			IndexedVector3 zero = IndexedVector3.Zero;
 
 			if (infoGlobal.m_splitImpulse)
 			{
@@ -912,24 +936,24 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 								solverConstraint.m_originalContactPointConstraint = constraint;
 
 								{
-									Vector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;
-									solverConstraint.m_angularComponentA = Vector3.TransformNormal(ftorqueAxis1, constraint.GetRigidBodyA().GetInvInertiaTensorWorld()) * constraint.GetRigidBodyA().GetAngularFactor();
+									IndexedVector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;
+                                    solverConstraint.m_angularComponentA = constraint.GetRigidBodyA().GetInvInertiaTensorWorld() * ftorqueAxis1 * constraint.GetRigidBodyA().GetAngularFactor();
 								}
 								{
-									Vector3 ftorqueAxis2 = solverConstraint.m_relpos2CrossNormal;
-									solverConstraint.m_angularComponentB = Vector3.TransformNormal(ftorqueAxis2, constraint.GetRigidBodyB().GetInvInertiaTensorWorld()) * constraint.GetRigidBodyB().GetAngularFactor();
+									IndexedVector3 ftorqueAxis2 = solverConstraint.m_relpos2CrossNormal;
+                                    solverConstraint.m_angularComponentB = constraint.GetRigidBodyB().GetInvInertiaTensorWorld() * ftorqueAxis2 * constraint.GetRigidBodyB().GetAngularFactor();
 								}
 
 								{
-									Vector3 iMJlA = solverConstraint.m_contactNormal * rbA.GetInvMass();
-									Vector3 iMJaA = Vector3.TransformNormal(solverConstraint.m_relpos1CrossNormal, rbA.GetInvInertiaTensorWorld());
-									Vector3 iMJlB = solverConstraint.m_contactNormal * rbB.GetInvMass();//sign of normal?
-									Vector3 iMJaB = Vector3.TransformNormal(solverConstraint.m_relpos2CrossNormal, rbB.GetInvInertiaTensorWorld());
+									IndexedVector3 iMJlA = solverConstraint.m_contactNormal * rbA.GetInvMass();
+                                    IndexedVector3 iMJaA = rbA.GetInvInertiaTensorWorld() * solverConstraint.m_relpos1CrossNormal;
+									IndexedVector3 iMJlB = solverConstraint.m_contactNormal * rbB.GetInvMass();//sign of normal?
+                                    IndexedVector3 iMJaB = rbB.GetInvInertiaTensorWorld() * solverConstraint.m_relpos2CrossNormal;
 
-									float sum = Vector3.Dot(iMJlA, solverConstraint.m_contactNormal);
-									float a = Vector3.Dot(iMJaA, solverConstraint.m_relpos1CrossNormal);
-									float b = Vector3.Dot(iMJlB, solverConstraint.m_contactNormal);
-									float c = Vector3.Dot(iMJaB, solverConstraint.m_relpos2CrossNormal);
+									float sum = IndexedVector3.Dot(iMJlA, solverConstraint.m_contactNormal);
+									float a = IndexedVector3.Dot(iMJaA, solverConstraint.m_relpos1CrossNormal);
+									float b = IndexedVector3.Dot(iMJlB, solverConstraint.m_contactNormal);
+									float c = IndexedVector3.Dot(iMJaB, solverConstraint.m_relpos2CrossNormal);
 									sum += a;
 									sum += b;
 									sum += c;
@@ -944,8 +968,8 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 								///todo: add force/torque accelerators
 								{
 									float rel_vel;
-									float vel1Dotn = Vector3.Dot(solverConstraint.m_contactNormal, rbA.GetLinearVelocity()) + Vector3.Dot(solverConstraint.m_relpos1CrossNormal, rbA.GetAngularVelocity());
-									float vel2Dotn = -Vector3.Dot(solverConstraint.m_contactNormal, rbB.GetLinearVelocity()) + Vector3.Dot(solverConstraint.m_relpos2CrossNormal, rbB.GetAngularVelocity());
+									float vel1Dotn = IndexedVector3.Dot(solverConstraint.m_contactNormal, rbA.GetLinearVelocity()) + IndexedVector3.Dot(solverConstraint.m_relpos1CrossNormal, rbA.GetAngularVelocity());
+									float vel2Dotn = -IndexedVector3.Dot(solverConstraint.m_contactNormal, rbB.GetLinearVelocity()) + IndexedVector3.Dot(solverConstraint.m_relpos2CrossNormal, rbB.GetAngularVelocity());
 
 									rel_vel = vel1Dotn + vel2Dotn;
 
@@ -974,13 +998,9 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				}
 
 				{
-					PersistentManifold manifold2 = null;
-					CollisionObject colObj0 = null, colObj1 = null;
-
 					for (int i = 0; i < numManifolds; i++)
 					{
-						manifold2 = manifold[i];
-						ConvertContact(manifold2, infoGlobal);
+                        ConvertContact(manifold[i], infoGlobal);
 					}
 				}
 			}
@@ -1007,6 +1027,13 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			}
 
             BulletGlobals.StopProfile();
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlySetup stop");
+            }
+
 			return 0f;
 
 
@@ -1016,6 +1043,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
             BulletGlobals.StartProfile("solveGroupCacheFriendlyIterations");
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyIterations start");
+            }
+
 
 			//should traverse the contacts random order...
 			{
@@ -1027,6 +1060,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 				}
 
 			}
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyIterations stop");
+            }
+
             BulletGlobals.StopProfile();
 			return 0.0f;
 		}
@@ -1156,17 +1195,17 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
 			return m_btSeed2;
 		}
 
-		private static void ApplyAnisotropicFriction(CollisionObject colObj, ref Vector3 frictionDirection)
+		private static void ApplyAnisotropicFriction(CollisionObject colObj, ref IndexedVector3 frictionDirection)
 		{
 			if (colObj != null && colObj.HasAnisotropicFriction())
 			{
 				// transform to local coordinates
-				Vector3 loc_lateral = MathUtil.TransposeTransformNormal(frictionDirection, colObj.GetWorldTransform());
-				Vector3 friction_scaling = colObj.GetAnisotropicFriction();
+                IndexedVector3 loc_lateral = frictionDirection * colObj.GetWorldTransform()._basis;
+				IndexedVector3 friction_scaling = colObj.GetAnisotropicFriction();
 				//apply anisotropic friction
 				loc_lateral *= friction_scaling;
 				// ... and transform it back to global coordinates
-				frictionDirection = Vector3.TransformNormal(loc_lateral, colObj.GetWorldTransform());
+                frictionDirection = colObj.GetWorldTransform()._basis * loc_lateral;
 			}
 		}
 

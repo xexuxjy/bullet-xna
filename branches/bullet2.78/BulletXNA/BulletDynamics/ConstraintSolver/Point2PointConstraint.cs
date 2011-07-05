@@ -21,32 +21,32 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletDynamics.Dynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
     public class Point2PointConstraint : TypedConstraint
     {
 	    public JacobianEntry[] m_jac = new JacobianEntry[3]; //3 orthogonal linear constraints
-	    public Vector3 m_pivotInA;
-	    public Vector3 m_pivotInB;
+	    public IndexedVector3 m_pivotInA;
+	    public IndexedVector3 m_pivotInB;
         public Point2PointFlags m_flags = 0;
         public float m_erp;
         public float m_cfm;
 
 	    public ConstraintSetting m_setting = new ConstraintSetting();
 
-        public Point2PointConstraint(RigidBody rbA, RigidBody rbB, ref Vector3 pivotInA, ref Vector3 pivotInB)
+        public Point2PointConstraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 pivotInA, ref IndexedVector3 pivotInB)
             : base(TypedConstraintType.POINT2POINT_CONSTRAINT_TYPE,rbA,rbB)
         {
             m_pivotInA = pivotInA;
             m_pivotInB = pivotInB;
         }
-	    public Point2PointConstraint(RigidBody rbA,ref Vector3 pivotInA) : base(TypedConstraintType.POINT2POINT_CONSTRAINT_TYPE,rbA)
+	    public Point2PointConstraint(RigidBody rbA,ref IndexedVector3 pivotInA) : base(TypedConstraintType.POINT2POINT_CONSTRAINT_TYPE,rbA)
         {
             m_pivotInA = pivotInA;
-            m_pivotInB = Vector3.Transform(pivotInA, rbA.GetCenterOfMassTransform());
+            m_pivotInB = rbA.GetCenterOfMassTransform() * pivotInA;
         }
 
         public override void GetInfo1(ConstraintInfo1 info)
@@ -64,7 +64,7 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             GetInfo2NonVirtual(info, m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
         }
 
-        public void GetInfo2NonVirtual(ConstraintInfo2 info,Matrix body0_trans,Matrix body1_trans)
+        public void GetInfo2NonVirtual(ConstraintInfo2 info,IndexedMatrix body0_trans,IndexedMatrix body1_trans)
         {
             // anchor points in global coordinates with respect to body PORs.
 
@@ -73,9 +73,9 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             info.m_solverConstraints[1].m_contactNormal.Y = 1;
             info.m_solverConstraints[2].m_contactNormal.Z = 1;
 
-            Vector3 a1 = Vector3.TransformNormal(GetPivotInA(),body0_trans);
+            IndexedVector3 a1 = body0_trans._basis * GetPivotInA();
             {
-                Vector3 a1neg = -a1;
+                IndexedVector3 a1neg = -a1;
 
                 MathUtil.GetSkewSymmetricMatrix(ref a1neg,
                     out info.m_solverConstraints[0].m_relpos1CrossNormal,
@@ -88,10 +88,10 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             info->m_J2linearAxis[2*s+2] = -1;
             */
 
-            Vector3 a2 = Vector3.TransformNormal(GetPivotInB(),body1_trans);
+            IndexedVector3 a2 = body1_trans._basis * GetPivotInB();
 
             {
-                Vector3 a2n = -a2;
+                IndexedVector3 a2n = -a2;
 
                 MathUtil.GetSkewSymmetricMatrix(ref a2,
                     out info.m_solverConstraints[0].m_relpos2CrossNormal,
@@ -103,12 +103,12 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
             float currERP = ((m_flags & Point2PointFlags.BT_P2P_FLAGS_ERP) != 0) ? m_erp : info.erp;
             float k = info.fps * currERP;
             int j;
-            Vector3 body0Origin = body0_trans.Translation;
-            Vector3 body1Origin = body1_trans.Translation;
+            IndexedVector3 body0Origin = body0_trans._origin;
+            IndexedVector3 body1Origin = body1_trans._origin;
 
             for (j = 0; j < 3; j++)
             {
-                info.m_solverConstraints[j].m_rhs = k * (MathUtil.VectorComponent(ref a2,j) + MathUtil.VectorComponent(ref body1Origin,j) - MathUtil.VectorComponent(ref a1,j) - MathUtil.VectorComponent(ref body0Origin,j));
+                info.m_solverConstraints[j].m_rhs = k * (a2[j] + body1Origin[j] - a1[j] - body0Origin[j]);
                 //printf("info->m_constraintError[%d]=%f\n",j,info->m_constraintError[j]);
             }
 
@@ -138,22 +138,22 @@ namespace BulletXNA.BulletDynamics.ConstraintSolver
         {
         }
 
-	    public void SetPivotA(ref Vector3 pivotA)
+	    public void SetPivotA(ref IndexedVector3 pivotA)
 	    {
 		    m_pivotInA = pivotA;
 	    }
 
-	    public void SetPivotB(ref Vector3 pivotB)
+	    public void SetPivotB(ref IndexedVector3 pivotB)
 	    {
 		    m_pivotInB = pivotB;
 	    }
 
-	    public Vector3 GetPivotInA()
+	    public IndexedVector3 GetPivotInA()
 	    {
 		    return m_pivotInA;
 	    }
 
-	    public Vector3 GetPivotInB() 
+	    public IndexedVector3 GetPivotInB() 
 	    {
 		    return m_pivotInB;
 	    }

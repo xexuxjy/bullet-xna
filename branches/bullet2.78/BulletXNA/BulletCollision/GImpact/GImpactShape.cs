@@ -47,17 +47,11 @@ subject to the following restrictions:
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
 using System.Diagnostics;
-using BulletXNA;
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.GImpact
+namespace BulletXNA.BulletCollision
 {
     public enum GIMPACT_SHAPE_TYPE
     {
@@ -76,8 +70,8 @@ namespace BulletXNA.BulletCollision.GImpact
 
 
         public void SetVertices(
-            ref Vector3 v0, ref Vector3 v1,
-            ref Vector3 v2, ref Vector3 v3)
+            ref IndexedVector3 v0, ref IndexedVector3 v1,
+            ref IndexedVector3 v2, ref IndexedVector3 v3)
         {
             m_vertices[0] = v0;
             m_vertices[1] = v1;
@@ -92,7 +86,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
         protected AABB m_localAABB;
         protected bool m_needs_update;
-        protected Vector3 localScaling;
+        protected IndexedVector3 localScaling;
         protected GImpactQuantizedBvh m_box_set = new GImpactQuantizedBvh();// optionally boxset
 
         //! declare Quantized trees, (you can change to float based trees)
@@ -127,6 +121,8 @@ namespace BulletXNA.BulletCollision.GImpact
             UnlockChildShapes();
 
             m_localAABB = m_box_set.GetGlobalBox();
+
+
         }
 
 
@@ -135,7 +131,7 @@ namespace BulletXNA.BulletCollision.GImpact
             m_shapeType = BroadphaseNativeTypes.GIMPACT_SHAPE_PROXYTYPE;
             m_localAABB.Invalidate();
             m_needs_update = true;
-            localScaling = Vector3.One;
+            localScaling = IndexedVector3.One;
         }
 
 
@@ -157,7 +153,7 @@ namespace BulletXNA.BulletCollision.GImpact
         /*!
         \post Calls updateBound() for update the box set.
         */
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             AABB transformedbox = m_localAABB;
             transformedbox.ApplyTransform(ref t);
@@ -180,13 +176,13 @@ namespace BulletXNA.BulletCollision.GImpact
         /*!
         \post You must call updateBound() for update the box set.
         */
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             localScaling = scaling;
             PostUpdate();
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return localScaling;
         }
@@ -266,7 +262,7 @@ namespace BulletXNA.BulletCollision.GImpact
         //! Retrieves the bound from a child
         /*!
         */
-        public virtual void GetChildAabb(int child_index, ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetChildAabb(int child_index, ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             AABB child_aabb;
             GetPrimitiveManager().GetPrimitiveBox(child_index, out child_aabb);
@@ -279,19 +275,19 @@ namespace BulletXNA.BulletCollision.GImpact
         public abstract CollisionShape GetChildShape(int index);
 
         //! Gets the children transform
-        public abstract Matrix GetChildTransform(int index);
+        public abstract IndexedMatrix GetChildTransform(int index);
 
         //! Sets the children transform
         /*!
         \post You must call updateBound() for update the box set.
         */
-        public abstract void SetChildTransform(int index, ref Matrix transform);
+        public abstract void SetChildTransform(int index, ref IndexedMatrix transform);
 
         //!@}
 
 
         //! virtual method for ray collision
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, RayResultCallback resultCallback)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, RayResultCallback resultCallback)
         {
 
         }
@@ -300,7 +296,7 @@ namespace BulletXNA.BulletCollision.GImpact
         /*!
         It gives the triangles in local space
         */
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
 
         }
@@ -347,14 +343,14 @@ namespace BulletXNA.BulletCollision.GImpact
 
         public virtual void GetPrimitiveBox(int prim_index, out AABB primbox)
         {
-            Matrix prim_trans;
+            IndexedMatrix prim_trans;
             if (m_compoundShape.ChildrenHasTransform())
             {
                 prim_trans = m_compoundShape.GetChildTransform(prim_index);
             }
             else
             {
-                prim_trans = Matrix.Identity;
+                prim_trans = IndexedMatrix.Identity;
             }
             CollisionShape shape = m_compoundShape.GetChildShape(prim_index);
             shape.GetAabb(prim_trans, out primbox.m_min, out primbox.m_max);
@@ -377,7 +373,7 @@ namespace BulletXNA.BulletCollision.GImpact
     {
 
         protected CompoundPrimitiveManager m_primitive_manager;
-        protected ObjectArray<Matrix> m_childTransforms = new ObjectArray<Matrix>();
+        protected ObjectArray<IndexedMatrix> m_childTransforms = new ObjectArray<IndexedMatrix>();
 
         //protected ObjectArray<CollisionShape>	m_childShapes = new ObjectArray<CollisionShape>();
         // List here as collisionshape is abstract
@@ -429,7 +425,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
 
         //! Use this method for adding children. Only Convex shapes are allowed.
-        public void AddChildShape(ref Matrix localTransform, CollisionShape shape)
+        public void AddChildShape(ref IndexedMatrix localTransform, CollisionShape shape)
         {
             Debug.Assert(shape.IsConvex());
             m_childTransforms.Add(localTransform);
@@ -452,11 +448,11 @@ namespace BulletXNA.BulletCollision.GImpact
         //! Retrieves the bound from a child
         /*!
         */
-        public override void GetChildAabb(int child_index, ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetChildAabb(int child_index, ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             if (ChildrenHasTransform())
             {
-                Matrix temp = MathUtil.BulletMatrixMultiply(t, m_childTransforms[child_index]);
+                IndexedMatrix temp = t * m_childTransforms[child_index];
                 m_childShapes[child_index].GetAabb(ref temp, out aabbMin, out aabbMax);
             }
             else
@@ -467,7 +463,7 @@ namespace BulletXNA.BulletCollision.GImpact
 
 
         //! Gets the children transform
-        public override Matrix GetChildTransform(int index)
+        public override IndexedMatrix GetChildTransform(int index)
         {
             Debug.Assert(m_childTransforms.Count == m_childShapes.Count);
             return m_childTransforms[index];
@@ -477,7 +473,7 @@ namespace BulletXNA.BulletCollision.GImpact
         /*!
         \post You must call updateBound() for update the box set.
         */
-        public override void SetChildTransform(int index, ref Matrix transform)
+        public override void SetChildTransform(int index, ref IndexedMatrix transform)
         {
             Debug.Assert(m_childTransforms.Count == m_childShapes.Count);
             m_childTransforms[index] = transform;
@@ -508,8 +504,31 @@ namespace BulletXNA.BulletCollision.GImpact
 
 
         //! Calculates the exact inertia tensor for this shape
-        public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public virtual void CalculateLocalInertia(float mass, ref IndexedVector3 inertia)
         {
+            LockChildShapes();
+            inertia = IndexedVector3.Zero;
+
+            int i = GetNumChildShapes();
+            float shapemass = mass / ((float)i);
+
+            while (i-- != 0)
+            {
+                IndexedVector3 temp_inertia;
+                m_childShapes[i].CalculateLocalInertia(shapemass, out temp_inertia);
+                if (ChildrenHasTransform())
+                {
+
+                    inertia = GImpactMassUtil.GimInertiaAddTransformed(ref inertia, ref temp_inertia, ref m_childTransforms.GetRawArray()[i]);
+                }
+                else
+                {
+                    IndexedMatrix identity = IndexedMatrix.Identity;
+                    inertia = GImpactMassUtil.GimInertiaAddTransformed(ref inertia, ref temp_inertia, ref identity);
+                }
+
+            }
+
 
         }
 
@@ -544,7 +563,7 @@ namespace BulletXNA.BulletCollision.GImpact
         {
             public float m_margin;
             public StridingMeshInterface m_meshInterface;
-            public Vector3 m_scale;
+            public IndexedVector3 m_scale;
             public int m_part;
             public int m_lock_count;
             public object vertexbase;
@@ -559,7 +578,7 @@ namespace BulletXNA.BulletCollision.GImpact
             public TrimeshPrimitiveManager()
             {
                 m_margin = 0.01f;
-                m_scale = Vector3.One;
+                m_scale = IndexedVector3.One;
                 m_lock_count = 0;
                 vertexbase = null;
                 numverts = 0;
@@ -684,10 +703,10 @@ namespace BulletXNA.BulletCollision.GImpact
 
             }
 
-            public void GetVertex(int vertex_index, out Vector3 vertex)
+            public void GetVertex(int vertex_index, out IndexedVector3 vertex)
             {
-                ObjectArray<Vector3> svertices = vertexbase as ObjectArray<Vector3>;
-                vertex = Vector3.Zero;
+                ObjectArray<IndexedVector3> svertices = vertexbase as ObjectArray<IndexedVector3>;
+                vertex = IndexedVector3.Zero;
                 if (svertices != null)
                 {
                     int index = vertex_index * stride;
@@ -796,17 +815,17 @@ namespace BulletXNA.BulletCollision.GImpact
         }
 
         //! Gets the children transform
-        public override Matrix GetChildTransform(int index)
+        public override IndexedMatrix GetChildTransform(int index)
         {
             Debug.Assert(false);
-            return Matrix.Identity;
+            return IndexedMatrix.Identity;
         }
 
         //! Sets the children transform
         /*!
         \post You must call updateBound() for update the box set.
         */
-        public override void SetChildTransform(int index, ref Matrix transform)
+        public override void SetChildTransform(int index, ref IndexedMatrix transform)
         {
             Debug.Assert(false);
         }
@@ -823,8 +842,26 @@ namespace BulletXNA.BulletCollision.GImpact
             return m_primitive_manager;
         }
 
-        public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public virtual void CalculateLocalInertia(float mass, ref IndexedVector3 inertia)
         {
+            LockChildShapes();
+
+
+            inertia = IndexedVector3.Zero;
+
+            int i = GetVertexCount();
+            float pointmass = mass / ((float)i);
+
+            while (i-- != 0)
+            {
+                IndexedVector3 pointintertia;
+                GetVertex(i, out pointintertia);
+                pointintertia = GImpactMassUtil.GimGetPointInertia(ref pointintertia, pointmass);
+                inertia += pointintertia;
+            }
+
+            UnlockChildShapes();
+
         }
 
         public override String GetName()
@@ -866,29 +903,29 @@ namespace BulletXNA.BulletCollision.GImpact
             return m_primitive_manager.GetVertexCount();
         }
 
-        public void GetVertex(int vertex_index, out Vector3 vertex)
+        public void GetVertex(int vertex_index, out IndexedVector3 vertex)
         {
             m_primitive_manager.GetVertex(vertex_index, out vertex);
         }
 
-        public void SetMargin(float margin)
+        public override void SetMargin(float margin)
         {
             m_primitive_manager.m_margin = margin;
             PostUpdate();
         }
 
-        public float GetMargin()
+        public override float GetMargin()
         {
             return m_primitive_manager.m_margin;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_primitive_manager.m_scale = scaling;
             PostUpdate();
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_primitive_manager.m_scale;
         }
@@ -898,13 +935,32 @@ namespace BulletXNA.BulletCollision.GImpact
             return m_primitive_manager.m_part;
         }
 
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
+            LockChildShapes();
+            AABB box = new AABB();
+            box.m_min = aabbMin;
+            box.m_max = aabbMax;
+
+            ObjectArray<int> collided = new ObjectArray<int>();
+            m_box_set.BoxQuery(ref box, collided,callback.graphics());
+
+            if (collided.Count == 0)
+            {
+                UnlockChildShapes();
+                return;
+            }
+
+            int part = GetPart();
+            PrimitiveTriangle triangle = new PrimitiveTriangle();
+            int i = collided.Count;
+            while (i-- != 0)
+            {
+                GetPrimitiveTriangle(collided[i], triangle);
+                callback.ProcessTriangle(triangle.m_vertices, part, collided[i]);
+            }
+            UnlockChildShapes();
         }
-
-
-
-
     }
 
 
@@ -941,6 +997,13 @@ namespace BulletXNA.BulletCollision.GImpact
                 m_mesh_parts[i].UpdateBound();
                 m_localAABB.Merge(m_mesh_parts[i].GetLocalBox());
             }
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactShape)
+            {
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalcLocalAABB min ", m_localAABB.m_min);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalcLocalAABB max ", m_localAABB.m_max);
+            }
+
         }
 
         public GImpactMeshShape(StridingMeshInterface meshInterface)
@@ -972,11 +1035,11 @@ namespace BulletXNA.BulletCollision.GImpact
             return m_mesh_parts[index];
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             localScaling = scaling;
 
-            int i = m_mesh_parts.Count();
+            int i = m_mesh_parts.Count;
             while (i-- != 0)
             {
                 GImpactMeshShapePart part = m_mesh_parts[i];
@@ -1013,8 +1076,25 @@ namespace BulletXNA.BulletCollision.GImpact
             m_needs_update = true;
         }
 
-        public virtual void CalculateLocalInertia(float mass, ref Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
+            inertia = IndexedVector3.Zero;
+
+            int i = GetMeshPartCount();
+            float partmass = mass / (float)i;
+
+            while (i-- != 0)
+            {
+                IndexedVector3 partinertia = IndexedVector3.Zero;
+                GetMeshPart(i).CalculateLocalInertia(partmass, ref partinertia);
+                inertia += partinertia;
+            }
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactShape)
+            {
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "GImpact CalculateLocalInertia", inertia);
+            }
+
         }
 
 
@@ -1079,11 +1159,11 @@ namespace BulletXNA.BulletCollision.GImpact
         //! Retrieves the bound from a child
         /*!
         */
-        public override void GetChildAabb(int child_index, ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetChildAabb(int child_index, ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             Debug.Assert(false);
-            aabbMin = Vector3.Zero;
-            aabbMax = Vector3.Zero;
+            aabbMin = IndexedVector3.Zero;
+            aabbMax = IndexedVector3.Zero;
         }
 
         //! Gets the children
@@ -1095,17 +1175,17 @@ namespace BulletXNA.BulletCollision.GImpact
 
 
         //! Gets the children transform
-        public override Matrix GetChildTransform(int index)
+        public override IndexedMatrix GetChildTransform(int index)
         {
             Debug.Assert(false);
-            return Matrix.Identity;
+            return IndexedMatrix.Identity;
         }
 
         //! Sets the children transform
         /*!
         \post You must call updateBound() for update the box set.
         */
-        public override void SetChildTransform(int index, ref Matrix transform)
+        public override void SetChildTransform(int index, ref IndexedMatrix transform)
         {
             Debug.Assert(false);
         }
@@ -1122,7 +1202,7 @@ namespace BulletXNA.BulletCollision.GImpact
             return "GImpactMesh";
         }
 
-        public void RayTest(Vector3 rayFrom, ref Vector3 rayTo, RayResultCallback resultCallback)
+        public void RayTest(IndexedVector3 rayFrom, ref IndexedVector3 rayTo, RayResultCallback resultCallback)
         {
 
         }
@@ -1131,8 +1211,14 @@ namespace BulletXNA.BulletCollision.GImpact
         /*!
         It gives the triangles in local space
         */
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
+            int i = m_mesh_parts.Count;
+            while (i-- != 0)
+            {
+                m_mesh_parts[i].ProcessAllTriangles(callback, ref aabbMin, ref aabbMax);
+            }
+
         }
     }
 

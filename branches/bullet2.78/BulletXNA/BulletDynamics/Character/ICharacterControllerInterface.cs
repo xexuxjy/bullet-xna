@@ -21,18 +21,18 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.Character
+namespace BulletXNA.BulletDynamics
 {
     public interface ICharacterControllerInterface : IActionInterface
     {
-	    void	SetWalkDirection(ref Vector3 walkDirection);
-        void    SetVelocityForTimeInterval(ref Vector3 velocity, float timeInterval);
+	    void	SetWalkDirection(ref IndexedVector3 walkDirection);
+        void    SetVelocityForTimeInterval(ref IndexedVector3 velocity, float timeInterval);
         void	Reset ();
-	    void	Warp (ref Vector3 origin);
+	    void	Warp (ref IndexedVector3 origin);
 	    void	PreStep (CollisionWorld collisionWorld);
 	    void	PlayerStep (CollisionWorld collisionWorld, float dt);
 	    bool	CanJump ();

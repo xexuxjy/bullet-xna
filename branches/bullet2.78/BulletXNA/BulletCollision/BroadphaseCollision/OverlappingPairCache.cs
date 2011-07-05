@@ -22,11 +22,10 @@
  */
 
 using System;
-
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     //-------------------------------------------------------------------------------------------------
 
@@ -736,7 +735,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
     ///btNullPairCache skips add/removal of overlapping pairs. Userful for benchmarking and unit testing.
     public class NullPairCache : IOverlappingPairCache
     {
-        private ObjectArray<BroadphasePair> m_overlappingPairArray;
+        private ObjectArray<BroadphasePair> m_overlappingPairArray = new ObjectArray<BroadphasePair>();
 
         //public virtual BroadphasePair	getOverlappingPairArrayPtr()
         //{

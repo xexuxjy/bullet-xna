@@ -26,20 +26,20 @@ using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public abstract class StridingMeshInterface
     {
 		public StridingMeshInterface()
 		{
-            m_scaling = new Vector3(1f);
+            m_scaling = new IndexedVector3(1f);
 		}
 
         public virtual void Cleanup()
         {
         }
 
-		public virtual void	InternalProcessAllTriangles(IInternalTriangleIndexCallback callback,ref Vector3 aabbMin,ref Vector3 aabbMax)
+		public virtual void	InternalProcessAllTriangles(IInternalTriangleIndexCallback callback,ref IndexedVector3 aabbMin,ref IndexedVector3 aabbMax)
         {
 	        int numtotalphysicsverts = 0;
 	        int part,graphicssubparts = GetNumSubParts();
@@ -50,11 +50,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        PHY_ScalarType gfxindextype = PHY_ScalarType.PHY_INTEGER;
 	        int stride = 0,numverts = 0 ,numtriangles = 0;
 
-            Vector3[] triangle = new Vector3[3];
+            IndexedVector3[] triangle = new IndexedVector3[3];
 
-	        float graphicsBase = 0f;
-
-	        Vector3 meshScaling = GetScaling();
+	        IndexedVector3 meshScaling = GetScaling();
 
 	        ///if the number of parts is big, the performance might drop due to the innerloop switch on indextype
 	        for (part=0;part<graphicssubparts ;part++)
@@ -64,29 +62,24 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 		        switch (gfxindextype)
 		        {
-		        case PHY_ScalarType.PHY_INTEGER:
+		            case PHY_ScalarType.PHY_INTEGER:
 			        {
-                        ObjectArray<int> indexList = (ObjectArray<int>)indexbase;
-						//ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
+                        int[] indexList = ((ObjectArray<int>)indexbase).GetRawArray();
 
-						// hack for now - need to tidy this..
-
-						if (vertexbase is ObjectArray<Vector3>)
+						if (vertexbase is ObjectArray<IndexedVector3>)
 						{
-                            ObjectArray<Vector3> vertexList = vertexbase as ObjectArray<Vector3>;
+                            IndexedVector3[] vertexList = (vertexbase as ObjectArray<IndexedVector3>).GetRawArray();
 							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
 								int triIndex = (gfxindex * indexstride);
 
 								int index1 = indexList[triIndex];
 								int index2 = indexList[triIndex+1];
 								int index3 = indexList[triIndex+2];
 
-								triangle[0] = vertexList[indexList[triIndex]] * meshScaling;
-								triangle[1] = vertexList[indexList[triIndex+1]] * meshScaling;
-								triangle[2] = vertexList[indexList[triIndex+2]] * meshScaling;
+								triangle[0] = vertexList[index1] * meshScaling;
+                                triangle[1] = vertexList[index2] * meshScaling;
+                                triangle[2] = vertexList[index3] * meshScaling;
 
 						        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
 						        {
@@ -95,30 +88,47 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
 						        }
 
-
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
 						}
+                        else if (vertexbase is ObjectArray<Vector3>)
+                        {
+                            Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
+                            for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
+                            {
+                                int triIndex = (gfxindex * indexstride);
+
+                                int index1 = indexList[triIndex];
+                                int index2 = indexList[triIndex + 1];
+                                int index3 = indexList[triIndex + 2];
+
+                                triangle[0] = new IndexedVector3(vertexList[index1]) * meshScaling;
+                                triangle[1] = new IndexedVector3(vertexList[index2]) * meshScaling;
+                                triangle[2] = new IndexedVector3(vertexList[index3]) * meshScaling;
+
+                                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
+                                {
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T0", triangle[0]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+                                }
+
+                                callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
+                            }
+                        }
                         else if (vertexbase is ObjectArray<float>)
 						{
-							//triangle[0] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[1] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[2] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
+							float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();
 							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
 								int triIndex = (gfxindex * indexstride);
 
 								// ugly!!
-								triangle[0] = new Vector3(vertexList[indexList[triIndex]], vertexList[indexList[triIndex] + 1], vertexList[indexList[triIndex] + 2]) * meshScaling;
-								triangle[1] = new Vector3(vertexList[indexList[triIndex+1]], vertexList[indexList[triIndex+1] + 1], vertexList[indexList[triIndex+1] + 2]) * meshScaling;
-								triangle[2] = new Vector3(vertexList[indexList[triIndex+2]], vertexList[indexList[triIndex+2] + 1], vertexList[indexList[triIndex+2] + 2]) * meshScaling;
+								triangle[0] = new IndexedVector3(vertexList[indexList[triIndex]], vertexList[indexList[triIndex] + 1], vertexList[indexList[triIndex] + 2]) * meshScaling;
+								triangle[1] = new IndexedVector3(vertexList[indexList[triIndex+1]], vertexList[indexList[triIndex+1] + 1], vertexList[indexList[triIndex+1] + 2]) * meshScaling;
+								triangle[2] = new IndexedVector3(vertexList[indexList[triIndex+2]], vertexList[indexList[triIndex+2] + 1], vertexList[indexList[triIndex+2] + 2]) * meshScaling;
 								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
-
-
 						}
 						else
 						{
@@ -126,58 +136,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 						}
 				        break;
 			        }
-		        case PHY_ScalarType.PHY_SHORT:
-			        {
-                        ObjectArray<ushort> indexList = (ObjectArray<ushort>)indexbase;
-
-                        if (vertexbase is ObjectArray<Vector3>)
-						{
-							ObjectArray<Vector3> vertexList = (ObjectArray<Vector3>)vertexbase;
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
-								int triIndex = (gfxindex * indexstride);
-
-								triangle[0] = vertexList[indexList[triIndex]] * meshScaling;
-								triangle[1] = vertexList[indexList[triIndex + 1]] * meshScaling;
-								triangle[2] = vertexList[indexList[triIndex + 2]] * meshScaling;
-
-
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-						}
-						else if (vertexbase is ObjectArray<float>)
-						{
-							//triangle[0] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[1] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							//triangle[2] = new Vector3(vertexList[indexList[triIndex]] * meshScaling.X, vertexList[indexList[triIndex + 1]] * meshScaling.Y, vertexList[indexList[triIndex + 2]] * meshScaling.Z);
-							ObjectArray<float> vertexList = (ObjectArray<float>)vertexbase;
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								// FIXME - Work ref the properindexing on this.
-								int index = gfxindex * indexstride;
-								int triIndex = (gfxindex * indexstride);
-
-								// ugly!!
-								triangle[0] = new Vector3(vertexList[indexList[triIndex]], vertexList[indexList[triIndex] + 1], vertexList[indexList[triIndex] + 2]) * meshScaling;
-								triangle[1] = new Vector3(vertexList[indexList[triIndex + 1]], vertexList[indexList[triIndex + 1] + 1], vertexList[indexList[triIndex + 1] + 2]) * meshScaling;
-								triangle[2] = new Vector3(vertexList[indexList[triIndex + 2]], vertexList[indexList[triIndex + 2] + 1], vertexList[indexList[triIndex + 2] + 2]) * meshScaling;
-
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-
-
-						}
-						else
-						{
-							Debug.Assert(false); // unsupported type ....
-						}
-						break;
-					}
                 default:
                     {
-                        Debug.Assert((gfxindextype == PHY_ScalarType.PHY_INTEGER) || (gfxindextype == PHY_ScalarType.PHY_SHORT));
+                        Debug.Assert(gfxindextype == PHY_ScalarType.PHY_INTEGER);
                         break;
                     }
 		        }
@@ -186,7 +147,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             }
         }
 		///brute force method to calculate aabb
-        public void CalculateAabbBruteForce(out Vector3 aabbMin, out Vector3 aabbMax)
+        public void CalculateAabbBruteForce(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
 		        //first calculate the total aabb for all triangles
 	        AabbCalculationCallback	aabbCallback = new AabbCalculationCallback();
@@ -226,34 +187,34 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return false; 
         }
 		
-        public virtual void	SetPremadeAabb(ref Vector3 aabbMin, ref Vector3 aabbMax )
+        public virtual void	SetPremadeAabb(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax )
         {
         }
 
-        public virtual void GetPremadeAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetPremadeAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
-            aabbMin = Vector3.Zero;
-            aabbMax = Vector3.Zero;
+            aabbMin = IndexedVector3.Zero;
+            aabbMax = IndexedVector3.Zero;
         }
 
-		public Vector3	GetScaling() 
+		public IndexedVector3	GetScaling() 
         {
 			return m_scaling;
 		}
 		
-        public void SetScaling(ref Vector3 scaling)
+        public void SetScaling(ref IndexedVector3 scaling)
 		{
 			m_scaling = scaling;
 		}
 
-        protected Vector3 m_scaling;
+        protected IndexedVector3 m_scaling;
     }
 
 
 	public class AabbCalculationCallback : IInternalTriangleIndexCallback
 	{
-		public Vector3 m_aabbMin;
-		public Vector3 m_aabbMax;
+		public IndexedVector3 m_aabbMin;
+		public IndexedVector3 m_aabbMax;
 
 		public AabbCalculationCallback()
 		{
@@ -265,7 +226,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
             return false;
         }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
 			MathUtil.VectorMin(ref triangle[0],ref m_aabbMin);
             MathUtil.VectorMax(ref triangle[0], ref m_aabbMax);

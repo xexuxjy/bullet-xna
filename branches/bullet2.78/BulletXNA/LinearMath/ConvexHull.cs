@@ -29,7 +29,7 @@ namespace BulletXNA.LinearMath
 //#include "btConvexHull.h"
 //#include "LinearMath/List.h"
 //#include "LinearMath/btMinMax.h"
-//#include "LinearMath/Vector3.h"
+//#include "LinearMath/IndexedVector3.h"
 
     public class ConvexHull
     {
@@ -134,14 +134,14 @@ namespace BulletXNA.LinearMath
 
 //--------- Utility Functions ------
 
-//Vector3  PlaneLineIntersection(Plane plane, Vector3 p0, Vector3 p1);
-//Vector3  PlaneProject(Plane plane, Vector3 point);
+//IndexedVector3  PlaneLineIntersection(Plane plane, IndexedVector3 p0, IndexedVector3 p1);
+//IndexedVector3  PlaneProject(Plane plane, IndexedVector3 point);
 
-//Vector3  ThreePlaneIntersection(Plane p0,Plane p1, Plane p2);
+//IndexedVector3  ThreePlaneIntersection(Plane p0,Plane p1, Plane p2);
 
-//float   DistanceBetweenLines(ref Vector3 ustart, ref Vector3 udir, ref Vector3 vstart, ref Vector3 vdir, Vector3 *upoint=NULL, Vector3 *vpoint=NULL);
-//Vector3  TriNormal(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2);
-//Vector3  NormalOf(Vector3 *vert, int n);
+//float   DistanceBetweenLines(ref IndexedVector3 ustart, ref IndexedVector3 udir, ref IndexedVector3 vstart, ref IndexedVector3 vdir, IndexedVector3 *upoint=NULL, IndexedVector3 *vpoint=NULL);
+//IndexedVector3  TriNormal(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2);
+//IndexedVector3  NormalOf(IndexedVector3 *vert, int n);
 
 
 [Flags]
@@ -180,7 +180,7 @@ public class ConvexH
 	ConvexH()
 	{
 	}
-	public IList<Vector3> vertices = new ObjectArray<Vector3>();
+	public IList<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
 	public IList<HalfEdge> edges = new ObjectArray<HalfEdge>();
 	public IList<Plane> facets = new ObjectArray<Plane>();
 	
@@ -236,7 +236,7 @@ public class HullResult
 	}
 	public bool                    mPolygons;                  // true if indices represents polygons, false indices are triangles
 	public int            mNumOutputVertices;         // number of vertices in the output hull
-	public IList<Vector3>	m_OutputVertices = new List<Vector3>();            // array of vertices
+	public IList<IndexedVector3>	m_OutputVertices = new List<IndexedVector3>();            // array of vertices
 	public int            mNumFaces;                  // the number of faces produced
 	public int            mNumIndices;                // the total number of indices
 	public IList<int>    m_Indices = new List<int>();                   // pointer to indices.
@@ -258,7 +258,7 @@ public class PHullResult
 	public int mVcount;
     public int mIndexCount;
     public int mFaceCount;
-    public IList<Vector3> mVertices = new List<Vector3>();
+    public IList<IndexedVector3> mVertices = new List<IndexedVector3>();
     public IList<int> m_Indices = new List<int>();
 }
 
@@ -285,7 +285,7 @@ public class HullDesc
 
 	public HullDesc(HullFlag flag,
 		 int vcount,
-		 IList<Vector3> vertices)
+		 IList<IndexedVector3> vertices)
 	{
 		mFlags          = flag;
 		mVcount         = vcount;
@@ -312,7 +312,7 @@ public class HullDesc
 
 	public HullFlag mFlags;           // flags to use when generating the convex hull.
     public int mVcount;          // number of vertices in the input point cloud
-    public IList<Vector3> mVertices = new List<Vector3>();        // the array of vertices.
+    public IList<IndexedVector3> mVertices = new List<IndexedVector3>();        // the array of vertices.
     public int mVertexStride;    // the stride of each vertex, in bytes.
     public float mNormalEpsilon;   // the epsilon for removing duplicates.  This is a normalized value, if normalized bit is on.
     public int mMaxVertices;     // maximum number of vertices to be considered for the hull!
@@ -336,7 +336,7 @@ public class HullDesc
 //}
 
 
-//int above(Vector3* vertices,int3& t, ref Vector3 p, float epsilon);
+//int above(IndexedVector3* vertices,int3& t, ref IndexedVector3 p, float epsilon);
 
 public class HullTriangle : int3
 {
@@ -392,7 +392,7 @@ public class HullTriangle : int3
 
     public class HullLibrary
     {
-        public static int MaxDirFiltered(IList<Vector3> p,int count,ref Vector3 dir,IList<int> allow)
+        public static int MaxDirFiltered(IList<IndexedVector3> p,int count,ref IndexedVector3 dir,IList<int> allow)
         {
             Debug.Assert(count != 0);
             int m=-1;
@@ -400,7 +400,7 @@ public class HullTriangle : int3
             {
                 if (allow[i] != 0)
                 {
-                    if (m == -1 || Vector3.Dot(p[i], dir) > Vector3.Dot(p[m], dir))
+                    if (m == -1 || IndexedVector3.Dot(p[i], dir) > IndexedVector3.Dot(p[m], dir))
                         m = i;
                 }
             }
@@ -408,39 +408,39 @@ public class HullTriangle : int3
             return m;
         } 
 
-        public static Vector3 Orth(ref Vector3 v)
+        public static IndexedVector3 Orth(ref IndexedVector3 v)
         {
-            Vector3 a = Vector3.Cross(v,new Vector3(0,0,1));
-            Vector3 b = Vector3.Cross(v,new Vector3(0,1,0));
+            IndexedVector3 a = IndexedVector3.Cross(v,new IndexedVector3(0,0,1));
+            IndexedVector3 b = IndexedVector3.Cross(v,new IndexedVector3(0,1,0));
             if (a.Length() > b.Length())
             {
-                return Vector3.Normalize(a);
+                return IndexedVector3.Normalize(a);
             } 
             else 
             {
-                return Vector3.Normalize(b);
+                return IndexedVector3.Normalize(b);
             }
         }
-        public static int MaxDirSterId(IList<Vector3> p, int count, Vector3 dir, IList<int> allow)
+        public static int MaxDirSterId(IList<IndexedVector3> p, int count, IndexedVector3 dir, IList<int> allow)
         {
             return MaxDirSterId(p, count, ref dir, allow);
         }
 
-        public static int MaxDirSterId(IList<Vector3> p, int count, ref Vector3 dir, IList<int> allow)
+        public static int MaxDirSterId(IList<IndexedVector3> p, int count, ref IndexedVector3 dir, IList<int> allow)
         {
             int m = -1;
             while (m == -1)
             {
                 m = MaxDirFiltered(p, count, ref dir, allow);
                 if (allow[m] == 3) return m;
-                Vector3 u = Orth(ref dir);
-                Vector3 v = Vector3.Cross(u, dir);
+                IndexedVector3 u = Orth(ref dir);
+                IndexedVector3 v = IndexedVector3.Cross(u, dir);
                 int ma = -1;
                 for (float x = 0.0f; x <= 360.0f; x += 45.0f)
                 {
                     float s = (float)Math.Sin(MathUtil.SIMD_RADS_PER_DEG * (x));
                     float c = (float)Math.Cos(MathUtil.SIMD_RADS_PER_DEG * (x));
-                    Vector3 adjustedDir = dir + (u * s + v * c) * 0.025f;
+                    IndexedVector3 adjustedDir = dir + (u * s + v * c) * 0.025f;
                     int mb = MaxDirFiltered(p, count, ref adjustedDir, allow);
                     if (ma == m && mb == m)
                     {
@@ -454,7 +454,7 @@ public class HullTriangle : int3
                         {
                             float s1 = (float)Math.Sin(MathUtil.SIMD_RADS_PER_DEG * (xx));
                             float c1 = (float)Math.Cos(MathUtil.SIMD_RADS_PER_DEG * (xx));
-                            Vector3 adjustedDir2 = dir + (u * s1 + v * c1) * 0.025f;
+                            IndexedVector3 adjustedDir2 = dir + (u * s1 + v * c1) * 0.025f;
                             int md = MaxDirFiltered(p, count, ref adjustedDir2, allow);
                             if (mc == m && md == m)
                             {
@@ -473,15 +473,15 @@ public class HullTriangle : int3
             return m;
         }
 
-        public bool Above(IList<Vector3> vertices, int3 t, Vector3 p, float epsilon)
+        public bool Above(IList<IndexedVector3> vertices, int3 t, IndexedVector3 p, float epsilon)
         {
             return Above(vertices, t, ref p, epsilon);
         }
 
-        public bool Above(IList<Vector3> vertices, int3 t, ref Vector3 p, float epsilon)
+        public bool Above(IList<IndexedVector3> vertices, int3 t, ref IndexedVector3 p, float epsilon)
         {
-            Vector3 n = HullLibrary.TriNormal(vertices[t.At(0)], vertices[t.At(1)], vertices[t.At(2)]);
-            return (Vector3.Dot(n, p - vertices[t.At(0)]) > epsilon); // EPSILON???
+            IndexedVector3 n = HullLibrary.TriNormal(vertices[t.At(0)], vertices[t.At(1)], vertices[t.At(2)]);
+            return (IndexedVector3.Dot(n, p - vertices[t.At(0)]) > epsilon); // EPSILON???
         }
 
         public bool HasEdge(int3 t, int a, int b)
@@ -615,19 +615,19 @@ public class HullTriangle : int3
             return (t.rise > epsilon) ? t : null;
         }
 
-        public int4 FindSimplex(IList<Vector3> verts, int verts_count, IList<int> allow)
+        public int4 FindSimplex(IList<IndexedVector3> verts, int verts_count, IList<int> allow)
         {
-            Vector3[] basis = new Vector3[3];
-            basis[0] = new Vector3(0.01f, 0.02f, 1.0f);
+            IndexedVector3[] basis = new IndexedVector3[3];
+            basis[0] = new IndexedVector3(0.01f, 0.02f, 1.0f);
             int p0 = HullLibrary.MaxDirSterId(verts, verts_count, basis[0], allow);
             int p1 = HullLibrary.MaxDirSterId(verts, verts_count, -basis[0], allow);
             basis[0] = verts[p0] - verts[p1];
-            if (p0 == p1 || basis[0] == Vector3.Zero)
+            if (p0 == p1 || basis[0] == IndexedVector3.Zero)
             {
                 return new int4(-1, -1, -1, -1);
             }
-            basis[1] = Vector3.Cross(new Vector3(1f, 0.02f, 0f), basis[0]);
-            basis[2] = Vector3.Cross(new Vector3(-0.02f, 1f, 0f), basis[0]);
+            basis[1] = IndexedVector3.Cross(new IndexedVector3(1f, 0.02f, 0f), basis[0]);
+            basis[2] = IndexedVector3.Cross(new IndexedVector3(-0.02f, 1f, 0f), basis[0]);
             if (basis[1].Length() > basis[2].Length())
             {
                 basis[1].Normalize();
@@ -647,7 +647,7 @@ public class HullTriangle : int3
                 return new int4(-1, -1, -1, -1);
             }
             basis[1] = verts[p2] - verts[p0];
-            basis[2] = Vector3.Normalize(Vector3.Cross(basis[1], basis[0]));
+            basis[2] = IndexedVector3.Normalize(IndexedVector3.Cross(basis[1], basis[0]));
             int p3 = MaxDirSterId(verts, verts_count, basis[2], allow);
             if (p3 == p0 || p3 == p1 || p3 == p2)
             {
@@ -658,7 +658,7 @@ public class HullTriangle : int3
                 return new int4(-1, -1, -1, -1);
             }
             Debug.Assert(!(p0 == p1 || p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3 || p2 == p3));
-            if (Vector3.Dot(verts[p3] - verts[p0], Vector3.Cross(verts[p1] - verts[p0], verts[p2] - verts[p0])) < 0)
+            if (IndexedVector3.Dot(verts[p3] - verts[p0], IndexedVector3.Cross(verts[p1] - verts[p0], verts[p2] - verts[p0])) < 0)
             {
                 // Swap
                 int temp = p2;
@@ -668,15 +668,15 @@ public class HullTriangle : int3
             return new int4(p0, p1, p2, p3);
         }
 
-        public int CalcHullGen(IList<Vector3> verts, int verts_count, int vlimit)
+        public int CalcHullGen(IList<IndexedVector3> verts, int verts_count, int vlimit)
         {
 	        if(verts_count <4) return 0;
 	        if(vlimit==0)
             {
                 vlimit=1000000000;
             }
-            Vector3 bmin = MathUtil.MAX_VECTOR;
-            Vector3 bmax = MathUtil.MIN_VECTOR;
+            IndexedVector3 bmin = MathUtil.MAX_VECTOR;
+            IndexedVector3 bmax = MathUtil.MIN_VECTOR;
 
 	        IList<int> isextreme = new List<int>(verts_count);
 	        IList<int> allow = new List<int>(verts_count);
@@ -694,7 +694,7 @@ public class HullTriangle : int3
 	        int4 p = FindSimplex(verts,verts_count,allow);
 	        if(p.x==-1) return 0; // simplex failed
 
-	        Vector3 center = (verts[p.At(0)]+verts[p.At(1)]+verts[p.At(2)]+verts[p.At(3)]) / 4.0f;  // a valid interior point
+	        IndexedVector3 center = (verts[p.At(0)]+verts[p.At(1)]+verts[p.At(2)]+verts[p.At(3)]) / 4.0f;  // a valid interior point
 	        HullTriangle t0 = AllocateTriangle(p.At(2),p.At(3),p.At(1)); t0.n= new int3(2,3,1);
 	        HullTriangle t1 = AllocateTriangle(p.At(3),p.At(2),p.At(0)); t1.n= new int3(3,2,0);
 	        HullTriangle t2 = AllocateTriangle(p.At(0),p.At(1),p.At(3)); t2.n= new int3(0,1,3);
@@ -707,9 +707,9 @@ public class HullTriangle : int3
 		        HullTriangle t=m_tris[j];
 		        Debug.Assert(t != null);
 		        Debug.Assert(t.vmax<0);
-		        Vector3 n=HullLibrary.TriNormal(verts[t.At(0)],verts[t.At(1)],verts[t.At(2)]);
+		        IndexedVector3 n=HullLibrary.TriNormal(verts[t.At(0)],verts[t.At(1)],verts[t.At(2)]);
 		        t.vmax = MaxDirSterId(verts,verts_count,n,allow);
-		        t.rise = Vector3.Dot(n,verts[t.vmax]-verts[t.At(0)]);
+		        t.rise = IndexedVector3.Dot(n,verts[t.vmax]-verts[t.At(0)]);
 	        }
 	        HullTriangle te = null;
 	        vlimit-=4;
@@ -747,7 +747,7 @@ public class HullTriangle : int3
                         break;
                     }
 			        int3 nt=m_tris[j];
-			        if(Above(verts,nt,center,0.01f*epsilon)  || Vector3.Cross(verts[nt.At(1)]-verts[nt.At(0)],verts[nt.At(2)]-verts[nt.At(1)]).Length()< epsilon*epsilon*0.1f )
+			        if(Above(verts,nt,center,0.01f*epsilon)  || IndexedVector3.Cross(verts[nt.At(1)]-verts[nt.At(0)],verts[nt.At(2)]-verts[nt.At(1)]).Length()< epsilon*epsilon*0.1f )
 			        {
 				        HullTriangle nb = m_tris[m_tris[j].n.At(0)];
 				        Debug.Assert(nb != null);
@@ -769,7 +769,7 @@ public class HullTriangle : int3
                     {
                         break;
                     }
-			        Vector3 n=TriNormal(verts[t.At(0)],verts[t.At(1)],verts[t.At(2)]);
+			        IndexedVector3 n=TriNormal(verts[t.At(0)],verts[t.At(1)],verts[t.At(2)]);
 			        t.vmax = MaxDirSterId(verts,verts_count,n,allow);
 			        if(isextreme[t.vmax] != 0) 
 			        {
@@ -777,7 +777,7 @@ public class HullTriangle : int3
 			        }
 			        else
 			        {
-				        t.rise = Vector3.Dot(n,verts[t.vmax]-verts[t.At(0)]);
+				        t.rise = IndexedVector3.Dot(n,verts[t.vmax]-verts[t.At(0)]);
 			        }
 		        }
 		        vlimit --;
@@ -785,7 +785,7 @@ public class HullTriangle : int3
 	        return 1;
         }
 
-        public int CalcHull(IList<Vector3> verts, int verts_count, IList<int> tris_out, ref int tris_count, int vlimit)
+        public int CalcHull(IList<IndexedVector3> verts, int verts_count, IList<int> tris_out, ref int tris_count, int vlimit)
         {
             int rc = CalcHullGen(verts, verts_count, vlimit);
             if (rc == 0)
@@ -820,7 +820,7 @@ public class HullTriangle : int3
         }
 
 
-        public bool ComputeHull(int vcount, IList<Vector3> vertices, PHullResult result, int vlimit)
+        public bool ComputeHull(int vcount, IList<IndexedVector3> vertices, PHullResult result, int vlimit)
         {
 
             int tris_count = 0;
@@ -876,14 +876,14 @@ public class HullTriangle : int3
                 vcount = 8;
             }
 
-            IList<Vector3> vertexSource = new List<Vector3>((int)vcount);
+            IList<IndexedVector3> vertexSource = new List<IndexedVector3>((int)vcount);
             for (int i = 0; i < vcount; ++i)
             {
-                vertexSource.Add(Vector3.Zero);
+                vertexSource.Add(IndexedVector3.Zero);
             }
 
 
-            Vector3 scale = new Vector3(1);
+            IndexedVector3 scale = new IndexedVector3(1);
 
             int ovcount = 0;
 
@@ -895,7 +895,7 @@ public class HullTriangle : int3
                 {
                     for (int i = 0; i < ovcount; i++)
                     {
-                        Vector3 v = vertexSource[i];
+                        IndexedVector3 v = vertexSource[i];
                         v.X *= scale.X;
                         v.Y *= scale.Y;
                         v.Z *= scale.Z;
@@ -909,7 +909,7 @@ public class HullTriangle : int3
                 {
 
                     // re-index triangle mesh so it refers to only used vertices, rebuild a new vertex table.
-                    IList<Vector3> vertexScratch = new ObjectArray<Vector3>((int)hr.mVcount);
+                    IList<IndexedVector3> vertexScratch = new ObjectArray<IndexedVector3>((int)hr.mVcount);
                      
                     BringOutYourDead(hr.mVertices, hr.mVcount, vertexScratch, ref ovcount, hr.m_Indices, hr.mIndexCount);
 
@@ -931,7 +931,7 @@ public class HullTriangle : int3
                         {
                             result.m_OutputVertices.Add(vertexScratch[i]);
                         }
-                        //memcpy(&result.m_OutputVertices[0], &vertexScratch[0], sizeof(Vector3) * ovcount);
+                        //memcpy(&result.m_OutputVertices[0], &vertexScratch[0], sizeof(IndexedVector3) * ovcount);
 
                         if (desc.HasHullFlag(HullFlag.QF_REVERSE_ORDER))
                         {
@@ -975,7 +975,7 @@ public class HullTriangle : int3
                         {
                             result.m_OutputVertices.Add(vertexScratch[i]);
                         }
-                        //memcpy(&result.m_OutputVertices[0], &vertexScratch[0], sizeof(Vector3) * ovcount);
+                        //memcpy(&result.m_OutputVertices[0], &vertexScratch[0], sizeof(IndexedVector3) * ovcount);
 
                         //				if ( 1 )
                         {
@@ -1027,10 +1027,10 @@ public class HullTriangle : int3
         }
 
 
-        public static void AddPoint(ref int vcount, IList<Vector3> p, float x, float y, float z)
+        public static void AddPoint(ref int vcount, IList<IndexedVector3> p, float x, float y, float z)
         {
             // XXX, might be broken
-            Vector3 dest = p[vcount];
+            IndexedVector3 dest = p[vcount];
             dest.X = x;
             dest.Y = y;
             dest.Z = z;
@@ -1038,7 +1038,7 @@ public class HullTriangle : int3
             vcount++;
         }
 
-        public float GetDist(float px, float py, float pz, ref Vector3 p2)
+        public float GetDist(float px, float py, float pz, ref IndexedVector3 p2)
         {
 
             float dx = px - p2.X;
@@ -1051,12 +1051,12 @@ public class HullTriangle : int3
 
 
         public bool CleanupVertices(int svcount,
-                           IList<Vector3> svertices,
+                           IList<IndexedVector3> svertices,
                            int stride,
                            ref int vcount,       // output number of vertices
-                           IList<Vector3> vertices,                 // location to store the results.
+                           IList<IndexedVector3> vertices,                 // location to store the results.
                            float normalepsilon,
-                           ref Vector3 scale)
+                           ref IndexedVector3 scale)
         {
 	        if ( svcount == 0 ) 
             {
@@ -1067,12 +1067,12 @@ public class HullTriangle : int3
 
 	        vcount = 0;
 
-	        Vector3 recip = new Vector3();
+	        IndexedVector3 recip = new IndexedVector3();
 
-            scale = new Vector3(1);
+            scale = new IndexedVector3(1);
 
-            Vector3 bmin = MathUtil.MAX_VECTOR;
-            Vector3 bmax = MathUtil.MIN_VECTOR;
+            IndexedVector3 bmin = MathUtil.MAX_VECTOR;
+            IndexedVector3 bmax = MathUtil.MIN_VECTOR;
 
             //char *vtx = (char *) svertices;
 
@@ -1080,16 +1080,16 @@ public class HullTriangle : int3
 	        {
 		        for (int i=0; i<svcount; i++)
 		        {
-                    Vector3 p = svertices[i];
+                    IndexedVector3 p = svertices[i];
                     MathUtil.VectorMin(ref p,ref bmin);
                     MathUtil.VectorMax(ref p,ref bmax);
                     svertices[i] = p;
 		        }
 	        }
 
-            Vector3 diff = bmax - bmin;
+            IndexedVector3 diff = bmax - bmin;
 
-	        Vector3 center = diff * 0.5f;
+	        IndexedVector3 center = diff * 0.5f;
             center += bmin;
 	        if ( diff.X < EPSILON || diff.Y < EPSILON || diff.Z < EPSILON || svcount < 3 )
 	        {
@@ -1102,7 +1102,7 @@ public class HullTriangle : int3
 
 		        if ( len == float.MaxValue)
 		        {
-                    diff = new Vector3(0.01f);
+                    diff = new IndexedVector3(0.01f);
 		        }
 		        else
 		        {
@@ -1164,7 +1164,7 @@ public class HullTriangle : int3
 
 	        for (int i=0; i<svcount; i++)
 	        {
-		        Vector3 p = svertices[i];
+		        IndexedVector3 p = svertices[i];
 
 
 		        if ( scale.LengthSquared() > 0 )
@@ -1181,12 +1181,11 @@ public class HullTriangle : int3
 			        for (j=0; j<vcount; j++)
 			        {
 				        /// XXX might be broken
-				        Vector3 v = vertices[j];
+				        IndexedVector3 v = vertices[j];
 
-                        Vector3 temp = v - p;
+                        IndexedVector3 temp = v - p;
 
-                        Vector3 absTemp;
-                        MathUtil.AbsoluteVector(ref temp, out absTemp);
+                        IndexedVector3 absTemp = temp.Absolute();
 
                         if (absTemp.X < normalepsilon && absTemp.Y < normalepsilon && absTemp.Z < normalepsilon)
 				        {
@@ -1223,7 +1222,7 @@ public class HullTriangle : int3
 
 		        for (int i=0; i<vcount; i++)
 		        {
-			        Vector3 p = vertices[i];
+			        IndexedVector3 p = vertices[i];
                     if(p.X < bmin2[0]) bmin2[0] = p.X;
                     if (p.X > bmax2[0]) bmax2[0] = p.X;
                     if (p.Y < bmin2[1]) bmin2[1] = p.Y;
@@ -1287,7 +1286,7 @@ public class HullTriangle : int3
 	        return true;
         }
 
-        public void BringOutYourDead(IList<Vector3> verts, int vcount, IList<Vector3> overts, ref int ocount, IList<int> indices, int indexcount)
+        public void BringOutYourDead(IList<IndexedVector3> verts, int vcount, IList<IndexedVector3> overts, ref int ocount, IList<int> indices, int indexcount)
         {
             IList<int> tmpIndices = new ObjectArray<int>(m_vertexIndexMapping.Count);
 
@@ -1337,17 +1336,17 @@ public class HullTriangle : int3
                 }
             }
         }
-        public static Vector3 ThreePlaneIntersection(Plane p0, Plane p1, Plane p2)
+        public static IndexedVector3 ThreePlaneIntersection(Plane p0, Plane p1, Plane p2)
         {
-            Vector3 N1 = p0.Normal;
-            Vector3 N2 = p1.Normal;
-            Vector3 N3 = p2.Normal;
+            IndexedVector3 N1 = new IndexedVector3(p0.Normal);
+            IndexedVector3 N2 = new IndexedVector3(p1.Normal);
+            IndexedVector3 N3 = new IndexedVector3(p2.Normal);
 
-            Vector3 n2n3 = Vector3.Cross(N2, N3);
-            Vector3 n3n1 = Vector3.Cross(N3, N1);
-            Vector3 n1n2 = Vector3.Cross(N1, N2);
+            IndexedVector3 n2n3 = IndexedVector3.Cross(N2, N3);
+            IndexedVector3 n3n1 = IndexedVector3.Cross(N3, N1);
+            IndexedVector3 n1n2 = IndexedVector3.Cross(N1, N2);
 
-            float quotient = Vector3.Dot(N1, n2n3);
+            float quotient = IndexedVector3.Dot(N1, n2n3);
 
             Debug.Assert(Math.Abs(quotient) > 0.000001f);
 
@@ -1356,82 +1355,82 @@ public class HullTriangle : int3
             n3n1 *= p1.D;
             n1n2 *= p2.D;
 
-            Vector3 potentialVertex = n2n3;
+            IndexedVector3 potentialVertex = n2n3;
             potentialVertex += n3n1;
             potentialVertex += n1n2;
             potentialVertex *= quotient;
 
-            Vector3 result = potentialVertex;
+            IndexedVector3 result = potentialVertex;
             return result;
         }
 
 
-        public static Vector3 PlaneLineIntersection(ref Plane plane, ref Vector3 p0, ref Vector3 p1)
+        public static IndexedVector3 PlaneLineIntersection(ref Plane plane, ref IndexedVector3 p0, ref IndexedVector3 p1)
         {
             // returns the point where the line p0-p1 intersects the plane n&
-            Vector3 dif = p1 - p0;
-            float dn = Vector3.Dot(plane.Normal, dif);
-            float t = -(plane.D + Vector3.Dot(plane.Normal, p0)) / dn;
+            IndexedVector3 dif = p1 - p0;
+            float dn = IndexedVector3.Dot(plane.Normal, dif);
+            float t = -(plane.D + IndexedVector3.Dot(plane.Normal, p0)) / dn;
             return p0 + (dif * t);
         }
 
-        public static Vector3 PlaneProject(ref Plane plane, ref Vector3 point)
+        public static IndexedVector3 PlaneProject(ref Plane plane, ref IndexedVector3 point)
         {
-            return point - plane.Normal * (Vector3.Dot(point, plane.Normal) + plane.D);
+            return point - new IndexedVector3(plane.Normal) * (IndexedVector3.Dot(point, plane.Normal) + plane.D);
         }
 
-        public static Vector3 TriNormal(Vector3 v0, Vector3 v1, Vector3 v2)
+        public static IndexedVector3 TriNormal(IndexedVector3 v0, IndexedVector3 v1, IndexedVector3 v2)
         {
             return TriNormal(ref v0, ref v1, ref v2);
         }
 
-        public static Vector3 TriNormal(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2)
+        public static IndexedVector3 TriNormal(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2)
         {
             // return the normal of the triangle
             // inscribed by v0, v1, and v2
-            Vector3 cp = Vector3.Cross(v1 - v0, v2 - v1);
+            IndexedVector3 cp = IndexedVector3.Cross(v1 - v0, v2 - v1);
             float m = cp.Length();
             if (m == 0)
             {
-                return new Vector3(1, 0, 0);
+                return new IndexedVector3(1, 0, 0);
             }
             return cp * (1.0f / m);
         }
 
 
-        public static float DistanceBetweenLines(ref Vector3 ustart, ref Vector3 udir, ref Vector3 vstart, ref Vector3 vdir, ref Vector3? upoint, ref Vector3? vpoint)
+        public static float DistanceBetweenLines(ref IndexedVector3 ustart, ref IndexedVector3 udir, ref IndexedVector3 vstart, ref IndexedVector3 vdir, ref IndexedVector3? upoint, ref IndexedVector3? vpoint)
         {
-            Vector3 cp = Vector3.Cross(udir, vdir);
+            IndexedVector3 cp = IndexedVector3.Cross(udir, vdir);
             cp.Normalize();
 
-            float distu = -Vector3.Dot(cp, ustart);
-            float distv = -Vector3.Dot(cp, vstart);
+            float distu = -IndexedVector3.Dot(cp, ustart);
+            float distv = -IndexedVector3.Dot(cp, vstart);
             float dist = (float)Math.Abs(distu - distv);
             if (upoint.HasValue)
             {
                 Plane plane = new Plane();
-                plane.Normal = Vector3.Cross(vdir, cp);
+                plane.Normal = IndexedVector3.Cross(vdir, cp).ToVector3();
                 plane.Normal.Normalize();
-                plane.D = -Vector3.Dot(plane.Normal, vstart);
-                Vector3 a = ustart + udir;
+                plane.D = -IndexedVector3.Dot(plane.Normal, vstart);
+                IndexedVector3 a = ustart + udir;
                 upoint = PlaneLineIntersection(ref plane, ref ustart, ref a);
             }
             if (vpoint.HasValue)
             {
                 Plane plane = new Plane();
-                plane.Normal = Vector3.Cross(udir, cp);
+                plane.Normal = IndexedVector3.Cross(udir, cp).ToVector3();
                 plane.Normal.Normalize();
-                plane.D = -Vector3.Dot(plane.Normal, ustart);
-                Vector3 a = vstart + vdir;
+                plane.D = -IndexedVector3.Dot(plane.Normal, ustart);
+                IndexedVector3 a = vstart + vdir;
                 vpoint = PlaneLineIntersection(ref plane, ref vstart, ref a);
             }
             return dist;
         }
 
-        public static PlaneIntersectType PlaneTest(ref Plane p, ref Vector3 v)
+        public static PlaneIntersectType PlaneTest(ref Plane p, ref IndexedVector3 v)
         {
             float planetestepsilon = 0.0001f;
-            float a = Vector3.Dot(v, p.Normal) + p.D;
+            float a = IndexedVector3.Dot(v, p.Normal) + p.D;
             PlaneIntersectType flag = (a > planetestepsilon) ? PlaneIntersectType.OVER : ((a < -planetestepsilon) ? PlaneIntersectType.UNDER : PlaneIntersectType.COPLANAR);
             return flag;
         }
@@ -1441,7 +1440,7 @@ public class HullTriangle : int3
             PlaneIntersectType flag = PlaneIntersectType.COPLANAR;
             for (int i = 0; i < convex.vertices.Count; i++)
             {
-                Vector3 vtx = convex.vertices[i];
+                IndexedVector3 vtx = convex.vertices[i];
                 flag |= PlaneTest(ref plane, ref vtx);
             }
             return flag;
@@ -1455,7 +1454,7 @@ public class HullTriangle : int3
 
         public IList<HullTriangle> m_tris = new List<HullTriangle>();
         public IList<int> m_vertexIndexMapping = new List<int>();
-        public const float EPSILON = 0.000001f; /* close enough to consider two btScalaring point numbers to be 'the same'. */
+        public const float EPSILON = 0.000001f; /* close enough to consider two floating point numbers to be 'the same'. */
 
     }
 }

@@ -21,21 +21,20 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletDynamics.ConstraintSolver
+namespace BulletXNA.BulletDynamics
 {
 
     public struct SolverConstraint
     {
-	    public Vector3	m_relpos1CrossNormal;
-        public Vector3 m_contactNormal;
-        public Vector3 m_relpos2CrossNormal;
-        public Vector3 m_angularComponentA;
-        public Vector3 m_angularComponentB;
+	    public IndexedVector3	m_relpos1CrossNormal;
+        public IndexedVector3 m_contactNormal;
+        public IndexedVector3 m_relpos2CrossNormal;
+        public IndexedVector3 m_angularComponentA;
+        public IndexedVector3 m_angularComponentB;
         public float m_appliedPushImpulse;
         public float m_appliedImpulse;
         

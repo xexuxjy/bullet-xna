@@ -23,9 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -34,15 +33,15 @@ namespace BulletXNA
 {
 	public static class DrawHelper
 	{
-		public static void DebugDrawObject(ref Matrix worldTransform, CollisionShape shape, ref Vector3 color, IDebugDraw debugDraw)
+		public static void DebugDrawObject(ref IndexedMatrix worldTransform, CollisionShape shape, ref IndexedVector3 color, IDebugDraw debugDraw)
 		{
 			// Draw a small simplex at the center of the object
 			{
-				//Vector3 start = worldTransform.Translation;
+				//IndexedVector3 start = worldTransform._origin;
 				//float scale = 10f;
-				//debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Right, worldTransform) * scale), Vector3.Right);
-				//debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Up, worldTransform) * scale), Vector3.Up);
-				//debugDraw.DrawLine(start, start + (Vector3.TransformNormal(Vector3.Backward, worldTransform) * scale), Vector3.Backward);
+				//debugDraw.DrawLine(start, start + (IndexedVector3.TransformNormal(IndexedVector3.Right, worldTransform) * scale), IndexedVector3.Right);
+				//debugDraw.DrawLine(start, start + (IndexedVector3.TransformNormal(IndexedVector3.Up, worldTransform) * scale), IndexedVector3.Up);
+				//debugDraw.DrawLine(start, start + (IndexedVector3.TransformNormal(IndexedVector3.Backward, worldTransform) * scale), IndexedVector3.Backward);
 				debugDraw.DrawTransform(ref worldTransform, 1.0f);
 			}
 			//return;
@@ -51,9 +50,9 @@ namespace BulletXNA
 				CompoundShape compoundShape = (CompoundShape)shape;
 				for (int i = compoundShape.GetNumChildShapes() - 1; i >= 0; i--)
 				{
-					Matrix childTrans = compoundShape.GetChildTransform(i);
+					IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
 					CollisionShape colShape = compoundShape.GetChildShape(i);
-					Matrix temp = MathUtil.BulletMatrixMultiply(worldTransform, childTrans);
+					IndexedMatrix temp = worldTransform * childTrans;
 					DebugDrawObject(ref temp, colShape, ref color, debugDraw);
 				}
 			}
@@ -64,8 +63,8 @@ namespace BulletXNA
 					case (BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE):
 						{
 							BoxShape boxShape = shape as BoxShape;
-							Vector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
-							Vector3 negHalfExtents = -halfExtents;
+							IndexedVector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
+							IndexedVector3 negHalfExtents = -halfExtents;
 							debugDraw.DrawBox(ref negHalfExtents, ref halfExtents, ref worldTransform, ref color);
 							break;
 						}
@@ -83,8 +82,8 @@ namespace BulletXNA
 
 							for (int i = multiSphereShape.GetSphereCount() - 1; i >= 0; i--)
 							{
-								Matrix childTransform = worldTransform;
-								childTransform.Translation += multiSphereShape.GetSpherePosition(i);
+								IndexedMatrix childTransform = worldTransform;
+								childTransform._origin += multiSphereShape.GetSpherePosition(i);
 								DebugDrawSphere(multiSphereShape.GetSphereRadius(i), ref childTransform, ref color, debugDraw);
 							}
 
@@ -94,54 +93,54 @@ namespace BulletXNA
 						{
 							CapsuleShape capsuleShape = shape as CapsuleShape;
 
-							float radius = capsuleShape.getRadius();
-							float halfHeight = capsuleShape.getHalfHeight();
+							float radius = capsuleShape.GetRadius();
+							float halfHeight = capsuleShape.GetHalfHeight();
 
 							int upAxis = capsuleShape.GetUpAxis();
 
 
 
-							Vector3 capStart = Vector3.Zero; ;
-							MathUtil.VectorComponent(ref capStart, upAxis, -halfHeight);
+							IndexedVector3 capStart = IndexedVector3.Zero; ;
+                            capStart[upAxis] = -halfHeight;
 
-							Vector3 capEnd = Vector3.Zero;
-							MathUtil.VectorComponent(ref capEnd, upAxis, halfHeight);
+							IndexedVector3 capEnd = IndexedVector3.Zero;
+							capEnd[upAxis] = halfHeight;
 
 							// Draw the ends
 							{
 
-								Matrix childTransform = worldTransform;
-								childTransform.Translation = Vector3.Transform(capStart, worldTransform);
+								IndexedMatrix childTransform = worldTransform;
+								childTransform._origin = worldTransform * capStart;
 								DebugDrawSphere(radius, ref childTransform, ref color, debugDraw);
 							}
 
 							{
-								Matrix childTransform = worldTransform;
-								childTransform.Translation = Vector3.Transform(capEnd, worldTransform);
+								IndexedMatrix childTransform = worldTransform;
+                                childTransform._origin = worldTransform * capEnd;
 								DebugDrawSphere(radius, ref childTransform, ref color, debugDraw);
 							}
 
 							// Draw some additional lines
-							Vector3 start = worldTransform.Translation;
+							IndexedVector3 start = worldTransform._origin;
 
-							MathUtil.VectorComponent(ref capStart, (upAxis + 1) % 3, radius);
-							MathUtil.VectorComponent(ref capEnd, (upAxis + 1) % 3, radius);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(capStart, worldTransform), start + Vector3.TransformNormal(capEnd, worldTransform), color);
+							capStart[(upAxis + 1) % 3] = radius;
+                            capEnd[(upAxis + 1) % 3] = radius;
 
-							MathUtil.VectorComponent(ref capStart, (upAxis + 1) % 3, -radius);
-							MathUtil.VectorComponent(ref capEnd, (upAxis + 1) % 3, -radius);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(capStart, worldTransform), start + Vector3.TransformNormal(capEnd, worldTransform), color);
+							debugDraw.DrawLine(start + worldTransform._basis * capStart, start + worldTransform._basis * capEnd, color);
 
-							MathUtil.VectorComponent(ref capStart, (upAxis + 1) % 3, radius);
-							MathUtil.VectorComponent(ref capEnd, (upAxis + 1) % 3, radius);
+                            capStart[(upAxis + 1) % 3] = -radius;
+                            capEnd[(upAxis + 1) % 3] = -radius;
+                            debugDraw.DrawLine(start + worldTransform._basis * capStart, start + worldTransform._basis * capEnd, color);
 
-							MathUtil.VectorComponent(ref capStart, (upAxis + 2) % 3, radius);
-							MathUtil.VectorComponent(ref capEnd, (upAxis + 2) % 3, radius);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(capStart, worldTransform), start + Vector3.TransformNormal(capEnd, worldTransform), color);
 
-							MathUtil.VectorComponent(ref capStart, (upAxis + 2) % 3, -radius);
-							MathUtil.VectorComponent(ref capEnd, (upAxis + 2) % 3, -radius);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(capStart, worldTransform), start + Vector3.TransformNormal(capEnd, worldTransform), color);
+                            capStart[(upAxis + 2) % 3] = radius;
+                            capEnd[(upAxis + 2) % 3] = radius;
+                            debugDraw.DrawLine(start + worldTransform._basis * capStart, start + worldTransform._basis * capEnd, color);
+
+
+                            capStart[(upAxis + 2) % 3] = -radius;
+                            capEnd[(upAxis + 2) % 3] = -radius;
+                            debugDraw.DrawLine(start + worldTransform._basis * capStart, start + worldTransform._basis * capEnd, color);
 
 							break;
 						}
@@ -150,23 +149,23 @@ namespace BulletXNA
 							ConeShape coneShape = (ConeShape)shape;
 							float radius = coneShape.GetRadius();//+coneShape->getMargin();
 							float height = coneShape.GetHeight();//+coneShape->getMargin();
-							Vector3 start = worldTransform.Translation;
+							IndexedVector3 start = worldTransform._origin;
 
 							int upAxis = coneShape.GetConeUpIndex();
 
 
-							Vector3 offsetHeight = Vector3.Zero;
-							MathUtil.VectorComponent(ref offsetHeight, upAxis, height * 0.5f);
-							Vector3 offsetRadius = Vector3.Zero;
-							MathUtil.VectorComponent(ref offsetRadius, (upAxis + 1) % 3, radius);
+							IndexedVector3 offsetHeight = IndexedVector3.Zero;
+							offsetHeight[upAxis] =  height * 0.5f;
+							IndexedVector3 offsetRadius = IndexedVector3.Zero;
+							offsetRadius[(upAxis + 1) % 3] =  radius;
 
-							Vector3 offset2Radius = Vector3.Zero;
-							MathUtil.VectorComponent(ref offsetRadius, (upAxis + 2) % 3, radius);
+							IndexedVector3 offset2Radius = IndexedVector3.Zero;
+							offsetRadius[(upAxis + 2) % 3] = radius;
 
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight, worldTransform), start + Vector3.TransformNormal(-offsetHeight + offsetRadius, worldTransform), color);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight, worldTransform), start + Vector3.TransformNormal(-offsetHeight - offsetRadius, worldTransform), color);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight, worldTransform), start + Vector3.TransformNormal(-offsetHeight + offset2Radius, worldTransform), color);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight, worldTransform), start + Vector3.TransformNormal(-offsetHeight - offset2Radius, worldTransform), color);
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight, start + worldTransform._basis * -offsetHeight + offsetRadius, color);
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight, start + worldTransform._basis * -offsetHeight - offsetRadius, color);
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight, start + worldTransform._basis * -offsetHeight + offset2Radius, color);
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight, start + worldTransform._basis * -offsetHeight - offset2Radius, color);
 
 							break;
 
@@ -177,14 +176,14 @@ namespace BulletXNA
 							int upAxis = cylinder.GetUpAxis();
 							float radius = cylinder.GetRadius();
 
-							float halfHeight = MathUtil.VectorComponent(cylinder.GetHalfExtentsWithMargin(), upAxis);
-							Vector3 start = worldTransform.Translation;
-							Vector3 offsetHeight = Vector3.Zero;
-							MathUtil.VectorComponent(ref offsetHeight, upAxis, halfHeight);
-							Vector3 offsetRadius = Vector3.Zero;
-							MathUtil.VectorComponent(ref offsetRadius, (upAxis + 1) % 3, radius);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight + offsetRadius, worldTransform), start + Vector3.TransformNormal(-offsetHeight + offsetRadius, worldTransform), color);
-							debugDraw.DrawLine(start + Vector3.TransformNormal(offsetHeight - offsetRadius, worldTransform), start + Vector3.TransformNormal(-offsetHeight - offsetRadius, worldTransform), color);
+							float halfHeight = cylinder.GetHalfExtentsWithMargin()[upAxis];
+							IndexedVector3 start = worldTransform._origin;
+							IndexedVector3 offsetHeight = IndexedVector3.Zero;
+							offsetHeight[upAxis] = halfHeight;
+							IndexedVector3 offsetRadius = IndexedVector3.Zero;
+							offsetRadius[(upAxis + 1) % 3] =  radius;
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight + offsetRadius, start + worldTransform._basis * -offsetHeight + offsetRadius, color);
+							debugDraw.DrawLine(start + worldTransform._basis * offsetHeight - offsetRadius, start + worldTransform._basis * -offsetHeight - offsetRadius, color);
 							break;
 						}
 
@@ -192,17 +191,17 @@ namespace BulletXNA
 						{
 							StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
 							float planeConst = staticPlaneShape.GetPlaneConstant();
-							Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
-							Vector3 planeOrigin = planeNormal * planeConst;
-							Vector3 vec0, vec1;
+							IndexedVector3 planeNormal = staticPlaneShape.GetPlaneNormal();
+							IndexedVector3 planeOrigin = planeNormal * planeConst;
+							IndexedVector3 vec0, vec1;
 							TransformUtil.PlaneSpace1(ref planeNormal, out vec0, out vec1);
 							float vecLen = 100f;
-							Vector3 pt0 = planeOrigin + vec0 * vecLen;
-							Vector3 pt1 = planeOrigin - vec0 * vecLen;
-							Vector3 pt2 = planeOrigin + vec1 * vecLen;
-							Vector3 pt3 = planeOrigin - vec1 * vecLen;
-							debugDraw.DrawLine(Vector3.Transform(pt0, worldTransform), Vector3.Transform(pt1, worldTransform), color);
-							debugDraw.DrawLine(Vector3.Transform(pt2, worldTransform), Vector3.Transform(pt3, worldTransform), color);
+							IndexedVector3 pt0 = planeOrigin + vec0 * vecLen;
+							IndexedVector3 pt1 = planeOrigin - vec0 * vecLen;
+							IndexedVector3 pt2 = planeOrigin + vec1 * vecLen;
+							IndexedVector3 pt3 = planeOrigin - vec1 * vecLen;
+							debugDraw.DrawLine(worldTransform* pt0, worldTransform * pt1, color);
+							debugDraw.DrawLine(worldTransform* pt2, worldTransform* pt3, color);
 							break;
 
 						}
@@ -213,8 +212,8 @@ namespace BulletXNA
 								ConcaveShape concaveMesh = (ConcaveShape)shape;
 
 								///@todo pass camera, for some culling? no -> we are not a graphics lib
-								Vector3 aabbMax = MathUtil.MAX_VECTOR;
-								Vector3 aabbMin = MathUtil.MIN_VECTOR;
+								IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+								IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 								DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
 								concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
@@ -224,8 +223,8 @@ namespace BulletXNA
 							{
 								ConvexTriangleMeshShape convexMesh = (ConvexTriangleMeshShape)shape;
 								//todo: pass camera for some culling			
-								Vector3 aabbMax = MathUtil.MAX_VECTOR;
-								Vector3 aabbMin = MathUtil.MIN_VECTOR;
+								IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+								IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 								//DebugDrawcallback drawCallback;
 								DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
@@ -240,7 +239,7 @@ namespace BulletXNA
 									ConvexPolyhedron poly = polyshape.GetConvexPolyhedron();
 									for (int i = 0; i < poly.m_faces.Count; i++)
 									{
-										Vector3 centroid = Vector3.Zero;
+										IndexedVector3 centroid = IndexedVector3.Zero;
 										int numVerts = poly.m_faces[i].m_indices.Count;
 										if (numVerts != 0)
 										{
@@ -249,15 +248,15 @@ namespace BulletXNA
 											{
 												int curVert = poly.m_faces[i].m_indices[v];
 												centroid += poly.m_vertices[curVert];
-												debugDraw.DrawLine(Vector3.Transform(poly.m_vertices[lastV], worldTransform), Vector3.Transform(poly.m_vertices[curVert], worldTransform), color);
+												debugDraw.DrawLine(worldTransform * poly.m_vertices[lastV], worldTransform * poly.m_vertices[curVert], color);
 												lastV = curVert;
 											}
 										}
 										centroid *= 1.0f / (float)(numVerts);
 
-										Vector3 normalColor = new Vector3(1, 1, 0);
-										Vector3 faceNormal = new Vector3(poly.m_faces[i].m_plane[0], poly.m_faces[i].m_plane[1], poly.m_faces[i].m_plane[2]);
-										debugDraw.DrawLine(Vector3.Transform(centroid, worldTransform), Vector3.Transform((centroid + faceNormal), worldTransform), normalColor);
+										IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
+										IndexedVector3 faceNormal = new IndexedVector3(poly.m_faces[i].m_plane[0], poly.m_faces[i].m_plane[1], poly.m_faces[i].m_plane[2]);
+										debugDraw.DrawLine(worldTransform * centroid, worldTransform * (centroid + faceNormal), normalColor);
 									}
 
 								}
@@ -265,10 +264,10 @@ namespace BulletXNA
 								{
 									for (int i = 0; i < polyshape.GetNumEdges(); i++)
 									{
-										Vector3 a, b;
+										IndexedVector3 a, b;
 										polyshape.GetEdge(i, out a, out b);
-										Vector3 wa = Vector3.Transform(a, worldTransform);
-										Vector3 wb = Vector3.Transform(b, worldTransform);
+										IndexedVector3 wa = worldTransform * a;
+										IndexedVector3 wb = worldTransform * b;
 										debugDraw.DrawLine(ref wa, ref wb, ref color);
 									}
 								}
@@ -294,27 +293,27 @@ namespace BulletXNA
 				case TypedConstraintType.POINT2POINT_CONSTRAINT_TYPE:
 					{
 						Point2PointConstraint p2pC = constraint as Point2PointConstraint;
-						Matrix tr = Matrix.Identity;
-						Vector3 pivot = p2pC.GetPivotInA();
-						pivot = Vector3.Transform(pivot, p2pC.GetRigidBodyA().GetCenterOfMassTransform());
-						tr.Translation = pivot;
+						IndexedMatrix tr = IndexedMatrix.Identity;
+						IndexedVector3 pivot = p2pC.GetPivotInA();
+						pivot = p2pC.GetRigidBodyA().GetCenterOfMassTransform()* pivot;
+						tr._origin = pivot;
 						debugDraw.DrawTransform(ref tr, dbgDrawSize);
 						// that ideally should draw the same frame	
 						pivot = p2pC.GetPivotInB();
-						pivot = Vector3.Transform(pivot, p2pC.GetRigidBodyB().GetCenterOfMassTransform());
-						tr.Translation = pivot;
+						pivot = p2pC.GetRigidBodyB().GetCenterOfMassTransform() * pivot;
+						tr._origin = pivot;
 						if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
 					}
 					break;
 				case TypedConstraintType.HINGE_CONSTRAINT_TYPE:
 					{
 						HingeConstraint pHinge = constraint as HingeConstraint;
-						Matrix tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyA().GetCenterOfMassTransform(), pHinge.GetAFrame());
+						IndexedMatrix tr = pHinge.GetRigidBodyA().GetCenterOfMassTransform() * pHinge.GetAFrame();
 						if (drawFrames)
 						{
 							debugDraw.DrawTransform(ref tr, dbgDrawSize);
 						}
-						tr = MathUtil.BulletMatrixMultiply(pHinge.GetRigidBodyB().GetCenterOfMassTransform(), pHinge.GetBFrame());
+						tr = pHinge.GetRigidBodyB().GetCenterOfMassTransform() *  pHinge.GetBFrame();
 						if (drawFrames)
 						{
 							debugDraw.DrawTransform(ref tr, dbgDrawSize);
@@ -334,10 +333,10 @@ namespace BulletXNA
 						}
 						if (drawLimits)
 						{
-							Vector3 center = tr.Translation;
-							Vector3 normal = MathUtil.MatrixColumn(ref tr, 2);
-							Vector3 axis = MathUtil.MatrixColumn(ref tr, 0);
-							Vector3 zero = Vector3.Zero;
+							IndexedVector3 center = tr._origin;
+							IndexedVector3 normal = tr._basis.GetColumn(2);
+                            IndexedVector3 axis = tr._basis.GetColumn(0);
+							IndexedVector3 zero = IndexedVector3.Zero;
 							debugDraw.DrawArc(ref center, ref normal, ref axis, dbgDrawSize, dbgDrawSize, minAng, maxAng, ref zero, drawSect);
 						}
 					}
@@ -345,11 +344,11 @@ namespace BulletXNA
 				case TypedConstraintType.CONETWIST_CONSTRAINT_TYPE:
 					{
 						ConeTwistConstraint pCT = constraint as ConeTwistConstraint;
-						Matrix tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(), pCT.GetAFrame());
+						IndexedMatrix tr = pCT.GetRigidBodyA().GetCenterOfMassTransform() *  pCT.GetAFrame();
 						if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
-						tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform(), pCT.GetBFrame());
+						tr = pCT.GetRigidBodyB().GetCenterOfMassTransform() *  pCT.GetBFrame();
 						if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
-						Vector3 zero = Vector3.Zero;
+						IndexedVector3 zero = IndexedVector3.Zero;
 
 						if (drawLimits)
 						{
@@ -357,18 +356,18 @@ namespace BulletXNA
 							float length = dbgDrawSize;
 							int nSegments = 8 * 4;
 							float fAngleInRadians = MathUtil.SIMD_2_PI * (float)(nSegments - 1) / (float)nSegments;
-							Vector3 pPrev = pCT.GetPointForAngle(fAngleInRadians, length);
-							pPrev = Vector3.Transform(pPrev, tr);
+							IndexedVector3 pPrev = pCT.GetPointForAngle(fAngleInRadians, length);
+                            pPrev = tr * pPrev;
 							for (int i = 0; i < nSegments; i++)
 							{
 								fAngleInRadians = MathUtil.SIMD_2_PI * (float)i / (float)nSegments;
-								Vector3 pCur = pCT.GetPointForAngle(fAngleInRadians, length);
-								pCur = Vector3.Transform(pCur, tr);
+								IndexedVector3 pCur = pCT.GetPointForAngle(fAngleInRadians, length);
+                                pCur = tr * pCur;
 								debugDraw.DrawLine(ref pPrev, ref pCur, ref zero);
 
 								if (i % (nSegments / 8) == 0)
 								{
-									Vector3 origin = tr.Translation;
+									IndexedVector3 origin = tr._origin;
 									debugDraw.DrawLine(ref origin, ref pCur, ref zero);
 								}
 
@@ -379,17 +378,17 @@ namespace BulletXNA
 							bool useFrameB = (pCT.GetRigidBodyB().GetInvMass() > 0f);
 							if (useFrameB)
 							{
-								tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyB().GetCenterOfMassTransform(), pCT.GetBFrame());
+								tr = pCT.GetRigidBodyB().GetCenterOfMassTransform() *  pCT.GetBFrame();
 							}
 							else
 							{
-								tr = MathUtil.BulletMatrixMultiply(pCT.GetRigidBodyA().GetCenterOfMassTransform(), pCT.GetAFrame());
+								tr = pCT.GetRigidBodyA().GetCenterOfMassTransform() *  pCT.GetAFrame();
 							}
-							Vector3 pivot = tr.Translation;
-							Vector3 normal = MathUtil.MatrixColumn(ref tr, 0);
-							Vector3 axis1 = MathUtil.MatrixColumn(ref tr, 1);
+							IndexedVector3 pivot = tr._origin;
+                            IndexedVector3 normal = tr._basis.GetColumn(0);
+                            IndexedVector3 axis = tr._basis.GetColumn(1);
 
-							debugDraw.DrawArc(ref pivot, ref normal, ref axis1, dbgDrawSize, dbgDrawSize, -twa - tws, -twa + tws, ref zero, true);
+							debugDraw.DrawArc(ref pivot, ref normal, ref axis, dbgDrawSize, dbgDrawSize, -twa - tws, -twa + tws, ref zero, true);
 						}
 					}
 					break;
@@ -397,7 +396,7 @@ namespace BulletXNA
 				case TypedConstraintType.D6_SPRING_CONSTRAINT_TYPE:
 					{
 						Generic6DofConstraint p6DOF = constraint as Generic6DofConstraint;
-						Matrix tr = p6DOF.GetCalculatedTransformA();
+						IndexedMatrix tr = p6DOF.GetCalculatedTransformA();
 						if (drawFrames)
 						{
 							debugDraw.DrawTransform(ref tr, dbgDrawSize);
@@ -407,32 +406,33 @@ namespace BulletXNA
 						{
 							debugDraw.DrawTransform(ref tr, dbgDrawSize);
 						}
-						Vector3 zero = Vector3.Zero;
+						IndexedVector3 zero = IndexedVector3.Zero;
 						if (drawLimits)
 						{
 							tr = p6DOF.GetCalculatedTransformA();
-							Vector3 center = p6DOF.GetCalculatedTransformB().Translation;
+							IndexedVector3 center = p6DOF.GetCalculatedTransformB()._origin;
 							// up is axis 1 not 2 ?
-							Vector3 up = MathUtil.MatrixColumn(ref tr, 1);
-							Vector3 axis = MathUtil.MatrixColumn(ref tr, 0);
+
+							IndexedVector3 up = tr._basis.GetColumn(1);
+							IndexedVector3 axis = tr._basis.GetColumn(0);
 							float minTh = p6DOF.GetRotationalLimitMotor(1).m_loLimit;
 							float maxTh = p6DOF.GetRotationalLimitMotor(1).m_hiLimit;
 							float minPs = p6DOF.GetRotationalLimitMotor(2).m_loLimit;
 							float maxPs = p6DOF.GetRotationalLimitMotor(2).m_hiLimit;
 							debugDraw.DrawSpherePatch(ref center, ref up, ref axis, dbgDrawSize * .9f, minTh, maxTh, minPs, maxPs, ref zero);
-							axis = MathUtil.MatrixColumn(ref tr, 1);
+                            axis = tr._basis.GetColumn(1);
 							float ay = p6DOF.GetAngle(1);
 							float az = p6DOF.GetAngle(2);
 							float cy = (float)Math.Cos(ay);
 							float sy = (float)Math.Sin(ay);
 							float cz = (float)Math.Cos(az);
 							float sz = (float)Math.Sin(az);
-							Vector3 ref1 = new Vector3();
-							ref1.X = cy * cz * axis.X + cy * sz * axis.Y - sy * axis.Z;
-							ref1.Y = -sz * axis.X + cz * axis.Y;
-							ref1.Z = cz * sy * axis.X + sz * sy * axis.Y + cy * axis.Z;
+							IndexedVector3 ref1 = new IndexedVector3(
+							    cy * cz * axis.X + cy * sz * axis.Y - sy * axis.Z,
+							    -sz * axis.X + cz * axis.Y,
+							    cz * sy * axis.X + sz * sy * axis.Y + cy * axis.Z);
 							tr = p6DOF.GetCalculatedTransformB();
-							Vector3 normal = -MathUtil.MatrixColumn(ref tr, 0);
+                            IndexedVector3 normal = -tr._basis.GetColumn(0);
 							float minFi = p6DOF.GetRotationalLimitMotor(0).m_loLimit;
 							float maxFi = p6DOF.GetRotationalLimitMotor(0).m_hiLimit;
 							if (minFi > maxFi)
@@ -444,8 +444,8 @@ namespace BulletXNA
 								debugDraw.DrawArc(ref center, ref normal, ref ref1, dbgDrawSize, dbgDrawSize, minFi, maxFi, ref zero, false);
 							}
 							tr = p6DOF.GetCalculatedTransformA();
-							Vector3 bbMin = p6DOF.GetTranslationalLimitMotor().m_lowerLimit;
-							Vector3 bbMax = p6DOF.GetTranslationalLimitMotor().m_upperLimit;
+							IndexedVector3 bbMin = p6DOF.GetTranslationalLimitMotor().m_lowerLimit;
+							IndexedVector3 bbMax = p6DOF.GetTranslationalLimitMotor().m_upperLimit;
 							debugDraw.DrawBox(ref bbMin, ref bbMax, ref tr, ref zero);
 						}
 					}
@@ -453,22 +453,22 @@ namespace BulletXNA
 				case TypedConstraintType.SLIDER_CONSTRAINT_TYPE:
 					{
 						SliderConstraint pSlider = constraint as SliderConstraint;
-						Matrix tr = pSlider.GetCalculatedTransformA();
+						IndexedMatrix tr = pSlider.GetCalculatedTransformA();
 						if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
 						tr = pSlider.GetCalculatedTransformB();
 						if (drawFrames) debugDraw.DrawTransform(ref tr, dbgDrawSize);
-						Vector3 zero = Vector3.Zero;
+						IndexedVector3 zero = IndexedVector3.Zero;
 						if (drawLimits)
 						{
-							Matrix tr2 = pSlider.GetCalculatedTransformA();
-							Vector3 li_min = Vector3.Transform(new Vector3(pSlider.GetLowerLinLimit(), 0f, 0f), tr2);
-							Vector3 li_max = Vector3.Transform(new Vector3(pSlider.GetUpperLinLimit(), 0f, 0f), tr2);
+							IndexedMatrix tr2 = pSlider.GetCalculatedTransformA();
+							IndexedVector3 li_min = tr2 * new IndexedVector3(pSlider.GetLowerLinLimit(), 0f, 0f);
+							IndexedVector3 li_max = tr2 * new IndexedVector3(pSlider.GetUpperLinLimit(), 0f, 0f);
 							debugDraw.DrawLine(ref li_min, ref li_max, ref zero);
-							Vector3 normal = MathUtil.MatrixColumn(ref tr, 0);
-							Vector3 axis = MathUtil.MatrixColumn(ref tr, 1);
+                            IndexedVector3 normal = tr._basis.GetColumn(0);
+                            IndexedVector3 axis = tr._basis.GetColumn(1);
 							float a_min = pSlider.GetLowerAngLimit();
 							float a_max = pSlider.GetUpperAngLimit();
-							Vector3 center = pSlider.GetCalculatedTransformB().Translation;
+							IndexedVector3 center = pSlider.GetCalculatedTransformB()._origin;
 							debugDraw.DrawArc(ref center, ref normal, ref axis, dbgDrawSize, dbgDrawSize, a_min, a_max, ref zero, true);
 						}
 					}
@@ -480,13 +480,13 @@ namespace BulletXNA
 		}
 
 
-		private static void DebugDrawSphere(float radius, ref Matrix transform, ref Vector3 color, IDebugDraw debugDraw)
+		private static void DebugDrawSphere(float radius, ref IndexedMatrix transform, ref IndexedVector3 color, IDebugDraw debugDraw)
 		{
-			Vector3 start = transform.Translation;
+			IndexedVector3 start = transform._origin;
 
-			Vector3 xoffs = Vector3.TransformNormal(new Vector3(radius, 0, 0), transform);
-			Vector3 yoffs = Vector3.TransformNormal(new Vector3(0, radius, 0), transform);
-			Vector3 zoffs = Vector3.TransformNormal(new Vector3(0, 0, radius), transform);
+			IndexedVector3 xoffs = transform._basis * new IndexedVector3(radius, 0, 0);
+            IndexedVector3 yoffs = transform._basis * new IndexedVector3(0, radius, 0);
+            IndexedVector3 zoffs = transform._basis * new IndexedVector3(0, 0, radius);
 
 			// XY 
 			debugDraw.DrawLine(start - xoffs, start + yoffs, color);
@@ -508,25 +508,24 @@ namespace BulletXNA
 
 		}
 
-
 		public static ShapeData CreateCube()
 		{
-			Matrix identity = Matrix.Identity;
-			return CreateBox(Vector3.Zero, new Vector3(1), Color.Yellow, ref identity);
+			IndexedMatrix identity = IndexedMatrix.Identity;
+			return CreateBox(IndexedVector3.Zero, new IndexedVector3(1), Color.Yellow, ref identity);
 		}
 
-		public static ShapeData CreateBox(Vector3 position, Vector3 sideLength, Color color, ref Matrix transform)
+		public static ShapeData CreateBox(IndexedVector3 position, IndexedVector3 sideLength, Color color, ref IndexedMatrix transform)
 		{
 			ShapeData shapeData = new ShapeData(8, 36);
 			int index = 0;
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(0, 0, 0), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(sideLength.X, 0, 0), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(sideLength.X, 0, sideLength.Z), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(0, 0, sideLength.Z), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(0, sideLength.Y, 0), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(sideLength.X, sideLength.Y, 0), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(sideLength.X, sideLength.Y, sideLength.Z), transform), color);
-			shapeData.m_verticesArray[index++] = new VertexPositionColor(Vector3.Transform(position + new Vector3(0, sideLength.Y, sideLength.Z), transform), color);
+			shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(0, 0, 0))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(sideLength.X, 0, 0))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(sideLength.X, 0, sideLength.Z))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(0, 0, sideLength.Z))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(0, sideLength.Y, 0))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(sideLength.X, sideLength.Y, 0))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(sideLength.X, sideLength.Y, sideLength.Z))).ToVector3(), color);
+            shapeData.m_verticesArray[index++] = new VertexPositionColor((transform * (position + new IndexedVector3(0, sideLength.Y, sideLength.Z))).ToVector3(), color);
 			shapeData.m_indexArray = DrawHelper.s_cubeIndices;
 			return shapeData;
 		}
@@ -555,8 +554,8 @@ namespace BulletXNA
 					x = sc * (float)Math.Sin(theta);
 					z = sc * (float)Math.Cos(theta);
 
-					//s_sphereVertices[index++] = new VertexPositionNormalTexture(new Vector3(x, y, z),
-					//                            new Vector3(x, y, z),
+					//s_sphereVertices[index++] = new VertexPositionNormalTexture(new IndexedVector3(x, y, z),
+					//                            new IndexedVector3(x, y, z),
 					//                            new Vector2((float)slice / (float)slices, (float)stack / (float)stacks));
 
 					shapeData.m_verticesArray[index++] = new VertexPositionColor(new Vector3(x, y, z), color);
@@ -593,35 +592,36 @@ namespace BulletXNA
 	public class DebugDrawcallback : ITriangleCallback, IInternalTriangleIndexCallback
 	{
 		IDebugDraw m_debugDrawer;
-		Vector3 m_color;
-		Matrix m_worldTrans;
+		IndexedVector3 m_color;
+		IndexedMatrix m_worldTrans;
 
 		public virtual bool graphics()
 		{
 			return true;
 		}
 
-		public DebugDrawcallback(IDebugDraw debugDrawer, ref Matrix worldTrans, ref Vector3 color)
+		public DebugDrawcallback(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color)
 		{
 			m_debugDrawer = debugDrawer;
 			m_color = color;
 			m_worldTrans = worldTrans;
 		}
 
-		public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+		public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
 			ProcessTriangle(triangle, partId, triangleIndex);
 		}
 
-		public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+		public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
 			//(void)partId;
 			//(void)triangleIndex;
 
-			Vector3 wv0, wv1, wv2;
-			Vector3.Transform(ref triangle[0], ref m_worldTrans, out wv0);
-			Vector3.Transform(ref triangle[1], ref m_worldTrans, out wv1);
-			Vector3.Transform(ref triangle[2], ref m_worldTrans, out wv2);
+			IndexedVector3 wv0, wv1, wv2;
+            wv0 = m_worldTrans * triangle[0];
+            wv1 = m_worldTrans * triangle[1];
+            wv2 = m_worldTrans * triangle[2];
+
 
 			m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
 			m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);

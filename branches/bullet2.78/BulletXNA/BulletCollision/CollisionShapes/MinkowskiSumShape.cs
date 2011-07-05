@@ -22,13 +22,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class MinkowskiSumShape : ConvexInternalShape
     {
@@ -37,53 +35,52 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         {
             m_shapeA = shapeA;
             m_shapeB = shapeB;
-            m_transA = Matrix.Identity;
-            m_transB = Matrix.Identity;
+            m_transA = IndexedMatrix.Identity;
+            m_transB = IndexedMatrix.Identity;
             m_shapeType = BroadphaseNativeTypes.MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE;
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
         {
-			Vector3 ta = MathUtil.TransposeTransformNormal(vec, m_transA);
-			Vector3 tb = MathUtil.TransposeTransformNormal(vec, m_transB);
-
-            Vector3 supVertexA = Vector3.Transform((m_shapeA.LocalGetSupportingVertexWithoutMargin(ref ta)),m_transA);
-            Vector3 supVertexB = Vector3.Transform((m_shapeB.LocalGetSupportingVertexWithoutMargin(ref tb)), m_transB);
+            IndexedVector3 temp = vec * m_transA._basis;
+            IndexedVector3 supVertexA = m_transA * (m_shapeA.LocalGetSupportingVertexWithoutMargin(ref temp));
+            temp = -vec * m_transB._basis;
+            IndexedVector3 supVertexB = m_transB * (m_shapeB.LocalGetSupportingVertexWithoutMargin(ref temp));
             return supVertexA - supVertexB;
         }
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
             ///@todo: could make recursive use of batching. probably this shape is not used frequently.
             for (int i = 0; i < numVectors; i++)
             {
-                Vector3 temp = vectors[i];
-                supportVerticesOut[i] = new Vector4(LocalGetSupportingVertexWithoutMargin(ref temp),0f);
+                IndexedVector3 temp = vectors[i];
+                supportVerticesOut[i] = new Vector4(LocalGetSupportingVertexWithoutMargin(ref temp).ToVector3(),0f);
             }
         }
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
             Debug.Assert(false);
-            inertia = Vector3.Zero;
+            inertia = IndexedVector3.Zero;
         }
 
-	    public void	SetTransformA(ref Matrix transA) 
+	    public void	SetTransformA(ref IndexedMatrix transA) 
         { 
             m_transA = transA;
         }
 	    
-	    public void	SetTransformB(ref Matrix transB) 
+	    public void	SetTransformB(ref IndexedMatrix transB) 
         { 
             m_transB = transB;
         }
 
     
-        public Matrix GetTransformA()
+        public IndexedMatrix GetTransformA()
         { 
             return m_transA;
         }
 
-        public Matrix GetTransformB()
+        public IndexedMatrix GetTransformB()
         { 
             return m_transB;
         }
@@ -108,8 +105,8 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return "MinkowskiSum";
 	    }
 
-        private Matrix m_transA;
-        private Matrix m_transB;
+        private IndexedMatrix m_transA;
+        private IndexedMatrix m_transB;
 
         private ConvexShape m_shapeA;
         private ConvexShape m_shapeB;

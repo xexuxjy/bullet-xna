@@ -23,7 +23,7 @@
 
 using System.Collections.Generic;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class TriangleInfoMap
     {

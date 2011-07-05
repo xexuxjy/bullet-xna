@@ -21,15 +21,14 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface IConvexPenetrationDepthSolver
     {
-        bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref Matrix transA, ref Matrix transB,
-                ref Vector3 v, ref Vector3 pa, ref Vector3 pb, IDebugDraw debugDraw);
+        bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref IndexedMatrix transA, ref IndexedMatrix transB,
+                ref IndexedVector3 v, ref IndexedVector3 pa, ref IndexedVector3 pb, IDebugDraw debugDraw);
     }
 }

@@ -22,13 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class CapsuleShape : ConvexInternalShape
     {
@@ -40,18 +37,18 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         public CapsuleShape(float radius,float height) : this()
         {
 	        m_upAxis = 1;
-	        m_implicitShapeDimensions = new Vector3(radius,0.5f*height,radius);
+	        m_implicitShapeDimensions = new IndexedVector3(radius,0.5f*height,radius);
         }
 	    ///CollisionShape Interface
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
-	        Matrix ident = Matrix.Identity;
+	        IndexedMatrix ident = IndexedMatrix.Identity;
         	
-	        float radius = getRadius();
+	        float radius = GetRadius();
 
-	        Vector3 halfExtents = new Vector3(radius);
-            float val = MathUtil.VectorComponent(ref halfExtents,GetUpAxis());
-	        MathUtil.VectorComponent(ref halfExtents,GetUpAxis(),val +getHalfHeight());
+	        IndexedVector3 halfExtents = new IndexedVector3(radius);
+            float val = halfExtents[GetUpAxis()];
+	        halfExtents[GetUpAxis()] = val +GetHalfHeight();
 
 	        float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
 
@@ -63,26 +60,26 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        float z2 = lz*lz;
 	        float scaledmass = mass * 0.08333333f;
 
-	        inertia = scaledmass * (new Vector3(y2+z2,x2+z2,x2+y2));
+	        inertia = scaledmass * (new IndexedVector3(y2+z2,x2+z2,x2+y2));
         }
 
         public override void SetMargin(float collisionMargin)
 	    {
 		    //correct the m_implicitShapeDimensions for the margin
-		    Vector3 oldMargin = new Vector3(GetMargin());
-		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
+		    IndexedVector3 oldMargin = new IndexedVector3(GetMargin());
+		    IndexedVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
     		
 		    base.SetMargin(collisionMargin);
-		    Vector3 newMargin = new Vector3(GetMargin());
+		    IndexedVector3 newMargin = new IndexedVector3(GetMargin());
 		    m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	    }
 
-	    public override void SetLocalScaling(ref Vector3 scaling)
+	    public override void SetLocalScaling(ref IndexedVector3 scaling)
 	    {
-		    Vector3 oldMargin = new Vector3(GetMargin());
-		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
-		    Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
+		    IndexedVector3 oldMargin = new IndexedVector3(GetMargin());
+		    IndexedVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
+		    IndexedVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
 		    base.SetLocalScaling(ref scaling);
 
@@ -92,16 +89,16 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 
 
 	    /// btConvexShape Interface
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec0)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec0)
         {
-	        Vector3 supVec = Vector3.Zero;
+	        IndexedVector3 supVec = IndexedVector3.Zero;
 	        float maxDot = float.MinValue;
 
-	        Vector3 vec = vec0;
+	        IndexedVector3 vec = vec0;
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+		        vec = new IndexedVector3(1,0,0);
 	        } 
             else
 	        {
@@ -110,17 +107,17 @@ namespace BulletXNA.BulletCollision.CollisionShapes
               //vec.Normalize();
 	        }
 
-	        Vector3 vtx = new Vector3();
+	        IndexedVector3 vtx;
 	        float newDot;
         	
-	        float radius = getRadius();
+	        float radius = GetRadius();
 
 	        {
-		        Vector3 pos = Vector3.Zero;
-		        MathUtil.VectorComponent(ref pos,GetUpAxis(),getHalfHeight());
+		        IndexedVector3 pos = IndexedVector3.Zero;
+		        pos[GetUpAxis()] = GetHalfHeight();
 
 		        vtx = pos +vec*m_localScaling*(radius) - vec * GetMargin();
-		        newDot = Vector3.Dot(vec,vtx);
+		        newDot = vec.Dot(ref vtx);
 		        if (newDot > maxDot)
 		        {
 			        maxDot = newDot;
@@ -128,11 +125,11 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		        }
 	        }
 	        {
-                Vector3 pos = Vector3.Zero;
-                MathUtil.VectorComponent(ref pos, GetUpAxis(), -getHalfHeight());
+                IndexedVector3 pos = IndexedVector3.Zero;
+                pos[GetUpAxis()] = -GetHalfHeight();
 
                 vtx = pos + vec * m_localScaling * (radius) - vec * GetMargin();
-                newDot = Vector3.Dot(vec, vtx);
+                newDot = vec.Dot(ref vtx);
                 if (newDot > maxDot)
                 {
                     maxDot = newDot;
@@ -143,55 +140,55 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return supVec;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
-	        float radius = getRadius();
+	        float radius = GetRadius();
 
 	        for (int j=0;j<numVectors;j++)
 	        {
 		        float maxDot = float.MinValue;
-		        Vector3 vec = vectors[j];
+		        IndexedVector3 vec = vectors[j];
 
-		        Vector3 vtx = new Vector3();
+		        IndexedVector3 vtx;
 		        float newDot = 0f;
 	            {
-		            Vector3 pos = Vector3.Zero;
-		            MathUtil.VectorComponent(ref pos,GetUpAxis(),getHalfHeight());
+		            IndexedVector3 pos = IndexedVector3.Zero;
+                    pos[GetUpAxis()] = GetHalfHeight();
 
 		            vtx = pos +vec*m_localScaling*(radius) - vec * GetMargin();
-		            newDot = Vector3.Dot(vec,vtx);
+                    newDot = vec.Dot(ref vtx);
 		            if (newDot > maxDot)
 		            {
 			            maxDot = newDot;
-			            supportVerticesOut[j] = new Vector4(vtx,0);
+			            supportVerticesOut[j] = new Vector4(vtx.ToVector3(),0);
 		            }
 	            }
 	            {
-                    Vector3 pos = Vector3.Zero;
-                    MathUtil.VectorComponent(ref pos, GetUpAxis(), -getHalfHeight());
+                    IndexedVector3 pos = IndexedVector3.Zero;
+                    pos[GetUpAxis()] = -GetHalfHeight();
 
                     vtx = pos + vec * m_localScaling * (radius) - vec * GetMargin();
-                    newDot = Vector3.Dot(vec, vtx);
+                    newDot = vec.Dot(ref vtx);
                     if (newDot > maxDot)
                     {
                         maxDot = newDot;
-			            supportVerticesOut[j] = new Vector4(vtx,0);
+			            supportVerticesOut[j] = new Vector4(vtx.ToVector3(),0);
                     }
                 }
 	        }
         }
 	
-	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
+	    public override void GetAabb (ref IndexedMatrix trans, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
 	    {
-	        Vector3 halfExtents = new Vector3(getRadius());
-	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, getRadius() + getHalfHeight());
-	        halfExtents += new Vector3(GetMargin());
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
-            Vector3 center = trans.Translation;
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents),
-                                            Vector3.Dot(abs_b.Up, halfExtents),
-                                            Vector3.Dot(abs_b.Backward, halfExtents));
+	        IndexedVector3 halfExtents = new IndexedVector3(GetRadius());
+            halfExtents[m_upAxis] = GetRadius() + GetHalfHeight();
+
+	        halfExtents += new IndexedVector3(GetMargin());
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+            IndexedVector3 center = trans._origin;
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtents),
+                                           abs_b[1].Dot(ref halfExtents),
+                                           abs_b[2].Dot(ref halfExtents));
     		
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;
@@ -208,15 +205,15 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_upAxis;
 	    }
 
-	    public float getRadius()
+	    public float GetRadius()
 	    {
 		    int radiusAxis = (m_upAxis+2)%3;
-		    return MathUtil.VectorComponent(ref m_implicitShapeDimensions,radiusAxis);
+		    return m_implicitShapeDimensions[radiusAxis];
 	    }
 
-	    public float getHalfHeight()
+	    public float GetHalfHeight()
 	    {
-            return MathUtil.VectorComponent(ref m_implicitShapeDimensions,m_upAxis);
+            return m_implicitShapeDimensions[m_upAxis];
 	    }
         protected int m_upAxis;
 
@@ -229,7 +226,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public CapsuleShapeX(float radius,float height)
         {
             m_upAxis = 0;
-            m_implicitShapeDimensions = new Vector3(0.5f * height, radius, radius);
+            m_implicitShapeDimensions = new IndexedVector3(0.5f * height, radius, radius);
         }
     		
 	    //debugging
@@ -246,7 +243,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	    public CapsuleShapeZ(float radius,float height)
         {
             m_upAxis = 2;
-            m_implicitShapeDimensions= new Vector3(radius, radius, 0.5f * height);
+            m_implicitShapeDimensions= new IndexedVector3(radius, radius, 0.5f * height);
         }
         //debugging
 	    public override String GetName()

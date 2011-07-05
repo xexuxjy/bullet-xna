@@ -21,14 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     /// btConvexConcaveCollisionAlgorithm  supports collision between convex shapes and (concave) trianges meshes.
 
@@ -74,8 +70,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         //            m_convexTriangleCallback.m_manifoldPtr.setBodies(convexBody, triBody);
 
-        //            Vector3 min = m_convexTriangleCallback.getAabbMin();
-        //            Vector3 max = m_convexTriangleCallback.getAabbMax();
+        //            IndexedVector3 min = m_convexTriangleCallback.getAabbMin();
+        //            IndexedVector3 max = m_convexTriangleCallback.getAabbMax();
 
         //            concaveShape.processAllTriangles(m_convexTriangleCallback, ref min,ref max );
 
@@ -95,33 +91,33 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         //    //only perform CCD above a certain threshold, this prevents blocking on the long run
         //    //because object in a blocked ccd state (hitfraction<1) get their linear velocity halved each frame...
-        //    float squareMot0 = (convexbody.getInterpolationWorldTransform().Translation - convexbody.getWorldTransform().Translation).LengthSquared();
+        //    float squareMot0 = (convexbody.getInterpolationWorldTransform()._origin - convexbody.getWorldTransform()._origin).LengthSquared();
         //    if (squareMot0 < convexbody.getCcdSquareMotionThreshold())
         //    {
         //        return 1f;
         //    }
 
-        //    //const Vector3& from = convexbody.m_worldTransform.Translation;
-        //    //Vector3 to = convexbody.m_interpolationWorldTransform.Translation;
+        //    //const IndexedVector3& from = convexbody.m_worldTransform._origin;
+        //    //IndexedVector3 to = convexbody.m_interpolationWorldTransform._origin;
         //    //todo: only do if the motion exceeds the 'radius'
 
-        //    //Matrix triInv = Matrix.Invert(triBody.getWorldTransform());
-        //    //Matrix convexFromLocal = MathUtil.bulletMatrixMultiply(triInv , convexbody.getWorldTransform());
-        //    //Matrix convexToLocal = MathUtil.bulletMatrixMultiply(triInv , convexbody.getInterpolationWorldTransform());
+        //    //IndexedMatrix triInv = IndexedMatrix.Invert(triBody.getWorldTransform());
+        //    //IndexedMatrix convexFromLocal = MathUtil.bulletMatrixMultiply(triInv , convexbody.getWorldTransform());
+        //    //IndexedMatrix convexToLocal = MathUtil.bulletMatrixMultiply(triInv , convexbody.getInterpolationWorldTransform());
 
-        //    Matrix triInv = Matrix.Invert(triBody.getWorldTransform());
-        //    Matrix convexFromLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getWorldTransform());
-        //    Matrix convexToLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getInterpolationWorldTransform());
+        //    IndexedMatrix triInv = IndexedMatrix.Invert(triBody.getWorldTransform());
+        //    IndexedMatrix convexFromLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getWorldTransform());
+        //    IndexedMatrix convexToLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getInterpolationWorldTransform());
 
         //    if (triBody.getCollisionShape().isConcave())
         //    {
-        //        Vector3 rayAabbMin = convexFromLocal.Translation;
-        //        MathUtil.vectorMin(convexToLocal.Translation, ref rayAabbMin);
-        //        Vector3 rayAabbMax = convexFromLocal.Translation;
-        //        MathUtil.vectorMax(convexToLocal.Translation,ref rayAabbMax);
+        //        IndexedVector3 rayAabbMin = convexFromLocal._origin;
+        //        MathUtil.vectorMin(convexToLocal._origin, ref rayAabbMin);
+        //        IndexedVector3 rayAabbMax = convexFromLocal._origin;
+        //        MathUtil.vectorMax(convexToLocal._origin,ref rayAabbMax);
         //        float ccdRadius0 = convexbody.getCcdSweptSphereRadius();
-        //        rayAabbMin -= new Vector3(ccdRadius0,ccdRadius0,ccdRadius0);
-        //        rayAabbMax += new Vector3(ccdRadius0,ccdRadius0,ccdRadius0);
+        //        rayAabbMin -= new IndexedVector3(ccdRadius0,ccdRadius0,ccdRadius0);
+        //        rayAabbMax += new IndexedVector3(ccdRadius0,ccdRadius0,ccdRadius0);
 
         //        float curHitFraction = 1.0f; //is this available?
         //        LocalTriangleSphereCastCallback raycastCallback = new LocalTriangleSphereCastCallback(ref convexFromLocal, ref convexToLocal,
@@ -176,8 +172,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     //m_dispatcher->clearManifold(m_btConvexTriangleCallback.m_manifoldPtr);
 
                     m_convexTriangleCallback.m_manifoldPtr.SetBodies(convexBody, triBody);
-                    Vector3 min = m_convexTriangleCallback.GetAabbMin();
-                    Vector3 max = m_convexTriangleCallback.GetAabbMax();
+                    IndexedVector3 min = m_convexTriangleCallback.GetAabbMin();
+                    IndexedVector3 max = m_convexTriangleCallback.GetAabbMax();
 
                     concaveShape.ProcessAllTriangles(m_convexTriangleCallback, ref min, ref max);
                     resultOut.RefreshContactPoints();
@@ -195,25 +191,25 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             //only perform CCD above a certain threshold, this prevents blocking on the long run
             //because object in a blocked ccd state (hitfraction<1) get their linear velocity halved each frame...
-            float squareMot0 = (convexbody.GetInterpolationWorldTransform().Translation - convexbody.GetWorldTransform().Translation).LengthSquared();
+            float squareMot0 = (convexbody.GetInterpolationWorldTransform()._origin - convexbody.GetWorldTransform()._origin).LengthSquared();
             if (squareMot0 < convexbody.GetCcdSquareMotionThreshold())
             {
                 return 1;
             }
 
-            //Matrix triInv = MathHelper.InvertMatrix(triBody.getWorldTransform());
-            Matrix triInv = Matrix.Invert(triBody.GetWorldTransform());
+            //IndexedMatrix triInv = MathHelper.InvertMatrix(triBody.getWorldTransform());
+            IndexedMatrix triInv = triBody.GetWorldTransform().Inverse();
 
-            Matrix convexFromLocal = triInv * convexbody.GetWorldTransform();
-            Matrix convexToLocal = triInv * convexbody.GetInterpolationWorldTransform();
+            IndexedMatrix convexFromLocal = triInv * convexbody.GetWorldTransform();
+            IndexedMatrix convexToLocal = triInv * convexbody.GetInterpolationWorldTransform();
 
             if (triBody.GetCollisionShape().IsConcave())
             {
-                Vector3 rayAabbMin = convexFromLocal.Translation;
-                MathUtil.VectorMin(convexToLocal.Translation, ref rayAabbMin);
-                Vector3 rayAabbMax = convexFromLocal.Translation;
-                MathUtil.VectorMax(convexToLocal.Translation, ref rayAabbMax);
-                Vector3 ccdRadius0 = new Vector3(convexbody.GetCcdSweptSphereRadius());
+                IndexedVector3 rayAabbMin = convexFromLocal._origin;
+                MathUtil.VectorMin(convexToLocal._origin, ref rayAabbMin);
+                IndexedVector3 rayAabbMax = convexFromLocal._origin;
+                MathUtil.VectorMax(convexToLocal._origin, ref rayAabbMax);
+                IndexedVector3 ccdRadius0 = new IndexedVector3(convexbody.GetCcdSweptSphereRadius());
                 rayAabbMin -= ccdRadius0;
                 rayAabbMax += ccdRadius0;
 
@@ -264,9 +260,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
     public class LocalTriangleSphereCastCallback : ITriangleCallback
     {
-        public Matrix m_ccdSphereFromTrans;
-        public Matrix m_ccdSphereToTrans;
-        public Matrix m_meshTransform;
+        public IndexedMatrix m_ccdSphereFromTrans;
+        public IndexedMatrix m_ccdSphereToTrans;
+        public IndexedMatrix m_meshTransform;
 
         public float m_ccdSphereRadius;
         public float m_hitFraction;
@@ -276,7 +272,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return false;
         }
 
-        public LocalTriangleSphereCastCallback(ref Matrix from, ref Matrix to, float ccdSphereRadius, float hitFraction)
+        public LocalTriangleSphereCastCallback(ref IndexedMatrix from, ref IndexedMatrix to, float ccdSphereRadius, float hitFraction)
         {
             m_ccdSphereFromTrans = from;
             m_ccdSphereToTrans = to;
@@ -288,10 +284,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
         }
 
-        public void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
             //do a swept sphere for now
-            Matrix ident = Matrix.Identity;
+            IndexedMatrix ident = IndexedMatrix.Identity;
             CastResult castResult = new CastResult();
             castResult.m_fraction = m_hitFraction;
             SphereShape pointShape = new SphereShape(m_ccdSphereRadius);
@@ -320,8 +316,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         private CollisionObject m_convexBody;
         private CollisionObject m_triBody;
 
-        private Vector3 m_aabbMin;
-        private Vector3 m_aabbMax;
+        private IndexedVector3 m_aabbMin;
+        private IndexedVector3 m_aabbMax;
 
         private ManifoldResult m_resultOut;
         private IDispatcher m_dispatcher;
@@ -361,18 +357,18 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_resultOut = resultOut;
 
             //recalc aabbs
-            //Matrix convexInTriangleSpace = MathUtil.bulletMatrixMultiply(Matrix.Invert(m_triBody.getWorldTransform()) , m_convexBody.getWorldTransform());
-            Matrix convexInTriangleSpace = MathUtil.InverseTimes(m_triBody.GetWorldTransform(), m_convexBody.GetWorldTransform());
+            //IndexedMatrix convexInTriangleSpace = MathUtil.bulletMatrixMultiply(IndexedMatrix.Invert(m_triBody.getWorldTransform()) , m_convexBody.getWorldTransform());
+            IndexedMatrix convexInTriangleSpace = m_triBody.GetWorldTransform().Inverse() * m_convexBody.GetWorldTransform();
             CollisionShape convexShape = m_convexBody.GetCollisionShape();
             convexShape.GetAabb(ref convexInTriangleSpace, out m_aabbMin, out m_aabbMax);
             float extraMargin = collisionMarginTriangle;
-            Vector3 extra = new Vector3(extraMargin);
+            IndexedVector3 extra = new IndexedVector3(extraMargin);
 
             m_aabbMax += extra;
             m_aabbMin -= extra;
         }
 
-        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
             //aabb filter is already applied!	
             CollisionAlgorithmConstructionInfo ci = new CollisionAlgorithmConstructionInfo();
@@ -385,11 +381,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawWireframe) > 0))
             {
-                Vector3 color = new Vector3(1, 1, 0);
-                Matrix tr = ob.GetWorldTransform();
+                IndexedVector3 color = new IndexedVector3(1, 1, 0);
+                IndexedMatrix tr = ob.GetWorldTransform();
 
-                Vector3[] transformedTriangles = new Vector3[3];
-                Vector3.Transform(triangle, ref tr, transformedTriangles);
+                IndexedVector3[] transformedTriangles = new IndexedVector3[3];
+                IndexedVector3.Transform(triangle, ref tr, transformedTriangles);
 
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[0], ref transformedTriangles[1], ref color);
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[1], ref transformedTriangles[2], ref color);
@@ -432,11 +428,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_dispatcher.ClearManifold(m_manifoldPtr);
         }
 
-        public Vector3 GetAabbMin()
+        public IndexedVector3 GetAabbMin()
         {
             return m_aabbMin;
         }
-        public Vector3 GetAabbMax()
+        public IndexedVector3 GetAabbMax()
         {
             return m_aabbMax;
         }

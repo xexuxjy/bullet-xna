@@ -26,11 +26,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class CollisionDispatcher : IDispatcher
     {
@@ -85,7 +83,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             // nothing in our pool so create a new one and return it.
             // need a way to flush the pool ideally
-            PersistentManifold manifold = null;
+            PersistentManifold manifold;
             if (m_persistentManifoldsPool.Count == 0)
             {
                 manifold = new PersistentManifold();
@@ -137,9 +135,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             int index1 = (int)body0.GetCollisionShape().GetShapeType();
             int index2 = (int)body1.GetCollisionShape().GetShapeType();
 
-            CollisionAlgorithm algo = m_doubleDispatch[index1, index2].CreateCollisionAlgorithm(ci, body0, body1);
-            return algo;
-
+            return m_doubleDispatch[index1, index2].CreateCollisionAlgorithm(ci, body0, body1);
         }
 
         public virtual bool NeedsCollision(CollisionObject body0, CollisionObject body1)

@@ -22,12 +22,10 @@
  */
 
 using System;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class BoxBoxDetector
     {
@@ -47,8 +45,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public virtual void GetClosestPoints(ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
         {
-            Matrix transformA = input.m_transformA;
-            Matrix transformB = input.m_transformB;
+            IndexedMatrix transformA = input.m_transformA;
+            IndexedMatrix transformB = input.m_transformB;
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
             {
@@ -60,67 +58,70 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             int skip = 0;
             Object contact = null;
-            Matrix rotateA = Matrix.Identity;
-            rotateA.Backward = transformA.Backward;
-            rotateA.Right = transformA.Right;
-            rotateA.Up = transformA.Up;
-
-            Matrix rotateB = Matrix.Identity;
-            rotateB.Backward = transformB.Backward;
-            rotateB.Right = transformB.Right;
-            rotateB.Up = transformB.Up;
 
             IndexedVector3 normal = new IndexedVector3();
             float depth = 0f;
             int return_code = -1;
             int maxc = 4;
 
-            IndexedVector3 translationA = new IndexedVector3(transformA.Translation);
-            IndexedVector3 translationB = new IndexedVector3(transformB.Translation);
+            IndexedVector3 translationA = new IndexedVector3(transformA._origin);
+            IndexedVector3 translationB = new IndexedVector3(transformB._origin);
 
-            //Vector3 debugExtents = new Vector3(2f, 2f, 2f);
+            //IndexedVector3 debugExtents = new IndexedVector3(2f, 2f, 2f);
 
             IndexedVector3 box1Margin = new IndexedVector3(2f * m_box1.GetHalfExtentsWithMargin());
             IndexedVector3 box2Margin = new IndexedVector3(2f * m_box2.GetHalfExtentsWithMargin());
 
-            //Vector3 box1Margin = 2f * debugExtents;
-            //Vector3 box2Margin = 2f * debugExtents;
-            rotateA = Matrix.Transpose(rotateA);
-            rotateB = Matrix.Transpose(rotateB);
+            //IndexedVector3 box1Margin = 2f * debugExtents;
+            //IndexedVector3 box2Margin = 2f * debugExtents;
 
-            float[] temp1 = s_temp1;
-            float[] temp2 = s_temp2;
+            IndexedBasisMatrix rotateA = transformA._basis.Transpose();
+            IndexedBasisMatrix rotateB = transformB._basis.Transpose();
 
-            temp1[0] = rotateA.M11;
-            temp1[1] = rotateA.M12;
-            temp1[2] = rotateA.M13;
+            for (int j = 0; j < 3; j++)
+            {
+                s_temp1[0 + 4 * j] = transformA._basis[j].X;
+                s_temp2[0 + 4 * j] = transformB._basis[j].X;
 
-            temp1[4] = rotateA.M21;
-            temp1[5] = rotateA.M22;
-            temp1[6] = rotateA.M23;
-
-            temp1[8] = rotateA.M31;
-            temp1[9] = rotateA.M32;
-            temp1[10] = rotateA.M33;
+                s_temp1[1 + 4 * j] = transformA._basis[j].Y;
+                s_temp2[1 + 4 * j] = transformB._basis[j].Y;
 
 
-            temp2[0] = rotateB.M11;
-            temp2[1] = rotateB.M12;
-            temp2[2] = rotateB.M13;
+                s_temp1[2 + 4 * j] = transformA._basis[j].Z;
+                s_temp2[2 + 4 * j] = transformB._basis[j].Z;
 
-            temp2[4] = rotateB.M21;
-            temp2[5] = rotateB.M22;
-            temp2[6] = rotateB.M23;
+            }
 
-            temp2[8] = rotateB.M31;
-            temp2[9] = rotateB.M32;
-            temp2[10] = rotateB.M33;
+            //s_temp1[0] = rotateA._Row0.X;
+            //s_temp1[1] = rotateA._Row0.Y;
+            //s_temp1[2] = rotateA._Row0.Z;
+
+            //s_temp1[4] = rotateA._Row1.X;
+            //s_temp1[5] = rotateA._Row1.Y;
+            //s_temp1[6] = rotateA._Row1.Z;
+
+            //s_temp1[8] = rotateA._Row2.X;
+            //s_temp1[9] = rotateA._Row2.X;
+            //s_temp1[10] = rotateA._Row2.X;
+
+
+            //s_temp2[0] = rotateB._Row0.X;
+            //s_temp2[1] = rotateB._Row0.Y;
+            //s_temp2[2] = rotateB._Row0.Z;
+
+            //s_temp2[4] = rotateB._Row1.X;
+            //s_temp2[5] = rotateB._Row1.Y;
+            //s_temp2[6] = rotateB._Row1.Z;
+
+            //s_temp2[8] = rotateB._Row2.X;
+            //s_temp2[9] = rotateB._Row2.Y;
+            //s_temp2[10] = rotateB._Row2.Z;
 
             DBoxBox2(ref translationA,
-            temp1,
+            s_temp1,
             ref box1Margin,
             ref translationB,
-            temp2,
+            s_temp2,
             ref box2Margin,
             ref normal, ref depth, ref return_code,
             maxc, contact, skip,
@@ -134,7 +135,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         ref IndexedVector3 normal, ref float depth, ref int return_code,
         int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output)
         {
-            Vector3 centerDifference = Vector3.Zero, ppv = Vector3.Zero;
+            //IndexedVector3 centerDifference = IndexedVector3.Zero, ppv = IndexedVector3.Zero;
             float[] normalR = null;
             int normalROffsetResult = 0;
 
@@ -201,7 +202,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             // note: cross product axes need to be scaled when s is computed.
             // normal (n1,n2,n3) is relative to box 1.
             // separating axis = u1 x (v1,v2,v3)
-            //private static bool TST2(float expr1,float expr2,ref Vector3 normal, ref Vector3 normalC,int cc,ref int code)
+            //private static bool TST2(float expr1,float expr2,ref IndexedVector3 normal, ref IndexedVector3 normalC,int cc,ref int code)
 
             IndexedVector3 normalC = new IndexedVector3();
 
@@ -317,8 +318,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             pointInWorld = (pa + pb) * 0.5f;
             output.addContactPoint(-normal,pointInWorld,-depth);
 #else
-                    Vector3 pbv = pb1.ToVector3();
-                    output.AddContactPoint((-normal).ToVector3(), pbv, -depth);
+                    output.AddContactPoint(-normal, pb1, -depth);
 #endif //
                     return_code = code;
                 }
@@ -551,13 +551,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                         {
                             pointInWorldFA[i] = point[j * 3 + i] + pa[i];
                         }
-                        Vector3 pointInWorld = pointInWorldFA.ToVector3();
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
-                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
+                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorldFA);
                         }
 
-                        output.AddContactPoint((-normal).ToVector3(), pointInWorld, -dep[j]);
+                        output.AddContactPoint(-normal, pointInWorldFA, -dep[j]);
                     }
                 }
                 else
@@ -574,9 +573,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
-                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld.ToVector3());
+                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                         }
-                        output.AddContactPoint((-normal).ToVector3(), pointInWorld.ToVector3(), -dep[j]);
+                        output.AddContactPoint(-normal, pointInWorld, -dep[j]);
                     }
                 }
             }
@@ -608,14 +607,14 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     {
                         posInWorldFA[i] = point[iret[j] * 3 + i] + pa[i];
                     }
-                    Vector3 pointInWorld = posInWorldFA.ToVector3();
+                    IndexedVector3 pointInWorld = posInWorldFA;
 
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                     }
 
-                    output.AddContactPoint((-normal).ToVector3(), pointInWorld, -dep[iret[j]]);
+                    output.AddContactPoint((-normal), pointInWorld, -dep[iret[j]]);
 
                 }
                 cnum = maxc;
@@ -630,9 +629,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             IndexedVector3 p = pb - pa;
 
-            float uaub = IndexedVector3.Dot(ref ua, ref ub);
-            float q1 = IndexedVector3.Dot(ref ua, ref p);
-            float q2 = -IndexedVector3.Dot(ref ub, ref p);
+            float uaub = ua.Dot(ref ub);
+            float q1 = ua.Dot(ref p);
+            float q2 = -(ub.Dot(ref p));
             float d = 1 - uaub * uaub;
             if (d <= 0.0001f)
             {
@@ -882,47 +881,58 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             return false;
         }
 
-        private static float DDOT(ref IndexedVector3 a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(ref a, ref b, aOffset, bOffset, 1, 1); }
+        //#define dDOTpq(a,b,p,q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
 
-        private static float DDOT(ref IndexedVector3 a, int aOffset, float[] b, int bOffset) { return DDOTpq(ref a, b, aOffset, bOffset, 1, 1); }
-
-        private static float DDOT(float[] a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(a, ref b, aOffset, bOffset, 1, 1); }
-
-
-        private static float DDOT44(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 4); }
-        private static float DDOT41(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 4, 1); }
-        private static float DDOT41(float[] a, int aOffset, ref IndexedVector3 b, int bOffset) { return DDOTpq(a, ref b, aOffset, bOffset, 4, 1); }
-
-        private static float DDOT14(float[] a, int aOffset, float[] b, int bOffset) { return DDOTpq(a, b, aOffset, bOffset, 1, 4); }
-
-        private static float DDOT14(ref IndexedVector3 a, int aOffset, float[] b, int bOffset) { return DDOTpq(ref a, b, aOffset, bOffset, 1, 4); }
-
-
-        private static float DDOTpq(float[] a, ref IndexedVector3 b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(ref IndexedVector3 a, int aOffset, ref IndexedVector3 b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
+            //return DDOTpq(ref a, ref b, aOffset, bOffset, 1, 1);
+            return a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset];
         }
 
-        private static float DDOTpq(ref IndexedVector3 a, float[] b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(ref IndexedVector3 a, int aOffset, float[] b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(ref a, b, aOffset, bOffset, 1, 1);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset]);
         }
 
-        private static float DDOTpq(ref IndexedVector3 a, ref IndexedVector3 b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT(float[] a, int aOffset, ref IndexedVector3 b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(a, ref b, aOffset, bOffset, 1, 1);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[1 + bOffset] + a[2 + aOffset] * b[2 + bOffset]);
         }
 
 
-
-        private static float DDOTpq(float[] a, float[] b, int aOffset, int bOffset, int p, int q)
+        private static float DDOT44(float[] a, int aOffset, float[] b, int bOffset)
         {
-            //return (a[0] * b[0] + (a)[p] * (b)[q] + (a)[2 * (p)] * (b)[2 * (q)]); 
-            return (a[aOffset] * b[bOffset] + a[p + aOffset] * b[q + bOffset] + a[(2 * p) + aOffset] * b[(2 * q) + bOffset]);
+            //return DDOTpq(a, b, aOffset, bOffset, 4, 4);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[4 + bOffset] + a[8 + aOffset] * b[8 + bOffset]);
         }
+
+        private static float DDOT41(float[] a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(a, b, aOffset, bOffset, 4, 1);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[1 + bOffset] + a[8 + aOffset] * b[2 + bOffset]);
+        }
+        
+        private static float DDOT41(float[] a, int aOffset, ref IndexedVector3 b, int bOffset)
+        {
+            //return DDOTpq(a, ref b, aOffset, bOffset, 4, 1);
+            return (a[aOffset] * b[bOffset] + a[4 + aOffset] * b[1 + bOffset] + a[8 + aOffset] * b[2 + bOffset]);
+        }
+
+        private static float DDOT14(float[] a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(a, b, aOffset, bOffset, 1, 4);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[4 + bOffset] + a[2 + aOffset] * b[8 + bOffset]);
+        }
+
+        private static float DDOT14(ref IndexedVector3 a, int aOffset, float[] b, int bOffset)
+        {
+            //return DDOTpq(ref a, b, aOffset, bOffset, 1, 4);
+            return (a[aOffset] * b[bOffset] + a[1 + aOffset] * b[4 + bOffset] + a[2 + aOffset] * b[8 + bOffset]);
+        }
+
 
         public static void DMULTIPLY1_331(ref IndexedVector3 A, float[] B, ref IndexedVector3 C)
         {
@@ -967,8 +977,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 		public virtual void GetClosestPoints(ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
 		{
-			Matrix transformA = input.m_transformA;
-			Matrix transformB = input.m_transformB;
+			IndexedMatrix transformA = input.m_transformA;
+			IndexedMatrix transformB = input.m_transformB;
 
 			//if (BulletGlobals.g_streamWriter != null && debugBoxBox)
 			//{
@@ -980,12 +990,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 			int skip = 0;
 			Object contact = null;
-			Matrix rotateA = Matrix.Identity;
+			IndexedMatrix rotateA = IndexedMatrix.Identity;
 			rotateA.Backward = transformA.Backward;
 			rotateA.Right = transformA.Right;
 			rotateA.Up = transformA.Up;
 
-			Matrix rotateB = Matrix.Identity;
+			IndexedMatrix rotateB = IndexedMatrix.Identity;
 			rotateB.Backward = transformB.Backward;
 			rotateB.Right = transformB.Right;
 			rotateB.Up = transformB.Up;
@@ -995,18 +1005,18 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			int return_code = -1;
 			int maxc = 4;
 
-            IndexedVector3 translationA = new IndexedVector3(transformA.Translation);
-            IndexedVector3 translationB = new IndexedVector3(transformB.Translation);
+            IndexedVector3 translationA = new IndexedVector3(transformA._origin);
+            IndexedVector3 translationB = new IndexedVector3(transformB._origin);
 
-			Vector3 debugExtents = new Vector3(2f, 2f, 2f);
+			IndexedVector3 debugExtents = new IndexedVector3(2f, 2f, 2f);
 
             IndexedVector3 box1Margin = new IndexedVector3(2f * m_box1.GetHalfExtentsWithMargin());
             IndexedVector3 box2Margin = new IndexedVector3(2f * m_box2.GetHalfExtentsWithMargin());
 
-			//Vector3 box1Margin = 2f * debugExtents;
-			//Vector3 box2Margin = 2f * debugExtents;
-			rotateA = Matrix.Transpose(rotateA);
-			rotateB = Matrix.Transpose(rotateB);
+			//IndexedVector3 box1Margin = 2f * debugExtents;
+			//IndexedVector3 box2Margin = 2f * debugExtents;
+			rotateA = IndexedMatrix.Transpose(rotateA);
+			rotateB = IndexedMatrix.Transpose(rotateB);
 
 
 			DBoxBox2(ref translationA,
@@ -1021,16 +1031,16 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 		}
 
-		private static int DBoxBox2(ref IndexedVector3 p1, ref Matrix R1,
+		private static int DBoxBox2(ref IndexedVector3 p1, ref IndexedMatrix R1,
         ref IndexedVector3 side1, ref IndexedVector3 p2,
-        ref Matrix R2, ref IndexedVector3 side2,
+        ref IndexedMatrix R2, ref IndexedVector3 side2,
         ref IndexedVector3 normal, ref float depth, ref int return_code,
 		int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output)
 		{
 			counter++;
 
-			Vector3 centerDifference = Vector3.Zero, ppv = Vector3.Zero;
-			Matrix normalR = Matrix.Identity;
+			IndexedVector3 centerDifference = IndexedVector3.Zero, ppv = IndexedVector3.Zero;
+			IndexedMatrix normalR = IndexedMatrix.Identity;
 			int normalROffsetResult = 0;
 
 
@@ -1054,15 +1064,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			// set to a vector relative to body 1. invert_normal is 1 if the sign of
 			// the normal should be flipped.
 
-			float R11 = Vector3.Dot(R1.Right, R2.Right);
-			float R12 = Vector3.Dot(R1.Right, R2.Up);
-			float R13 = Vector3.Dot(R1.Right, R2.Backward);
-			float R21 = Vector3.Dot(R1.Up, R2.Right);
-			float R22 = Vector3.Dot(R1.Up, R2.Up);
-			float R23 = Vector3.Dot(R1.Up, R2.Backward);
-			float R31 = Vector3.Dot(R1.Backward, R2.Right);
-			float R32 = Vector3.Dot(R1.Backward, R2.Up);
-			float R33 = Vector3.Dot(R1.Backward, R2.Backward);
+			float R11 = IndexedVector3.Dot(R1.Right, R2.Right);
+			float R12 = IndexedVector3.Dot(R1.Right, R2.Up);
+			float R13 = IndexedVector3.Dot(R1.Right, R2.Backward);
+			float R21 = IndexedVector3.Dot(R1.Up, R2.Right);
+			float R22 = IndexedVector3.Dot(R1.Up, R2.Up);
+			float R23 = IndexedVector3.Dot(R1.Up, R2.Backward);
+			float R31 = IndexedVector3.Dot(R1.Backward, R2.Right);
+			float R32 = IndexedVector3.Dot(R1.Backward, R2.Up);
+			float R33 = IndexedVector3.Dot(R1.Backward, R2.Backward);
 
 			float Q11 = Math.Abs(R11);
 			float Q12 = Math.Abs(R12);
@@ -1096,7 +1106,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			// note: cross product axes need to be scaled when s is computed.
 			// normal (n1,n2,n3) is relative to box 1.
 			// separating axis = u1 x (v1,v2,v3)
-			//private static bool TST2(float expr1,float expr2,ref Vector3 normal, ref Vector3 normalC,int cc,ref int code)
+			//private static bool TST2(float expr1,float expr2,ref IndexedVector3 normal, ref IndexedVector3 normalC,int cc,ref int code)
 
             IndexedVector3 normalC = new IndexedVector3();
 			// separating axis = u1 x (v1,v2,v3)
@@ -1193,8 +1203,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             pointInWorld = (pa + pb) * 0.5f;
             output.addContactPoint(-normal,pointInWorld,-depth);
 #else
-					Vector3 pbv = pb1.ToVector3();
-					output.AddContactPoint(-normal.ToVector3(), pbv, -depth);
+					IndexedVector3 pbv = pb1;
+					output.AddContactPoint(-normal, pbv, -depth);
 #endif //
 					return_code = code;
 				}
@@ -1207,8 +1217,8 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			// the incident face (the closest face of the other box).
 
 
-			Matrix Ra = Matrix.Identity;
-			Matrix Rb = Matrix.Identity;
+			IndexedMatrix Ra = IndexedMatrix.Identity;
+			IndexedMatrix Rb = IndexedMatrix.Identity;
 			IndexedVector3 pa = new IndexedVector3();
             IndexedVector3 pb = new IndexedVector3();
             IndexedVector3 Sa = new IndexedVector3();
@@ -1348,10 +1358,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			// optimize this? - we have already computed this data above, but it is not
 			// stored in an easy-to-index format. for now it's quicker just to recompute
 			// the four dot products.
-			m11 = Vector3.Dot(MathUtil.MatrixColumn(ref Ra, code1), MathUtil.MatrixColumn(ref Rb, a1));
-			m12 = Vector3.Dot(MathUtil.MatrixColumn(ref Ra, code1), MathUtil.MatrixColumn(ref Rb, a2));
-			m21 = Vector3.Dot(MathUtil.MatrixColumn(ref Ra, code2), MathUtil.MatrixColumn(ref Rb, a1));
-			m22 = Vector3.Dot(MathUtil.MatrixColumn(ref Ra, code2), MathUtil.MatrixColumn(ref Rb, a2));
+			m11 = IndexedVector3.Dot(MathUtil.MatrixColumn(ref Ra, code1), MathUtil.MatrixColumn(ref Rb, a1));
+			m12 = IndexedVector3.Dot(MathUtil.MatrixColumn(ref Ra, code1), MathUtil.MatrixColumn(ref Rb, a2));
+			m21 = IndexedVector3.Dot(MathUtil.MatrixColumn(ref Ra, code2), MathUtil.MatrixColumn(ref Rb, a1));
+			m22 = IndexedVector3.Dot(MathUtil.MatrixColumn(ref Ra, code2), MathUtil.MatrixColumn(ref Rb, a2));
 
 			{
 				float k1 = m11 * Sb[a1];
@@ -1427,7 +1437,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 				//    BulletGlobals.g_streamWriter.WriteLine("k1[{0:0.00000000}] k2[{1:0.00000000}] a[{2:0.00000000}] b[{3:0.00000000}] c[{4:0.00000000}] p[{5:0.00000000}]", k1, k2, a, b, c, point[cnum * 3 + 2]);
 				//}
 
-				Vector3 temp = new Vector3(point[cnum * 3], point[(cnum * 3) + 1], point[(cnum * 3) + 2]);
+				IndexedVector3 temp = new IndexedVector3(point[cnum * 3], point[(cnum * 3) + 1], point[(cnum * 3) + 2]);
 				//dep[cnum] = MathUtil.VectorComponent(ref Sa,codeN) - DDOT(normal2,0, point ,cnum * 3);
 				dep[cnum] = Sa[codeN] - IndexedVector3.Dot(ref normal2, ref temp);
 
@@ -1487,17 +1497,17 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                             pointInWorldFA[i] = point[j * 3 + i] + pa[i];
                         }
 
-						Vector3 pointInWorld = pointInWorldFA.ToVector3();
+						IndexedVector3 pointInWorld = pointInWorldFA;
 						if (BulletGlobals.g_streamWriter != null && debugBoxBox)
 						{
 							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
 							BulletGlobals.g_streamWriter.WriteLine(String.Format("Code [{0}] cnum[{1}]", code, cnum));
 							BulletGlobals.g_streamWriter.WriteLine(String.Format("depth [{0:0000.00000000}]", -dep[j]));
-							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox normal", (-normal).ToVector3());
+							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox normal", (-normal));
 
 						}
 
-						output.AddContactPoint((-normal).ToVector3(), pointInWorld, -dep[j]);
+						output.AddContactPoint((-normal), pointInWorld, -dep[j]);
 					}
 				}
 				else
@@ -1505,7 +1515,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 					// we have less contacts than we need, so we use them all
 					for (int j = 0; j < cnum; j++)
 					{
-						Vector3 pointInWorld = Vector3.Zero;
+						IndexedVector3 pointInWorld = IndexedVector3.Zero;
 						pointInWorld.X = point[j * 3 + 0] + pa.X - normal.X * dep[j];
 						pointInWorld.Y = point[j * 3 + 1] + pa.Y - normal.Y * dep[j];
 						pointInWorld.Z = point[j * 3 + 2] + pa.Z - normal.Z * dep[j];
@@ -1515,9 +1525,9 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
 							BulletGlobals.g_streamWriter.WriteLine(String.Format("Code [{0}] cnum[{1}]", code, cnum));
 							BulletGlobals.g_streamWriter.WriteLine(String.Format("depth [{0:0000.00000000}]", -dep[j]));
-							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox normal", (-normal).ToVector3());
+							MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox normal", (-normal));
 						}
-						output.AddContactPoint((-normal).ToVector3(), pointInWorld, -dep[j]);
+						output.AddContactPoint((-normal), pointInWorld, -dep[j]);
 					}
 				}
 			}
@@ -1557,11 +1567,11 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 					if (code < 4)
 					{
-						output.AddContactPoint((-normal).ToVector3(), pointInWorld.ToVector3(), -dep[iret[j]]);
+						output.AddContactPoint((-normal), pointInWorld, -dep[iret[j]]);
 					}
 					else
 					{
-						output.AddContactPoint((-normal).ToVector3(), (pointInWorld - normal * dep[iret[j]]).ToVector3(), -dep[iret[j]]);
+						output.AddContactPoint((-normal), (pointInWorld - normal * dep[iret[j]]), -dep[iret[j]]);
 					}
 
 				}
@@ -1814,7 +1824,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 			}
 		}
 
-		private static bool TST(float expr1, float expr2, ref Matrix norm, ref Matrix normalR, ref bool normalRHasValue,int offset, ref int normalROffset, int cc, ref int code, ref float s, ref bool invert_normal)
+		private static bool TST(float expr1, float expr2, ref IndexedMatrix norm, ref IndexedMatrix normalR, ref bool normalRHasValue,int offset, ref int normalROffset, int cc, ref int code, ref float s, ref bool invert_normal)
 		{
 			float s2 = Math.Abs(expr1) - expr2;
 			if (s2 > 0)
@@ -1835,7 +1845,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
 		// note: cross product axes need to be scaled when s is computed.
 		// normal (n1,n2,n3) is relative to box 1.
-        private static bool TST2(float expr1, float expr2, float n1, float n2, float n3, ref IndexedVector3 normalC, ref Matrix normalR, ref bool normalRHasValue, int cc, ref int code, ref float s, ref bool invert_normal)
+        private static bool TST2(float expr1, float expr2, float n1, float n2, float n3, ref IndexedVector3 normalC, ref IndexedMatrix normalR, ref bool normalRHasValue, int cc, ref int code, ref float s, ref bool invert_normal)
 		{
 			float s2 = Math.Abs(expr1) - (expr2);
 			if (s2 > MathUtil.SIMD_EPSILON)
@@ -1849,7 +1859,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 				if (s2 * fudge_factor > s)
 				{
 					s = s2;
-					normalR = Matrix.Identity;
+					normalR = IndexedMatrix.Identity;
 					normalRHasValue = false;
                     normalC = new IndexedVector3((n1) / l, (n2) / l, (n3) / l);
 					invert_normal = ((expr1) < 0);

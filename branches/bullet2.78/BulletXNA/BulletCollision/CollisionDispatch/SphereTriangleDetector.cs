@@ -22,13 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletCollision.NarrowPhaseCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionDispatch
+namespace BulletXNA.BulletCollision
 {
     public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface
     {
@@ -40,17 +37,17 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             m_contactBreakingThreshold = contactBreakingThreshold;
         }
 
-        public bool Collide(ref Vector3 sphereCenter, out Vector3 point, out Vector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
+        public bool Collide(ref IndexedVector3 sphereCenter, out IndexedVector3 point, out IndexedVector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
         {
-            Vector3[] vertices = m_triangle.GetVertexPtr(0);
+            IndexedVector3[] vertices = m_triangle.GetVertexPtr(0);
 
             float radius = m_sphere.GetRadius();
             float radiusWithThreshold = radius + contactBreakingThreshold;
 
-            Vector3 normal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+            IndexedVector3 normal = IndexedVector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
             normal.Normalize();
-            Vector3 p1ToCentre = sphereCenter - vertices[0];
-            float distanceFromPlane = Vector3.Dot(p1ToCentre, normal);
+            IndexedVector3 p1ToCentre = sphereCenter - vertices[0];
+            float distanceFromPlane = IndexedVector3.Dot(p1ToCentre, normal);
 
             if (distanceFromPlane < 0f)
             {
@@ -64,7 +61,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             // Check for contact / intersection
             bool hasContact = false;
-            Vector3 contactPoint = Vector3.Zero;
+            IndexedVector3 contactPoint = IndexedVector3.Zero;
             if (isInsideContactPlane)
             {
                 if (FaceContains(ref sphereCenter, vertices, ref normal))
@@ -77,12 +74,12 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 {
                     // Could be inside one of the contact capsules
                     float contactCapsuleRadiusSqr = (radiusWithThreshold) * (radiusWithThreshold);
-                    Vector3 nearestOnEdge;
+                    IndexedVector3 nearestOnEdge;
                     for (int i = 0; i < m_triangle.GetNumEdges(); i++)
                     {
 
-                        Vector3 pa;
-                        Vector3 pb;
+                        IndexedVector3 pa;
+                        IndexedVector3 pb;
 
                         m_triangle.GetEdge(i, out pa, out pb);
 
@@ -99,7 +96,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (hasContact)
             {
-                Vector3 contactToCentre = sphereCenter - contactPoint;
+                IndexedVector3 contactToCentre = sphereCenter - contactPoint;
                 float distanceSqr = contactToCentre.LengthSquared();
                 if (distanceSqr < (radiusWithThreshold) * (radiusWithThreshold))
                 {
@@ -121,40 +118,40 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                     return true;
                 }
             }
-            resultNormal = Vector3.Up;
-            point = Vector3.Zero;
+            resultNormal = new IndexedVector3(0, 1, 0);
+            point = IndexedVector3.Zero;
             return false;
         }
 
-        private bool PointInTriangle(Vector3[] vertices, ref Vector3 normal, ref Vector3 p)
+        private bool PointInTriangle(IndexedVector3[] vertices, ref IndexedVector3 normal, ref IndexedVector3 p)
         {
-            Vector3 p1 = vertices[0];
-            Vector3 p2 = vertices[1];
-            Vector3 p3 = vertices[2];
+            IndexedVector3 p1 = vertices[0];
+            IndexedVector3 p2 = vertices[1];
+            IndexedVector3 p3 = vertices[2];
 
-            Vector3 edge1 = p2 - p1;
-            Vector3 edge2 = p3 - p2;
-            Vector3 edge3 = p1 - p3;
+            IndexedVector3 edge1 = p2 - p1;
+            IndexedVector3 edge2 = p3 - p2;
+            IndexedVector3 edge3 = p1 - p3;
 
-            Vector3 p1_to_p = p - p1;
-            Vector3 p2_to_p = p - p2;
-            Vector3 p3_to_p = p - p3;
+            IndexedVector3 p1_to_p = p - p1;
+            IndexedVector3 p2_to_p = p - p2;
+            IndexedVector3 p3_to_p = p - p3;
 
-            Vector3 edge1_normal = Vector3.Cross(edge1, normal);
-            Vector3 edge2_normal = Vector3.Cross(edge2, normal);
-            Vector3 edge3_normal = Vector3.Cross(edge3, normal);
+            IndexedVector3 edge1_normal = IndexedVector3.Cross(edge1, normal);
+            IndexedVector3 edge2_normal = IndexedVector3.Cross(edge2, normal);
+            IndexedVector3 edge3_normal = IndexedVector3.Cross(edge3, normal);
 
             float r1, r2, r3;
-            r1 = Vector3.Dot(edge1_normal, p1_to_p);
-            r2 = Vector3.Dot(edge2_normal, p2_to_p);
-            r3 = Vector3.Dot(edge3_normal, p3_to_p);
+            r1 = IndexedVector3.Dot(edge1_normal, p1_to_p);
+            r2 = IndexedVector3.Dot(edge2_normal, p2_to_p);
+            r3 = IndexedVector3.Dot(edge3_normal, p3_to_p);
             if ((r1 > 0 && r2 > 0 && r3 > 0) ||
                  (r1 <= 0 && r2 <= 0 && r3 <= 0))
                 return true;
             return false;
         }
 
-        private bool FaceContains(ref Vector3 p, Vector3[] vertices, ref Vector3 normal)
+        private bool FaceContains(ref IndexedVector3 p, IndexedVector3[] vertices, ref IndexedVector3 normal)
         {
             return PointInTriangle(vertices, ref normal, ref p);
 
@@ -165,30 +162,30 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
         {
-            Matrix transformA = input.m_transformA;
-            Matrix transformB = input.m_transformB;
+            IndexedMatrix transformA = input.m_transformA;
+            IndexedMatrix transformB = input.m_transformB;
 
-            Vector3 point, normal;
+            IndexedVector3 point, normal;
             float timeOfImpact = 1f;
             float depth = 0f;
             //	output.m_distance = float(1e30);
             //move sphere into triangle space
-            Matrix sphereInTr = MathUtil.InverseTimes(transformB, transformA);
+            IndexedMatrix sphereInTr = transformB.InverseTimes(ref transformA);
 
-            Vector3 temp = sphereInTr.Translation;
+            IndexedVector3 temp = sphereInTr._origin;
             if (Collide(ref temp, out point, out normal, ref depth, ref timeOfImpact, m_contactBreakingThreshold))
             {
                 if (swapResults)
                 {
-                    Vector3 normalOnB = Vector3.TransformNormal(normal, transformB);
-                    Vector3 normalOnA = -normalOnB;
-                    Vector3 pointOnA = Vector3.Transform(point, transformB) + normalOnB * depth;
+                    IndexedVector3 normalOnB = transformB._basis * normal;
+                    IndexedVector3 normalOnA = -normalOnB;
+                    IndexedVector3 pointOnA = transformB * point + normalOnB * depth;
                     output.AddContactPoint(ref normalOnA, ref pointOnA, depth);
                 }
                 else
                 {
-                    Vector3 p = Vector3.TransformNormal(normal, transformB);
-                    Vector3 p2 = Vector3.Transform(point, transformB);
+                    IndexedVector3 p = transformB._basis * normal;
+                    IndexedVector3 p2 = transformB * point;
                     output.AddContactPoint(ref p, ref p2, depth);
                 }
             }
@@ -198,15 +195,15 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         // See also geometrictools.com
         // Basic idea: D = |p - (lo + t0*lv)| where t0 = lv . (p - lo) / lv . lv
-        public static float SegmentSqrDistance(ref Vector3 from, ref Vector3 to, ref Vector3 p, out Vector3 nearest)
+        public static float SegmentSqrDistance(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 p, out IndexedVector3 nearest)
         {
-            Vector3 diff = p - from;
-            Vector3 v = to - from;
-            float t = Vector3.Dot(v, diff);
+            IndexedVector3 diff = p - from;
+            IndexedVector3 v = to - from;
+            float t = IndexedVector3.Dot(v, diff);
 
             if (t > 0)
             {
-                float dotVV = Vector3.Dot(v, v);
+                float dotVV = IndexedVector3.Dot(v, v);
                 if (t < dotVV)
                 {
                     t /= dotVV;
@@ -224,7 +221,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             }
 
             nearest = from + t * v;
-            return Vector3.Dot(diff, diff);
+            return IndexedVector3.Dot(diff, diff);
         }
 
         private SphereShape m_sphere;

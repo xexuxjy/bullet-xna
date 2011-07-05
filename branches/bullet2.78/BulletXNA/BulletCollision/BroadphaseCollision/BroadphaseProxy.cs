@@ -20,11 +20,12 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
+
 using System;
-
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     ///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases. 
     ///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
@@ -39,8 +40,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         public Object m_multiSapParentProxy;
         public int m_uniqueId;//m_uniqueId is introduced for paircache. could get rid of this, by calculating the address offset etc.
 
-        public Vector3 m_aabbMin;
-        public Vector3 m_aabbMax;
+        public IndexedVector3 m_aabbMin;
+        public IndexedVector3 m_aabbMax;
 
         public int GetUid()
         {
@@ -54,7 +55,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_multiSapParentProxy = null;
         }
 
-        public BroadphaseProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapParentProxy)
+        public BroadphaseProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, Object multiSapParentProxy)
         {
             m_clientObject = userPtr;
             m_collisionFilterGroup = collisionFilterGroup;
@@ -107,22 +108,22 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        public Vector3 GetMinAABB()
+        public IndexedVector3 GetMinAABB()
         {
             return m_aabbMin;
         }
 
-        public Vector3 GetMaxAABB()
+        public IndexedVector3 GetMaxAABB()
         {
             return m_aabbMax;
         }
 
-        public void SetMinAABB(ref Vector3 min)
+        public void SetMinAABB(ref IndexedVector3 min)
         {
             m_aabbMin = min;
         }
 
-        public void SetMaxAABB(ref Vector3 max)
+        public void SetMaxAABB(ref IndexedVector3 max)
         {
             m_aabbMax = max;
         }

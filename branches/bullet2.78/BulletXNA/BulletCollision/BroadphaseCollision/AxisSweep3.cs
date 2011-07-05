@@ -28,11 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class AxisSweep3
     {
@@ -91,9 +90,9 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
     {
         protected int m_bpHandleMask;
         protected ushort m_handleSentinel;
-        protected Vector3 m_worldAabbMin;						// overall system bounds
-        protected Vector3 m_worldAabbMax;						// overall system bounds
-        protected Vector3 m_quantize;						// scaling factor for quantization
+        protected IndexedVector3 m_worldAabbMin;						// overall system bounds
+        protected IndexedVector3 m_worldAabbMax;						// overall system bounds
+        protected IndexedVector3 m_quantize;						// scaling factor for quantization
 
         protected ushort m_numHandles;						// number of active handles
         protected ushort m_maxHandles;						// max number of handles
@@ -438,8 +437,8 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        //public AxisSweep3Internal(ref Vector3 worldAabbMin,ref Vector3 worldAabbMax, int handleMask, int handleSentinel, int maxHandles = 16384, OverlappingPairCache* pairCache=0,bool disableRaycastAccelerator = false);
-        public AxisSweep3Internal(ref Vector3 worldAabbMin, ref Vector3 worldAabbMax, int handleMask, ushort handleSentinel, ushort userMaxHandles, IOverlappingPairCache pairCache, bool disableRaycastAccelerator)
+        //public AxisSweep3Internal(ref IndexedVector3 worldAabbMin,ref IndexedVector3 worldAabbMax, int handleMask, int handleSentinel, int maxHandles = 16384, OverlappingPairCache* pairCache=0,bool disableRaycastAccelerator = false);
+        public AxisSweep3Internal(ref IndexedVector3 worldAabbMin, ref IndexedVector3 worldAabbMax, int handleMask, ushort handleSentinel, ushort userMaxHandles, IOverlappingPairCache pairCache, bool disableRaycastAccelerator)
         {
             m_bpHandleMask = (handleMask);
             m_handleSentinel = (handleSentinel);
@@ -469,11 +468,11 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             m_worldAabbMin = worldAabbMin;
             m_worldAabbMax = worldAabbMax;
 
-            Vector3 aabbSize = m_worldAabbMax - m_worldAabbMin;
+            IndexedVector3 aabbSize = m_worldAabbMax - m_worldAabbMin;
 
             int maxInt = m_handleSentinel;
 
-            m_quantize = new Vector3((float)maxInt) / aabbSize;
+            m_quantize = new IndexedVector3((float)maxInt) / aabbSize;
 
             // allocate handles buffer, using btAlignedAlloc, and put all handles on free list
             m_pHandles = new Handle[maxHandles];
@@ -635,7 +634,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         }
 
-        public ushort AddHandle(ref Vector3 aabbMin, ref Vector3 aabbMax, Object pOwner, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public ushort AddHandle(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, Object pOwner, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             // quantize the bounds
             ushort[] min = new ushort[3], max = new ushort[3];
@@ -739,7 +738,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             FreeHandle(handle);
         }
 
-        public void UpdateHandle(ushort handle, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public void UpdateHandle(ushort handle, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             Handle pHandle = GetHandle(handle);
 
@@ -805,12 +804,12 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
         //Broadphase Interface
-        public virtual BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(IndexedVector3 aabbMin, IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             return CreateProxy(ref aabbMin, ref aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, dispatcher, multiSapProxy);
         }
 
-        public virtual BroadphaseProxy CreateProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             ushort handleId = AddHandle(ref aabbMin, ref aabbMax, userPtr, collisionFilterGroup, collisionFilterMask, dispatcher, multiSapProxy);
 
@@ -834,7 +833,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             RemoveHandle((ushort)handle.GetUid(), dispatcher);
 
         }
-        public virtual void SetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public virtual void SetAabb(BroadphaseProxy proxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             Handle handle = (Handle)proxy;
             handle.SetMinAABB(ref aabbMin);
@@ -845,14 +844,14 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
                 m_raycastAccelerator.SetAabb(handle.m_dbvtProxy, ref aabbMin, ref aabbMax, dispatcher);
             }
         }
-        public virtual void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy proxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             Handle pHandle = (Handle)proxy;
             aabbMin = pHandle.GetMinAABB();
             aabbMax = pHandle.GetMaxAABB();
         }
 
-        public virtual void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback callback)
+        public virtual void AabbTest(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IBroadphaseAabbCallback callback)
         {
             if (m_raycastAccelerator != null)
             {
@@ -879,15 +878,15 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
         }
 
 
-        //virtual void	rayTest(const Vector3& rayFrom,const Vector3& rayTo, btBroadphaseRayCallback& rayCallback, const Vector3& aabbMin=Vector3(0,0,0), const Vector3& aabbMax = Vector3(0,0,0));
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback)
+        //virtual void	rayTest(const IndexedVector3& rayFrom,const IndexedVector3& rayTo, btBroadphaseRayCallback& rayCallback, const IndexedVector3& aabbMin=IndexedVector3(0,0,0), const IndexedVector3& aabbMax = IndexedVector3(0,0,0));
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback)
         {
-            Vector3 min = MathUtil.MIN_VECTOR;
-            Vector3 max = MathUtil.MAX_VECTOR;
+            IndexedVector3 min = MathUtil.MIN_VECTOR;
+            IndexedVector3 max = MathUtil.MAX_VECTOR;
             RayTest(ref rayFrom, ref rayTo, rayCallback, ref min, ref max);
         }
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             if (m_raycastAccelerator != null)
             {
@@ -908,20 +907,20 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             }
         }
 
-        public void Quantize(ushort[] output, ref Vector3 point, int isMax)
+        public void Quantize(ushort[] output, ref IndexedVector3 point, int isMax)
         {
 #if OLD_CLAMPING_METHOD
 	    ///problem with this clamping method is that the floating point during quantization might still go outside the range [(0|isMax) .. (m_handleSentinel&m_bpHandleMask]|isMax]
 	    ///see http://code.google.com/p/bullet/issues/detail?id=87
-	    Vector3 clampedPoint = point;
+	    IndexedVector3 clampedPoint = point;
 	    clampedPoint.setMax(m_worldAabbMin);
 	    clampedPoint.setMin(m_worldAabbMax);
-	    Vector3 v = (clampedPoint - m_worldAabbMin) * m_quantize;
+	    IndexedVector3 v = (clampedPoint - m_worldAabbMin) * m_quantize;
 	    output[0] = (int)(((int)v.X & m_bpHandleMask) | isMax);
 	    output[1] = (int)(((int)v.Y & m_bpHandleMask) | isMax);
 	    output[2] = (int)(((int)v.Z & m_bpHandleMask) | isMax);
 #else
-            Vector3 v = (point - m_worldAabbMin) * m_quantize;
+            IndexedVector3 v = (point - m_worldAabbMin) * m_quantize;
             output[0] = (v.X <= 0) ? (ushort)isMax : (v.X >= m_handleSentinel) ? (ushort)((m_handleSentinel & m_bpHandleMask) | isMax) : (ushort)(((ushort)v.X & m_bpHandleMask) | isMax);
             output[1] = (v.Y <= 0) ? (ushort)isMax : (v.Y >= m_handleSentinel) ? (ushort)((m_handleSentinel & m_bpHandleMask) | isMax) : (ushort)(((ushort)v.Y & m_bpHandleMask) | isMax);
             output[2] = (v.Z <= 0) ? (ushort)isMax : (v.Z >= m_handleSentinel) ? (ushort)((m_handleSentinel & m_bpHandleMask) | isMax) : (ushort)(((ushort)v.Z & m_bpHandleMask) | isMax);
@@ -929,7 +928,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         }
         ///unQuantize should be conservative: aabbMin/aabbMax should be larger then 'getAabb' result
-        public void UnQuantize(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        public void UnQuantize(BroadphaseProxy proxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             Handle pHandle = (Handle)proxy;
 
@@ -943,13 +942,13 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
             vecInMin[2] = (ushort)m_pEdges[2, pHandle.m_minEdges[2]].m_pos;
             vecInMax[2] = (ushort)(m_pEdges[2, pHandle.m_maxEdges[2]].m_pos + 1);
 
-            aabbMin = new Vector3(
+            aabbMin = new IndexedVector3(
                 (float)(vecInMin[0]) / (m_quantize.X),
                 (float)(vecInMin[1]) / (m_quantize.Y),
                 (float)(vecInMin[2]) / (m_quantize.Z));
             aabbMin += m_worldAabbMin;
 
-            aabbMax = new Vector3(
+            aabbMax = new IndexedVector3(
                 (float)(vecInMax[0]) / (m_quantize.X),
                 (float)(vecInMax[1]) / (m_quantize.Y),
                 (float)(vecInMax[2]) / (m_quantize.Z));
@@ -994,7 +993,7 @@ namespace BulletXNA.BulletCollision.BroadphaseCollision
 
         ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
         ///will add some transform later
-        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetBroadphaseAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             aabbMin = m_worldAabbMin;
             aabbMax = m_worldAabbMax;

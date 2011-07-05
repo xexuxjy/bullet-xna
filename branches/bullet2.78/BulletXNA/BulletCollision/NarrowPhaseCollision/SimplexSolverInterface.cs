@@ -23,30 +23,31 @@
 
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface ISimplexSolverInterface
     {
         void Reset();
 
-        void AddVertex(ref Vector3 w, ref Vector3 p, ref Vector3 q);
+        void AddVertex(ref IndexedVector3 w, ref IndexedVector3 p, ref IndexedVector3 q);
 
-        bool Closest(out Vector3 v);
+        bool Closest(out IndexedVector3 v);
 
         float MaxVertex();
 
         bool FullSimplex();
 
-        int GetSimplex(IList<Vector3> pBuf, IList<Vector3> qBuf, IList<Vector3> yBuf);
+        int GetSimplex(IList<IndexedVector3> pBuf, IList<IndexedVector3> qBuf, IList<IndexedVector3> yBuf);
 
-        bool InSimplex(ref Vector3 w);
+        bool InSimplex(ref IndexedVector3 w);
 
-        void BackupClosest(ref Vector3 v);
+        void BackupClosest(ref IndexedVector3 v);
 
         bool EmptySimplex();
 
-        void ComputePoints(out Vector3 p1, out Vector3 p2);
+        void ComputePoints(out IndexedVector3 p1, out IndexedVector3 p2);
 
         int NumVertices();
 

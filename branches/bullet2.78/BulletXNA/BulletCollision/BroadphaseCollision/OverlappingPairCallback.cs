@@ -23,7 +23,7 @@
 
 using System;
 
-namespace BulletXNA.BulletCollision.BroadphaseCollision
+namespace BulletXNA.BulletCollision
 {
     public interface IOverlappingPairCallback
     {

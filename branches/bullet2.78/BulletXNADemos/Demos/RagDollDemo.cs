@@ -20,11 +20,8 @@ Written by: Marten Svanfeldt
 
 using System.IO;
 using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -88,7 +85,7 @@ namespace BulletXNADemos.Demos
             {
             }
 
-        	public RagDoll (RagDollDemo ragDollDemo,DynamicsWorld ownerWorld, ref Vector3 positionOffset,StreamWriter streamWriter)
+        	public RagDoll (RagDollDemo ragDollDemo,DynamicsWorld ownerWorld, ref IndexedVector3 positionOffset,StreamWriter streamWriter)
 		
 	        {
                 m_ownerWorld = ownerWorld;
@@ -107,65 +104,66 @@ namespace BulletXNADemos.Demos
                 m_shapes[(int)BODYPART.RIGHT_LOWER_ARM] = new CapsuleShape(0.04f, 0.25f);
 
 		        // Setup all the rigid bodies
-		        Matrix offset = Matrix.CreateTranslation(positionOffset);
+		        IndexedMatrix offset = IndexedMatrix.CreateTranslation(positionOffset);
 
-		        Matrix transform = Matrix.CreateTranslation(new Vector3(0,1,0));
+		        IndexedMatrix transform = IndexedMatrix.CreateTranslation(new IndexedVector3(0,1,0));
 
-				Matrix adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				IndexedMatrix adjusted = offset*transform;
 
                 m_bodies[(int)BODYPART.PELVIS] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.PELVIS],true);
 				m_bodies[(int)BODYPART.PELVIS].SetUserPointer("PELVIS");
-                transform = Matrix.CreateTranslation(new Vector3(0,1.2f,0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+                transform = IndexedMatrix.CreateTranslation(new IndexedVector3(0,1.2f,0));
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.SPINE] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.SPINE], true);
 				m_bodies[(int)BODYPART.SPINE].SetUserPointer("SPINE");
 
-                transform = Matrix.CreateTranslation(new Vector3(0,1.6f,0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+                transform = IndexedMatrix.CreateTranslation(new IndexedVector3(0,1.6f,0));
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.HEAD] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.HEAD], true);
 				m_bodies[(int)BODYPART.HEAD].SetUserPointer("HEAD");
 
-				transform = Matrix.CreateTranslation(new Vector3(-0.18f, 0.65f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform = IndexedMatrix.CreateTranslation(new IndexedVector3(-0.18f, 0.65f, 0));
+				adjusted = offset * transform
+                    ;
 				m_bodies[(int)BODYPART.LEFT_UPPER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_UPPER_LEG], true);
 				m_bodies[(int)BODYPART.LEFT_UPPER_LEG].SetUserPointer("LEFTUPPERLEG");
 
-				transform = Matrix.CreateTranslation(new Vector3(-0.18f, 0.2f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform = IndexedMatrix.CreateTranslation(new IndexedVector3(-0.18f, 0.2f, 0));
+				adjusted = offset *transform;
 				m_bodies[(int)BODYPART.LEFT_LOWER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_LOWER_LEG], true);
 				m_bodies[(int)BODYPART.LEFT_LOWER_LEG].SetUserPointer("LEFTLOWERLEG");
 
-				transform = Matrix.CreateTranslation(new Vector3(0.18f, 0.65f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform = IndexedMatrix.CreateTranslation(new IndexedVector3(0.18f, 0.65f, 0));
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.RIGHT_UPPER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_UPPER_LEG], true);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_LEG].SetUserPointer("RIGHTUPPERLEG");
 
-				transform = Matrix.CreateTranslation(new Vector3(0.18f, 0.2f, 0));
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform = IndexedMatrix.CreateTranslation(new IndexedVector3(0.18f, 0.2f, 0));
+				adjusted = offset*transform;
 				m_bodies[(int)BODYPART.RIGHT_LOWER_LEG] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_LOWER_LEG], true);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_LEG].SetUserPointer("RIGHTLOWERLEG");
 
 				transform = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-				transform.Translation = new Vector3(-0.35f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform._origin = new IndexedVector3(-0.35f, 1.45f, 0);
+				adjusted = offset *transform;
 				m_bodies[(int)BODYPART.LEFT_UPPER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_UPPER_ARM], true);
 				m_bodies[(int)BODYPART.LEFT_UPPER_ARM].SetUserPointer("LEFTUPPERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-				transform.Translation = new Vector3(-0.7f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform._origin = new IndexedVector3(-0.7f, 1.45f, 0);
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.LEFT_LOWER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.LEFT_LOWER_ARM], true);
 				m_bodies[(int)BODYPART.LEFT_LOWER_ARM].SetUserPointer("LEFTLOWERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_HALF_PI);
-				transform.Translation = new Vector3(0.35f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform._origin = new IndexedVector3(0.35f, 1.45f, 0);
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.RIGHT_UPPER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_UPPER_ARM], true);
 				m_bodies[(int)BODYPART.RIGHT_UPPER_ARM].SetUserPointer("RIGHTUPPERARM");
 
 				transform = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_HALF_PI);
-				transform.Translation = new Vector3(0.7f, 1.45f, 0);
-				adjusted = MathUtil.BulletMatrixMultiply(ref offset, ref transform);
+				transform._origin = new IndexedVector3(0.7f, 1.45f, 0);
+				adjusted = offset * transform;
 				m_bodies[(int)BODYPART.RIGHT_LOWER_ARM] = m_ragDollDemo.LocalCreateRigidBody(1f, adjusted, m_shapes[(int)BODYPART.RIGHT_LOWER_ARM], true);
 				m_bodies[(int)BODYPART.RIGHT_LOWER_ARM].SetUserPointer("RIGHTLOWERARM");
 
@@ -184,13 +182,13 @@ namespace BulletXNADemos.Demos
 		        HingeConstraint hingeC;
 		        ConeTwistConstraint coneC;
 
-		        Matrix localA = Matrix.Identity;
-                Matrix localB = Matrix.Identity;
+		        IndexedMatrix localA = IndexedMatrix.Identity;
+                IndexedMatrix localB = IndexedMatrix.Identity;
 
                 localA = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-                localA.Translation = new Vector3(0.0f, 0.15f, 0.0f);
+                localA._origin = new IndexedVector3(0.0f, 0.15f, 0.0f);
                 localB = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-                localB.Translation = new Vector3(0.0f, -0.15f, 0.0f);
+                localB._origin = new IndexedVector3(0.0f, -0.15f, 0.0f);
                 hingeC = new HingeConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.SPINE], ref localA, ref localB);
 		        hingeC.SetLimit(-MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_HALF_PI);
                 m_joints[(int)JOINT.PELVIS_SPINE] = hingeC;
@@ -200,9 +198,9 @@ namespace BulletXNADemos.Demos
 
 
                 localA = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-                localA.Translation = new Vector3(0.0f, 0.30f, 0.0f);
+                localA._origin = new IndexedVector3(0.0f, 0.30f, 0.0f);
                 localB = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-                localB.Translation = new Vector3(0.0f, -0.14f, 0.0f);
+                localB._origin = new IndexedVector3(0.0f, -0.14f, 0.0f);
                 coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.SPINE], m_bodies[(int)BODYPART.HEAD], ref localA, ref localB);
 		        coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_HALF_PI);
                 m_joints[(int)JOINT.SPINE_HEAD] = coneC;
@@ -211,12 +209,12 @@ namespace BulletXNADemos.Demos
                 m_ownerWorld.AddConstraint(m_joints[(int)JOINT.SPINE_HEAD], true);
 
 
-				localA = Matrix.Identity;
-				localB = Matrix.Identity;
+				localA = IndexedMatrix.Identity;
+				localB = IndexedMatrix.Identity;
 				localA = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_QUARTER_PI * 5);
-				localA.Translation = new Vector3(-0.18f, -0.10f, 0.0f);
+				localA._origin = new IndexedVector3(-0.18f, -0.10f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, 0, -MathUtil.SIMD_QUARTER_PI * 5);
-				localB.Translation = new Vector3(0.0f, 0.225f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, 0.225f, 0.0f);
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.LEFT_UPPER_LEG], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, 0);
 				m_joints[(int)JOINT.LEFT_HIP] = coneC;
@@ -225,9 +223,9 @@ namespace BulletXNADemos.Demos
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_HIP], true);
 
 				localA = MathUtil.SetEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
-				localA.Translation = new Vector3(0.0f, -0.225f, 0.0f);
+				localA._origin = new IndexedVector3(0.0f, -0.225f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localB.Translation = new Vector3(0.0f, 0.185f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, 0.185f, 0.0f);
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.LEFT_UPPER_LEG], m_bodies[(int)BODYPART.LEFT_LOWER_LEG], ref localA, ref localB);
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.LEFT_KNEE] = hingeC;
@@ -237,9 +235,9 @@ namespace BulletXNADemos.Demos
 
 
 				localA = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_QUARTER_PI);
-				localA.Translation = new Vector3(0.18f, -0.10f, 0.0f);
+				localA._origin = new IndexedVector3(0.18f, -0.10f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_QUARTER_PI);
-				localB.Translation = new Vector3(0.0f, 0.225f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, 0.225f, 0.0f);
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.RIGHT_UPPER_LEG], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, 0);
 				m_joints[(int)JOINT.RIGHT_HIP] = coneC;
@@ -248,9 +246,9 @@ namespace BulletXNADemos.Demos
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_HIP], true);
 
 				localA = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localA.Translation = new Vector3(0.0f, -0.225f, 0.0f);
+				localA._origin = new IndexedVector3(0.0f, -0.225f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localB.Translation = new Vector3(0.0f, 0.185f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, 0.185f, 0.0f);
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.RIGHT_UPPER_LEG], m_bodies[(int)BODYPART.RIGHT_LOWER_LEG], ref localA, ref localB);
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.RIGHT_KNEE] = hingeC;
@@ -260,9 +258,9 @@ namespace BulletXNADemos.Demos
 
 
 				localA = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_PI);
-				localA.Translation = new Vector3(-0.2f, 0.15f, 0.0f);
+				localA._origin = new IndexedVector3(-0.2f, 0.15f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-				localB.Translation = new Vector3(0.0f, -0.18f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, -0.18f, 0.0f);
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.SPINE], m_bodies[(int)BODYPART.LEFT_UPPER_ARM], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_HALF_PI, MathUtil.SIMD_HALF_PI, 0);
 				coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
@@ -271,9 +269,9 @@ namespace BulletXNADemos.Demos
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_SHOULDER], true);
 
 				localA = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localA.Translation = new Vector3(0.0f, 0.18f, 0.0f);
+				localA._origin = new IndexedVector3(0.0f, 0.18f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localB.Translation = new Vector3(0.0f, -0.14f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, -0.14f, 0.0f);
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.LEFT_UPPER_ARM], m_bodies[(int)BODYPART.LEFT_LOWER_ARM], ref localA, ref localB);
 				//		hingeC.setLimit(-MathUtil.SIMD_HALF_PI), 0));
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
@@ -283,9 +281,9 @@ namespace BulletXNADemos.Demos
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_ELBOW], true);
 
 				localA = MathUtil.SetEulerZYX(0, 0, 0);
-				localA.Translation = new Vector3(0.2f, 0.15f, 0.0f);
+				localA._origin = new IndexedVector3(0.2f, 0.15f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-				localB.Translation = new Vector3(0.0f, -0.18f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, -0.18f, 0.0f);
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.SPINE], m_bodies[(int)BODYPART.RIGHT_UPPER_ARM], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_HALF_PI, MathUtil.SIMD_HALF_PI, 0);
 				m_joints[(int)JOINT.RIGHT_SHOULDER] = coneC;
@@ -294,9 +292,9 @@ namespace BulletXNADemos.Demos
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_SHOULDER], true);
 
 				localA = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localA.Translation = new Vector3(0.0f, 0.18f, 0.0f);
+				localA._origin = new IndexedVector3(0.0f, 0.18f, 0.0f);
 				localB = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
-				localB.Translation = new Vector3(0.0f, -0.14f, 0.0f);
+				localB._origin = new IndexedVector3(0.0f, -0.14f, 0.0f);
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.RIGHT_UPPER_ARM], m_bodies[(int)BODYPART.RIGHT_LOWER_ARM], ref localA, ref localB);
 				//		hingeC.setLimit(-MathUtil.SIMD_HALF_PI), 0));
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
@@ -358,8 +356,8 @@ namespace BulletXNADemos.Demos
 
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 
-	        Vector3 worldAabbMin = new Vector3(-10000,-10000,-10000);
-	        Vector3 worldAabbMax = new Vector3(10000,10000,10000);
+	        IndexedVector3 worldAabbMin = new IndexedVector3(-10000,-10000,-10000);
+	        IndexedVector3 worldAabbMax = new IndexedVector3(10000,10000,10000);
             //m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, true);
             m_broadphase = new SimpleBroadphase(1000, null);
 	        m_constraintSolver = new SequentialImpulseConstraintSolver();
@@ -372,9 +370,9 @@ namespace BulletXNADemos.Demos
 
 	        // Setup a big ground box
 	        {
-		        CollisionShape groundShape = new BoxShape(new Vector3(200.0f,10.0f,200.0f));
+		        CollisionShape groundShape = new BoxShape(new IndexedVector3(200.0f,10.0f,200.0f));
 		        m_collisionShapes.Add(groundShape);
-		        Matrix groundTransform = Matrix.CreateTranslation(0,-10,0);
+		        IndexedMatrix groundTransform = IndexedMatrix.CreateTranslation(0,-10,0);
 
 		        CollisionObject fixedGround = new CollisionObject();
 		        fixedGround.SetCollisionShape(groundShape);
@@ -383,22 +381,22 @@ namespace BulletXNADemos.Demos
 	        }
 
 	        // Spawn one ragdoll
-	        Vector3 startOffset = new Vector3(1,0.5f,0);
+	        IndexedVector3 startOffset = new IndexedVector3(1,0.5f,0);
 
 
-			string filename = @"E:\users\man\bullet\xna-ragdoll-constraints-output.txt";
-            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            //string filename = @"E:\users\man\bullet\xna-ragdoll-constraints-output.txt";
+            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 
 			SpawnRagdoll(ref startOffset, BulletGlobals.g_streamWriter);
-            //startOffset = new Vector3(-1,0.5f,0);
+            //startOffset = new IndexedVector3(-1,0.5f,0);
             //spawnRagdoll(ref startOffset);
 
 	        ClientResetScene();		
         }
 
-        public void SpawnRagdoll(ref Vector3 startOffset,StreamWriter streamWriter)
+        public void SpawnRagdoll(ref IndexedVector3 startOffset,StreamWriter streamWriter)
         {
 	        RagDoll ragDoll = new RagDoll (this,m_dynamicsWorld, ref startOffset,streamWriter);
 	        m_ragdolls.Add(ragDoll);
@@ -410,7 +408,7 @@ namespace BulletXNADemos.Demos
 	        {
 	        case Keys.E:
 		        {
-		        Vector3 startOffset = new Vector3(0,2,0);
+		        IndexedVector3 startOffset = new IndexedVector3(0,2,0);
 		        SpawnRagdoll(ref startOffset,BulletGlobals.g_streamWriter);
 		        break;
 		        }

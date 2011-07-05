@@ -23,15 +23,14 @@
 
 using System;
 using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class MultiSphereShape : ConvexInternalAabbCachingShape
     {
-	    public MultiSphereShape (IList<Vector3> positions,IList<float> radi,int numSpheres)
+	    public MultiSphereShape (IList<IndexedVector3> positions,IList<float> radi,int numSpheres)
         {
             m_shapeType = BroadphaseNativeTypes.MULTI_SPHERE_SHAPE_PROXYTYPE;
             //float startMargin = float.MaxValue;
@@ -45,35 +44,35 @@ namespace BulletXNA.BulletCollision.CollisionShapes
         }
 
 	    ///CollisionShape Interface
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
-            Vector3 localAabbMin;
-            Vector3 localAabbMax;
+            IndexedVector3 localAabbMin;
+            IndexedVector3 localAabbMax;
 	        GetCachedLocalAabb(out localAabbMin,out localAabbMax);
-	        Vector3 halfExtents = (localAabbMax-localAabbMin)*0.5f;
+	        IndexedVector3 halfExtents = (localAabbMax-localAabbMin)*0.5f;
 
 	        float lx=2f*(halfExtents.X);
 	        float ly=2f*(halfExtents.Y);
 	        float lz=2f*(halfExtents.Z);
 
-	        inertia = new Vector3(mass/(12.0f) * (ly*ly + lz*lz),
+	        inertia = new IndexedVector3(mass/(12.0f) * (ly*ly + lz*lz),
 					        mass/(12.0f) * (lx*lx + lz*lz),
 					        mass/(12.0f) * (lx*lx + ly*ly));
         }
 
     	/// btConvexShape Interface
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec0)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec0)
         {
 	        int i;
-	        Vector3 supVec = Vector3.Zero;
+	        IndexedVector3 supVec = IndexedVector3.Zero;
 
 	        float maxDot = float.MinValue;
 
-	        Vector3 vec = vec0;
+	        IndexedVector3 vec = vec0;
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 	        {
-		        vec = Vector3.Right;
+		        vec = new IndexedVector3(1,0,0);
 	        } 
             else
 	        {
@@ -82,16 +81,16 @@ namespace BulletXNA.BulletCollision.CollisionShapes
                 //vec.Normalize();
             }
 
-	        Vector3 vtx = Vector3.Zero;
+	        IndexedVector3 vtx = IndexedVector3.Zero;
 	        float newDot;
 
             int numSpheres = m_localPositionArray.Count;
 	        for (i=0;i<numSpheres;i++)
 	        {
-                Vector3 pos = m_localPositionArray[i];
+                IndexedVector3 pos = m_localPositionArray[i];
                 float rad = m_radiArray[i];
                 vtx = (pos) + vec * m_localScaling * (rad) - vec * GetMargin();
-		        newDot = Vector3.Dot(vec,vtx);
+		        newDot = IndexedVector3.Dot(vec,vtx);
 		        if (newDot > maxDot)
 		        {
 			        maxDot = newDot;
@@ -101,27 +100,27 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return supVec;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        for (int j=0;j<numVectors;j++)
 	        {
 	            float maxDot = float.MinValue;
 
-		        Vector3 vec = vectors[j];
+		        IndexedVector3 vec = vectors[j];
 
-	            Vector3 vtx = Vector3.Zero;
+	            IndexedVector3 vtx = IndexedVector3.Zero;
 	            float newDot;
                 int numSpheres = m_localPositionArray.Count;
                 for (int i=0;i<numSpheres;i++)
                 {
-                    Vector3 pos = m_localPositionArray[i];
+                    IndexedVector3 pos = m_localPositionArray[i];
                     float rad = m_radiArray[i];
                     vtx = (pos) + vec * m_localScaling * (rad) - vec * GetMargin();
-	                newDot = Vector3.Dot(vec,vtx);
+	                newDot = IndexedVector3.Dot(vec,vtx);
 	                if (newDot > maxDot)
 	                {
 		                maxDot = newDot;
-		                supportVerticesOut[j] = new Vector4(vtx,0);
+		                supportVerticesOut[j] = new Vector4(vtx.ToVector3(),0);
 	                }
                 }
             }
@@ -132,7 +131,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return m_localPositionArray.Count;
 	    }
 
-	    public Vector3 GetSpherePosition(int index)
+	    public IndexedVector3 GetSpherePosition(int index)
 	    {
 		    return m_localPositionArray[index];
 	    }
@@ -148,9 +147,9 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		    return "MultiSphere";
 	    }
 
-        private IList<Vector3> m_localPositionArray = new List<Vector3>();
+        private IList<IndexedVector3> m_localPositionArray = new List<IndexedVector3>();
         private IList<float> m_radiArray = new List<float>();
-        private Vector3 m_inertiaHalfExtents;
+        private IndexedVector3 m_inertiaHalfExtents;
     }
 
 }

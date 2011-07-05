@@ -1,4 +1,5 @@
-﻿/*
+﻿
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -23,12 +24,11 @@
 
 using System;
 using BulletXNA;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using BulletXNA.BulletCollision.CollisionDispatch;
-using BulletXNA.BulletCollision.CollisionShapes;
-using BulletXNA.BulletDynamics.ConstraintSolver;
-using BulletXNA.BulletDynamics.Dynamics;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
+using System.IO;
 
 namespace BulletXNADemos.Demos
 {
@@ -42,9 +42,9 @@ namespace BulletXNADemos.Demos
         {
             SetCameraDistance(SCALING * 50f);
 
-			//string filename = @"C:\users\man\bullett\xna-basic-output.txt";
-			//FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-			//BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            //string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
+            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 	        ///collision configuration contains default setup for memory, collision setup
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
@@ -64,37 +64,37 @@ namespace BulletXNADemos.Demos
 
             m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
-            Vector3 gravity = new Vector3(0, -10, 0);
+            IndexedVector3 gravity = new IndexedVector3(0, -10, 0);
 	        m_dynamicsWorld.SetGravity(ref gravity);
 
 	        ///create a few basic rigid bodies
-            Vector3 halfExtents = new Vector3(50, 50, 50);
-            //Vector3 halfExtents = new Vector3(10, 10, 10);
+            IndexedVector3 halfExtents = new IndexedVector3(50, 50, 50);
+            //IndexedVector3 halfExtents = new IndexedVector3(10, 10, 10);
             CollisionShape groundShape = new BoxShape(ref halfExtents);
-            //CollisionShape groundShape = new StaticPlaneShape(Vector3.Up, 50);
+            //CollisionShape groundShape = new StaticPlaneShape(new IndexedVector3(0,1,0), 50);
         	
 	        m_collisionShapes.Add(groundShape);
 
-            Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0, -50, 0));
-            //Matrix groundTransform = Matrix.CreateTranslation(new Vector3(0,-10,0));
+            IndexedMatrix groundTransform = IndexedMatrix.CreateTranslation(new IndexedVector3(0, -50, 0));
+            //IndexedMatrix groundTransform = IndexedMatrix.CreateTranslation(new IndexedVector3(0,-10,0));
 	        float mass = 0f;
             LocalCreateRigidBody(mass, ref groundTransform, groundShape);
 	        {
 		        //create a few dynamic rigidbodies
-                CollisionShape colShape = new BoxShape(new Vector3(SCALING, SCALING, SCALING));
+                CollisionShape colShape = new BoxShape(new IndexedVector3(SCALING, SCALING, SCALING));
 		        //btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-                //CollisionShape colShape = new CylinderShape(new Vector3(1f, 1, 1f));
+                //CollisionShape colShape = new CylinderShape(new IndexedVector3(1f, 1, 1f));
 		        m_collisionShapes.Add(colShape);
 
 		        /// Create Dynamic Objects
-		        Matrix startTransform = Matrix.Identity;
+		        IndexedMatrix startTransform = IndexedMatrix.Identity;
 
 		        mass = 1f;
 
 		        //rigidbody is dynamic if and only if mass is non zero, otherwise static
 		        bool isDynamic = mass != 0f;
 
-		        Vector3 localInertia = Vector3.Zero;
+		        IndexedVector3 localInertia = IndexedVector3.Zero;
 		        if (isDynamic)
                 {
 			        colShape.CalculateLocalInertia(mass, out localInertia);
@@ -109,10 +109,10 @@ namespace BulletXNADemos.Demos
 			        {
 				        for(int j = 0;j<ARRAY_SIZE_Z;j++)
 				        {
-                            startTransform.Translation = (new Vector3(2.0f * i + start_x, 20 + 2.0f * k + start_y, 2.0f * j + start_z) * SCALING);
+                            startTransform._origin = (new IndexedVector3(2.0f * i + start_x, 20 + 2.0f * k + start_y, 2.0f * j + start_z) * SCALING);
 
                             //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-                            DefaultMotionState myMotionState = new DefaultMotionState(startTransform, Matrix.Identity);
+                            DefaultMotionState myMotionState = new DefaultMotionState(startTransform, IndexedMatrix.Identity);
                             RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
                             RigidBody body = new RigidBody(rbInfo);
                             //body->setContactProcessingThreshold(colShape->getContactBreakingThreshold());

@@ -21,20 +21,19 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision.CollisionShapes;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.NarrowPhaseCollision
+namespace BulletXNA.BulletCollision
 {
     public class GjkEpaPenetrationDepthSolver : IConvexPenetrationDepthSolver
     {
-        public virtual bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref Matrix transA, ref Matrix transB,
-                ref Vector3 v, ref Vector3 wWitnessOnA, ref Vector3 wWitnessOnB, IDebugDraw debugDraw)
+        public virtual bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref IndexedMatrix transA, ref IndexedMatrix transB,
+                ref IndexedVector3 v, ref IndexedVector3 wWitnessOnA, ref IndexedVector3 wWitnessOnB, IDebugDraw debugDraw)
         {
             //float radialmargin = 0f;
 
-            Vector3 guessVector = (transA.Translation - transB.Translation);
+            IndexedVector3 guessVector = (transA._origin - transB._origin);
             GjkEpaSolver2Results results = new GjkEpaSolver2Results();
             if (GjkEpaSolver2.Penetration(convexA, ref transA,
                                         convexB, ref transB,

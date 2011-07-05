@@ -22,7 +22,7 @@
  */
 
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public static class CollisionMargin
     {

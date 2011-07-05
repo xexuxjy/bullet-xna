@@ -268,12 +268,7 @@ void btRigidBody::updateInertiaTensor()
 	if(g_file != NULL && btBulletDebug::debugRigidBody)
 	{
 		fprintf(g_file,"[%s] RigidBody updateInertiaTensor\n",(char*)m_userObjectPointer);
-		btGeometryUtil::PrintVector(g_file,"invInertiaLocal",m_invInertiaLocal);
-		btGeometryUtil::PrintMatrix(g_file,m_worldTransform);
-		btGeometryUtil::PrintMatrix(g_file,m_worldTransform.getBasis().scaled(m_invInertiaLocal));
-		btGeometryUtil::PrintMatrix(g_file,m_worldTransform.getBasis().transpose());
 	}
-
 
 	m_invInertiaTensorWorld = m_worldTransform.getBasis().scaled(m_invInertiaLocal) * m_worldTransform.getBasis().transpose();
 	if(g_file != NULL && btBulletDebug::debugRigidBody)

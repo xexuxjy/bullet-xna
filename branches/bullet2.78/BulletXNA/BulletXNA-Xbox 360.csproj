@@ -83,6 +83,7 @@
     <Compile Include="BulletCollision\GImpact\GeometeryOperations.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactBvh.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactCollisionAlgorithm.cs" />
+    <Compile Include="BulletCollision\GImpact\GImpactMassUtil.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactQuantization.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactQuantizedBvh.cs" />
     <Compile Include="BulletCollision\GImpact\GImpactShape.cs" />
@@ -205,6 +206,8 @@
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
+    <Compile Include="LinearMath\IndexedBasisMatrix.cs" />
+    <Compile Include="LinearMath\IndexedMatrix.cs" />
     <Compile Include="LinearMath\IndexedVector3.cs" />
     <Compile Include="LinearMath\ObjectArray.cs" />
     <Compile Include="LinearMath\ConvexHull.cs" />

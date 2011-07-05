@@ -22,12 +22,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using BulletXNA.BulletCollision.BroadphaseCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
-namespace BulletXNA.BulletCollision.CollisionShapes
+namespace BulletXNA.BulletCollision
 {
     public class UniformScalingShape : ConvexShape
     {
@@ -43,13 +41,13 @@ namespace BulletXNA.BulletCollision.CollisionShapes
  	         base.Cleanup();
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
         {
-	        Vector3 tmpVertex = m_childConvexShape.LocalGetSupportingVertexWithoutMargin(ref vec);
+	        IndexedVector3 tmpVertex = m_childConvexShape.LocalGetSupportingVertexWithoutMargin(ref vec);
 	        return tmpVertex*m_uniformScalingFactor;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        m_childConvexShape.BatchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
 	        for (int i=0;i<numVectors;i++)
@@ -58,37 +56,37 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        }
         }
 
-        public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-	        Vector3 tmpVertex = m_childConvexShape.LocalGetSupportingVertex(ref vec);
+	        IndexedVector3 tmpVertex = m_childConvexShape.LocalGetSupportingVertex(ref vec);
 	        return tmpVertex*m_uniformScalingFactor;
         }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
 	        ///this linear upscaling is not realistic, but we don't deal with large mass ratios...
-	        Vector3 tmpInertia;
+	        IndexedVector3 tmpInertia;
 	        m_childConvexShape.CalculateLocalInertia(mass, out tmpInertia);
 	        inertia = tmpInertia * m_uniformScalingFactor;
         }
 
 	        ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             GetAabbSlow(ref t, out aabbMin, out aabbMax);
         }
 
-        public override void GetAabbSlow(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabbSlow(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
 #if true
-	Vector3[] _directions = new Vector3[]
+	IndexedVector3[] _directions = new IndexedVector3[]
 	{
-		new Vector3( 1.0f,  0.0f,  0.0f),
-		new Vector3( 0.0f,  1.0f,  0.0f),
-		new Vector3( 0.0f,  0.0f,  1.0f),
-		new Vector3( -1.0f, 0.0f,  0.0f),
-		new Vector3( 0.0f, -1.0f,  0.0f),
-		new Vector3( 0.0f,  0.0f, -1.0f)
+		new IndexedVector3( 1.0f,  0.0f,  0.0f),
+		new IndexedVector3( 0.0f,  1.0f,  0.0f),
+		new IndexedVector3( 0.0f,  0.0f,  1.0f),
+		new IndexedVector3( -1.0f, 0.0f,  0.0f),
+		new IndexedVector3( 0.0f, -1.0f,  0.0f),
+		new IndexedVector3( 0.0f,  0.0f, -1.0f)
 	};
 	
 	Vector4[] _supporting = new Vector4[]
@@ -100,38 +98,42 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 		Vector4.Zero,
 		Vector4.Zero
 	};
+
+    for (int i = 0; i < 6; i++)
+    {
+        _directions[i] = _directions[i] * t._basis;
+    }
     
-    Vector3.TransformNormal(_directions,ref t,_directions);
-	ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
+    ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
 
 	
 	BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
 	
-	Vector3 aabbMin1 = new Vector3(0,0,0),aabbMax1 = new Vector3(0,0,0);
+	IndexedVector3 aabbMin1 = new IndexedVector3(0,0,0),aabbMax1 = new IndexedVector3(0,0,0);
 
 	for ( int i = 0; i < 3; ++i )
 	{
-		Vector3 temp = new Vector3(_supporting[i].X, _supporting[i].Y, _supporting[i].Z);
-		MathUtil.VectorComponent(ref aabbMax1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
-		temp = new Vector3(_supporting[i+3].X, _supporting[i+3].Y, _supporting[i+3].Z);
-		MathUtil.VectorComponent(ref aabbMin1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
+		IndexedVector3 temp = new IndexedVector3(_supporting[i].X, _supporting[i].Y, _supporting[i].Z);
+		aabbMax1[i] = (t *temp)[i];
+		temp = new IndexedVector3(_supporting[i+3].X, _supporting[i+3].Y, _supporting[i+3].Z);
+        aabbMin1[i] = (t * temp)[i];
 	}
 
-	Vector3 marginVec = new Vector3(GetMargin());
+	IndexedVector3 marginVec = new IndexedVector3(GetMargin());
 	aabbMin = aabbMin1-marginVec;
 	aabbMax = aabbMax1+marginVec;
 	
 #else
 
-	btScalar margin = getMargin();
+	float margin = getMargin();
 	for (int i=0;i<3;i++)
 	{
-		Vector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
-		vec[i] = btScalar(1.);
-		Vector3 sv = localGetSupportingVertex(vec*t.getBasis());
-		Vector3 tmp = t(sv);
+		IndexedVector3 vec(float(0.),float(0.),float(0.));
+		vec[i] = float(1.);
+		IndexedVector3 sv = localGetSupportingVertex(vec*t.getBasis());
+		IndexedVector3 tmp = t(sv);
 		aabbMax[i] = tmp[i]+margin;
-		vec[i] = btScalar(-1.);
+		vec[i] = float(-1.);
 		sv = localGetSupportingVertex(vec*t.getBasis());
 		tmp = t(sv);
 		aabbMin[i] = tmp[i]-margin;
@@ -140,12 +142,12 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 #endif
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling) 
+        public override void SetLocalScaling(ref IndexedVector3 scaling) 
         {
 	        m_childConvexShape.SetLocalScaling(ref scaling);
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
 	        return m_childConvexShape.GetLocalScaling();
         }
@@ -165,7 +167,7 @@ namespace BulletXNA.BulletCollision.CollisionShapes
 	        return m_childConvexShape.GetNumPreferredPenetrationDirections();
         }
 	
-        public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
+        public override void GetPreferredPenetrationDirection(int index, out IndexedVector3 penetrationVector)
         {
             m_childConvexShape.GetPreferredPenetrationDirection(index, out penetrationVector);
         }

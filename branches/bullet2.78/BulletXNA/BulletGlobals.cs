@@ -23,7 +23,7 @@
 
 using System;
 using System.IO;
-using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
@@ -41,7 +41,7 @@ namespace BulletXNA
 
         public static Random gRandom = new Random();
 
-        public static Matrix IdentityMatrix = Matrix.Identity;
+        public static IndexedMatrix IdentityMatrix = IndexedMatrix.Identity;
 
         public static IContactAddedCallback gContactAddedCallback;
 
@@ -77,8 +77,8 @@ namespace BulletXNA
 
 
 
-		public const bool debugRigidBody = false;
-		public const bool debugCollisionWorld = false;
+		public const bool debugRigidBody = true;
+		public const bool debugCollisionWorld = true;
 		public const bool debugConstraints = false;
 		public const bool debugDiscreteDynamicsWorld = false;
 		public const bool debugBoxBoxDetector = false;
@@ -89,15 +89,14 @@ namespace BulletXNA
 		public const bool debugShapeHull = false;
 		public const bool debugStridingMesh = false;
 		public const bool debugGJK = false;
-		public const bool debugGJKDetector = true;
-		public const bool debugPersistentManifold = true;
+		public const bool debugGJKDetector = false;
+		public const bool debugPersistentManifold = false;
 		public const bool debugVoronoiSimplex = false;
 		public const bool debugSolver = false;
-
-
-
-
-
-
+        public const bool debugBroadphase = false;
+        public const bool debugBoxShape = false;
+        public const bool debugGimpactShape= false;
+        public const bool debugGimpactAlgo = false;
+        public const bool debugGimpactBVH = false;
     }
 }

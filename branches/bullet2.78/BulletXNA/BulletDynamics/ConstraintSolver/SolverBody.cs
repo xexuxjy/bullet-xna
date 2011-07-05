@@ -113,39 +113,39 @@
 /////The btSolverBody is an internal datastructure for the constraint solver. Only necessary data is packed to increase cache coherence/performance.
 //    public class SolverBodyObsolete
 //    {
-//        public Vector3 m_deltaLinearVelocity;
-//        public Vector3 m_deltaAngularVelocity;
-//        public Vector3 m_angularFactor;
-//        public Vector3 m_invMass;
+//        public IndexedVector3 m_deltaLinearVelocity;
+//        public IndexedVector3 m_deltaAngularVelocity;
+//        public IndexedVector3 m_angularFactor;
+//        public IndexedVector3 m_invMass;
 //        public RigidBody	m_originalBody;
-//        public Vector3		m_pushVelocity;
-//        public Vector3		m_turnVelocity;	
+//        public IndexedVector3		m_pushVelocity;
+//        public IndexedVector3		m_turnVelocity;	
 
 
-//        public Vector3 getDeltaLinearVelocity()
+//        public IndexedVector3 getDeltaLinearVelocity()
 //        {
 //            return m_deltaLinearVelocity;
 //        }
 
-//        public void setDeltaLinearVelocity(Vector3 value)
+//        public void setDeltaLinearVelocity(IndexedVector3 value)
 //        {
 //            m_deltaLinearVelocity = value;
 //            MathUtil.sanityCheckVector(m_deltaLinearVelocity);
 //        }
 
-//        public void	getVelocityInLocalPointObsolete(ref Vector3 rel_pos, ref Vector3 velocity )
+//        public void	getVelocityInLocalPointObsolete(ref IndexedVector3 rel_pos, ref IndexedVector3 velocity )
 //        {
 //            if (m_originalBody != null)
 //            {
-//                velocity = m_originalBody.getLinearVelocity()+m_deltaLinearVelocity + (Vector3.Cross((m_originalBody.getAngularVelocity()+m_deltaAngularVelocity),rel_pos));
+//                velocity = m_originalBody.getLinearVelocity()+m_deltaLinearVelocity + (IndexedVector3.Cross((m_originalBody.getAngularVelocity()+m_deltaAngularVelocity),rel_pos));
 //            }
 //            else
 //            {
-//                velocity = Vector3.Zero;
+//                velocity = IndexedVector3.Zero;
 //            }
 //        }
 
-//        public void	getAngularVelocity(ref Vector3 angVel)
+//        public void	getAngularVelocity(ref IndexedVector3 angVel)
 //        {
 //            if (m_originalBody != null)
 //            {
@@ -153,17 +153,17 @@
 //            }
 //            else
 //            {
-//                angVel = Vector3.Zero;
+//                angVel = IndexedVector3.Zero;
 //            }
 //        }
 
 //        //Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
-//        public void applyImpulse(Vector3 linearComponent, Vector3 angularComponent, float impulseMagnitude)
+//        public void applyImpulse(IndexedVector3 linearComponent, IndexedVector3 angularComponent, float impulseMagnitude)
 //        {
 //            applyImpulse(ref linearComponent, ref angularComponent, impulseMagnitude);
 //        }
 
-//        public void applyImpulse(ref Vector3 linearComponent, ref Vector3 angularComponent,float impulseMagnitude)
+//        public void applyImpulse(ref IndexedVector3 linearComponent, ref IndexedVector3 angularComponent,float impulseMagnitude)
 //        {
 //            //if (m_invMass)
 //            {
@@ -174,7 +174,7 @@
 //            }
 //        }
 
-//        public void internalApplyPushImpulse(ref Vector3 linearComponent, ref Vector3 angularComponent,float impulseMagnitude)
+//        public void internalApplyPushImpulse(ref IndexedVector3 linearComponent, ref IndexedVector3 angularComponent,float impulseMagnitude)
 //        {
 //            if (m_originalBody != null)
 //            {
@@ -202,8 +202,8 @@
 //                m_originalBody.setAngularVelocity(m_originalBody.getAngularVelocity()+m_deltaAngularVelocity);
     			
 //                //correct the position/orientation based on push/turn recovery
-//                Matrix newTransform = Matrix.Identity;
-//                Matrix orig = m_originalBody.GetWorldTransform();
+//                IndexedMatrix newTransform = IndexedMatrix.Identity;
+//                IndexedMatrix orig = m_originalBody.GetWorldTransform();
 //                TransformUtil.integrateTransform(ref orig,ref m_pushVelocity,ref m_turnVelocity,timeStep,ref newTransform);
 //                m_originalBody.SetWorldTransform(ref newTransform);
     			

@@ -392,7 +392,7 @@ namespace BulletXNA.BulletDynamics
         	
             // FIXME MAN - MATRIX ORDER
             //wheel.m_worldTransform = steeringMat * rotatingMat * basis2;
-            wheel.m_worldTransform._basis = basis2 * rotatingMat * steeringMat;
+            wheel.m_worldTransform._basis = steeringMat * rotatingMat * basis2;
 	        wheel.m_worldTransform._origin = 
 		        wheel.m_raycastInfo.m_hardPointWS + (wheel.m_raycastInfo.m_wheelDirectionWS * wheel.m_raycastInfo.m_suspensionLength);
        

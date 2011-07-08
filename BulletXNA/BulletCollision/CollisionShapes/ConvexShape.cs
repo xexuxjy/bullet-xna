@@ -98,8 +98,8 @@ namespace BulletXNA.BulletCollision
                     {
                         TriangleShape triangleShape = (TriangleShape)this;
                         IndexedVector3 dir = localDir;
-                        IList<IndexedVector3> vertices = triangleShape.m_vertices1;
-                        IndexedVector3 dots = new IndexedVector3(IndexedVector3.Dot(dir, vertices[0]), IndexedVector3.Dot(dir, vertices[1]), IndexedVector3.Dot(dir, vertices[2]));
+                        IndexedVector3[] vertices = triangleShape.m_vertices1;
+                        IndexedVector3 dots = new IndexedVector3(IndexedVector3.Dot(ref dir, ref vertices[0]), IndexedVector3.Dot(ref dir, ref vertices[1]), IndexedVector3.Dot(ref dir, ref vertices[2]));
                         int maxAxis = MathUtil.MaxAxis(ref dots);
                         IndexedVector3 sup = vertices[maxAxis];
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
@@ -220,7 +220,7 @@ namespace BulletXNA.BulletCollision
 
                             //vtx = pos +vec*(radius);
                             vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
-                            newDot = IndexedVector3.Dot(vec, vtx);
+                            newDot = IndexedVector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
                             {
@@ -234,7 +234,7 @@ namespace BulletXNA.BulletCollision
 
                             //vtx = pos +vec*(radius);
                             vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
-                            newDot = IndexedVector3.Dot(vec, vtx);
+                            newDot = IndexedVector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
                             {
@@ -287,7 +287,7 @@ namespace BulletXNA.BulletCollision
             {
                 localDirNorm = new IndexedVector3(-1f);
             }
-            localDirNorm = IndexedVector3.Normalize(localDirNorm);
+            localDirNorm = IndexedVector3.Normalize(ref localDirNorm);
 
             return LocalGetSupportVertexWithoutMarginNonVirtual(ref localDirNorm) + GetMarginNonVirtual() * localDirNorm;
         }

@@ -595,8 +595,8 @@ namespace BulletXNA.BulletDynamics
 
 			//check magniture of applied impulse from SolverConstraint 
 			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
-			float deltaVel1Dotn = IndexedVector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
-			float deltaVel2Dotn = -IndexedVector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + IndexedVector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
+			float deltaVel1Dotn = c.m_contactNormal.Dot(body1.InternalGetDeltaLinearVelocity()) + c.m_relpos1CrossNormal.Dot(body1.InternalGetDeltaAngularVelocity());
+			float deltaVel2Dotn = -c.m_contactNormal.Dot(body2.InternalGetDeltaLinearVelocity()) + c.m_relpos2CrossNormal.Dot(body2.InternalGetDeltaAngularVelocity());
 
 			deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
 			deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;

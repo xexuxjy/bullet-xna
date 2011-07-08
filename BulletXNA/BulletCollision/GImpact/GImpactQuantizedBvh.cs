@@ -491,12 +491,12 @@ namespace BulletXNA.BulletCollision
 
         public bool TestQuantizedBoxOverlapp(ref UShortVector3 quantizedMin, ref UShortVector3 quantizedMax)
         {
-            if (m_quantizedAabbMin[0] > quantizedMax[0] ||
-               m_quantizedAabbMax[0] < quantizedMin[0] ||
-               m_quantizedAabbMin[1] > quantizedMax[1] ||
-               m_quantizedAabbMax[1] < quantizedMin[1] ||
-               m_quantizedAabbMin[2] > quantizedMax[2] ||
-               m_quantizedAabbMax[2] < quantizedMin[2])
+            if (m_quantizedAabbMin.X > quantizedMax.X ||
+               m_quantizedAabbMax.X < quantizedMin.X ||
+               m_quantizedAabbMin.Y > quantizedMax.Y ||
+               m_quantizedAabbMax.Y < quantizedMin.Y ||
+               m_quantizedAabbMin.Z > quantizedMax.Z ||
+               m_quantizedAabbMax.Z < quantizedMin.Z)
             {
                 return false;
             }

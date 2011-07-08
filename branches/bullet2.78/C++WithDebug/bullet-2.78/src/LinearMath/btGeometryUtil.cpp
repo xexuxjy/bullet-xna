@@ -200,10 +200,16 @@ void btGeometryUtil::PrintMatrix(FILE* file,const btMatrix3x3& m)
 
 void btGeometryUtil::PrintMatrix(FILE* file,const char* name,const btMatrix3x3& m)
 {
-	btTransform trans;
-	trans.getBasis() = m;
-	trans.getOrigin() = btVector3(0,0,0);
-	PrintMatrix(file,name,trans);
+	const btVector3 right = m.getColumn(0);
+	const btVector3 up = m.getColumn(1);
+	const btVector3 backward = m.getColumn(2);
+	if(name)
+	{
+		fprintf(file,"%s\n",name);
+	}
+	PrintVector(file,"Right       ",right);
+	PrintVector(file,"Up          ",up);
+	PrintVector(file,"Backward    ",backward);
 }
 void btGeometryUtil::PrintMatrix(FILE* file,const btTransform& m)
 {

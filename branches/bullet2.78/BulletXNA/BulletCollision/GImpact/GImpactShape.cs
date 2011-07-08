@@ -574,6 +574,7 @@ namespace BulletXNA.BulletCollision
             public int indexstride;
             public int numfaces;
             public PHY_ScalarType indicestype;
+            public int[] indicesHolder = new int[3];
 
             public TrimeshPrimitiveManager()
             {
@@ -671,10 +672,11 @@ namespace BulletXNA.BulletCollision
                     ObjectArray<ushort> ushortArray = indexbase as ObjectArray<ushort>;
                     if (ushortArray != null)
                     {
+                        ushort[] temp = ushortArray.GetRawArray();
                         int index = face_index * indexstride;
-                        i0 = ushortArray[index];
-                        i1 = ushortArray[index + 1];
-                        i2 = ushortArray[index + 2];
+                        i0 = temp[index];
+                        i1 = temp[index + 1];
+                        i2 = temp[index + 2];
                     }
                     else
                     {
@@ -688,10 +690,11 @@ namespace BulletXNA.BulletCollision
                     ObjectArray<int> intArray = indexbase as ObjectArray<int>;
                     if (intArray != null)
                     {
+                        int[] temp = intArray.GetRawArray();
                         int index = face_index * indexstride;
-                        i0 = intArray[index];
-                        i1 = intArray[index + 1];
-                        i2 = intArray[index + 2];
+                        i0 = temp[index];
+                        i1 = temp[index + 1];
+                        i2 = temp[index + 2];
                     }
                     else
                     {
@@ -717,10 +720,11 @@ namespace BulletXNA.BulletCollision
                     ObjectArray<float> fvertices = vertexbase as ObjectArray<float>;
                     if (svertices != null)
                     {
+                        float[] temp = fvertices.GetRawArray();
                         int index = vertex_index * stride;
-                        vertex.X = fvertices[index] * m_scale.X;
-                        vertex.Y = fvertices[index + 1] * m_scale.Y;
-                        vertex.Z = fvertices[index + 2] * m_scale.Z;
+                        vertex.X = temp[index] * m_scale.X;
+                        vertex.Y = temp[index + 1] * m_scale.Y;
+                        vertex.Z = temp[index + 2] * m_scale.Z;
                     }
 
                 }
@@ -738,21 +742,19 @@ namespace BulletXNA.BulletCollision
 
             public virtual void GetPrimitiveTriangle(int prim_index, PrimitiveTriangle triangle)
             {
-                int[] indices = new int[3];
-                GetIndices(prim_index, out indices[0], out indices[1], out indices[2]);
-                GetVertex(indices[0], out triangle.m_vertices[0]);
-                GetVertex(indices[1], out triangle.m_vertices[1]);
-                GetVertex(indices[2], out triangle.m_vertices[2]);
+                GetIndices(prim_index, out indicesHolder[0], out indicesHolder[1], out indicesHolder[2]);
+                GetVertex(indicesHolder[0], out triangle.m_vertices[0]);
+                GetVertex(indicesHolder[1], out triangle.m_vertices[1]);
+                GetVertex(indicesHolder[2], out triangle.m_vertices[2]);
                 triangle.m_margin = m_margin;
             }
 
             public void GetBulletTriangle(int prim_index, TriangleShapeEx triangle)
             {
-                int[] indices = new int[3];
-                GetIndices(prim_index, out indices[0], out indices[1], out indices[2]);
-                GetVertex(indices[0], out triangle.m_vertices1[0]);
-                GetVertex(indices[1], out triangle.m_vertices1[1]);
-                GetVertex(indices[2], out triangle.m_vertices1[2]);
+                GetIndices(prim_index, out indicesHolder[0], out indicesHolder[1], out indicesHolder[2]);
+                GetVertex(indicesHolder[0], out triangle.m_vertices1[0]);
+                GetVertex(indicesHolder[1], out triangle.m_vertices1[1]);
+                GetVertex(indicesHolder[2], out triangle.m_vertices1[2]);
                 triangle.SetMargin(m_margin);
             }
 

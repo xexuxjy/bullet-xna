@@ -19,11 +19,11 @@ subject to the following restrictions:
 #include "LinearMath/btQuaternion.h"
 #include "LinearMath/btSerializer.h"
 #include "LinearMath/btGeometryUtil.h"
+#include "btBulletDebugGlobals.h"
 
 #include <stdio.h>
 
 extern FILE* g_file;
-bool debugConvexHull = true;
 
 btConvexHullShape ::btConvexHullShape (const btScalar* points,int numPoints,int stride) : btPolyhedralConvexAabbCachingShape ()
 {
@@ -62,7 +62,7 @@ btVector3	btConvexHullShape::localGetSupportingVertexWithoutMargin(const btVecto
 {
 	btVector3 supVec(btScalar(0.),btScalar(0.),btScalar(0.));
 	btScalar newDot,maxDot = btScalar(-BT_LARGE_FLOAT);
-	if(g_file && debugConvexHull)
+	if(g_file && btBulletDebug::debugConvexHull)
 	{
 		fprintf(g_file,"localGetSupportingVertexWithoutMargin\n");
 		btGeometryUtil::PrintVector(g_file,"vec",vec);

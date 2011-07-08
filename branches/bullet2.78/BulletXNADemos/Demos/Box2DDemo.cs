@@ -148,8 +148,8 @@ namespace BulletXNADemos.Demos
 							{
 		#if true
 							case 0:
-                                //rbInfo = new RigidBodyConstructionInfo(mass,myMotionState,boxShape,localInertia);
-                                    rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, triangleShape, localInertia);
+                                    rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, boxShape, localInertia);
+                                    //rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, triangleShape, localInertia);
 								break;
 							case 1:
 								rbInfo = new RigidBodyConstructionInfo(mass,myMotionState,triangleShape,localInertia);
@@ -188,9 +188,9 @@ namespace BulletXNADemos.Demos
 			ClientResetScene();
 		}
 
-		const int ARRAY_SIZE_X  = 1;
-		const int ARRAY_SIZE_Y =1 ;
-		const int ARRAY_SIZE_Z =1;
+		const int ARRAY_SIZE_X  = 5;
+		const int ARRAY_SIZE_Y =5 ;
+		const int ARRAY_SIZE_Z =5;
 
 		//maximum number of objects (and allow user to shoot additional boxes)
 		const int MAX_PROXIES =(ARRAY_SIZE_X*ARRAY_SIZE_Y*ARRAY_SIZE_Z + 1024);

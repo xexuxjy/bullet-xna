@@ -172,7 +172,8 @@ namespace BulletXNADemos.Demos
 		        {
 					if (m_bodies[i] != null)
 					{
-						m_bodies[i].SetDamping(0.05f, 0.85f);
+                        //m_bodies[i].SetDamping(0.05f, 0.85f);
+                        m_bodies[i].SetDamping(0.5f, 0.85f);
 						m_bodies[i].SetDeactivationTime(0.8f);
 						m_bodies[i].SetSleepingThresholds(1.6f, 2.5f);
 					}
@@ -192,6 +193,7 @@ namespace BulletXNADemos.Demos
                 hingeC = new HingeConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.SPINE], ref localA, ref localB);
 		        hingeC.SetLimit(-MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_HALF_PI);
                 m_joints[(int)JOINT.PELVIS_SPINE] = hingeC;
+                m_joints[(int)JOINT.PELVIS_SPINE].m_debugName = "PELVIS_SPINE";
 		        hingeC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
                 m_ownerWorld.AddConstraint(m_joints[(int)JOINT.PELVIS_SPINE], true);
@@ -204,6 +206,8 @@ namespace BulletXNADemos.Demos
                 coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.SPINE], m_bodies[(int)BODYPART.HEAD], ref localA, ref localB);
 		        coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_HALF_PI);
                 m_joints[(int)JOINT.SPINE_HEAD] = coneC;
+                m_joints[(int)JOINT.SPINE_HEAD].m_debugName = "SPINE_HEAD";
+
 		        coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
                 m_ownerWorld.AddConstraint(m_joints[(int)JOINT.SPINE_HEAD], true);
@@ -218,6 +222,8 @@ namespace BulletXNADemos.Demos
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.LEFT_UPPER_LEG], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, 0);
 				m_joints[(int)JOINT.LEFT_HIP] = coneC;
+                m_joints[(int)JOINT.LEFT_HIP].m_debugName = "LEFT_HIP";
+
 				coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_HIP], true);
@@ -229,6 +235,8 @@ namespace BulletXNADemos.Demos
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.LEFT_UPPER_LEG], m_bodies[(int)BODYPART.LEFT_LOWER_LEG], ref localA, ref localB);
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.LEFT_KNEE] = hingeC;
+                m_joints[(int)JOINT.LEFT_KNEE].m_debugName = "LEFT_KNEE";
+
 				hingeC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_KNEE], true);
@@ -241,6 +249,8 @@ namespace BulletXNADemos.Demos
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.PELVIS], m_bodies[(int)BODYPART.RIGHT_UPPER_LEG], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, 0);
 				m_joints[(int)JOINT.RIGHT_HIP] = coneC;
+                m_joints[(int)JOINT.RIGHT_HIP].m_debugName = "RIGHT_HIP";
+
 				coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_HIP], true);
@@ -252,6 +262,8 @@ namespace BulletXNADemos.Demos
 				hingeC = new HingeConstraint(m_bodies[(int)BODYPART.RIGHT_UPPER_LEG], m_bodies[(int)BODYPART.RIGHT_LOWER_LEG], ref localA, ref localB);
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.RIGHT_KNEE] = hingeC;
+                m_joints[(int)JOINT.RIGHT_KNEE].m_debugName = "RIGHT_KNEE";
+
 				hingeC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_KNEE], true);
@@ -266,6 +278,8 @@ namespace BulletXNADemos.Demos
 				coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_joints[(int)JOINT.LEFT_SHOULDER] = coneC;
+                m_joints[(int)JOINT.LEFT_SHOULDER].m_debugName = "LEFT_SHOULDER";
+
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_SHOULDER], true);
 
 				localA = MathUtil.SetEulerZYX(0, MathUtil.SIMD_HALF_PI, 0);
@@ -276,6 +290,8 @@ namespace BulletXNADemos.Demos
 				//		hingeC.setLimit(-MathUtil.SIMD_HALF_PI), 0));
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.LEFT_ELBOW] = hingeC;
+                m_joints[(int)JOINT.LEFT_ELBOW].m_debugName = "LEFT_ELBOW";
+
 				hingeC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.LEFT_ELBOW], true);
@@ -287,6 +303,8 @@ namespace BulletXNADemos.Demos
 				coneC = new ConeTwistConstraint(m_bodies[(int)BODYPART.SPINE], m_bodies[(int)BODYPART.RIGHT_UPPER_ARM], ref localA, ref localB);
 				coneC.SetLimit(MathUtil.SIMD_HALF_PI, MathUtil.SIMD_HALF_PI, 0);
 				m_joints[(int)JOINT.RIGHT_SHOULDER] = coneC;
+                m_joints[(int)JOINT.RIGHT_SHOULDER].m_debugName = "RIGHT_SHOULDER";
+
 				coneC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
 				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_SHOULDER], true);
@@ -299,9 +317,11 @@ namespace BulletXNADemos.Demos
 				//		hingeC.setLimit(-MathUtil.SIMD_HALF_PI), 0));
 				hingeC.SetLimit(0, MathUtil.SIMD_HALF_PI);
 				m_joints[(int)JOINT.RIGHT_ELBOW] = hingeC;
+                m_joints[(int)JOINT.RIGHT_ELBOW].m_debugName = "RIGHT_ELBOW";
+
 				hingeC.SetDbgDrawSize(CONSTRAINT_DEBUG_SIZE);
 
-				m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_ELBOW], true); 
+                m_ownerWorld.AddConstraint(m_joints[(int)JOINT.RIGHT_ELBOW], true); 
 				
 				
 	        }
@@ -377,6 +397,7 @@ namespace BulletXNADemos.Demos
 		        CollisionObject fixedGround = new CollisionObject();
 		        fixedGround.SetCollisionShape(groundShape);
 		        fixedGround.SetWorldTransform(ref groundTransform);
+                fixedGround.SetUserPointer("Ground");
 		        m_dynamicsWorld.AddCollisionObject(fixedGround);
 	        }
 
@@ -384,7 +405,7 @@ namespace BulletXNADemos.Demos
 	        IndexedVector3 startOffset = new IndexedVector3(1,0.5f,0);
 
 
-            //string filename = @"E:\users\man\bullet\xna-ragdoll-constraints-output.txt";
+            //string filename = @"c:\users\man\bullet\xna-ragdoll-constraints-output.txt";
             //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
             //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 

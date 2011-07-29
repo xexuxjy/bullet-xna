@@ -37,7 +37,7 @@ namespace BulletXNADemos.Demos
     public class DemoApplication : Microsoft.Xna.Framework.Game
     {
         protected int numiterations = 0;
-        protected int maxiterations = 100;
+        protected int maxiterations = 0;
         protected IProfileManager m_profileManager;
         protected IProfileIterator m_profileIterator;
         protected IDebugDraw m_debugDraw;
@@ -633,11 +633,11 @@ namespace BulletXNADemos.Demos
             {
                 m_dynamicsWorld.StepSimulation(ms, 1);
                 numiterations++;
-                //if (numiterations > maxiterations)
-                //{
-                //    Cleanup();
-                //    Exit();                    
-                //}
+                if (maxiterations > 0 && numiterations > maxiterations)
+                {
+                    Cleanup();
+                    Exit();
+                }
             }
 
             //renderme();

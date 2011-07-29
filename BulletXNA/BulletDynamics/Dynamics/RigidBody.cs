@@ -541,9 +541,9 @@ namespace BulletXNA.BulletDynamics
 	    }
 
 	    //Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
-        public void InternalApplyImpulse(IndexedVector3 linearComponent, IndexedVector3 angularComponent, float impulseMagnitude)
+        public void InternalApplyImpulse(IndexedVector3 linearComponent, IndexedVector3 angularComponent, float impulseMagnitude,String caller)
         {
-            InternalApplyImpulse(ref linearComponent, ref angularComponent, impulseMagnitude);
+            InternalApplyImpulse(ref linearComponent, ref angularComponent, impulseMagnitude,caller);
         }
 	
 	    public void ClearForces() 
@@ -895,11 +895,11 @@ namespace BulletXNA.BulletDynamics
 	    }
 
 	    //Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
-	    public void InternalApplyImpulse(ref IndexedVector3 linearComponent, ref IndexedVector3 angularComponent,float impulseMagnitude)
+        public void InternalApplyImpulse(ref IndexedVector3 linearComponent, ref IndexedVector3 angularComponent, float impulseMagnitude, String caller)
 	    {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
 			{
-				BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] internalApplyImpule", (String)m_userObjectPointer));
+				BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] internalApplyImpule [{1}]", (String)m_userObjectPointer,caller));
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "linComponenet", linearComponent);
 				MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "angComponenet", angularComponent);
 				BulletGlobals.g_streamWriter.WriteLine("magnitude [{0:0.00000000}]", impulseMagnitude);

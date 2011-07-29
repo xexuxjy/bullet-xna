@@ -107,6 +107,14 @@ namespace BulletXNA.LinearMath
             this.Z *= num;
         }
 
+        public IndexedVector3 Normalized()
+        {
+            float num = 1f / (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            return new IndexedVector3(X * num, Y * num, Z * num);
+
+
+        }
+
         public static void Transform(IndexedVector3[] source ,ref IndexedMatrix t, IndexedVector3[] dest)
         {
             for(int i=0;i<source.Length;++i)

@@ -219,7 +219,24 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
                 //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
                 //((ObjectArray<PersistentManifold>)m_islandmanifold).Sort();
+
+                //ObjectArray<PersistentManifold> copy = new ObjectArray<PersistentManifold>(m_islandmanifold);
                 m_islandmanifold.Sort(sortPredicate);
+
+                //for (int i = 0; i < m_islandmanifold.Count; ++i)
+                //{
+                //    if (copy[i] != m_islandmanifold[i])
+                //    {
+
+                //        int island0 = ((CollisionObject)m_islandmanifold[i].GetBody0()).GetIslandTag();
+                //        int island1 = ((CollisionObject)m_islandmanifold[i].GetBody1()).GetIslandTag();
+
+                //        int islandc0 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
+                //        int islandc1 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
+
+                //        int ibreak = 0;
+                //    }
+                //}
 
                 //now process all active islands (sets of manifolds for now)
 
@@ -256,12 +273,24 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     if (startManifoldIndex < numManifolds)
                     {
                         int curIslandId = GetIslandId(m_islandmanifold[startManifoldIndex]);
+
+                        if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
+				        {
+					        BulletGlobals.g_streamWriter.WriteLine("curIsland[{0}] startManifold[{1}].",curIslandId,startManifoldIndex);
+				        }
+
+
+
                         if (curIslandId == islandId)
                         {
                             startManifold = m_islandmanifold[startManifoldIndex];
 
                             for (endManifoldIndex = startManifoldIndex + 1; (endManifoldIndex < numManifolds) && (islandId == GetIslandId(m_islandmanifold[endManifoldIndex])); endManifoldIndex++)
                             {
+                                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
+                                {
+                                    BulletGlobals.g_streamWriter.WriteLine("endManifoldIndex[{0}] islandId[{1}] getIsland[{2}].",endManifoldIndex,startManifoldIndex,GetIslandId(m_islandmanifold[endManifoldIndex]));
+                                }
 
                             }
                             /// Process the actual simulation, only if not sleeping/deactivated
@@ -278,8 +307,19 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                         {
                             subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
+
+
+
                         callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, subList, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
+                    }
+                    else
+                    {
+                        if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
+                        {
+                            BulletGlobals.g_streamWriter.WriteLine("islandSleeping.");
+                        }
+
                     }
 
                     if (numIslandManifolds != 0)

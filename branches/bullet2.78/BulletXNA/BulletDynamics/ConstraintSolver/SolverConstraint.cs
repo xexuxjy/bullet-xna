@@ -24,6 +24,7 @@
 using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using System.IO;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -56,6 +57,21 @@ namespace BulletXNA.BulletDynamics
         public float m_lowerLimit;
         public float m_upperLimit;
         public float m_rhsPenetration;
+
+        public void PrintSolverConstraint(TextWriter tw)
+        {
+            if (tw != null)
+            {
+                MathUtil.PrintVector3(tw,"SC:RP1CN",m_relpos1CrossNormal);
+                MathUtil.PrintVector3(tw,"SC:RP2CN",m_relpos2CrossNormal);
+                MathUtil.PrintVector3(tw,"SC:CN",m_contactNormal);
+                MathUtil.PrintVector3(tw,"SC:ANGA",m_angularComponentA);
+                MathUtil.PrintVector3(tw,"SC:ANGB",m_angularComponentB);
+                tw.WriteLine("SC:AppPush[{0}] AppImp[{1}] Fric[{2}] Jac[{3}] comA[{4}] comB[{5}]",m_appliedPushImpulse,m_appliedImpulse,m_friction,m_jacDiagABInv,m_companionIdA,m_companionIdB);
+            }
+        }
+
+
     }
 
     public enum SolverConstraintType

@@ -32,16 +32,14 @@ namespace BulletXNA.BulletCollision
     public class ManifoldPoint
     {
 
-        //public ManifoldPoint()
-        //{
-        //}
-        public ManifoldPoint(ref IndexedVector3 pointA, ref IndexedVector3 pointB, ref IndexedVector3 normal, float distance)
+        public ManifoldPoint()
         {
-            m_localPointA = pointA;
-            m_localPointB = pointB;
-            m_normalWorldOnB = normal;
-            m_distance1 = distance;
+            m_constraintRow = new ConstraintRow[3];
+        }
 
+
+        public void Initialise(ref IndexedVector3 pointA, ref IndexedVector3 pointB, ref IndexedVector3 normal, float distance)
+        {
             /* Don't initialize default values twice in C# */
             m_lateralFrictionDir1 = IndexedVector3.Zero;
             m_lateralFrictionDir2 = IndexedVector3.Zero;
@@ -65,7 +63,10 @@ namespace BulletXNA.BulletCollision
             m_positionWorldOnA = IndexedVector3.Zero;
             m_positionWorldOnB = IndexedVector3.Zero;
 
-            m_constraintRow = new ConstraintRow[3];
+            m_localPointA = pointA;
+            m_localPointB = pointB;
+            m_normalWorldOnB = normal;
+            m_distance1 = distance;
 
         }
 

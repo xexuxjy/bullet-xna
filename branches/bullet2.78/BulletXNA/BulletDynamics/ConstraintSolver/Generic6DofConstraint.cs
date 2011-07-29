@@ -991,8 +991,8 @@ namespace BulletXNA.BulletDynamics
 			//body0.applyTorqueImpulse(motorImp);
 			//body1.applyTorqueImpulse(-motorImp);
 
-			body0.InternalApplyImpulse(IndexedVector3.Zero, body0.GetInvInertiaTensorWorld() * axis, clippedMotorImpulse);
-			body1.InternalApplyImpulse(IndexedVector3.Zero, body1.GetInvInertiaTensorWorld() *axis , -clippedMotorImpulse);
+            body0.InternalApplyImpulse(IndexedVector3.Zero, body0.GetInvInertiaTensorWorld() * axis, clippedMotorImpulse, "Generic6DoF body0");
+            body1.InternalApplyImpulse(IndexedVector3.Zero, body1.GetInvInertiaTensorWorld() * axis, -clippedMotorImpulse, "Generic6DoF body1");
 
 			return clippedMotorImpulse;
 		}
@@ -1179,8 +1179,8 @@ namespace BulletXNA.BulletDynamics
 
 			IndexedVector3 ftorqueAxis1 = IndexedVector3.Cross(rel_pos1, axis_normal_on_a);
 			IndexedVector3 ftorqueAxis2 = IndexedVector3.Cross(rel_pos2, axis_normal_on_a);
-			body1.InternalApplyImpulse(axis_normal_on_a * body1.GetInvMass(),  body1.GetInvInertiaTensorWorld() * ftorqueAxis1, normalImpulse);
-			body2.InternalApplyImpulse(axis_normal_on_a * body2.GetInvMass(),  body2.GetInvInertiaTensorWorld() * ftorqueAxis2, -normalImpulse);
+            body1.InternalApplyImpulse(axis_normal_on_a * body1.GetInvMass(), body1.GetInvInertiaTensorWorld() * ftorqueAxis1, normalImpulse, "Generic6DoF body1");
+            body2.InternalApplyImpulse(axis_normal_on_a * body2.GetInvMass(), body2.GetInvInertiaTensorWorld() * ftorqueAxis2, -normalImpulse, "Generic6DoF body2");
 
 			return normalImpulse;
 

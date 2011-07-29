@@ -567,6 +567,12 @@ namespace BulletXNA.BulletDynamics
         {
             BulletGlobals.StartProfile("predictUnconstraintMotion");
 			int length = m_nonStaticRigidBodies.Count;
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("PredictUnconstraintMotion [{0}][{1}]",length,timeStep);
+            }
+
             for (int i = 0; i < length; ++i)
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
@@ -586,14 +592,17 @@ namespace BulletXNA.BulletDynamics
 		protected virtual void IntegrateTransforms(float timeStep)
 		{
 			BulletGlobals.StartProfile("integrateTransforms");
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
-			{
-				BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms");
-			}
 
 			IndexedMatrix predictedTrans;
 			int length = m_nonStaticRigidBodies.Count;
-			for (int i = 0; i < length; ++i)
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms [{0}]",length);
+            }
+            
+            
+            for (int i = 0; i < length; ++i)
 			{
 				RigidBody body = m_nonStaticRigidBodies[i];
 				if (body != null)
@@ -904,8 +913,11 @@ namespace BulletXNA.BulletDynamics
 				        } 
                         else
 				        {
-					        if (body.GetActivationState() == ActivationState.ACTIVE_TAG)
-						        body.SetActivationState( ActivationState.WANTS_DEACTIVATION );
+                            if (body.GetActivationState() == ActivationState.ACTIVE_TAG)
+                            {
+                                body.SetActivationState(ActivationState.WANTS_DEACTIVATION);
+                            }
+
 					        if (body.GetActivationState() == ActivationState.ISLAND_SLEEPING) 
 					        {
                                 IndexedVector3 zero = IndexedVector3.Zero;
@@ -1137,7 +1149,7 @@ namespace BulletXNA.BulletDynamics
                 if (m_solverInfo.m_minimumSolverBatchSize<=1)
 				{
 					///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
-					if (numManifolds + numCurConstraints != 0)
+					if (numManifolds + numCurConstraints > 0)
 					{
                         m_solver.SolveGroup(bodies, numBodies, manifolds, numManifolds, m_sortedConstraints, startConstraint, numCurConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
 					}

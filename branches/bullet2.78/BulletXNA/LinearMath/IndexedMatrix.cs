@@ -380,6 +380,12 @@ namespace BulletXNA.LinearMath
             return new IndexedMatrix(inv, inv * -_origin);
 	    }
 
+        public IndexedVector3 InvXform(IndexedVector3 inVec)
+        {
+            IndexedVector3 v = inVec - _origin;
+            return (_basis.Transpose() * v);
+        }
+
         public IndexedVector3 InvXform(ref IndexedVector3 inVec)
         {
 	        IndexedVector3 v = inVec - _origin;

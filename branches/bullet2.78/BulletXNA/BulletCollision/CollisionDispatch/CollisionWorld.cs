@@ -239,7 +239,7 @@ namespace BulletXNA.BulletCollision
                                     }
                             };
                             IndexedMatrix transform = colObj.GetWorldTransform();
-                            //DrawHelper.debugDrawObject(ref transform, colObj.getCollisionShape(), ref color, getDebugDrawer());
+                            DebugDrawObject(ref transform, colObj.GetCollisionShape(), ref color);
                         }
                         if (aabb)
                         {
@@ -274,6 +274,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DebugDrawObject(ref IndexedMatrix worldTransform, CollisionShape shape, ref IndexedVector3 color)
         {
+            DrawHelper.DebugDrawObject(ref worldTransform, shape, ref color, GetDebugDrawer());
         }
 
 

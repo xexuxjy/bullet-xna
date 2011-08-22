@@ -25,60 +25,60 @@ using System.Collections.Generic;
 
 namespace BulletXNA.BulletCollision
 {
-    public class TriangleInfoMap
+
+    ///The btTriangleInfo structure stores information to adjust collision normals to avoid collisions against internal edges
+    ///it can be generated using 
+    public class TriangleInfo
+    {
+        public TriangleInfo()
+        {
+            m_edgeV0V1Angle = MathUtil.SIMD_2_PI;
+            m_edgeV1V2Angle = MathUtil.SIMD_2_PI;
+            m_edgeV2V0Angle = MathUtil.SIMD_2_PI;
+            m_flags = 0;
+        }
+
+        public int m_flags;
+
+        public float m_edgeV0V1Angle;
+        public float m_edgeV1V2Angle;
+        public float m_edgeV2V0Angle;
+
+    }
+
+
+    public class TriangleInfoMap : Dictionary<int, TriangleInfo>
     {
 
         ///for btTriangleInfo m_flags
-        public const int TRI_INFO_V0V1_CONVEX= 1;
-        public const int TRI_INFO_V1V2_CONVEX= 2;
-        public const int TRI_INFO_V2V0_CONVEX= 4;
+        public const int TRI_INFO_V0V1_CONVEX = 1;
+        public const int TRI_INFO_V1V2_CONVEX = 2;
+        public const int TRI_INFO_V2V0_CONVEX = 4;
 
-        public const int TRI_INFO_V0V1_SWAP_NORMALB= 8;
-        public const int TRI_INFO_V1V2_SWAP_NORMALB= 16;
-        public const int TRI_INFO_V2V0_SWAP_NORMALB= 32;
+        public const int TRI_INFO_V0V1_SWAP_NORMALB = 8;
+        public const int TRI_INFO_V1V2_SWAP_NORMALB = 16;
+        public const int TRI_INFO_V2V0_SWAP_NORMALB = 32;
 
 
-        ///The btTriangleInfo structure stores information to adjust collision normals to avoid collisions against internal edges
-        ///it can be generated using 
-        public class TriangleInfo
+        ///The btTriangleInfoMap stores edge angle information for some triangles. You can compute this information yourself or using btGenerateInternalEdgeInfo.
+        public float m_convexEpsilon;///used to determine if an edge or contact normal is convex, using the dot product
+        public float m_planarEpsilon; ///used to determine if a triangle edge is planar with zero angle
+        public float m_equalVertexThreshold; ///used to compute connectivity: if the distance between two vertices is smaller than m_equalVertexThreshold, they are considered to be 'shared'
+        public float m_edgeDistanceThreshold; ///used to determine edge contacts: if the closest distance between a contact point and an edge is smaller than this distance threshold it is considered to "hit the edge"
+        public float m_maxEdgeAngleThreshold; //ignore edges that connect triangles at an angle larger than this m_maxEdgeAngleThreshold
+        public float m_zeroAreaThreshold; ///used to determine if a triangle is degenerate (length squared of cross product of 2 triangle edges < threshold)
+
+        public TriangleInfoMap()
         {
-	        public TriangleInfo()
-	        {
-		        m_edgeV0V1Angle = MathUtil.SIMD_2_PI;
-		        m_edgeV1V2Angle = MathUtil.SIMD_2_PI;
-		        m_edgeV2V0Angle = MathUtil.SIMD_2_PI;
-		        m_flags=0;
-	        }
+            m_convexEpsilon = 0.00f;
+            m_planarEpsilon = 0.0001f;
+            m_equalVertexThreshold = 0.0001f * 0.0001f;
+            m_edgeDistanceThreshold = 0.1f;
+            m_zeroAreaThreshold = 0.0001f * 0.0001f;
+            m_maxEdgeAngleThreshold = MathUtil.SIMD_2_PI;
 
-	        int			m_flags;
-
-	        float	m_edgeV0V1Angle;
-	        float	m_edgeV1V2Angle;
-	        float	m_edgeV2V0Angle;
-
-        };
-
-///The btTriangleInfoMap stores edge angle information for some triangles. You can compute this information yourself or using btGenerateInternalEdgeInfo.
-        public class InternalTriangleInfoMap : Dictionary<int,TriangleInfo>
-        {
-	        float	m_convexEpsilon;///used to determine if an edge or contact normal is convex, using the dot product
-	        float	m_planarEpsilon; ///used to determine if a triangle edge is planar with zero angle
-	        float	m_equalVertexThreshold; ///used to compute connectivity: if the distance between two vertices is smaller than m_equalVertexThreshold, they are considered to be 'shared'
-	        float	m_edgeDistanceThreshold; ///used to determine edge contacts: if the closest distance between a contact point and an edge is smaller than this distance threshold it is considered to "hit the edge"
-            float  m_maxEdgeAngleThreshold; //ignore edges that connect triangles at an angle larger than this m_maxEdgeAngleThreshold
-            float m_zeroAreaThreshold; ///used to determine if a triangle is degenerate (length squared of cross product of 2 triangle edges < threshold)
-	
-	        public InternalTriangleInfoMap()
-	        {
-		        m_convexEpsilon = 0.00f;
-		        m_planarEpsilon = 0.0001f;
-		        m_equalVertexThreshold = 0.0001f*0.0001f;
-		        m_edgeDistanceThreshold = 0.1f;
-		        m_zeroAreaThreshold = 0.0001f*0.0001f;
-                m_maxEdgeAngleThreshold = MathUtil.SIMD_2_PI;
-
-	        }
         }
-
     }
+
 }
+

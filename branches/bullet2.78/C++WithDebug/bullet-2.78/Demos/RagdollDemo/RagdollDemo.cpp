@@ -413,7 +413,7 @@ void RagdollDemo::initPhysics()
 
 	// Spawn one ragdoll
 	btVector3 startOffset(1,0.5,0);
-	g_file = fopen("c:/users/man/bullet/cpp-ragdoll-constraints-output.txt","w");
+	g_file = fopen("e:/users/man/bullet/cpp-ragdoll-constraints-output.txt","w");
 
 	spawnRagdoll(startOffset,g_file);
 	//startOffset.setValue(-1,0.5,0);

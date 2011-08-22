@@ -910,7 +910,9 @@ namespace BulletXNADemos.Demos
 
         public void DrawContactPoint(ref IndexedVector3 PointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color)
         {
-            //throw new NotImplementedException();
+            IndexedVector3 from = PointOnB;
+            IndexedVector3 to = PointOnB + (normalOnB * 1f);
+            DrawLine(ref from, ref to, ref color);
         }
 
         public void ReportErrorWarning(string warningString)

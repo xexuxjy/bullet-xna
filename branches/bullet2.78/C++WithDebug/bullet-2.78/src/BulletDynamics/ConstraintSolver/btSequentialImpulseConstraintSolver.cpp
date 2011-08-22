@@ -39,7 +39,7 @@ extern FILE* g_file;
 
 #include "btBulletDebugGlobals.h"
 
-#undef USE_SIMD
+//#undef USE_SIMD
 
 btSequentialImpulseConstraintSolver::btSequentialImpulseConstraintSolver()
 :m_btSeed2(0)

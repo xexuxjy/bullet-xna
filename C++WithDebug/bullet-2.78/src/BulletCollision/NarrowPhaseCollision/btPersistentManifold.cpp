@@ -97,7 +97,7 @@ int btPersistentManifold::sortCachedPoints(const btManifoldPoint& pt)
 		//also need to keep 'deepest'
 		
 		int maxPenetrationIndex = -1;
-//#define KEEP_DEEPEST_POINT 1
+#define KEEP_DEEPEST_POINT 1
 #ifdef KEEP_DEEPEST_POINT
 		btScalar maxPenetration = pt.getDistance();
 		for (int i=0;i<4;i++)

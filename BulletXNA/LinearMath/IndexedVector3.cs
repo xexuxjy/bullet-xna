@@ -461,6 +461,40 @@ namespace BulletXNA.LinearMath
         }
 
 
+        public void SetMin(ref IndexedVector3 v)
+        {
+            if (v.X < X)
+            {
+                X = v.X;
+            }
+            if (v.Y < Y)
+            {
+                Y = v.Y;
+            }
+            if (v.Z < Z)
+            {
+                Z = v.Z;
+            }
+        }
+
+
+        public void SetMax(ref IndexedVector3 v)
+        {
+            if (v.X > X)
+            {
+                X = v.X;
+            }
+            if (v.Y > Y)
+            {
+                Y = v.Y;
+            }
+            if (v.Z > Z)
+            {
+                Z = v.Z;
+            }
+        }
+ 
+        
         private static IndexedVector3 _zero = new IndexedVector3();
         private static IndexedVector3 _one = new IndexedVector3(1);
 

@@ -341,7 +341,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         /////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////
 
-        public void GenerateInternalEdgeInfo(BvhTriangleMeshShape trimeshShape, TriangleInfoMap triangleInfoMap)
+        public static void GenerateInternalEdgeInfo(BvhTriangleMeshShape trimeshShape, TriangleInfoMap triangleInfoMap)
         {
             //the user pointer shouldn't already be used for other purposes, we intend to store connectivity info there!
             if (trimeshShape.GetTriangleInfoMap() != null)
@@ -432,7 +432,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         }
 
-        private void ProcessResult(IndexedVector3[] triangleVerts, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax, BvhTriangleMeshShape trimeshShape, int partId, int triangleIndex, TriangleInfoMap triangleInfoMap)
+        private static void ProcessResult(IndexedVector3[] triangleVerts, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax, BvhTriangleMeshShape trimeshShape, int partId, int triangleIndex, TriangleInfoMap triangleInfoMap)
         {
             aabbMin = MathUtil.MAX_VECTOR;
             aabbMax = MathUtil.MIN_VECTOR;
@@ -539,7 +539,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 	
                 if( colObj0.GetRootCollisionShape().GetShapeType() == BroadphaseNativeTypes.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE )
                 {
-                    //trimesh = (colObj0.GetRootCollisionShape() as ScaledBvhTriangleMeshShape).GetChildShape();
+                    trimesh = (colObj0.GetRootCollisionShape() as ScaledBvhTriangleMeshShape).GetChildShape();
                 }
                 else	   
                 {
@@ -937,6 +937,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
         public enum InternalEdgeAdjustFlags
         {
+            BT_TRIANGLE_CONVEX_BACKFACE_NONE = 0,
             BT_TRIANGLE_CONVEX_BACKFACE_MODE = 1,
             BT_TRIANGLE_CONCAVE_DOUBLE_SIDED = 2, //double sided options are experimental, single sided is recommended
             BT_TRIANGLE_CONVEX_DOUBLE_SIDED = 4

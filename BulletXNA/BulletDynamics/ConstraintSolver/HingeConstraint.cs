@@ -684,8 +684,8 @@ namespace BulletXNA.BulletDynamics
 			info.m_solverConstraints[s0].m_relpos1CrossNormal = tmpA;
 			info.m_solverConstraints[s0].m_relpos2CrossNormal = -tmpB;
 
-			tmpA = IndexedVector3.Cross(relA, q);
-			tmpB = IndexedVector3.Cross(relB, q);
+            tmpA = IndexedVector3.Cross(ref relA, ref q);
+            tmpB = IndexedVector3.Cross(ref relB, ref q);
 			if (hasStaticBody && GetSolveLimit())
 			{ // to make constraint between static and dynamic objects more rigid
 				// remove wA (or wB) from equation if angular limit is hit
@@ -696,8 +696,8 @@ namespace BulletXNA.BulletDynamics
 			info.m_solverConstraints[s1].m_relpos1CrossNormal = tmpA;
 			info.m_solverConstraints[s1].m_relpos2CrossNormal = -tmpB;
 
-			tmpA = IndexedVector3.Cross(relA, ax1);
-			tmpB = IndexedVector3.Cross(relB, ax1);
+            tmpA = IndexedVector3.Cross(ref relA, ref ax1);
+            tmpB = IndexedVector3.Cross(ref relB, ref ax1);
 			if (hasStaticBody)
 			{ // to make constraint between static and dynamic objects more rigid
 				// remove wA (or wB) from equation
@@ -716,11 +716,11 @@ namespace BulletXNA.BulletDynamics
 				info.m_solverConstraints[s2].m_contactNormal = ax1;
 
 				// compute three elements of right hand side
-				float rhs = k * IndexedVector3.Dot(p, ofs);
+                float rhs = k * IndexedVector3.Dot(ref p, ref ofs);
 				info.m_solverConstraints[s0].m_rhs = rhs;
-				rhs = k * IndexedVector3.Dot(q, ofs);
+                rhs = k * IndexedVector3.Dot(ref q, ref ofs);
 				info.m_solverConstraints[s1].m_rhs = rhs;
-				rhs = k * IndexedVector3.Dot(ax1, ofs);
+                rhs = k * IndexedVector3.Dot(ref ax1, ref ofs);
 				info.m_solverConstraints[s2].m_rhs = rhs;
 			}
 
@@ -755,7 +755,7 @@ namespace BulletXNA.BulletDynamics
 			// ax1 x ax2 is in the plane space of ax1, so we project the angular
 			// velocity to p and q to find the right hand side.
 			k = info.fps * info.erp;
-			IndexedVector3 u = IndexedVector3.Cross(ax1A, ax1B);
+            IndexedVector3 u = IndexedVector3.Cross(ref ax1A, ref ax1B);
 			info.m_solverConstraints[s3].m_rhs = k * IndexedVector3.Dot(u, p);
 			info.m_solverConstraints[s4].m_rhs = k * IndexedVector3.Dot(u, q);
 #endif
@@ -839,8 +839,8 @@ namespace BulletXNA.BulletDynamics
 
 					if (bounce > 0f)
 					{
-						float vel = IndexedVector3.Dot(angVelA, ax1);
-						vel -= IndexedVector3.Dot(angVelB, ax1);
+                        float vel = IndexedVector3.Dot(ref angVelA, ref ax1);
+                        vel -= IndexedVector3.Dot(ref angVelB, ref ax1);
 						// only apply bounce if the velocity is incoming, and if the
 						// resulting c[] exceeds what we already have.
 						if (limit == 1)
@@ -1003,7 +1003,7 @@ namespace BulletXNA.BulletDynamics
 
 			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
 			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
-			IndexedVector3 rbAxisB2 = IndexedVector3.Cross(axisInB, rbAxisB1);
+            IndexedVector3 rbAxisB2 = IndexedVector3.Cross(ref axisInB, ref rbAxisB1);
 
             m_rbBFrame._origin = m_rbB.GetCenterOfMassTransform().Inverse() * (m_rbA.GetCenterOfMassTransform() * (pivotInA));
 

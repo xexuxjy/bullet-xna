@@ -1,4 +1,5 @@
-﻿///*
+﻿//#define DEBUG_CONVEX_HULL
+///*
 //Copyright (c) 2011 Ole Kniemeyer, MAXON, www.maxon.net
 
 //This software is provided 'as-is', without any express or implied warranty.
@@ -18,27 +19,22 @@
 //using Microsoft.Xna.Framework;
 //using System.Diagnostics;
 
-//#define DEBUG_CONVEX_HULL
 
 //namespace BulletXNA.LinearMath
 //{
 ///// Convex hull implementation based on Preparata and Hong
 ///// See http://code.google.com/p/bullet/issues/detail?id=275
 ///// Ole Kniemeyer, MAXON Computer GmbH
-//    public static class ConvexHullComputer
+//    public class ConvexHullComputer
 //    {
-	
-
-
-
 //        // Vertices of the output hull
-//        ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
+//        public ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
 
 //        // Edges of the output hull
-//        ObjectArray<Edge> edges = new ObjectArray<Edge>;
+//        public ObjectArray<Edge> edges = new ObjectArray<Edge>();
 
 //        // Faces of the convex hull. Each entry is an index into the "edges" array pointing to an edge of the face. Faces are planar n-gons
-//        ObjectArray<int> faces = new ObjectArray<int>();
+//        public ObjectArray<int> faces = new ObjectArray<int>();
 
 //        /*
 //        Compute convex hull of "count" vertices stored in "coords". "stride" is the difference in bytes
@@ -64,7 +60,13 @@
 
 //}
 
-
+//    public struct Point32
+//    {
+//        public int X;
+//        public int Y;
+//        public int Z;
+//        public int index;
+//    }
 
 
 
@@ -105,7 +107,9 @@
 
 //    private class ConvexHullInternal
 //    {
-//        class Vertex
+//    }
+
+//        public class Vertex
 //        {
 //                public Vertex next;
 //                public Vertex prev;
@@ -118,45 +122,35 @@
 				
 //                public Vertex()
 //                {
-//                 next = null; 
-//                    prev = null; 
-//                    edges = null; 
-//                    firstNearbyFace = null; 
-//                    lastNearbyFace = null; 
 //                    copy = -1;
 //                }
 
 //#if DEBUG_CONVEX_HULL
-//                void print()
+//                void Print()
 //                {
-//                    printf("V%d (%d, %d, %d)", point.index, point.x, point.y, point.z);
+//                    System.Console.WriteLine("V{0} ({1})", point.index, point);
 //                }
 
 //                void printGraph();
 //#endif
 
-//                Point32 operator-(const Vertex& b) const
+//                public static Point32 operator -(Point32 value1, Vertex value2)
 //                {
-//                    return point - b.point;
+//                    return new Point32(value1.X - value2.point.X,value1.Y - value2.point.Y,value1.Z - value2.point.Z);
 //                }
 
-//                Rational128 dot(const Point64& b) const
-//                {
-//                    return (point.index >= 0) ? Rational128(point.dot(b))
-//                        : Rational128(point128.x * b.x + point128.y * b.y + point128.z * b.z, point128.denominator);
-//                }
 
-//                float xvalue() const
+//                public float xvalue()
 //                {
 //                    return (point.index >= 0) ? float(point.x) : point128.xvalue();
 //                }
 
-//                float yvalue() const
+//                public float yvalue()
 //                {
 //                    return (point.index >= 0) ? float(point.y) : point128.yvalue();
 //                }
 
-//                float zvalue() const
+//                public float zvalue()
 //                {
 //                    return (point.index >= 0) ? float(point.z) : point128.zvalue();
 //                }
@@ -183,10 +177,10 @@
 //                    src.firstNearbyFace = NULL;
 //                    src.lastNearbyFace = NULL;
 //                }
-//        };
+//        }
 
 
-//        class Edge
+//        public class Edge
 //        {
 //                public Edge next;
 //                public Edge prev;
@@ -195,14 +189,14 @@
 //                public Face face;
 //                int copy;
 
-//                ~Edge()
-//                {
-//                    next = NULL;
-//                    prev = NULL;
-//                    reverse = NULL;
-//                    target = NULL;
-//                    face = NULL;
-//                }
+//                //~Edge()
+//                //{
+//                //    next = NULL;
+//                //    prev = NULL;
+//                //    reverse = NULL;
+//                //    target = NULL;
+//                //    face = NULL;
+//                //}
 
 //                public void Link(Edge n)
 //                {
@@ -214,13 +208,13 @@
 //#if DEBUG_CONVEX_HULL
 //                void print()
 //                {
-//                    printf("E%p : %d . %d,  n=%p p=%p   (0 %d\t%d\t%d) . (%d %d %d)", this, reverse.target.point.index, target.point.index, next, prev,
-//                                 reverse.target.point.x, reverse.target.point.y, reverse.target.point.z, target.point.x, target.point.y, target.point.z);
+//                    System.Console.WriteLine("E{0} : {1} . {2},  n={3} p={4}   (0 {5}) . ({6})", this, reverse.target.point.index, target.point.index, next, prev,
+//                                 reverse.target.point, target.point);
 //                }
 //#endif
-//        };
+//        }
 
-//        class Face
+//        public class Face
 //        {
 //                public Face next;
 //                public Vertex nearbyVertex;
@@ -250,15 +244,6 @@
 //                    a.lastNearbyFace = this;
 //                }
 
-//                Point64 getNormal()
-//                {
-//                    return dir0.cross(dir1);
-//                }
-//        };
-
-
-//    }
-
-
+//        }
 
 //}

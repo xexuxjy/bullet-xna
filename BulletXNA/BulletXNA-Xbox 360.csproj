@@ -75,6 +75,7 @@
     <Compile Include="BulletCollision\CollisionShapes\Box2dShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\Convex2dShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\ConvexPolyhedron.cs" />
+    <Compile Include="BulletCollision\CollisionShapes\ScaledBvhTriangleMeshShape.cs" />
     <Compile Include="BulletCollision\CollisionShapes\ShapeHull.cs" />
     <Compile Include="BulletCollision\CollisionShapes\TriangleInfoMap.cs" />
     <Compile Include="BulletCollision\GImpact\BoxCollision.cs" />

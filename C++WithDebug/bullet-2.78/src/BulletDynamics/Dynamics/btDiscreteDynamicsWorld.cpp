@@ -575,6 +575,12 @@ class btSortConstraintOnIslandPredicate
 			int rIslandId0,lIslandId0;
 			rIslandId0 = btGetConstraintIslandId(rhs);
 			lIslandId0 = btGetConstraintIslandId(lhs);
+
+			if(g_file && btBulletDebug.debugDiscreteDynamicsWorld)
+			{
+				fprintf(g_file,"SortCompare RHS[%d] LHS[%d]\n",rIslandId0,lIslandId0);
+			}
+
 			return lIslandId0 < rIslandId0;
 		}
 };
@@ -720,7 +726,7 @@ void	btDiscreteDynamicsWorld::solveConstraints(btContactSolverInfo& solverInfo)
 		
 	
 
-	//sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
+	sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
 	
 	btTypedConstraint** constraintsPtr = getNumConstraints() ? &sortedConstraints[0] : 0;
 	

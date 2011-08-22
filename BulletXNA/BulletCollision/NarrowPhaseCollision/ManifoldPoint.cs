@@ -355,7 +355,7 @@ namespace BulletXNA.BulletCollision
         public IndexedVector3 m_lateralFrictionDir1;
         public IndexedVector3 m_lateralFrictionDir2;
 
-        public ConstraintRow[] m_constraintRow;
+        public ConstraintRow[] m_constraintRow = new ConstraintRow[3];
 
     }
 

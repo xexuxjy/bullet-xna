@@ -24,6 +24,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -36,7 +37,6 @@ namespace BulletXNA.BulletDynamics
 			m_frameInB = frameInB;
 			m_useLinearReferenceFrameA = useLinearReferenceFrameA;
 			m_useOffsetForConstraintFrame = D6_USE_FRAME_OFFSET;
-			m_flags = 0;
 			m_linearLimits = new TranslationalLimitMotor();
 			m_angularLimits[0] = new RotationalLimitMotor();
 			m_angularLimits[1] = new RotationalLimitMotor();
@@ -50,7 +50,6 @@ namespace BulletXNA.BulletDynamics
 			m_frameInB = frameInB;
 			m_useLinearReferenceFrameA = useLinearReferenceFrameB;
 			m_useOffsetForConstraintFrame = D6_USE_FRAME_OFFSET;
-			m_flags = 0;
 			m_linearLimits = new TranslationalLimitMotor();
 			m_angularLimits[0] = new RotationalLimitMotor();
 			m_angularLimits[1] = new RotationalLimitMotor();
@@ -762,7 +761,55 @@ namespace BulletXNA.BulletDynamics
 			CalculateTransforms();
 		}
 
-
+        public void SetParam(ConstraintParams num, float value, int axis)
+        {
+            if ((axis >= 0) && (axis < 3))
+            {
+                switch (num)
+                {
+                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                        m_linearLimits.m_stopERP[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                        m_linearLimits.m_stopCFM[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                        m_linearLimits.m_normalCFM[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+            }
+            else if ((axis >= 3) && (axis < 6))
+            {
+                switch (num)
+                {
+                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                        m_angularLimits[axis - 3].m_stopERP = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                        m_angularLimits[axis - 3].m_stopCFM = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                        m_angularLimits[axis - 3].m_normalCFM = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+        }
 
 		//! relative_frames
 		//!@{
@@ -803,7 +850,7 @@ namespace BulletXNA.BulletDynamics
 
 		protected bool m_useLinearReferenceFrameA;
 		protected bool m_useOffsetForConstraintFrame;
-		protected int m_flags;
+        protected int m_flags;
 
 		public const int BT_6DOF_FLAGS_AXIS_SHIFT = 3; // bits per axis
 		public const bool D6_USE_FRAME_OFFSET = true;
@@ -1185,6 +1232,9 @@ namespace BulletXNA.BulletDynamics
 			return normalImpulse;
 
 		}
+
+
+
 	}
 
 

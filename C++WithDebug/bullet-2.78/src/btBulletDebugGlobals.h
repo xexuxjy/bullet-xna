@@ -3,10 +3,10 @@
 
 struct btBulletDebug
 {
-		static const  bool debugRigidBody = true;
+		static const  bool debugRigidBody = false;
 		static const bool debugCollisionWorld = false;
-		static const bool debugConstraints = true;
-		static const bool debugDiscreteDynamicsWorld = false;
+		static const bool debugConstraints = false;
+		static const bool debugDiscreteDynamicsWorld = true;
 		static const bool debugBoxBoxDetector = false;
 		static const bool debugIslands = false;
 		static const bool debugBVHTriangleMesh = false;
@@ -21,8 +21,8 @@ struct btBulletDebug
 		static const bool debugSolver = false;
 		static const bool debugBroadphase = false;
 		static const bool debugBoxShape = false;
-		static const bool debugGimpactShape = true;
-		static const bool debugGimpactAlgo = true;
+		static const bool debugGimpactShape = false;
+		static const bool debugGimpactAlgo = false;
 		static const bool debugGimpactBVH = false;
 };
 

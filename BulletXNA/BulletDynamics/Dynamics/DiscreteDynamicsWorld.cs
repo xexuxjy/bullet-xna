@@ -361,7 +361,7 @@ namespace BulletXNA.BulletDynamics
 	    public override void DebugDrawWorld()
         {
             BulletGlobals.StartProfile("debugDrawWorld");
-            
+            base.DebugDrawWorld();
             //if (getDebugDrawer() != null && ((getDebugDrawer().getDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
             //{
             //    int numManifolds = getDispatcher().getNumManifolds();
@@ -384,96 +384,31 @@ namespace BulletXNA.BulletDynamics
 	        if (GetDebugDrawer() != null)
 	        {
                 DebugDrawModes mode = GetDebugDrawer().GetDebugMode();
-		        if((mode  & (DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits)) != 0)
-		        {
-			        drawConstraints = true;
-		        }
-	        }
-
-            if(drawConstraints)
-	        {
-		        for(int i = GetNumConstraints()-1; i>=0 ;i--)
-		        {
-			        TypedConstraint constraint = GetConstraint(i);
-			        DrawHelper.DebugDrawConstraint(constraint,GetDebugDrawer());
-		        }
-	        }
-
-            if (GetDebugDrawer() != null)
-            {
-                DebugDrawModes debugMode = GetDebugDrawer().GetDebugMode();
-                bool wireFrame = (debugMode & DebugDrawModes.DBG_DrawWireframe) != 0;
-                bool aabb = (debugMode & DebugDrawModes.DBG_DrawAabb) != 0;
-
-                if(wireFrame || aabb)
+                if ((mode & (DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits)) != 0)
                 {
-					int length = m_collisionObjects.Count;
-					for (int i = 0; i < length;++i )
-					{
-	                    CollisionObject colObj = m_collisionObjects[i];
+                    drawConstraints = true;
 
-                        if (wireFrame)
+                    if (drawConstraints)
+                    {
+                        for (int i = GetNumConstraints() - 1; i >= 0; i--)
                         {
-                            IndexedVector3 color = new IndexedVector3(255, 255, 255);
-                            switch (colObj.GetActivationState())
-                            {
-                                case ActivationState.ACTIVE_TAG:
-                                    {
-                                        color = new IndexedVector3(255, 255, 255);
-                                        break;
-                                    }
-                                case ActivationState.ISLAND_SLEEPING:
-                                    {
-                                        color = new IndexedVector3(0, 255, 0);
-                                        break;
-                                    }
-                                case ActivationState.WANTS_DEACTIVATION:
-                                    {
-                                        color = new IndexedVector3(0, 255, 255);
-                                        break;
-                                    }
-                                case ActivationState.DISABLE_DEACTIVATION:
-                                    {
-                                        color = new IndexedVector3(255, 0, 0);
-                                        break;
-                                    }
-                                case ActivationState.DISABLE_SIMULATION:
-                                    {
-                                        color = new IndexedVector3(255, 255, 0);
-                                        break;
-                                    }
-
-                                default:
-                                    {
-                                        color = new IndexedVector3(255, 0, 0);
-                                        break;
-                                    }
-                            };
-                            IndexedMatrix transform = colObj.GetWorldTransform();
-                            //DrawHelper.debugDrawObject(ref transform, colObj.GetCollisionShape(), ref color, getDebugDrawer());
+                            TypedConstraint constraint = GetConstraint(i);
+                            DrawHelper.DebugDrawConstraint(constraint, GetDebugDrawer());
                         }
-                        if (aabb)
-                        {
-                            IndexedVector3 minAabb;
-                            IndexedVector3 maxAabb;
-                            IndexedVector3 colorvec = new IndexedVector3(1, 0, 0);
-                            colObj.GetCollisionShape().GetAabb(colObj.GetWorldTransform(), out minAabb, out maxAabb);
-                            m_debugDrawer.DrawAabb(ref minAabb, ref maxAabb, ref colorvec);
-                        }
-
                     }
-        	
-		            if (debugMode != 0)
-		            {
-						int LengthSquared = m_actions.Count;
-			            for(int i=0;i<LengthSquared;++i)
-			            {
-				            m_actions[i].DebugDraw(m_debugDrawer);
-			            }
-		            }
                 }
-                BulletGlobals.StopProfile();
-            }
+                if (mode != 0)
+                {
+                    int LengthSquared = m_actions.Count;
+                    for (int i = 0; i < LengthSquared; ++i)
+                    {
+                        m_actions[i].DebugDraw(m_debugDrawer);
+                    }
+                }
+	        }
+
+            BulletGlobals.StopProfile();
+
         }
 
 	    public override void SetConstraintSolver(IConstraintSolver solver)
@@ -856,7 +791,8 @@ namespace BulletXNA.BulletDynamics
                 sortedConstraints = new ObjectArray<TypedConstraint>(m_constraints);
 
                 //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
-                //sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
+                // If this sort is removed then the constraint gets twitchy...
+                sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
             }
             else
             {
@@ -1291,11 +1227,17 @@ namespace BulletXNA.BulletDynamics
     {
         #region IComparer<TypedConstraint> Members
 
-        public int Compare(TypedConstraint x, TypedConstraint y)
+        public int Compare(TypedConstraint lhs, TypedConstraint rhs)
         {
-            int id1 = DiscreteDynamicsWorld.GetConstraintIslandId(x);
-            int id2 = DiscreteDynamicsWorld.GetConstraintIslandId(y);
-            return id1 - id2;
+            int rIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(rhs);
+            int lIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(lhs);
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("SortCompare RHS[{0}] LHS[{1}]", rIslandId0, lIslandId0);
+            }
+            //lIslandId0 < rIslandId0;
+            //return lIslandId0 - rIslandId0;
+            return rIslandId0 = lIslandId0;
         }
 
         #endregion

@@ -26,7 +26,7 @@ subject to the following restrictions:
 //#define HINGE_USE_OBSOLETE_SOLVER false
 #define HINGE_USE_OBSOLETE_SOLVER false
 
-#define HINGE_USE_FRAME_OFFSET false
+#define HINGE_USE_FRAME_OFFSET true
 
 #ifndef __SPU__
 

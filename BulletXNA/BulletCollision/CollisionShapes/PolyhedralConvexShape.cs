@@ -1,4 +1,5 @@
-﻿/*
+﻿//#define USE_CONVEX_HULL_COMPUTER
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -63,7 +64,7 @@ namespace BulletXNA.BulletCollision
 
             ConvexHullComputer conv = new ConvexHullComputer();
             //conv.compute(&tmpVertices[0].getX(), sizeof(IndexedVector3),tmpVertices.Count,0.0f,0.0f);
-            conv.compute(tmpVertices, 0, tmpVertices.Count, 0.0f, 0.0f);
+            conv.Compute(tmpVertices, 0, tmpVertices.Count, 0.0f, 0.0f);
 
 
 
@@ -75,7 +76,7 @@ namespace BulletXNA.BulletCollision
 
 
             m_polyhedron.m_faces.Resize(numFaces);
-            int numVertices = convexUtil.vertices.size();
+            int numVertices = convexUtil.vertices.Count;
             m_polyhedron.m_vertices.Resize(numVertices);
             for (int p = 0; p < numVertices; p++)
             {
@@ -86,8 +87,8 @@ namespace BulletXNA.BulletCollision
             {
                 int face = convexUtil.faces[i];
                 //printf("face=%d\n",face);
-                Edge firstEdge = convexUtil.edges[face];
-                Edge edge = firstEdge;
+                LinearMath.Edge firstEdge = convexUtil.edges[face];
+                LinearMath.Edge edge = firstEdge;
 
                 IndexedVector3[] edges = new IndexedVector3[3];
                 int numEdges = 0;
@@ -98,10 +99,9 @@ namespace BulletXNA.BulletCollision
 
                 do
                 {
-
-                    int src = edge.getSourceVertex();
+                    int src = edge.GetSourceVertex();
                     m_polyhedron.m_faces[i].m_indices.Add(src);
-                    int targ = edge.getTargetVertex();
+                    int targ = edge.GetTargetVertex();
                     IndexedVector3 wa = convexUtil.vertices[src];
 
                     IndexedVector3 wb = convexUtil.vertices[targ];
@@ -112,7 +112,7 @@ namespace BulletXNA.BulletCollision
                         edges[numEdges++] = newEdge;
                     }
 
-                    edge = edge.getNextEdgeOfFace();
+                    edge = edge.GetNextEdgeOfFace();
                 } while (edge != firstEdge);
 
                 float planeEq = 1e30f;
@@ -146,7 +146,7 @@ namespace BulletXNA.BulletCollision
             }
 
 
-            if (m_polyhedron.m_faces.Count && conv.vertices.size())
+            if (m_polyhedron.m_faces.Count > 0 && conv.vertices.Count > 0)
             {
 
                 for (int f = 0; f < m_polyhedron.m_faces.Count; f++)

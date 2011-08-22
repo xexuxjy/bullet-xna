@@ -376,7 +376,7 @@ m_dynamicsWorld->getSolverInfo().m_splitImpulse = true;
 		colShape->addPoint(vtx);
 	}
 	//this will enable polyhedral contact clipping, better quality, slightly slower
-	colShape->initializePolyhedralFeatures();
+	//colShape->initializePolyhedralFeatures();
 
 	//the polyhedral contact clipping can use either GJK or SAT test to find the separating axis
 	m_dynamicsWorld->getDispatchInfo().m_enableSatConvex=false;
@@ -419,6 +419,7 @@ m_dynamicsWorld->getSolverInfo().m_splitImpulse = true;
 
 	getDynamicsWorld()->setDebugDrawer(&gDebugDrawer);
 	setDebugMode(btIDebugDraw::DBG_DrawText|btIDebugDraw::DBG_NoHelpText+btIDebugDraw::DBG_DrawWireframe+btIDebugDraw::DBG_DrawContactPoints);
+//setDebugMode(btIDebugDraw::DBG_DrawText|btIDebugDraw::DBG_NoHelpText+btIDebugDraw::DBG_DrawWireframe);
 
 
 #ifdef BT_INTERNAL_EDGE_DEBUG_DRAW

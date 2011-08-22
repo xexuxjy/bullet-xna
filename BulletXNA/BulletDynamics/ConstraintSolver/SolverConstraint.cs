@@ -29,7 +29,7 @@ using System.IO;
 namespace BulletXNA.BulletDynamics
 {
 
-    public struct SolverConstraint
+    public class SolverConstraint
     {
 	    public IndexedVector3	m_relpos1CrossNormal;
         public IndexedVector3 m_contactNormal;

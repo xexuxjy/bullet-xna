@@ -127,6 +127,7 @@ namespace BulletXNADemos.Demos
         protected float m_aspect;
 
 
+        protected bool use6Dof = false;
 
         //----------------------------------------------------------------------------------------------
 
@@ -1165,14 +1166,48 @@ namespace BulletXNADemos.Demos
 
                                 IndexedVector3 localPivot = body.GetCenterOfMassTransform().Inverse() * pickPos;
 
-                                Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
-								m_dynamicsWorld.AddConstraint(p2p, false);
+                                if (use6Dof)
+                                {
+                                    IndexedMatrix tr = IndexedMatrix.Identity;
+                                    tr._origin = localPivot;
+                                    Generic6DofConstraint dof6 = new Generic6DofConstraint(body, ref tr, false);
+                                    dof6.SetLinearLowerLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetLinearUpperLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetAngularLowerLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetAngularUpperLimit(new IndexedVector3(0, 0, 0));
 
-                                p2p.m_setting.m_impulseClamp = mousePickClamping;
-								p2p.m_setting.m_tau = 0.001f;
+                                    m_dynamicsWorld.AddConstraint(dof6);
+                                    m_pickConstraint = dof6;
 
-                                m_pickConstraint = p2p;
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 0);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 1);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 2);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 3);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 4);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 5);
 
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 0);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 1);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 2);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 3);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 4);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 5);
+                                }
+                                else
+                                {
+                                    Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
+                                    m_dynamicsWorld.AddConstraint(p2p, false);
+
+                                    p2p.m_setting.m_impulseClamp = mousePickClamping;
+                                    p2p.m_setting.m_tau = 0.001f;
+
+
+                                    if (m_pickConstraint != null)
+                                    {
+                                        int ibreak = 0;
+                                    }
+                                    m_pickConstraint = p2p;
+                                }
                                 //save mouse position for dragging
                                 gOldPickingPos = rayTo;
 								gHitPos = pickPos;

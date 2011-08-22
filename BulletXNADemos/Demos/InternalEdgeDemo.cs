@@ -21,6 +21,7 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
+            SetCameraDistance(50);
             int totalTriangles = 2 * (NUM_VERTS_X - 1) * (NUM_VERTS_Y - 1);
 
             int vertStride = 1;
@@ -149,14 +150,14 @@ namespace BulletXNADemos.Demos
 
 
             {
-                for (int i2 = 0; i2 < 1; i2++)
-                {
-                    startTransform._origin = new IndexedVector3(-10.0f + i2 * 3.0f, 2.2f + i2 * 0.1f, -1.3f);
-                    RigidBody body = LocalCreateRigidBody(10, startTransform, colShape);
-                    body.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
-                    body.SetLinearVelocity(new IndexedVector3(0, 0, -1));
-                    //body->setContactProcessingThreshold(0.f);
-                }
+                //for (int i2 = 0; i2 < 1; i2++)
+                //{
+                //    startTransform._origin = new IndexedVector3(-10.0f + i2 * 3.0f, 2.2f + i2 * 0.1f, -1.3f);
+                //    RigidBody body = LocalCreateRigidBody(10, startTransform, colShape);
+                //    body.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
+                //    body.SetLinearVelocity(new IndexedVector3(0, 0, -1));
+                //    //body->setContactProcessingThreshold(0.f);
+                //}
             }
             {
                 BoxShape colShape2 = new BoxShape(new IndexedVector3(1, 1, 1));

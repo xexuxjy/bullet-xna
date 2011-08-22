@@ -845,39 +845,19 @@ namespace BulletXNADemos.Demos
 
         public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha)
         {
-            IndexedVector3 sideLengths = boxMax - boxMin;
-            IndexedVector3 position = boxMin + (sideLengths * 0.5f);
+			DrawLine(transform * (new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)) , transform * (new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
 
-            IndexedVector3 min = transform * boxMin;
-            IndexedVector3 max = transform * boxMax;
-
-			DrawLine(new IndexedVector3(min.X, min.Y, min.Z), new IndexedVector3(max.X, min.Y, min.Z), color);
-			DrawLine(new IndexedVector3(max.X, min.Y, min.Z), new IndexedVector3(max.X, max.Y, min.Z), color);
-			DrawLine(new IndexedVector3(max.X, max.Y, min.Z), new IndexedVector3(min.X, max.Y, min.Z), color);
-			DrawLine(new IndexedVector3(min.X, max.Y, min.Z), new IndexedVector3(min.X, min.Y, min.Z), color);
-			DrawLine(new IndexedVector3(min.X, min.Y, min.Z), new IndexedVector3(min.X, min.Y, max.Z), color);
-			DrawLine(new IndexedVector3(max.X, min.Y, min.Z), new IndexedVector3(max.X, min.Y, max.Z), color);
-			DrawLine(new IndexedVector3(max.X, max.Y, min.Z), new IndexedVector3(max.X, max.Y, max.Z), color);
-			DrawLine(new IndexedVector3(min.X, max.Y, min.Z), new IndexedVector3(min.X, max.Y, max.Z), color);
-			DrawLine(new IndexedVector3(min.X, min.Y, max.Z), new IndexedVector3(max.X, min.Y, max.Z), color);
-			DrawLine(new IndexedVector3(max.X, min.Y, max.Z), new IndexedVector3(max.X, max.Y, max.Z), color);
-			DrawLine(new IndexedVector3(max.X, max.Y, max.Z), new IndexedVector3(min.X, max.Y, max.Z), color);
-			DrawLine(new IndexedVector3(min.X, max.Y, max.Z), new IndexedVector3(min.X, min.Y, max.Z), color);
-
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLi    ne(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z),transform), IndexedVector3.Transform(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z), transform), color);
-
-            //m_shapeList.Add(DrawHelper.createBox(position, sideLengths, new Color(color), ref transform));
         }
 
 

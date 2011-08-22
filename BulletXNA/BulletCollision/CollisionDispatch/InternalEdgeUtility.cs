@@ -1,10 +1,14 @@
-﻿using System;
+﻿#define BT_INTERNAL_EDGE_DEBUG_DRAW
+#define DEBUG_INTERNAL_EDGE
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 using BulletXNA.BulletCollision.CollisionShapes;
 using System.Diagnostics;
+
+
 
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
@@ -15,28 +19,27 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         ///If the utility doesn't work properly, you might have to adjust the threshold values in btTriangleInfoMap
         //#define BT_INTERNAL_EDGE_DEBUG_DRAW
 
-#if BT_INTERNAL_EDGE_DEBUG_DRAW
-    void	btSetDebugDrawer(btIDebugDraw* debugDrawer);
-#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
         //#define DEBUG_INTERNAL_EDGE
 
 
 
 #if BT_INTERNAL_EDGE_DEBUG_DRAW
-    public static IDebugDraw gDebugDrawer = null;
 
-    public static void setDebugDrawer(IDebugDraw debugDrawer)
-    {
-        gDebugDrawer = debugDrawer;
-    }
-
-    public static void debugDrawLine(ref IndexedVector3 from,ref IndexedVector3 to, ref IndexedVector3 color)
-    {
-        if (gDebugDrawer != null)
+        public static void DebugDrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
         {
-            gDebugDrawer.drawLine(ref from,ref to,ref color);
+            if (BulletGlobals.gDebugDraw != null)
+            {
+                BulletGlobals.gDebugDraw.DrawLine(ref from, ref to, ref color);
+            }
         }
-    }
+
+        public static void DebugDrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
+        {
+            if (BulletGlobals.gDebugDraw != null)
+            {
+                BulletGlobals.gDebugDraw.DrawLine(ref from, ref to, ref color);
+            }
+        }
 #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
 
@@ -155,7 +158,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                             int hash = GetHash(m_partIdA, m_triangleIndexA);
 
-                            
+
                             TriangleInfo info = null;
                             if (m_triangleInfoMap.ContainsKey(hash))
                             {
@@ -255,10 +258,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                             info.m_flags |= TriangleInfoMap.TRI_INFO_V0V1_SWAP_NORMALB;
                                         }
 #if DEBUG_INTERNAL_EDGE
-                                if ((computedNormalB-normalB).length()>0.0001)
-                                {
-                                    printf("warning: normals not identical\n");
-                                }
+                                        if ((computedNormalB - normalB).Length() > 0.0001f)
+                                        {
+                                            System.Console.WriteLine("warning: normals not identical");
+                                        }
 #endif//DEBUG_INTERNAL_EDGE
 
                                         info.m_edgeV0V1Angle = -correctedAngle;
@@ -281,10 +284,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                         }
 
 #if DEBUG_INTERNAL_EDGE
-                                if ((computedNormalB-normalB).length()>0.0001)
-                                {
-                                    printf("warning: normals not identical\n");
-                                }
+                                        if ((computedNormalB - normalB).Length() > 0.0001)
+                                        {
+                                            System.Console.WriteLine("warning: normals not identical");
+                                        }
 #endif //DEBUG_INTERNAL_EDGE
                                         info.m_edgeV2V0Angle = -correctedAngle;
                                         if (isConvex)
@@ -302,10 +305,10 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                             computedNormalB *= -1;
                                         }
 #if DEBUG_INTERNAL_EDGE
-                                if ((computedNormalB-normalB).length()>0.0001)
-                                {
-                                    printf("warning: normals not identical\n");
-                                }
+                                        if ((computedNormalB - normalB).Length() > 0.0001)
+                                        {
+                                            System.Console.WriteLine("warning: normals not identical");
+                                        }
 #endif //DEBUG_INTERNAL_EDGE
                                         info.m_edgeV1V2Angle = -correctedAngle;
 
@@ -463,25 +466,25 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             IndexedVector3 lineDelta = line1 - line0;
 
             // Handle degenerate lines
-            if ( MathUtil.FuzzyZero(lineDelta.LengthSquared()))
+            if (MathUtil.FuzzyZero(lineDelta.LengthSquared()))
             {
                 nearestPoint = line0;
             }
             else
             {
-                float delta = IndexedVector3.Dot((point-line0),(lineDelta)) / IndexedVector3.Dot((lineDelta),(lineDelta));
+                float delta = IndexedVector3.Dot((point - line0), (lineDelta)) / IndexedVector3.Dot((lineDelta), (lineDelta));
 
                 // Clamp the point to conform to the segment's endpoints
-                if ( delta < 0 )
+                if (delta < 0)
                 {
                     delta = 0;
                 }
-                else if ( delta > 1 )
+                else if (delta > 1)
                 {
                     delta = 1;
                 }
 
-                nearestPoint = line0 + lineDelta*delta;
+                nearestPoint = line0 + lineDelta * delta;
             }
         }
 
@@ -531,59 +534,59 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         {
             //btAssert(colObj0.GetCollisionShape().GetShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
             if (colObj0.GetCollisionShape().GetShapeType() != BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE)
+                return;
+
+            BvhTriangleMeshShape trimesh = null;
+
+            if (colObj0.GetRootCollisionShape().GetShapeType() == BroadphaseNativeTypes.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
+            {
+                trimesh = ((ScaledBvhTriangleMeshShape)colObj0.GetRootCollisionShape()).GetChildShape();
+            }
+            else
+            {
+                trimesh = (BvhTriangleMeshShape)colObj0.GetRootCollisionShape();
+            }
+
+            TriangleInfoMap triangleInfoMapPtr = (TriangleInfoMap)trimesh.GetTriangleInfoMap();
+            if (triangleInfoMapPtr == null)
             {
                 return;
             }
 
-                BvhTriangleMeshShape trimesh = null;
-	
-                if( colObj0.GetRootCollisionShape().GetShapeType() == BroadphaseNativeTypes.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE )
-                {
-                    trimesh = (colObj0.GetRootCollisionShape() as ScaledBvhTriangleMeshShape).GetChildShape();
-                }
-                else	   
-                {
-                    trimesh = colObj0.GetRootCollisionShape() as BvhTriangleMeshShape;
-                }
-                
-            TriangleInfoMap triangleInfoMapPtr = (TriangleInfoMap) trimesh.GetTriangleInfoMap();
-                if (triangleInfoMapPtr == null)
-                {
-                    return;
-                }
+            int hash = GetHash(partId0, index0);
 
-            int hash = GetHash(partId0,index0);
-
-
-            if(!triangleInfoMapPtr.ContainsKey(hash))
+            TriangleInfo info;
+            if (!triangleInfoMapPtr.TryGetValue(hash, out info))
             {
                 return;
             }
-            TriangleInfo info = triangleInfoMapPtr[hash];
 
-            float frontFacing = (normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_BACKFACE_MODE)==0? 1.0f : -1.0f;
-        	
-            TriangleShape tri_shape = (TriangleShape)(colObj0.GetCollisionShape());
-            IndexedVector3 v0,v1,v2;
-            tri_shape.GetVertex(0,out  v0);
-            tri_shape.GetVertex(1,out v1);
-            tri_shape.GetVertex(2,out v2);
 
-            IndexedVector3 center = (v0+v1+v2)*(1f/3f);
+            float frontFacing = (normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_BACKFACE_MODE) == 0 ? 1.0f : -1.0f;
 
-            IndexedVector3 red = new IndexedVector3(1,0,0), green = new IndexedVector3(0,1,0),blue = new IndexedVector3(0,0,1),white = new IndexedVector3(1,1,1),black = new IndexedVector3(0,0,0);
+            TriangleShape tri_shape = colObj0.GetCollisionShape() as TriangleShape;
+            IndexedVector3 v0, v1, v2;
+            tri_shape.GetVertex(0, out v0);
+            tri_shape.GetVertex(1, out v1);
+            tri_shape.GetVertex(2, out v2);
+
+            IndexedVector3 center = (v0 + v1 + v2) * (1.0f / 3.0f);
+
+            IndexedVector3 red = new IndexedVector3(1, 0, 0), green = new IndexedVector3(0, 1, 0), blue = new IndexedVector3(0, 0, 1), white = new IndexedVector3(1, 1, 1), black = new IndexedVector3(0, 0, 0);
             IndexedVector3 tri_normal;
             tri_shape.CalcNormal(out tri_normal);
 
             //float dot = tri_normal.dot(cp.m_normalWorldOnB);
             IndexedVector3 nearest;
-            NearestPointInLineSegment(ref cp.m_localPointB,ref v0,ref v1,out nearest);
+            NearestPointInLineSegment(ref cp.m_localPointB, ref v0, ref v1, out nearest);
 
             IndexedVector3 contact = cp.m_localPointB;
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-            const btTransform& tr = colObj0.GetWorldTransform();
-            btDebugDrawLine(tr*nearest,tr*cp.m_localPointB,red);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+            IndexedMatrix tr = colObj0.GetWorldTransform();
+            DebugDrawLine(tr * nearest, tr * cp.m_localPointB, red);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+
 
             bool isNearEdge = false;
 
@@ -593,346 +596,348 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
             IndexedVector3 localContactNormalOnB = colObj0.GetWorldTransform()._basis.Transpose() * cp.m_normalWorldOnB;
             localContactNormalOnB.Normalize();//is this necessary?
 
-     //Get closest edge
-    int      bestedge=-1;
-    float    disttobestedge=MathUtil.BT_LARGE_FLOAT;
-    //
-    // Edge 0 . 1
-    if (Math.Abs(info.m_edgeV0V1Angle)< triangleInfoMapPtr.m_maxEdgeAngleThreshold)
-    {	
-       IndexedVector3  nearest1;
-       NearestPointInLineSegment( ref cp.m_localPointB, ref v0, ref v1, out nearest1 );
-       float len=(contact-nearest1).Length();
-       //
-       if( len < disttobestedge )
-        {
-          bestedge=0;
-          disttobestedge=len;
-        }	      
-   }	   
-    // Edge 1 . 2
-    if (Math.Abs(info.m_edgeV1V2Angle)< triangleInfoMapPtr.m_maxEdgeAngleThreshold)
-    {	
-       IndexedVector3  nearest1;
-       NearestPointInLineSegment(ref cp.m_localPointB, ref v1, ref v2, out nearest1 );
-       float     len=(contact-nearest1).Length();
-       //
-       if( len < disttobestedge )
-       {
-          bestedge=1;
-          disttobestedge=len;
-      }	      
-   }	   
-    // Edge 2 . 0
-    if (Math.Abs(info.m_edgeV2V0Angle)< triangleInfoMapPtr.m_maxEdgeAngleThreshold)
-    {	
-       IndexedVector3  nearest1;
-       NearestPointInLineSegment( ref cp.m_localPointB, ref v2, ref v0, out nearest1 );
-       float     len=(contact-nearest1).Length();
-       //
-       if( len < disttobestedge )
-       {
-          bestedge=2;
-          disttobestedge=len;
-      }	      
-   }   	      	
-	
-#if BT_INTERNAL_EDGE_DEBUG_DRAW
-   Vector3 upfix=tri_normal * btVector3(0.1f,0.1f,0.1f);
-    DebugDrawLine(tr * v0 + upfix, tr * v1 + upfix, red );
-#endif   
-    if (Math.Abs(info.m_edgeV0V1Angle)< triangleInfoMapPtr.m_maxEdgeAngleThreshold)
-    {
-
-
-
-            if ((info.m_edgeV0V1Angle)< MathUtil.SIMD_2_PI)
+            // Get closest edge
+            int bestedge = -1;
+            float disttobestedge = MathUtil.BT_LARGE_FLOAT;
+            //
+            // Edge 0 . 1
+            if (Math.Abs(info.m_edgeV0V1Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
             {
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                btDebugDrawLine(tr*contact,tr*(contact+cp.m_normalWorldOnB*10),black);
-        #endif
-                float len = (contact-nearest).Length();
-                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
+                //IndexedVector3 nearest;
+                NearestPointInLineSegment(ref cp.m_localPointB, ref v0, ref v1, out nearest);
+                float len = (contact - nearest).Length();
+                //
+                if (len < disttobestedge)
                 {
-                    IndexedVector3 edge = new IndexedVector3(v0-v1);
-                    isNearEdge = true;
-
-                    if (info.m_edgeV0V1Angle==0f)
-                    {
-                        numConcaveEdgeHits++;
-                    } 
-                    else
-                    {
-                        bool isEdgeConvex = ((info.m_flags & TriangleInfoMap.TRI_INFO_V0V1_CONVEX) != 0);
-                        float swapFactor = isEdgeConvex ? 1f : -1f;
-            #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
-            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                        IndexedVector3 nA = swapFactor * tri_normal;
-
-                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge.ToVector3(),info.m_edgeV0V1Angle);
-                        IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn,tri_normal);
-                        if ((info.m_flags & TriangleInfoMap.TRI_INFO_V0V1_SWAP_NORMALB) != 0)
-                        {
-                            computedNormalB*=-1;
-                        }
-                        IndexedVector3 nB = swapFactor*computedNormalB;
-
-                        float	NdotA = localContactNormalOnB.Dot(nA);
-                        float	NdotB = localContactNormalOnB.Dot(nB);
-                        bool backFacingNormal = (NdotA< triangleInfoMapPtr.m_convexEpsilon) && (NdotB<triangleInfoMapPtr.m_convexEpsilon);
-
-        #if DEBUG_INTERNAL_EDGE
-                        {
-        					
-                            btDebugDrawLine(cp.GetPositionWorldOnB(),cp.GetPositionWorldOnB()+tr.GetBasis()*(nB*20),red);
-                        }
-        #endif //DEBUG_INTERNAL_EDGE
-
-
-                        if (backFacingNormal)
-                        {
-                            numConcaveEdgeHits++;
-                        }
-                        else
-                        {
-                            numConvexEdgeHits++;
-                            IndexedVector3 clampedLocalNormal;
-                            bool isClamped = ClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB, info.m_edgeV0V1Angle,out clampedLocalNormal);
-                            if (isClamped)
-                            {
-                                if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || clampedLocalNormal.Dot(frontFacing*tri_normal)>0)
-                                {
-                                    IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
-                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
-                                    cp.m_normalWorldOnB = newNormal;
-                                    // Reproject collision point along normal. (what about cp.m_distance1?)
-                                    cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
-                                    cp.m_localPointB = colObj0.GetWorldTransform().InvXform(ref cp.m_positionWorldOnB);
-        							
-                                }
-                            }
-                        }
-                    }
+                    bestedge = 0;
+                    disttobestedge = len;
                 }
             }
-
-            NearestPointInLineSegment(ref contact,ref v1,ref v2,out nearest);
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-            btDebugDrawLine(tr*nearest,tr*cp.m_localPointB,green);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-            if ((info.m_edgeV1V2Angle)< MathUtil.SIMD_2_PI)
+            // Edge 1 . 2
+            if (Math.Abs(info.m_edgeV1V2Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
             {
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                btDebugDrawLine(tr*contact,tr*(contact+cp.m_normalWorldOnB*10),black);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                float len = (contact-nearest).Length();
-                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
-        if( bestedge==0 )
+                //IndexedVector3 nearest;
+                NearestPointInLineSegment(ref  cp.m_localPointB, ref v1, ref v2, out nearest);
+                float len = (contact - nearest).Length();
+                //
+                if (len < disttobestedge)
                 {
-                    isNearEdge = true;
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                    btDebugDrawLine(tr*nearest,tr*(nearest+tri_normal*10),white);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                    IndexedVector3 edge = (v1-v2);
-
-                    isNearEdge = true;
-
-                    if (info.m_edgeV1V2Angle == 0f)
-                    {
-                        numConcaveEdgeHits++;
-                    } else
-                    {
-                        bool isEdgeConvex = (info.m_flags & TriangleInfoMap.TRI_INFO_V1V2_CONVEX)!=0;
-                        float swapFactor = isEdgeConvex ? 1f : -1f;
-            #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
-            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                        IndexedVector3 nA = swapFactor * tri_normal;
-        				
-                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge.ToVector3(),info.m_edgeV1V2Angle);
-                        IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn,tri_normal);
-                        if ((info.m_flags & TriangleInfoMap.TRI_INFO_V1V2_SWAP_NORMALB) != 0)
-                        {
-                            computedNormalB*=-1;
-                        }
-                        IndexedVector3 nB = swapFactor*computedNormalB;
-
-        #if DEBUG_INTERNAL_EDGE
-                        {
-                            btDebugDrawLine(cp.GetPositionWorldOnB(),cp.GetPositionWorldOnB()+tr.GetBasis()*(nB*20),red);
-                        }
-        #endif //DEBUG_INTERNAL_EDGE
-
-
-                        float	NdotA = localContactNormalOnB.Dot(nA);
-                        float	NdotB = localContactNormalOnB.Dot(nB);
-                        bool backFacingNormal = (NdotA< triangleInfoMapPtr.m_convexEpsilon) && (NdotB<triangleInfoMapPtr.m_convexEpsilon);
-
-                        if (backFacingNormal)
-                        {
-                            numConcaveEdgeHits++;
-                        }
-                        else
-                        {
-                            numConvexEdgeHits++;
-                            IndexedVector3 localContactNormalOnB1 = colObj0.GetWorldTransform()._basis.Transpose() * cp.m_normalWorldOnB;
-                            IndexedVector3 clampedLocalNormal;
-                            bool isClamped = ClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB1, info.m_edgeV1V2Angle,out clampedLocalNormal);
-                            if (isClamped)
-                            {
-                                if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (clampedLocalNormal.Dot(frontFacing*tri_normal)>0))
-                                {
-                                    IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
-                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
-                                    cp.m_normalWorldOnB = newNormal;
-                                    // Reproject collision point along normal.
-                                    cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
-                                    cp.m_localPointB = colObj0.GetWorldTransform().InvXform(ref cp.m_positionWorldOnB);
-                                }
-                            }
-                        }
-                    }
+                    bestedge = 1;
+                    disttobestedge = len;
                 }
             }
-
-            NearestPointInLineSegment(ref contact,ref v2,ref v0,out nearest);
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-            btDebugDrawLine(tr*nearest,tr*cp.m_localPointB,blue);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
+            // Edge 2 . 0
+            if (Math.Abs(info.m_edgeV2V0Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
+            {
+                //IndexedVector3 nearest;
+                NearestPointInLineSegment(ref  cp.m_localPointB, ref v2, ref v0, out nearest);
+                float len = (contact - nearest).Length();
+                //
+                if (len < disttobestedge)
+                {
+                    bestedge = 2;
+                    disttobestedge = len;
+                }
+            }
 
 #if BT_INTERNAL_EDGE_DEBUG_DRAW
-   btDebugDrawLine(tr * v1 + upfix, tr * v2 + upfix , green );
-#endif   
-
-    if (Math.Abs(info.m_edgeV1V2Angle)< triangleInfoMapPtr.m_maxEdgeAngleThreshold)
-    {
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                btDebugDrawLine(tr*contact,tr*(contact+cp.m_normalWorldOnB*10),black);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                float len = (contact-nearest).Length();
-                if(len<triangleInfoMapPtr.m_edgeDistanceThreshold)
-        if( bestedge==1 )
-                {
-                    isNearEdge = true;
-        #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                    btDebugDrawLine(tr*nearest,tr*(nearest+tri_normal*10),white);
-        #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                    IndexedVector3 edge = (v2-v0);
-
-                    if (info.m_edgeV2V0Angle==0f)
+            IndexedVector3 upfix = tri_normal * new IndexedVector3(0.1f, 0.1f, 0.1f);
+            DebugDrawLine(tr * v0 + upfix, tr * v1 + upfix, red);
+#endif
+            if (Math.Abs(info.m_edgeV0V1Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
+            {
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                DebugDrawLine(tr * contact, tr * (contact + cp.m_normalWorldOnB * 10), black);
+#endif
+                float len = (contact - nearest).Length();
+                if (len < triangleInfoMapPtr.m_edgeDistanceThreshold)
+                    if (bestedge == 0)
                     {
-                        numConcaveEdgeHits++;
-                    } 
-                    else
-                    {
+                        IndexedVector3 edge = (v0 - v1);
+                        isNearEdge = true;
 
-                        bool isEdgeConvex = (info.m_flags & TriangleInfoMap.TRI_INFO_V2V0_CONVEX)!=0;
-                        float swapFactor = isEdgeConvex ? 1 : -1f;
-            #if BT_INTERNAL_EDGE_DEBUG_DRAW
-                        btDebugDrawLine(tr*nearest,tr*(nearest+swapFactor*tri_normal*10),white);
-            #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
-
-                        IndexedVector3 nA = swapFactor * tri_normal;
-                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge.ToVector3(),info.m_edgeV2V0Angle);
-                        IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn,tri_normal);
-                        if ((info.m_flags & TriangleInfoMap.TRI_INFO_V2V0_SWAP_NORMALB) != 0)
-                        {
-                            computedNormalB*=-1;
-                        }
-                        IndexedVector3 nB = swapFactor*computedNormalB;
-
-        #if DEBUG_INTERNAL_EDGE
-                        {
-                            btDebugDrawLine(cp.GetPositionWorldOnB(),cp.GetPositionWorldOnB()+tr.GetBasis()*(nB*20),red);
-                        }
-        #endif //DEBUG_INTERNAL_EDGE
-
-                        float	NdotA = IndexedVector3.Dot(localContactNormalOnB,nA);
-                        float	NdotB = IndexedVector3.Dot(localContactNormalOnB,nB);
-                        bool backFacingNormal = (NdotA< triangleInfoMapPtr.m_convexEpsilon) && (NdotB<triangleInfoMapPtr.m_convexEpsilon);
-
-                        if (backFacingNormal)
+                        if (info.m_edgeV0V1Angle == 0.0f)
                         {
                             numConcaveEdgeHits++;
                         }
                         else
                         {
-                            numConvexEdgeHits++;
-                            //				printf("hitting convex edge\n");
 
+                            bool isEdgeConvex = (info.m_flags & TriangleInfoMap.TRI_INFO_V0V1_CONVEX) != 0;
+                            float swapFactor = isEdgeConvex ? 1.0f : -1.0f;
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                            DebugDrawLine(tr * nearest, tr * (nearest + swapFactor * tri_normal * 10), white);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
-                            IndexedVector3 localContactNormalOnB1 = colObj0.GetWorldTransform()._basis.Transpose() * cp.m_normalWorldOnB;
-                            IndexedVector3 clampedLocalNormal;
-                            bool isClamped = ClampNormal(edge,swapFactor*tri_normal,localContactNormalOnB1,info.m_edgeV2V0Angle,out clampedLocalNormal);
-                            if (isClamped)
+                            IndexedVector3 nA = swapFactor * tri_normal;
+
+                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV0V1Angle);
+                            IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
+                            if ((info.m_flags & TriangleInfoMap.TRI_INFO_V0V1_SWAP_NORMALB) != 0)
                             {
-                                if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED)!=0) || (clampedLocalNormal.Dot(frontFacing*tri_normal)>0))
+                                computedNormalB *= -1;
+                            }
+                            IndexedVector3 nB = swapFactor * computedNormalB;
+
+                            float NdotA = localContactNormalOnB.Dot(ref nA);
+                            float NdotB = localContactNormalOnB.Dot(ref nB);
+                            bool backFacingNormal = (NdotA < triangleInfoMapPtr.m_convexEpsilon) && (NdotB < triangleInfoMapPtr.m_convexEpsilon);
+
+#if DEBUG_INTERNAL_EDGE
+                            {
+
+                                DebugDrawLine(cp.GetPositionWorldOnB(), cp.GetPositionWorldOnB() + tr._basis * (nB * 20), red);
+                            }
+#endif //DEBUG_INTERNAL_EDGE
+
+
+                            if (backFacingNormal)
+                            {
+                                numConcaveEdgeHits++;
+                            }
+                            else
+                            {
+                                numConvexEdgeHits++;
+                                IndexedVector3 clampedLocalNormal;
+                                bool isClamped = ClampNormal(edge, swapFactor * tri_normal, localContactNormalOnB, info.m_edgeV0V1Angle, out clampedLocalNormal);
+                                if (isClamped)
                                 {
-                                    IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
-                                    //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
-                                    cp.m_normalWorldOnB = newNormal;
-                                    // Reproject collision point along normal.
-                                    cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
-                                    cp.m_localPointB = colObj0.GetWorldTransform().InvXform(ref cp.m_positionWorldOnB);
+                                    if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED) != 0) || (clampedLocalNormal.Dot(frontFacing * tri_normal) > 0))
+                                    {
+                                        IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
+                                        //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
+                                        cp.m_normalWorldOnB = newNormal;
+                                        // Reproject collision point along normal. (what about cp.m_distance1?)
+                                        cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+                                        cp.m_localPointB = colObj0.GetWorldTransform().InvXform(cp.m_positionWorldOnB);
+
+                                    }
                                 }
                             }
-                        } 
+                        }
                     }
-                }
             }
 
-        #if DEBUG_INTERNAL_EDGE
+            NearestPointInLineSegment(ref contact, ref v1, ref v2, out nearest);
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+            DebugDrawLine(tr * nearest, tr * cp.m_localPointB, green);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+            DebugDrawLine(tr * v1 + upfix, tr * v2 + upfix, green);
+#endif
+
+            if (Math.Abs(info.m_edgeV1V2Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
             {
-                IndexedVector3 color(0,1,1);
-                btDebugDrawLine(cp.GetPositionWorldOnB(),cp.GetPositionWorldOnB()+cp.m_normalWorldOnB*10,color);
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                DebugDrawLine(tr * contact, tr * (contact + cp.m_normalWorldOnB * 10), black);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+
+
+                float len = (contact - nearest).Length();
+                if (len < triangleInfoMapPtr.m_edgeDistanceThreshold)
+                    if (bestedge == 1)
+                    {
+                        isNearEdge = true;
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                        DebugDrawLine(tr * nearest, tr * (nearest + tri_normal * 10), white);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+                        IndexedVector3 edge = (v1 - v2);
+
+                        isNearEdge = true;
+
+                        if (info.m_edgeV1V2Angle == 0f)
+                        {
+                            numConcaveEdgeHits++;
+                        }
+                        else
+                        {
+                            bool isEdgeConvex = (info.m_flags & TriangleInfoMap.TRI_INFO_V1V2_CONVEX) != 0;
+                            float swapFactor = isEdgeConvex ? 1.0f : -1.0f;
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                            DebugDrawLine(tr * nearest, tr * (nearest + swapFactor * tri_normal * 10), white);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+                            IndexedVector3 nA = swapFactor * tri_normal;
+
+                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV1V2Angle);
+                            IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
+                            if ((info.m_flags & TriangleInfoMap.TRI_INFO_V1V2_SWAP_NORMALB) != 0)
+                            {
+                                computedNormalB *= -1;
+                            }
+                            IndexedVector3 nB = swapFactor * computedNormalB;
+
+#if DEBUG_INTERNAL_EDGE
+                            {
+                                DebugDrawLine(cp.GetPositionWorldOnB(), cp.GetPositionWorldOnB() + tr._basis * (nB * 20), red);
+                            }
+#endif //DEBUG_INTERNAL_EDGE
+
+
+                            float NdotA = localContactNormalOnB.Dot(ref nA);
+                            float NdotB = localContactNormalOnB.Dot(ref nB);
+                            bool backFacingNormal = (NdotA < triangleInfoMapPtr.m_convexEpsilon) && (NdotB < triangleInfoMapPtr.m_convexEpsilon);
+
+                            if (backFacingNormal)
+                            {
+                                numConcaveEdgeHits++;
+                            }
+                            else
+                            {
+                                numConvexEdgeHits++;
+                                IndexedVector3 localContactNormalOnB2 = colObj0.GetWorldTransform()._basis.Transpose() * cp.m_normalWorldOnB;
+                                IndexedVector3 clampedLocalNormal;
+                                bool isClamped = ClampNormal(edge, swapFactor * tri_normal, localContactNormalOnB2, info.m_edgeV1V2Angle, out clampedLocalNormal);
+                                if (isClamped)
+                                {
+                                    if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED) != 0) || (clampedLocalNormal.Dot(frontFacing * tri_normal) > 0))
+                                    {
+                                        IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
+                                        //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
+                                        cp.m_normalWorldOnB = newNormal;
+                                        // Reproject collision point along normal.
+                                        cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+                                        cp.m_localPointB = colObj0.GetWorldTransform().InvXform(cp.m_positionWorldOnB);
+                                    }
+                                }
+                            }
+                        }
+                    }
             }
-        #endif //DEBUG_INTERNAL_EDGE
+
+            NearestPointInLineSegment(ref contact, ref v2, ref v0, out nearest);
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+            DebugDrawLine(tr * nearest, tr * cp.m_localPointB, blue);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+            DebugDrawLine(tr * v2 + upfix, tr * v0 + upfix, blue);
+#endif
+
+            if (Math.Abs(info.m_edgeV2V0Angle) < triangleInfoMapPtr.m_maxEdgeAngleThreshold)
+            {
+
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                DebugDrawLine(tr * contact, tr * (contact + cp.m_normalWorldOnB * 10), black);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+                float len = (contact - nearest).Length();
+                if (len < triangleInfoMapPtr.m_edgeDistanceThreshold)
+                    if (bestedge == 2)
+                    {
+                        isNearEdge = true;
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                        DebugDrawLine(tr * nearest, tr * (nearest + tri_normal * 10), white);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+                        IndexedVector3 edge = (v2 - v0);
+
+                        if (info.m_edgeV2V0Angle == 0f)
+                        {
+                            numConcaveEdgeHits++;
+                        }
+                        else
+                        {
+
+                            bool isEdgeConvex = (info.m_flags & TriangleInfoMap.TRI_INFO_V2V0_CONVEX) != 0;
+                            float swapFactor = isEdgeConvex ? 1.0f : -1.0f;
+#if BT_INTERNAL_EDGE_DEBUG_DRAW
+                            DebugDrawLine(tr * nearest, tr * (nearest + swapFactor * tri_normal * 10), white);
+#endif //BT_INTERNAL_EDGE_DEBUG_DRAW
+
+                            IndexedVector3 nA = swapFactor * tri_normal;
+                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV2V0Angle);
+                            IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
+                            if ((info.m_flags & TriangleInfoMap.TRI_INFO_V2V0_SWAP_NORMALB) != 0)
+                            {
+                                computedNormalB *= -1;
+                            }
+                            IndexedVector3 nB = swapFactor * computedNormalB;
+
+#if DEBUG_INTERNAL_EDGE
+                            {
+                                DebugDrawLine(cp.GetPositionWorldOnB(), cp.GetPositionWorldOnB() + tr._basis * (nB * 20), red);
+                            }
+#endif //DEBUG_INTERNAL_EDGE
+
+                            float NdotA = localContactNormalOnB.Dot(ref nA);
+                            float NdotB = localContactNormalOnB.Dot(ref nB);
+                            bool backFacingNormal = (NdotA < triangleInfoMapPtr.m_convexEpsilon) && (NdotB < triangleInfoMapPtr.m_convexEpsilon);
+
+                            if (backFacingNormal)
+                            {
+                                numConcaveEdgeHits++;
+                            }
+                            else
+                            {
+                                numConvexEdgeHits++;
+                                //				printf("hitting convex edge\n");
+
+
+                                IndexedVector3 localContactNormalOnB2 = colObj0.GetWorldTransform()._basis.Transpose() * cp.m_normalWorldOnB;
+                                IndexedVector3 clampedLocalNormal;
+                                bool isClamped = ClampNormal(edge, swapFactor * tri_normal, localContactNormalOnB2, info.m_edgeV2V0Angle, out clampedLocalNormal);
+                                if (isClamped)
+                                {
+                                    if (((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONVEX_DOUBLE_SIDED) != 0) || (clampedLocalNormal.Dot(frontFacing * tri_normal) > 0))
+                                    {
+                                        IndexedVector3 newNormal = colObj0.GetWorldTransform()._basis * clampedLocalNormal;
+                                        //					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
+                                        cp.m_normalWorldOnB = newNormal;
+                                        // Reproject collision point along normal.
+                                        cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+                                        cp.m_localPointB = colObj0.GetWorldTransform().InvXform(cp.m_positionWorldOnB);
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+            }
+
+#if DEBUG_INTERNAL_EDGE
+            {
+                IndexedVector3 color = new IndexedVector3(0, 1, 1);
+                DebugDrawLine(cp.GetPositionWorldOnB(), cp.GetPositionWorldOnB() + cp.m_normalWorldOnB * 10, color);
+            }
+#endif //DEBUG_INTERNAL_EDGE
 
             if (isNearEdge)
             {
 
-                if (numConcaveEdgeHits>0)
+                if (numConcaveEdgeHits > 0)
                 {
-                    if ((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONCAVE_DOUBLE_SIDED)!=0)
+                    if ((normalAdjustFlags & InternalEdgeAdjustFlags.BT_TRIANGLE_CONCAVE_DOUBLE_SIDED) != 0)
                     {
                         //fix tri_normal so it pointing the same direction as the current local contact normal
-                        if (IndexedVector3.Dot(ref tri_normal,ref localContactNormalOnB) < 0)
+                        if (tri_normal.Dot(ref localContactNormalOnB) < 0)
                         {
                             tri_normal *= -1;
                         }
-                        cp.m_normalWorldOnB = colObj0.GetWorldTransform()._basis*tri_normal;
-                    } 
+                        cp.m_normalWorldOnB = colObj0.GetWorldTransform()._basis * tri_normal;
+                    }
                     else
                     {
-                IndexedVector3 newNormal = tri_normal *frontFacing;
-                //if the tri_normal is pointing opposite direction as the current local contact normal, skip it
-                float d = newNormal.Dot(localContactNormalOnB) ;
-                if (d< 0)
-                {
-                    return;
-                }
-
+                        IndexedVector3 newNormal = tri_normal * frontFacing;
+                        //if the tri_normal is pointing opposite direction as the current local contact normal, skip it
+                        float d = newNormal.Dot(ref localContactNormalOnB);
+                        if (d < 0)
+                        {
+                            return;
+                        }
                         //modify the normal to be the triangle normal (or backfacing normal)
-                        cp.m_normalWorldOnB = colObj0.GetWorldTransform()._basis*newNormal;
+                        cp.m_normalWorldOnB = colObj0.GetWorldTransform()._basis * newNormal;
                     }
-        			
+
                     // Reproject collision point along normal.
                     cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
-                    cp.m_localPointB = colObj0.GetWorldTransform().InvXform(ref cp.m_positionWorldOnB);
+                    cp.m_localPointB = colObj0.GetWorldTransform().InvXform(cp.m_positionWorldOnB);
                 }
             }
         }
-
-    }
 
 
         public enum InternalEdgeAdjustFlags

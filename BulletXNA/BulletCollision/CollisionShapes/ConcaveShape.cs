@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -37,7 +38,7 @@ namespace BulletXNA.BulletCollision
             base.Cleanup();
         }
 
-	    public abstract void ProcessAllTriangles(ITriangleCallback callback,ref Vector3 aabbMin,ref Vector3 aabbMax);
+	    public abstract void ProcessAllTriangles(ITriangleCallback callback,ref IndexedVector3 aabbMin,ref IndexedVector3 aabbMax);
 
 	    public override float GetMargin() 
         {

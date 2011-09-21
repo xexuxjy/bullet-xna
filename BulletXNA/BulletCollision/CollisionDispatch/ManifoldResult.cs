@@ -23,6 +23,7 @@
 
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -92,15 +93,24 @@ namespace BulletXNA.BulletCollision
             return m_body1;
         }
 
-        public virtual void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(IndexedVector3 normalOnBInWorld, IndexedVector3 pointInWorld, float depth)
         {
             AddContactPoint(ref normalOnBInWorld, ref pointInWorld, depth);
         }
 
-        public virtual void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        public virtual void AddContactPoint(ref IndexedVector3 normalOnBInWorld, ref IndexedVector3 pointInWorld, float depth)
         {
             Debug.Assert(m_manifoldPtr != null);
             //order in manifold needs to match
+
+
+	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugManifoldResult)
+	        {
+		        BulletGlobals.g_streamWriter.WriteLine("AddContactPoint depth[{0}]",depth);
+		        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"normalOnBInWorld",normalOnBInWorld);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"pointInWorld", pointInWorld);
+	        }
+
 
             //if (depth > m_manifoldPtr.GetContactBreakingThreshold())
             if (depth > m_manifoldPtr.GetContactProcessingThreshold())
@@ -110,10 +120,10 @@ namespace BulletXNA.BulletCollision
 
             bool isSwapped = m_manifoldPtr.GetBody0() != m_body0;
 
-            Vector3 pointA = pointInWorld + normalOnBInWorld * depth;
+            IndexedVector3 pointA = pointInWorld + normalOnBInWorld * depth;
 
-            Vector3 localA;
-            Vector3 localB;
+            IndexedVector3 localA;
+            IndexedVector3 localB;
 
             if (isSwapped)
             {
@@ -126,7 +136,10 @@ namespace BulletXNA.BulletCollision
                 MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
-            ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);
+            ManifoldPoint newPt = BulletGlobals.GetManifoldPoint();
+            newPt.Initialise(ref localA, ref localB, ref normalOnBInWorld, depth);
+            
+
             newPt.SetPositionWorldOnA(ref pointA);
             newPt.SetPositionWorldOnB(ref pointInWorld);
 
@@ -151,6 +164,11 @@ namespace BulletXNA.BulletCollision
                 newPt.m_index1 = m_index1;
             }
 
+            if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugManifoldResult)
+            {
+                MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter ,newPt);
+            }
+
             //printf("depth=%f\n",depth);
             ///@todo, check this for any side effects
             if (insertIndex >= 0)
@@ -163,6 +181,7 @@ namespace BulletXNA.BulletCollision
                 insertIndex = m_manifoldPtr.AddManifoldPoint(ref newPt);
             }
 
+            
             //User can override friction and/or restitution
             if (BulletGlobals.gContactAddedCallback != null &&
                 //and if either of the two bodies requires custom material
@@ -220,8 +239,8 @@ namespace BulletXNA.BulletCollision
         protected PersistentManifold m_manifoldPtr;
 
         //we need this for compounds
-        protected Matrix m_rootTransA;
-        protected Matrix m_rootTransB;
+        protected IndexedMatrix m_rootTransA;
+        protected IndexedMatrix m_rootTransB;
 
         protected CollisionObject m_body0;
         protected CollisionObject m_body1;

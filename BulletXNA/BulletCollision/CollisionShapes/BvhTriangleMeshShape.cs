@@ -50,7 +50,7 @@ namespace BulletXNA.BulletCollision
             //construct bvh from meshInterface
 #if !DISABLE_BVH
 
-            //Vector3 bvhAabbMin = Vector3.Zero, bvhAabbMax = Vector3.Zero;
+            //IndexedVector3 bvhAabbMin = IndexedVector3.Zero, bvhAabbMax = IndexedVector3.Zero;
             //if (meshInterface.hasPremadeAabb())
             //{
             //    meshInterface.getPremadeAabb(ref bvhAabbMin, ref bvhAabbMax);
@@ -84,7 +84,7 @@ namespace BulletXNA.BulletCollision
 
 
         ///optionally pass in a larger bvh aabb, used for quantization. This allows for deformations within this aabb
-        public BvhTriangleMeshShape(StridingMeshInterface meshInterface, bool useQuantizedAabbCompression, ref Vector3 bvhAabbMin, ref Vector3 bvhAabbMax, bool buildBvh)
+        public BvhTriangleMeshShape(StridingMeshInterface meshInterface, bool useQuantizedAabbCompression, ref IndexedVector3 bvhAabbMin, ref IndexedVector3 bvhAabbMax, bool buildBvh)
             : base(meshInterface)
         {
             m_bvh = null;
@@ -110,7 +110,7 @@ namespace BulletXNA.BulletCollision
             return m_ownsBvh;
         }
 
-        public void PerformRaycast(ITriangleCallback callback, ref Vector3 raySource, ref Vector3 rayTarget)
+        public void PerformRaycast(ITriangleCallback callback, ref IndexedVector3 raySource, ref IndexedVector3 rayTarget)
         {
             if (m_bvh != null)
             {
@@ -121,7 +121,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void PerformConvexCast(ITriangleCallback callback, ref Vector3 boxSource, ref Vector3 boxTarget, ref Vector3 boxMin, ref Vector3 boxMax)
+        public void PerformConvexCast(ITriangleCallback callback, ref IndexedVector3 boxSource, ref IndexedVector3 boxTarget, ref IndexedVector3 boxMin, ref IndexedVector3 boxMax)
         {
             if (m_bvh != null)
             {
@@ -131,8 +131,8 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        //public override void processAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        //public override void processAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
 #if DISABLE_BVH
 	        base.ProcessAllTriangles(callback,ref aabbMin,ref aabbMax);
@@ -146,7 +146,7 @@ namespace BulletXNA.BulletCollision
 #endif
         }
 
-        public void RefitTree(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public void RefitTree(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             if (m_bvh != null)
             {
@@ -156,7 +156,7 @@ namespace BulletXNA.BulletCollision
         }
 
         ///for a fast incremental refit of parts of the tree. Note: the entire AABB of the tree will become more conservative, it never shrinks
-        public void PartialRefitTree(ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public void PartialRefitTree(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             if (m_bvh != null)
             {
@@ -174,7 +174,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             if ((GetLocalScaling() - scaling).LengthSquared() > MathUtil.SIMD_EPSILON)
             {
@@ -189,7 +189,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void SetOptimizedBvh(OptimizedBvh bvh, ref Vector3 scaling)
+        public void SetOptimizedBvh(OptimizedBvh bvh, ref IndexedVector3 scaling)
         {
             Debug.Assert(m_bvh == null);
             Debug.Assert(m_ownsBvh == false);
@@ -227,7 +227,7 @@ namespace BulletXNA.BulletCollision
         {
             public StridingMeshInterface m_meshInterface;
             public ITriangleCallback m_callback;
-            Vector3[] m_triangle = new Vector3[3];
+            IndexedVector3[] m_triangle = new IndexedVector3[3];
 
             public MyNodeOverlapCallback(ITriangleCallback callback, StridingMeshInterface meshInterface)
             {
@@ -268,26 +268,38 @@ namespace BulletXNA.BulletCollision
 
 
 
-                Vector3 meshScaling = m_meshInterface.GetScaling();
+                IndexedVector3 meshScaling = m_meshInterface.GetScaling();
                 int[] indexRaw = ((ObjectArray<int>)indexBase).GetRawArray();
 
 
-                if (vertexBase is ObjectArray<Vector3>)
+                if (vertexBase is ObjectArray<IndexedVector3>)
+                {
+                    IndexedVector3[] vertexBaseRaw = ((ObjectArray<IndexedVector3>)vertexBase).GetRawArray();
+                    for (int j = 2; j >= 0; j--)
+                    {
+                        m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
+                        //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        m_triangle[j] *= meshScaling;
+                    }
+                }
+                else if (vertexBase is ObjectArray<Vector3>)
                 {
                     Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
                     for (int j = 2; j >= 0; j--)
                     {
-                        m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
-                        Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        m_triangle[j] = new IndexedVector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
+                        //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        m_triangle[j] *= meshScaling;
                     }
                 }
+
                 else if (vertexBase is ObjectArray<float>)
                 {
                     float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();
                     for (int j = 2; j >= 0; j--)
                     {
                         int offset = indexRaw[indexIndex + j] * 3;
-                        m_triangle[j] = new Vector3(floats[offset] * meshScaling.X, floats[offset + 1] * meshScaling.Y, floats[offset + 2] * meshScaling.Z);
+                        m_triangle[j] = new IndexedVector3(floats[offset] * meshScaling.X, floats[offset + 1] * meshScaling.Y, floats[offset + 2] * meshScaling.Z);
                     }
                 }
                 else

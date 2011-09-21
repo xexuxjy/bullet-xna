@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -99,18 +100,18 @@ namespace BulletXNA.BulletCollision
                     case 2:
                         {
                             //closest point origin from line segment
-                            Vector3 from = m_simplexVectorW[0];
-                            Vector3 to = m_simplexVectorW[1];
-                            Vector3 nearest;
+                            IndexedVector3 from = m_simplexVectorW[0];
+                            IndexedVector3 to = m_simplexVectorW[1];
+                            IndexedVector3 nearest;
 
-                            Vector3 p = Vector3.Zero;
-                            Vector3 diff = p - from;
-                            Vector3 v = to - from;
-                            float t = Vector3.Dot(v, diff);
+                            IndexedVector3 p = IndexedVector3.Zero;
+                            IndexedVector3 diff = p - from;
+                            IndexedVector3 v = to - from;
+                            float t = IndexedVector3.Dot(v, diff);
 
                             if (t > 0)
                             {
-                                float dotVV = Vector3.Dot(v, v);
+                                float dotVV = IndexedVector3.Dot(v, v);
                                 if (t < dotVV)
                                 {
                                     t /= dotVV;
@@ -147,11 +148,11 @@ namespace BulletXNA.BulletCollision
                     case 3:
                         {
                             //closest point origin from triangle 
-                            Vector3 p = Vector3.Zero;
+                            IndexedVector3 p = IndexedVector3.Zero;
 
-                            Vector3 a = m_simplexVectorW[0];
-                            Vector3 b = m_simplexVectorW[1];
-                            Vector3 c = m_simplexVectorW[2];
+                            IndexedVector3 a = m_simplexVectorW[0];
+                            IndexedVector3 b = m_simplexVectorW[1];
+                            IndexedVector3 c = m_simplexVectorW[2];
 
                             ClosestPtPointTriangle(ref p, ref a, ref b, ref c, ref m_cachedBC);
                             m_cachedP1 = m_simplexPointsP[0] * m_cachedBC.m_barycentricCoords.X +
@@ -185,12 +186,12 @@ namespace BulletXNA.BulletCollision
                         {
 
 
-                            Vector3 p = Vector3.Zero;
+                            IndexedVector3 p = IndexedVector3.Zero;
 
-                            Vector3 a = m_simplexVectorW[0];
-                            Vector3 b = m_simplexVectorW[1];
-                            Vector3 c = m_simplexVectorW[2];
-                            Vector3 d = m_simplexVectorW[3];
+                            IndexedVector3 a = m_simplexVectorW[0];
+                            IndexedVector3 b = m_simplexVectorW[1];
+                            IndexedVector3 c = m_simplexVectorW[2];
+                            IndexedVector3 d = m_simplexVectorW[3];
 
                             bool hasSeperation = ClosestPtPointTetrahedron(ref p, ref a, ref b, ref c, ref d, ref m_cachedBC);
 
@@ -222,7 +223,7 @@ namespace BulletXNA.BulletCollision
                                 {
                                     m_cachedValidClosest = true;
                                     //degenerate case == false, penetration = true + zero
-                                    m_cachedV = Vector3.Zero;
+                                    m_cachedV = IndexedVector3.Zero;
                                 }
                                 break;
                             }
@@ -255,7 +256,7 @@ namespace BulletXNA.BulletCollision
             return m_cachedValidClosest;
         }
 
-        public bool ClosestPtPointTetrahedron(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, ref SubSimplexClosestResult finalResult)
+        public bool ClosestPtPointTetrahedron(ref IndexedVector3 p, ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c, ref IndexedVector3 d, ref SubSimplexClosestResult finalResult)
         {
             SubSimplexClosestResult tempResult = new SubSimplexClosestResult();
 
@@ -285,7 +286,7 @@ namespace BulletXNA.BulletCollision
             if (pointOutsideABC != 0)
             {
                 ClosestPtPointTriangle(ref p, ref a, ref b, ref c, ref tempResult);
-                Vector3 q = tempResult.m_closestPointOnSimplex;
+                IndexedVector3 q = tempResult.m_closestPointOnSimplex;
 
                 float sqDist = (q - p).LengthSquared();
                 // Update best closest point if (squared) distance is less than current best
@@ -313,7 +314,7 @@ namespace BulletXNA.BulletCollision
             if (pointOutsideACD != 0)
             {
                 ClosestPtPointTriangle(ref p, ref a, ref c, ref d, ref tempResult);
-                Vector3 q = tempResult.m_closestPointOnSimplex;
+                IndexedVector3 q = tempResult.m_closestPointOnSimplex;
 
                 float sqDist = (q - p).LengthSquared();
                 // Update best closest point if (squared) distance is less than current best
@@ -339,7 +340,7 @@ namespace BulletXNA.BulletCollision
             if (pointOutsideADB != 0)
             {
                 ClosestPtPointTriangle(ref p, ref a, ref d, ref b, ref tempResult);
-                Vector3 q = tempResult.m_closestPointOnSimplex;
+                IndexedVector3 q = tempResult.m_closestPointOnSimplex;
 
                 float sqDist = (q - p).LengthSquared();
                 // Update best closest point if (squared) distance is less than current best
@@ -365,7 +366,7 @@ namespace BulletXNA.BulletCollision
             if (pointOutsideBDC != 0)
             {
                 ClosestPtPointTriangle(ref p, ref b, ref d, ref c, ref tempResult);
-                Vector3 q = tempResult.m_closestPointOnSimplex;
+                IndexedVector3 q = tempResult.m_closestPointOnSimplex;
 
                 float sqDist = (q - p).LengthSquared();
                 // Update best closest point if (squared) distance is less than current best
@@ -401,12 +402,12 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public int PointOutsideOfPlane(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d)
+        public int PointOutsideOfPlane(ref IndexedVector3 p, ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c, ref IndexedVector3 d)
         {
-            Vector3 normal = Vector3.Cross((b - a), (c - a));
+            IndexedVector3 normal = IndexedVector3.Cross((b - a), (c - a));
 
-            float signp = Vector3.Dot((p - a), normal); // [AP AB AC]
-            float signd = Vector3.Dot((d - a), normal); // [AD AB AC]
+            float signp = IndexedVector3.Dot((p - a), normal); // [AP AB AC]
+            float signd = IndexedVector3.Dot((d - a), normal); // [AD AB AC]
 
 #if CATCH_DEGENERATE_TETRAHEDRON
             if (signd * signd < (1e-4f * 1e-4f))
@@ -419,16 +420,16 @@ namespace BulletXNA.BulletCollision
             return (signp * signd) < 0f ? 1 : 0;
         }
 
-        public bool ClosestPtPointTriangle(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref SubSimplexClosestResult result)
+        public bool ClosestPtPointTriangle(ref IndexedVector3 p, ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c, ref SubSimplexClosestResult result)
         {
             result.m_usedVertices.SetAll(false);
 
             // Check if P in vertex region outside A
-            Vector3 ab = b - a;
-            Vector3 ac = c - a;
-            Vector3 ap = p - a;
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
+            IndexedVector3 ab = b - a;
+            IndexedVector3 ac = c - a;
+            IndexedVector3 ap = p - a;
+            float d1 = IndexedVector3.Dot(ab, ap);
+            float d2 = IndexedVector3.Dot(ac, ap);
             if (d1 <= 0f && d2 <= 0f)
             {
                 result.m_closestPointOnSimplex = a;
@@ -438,9 +439,9 @@ namespace BulletXNA.BulletCollision
             }
 
             // Check if P in vertex region outside B
-            Vector3 bp = p - b;
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
+            IndexedVector3 bp = p - b;
+            float d3 = IndexedVector3.Dot(ab, bp);
+            float d4 = IndexedVector3.Dot(ac, bp);
             if (d3 >= 0f && d4 <= d3)
             {
                 result.m_closestPointOnSimplex = b;
@@ -463,9 +464,9 @@ namespace BulletXNA.BulletCollision
             }
 
             // Check if P in vertex region outside C
-            Vector3 cp = p - c;
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
+            IndexedVector3 cp = p - c;
+            float d5 = IndexedVector3.Dot(ab, cp);
+            float d6 = IndexedVector3.Dot(ac, cp);
             if (d6 >= 0f && d5 <= d6)
             {
                 result.m_closestPointOnSimplex = c;
@@ -526,7 +527,7 @@ namespace BulletXNA.BulletCollision
             m_cachedBC.Reset();
         }
 
-        public void AddVertex(ref Vector3 w, ref Vector3 p, ref Vector3 q)
+        public void AddVertex(ref IndexedVector3 w, ref IndexedVector3 p, ref IndexedVector3 q)
         {
             m_lastW = w;
             m_needsUpdate = true;
@@ -538,7 +539,7 @@ namespace BulletXNA.BulletCollision
             m_numVertices++;
         }
 
-        public bool Closest(out Vector3 v)
+        public bool Closest(out IndexedVector3 v)
         {
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
@@ -574,7 +575,7 @@ namespace BulletXNA.BulletCollision
             return (m_numVertices == 4);
         }
 
-        public int GetSimplex(IList<Vector3> pBuf, IList<Vector3> qBuf, IList<Vector3> yBuf)
+        public int GetSimplex(IList<IndexedVector3> pBuf, IList<IndexedVector3> qBuf, IList<IndexedVector3> yBuf)
         {
             int i;
             for (i = 0; i < NumVertices(); i++)
@@ -586,7 +587,7 @@ namespace BulletXNA.BulletCollision
             return NumVertices();
         }
 
-        public bool InSimplex(ref Vector3 w)
+        public bool InSimplex(ref IndexedVector3 w)
         {
             bool found = false;
             int i, numverts = NumVertices();
@@ -614,7 +615,7 @@ namespace BulletXNA.BulletCollision
             return found;
         }
 
-        public void BackupClosest(ref Vector3 v)
+        public void BackupClosest(ref IndexedVector3 v)
         {
             v = m_cachedV;
         }
@@ -624,7 +625,7 @@ namespace BulletXNA.BulletCollision
             return (NumVertices() == 0);
         }
 
-        public void ComputePoints(out Vector3 p1, out Vector3 p2)
+        public void ComputePoints(out IndexedVector3 p1, out IndexedVector3 p2)
         {
             UpdateClosestVectorAndPoints();
             p1 = m_cachedP1;
@@ -637,14 +638,14 @@ namespace BulletXNA.BulletCollision
         }
 
         public int m_numVertices;
-        public Vector3[] m_simplexVectorW = new Vector3[VORONOI_SIMPLEX_MAX_VERTS];
-        public Vector3[] m_simplexPointsP = new Vector3[VORONOI_SIMPLEX_MAX_VERTS];
-        public Vector3[] m_simplexPointsQ = new Vector3[VORONOI_SIMPLEX_MAX_VERTS];
+        public IndexedVector3[] m_simplexVectorW = new IndexedVector3[VORONOI_SIMPLEX_MAX_VERTS];
+        public IndexedVector3[] m_simplexPointsP = new IndexedVector3[VORONOI_SIMPLEX_MAX_VERTS];
+        public IndexedVector3[] m_simplexPointsQ = new IndexedVector3[VORONOI_SIMPLEX_MAX_VERTS];
 
-        public Vector3 m_cachedP1;
-        public Vector3 m_cachedP2;
-        public Vector3 m_cachedV;
-        public Vector3 m_lastW;
+        public IndexedVector3 m_cachedP1;
+        public IndexedVector3 m_cachedP2;
+        public IndexedVector3 m_cachedV;
+        public IndexedVector3 m_lastW;
         public bool m_cachedValidClosest;
         public float m_equalVertexThreshold;
 
@@ -659,7 +660,7 @@ namespace BulletXNA.BulletCollision
 
     public class SubSimplexClosestResult
     {
-        public Vector3 m_closestPointOnSimplex;
+        public IndexedVector3 m_closestPointOnSimplex;
         //MASK for m_usedVertices
         //stores the simplex vertex-usage, using the MASK, 
         // if m_usedVertices & MASK then the related vertex is used

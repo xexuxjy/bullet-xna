@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -34,10 +35,10 @@ namespace BulletXNA.BulletCollision
         public CompoundShape(bool enableDynamicAabbTree)
         {
             m_children = new List<CompoundShapeChild>();
-            m_localAabbMax = new Vector3(float.MinValue);
-            m_localAabbMin = new Vector3(float.MaxValue);
+            m_localAabbMax = new IndexedVector3(float.MinValue);
+            m_localAabbMin = new IndexedVector3(float.MaxValue);
             m_collisionMargin = 0f;
-            m_localScaling = new Vector3(1f);
+            m_localScaling = new IndexedVector3(1f);
             m_dynamicAabbTree = null;
             m_updateRevision = 1;
             m_shapeType = BroadphaseNativeTypes.COMPOUND_SHAPE_PROXYTYPE;
@@ -57,7 +58,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public void AddChildShape(ref Matrix localTransform, CollisionShape shape)
+        public void AddChildShape(ref IndexedMatrix localTransform, CollisionShape shape)
         {
             m_updateRevision++;
             //m_childTransforms.push_back(localTransform);
@@ -69,8 +70,8 @@ namespace BulletXNA.BulletCollision
             child.m_childMargin = shape.GetMargin();
 
             //extend the local aabbMin/aabbMax
-            Vector3 localAabbMin;
-            Vector3 localAabbMax;
+            IndexedVector3 localAabbMin;
+            IndexedVector3 localAabbMax;
             shape.GetAabb(ref localTransform, out localAabbMin, out localAabbMax);
             MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
             MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
@@ -130,26 +131,26 @@ namespace BulletXNA.BulletCollision
             return m_children[index].m_childShape;
         }
 
-        public Matrix GetChildTransform(int index)
+        public IndexedMatrix GetChildTransform(int index)
         {
             return m_children[index].m_transform;
         }
 
         ///set a new transform for a child, and update internal data structures (local aabb and dynamic tree)
-        public void UpdateChildTransform(int childIndex, ref Matrix newChildTransform)
+        public void UpdateChildTransform(int childIndex, ref IndexedMatrix newChildTransform)
         {
             UpdateChildTransform(childIndex, ref newChildTransform, true);
         }
 
-        public void UpdateChildTransform(int childIndex, ref Matrix newChildTransform, bool shouldRecalculateLocalAabb)
+        public void UpdateChildTransform(int childIndex, ref IndexedMatrix newChildTransform, bool shouldRecalculateLocalAabb)
         {
             m_children[childIndex].m_transform = newChildTransform;
 
             if (m_dynamicAabbTree != null)
             {
                 ///update the dynamic aabb tree
-                Vector3 localAabbMin;
-                Vector3 localAabbMax;
+                IndexedVector3 localAabbMin;
+                IndexedVector3 localAabbMax;
                 m_children[childIndex].m_childShape.GetAabb(ref newChildTransform, out localAabbMin, out localAabbMax);
                 DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
                 //int index = m_children.Count - 1;
@@ -162,17 +163,17 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
 
             for (int i = 0; i < m_children.Count; i++)
             {
-                Matrix childTrans = GetChildTransform(i);
-                Vector3 childScale = m_children[i].m_childShape.GetLocalScaling();
+                IndexedMatrix childTrans = GetChildTransform(i);
+                IndexedVector3 childScale = m_children[i].m_childShape.GetLocalScaling();
                 //		childScale = childScale * (childTrans.getBasis() * scaling);
                 childScale = childScale * scaling / m_localScaling;
                 m_children[i].m_childShape.SetLocalScaling(ref childScale);
-                childTrans.Translation = ((childTrans.Translation) * scaling);
+                childTrans._origin = ((childTrans._origin) * scaling);
                 UpdateChildTransform(i, ref childTrans, false);
             }
             m_localScaling = scaling;
@@ -190,7 +191,7 @@ namespace BulletXNA.BulletCollision
                     CompoundShapeChild child = m_children[index];
 
                     //extend the local aabbMin/aabbMax
-                    Vector3 localAabbMin, localAabbMax;
+                    IndexedVector3 localAabbMin, localAabbMax;
                     child.m_childShape.GetAabb(ref child.m_transform, out localAabbMin, out localAabbMax);
 
                     DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
@@ -206,31 +207,29 @@ namespace BulletXNA.BulletCollision
         }
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix trans, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
-            Vector3 localHalfExtents = .5f * (m_localAabbMax - m_localAabbMin);
-            Vector3 localCenter = .5f * (m_localAabbMax + m_localAabbMin);
+            IndexedVector3 localHalfExtents = .5f * (m_localAabbMax - m_localAabbMin);
+            IndexedVector3 localCenter = .5f * (m_localAabbMax + m_localAabbMin);
 
             //avoid an illegal AABB when there are no children
             if (m_children.Count == 0)
             {
-                localHalfExtents = Vector3.Zero;
-                localCenter = Vector3.Zero;
+                localHalfExtents = IndexedVector3.Zero;
+                localCenter = IndexedVector3.Zero;
             }
             float margin = GetMargin();
-            localHalfExtents += new Vector3(margin);
+            localHalfExtents += new IndexedVector3(margin);
 
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
+         
+           	IndexedBasisMatrix abs_b = trans._basis.Absolute();  
 
+    	    IndexedVector3 center = trans * localCenter;
 
-            //Vector3 center = trans.Translation;
-            Vector3 center = Vector3.Transform(localCenter, trans);
-
-
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
-                                            Vector3.Dot(abs_b.Up, localHalfExtents),
-                                            Vector3.Dot(abs_b.Backward, localHalfExtents));
+	        IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
+		                            abs_b[1].Dot(ref localHalfExtents),
+		                            abs_b[2].Dot(ref localHalfExtents));
+ 
             aabbMin = center - extent;
             aabbMax = center + extent;
         }
@@ -241,40 +240,40 @@ namespace BulletXNA.BulletCollision
             // Recalculate the local aabb
             // Brute force, it iterates over all the shapes left.
 
-            m_localAabbMin = new Vector3(float.MaxValue);
-            m_localAabbMax = new Vector3(float.MinValue);
+            m_localAabbMin = new IndexedVector3(float.MaxValue);
+            m_localAabbMax = new IndexedVector3(float.MinValue);
 
             //extend the local aabbMin/aabbMax
-            Vector3 localAabbMin;
-            Vector3 localAabbMax;
+            IndexedVector3 localAabbMin;
+            IndexedVector3 localAabbMax;
             for (int j = 0; j < m_children.Count; j++)
             {
-                Matrix foo = m_children[j].m_transform;
+                IndexedMatrix foo = m_children[j].m_transform;
                 m_children[j].m_childShape.GetAabb(ref foo, out localAabbMin, out localAabbMax);
                 MathUtil.VectorMin(ref localAabbMin, ref m_localAabbMin);
                 MathUtil.VectorMax(ref localAabbMax, ref m_localAabbMax);
             }
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_localScaling;
         }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
             //approximation: take the inertia from the aabb for now
-            Matrix ident = Matrix.Identity;
-            Vector3 aabbMin;
-            Vector3 aabbMax;
+            IndexedMatrix ident = IndexedMatrix.Identity;
+            IndexedVector3 aabbMin;
+            IndexedVector3 aabbMax;
             GetAabb(ref ident, out aabbMin, out aabbMax);
 
-            Vector3 halfExtents = (aabbMax - aabbMin) * .5f;
+            IndexedVector3 halfExtents = (aabbMax - aabbMin) * .5f;
             float lx = 2f * (halfExtents.X);
             float ly = 2f * (halfExtents.Y);
             float lz = 2f * (halfExtents.Z);
 
-            inertia = new Vector3(mass / (12.0f) * (ly * ly + lz * lz),
+            inertia = new IndexedVector3(mass / (12.0f) * (ly * ly + lz * lz),
                             mass / (12.0f) * (lx * lx + lz * lz),
                             mass / (12.0f) * (lx * lx + ly * ly));
         }
@@ -307,74 +306,63 @@ namespace BulletXNA.BulletCollision
         ///"principal" has to be applied inversely to all children transforms in order for the local coordinate system of the compound
         ///shape to be centered at the center of mass and to coincide with the principal axes. This also necessitates a correction of the world transform
         ///of the collision object by the principal transform.
-        public void CalculatePrincipalAxisTransform(IList<float> masses, ref Matrix principal, out Vector3 inertia)
+        public void CalculatePrincipalAxisTransform(IList<float> masses, ref IndexedMatrix principal, out IndexedVector3 inertia)
         {
             int n = m_children.Count;
 
             float totalMass = 0;
-            Vector3 center = Vector3.Zero;
+            IndexedVector3 center = IndexedVector3.Zero;
 
             for (int k = 0; k < n; k++)
             {
                 Debug.Assert(masses[k] > 0f);
-                center += m_children[k].m_transform.Translation * masses[k];
+                center += m_children[k].m_transform._origin * masses[k];
                 totalMass += masses[k];
             }
 
             Debug.Assert(totalMass > 0f);
             center /= totalMass;
-            principal.Translation = center;
+            principal._origin = center;
 
-            Matrix tensor = new Matrix();
+            IndexedBasisMatrix tensor = new IndexedBasisMatrix();
             for (int k = 0; k < n; k++)
             {
-                Vector3 i;
+                IndexedVector3 i;
                 m_children[k].m_childShape.CalculateLocalInertia(masses[k], out i);
 
-                Matrix t = m_children[k].m_transform;
-                Vector3 o = t.Translation - center;
+                IndexedMatrix t = m_children[k].m_transform;
+                IndexedVector3 o = t._origin - center;
 
                 //compute inertia tensor in coordinate system of compound shape
-                Matrix j = Matrix.Transpose(t);
-                j.Right = j.Right * i.X;
-                j.Up = j.Up * i.Y;
-                j.Backward = j.Backward * i.Z;
-
-                Matrix basis = MathUtil.BasisMatrix(ref t);
-                j = basis * j;
+                IndexedBasisMatrix j = t._basis.Transpose();
+                j[0] *= i[0];
+                j[1] *= i[1];
+                j[2] *= i[2];
+                j = t._basis * j;
 
                 //add inertia tensor
-                //tensor[0] += j[0];
-                //tensor[1] += j[1];
-                //tensor[2] += j[2];
-                tensor += j;
+                tensor[0] += j[0];
+                tensor[1] += j[1];
+                tensor[2] += j[2];
+                //tensor += j;
 
                 //compute inertia tensor of pointmass at o
                 float o2 = o.LengthSquared();
-                Vector3 a = new Vector3(o2, 0, 0);
-                MathUtil.SetMatrixVector(ref j, 0, ref a);
-                a = new Vector3(0, o2, 0);
-                MathUtil.SetMatrixVector(ref j, 1, ref a);
-                a = new Vector3(0, 0, o2);
-                MathUtil.SetMatrixVector(ref j, 2, ref a);
+                j._Row0 = new IndexedVector3(o2, 0, 0);
+                j._Row1 = new IndexedVector3(0, o2, 0);
+                j._Row2 = new IndexedVector3(0, 0, o2);
 
-                a = o * -o.X;
-                MathUtil.SetMatrixVector(ref j, 0, ref a);
-                a = o * -o.Y;
-                MathUtil.SetMatrixVector(ref j, 1, ref a);
-                a = o * -o.Z;
-                MathUtil.SetMatrixVector(ref j, 2, ref a);
+                j._Row0 = o * -o.X;
+                j._Row1 = o * -o.Y;
+                j._Row2 = o * -o.Z;
 
                 //add inertia tensor of pointmass
-                //tensor[0] += masses[k] * j[0];
-                //tensor[1] += masses[k] * j[1];
-                //tensor[2] += masses[k] * j[2];
-                tensor.Right += masses[k] * j.Right;
-                tensor.Up += masses[k] * j.Up;
-                tensor.Backward += masses[k] * j.Backward;
+                tensor[0] += masses[k] * j[0];
+                tensor[1] += masses[k] * j[1];
+                tensor[2] += masses[k] * j[2];
             }
-            MathUtil.Diagonalize(ref tensor, ref principal, 0.00001f, 20);
-            inertia = new Vector3(tensor.M11, tensor.M22, tensor.M33);
+            tensor.Diagonalize(out principal, 0.00001f, 20);
+            inertia = new IndexedVector3(tensor._Row0.X, tensor._Row1.Y, tensor._Row2.Z);
         }
 
         public int GetUpdateRevision()
@@ -383,20 +371,20 @@ namespace BulletXNA.BulletCollision
         }
 
         private IList<CompoundShapeChild> m_children;
-        private Vector3 m_localAabbMin;
-        private Vector3 m_localAabbMax;
+        private IndexedVector3 m_localAabbMin;
+        private IndexedVector3 m_localAabbMax;
 
         private Dbvt m_dynamicAabbTree;
 
         ///increment m_updateRevision when adding/removing/replacing child shapes, so that some caches can be updated
         private int m_updateRevision;
         private float m_collisionMargin;
-        protected Vector3 m_localScaling;
+        protected IndexedVector3 m_localScaling;
     }
 
     public class CompoundShapeChild
     {
-        public Matrix m_transform;
+        public IndexedMatrix m_transform;
         public CollisionShape m_childShape;
         public BroadphaseNativeTypes m_childShapeType;
         public float m_childMargin;

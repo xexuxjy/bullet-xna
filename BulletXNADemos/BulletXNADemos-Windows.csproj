@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.GImpactTestDemo</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.InternalEdgeDemo</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>
@@ -112,14 +112,19 @@
   <ItemGroup>
     <Compile Include="Demos\BasicDemo.cs" />
     <Compile Include="Demos\Box2DDemo.cs" />
+    <Compile Include="Demos\BSPDemo.cs" />
+    <Compile Include="Demos\CapsuleHeightfieldDemo.cs" />
     <Compile Include="Demos\ConcaveDemo.cs" />
     <Compile Include="Demos\ConcaveRaycastDemo.cs" />
     <Compile Include="Demos\ConstraintDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\DemoMeshes.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
+    <Compile Include="Demos\FractureDemo.cs" />
     <Compile Include="Demos\GImpactTestDemo.cs" />
+    <Compile Include="Demos\InternalEdgeDemo.cs" />
     <Compile Include="Demos\IslandStressDemo.cs" />
+    <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
@@ -192,6 +197,7 @@
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

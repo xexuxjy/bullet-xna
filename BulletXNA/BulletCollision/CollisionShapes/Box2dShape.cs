@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -31,54 +32,54 @@ namespace BulletXNA.BulletCollision
 	public class Box2dShape: PolyhedralConvexShape
 	{
 
-		//Vector3	m_boxHalfExtents1; //use m_implicitShapeDimensions instead
+		//IndexedVector3	m_boxHalfExtents1; //use m_implicitShapeDimensions instead
 
-		private Vector3 m_centroid;
-		private Vector3[] m_vertices = new Vector3[4];
-		private Vector3[] m_normals = new Vector3[4];
+		private IndexedVector3 m_centroid;
+		private IndexedVector3[] m_vertices = new IndexedVector3[4];
+		private IndexedVector3[] m_normals = new IndexedVector3[4];
 
 
-		public virtual Vector3 GetHalfExtentsWithMargin()
+		public virtual IndexedVector3 GetHalfExtentsWithMargin()
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-			Vector3 margin = new Vector3(GetMargin());
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 margin = new IndexedVector3(GetMargin());
 			halfExtents += margin;
 			return halfExtents;
 		}
 		
-		public virtual Vector3 GetHalfExtentsWithoutMargin()
+		public virtual IndexedVector3 GetHalfExtentsWithoutMargin()
 		{
 			return m_implicitShapeDimensions;//changed in Bullet 2.63: assume the scaling and margin are included
 		}
 		
 
-		public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
+		public override IndexedVector3	LocalGetSupportingVertex(ref IndexedVector3 vec)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-			Vector3 margin= new Vector3(GetMargin());
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 margin= new IndexedVector3(GetMargin());
 			halfExtents += margin;
 
-			return new Vector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
+			return new IndexedVector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
 				MathUtil.FSel(vec.Y, halfExtents.Y, -halfExtents.Y),
 				MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z));
 		}
 
-		public override Vector3	LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+		public override IndexedVector3	LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
-			return new Vector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
+			return new IndexedVector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
 				MathUtil.FSel(vec.Y, halfExtents.Y, -halfExtents.Y),
 				MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z));
 		}
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 		
 			for (int i=0;i<numVectors;i++)
 			{
-				Vector3 vec = vectors[i];
+				IndexedVector3 vec = vectors[i];
 				supportVerticesOut[i] = new Vector4(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
 					MathUtil.FSel(vec.Y, halfExtents.Y, -halfExtents.Y),
 					MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z),0); 
@@ -87,64 +88,64 @@ namespace BulletXNA.BulletCollision
 		}
 
 
-		public Box2dShape(ref Vector3 boxHalfExtents) 
+		public Box2dShape(ref IndexedVector3 boxHalfExtents) 
 		{
-			m_centroid = Vector3.Zero;
-			m_vertices[0] = new Vector3(-boxHalfExtents.X,-boxHalfExtents.Y,0);
-			m_vertices[1] = new Vector3(boxHalfExtents.X,-boxHalfExtents.Y,0);
-			m_vertices[2] = new Vector3(boxHalfExtents.X,boxHalfExtents.Y,0);
-			m_vertices[3] = new Vector3(-boxHalfExtents.X,boxHalfExtents.Y,0);
+			m_centroid = IndexedVector3.Zero;
+			m_vertices[0] = new IndexedVector3(-boxHalfExtents.X,-boxHalfExtents.Y,0);
+			m_vertices[1] = new IndexedVector3(boxHalfExtents.X,-boxHalfExtents.Y,0);
+			m_vertices[2] = new IndexedVector3(boxHalfExtents.X,boxHalfExtents.Y,0);
+			m_vertices[3] = new IndexedVector3(-boxHalfExtents.X,boxHalfExtents.Y,0);
 
-			m_normals[0] = new Vector3(0,-1,0);
-			m_normals[1] = new Vector3(1,0,0);
-			m_normals[2] = new Vector3(0,1,0);
-			m_normals[3] = new Vector3(-1,0,0);
+			m_normals[0] = new IndexedVector3(0,-1,0);
+			m_normals[1] = new IndexedVector3(1,0,0);
+			m_normals[2] = new IndexedVector3(0,1,0);
+			m_normals[3] = new IndexedVector3(-1,0,0);
 
 			m_shapeType = BroadphaseNativeTypes.BOX_2D_SHAPE_PROXYTYPE;
-			Vector3 margin = new Vector3(GetMargin());
+			IndexedVector3 margin = new IndexedVector3(GetMargin());
 			m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
 		}
 
 		public override void SetMargin(float collisionMargin)
 		{
 			//correct the m_implicitShapeDimensions for the margin
-			Vector3 oldMargin= new Vector3(GetMargin());
-			Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
+			IndexedVector3 oldMargin= new IndexedVector3(GetMargin());
+			IndexedVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 			
 			base.SetMargin(collisionMargin);
-			Vector3 newMargin= new Vector3(GetMargin());
+			IndexedVector3 newMargin= new IndexedVector3(GetMargin());
 			m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 		}
-		public override void SetLocalScaling(ref Vector3 scaling)
+		public override void SetLocalScaling(ref IndexedVector3 scaling)
 		{
-			Vector3 oldMargin= new Vector3(GetMargin());
-			Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
-			Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
+			IndexedVector3 oldMargin= new IndexedVector3(GetMargin());
+			IndexedVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
+			IndexedVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
 			base.SetLocalScaling(ref scaling);
 
 			m_implicitShapeDimensions = (unScaledImplicitShapeDimensionsWithMargin * m_localScaling) - oldMargin;
 		}
 
-		public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
+		public override void GetAabb(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)
 		{
 			AabbUtil2.TransformAabb(GetHalfExtentsWithoutMargin(),GetMargin(),ref t, out aabbMin,out aabbMax);
 		}
 
 		
 
-		public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+		public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
 		{
 
 		//float margin = float(0.);
-			Vector3 halfExtents = GetHalfExtentsWithMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithMargin();
 
 			float lx=2.0f*halfExtents.X;
 			float ly=2.0f*halfExtents.Y;
 			float lz=2.0f*halfExtents.Z;
 
-			inertia = new Vector3(mass/(12.0f) * (ly*ly + lz*lz),
+			inertia = new IndexedVector3(mass/(12.0f) * (ly*ly + lz*lz),
 							mass/(12.0f) * (lx*lx + lz*lz),
 							mass/(12.0f) * (lx*lx + ly*ly));
 		}
@@ -163,27 +164,27 @@ namespace BulletXNA.BulletCollision
 			return 4;
 		}
 
-		public Vector3[] GetVertices()
+		public IndexedVector3[] GetVertices()
 		{
 			return m_vertices;
 		}
 
-		public Vector3[] GetNormals()
+		public IndexedVector3[] GetNormals()
 		{
 			return m_normals;
 		}
 
-        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
+        public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
 		{
 			//this plane might not be aligned...
 			Vector4 plane;
 			GetPlaneEquation(out plane,i);
-			planeNormal = new Vector3(plane.X,plane.Y,plane.Z);
+			planeNormal = new IndexedVector3(plane.X,plane.Y,plane.Z);
 			planeSupport = LocalGetSupportingVertex(-planeNormal);
 		}
 
 
-		public Vector3 GetCentroid()
+		public IndexedVector3 GetCentroid()
 		{
 			return m_centroid;
 		}
@@ -199,11 +200,11 @@ namespace BulletXNA.BulletCollision
 		}
 
 
-		public override void GetVertex(int i, out Vector3 vtx)
+		public override void GetVertex(int i, out IndexedVector3 vtx)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
-			vtx = new Vector3(
+			vtx = new IndexedVector3(
 					halfExtents.X * (1-(i&1)) - halfExtents.X * (i&1),
 					halfExtents.Y * (1-((i&2)>>1)) - halfExtents.Y * ((i&2)>>1),
 					halfExtents.Z * (1-((i&4)>>2)) - halfExtents.Z * ((i&4)>>2));
@@ -212,7 +213,7 @@ namespace BulletXNA.BulletCollision
 
 		public void GetPlaneEquation(out Vector4 plane,int i)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
 			switch (i)
 			{
@@ -242,7 +243,7 @@ namespace BulletXNA.BulletCollision
 		}
 
 
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
 		//virtual void getEdge(int i,Edge& edge) const
 		{
 			int edgeVert0 = 0;
@@ -311,9 +312,9 @@ namespace BulletXNA.BulletCollision
 
 
 		
-		public override bool IsInside(ref Vector3 pt,float tolerance)
+		public override bool IsInside(ref IndexedVector3 pt,float tolerance)
 		{
-			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
 			//float minDist = 2*tolerance;
 			
@@ -339,31 +340,31 @@ namespace BulletXNA.BulletCollision
 			return 6;
 		}
 		
-		public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector) 
+		public override void GetPreferredPenetrationDirection(int index, out IndexedVector3 penetrationVector) 
 		{
 			switch (index)
 			{
 			case 0:
-				penetrationVector = new Vector3(1,0,0);
+				penetrationVector = new IndexedVector3(1,0,0);
 				break;
 			case 1:
-				penetrationVector = new Vector3(-1,0,0);
+				penetrationVector = new IndexedVector3(-1,0,0);
 				break;
 			case 2:
-				penetrationVector = new Vector3(0,1,0);
+				penetrationVector = new IndexedVector3(0,1,0);
 				break;
 			case 3:
-				penetrationVector = new Vector3(0,-1,0);
+				penetrationVector = new IndexedVector3(0,-1,0);
 				break;
 			case 4:
-				penetrationVector = new Vector3(0,0,1);
+				penetrationVector = new IndexedVector3(0,0,1);
 				break;
 			case 5:
-				penetrationVector = new Vector3(0,0,-1);
+				penetrationVector = new IndexedVector3(0,0,-1);
 				break;
 			default:
 				Debug.Assert(false);
-                penetrationVector = Vector3.Zero;
+                penetrationVector = IndexedVector3.Zero;
 				break;
 			}
 		}

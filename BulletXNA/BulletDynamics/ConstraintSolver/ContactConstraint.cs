@@ -25,6 +25,7 @@ using System;
 using System.Diagnostics;
 using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -62,24 +63,23 @@ namespace BulletXNA.BulletDynamics
 		public static float ResolveSingleCollision(
 				RigidBody body1,
 				CollisionObject colObj2,
-				ref Vector3 contactPositionWorld,
-				ref Vector3 contactNormalOnB,
+				ref IndexedVector3 contactPositionWorld,
+				ref IndexedVector3 contactNormalOnB,
 				ContactSolverInfo solverInfo,
 				float distance)
 		{
 			RigidBody body2 = RigidBody.Upcast(colObj2);
 
 
-			Vector3 normal = contactNormalOnB;
+			IndexedVector3 normal = contactNormalOnB;
 
-			Vector3 rel_pos1 = contactPositionWorld - body1.GetWorldTransform().Translation;
-			Vector3 rel_pos2 = contactPositionWorld - colObj2.GetWorldTransform().Translation;
+			IndexedVector3 rel_pos1 = contactPositionWorld - body1.GetWorldTransform()._origin;
+			IndexedVector3 rel_pos2 = contactPositionWorld - colObj2.GetWorldTransform()._origin;
 
-			Vector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
-			Vector3 vel2 = body2 != null ? body2.GetVelocityInLocalPoint(ref rel_pos2) : Vector3.Zero;
-			Vector3 vel = vel1 - vel2;
-			float rel_vel;
-			Vector3.Dot(ref normal, ref vel, out rel_vel);
+			IndexedVector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
+			IndexedVector3 vel2 = body2 != null ? body2.GetVelocityInLocalPoint(ref rel_pos2) : IndexedVector3.Zero;
+			IndexedVector3 vel = vel1 - vel2;
+			float rel_vel = normal.Dot(ref vel);
 
 			float combinedRestitution = body1.GetRestitution() * colObj2.GetRestitution();
 			float restitution = combinedRestitution * -rel_vel;
@@ -110,9 +110,9 @@ namespace BulletXNA.BulletDynamics
 
 		///bilateral constraint between two dynamic objects
 		///positive distance = separation, negative distance = penetration
-		public static void ResolveSingleBilateral(RigidBody body1, ref Vector3 pos1,
-							  RigidBody body2, ref Vector3 pos2,
-							  float distance, ref Vector3 normal, ref float impulse, float timeStep)
+		public static void ResolveSingleBilateral(RigidBody body1, ref IndexedVector3 pos1,
+							  RigidBody body2, ref IndexedVector3 pos2,
+							  float distance, ref IndexedVector3 normal, ref float impulse, float timeStep)
 		{
 			float normalLenSqr = normal.LengthSquared();
 			Debug.Assert(Math.Abs(normalLenSqr) < 1.1f);
@@ -121,16 +121,16 @@ namespace BulletXNA.BulletDynamics
 				impulse = 0f;
 				return;
 			}
-			Vector3 rel_pos1 = pos1 - body1.GetCenterOfMassPosition();
-			Vector3 rel_pos2 = pos2 - body2.GetCenterOfMassPosition();
+			IndexedVector3 rel_pos1 = pos1 - body1.GetCenterOfMassPosition();
+			IndexedVector3 rel_pos2 = pos2 - body2.GetCenterOfMassPosition();
 			//this jacobian entry could be re-used for all iterations
 
-			Vector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
-			Vector3 vel2 = body2.GetVelocityInLocalPoint(ref rel_pos2);
-			Vector3 vel = vel1 - vel2;
+			IndexedVector3 vel1 = body1.GetVelocityInLocalPoint(ref rel_pos1);
+			IndexedVector3 vel2 = body2.GetVelocityInLocalPoint(ref rel_pos2);
+			IndexedVector3 vel = vel1 - vel2;
 
-			Matrix m1 = MathUtil.TransposeBasis(body1.GetCenterOfMassTransform());
-			Matrix m2 = MathUtil.TransposeBasis(body2.GetCenterOfMassTransform());
+            IndexedBasisMatrix m1 = body1.GetCenterOfMassTransform()._basis.Transpose();
+            IndexedBasisMatrix m2 = body2.GetCenterOfMassTransform()._basis.Transpose();
 
 
 			JacobianEntry jac = new JacobianEntry(m1, m2, rel_pos1, rel_pos2, normal,
@@ -142,11 +142,13 @@ namespace BulletXNA.BulletDynamics
 
 
 			float rel_vel = jac.GetRelativeVelocity(
-				body1.GetLinearVelocity(), Vector3.TransformNormal(body1.GetAngularVelocity(), m1),
-				body2.GetLinearVelocity(), Vector3.TransformNormal(body2.GetAngularVelocity(), m2));
-			float a = jacDiagABInv;
+				body1.GetLinearVelocity(),
+                body1.GetCenterOfMassTransform()._basis.Transpose() * body1.GetAngularVelocity(),
+                body2.GetLinearVelocity(),
+                body2.GetCenterOfMassTransform()._basis.Transpose() * body2.GetAngularVelocity());
+            float a = jacDiagABInv;
 
-			rel_vel = Vector3.Dot(normal, vel);
+			rel_vel = normal.Dot(ref vel);
 
 			//todo: move this into proper structure
 			float contactDamping = 0.2f;

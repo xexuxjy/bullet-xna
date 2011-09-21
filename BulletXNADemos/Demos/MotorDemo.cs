@@ -4,6 +4,7 @@ using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {
@@ -20,10 +21,10 @@ namespace BulletXNADemos.Demos
 
 		DynamicsWorld m_dynamicsWorld;
 
-		public TestRig (DemoApplication demoApplication,DynamicsWorld ownerWorld, ref Vector3 positionOffset, bool bFixed)
+		public TestRig (DemoApplication demoApplication,DynamicsWorld ownerWorld, ref IndexedVector3 positionOffset, bool bFixed)
 		{
 			m_dynamicsWorld = ownerWorld;
-			Vector3 vUp = Vector3.Up;;
+            IndexedVector3 vUp = new IndexedVector3(0, 1, 0);
 
 			//
 			// Setup geometry
@@ -42,20 +43,20 @@ namespace BulletXNADemos.Demos
 			// Setup rigid bodies
 			//
 			float fHeight = 0.5f;
-			Matrix offset = Matrix.Identity;
-			offset.Translation = positionOffset;		
+			IndexedMatrix offset = IndexedMatrix.Identity;
+			offset._origin = positionOffset;		
 
 			// root
-			Vector3 vRoot = new Vector3(0,fHeight,0);
-			Matrix transform = Matrix.Identity;
-			transform.Translation = vRoot;
+			IndexedVector3 vRoot = new IndexedVector3(0,fHeight,0);
+			IndexedMatrix transform = IndexedMatrix.Identity;
+			transform._origin = vRoot;
 
 			if (bFixed)
 			{
-				m_bodies[0] = demoApplication.LocalCreateRigidBody(0.0f, MathUtil.BulletMatrixMultiply(ref offset,ref transform), m_shapes[0]);
+				m_bodies[0] = demoApplication.LocalCreateRigidBody(0.0f, offset * transform, m_shapes[0]);
 			} else
 			{
-				m_bodies[0] = demoApplication.LocalCreateRigidBody(1.0f, MathUtil.BulletMatrixMultiply(ref offset,ref transform), m_shapes[0]);
+				m_bodies[0] = demoApplication.LocalCreateRigidBody(1.0f, offset * transform, m_shapes[0]);
 			}
 			// legs
 			for (int i=0; i<NUM_LEGS; i++)
@@ -64,23 +65,23 @@ namespace BulletXNADemos.Demos
 				float fSin = (float)Math.Sin(fAngle);
 				float fCos = (float)Math.Cos(fAngle);
 
-				transform = Matrix.Identity;
-				Vector3 vBoneOrigin = new Vector3(fCos*(fBodySize+0.5f*fLegLength), fHeight, fSin*(fBodySize+0.5f*fLegLength));
-				transform.Translation = vBoneOrigin;
+				transform = IndexedMatrix.Identity;
+				IndexedVector3 vBoneOrigin = new IndexedVector3(fCos*(fBodySize+0.5f*fLegLength), fHeight, fSin*(fBodySize+0.5f*fLegLength));
+				transform._origin = vBoneOrigin;
 
 				// thigh
-				Vector3 vToBone = (vBoneOrigin - vRoot);
+				IndexedVector3 vToBone = (vBoneOrigin - vRoot);
 				vToBone.Normalize();
 
-				Vector3 vAxis = Vector3.Cross(vToBone,vUp);	
-				transform = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(vAxis, MathUtil.SIMD_HALF_PI));
-				transform.Translation = vBoneOrigin;
-				m_bodies[1+2*i] = demoApplication.LocalCreateRigidBody(1.0f, MathUtil.BulletMatrixMultiply(ref offset,ref transform), m_shapes[1+2*i]);
+				IndexedVector3 vAxis = IndexedVector3.Cross(vToBone,vUp);	
+				transform._basis = new IndexedBasisMatrix(Quaternion.CreateFromAxisAngle(vAxis.ToVector3(), MathUtil.SIMD_HALF_PI));
+				transform._origin = vBoneOrigin;
+				m_bodies[1+2*i] = demoApplication.LocalCreateRigidBody(1.0f, offset * transform, m_shapes[1+2*i]);
 
 				// shin
-				transform = Matrix.Identity;
-				transform.Translation = new Vector3(fCos*(fBodySize+fLegLength), fHeight-0.5f*fForeLegLength, fSin*(fBodySize+fLegLength));
-				m_bodies[2+2*i] = demoApplication.LocalCreateRigidBody(1.0f, MathUtil.BulletMatrixMultiply(ref offset, ref transform), m_shapes[2+2*i]);
+				transform = IndexedMatrix.Identity;
+				transform._origin = new IndexedVector3(fCos*(fBodySize+fLegLength), fHeight-0.5f*fForeLegLength, fSin*(fBodySize+fLegLength));
+				m_bodies[2+2*i] = demoApplication.LocalCreateRigidBody(1.0f, offset * transform, m_shapes[2+2*i]);
 			}
 
 			// Setup some damping on the m_bodies
@@ -98,7 +99,7 @@ namespace BulletXNADemos.Demos
 			//
 			HingeConstraint hingeC;
 
-			Matrix localA, localB, localC;
+			IndexedMatrix localA, localB, localC;
 
 			for (int i=0; i<NUM_LEGS; i++)
 			{
@@ -107,25 +108,18 @@ namespace BulletXNADemos.Demos
 				float fCos = (float)Math.Cos(fAngle);
 
 				// hip joints
-				localA = Matrix.Identity; 
-				localB= Matrix.Identity;
+				localA = IndexedMatrix.Identity; 
+				localB= IndexedMatrix.Identity;
 
 				localA = MathUtil.SetEulerZYX(0f,-fAngle,0f);	
-				localA.Translation = new Vector3(fCos*fBodySize, 0.0f, fSin*fBodySize);
-				localB = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_bodies[1 + 2 * i].GetWorldTransform()),MathUtil.BulletMatrixMultiply(m_bodies[0].GetWorldTransform(), localA));
-
-				Matrix temp0 = m_bodies[1 + 2 * i].GetWorldTransform();
-				Matrix temp1 = Matrix.Invert(m_bodies[1 + 2 * i].GetWorldTransform());
-				Matrix temp2 = MathUtil.BulletMatrixMultiply(m_bodies[0].GetWorldTransform(), localA);
+				localA._origin = new IndexedVector3(fCos*fBodySize, 0.0f, fSin*fBodySize);
+                localB = m_bodies[1 + 2 * i].GetWorldTransform().Inverse() * m_bodies[0].GetWorldTransform() * localA;
 
 
 				if (BulletGlobals.g_streamWriter != null)
 				{
 					MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "Hip LocalA", localA);
 					MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "Hip LocalB", localB);
-					MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "Hip temp0", temp0);
-					MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "Hip temp1", temp1);
-					MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "Hip temp2", temp2);
 				}
 
 				hingeC = new HingeConstraint(m_bodies[0], m_bodies[1+2*i], ref localA, ref localB);
@@ -134,15 +128,15 @@ namespace BulletXNADemos.Demos
 				m_dynamicsWorld.AddConstraint(m_joints[2*i], true);
 
 				// knee joints
-				localA = Matrix.Identity; 
-				localB= Matrix.Identity;
-				localC = Matrix.Identity;
+				localA = IndexedMatrix.Identity; 
+				localB= IndexedMatrix.Identity;
+				localC = IndexedMatrix.Identity;
 
 				localA = MathUtil.SetEulerZYX(0f,-fAngle,0f);	
-				localA.Translation = new Vector3(fCos*(fBodySize+fLegLength), 0.0f, fSin*(fBodySize+fLegLength));
+				localA._origin = new IndexedVector3(fCos*(fBodySize+fLegLength), 0.0f, fSin*(fBodySize+fLegLength));
 
-				localB = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_bodies[1 + 2 * i].GetWorldTransform()),MathUtil.BulletMatrixMultiply(m_bodies[0].GetWorldTransform(),localA));
-				localC = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_bodies[2 + 2 * i].GetWorldTransform()), MathUtil.BulletMatrixMultiply(m_bodies[0].GetWorldTransform(), localA));
+                localB = m_bodies[1 + 2 * i].GetWorldTransform().Inverse() * m_bodies[0].GetWorldTransform() * localA;
+                localC = m_bodies[2 + 2 * i].GetWorldTransform().Inverse() * m_bodies[0].GetWorldTransform() * localA;
 
 
 				if (BulletGlobals.g_streamWriter != null)
@@ -213,7 +207,7 @@ namespace BulletXNADemos.Demos
 
 			m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
-			Vector3 gravity = new Vector3(0, -10, 0);
+			IndexedVector3 gravity = new IndexedVector3(0, -10, 0);
 			m_dynamicsWorld.SetGravity(ref gravity);
 
 			m_dynamicsWorld.SetInternalTickCallback(new MotorPreTickCallback(),this,true);
@@ -221,23 +215,23 @@ namespace BulletXNADemos.Demos
 
 			// Setup a big ground box
 			{
-				CollisionShape groundShape = new BoxShape(new Vector3(200.0f,10.0f,200.0f));
+				CollisionShape groundShape = new BoxShape(new IndexedVector3(200.0f,10.0f,200.0f));
 				m_collisionShapes.Add(groundShape);
-				Matrix groundTransform = Matrix.CreateTranslation(0,-10,0);
+				IndexedMatrix groundTransform = IndexedMatrix.CreateTranslation(0,-10,0);
 				LocalCreateRigidBody(0f,ref groundTransform,groundShape);
 			}
 
 			// Spawn one ragdoll
-			Vector3 startOffset = new Vector3(1,0.5f,0);
+			IndexedVector3 startOffset = new IndexedVector3(1,0.5f,0);
 			SpawnTestRig(ref startOffset, false);
-			startOffset = new Vector3(-2, 0.5f, 0);
+			startOffset = new IndexedVector3(-2, 0.5f, 0);
 			SpawnTestRig(ref startOffset, true);
 
 			ClientResetScene();
 		}
 
 
-		public void SpawnTestRig(ref Vector3 startOffset, bool bFixed)
+		public void SpawnTestRig(ref IndexedVector3 startOffset, bool bFixed)
 		{
 			TestRig rig = new TestRig(this,m_dynamicsWorld, ref startOffset, bFixed);
 			m_rigs.Add(rig);

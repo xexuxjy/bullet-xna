@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -49,10 +50,10 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
+        public virtual bool CalcTimeOfImpact(ref IndexedMatrix fromA, ref IndexedMatrix toA, ref IndexedMatrix fromB, ref IndexedMatrix toB, CastResult result)
         {
             /// compute linear and angular velocity for this interval, to interpolate
-            Vector3 linVelA, angVelA, linVelB, angVelB;
+            IndexedVector3 linVelA, angVelA, linVelB, angVelB;
             TransformUtil.CalculateVelocity(ref fromA, ref toA, 1f, out linVelA, out angVelA);
             TransformUtil.CalculateVelocity(ref fromB, ref toB, 1f, out linVelB, out angVelB);
 
@@ -60,7 +61,7 @@ namespace BulletXNA.BulletCollision
             float boundingRadiusB = m_convexB1 != null ? m_convexB1.GetAngularMotionDisc() : 0.0f;
 
             float maxAngularProjectedVelocity = angVelA.Length() * boundingRadiusA + angVelB.Length() * boundingRadiusB;
-            Vector3 relLinVel = (linVelB - linVelA);
+            IndexedVector3 relLinVel = (linVelB - linVelA);
 
             float relLinVelocLength = relLinVel.Length();
 
@@ -71,17 +72,17 @@ namespace BulletXNA.BulletCollision
 
 
             float lambda = 0f;
-            Vector3 v = new Vector3(1, 0, 0);
+            IndexedVector3 v = new IndexedVector3(1, 0, 0);
 
             int maxIter = MAX_ITERATIONS;
 
-            Vector3 n = Vector3.Zero;
+            IndexedVector3 n = IndexedVector3.Zero;
 
             bool hasResult = false;
-            Vector3 c;
+            IndexedVector3 c;
 
             float lastLambda = lambda;
-            //btScalar epsilon = btScalar(0.001);
+            //float epsilon = float(0.001);
 
             int numIter = 0;
             //first solution, using GJK
@@ -106,7 +107,7 @@ namespace BulletXNA.BulletCollision
  
                 n = pointCollector1.m_normalOnBInWorld;
 
-                float projectedLinearVelocity = Vector3.Dot(relLinVel, n);
+                float projectedLinearVelocity = IndexedVector3.Dot(relLinVel, n);
                 if ((projectedLinearVelocity + maxAngularProjectedVelocity) <= MathUtil.SIMD_EPSILON)
                 {
                     return false;
@@ -117,12 +118,12 @@ namespace BulletXNA.BulletCollision
                 {
                     if (result.m_debugDrawer != null)
                     {
-                        Vector3 colour = new Vector3(1, 1, 1);
+                        IndexedVector3 colour = new IndexedVector3(1, 1, 1);
                         result.m_debugDrawer.DrawSphere(ref c, 0.2f, ref colour);
                     }
                     float dLambda = 0f;
 
-                    projectedLinearVelocity = Vector3.Dot(relLinVel, n);
+                    projectedLinearVelocity = IndexedVector3.Dot(relLinVel, n);
 
                     //don't report time of impact for motion away from the contact normal (or causes minor penetration)
                     if ((projectedLinearVelocity + maxAngularProjectedVelocity) <= MathUtil.SIMD_EPSILON)
@@ -149,15 +150,15 @@ namespace BulletXNA.BulletCollision
                     lastLambda = lambda;
 
                     //interpolate to next lambda
-                    Matrix interpolatedTransA = Matrix.Identity, interpolatedTransB = Matrix.Identity, relativeTrans = Matrix.Identity;
+                    IndexedMatrix interpolatedTransA = IndexedMatrix.Identity, interpolatedTransB = IndexedMatrix.Identity, relativeTrans = IndexedMatrix.Identity;
 
                     TransformUtil.IntegrateTransform(ref fromA, ref linVelA, ref angVelA, lambda, out interpolatedTransA);
                     TransformUtil.IntegrateTransform(ref fromB, ref linVelB, ref angVelB, lambda, out interpolatedTransB);
                     //relativeTrans = interpolatedTransB.inverseTimes(interpolatedTransA);
-                    relativeTrans = MathUtil.InverseTimes(ref interpolatedTransB, ref interpolatedTransA);
+                    relativeTrans = interpolatedTransB.InverseTimes(ref interpolatedTransA);
                     if (result.m_debugDrawer != null)
                     {
-                        result.m_debugDrawer.DrawSphere(interpolatedTransA.Translation, 0.2f, new Vector3(1, 0, 0));
+                        result.m_debugDrawer.DrawSphere(interpolatedTransA._origin, 0.2f, new IndexedVector3(1, 0, 0));
                     }
                     result.DebugDraw(lambda);
 
@@ -196,7 +197,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public void ComputeClosestPoints(ref Matrix transA, ref Matrix transB, PointCollector pointCollector)
+        public void ComputeClosestPoints(ref IndexedMatrix transA, ref IndexedMatrix transB, PointCollector pointCollector)
         {
             if (m_convexB1 != null)
             {
@@ -214,21 +215,21 @@ namespace BulletXNA.BulletCollision
                 StaticPlaneShape planeShape = m_planeShape;
 
                 bool hasCollision = false;
-                Vector3 planeNormal = planeShape.GetPlaneNormal();
+                IndexedVector3 planeNormal = planeShape.GetPlaneNormal();
                 float planeConstant = planeShape.GetPlaneConstant();
 
-                Matrix convexWorldTransform = transA;
-                Matrix convexInPlaneTrans = MathUtil.InverseTimes(ref transB, ref convexWorldTransform);
-                Matrix planeInConvex = MathUtil.InverseTimes(ref convexWorldTransform, ref transB);
+                IndexedMatrix convexWorldTransform = transA;
+                IndexedMatrix convexInPlaneTrans = transB.Inverse() * convexWorldTransform;
+                IndexedMatrix planeInConvex = convexWorldTransform.Inverse() *  transB;
 
-                Vector3 vtx = convexShape.LocalGetSupportingVertex(Vector3.TransformNormal(-planeNormal, planeInConvex));
+                IndexedVector3 vtx = convexShape.LocalGetSupportingVertex(planeInConvex._basis * -planeNormal);
 
-                Vector3 vtxInPlane = Vector3.Transform(vtx,convexInPlaneTrans);
-                float distance = Vector3.Dot(planeNormal, vtxInPlane) - planeConstant;
+                IndexedVector3 vtxInPlane = convexInPlaneTrans * vtx;
+                float distance = IndexedVector3.Dot(planeNormal, vtxInPlane) - planeConstant;
 
-                Vector3 vtxInPlaneProjected = vtxInPlane - distance * planeNormal;
-                Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected, transB);
-                Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal, transB);
+                IndexedVector3 vtxInPlaneProjected = vtxInPlane - distance * planeNormal;
+                IndexedVector3 vtxInPlaneWorld = transB * vtxInPlaneProjected;
+                IndexedVector3 normalOnSurfaceB = transB._basis * planeNormal;
 
                 pointCollector.AddContactPoint(
                     ref normalOnSurfaceB,

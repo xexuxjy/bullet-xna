@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -37,53 +38,48 @@ namespace BulletXNA.BulletCollision
 
         ///SimsimplexConvexCast calculateTimeOfImpact calculates the time of impact+normal for the linear cast (sweep) between two moving objects.
         ///Precondition is that objects should not penetration/overlap at the start from the interval. Overlap can be tested using btGjkPairDetector.
-        public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
+        public virtual bool CalcTimeOfImpact(ref IndexedMatrix fromA, ref IndexedMatrix toA, ref IndexedMatrix fromB, ref IndexedMatrix toB, CastResult result)
         {
             m_simplexSolver.Reset();
 
-            Vector3 linVelA = toA.Translation - fromA.Translation;
-            Vector3 linVelB = toB.Translation - fromB.Translation;
+            IndexedVector3 linVelA = toA._origin - fromA._origin;
+            IndexedVector3 linVelB = toB._origin - fromB._origin;
 
             float lambda = 0f;
 
-            Matrix interpolatedTransA = fromA;
-            Matrix interpolatedTransB = fromB;
+            IndexedMatrix interpolatedTransA = fromA;
+            IndexedMatrix interpolatedTransB = fromB;
 
             ///take relative motion
-            Vector3 r = (linVelA - linVelB);
-            Vector3 v;
+            IndexedVector3 r = (linVelA - linVelB);
+            IndexedVector3 v;
 
-            Vector3 supportTemp = MathUtil.TransposeTransformNormal(-r, fromA);
-            Vector3 supVertexA = Vector3.Transform(m_convexA.LocalGetSupportingVertex(ref supportTemp), fromA);
-            supportTemp = MathUtil.TransposeTransformNormal(r, fromB);
-            Vector3 foo = m_convexB.LocalGetSupportingVertex(ref supportTemp);
-            Vector3 supVertexB = Vector3.Transform(foo, fromB);
+            IndexedVector3 supVertexA = fromA * m_convexA.LocalGetSupportingVertex(-r * fromA._basis);
+            IndexedVector3 supVertexB = fromB * m_convexB.LocalGetSupportingVertex(r * fromB._basis);
             v = supVertexA - supVertexB;
             int maxIter = MAX_ITERATIONS;
 
-            Vector3 n = Vector3.Zero;
+            IndexedVector3 n = IndexedVector3.Zero;
 
             bool hasResult = false;
-            Vector3 c;
+            IndexedVector3 c;
 
             float lastLambda = lambda;
 
 
             float dist2 = v.LengthSquared();
             float epsilon = 0.0001f;
-            Vector3 w, p;
+            IndexedVector3 w, p;
             float VdotR;
 
             while ((dist2 > epsilon) && (maxIter-- > 0))
             {
-                supportTemp = MathUtil.TransposeTransformNormal(-v, interpolatedTransA);
-                supVertexA = Vector3.Transform(m_convexA.LocalGetSupportingVertex(ref supportTemp), interpolatedTransA);
-                supportTemp = MathUtil.TransposeTransformNormal(v, interpolatedTransB);
-                supVertexB = Vector3.Transform(m_convexB.LocalGetSupportingVertex(ref supportTemp), interpolatedTransB);
+                supVertexA = interpolatedTransA * (m_convexA.LocalGetSupportingVertex(-v * interpolatedTransA._basis));
+                supVertexB = interpolatedTransB * (m_convexB.LocalGetSupportingVertex(v * interpolatedTransB._basis));
 
                 w = supVertexA - supVertexB;
 
-                float VdotW = Vector3.Dot(v, w);
+                float VdotW = IndexedVector3.Dot(v, w);
 
                 if (lambda > 1.0f)
                 {
@@ -92,7 +88,7 @@ namespace BulletXNA.BulletCollision
 
                 if (VdotW > 0f)
                 {
-                    VdotR = Vector3.Dot(v, r);
+                    VdotR = IndexedVector3.Dot(v, r);
 
                     if (VdotR >= -(MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                     {
@@ -104,8 +100,8 @@ namespace BulletXNA.BulletCollision
                         //interpolate to next lambda
                         //	x = s + lambda * r;
 
-                        interpolatedTransA.Translation = MathUtil.Interpolate3(fromA.Translation, toA.Translation, lambda);
-                        interpolatedTransB.Translation = MathUtil.Interpolate3(fromB.Translation, toB.Translation, lambda);
+                        interpolatedTransA._origin = MathUtil.Interpolate3(fromA._origin, toA._origin, lambda);
+                        interpolatedTransB._origin = MathUtil.Interpolate3(fromB._origin, toB._origin, lambda);
                         //m_simplexSolver.reset();
                         //check next line
                         w = supVertexA - supVertexB;
@@ -144,104 +140,24 @@ namespace BulletXNA.BulletCollision
             result.m_fraction = lambda;
             if (n.LengthSquared() >= (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
             {
-                result.m_normal = Vector3.Normalize(n);
+                result.m_normal = IndexedVector3.Normalize(n);
             }
             else
             {
-                result.m_normal = Vector3.Zero;
+                result.m_normal = IndexedVector3.Zero;
             }
 
             //don't report time of impact for motion away from the contact normal (or causes minor penetration)
-            if (Vector3.Dot(result.m_normal, r) >= -result.m_allowedPenetration)
+            if (IndexedVector3.Dot(result.m_normal, r) >= -result.m_allowedPenetration)
             {
                 return false;
             }
 
-            Vector3 hitA, hitB;
+            IndexedVector3 hitA, hitB;
             m_simplexSolver.ComputePoints(out hitA, out hitB);
             result.m_hitPoint = hitB;
             return true;
 
-        }
-
-
-
-        public virtual bool russianCalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
-        {
-            MinkowskiSumShape convex = new MinkowskiSumShape(m_convexA, m_convexB);
-
-            Matrix rayFromLocalA;
-            Matrix rayToLocalA;
-
-            rayFromLocalA = Matrix.Invert(fromA) * fromB;
-            rayToLocalA = Matrix.Invert(toA) * toB;
-
-            m_simplexSolver.Reset();
-
-            //convex.TransformB = rayFromLocalA;
-            Matrix temp = Matrix.CreateFromQuaternion(Quaternion.CreateFromRotationMatrix(rayFromLocalA));
-            convex.SetTransformB(ref temp);
-
-            float lambda = 0;
-            //todo: need to verify this:
-            //because of minkowski difference, we need the inverse direction
-
-            Vector3 s = -rayFromLocalA.Translation;
-            Vector3 r = -(rayToLocalA.Translation - rayFromLocalA.Translation);
-            Vector3 x = s;
-            Vector3 v;
-            Vector3 arbitraryPoint = convex.LocalGetSupportingVertex(ref r);
-
-            v = x - arbitraryPoint;
-
-            int maxIter = MAX_ITERATIONS;
-
-            Vector3 n = new Vector3();
-            float lastLambda = lambda;
-
-            float dist2 = v.LengthSquared();
-            float epsilon = 0.0001f;
-
-            Vector3 w, p;
-            float VdotR;
-
-            while ((dist2 > epsilon) && (maxIter-- != 0))
-            {
-                p = convex.LocalGetSupportingVertex(ref v);
-                w = x - p;
-
-                float VdotW = Vector3.Dot(v, w);
-
-                if (VdotW > 0)
-                {
-                    VdotR = Vector3.Dot(v, r);
-
-                    if (VdotR >= -(MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
-                        return false;
-                    else
-                    {
-                        lambda = lambda - VdotW / VdotR;
-                        x = s + lambda * r;
-                        m_simplexSolver.Reset();
-                        //check next line
-                        w = x - p;
-                        lastLambda = lambda;
-                        n = v;
-                    }
-                }
-                m_simplexSolver.AddVertex(ref w, ref x, ref p);
-                if (m_simplexSolver.Closest(out v))
-                {
-                    dist2 = v.LengthSquared();
-                }
-                else
-                {
-                    dist2 = 0f;
-                }
-            }
-            result.m_fraction = lambda;
-            result.m_normal = n;
-            return true;
         }
 
 

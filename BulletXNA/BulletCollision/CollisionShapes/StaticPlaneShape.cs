@@ -23,22 +23,23 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
     public class StaticPlaneShape : ConcaveShape
     {
-        public StaticPlaneShape(Vector3 planeNormal, float planeConstant) : this(ref planeNormal,planeConstant)
+        public StaticPlaneShape(IndexedVector3 planeNormal, float planeConstant) : this(ref planeNormal,planeConstant)
         {
 
         }
 
-        public StaticPlaneShape(ref Vector3 planeNormal,float planeConstant)
+        public StaticPlaneShape(ref IndexedVector3 planeNormal,float planeConstant)
         {
             m_shapeType = BroadphaseNativeTypes.STATIC_PLANE_PROXYTYPE;
             m_planeNormal = planeNormal;
             m_planeConstant = planeConstant;
-            m_localScaling = Vector3.Zero;
+            m_localScaling = IndexedVector3.Zero;
         }
 
         public override void  Cleanup()
@@ -46,32 +47,32 @@ namespace BulletXNA.BulletCollision
  	         base.Cleanup();
         }
 
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             aabbMin = MathUtil.MIN_VECTOR;
             aabbMax = MathUtil.MAX_VECTOR;
         }
 
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-	        Vector3 halfExtents = (aabbMax - aabbMin) * .5f;
+	        IndexedVector3 halfExtents = (aabbMax - aabbMin) * .5f;
 	        float radius = halfExtents.Length();
-	        Vector3 center = (aabbMax + aabbMin) * 0.5f;
+	        IndexedVector3 center = (aabbMax + aabbMin) * 0.5f;
         	
 	        //this is where the triangles are generated, given AABB and plane equation (normal/constant)
 
-	        Vector3 tangentDir0;
-            Vector3 tangentDir1;
+	        IndexedVector3 tangentDir0;
+            IndexedVector3 tangentDir1;
 
 	        //tangentDir0/tangentDir1 can be precalculated
 	        TransformUtil.PlaneSpace1(ref m_planeNormal, out tangentDir0, out tangentDir1);
 
-            Vector3 supVertex0 = Vector3.Zero;
-            Vector3 supVertex1 = Vector3.Zero;
+            IndexedVector3 supVertex0 = IndexedVector3.Zero;
+            IndexedVector3 supVertex1 = IndexedVector3.Zero;
 
-	        Vector3 projectedCenter = center - (Vector3.Dot(m_planeNormal,center) - m_planeConstant)*m_planeNormal;
+	        IndexedVector3 projectedCenter = center - (IndexedVector3.Dot(m_planeNormal,center) - m_planeConstant)*m_planeNormal;
 
-            Vector3[] triangle = new Vector3[3];
+            IndexedVector3[] triangle = new IndexedVector3[3];
 	        triangle[0] = (projectedCenter + tangentDir0*radius + tangentDir1*radius);
             triangle[1] = (projectedCenter + tangentDir0 * radius - tangentDir1 * radius);
             triangle[2] = (projectedCenter - tangentDir0 * radius - tangentDir1 * radius);
@@ -86,22 +87,22 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
-            inertia = Vector3.Zero;
+            inertia = IndexedVector3.Zero;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_localScaling = scaling;
         }
 	    
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_localScaling;
         }
 	
-	    public Vector3	GetPlaneNormal()
+	    public IndexedVector3	GetPlaneNormal()
 	    {
 		    return	m_planeNormal;
 	    }
@@ -118,11 +119,11 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        protected Vector3 m_localAabbMin;
-        protected Vector3 m_localAabbMax;
-        protected Vector3 m_planeNormal;
+        protected IndexedVector3 m_localAabbMin;
+        protected IndexedVector3 m_localAabbMax;
+        protected IndexedVector3 m_planeNormal;
         protected float m_planeConstant;
-        protected Vector3 m_localScaling;
+        protected IndexedVector3 m_localScaling;
 
     }
 }

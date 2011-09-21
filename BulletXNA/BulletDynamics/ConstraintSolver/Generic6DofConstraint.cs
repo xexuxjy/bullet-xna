@@ -23,19 +23,20 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 namespace BulletXNA.BulletDynamics
 {
 	public class Generic6DofConstraint : TypedConstraint
 	{
-		public Generic6DofConstraint(RigidBody rbA, RigidBody rbB, ref Matrix frameInA, ref Matrix frameInB, bool useLinearReferenceFrameA)
+		public Generic6DofConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix frameInA, ref IndexedMatrix frameInB, bool useLinearReferenceFrameA)
 			: base(TypedConstraintType.D6_CONSTRAINT_TYPE, rbA, rbB)
 		{
 			m_frameInA = frameInA;
 			m_frameInB = frameInB;
 			m_useLinearReferenceFrameA = useLinearReferenceFrameA;
 			m_useOffsetForConstraintFrame = D6_USE_FRAME_OFFSET;
-			m_flags = 0;
 			m_linearLimits = new TranslationalLimitMotor();
 			m_angularLimits[0] = new RotationalLimitMotor();
 			m_angularLimits[1] = new RotationalLimitMotor();
@@ -43,25 +44,24 @@ namespace BulletXNA.BulletDynamics
 			CalculateTransforms();
 		}
 
-		public Generic6DofConstraint(RigidBody rbB, ref Matrix frameInB, bool useLinearReferenceFrameB)
+		public Generic6DofConstraint(RigidBody rbB, ref IndexedMatrix frameInB, bool useLinearReferenceFrameB)
 			: base(TypedConstraintType.D6_CONSTRAINT_TYPE, GetFixedBody(), rbB)
 		{
 			m_frameInB = frameInB;
 			m_useLinearReferenceFrameA = useLinearReferenceFrameB;
 			m_useOffsetForConstraintFrame = D6_USE_FRAME_OFFSET;
-			m_flags = 0;
 			m_linearLimits = new TranslationalLimitMotor();
 			m_angularLimits[0] = new RotationalLimitMotor();
 			m_angularLimits[1] = new RotationalLimitMotor();
 			m_angularLimits[2] = new RotationalLimitMotor();
 
 			///not providing rigidbody A means implicitly using worldspace for body A
-			m_frameInA = MathUtil.BulletMatrixMultiply(rbB.GetCenterOfMassTransform(), m_frameInB);
+            m_frameInA = rbB.GetCenterOfMassTransform() * m_frameInB;
 
 			CalculateTransforms();
 		}
 
-		protected virtual int SetAngularLimits(ConstraintInfo2 info, int row_offset, ref Matrix transA, ref Matrix transB, ref Vector3 linVelA, ref Vector3 linVelB, ref Vector3 angVelA, ref Vector3 angVelB)
+		protected virtual int SetAngularLimits(ConstraintInfo2 info, int row_offset, ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 linVelA, ref IndexedVector3 linVelB, ref IndexedVector3 angVelA, ref IndexedVector3 angVelB)
 		{
 			Generic6DofConstraint d6constraint = this;
 			int row = row_offset;
@@ -70,7 +70,7 @@ namespace BulletXNA.BulletDynamics
 			{
 				if (d6constraint.GetRotationalLimitMotor(i).NeedApplyTorques())
 				{
-					Vector3 axis = d6constraint.GetAxis(i);
+					IndexedVector3 axis = d6constraint.GetAxis(i);
 					int tempFlags = ((int)m_flags) >> ((i + 3) * BT_6DOF_FLAGS_AXIS_SHIFT);
 					SixDofFlags flags = (SixDofFlags)tempFlags;
 					if (0 == (flags & SixDofFlags.BT_6DOF_FLAGS_CFM_NORM))
@@ -95,7 +95,7 @@ namespace BulletXNA.BulletDynamics
 
 
 
-		protected virtual int SetLinearLimits(ConstraintInfo2 info, int row, ref Matrix transA, ref Matrix transB, ref Vector3 linVelA, ref Vector3 linVelB, ref Vector3 angVelA, ref Vector3 angVelB)
+		protected virtual int SetLinearLimits(ConstraintInfo2 info, int row, ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 linVelA, ref IndexedVector3 linVelB, ref IndexedVector3 angVelA, ref IndexedVector3 angVelB)
 		{
 			//solve linear limits
 			RotationalLimitMotor limot = new RotationalLimitMotor();
@@ -104,23 +104,23 @@ namespace BulletXNA.BulletDynamics
 				if (m_linearLimits.NeedApplyForce(i))
 				{ // re-use rotational motor code
 					limot.m_bounce = 0f;
-					limot.m_currentLimit = m_linearLimits.m_currentLimit[i];
-					limot.m_currentPosition = MathUtil.VectorComponent(ref m_linearLimits.m_currentLinearDiff, i);
-					limot.m_currentLimitError = MathUtil.VectorComponent(ref m_linearLimits.m_currentLimitError, i);
-					limot.m_damping = m_linearLimits.m_damping;
-					limot.m_enableMotor = m_linearLimits.m_enableMotor[i];
-					limot.m_hiLimit = MathUtil.VectorComponent(m_linearLimits.m_upperLimit, i);
-					limot.m_limitSoftness = m_linearLimits.m_limitSoftness;
-					limot.m_loLimit = MathUtil.VectorComponent(m_linearLimits.m_lowerLimit, i);
-					limot.m_maxLimitForce = 0f;
-					limot.m_maxMotorForce = MathUtil.VectorComponent(m_linearLimits.m_maxMotorForce, i);
-					limot.m_targetVelocity = MathUtil.VectorComponent(m_linearLimits.m_targetVelocity, i);
-					Vector3 axis = MathUtil.MatrixColumn(m_calculatedTransformA, i);
-					int tempFlags = (((int)m_flags) >> (i * BT_6DOF_FLAGS_AXIS_SHIFT));
+                    limot.m_currentLimit = m_linearLimits.m_currentLimit[i];
+                    limot.m_currentPosition = m_linearLimits.m_currentLinearDiff[i];
+                    limot.m_currentLimitError = m_linearLimits.m_currentLimitError[i];
+                    limot.m_damping = m_linearLimits.m_damping;
+                    limot.m_enableMotor = m_linearLimits.m_enableMotor[i];
+                    limot.m_hiLimit = m_linearLimits.m_upperLimit[i];
+                    limot.m_limitSoftness = m_linearLimits.m_limitSoftness;
+                    limot.m_loLimit = m_linearLimits.m_lowerLimit[i];
+                    limot.m_maxLimitForce = 0.0f;
+                    limot.m_maxMotorForce = m_linearLimits.m_maxMotorForce[i];
+                    limot.m_targetVelocity = m_linearLimits.m_targetVelocity[i];
+                    IndexedVector3 axis = m_calculatedTransformA._basis.GetColumn(i);
+                    int tempFlags = (((int)m_flags) >> (i * BT_6DOF_FLAGS_AXIS_SHIFT));
 					SixDofFlags flags = (SixDofFlags)tempFlags;
-					limot.m_normalCFM = ((flags & SixDofFlags.BT_6DOF_FLAGS_CFM_NORM) != 0) ? MathUtil.VectorComponent(ref m_linearLimits.m_normalCFM, i) : info.m_solverConstraints[0].m_cfm;
-					limot.m_stopCFM = ((flags & SixDofFlags.BT_6DOF_FLAGS_CFM_STOP) != 0) ? MathUtil.VectorComponent(ref m_linearLimits.m_stopCFM, i) : info.m_solverConstraints[0].m_cfm;
-					limot.m_stopERP = ((flags & SixDofFlags.BT_6DOF_FLAGS_ERP_STOP) != 0) ? MathUtil.VectorComponent(ref m_linearLimits.m_stopERP, i) : info.erp;
+                    limot.m_normalCFM = ((flags & SixDofFlags.BT_6DOF_FLAGS_CFM_NORM) != 0) ? m_linearLimits.m_normalCFM[i] : info.m_solverConstraints[0].m_cfm;
+                    limot.m_stopCFM = ((flags & SixDofFlags.BT_6DOF_FLAGS_CFM_STOP) != 0) ? m_linearLimits.m_stopCFM[i] : info.m_solverConstraints[0].m_cfm;
+                    limot.m_stopERP = ((flags & SixDofFlags.BT_6DOF_FLAGS_ERP_STOP) != 0) ? m_linearLimits.m_stopERP[i] : info.erp;
 					if (m_useOffsetForConstraintFrame)
 					{
 						int indx1 = (i + 1) % 3;
@@ -142,12 +142,12 @@ namespace BulletXNA.BulletDynamics
 		}
 
 		protected virtual void BuildLinearJacobian(
-			out JacobianEntry jacLinear, ref Vector3 normalWorld,
-			ref Vector3 pivotAInW, ref Vector3 pivotBInW)
+			out JacobianEntry jacLinear, ref IndexedVector3 normalWorld,
+			ref IndexedVector3 pivotAInW, ref IndexedVector3 pivotBInW)
 		{
 			jacLinear = new JacobianEntry(
-				MathUtil.TransposeBasis(m_rbA.GetCenterOfMassTransform()),
-				MathUtil.TransposeBasis(m_rbB.GetCenterOfMassTransform()),
+				m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
+				m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
 				pivotAInW - m_rbA.GetCenterOfMassPosition(),
 				pivotBInW - m_rbB.GetCenterOfMassPosition(),
 				normalWorld,
@@ -157,11 +157,11 @@ namespace BulletXNA.BulletDynamics
 				m_rbB.GetInvMass());
 		}
 
-		protected virtual void BuildAngularJacobian(out JacobianEntry jacAngular, ref Vector3 jointAxisW)
+		protected virtual void BuildAngularJacobian(out JacobianEntry jacAngular, ref IndexedVector3 jointAxisW)
 		{
 			jacAngular = new JacobianEntry(jointAxisW,
-									  MathUtil.TransposeBasis(m_rbA.GetCenterOfMassTransform()),
-									  MathUtil.TransposeBasis(m_rbB.GetCenterOfMassTransform()),
+									  m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
+									  m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
 									  m_rbA.GetInvInertiaDiagLocal(),
 									  m_rbB.GetInvInertiaDiagLocal());
 
@@ -170,9 +170,9 @@ namespace BulletXNA.BulletDynamics
 		// tests linear limits
 		protected virtual void CalculateLinearInfo()
 		{
-			m_calculatedLinearDiff = m_calculatedTransformB.Translation - m_calculatedTransformA.Translation;
-			m_calculatedLinearDiff = Vector3.TransformNormal(m_calculatedLinearDiff, MathUtil.InverseBasis(ref m_calculatedTransformA));
-			//for (int i = 0; i < 3; i++)
+			m_calculatedLinearDiff = m_calculatedTransformB._origin - m_calculatedTransformA._origin;
+            m_calculatedLinearDiff = m_calculatedTransformA._basis.Inverse() * m_calculatedLinearDiff;
+            //for (int i = 0; i < 3; i++)
 			//{
 			//    m_linearLimits.testLimitValue(i, m_[i]);
 			//}
@@ -188,7 +188,7 @@ namespace BulletXNA.BulletDynamics
 		//! calcs the euler angles between the two bodies.
 		protected virtual void CalculateAngleInfo()
 		{
-			Matrix relative_frame = MathUtil.BulletMatrixMultiplyBasis(MathUtil.InverseBasis(m_calculatedTransformA), MathUtil.BasisMatrix(ref m_calculatedTransformB));
+            IndexedBasisMatrix relative_frame = m_calculatedTransformA._basis.Inverse() * m_calculatedTransformB._basis;
 			MathUtil.MatrixToEulerXYZ(ref relative_frame, out m_calculatedAxisAngleDiff);
 
 			// in euler angle mode we do not actually constrain the angular velocity
@@ -205,16 +205,16 @@ namespace BulletXNA.BulletDynamics
 			// GetInfo1 then take the derivative. to prove this for angle[2] it is
 			// easier to take the euler rate expression for d(angle[2])/dt with respect
 			// to the components of w and set that to 0.
-			Vector3 axis0 = MathUtil.MatrixColumn(ref m_calculatedTransformB, 0);
-			Vector3 axis2 = MathUtil.MatrixColumn(ref m_calculatedTransformA, 2);
+            IndexedVector3 axis0 = m_calculatedTransformB._basis.GetColumn(0);
+            IndexedVector3 axis2 = m_calculatedTransformA._basis.GetColumn(2);
 
-			m_calculatedAxis[1] = Vector3.Cross(axis2, axis0);
-			m_calculatedAxis[0] = Vector3.Cross(m_calculatedAxis[1], axis2);
-			m_calculatedAxis[2] = Vector3.Cross(axis0, m_calculatedAxis[1]);
+            m_calculatedAxis[1] = axis2.Cross(ref axis0);
+            m_calculatedAxis[0] = m_calculatedAxis[1].Cross(ref axis2);
+            m_calculatedAxis[2] = axis0.Cross(ref m_calculatedAxis[1]);
 
-			m_calculatedAxis[0].Normalize();
-			m_calculatedAxis[1].Normalize();
-			m_calculatedAxis[2].Normalize();
+            m_calculatedAxis[0].Normalize();
+            m_calculatedAxis[1].Normalize();
+            m_calculatedAxis[2].Normalize();
 
 		}
 
@@ -230,15 +230,15 @@ namespace BulletXNA.BulletDynamics
 			CalculateTransforms(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
 		}
 
-		public virtual void CalculateTransforms(Matrix transA, Matrix transB)
+		public virtual void CalculateTransforms(IndexedMatrix transA, IndexedMatrix transB)
 		{
 			CalculateTransforms(ref transA, ref transB);
 		}
 
-		public virtual void CalculateTransforms(ref Matrix transA, ref Matrix transB)
+		public virtual void CalculateTransforms(ref IndexedMatrix transA, ref IndexedMatrix transB)
 		{
-			m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transA, m_frameInA);
-			m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transB, m_frameInB);
+			m_calculatedTransformA = transA * m_frameInA;
+			m_calculatedTransformB = transB * m_frameInB;
 			CalculateLinearInfo();
 			CalculateAngleInfo();
 			if (m_useOffsetForConstraintFrame)
@@ -263,7 +263,7 @@ namespace BulletXNA.BulletDynamics
 		/*!
 		\sa btGeneric6DofConstraint.getFrameOffsetA, btGeneric6DofConstraint.getFrameOffsetB, btGeneric6DofConstraint.calculateAngleInfo.
 		*/
-		public Matrix GetCalculatedTransformA()
+		public IndexedMatrix GetCalculatedTransformA()
 		{
 			return m_calculatedTransformA;
 		}
@@ -272,17 +272,17 @@ namespace BulletXNA.BulletDynamics
 		/*!
 		\sa btGeneric6DofConstraint.getFrameOffsetA, btGeneric6DofConstraint.getFrameOffsetB, btGeneric6DofConstraint.calculateAngleInfo.
 		*/
-		public Matrix GetCalculatedTransformB()
+		public IndexedMatrix GetCalculatedTransformB()
 		{
 			return m_calculatedTransformB;
 		}
 
-		public Matrix GetFrameOffsetA()
+		public IndexedMatrix GetFrameOffsetA()
 		{
 			return m_frameInA;
 		}
 
-		public Matrix GetFrameOffsetB()
+		public IndexedMatrix GetFrameOffsetB()
 		{
 			return m_frameInB;
 		}
@@ -325,12 +325,12 @@ namespace BulletXNA.BulletDynamics
 		public override void GetInfo2(ConstraintInfo2 info)
 		{
 
-			Matrix transA = m_rbA.GetCenterOfMassTransform();
-			Matrix transB = m_rbB.GetCenterOfMassTransform();
-			Vector3 linVelA = m_rbA.GetLinearVelocity();
-			Vector3 linVelB = m_rbB.GetLinearVelocity();
-			Vector3 angVelA = m_rbA.GetAngularVelocity();
-			Vector3 angVelB = m_rbB.GetAngularVelocity();
+			IndexedMatrix transA = m_rbA.GetCenterOfMassTransform();
+			IndexedMatrix transB = m_rbB.GetCenterOfMassTransform();
+			IndexedVector3 linVelA = m_rbA.GetLinearVelocity();
+			IndexedVector3 linVelB = m_rbB.GetLinearVelocity();
+			IndexedVector3 angVelA = m_rbA.GetAngularVelocity();
+			IndexedVector3 angVelB = m_rbB.GetAngularVelocity();
 
 			if (m_useOffsetForConstraintFrame)
 			{ // for stability better to solve angular limits first
@@ -344,7 +344,7 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
-		public void GetInfo2NonVirtual(ConstraintInfo2 info, Matrix transA, Matrix transB, Vector3 linVelA, Vector3 linVelB, Vector3 angVelA, Vector3 angVelB)
+		public void GetInfo2NonVirtual(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 linVelA, IndexedVector3 linVelB, IndexedVector3 angVelA, IndexedVector3 angVelB)
 		{
 			//prepare constraint
 			CalculateTransforms(ref transA, ref transB);
@@ -374,7 +374,7 @@ namespace BulletXNA.BulletDynamics
 		/*!
 		\pre btGeneric6DofConstraint.buildJacobian must be called previously.
 		*/
-		public virtual Vector3 GetAxis(int axis_index)
+		public virtual IndexedVector3 GetAxis(int axis_index)
 		{
 			return m_calculatedAxis[axis_index];
 		}
@@ -385,7 +385,7 @@ namespace BulletXNA.BulletDynamics
 		*/
 		public virtual float GetAngle(int axis_index)
 		{
-			return MathUtil.VectorComponent(ref m_calculatedAxisAngleDiff, axis_index);
+			return m_calculatedAxisAngleDiff[axis_index];
 		}
 
 		//! Get the relative position of the constraint pivot
@@ -394,7 +394,7 @@ namespace BulletXNA.BulletDynamics
 		*/
 		public float GetRelativePivotPosition(int axisIndex)
 		{
-			return MathUtil.VectorComponent(ref m_calculatedLinearDiff, axisIndex);
+			return m_calculatedLinearDiff[axisIndex];
 		}
 
 
@@ -405,7 +405,7 @@ namespace BulletXNA.BulletDynamics
 		*/
 		public virtual bool TestAngularLimitMotor(int axis_index)
 		{
-			float angle = MathUtil.VectorComponent(ref m_calculatedAxisAngleDiff, axis_index);
+			float angle = m_calculatedAxisAngleDiff[axis_index];
 			angle = AdjustAngleToLimits(angle, m_angularLimits[axis_index].m_loLimit, m_angularLimits[axis_index].m_hiLimit);
 			m_angularLimits[axis_index].m_currentPosition = angle;
 
@@ -413,44 +413,44 @@ namespace BulletXNA.BulletDynamics
 			m_angularLimits[axis_index].TestLimitValue(angle);
 			return m_angularLimits[axis_index].NeedApplyTorques();
 		}
-		public void SetLinearLowerLimit(Vector3 linearLower)
+		public void SetLinearLowerLimit(IndexedVector3 linearLower)
 		{
 			SetLinearLowerLimit(ref linearLower);
 		}
 
-		public void SetLinearLowerLimit(ref Vector3 linearLower)
+		public void SetLinearLowerLimit(ref IndexedVector3 linearLower)
 		{
 			m_linearLimits.m_lowerLimit = linearLower;
 		}
 
-		public void SetLinearUpperLimit(Vector3 linearUpper)
+		public void SetLinearUpperLimit(IndexedVector3 linearUpper)
 		{
 			SetLinearUpperLimit(ref linearUpper);
 		}
 
-		public void SetLinearUpperLimit(ref Vector3 linearUpper)
+		public void SetLinearUpperLimit(ref IndexedVector3 linearUpper)
 		{
 			m_linearLimits.m_upperLimit = linearUpper;
 		}
 
-		public void SetAngularLowerLimit(Vector3 angularLower)
+		public void SetAngularLowerLimit(IndexedVector3 angularLower)
 		{
 			SetAngularLowerLimit(ref angularLower);
 		}
 
-		public void SetAngularLowerLimit(ref Vector3 angularLower)
+		public void SetAngularLowerLimit(ref IndexedVector3 angularLower)
 		{
 			m_angularLimits[0].m_loLimit = MathUtil.NormalizeAngle(angularLower.X);
 			m_angularLimits[1].m_loLimit = MathUtil.NormalizeAngle(angularLower.Y);
 			m_angularLimits[2].m_loLimit = MathUtil.NormalizeAngle(angularLower.Z);
 		}
 
-		public void SetAngularUpperLimit(Vector3 angularUpper)
+		public void SetAngularUpperLimit(IndexedVector3 angularUpper)
 		{
 			SetAngularUpperLimit(ref angularUpper);
 		}
 
-		public void SetAngularUpperLimit(ref Vector3 angularUpper)
+		public void SetAngularUpperLimit(ref IndexedVector3 angularUpper)
 		{
 			m_angularLimits[0].m_hiLimit = MathUtil.NormalizeAngle(angularUpper.X);
 			m_angularLimits[1].m_hiLimit = MathUtil.NormalizeAngle(angularUpper.Y);
@@ -475,16 +475,16 @@ namespace BulletXNA.BulletDynamics
 		{
 			if (axis < 3)
 			{
-				MathUtil.VectorComponent(ref m_linearLimits.m_lowerLimit, axis, lo);
-				MathUtil.VectorComponent(ref m_linearLimits.m_upperLimit, axis, hi);
+				m_linearLimits.m_lowerLimit[axis] = lo;
+				m_linearLimits.m_upperLimit[axis] = hi;
 			}
 			else
 			{
 				lo = MathUtil.NormalizeAngle(lo);
 				hi = MathUtil.NormalizeAngle(hi);
-				MathUtil.VectorComponent(ref m_linearLimits.m_lowerLimit, axis - 3, lo);
-				MathUtil.VectorComponent(ref m_linearLimits.m_upperLimit, axis - 3, hi);
-			}
+                m_linearLimits.m_lowerLimit[axis-3] = lo;
+                m_linearLimits.m_upperLimit[axis-3] = hi;
+            }
 		}
 
 		//! Test limit
@@ -517,24 +517,24 @@ namespace BulletXNA.BulletDynamics
 			{
 				weight = imA / (imA + imB);
 			}
-			Vector3 pA = m_calculatedTransformA.Translation;
-			Vector3 pB = m_calculatedTransformB.Translation;
+			IndexedVector3 pA = m_calculatedTransformA._origin;
+			IndexedVector3 pB = m_calculatedTransformB._origin;
 			m_AnchorPos = pA * weight + pB * (1.0f - weight);
 			return;
 		}
 
 		public virtual int GetLimitMotorInfo2(RotationalLimitMotor limot,
-									ref Matrix transA, ref Matrix transB, ref Vector3 linVelA,
-									ref Vector3 linVelB, ref Vector3 angVelA, ref Vector3 angVelB,
-									ConstraintInfo2 info, int row, ref Vector3 ax1, int rotational, bool rotAllowed)
+									ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 linVelA,
+									ref IndexedVector3 linVelB, ref IndexedVector3 angVelA, ref IndexedVector3 angVelB,
+									ConstraintInfo2 info, int row, ref IndexedVector3 ax1, int rotational, bool rotAllowed)
 		{
 			bool powered = limot.m_enableMotor;
 			int limit = limot.m_currentLimit;
 			if (powered || limit != 0)
 			{
 				// if the joint is powered, or has joint limits, add in the extra row
-				//btScalar* J1 = rotational ? info->m_J1angularAxis : info->m_J1linearAxis;
-				//btScalar* J2 = rotational ? info->m_J2angularAxis : 0;
+				//float* J1 = rotational ? info->m_J1angularAxis : info->m_J1linearAxis;
+				//float* J2 = rotational ? info->m_J2angularAxis : 0;
 				//info2.m_J1linearAxis = currentConstraintRow->m_contactNormal;
 				//info2.m_J1angularAxis = currentConstraintRow->m_relpos1CrossNormal;
 				//info2.m_J2linearAxis = 0;
@@ -561,26 +561,26 @@ namespace BulletXNA.BulletDynamics
 				{
 					if (m_useOffsetForConstraintFrame)
 					{
-						Vector3 tmpA = Vector3.Zero, tmpB = Vector3.Zero, relA = Vector3.Zero, relB = Vector3.Zero;
+						IndexedVector3 tmpA = IndexedVector3.Zero, tmpB = IndexedVector3.Zero, relA = IndexedVector3.Zero, relB = IndexedVector3.Zero;
 						// get vector from bodyB to frameB in WCS
-						relB = m_calculatedTransformB.Translation - transB.Translation;
+						relB = m_calculatedTransformB._origin - transB._origin;
 						// get its projection to constraint axis
-						Vector3 projB = ax1 * Vector3.Dot(relB, ax1);
+						IndexedVector3 projB = ax1 * IndexedVector3.Dot(relB, ax1);
 						// get vector directed from bodyB to constraint axis (and orthogonal to it)
-						Vector3 orthoB = relB - projB;
+						IndexedVector3 orthoB = relB - projB;
 						// same for bodyA
-						relA = m_calculatedTransformA.Translation - transA.Translation;
-						Vector3 projA = ax1 * Vector3.Dot(relA, ax1);
-						Vector3 orthoA = relA - projA;
+						relA = m_calculatedTransformA._origin - transA._origin;
+						IndexedVector3 projA = ax1 * IndexedVector3.Dot(relA, ax1);
+						IndexedVector3 orthoA = relA - projA;
 						// get desired offset between frames A and B along constraint axis
 						float desiredOffs = limot.m_currentPosition - limot.m_currentLimitError;
 						// desired vector from projection of center of bodyA to projection of center of bodyB to constraint axis
-						Vector3 totalDist = projA + ax1 * desiredOffs - projB;
+						IndexedVector3 totalDist = projA + ax1 * desiredOffs - projB;
 						// get offset vectors relA and relB
 						relA = orthoA + totalDist * m_factA;
 						relB = orthoB - totalDist * m_factB;
-						tmpA = Vector3.Cross(relA, ax1);
-						tmpB = Vector3.Cross(relB, ax1);
+						tmpA = IndexedVector3.Cross(relA, ax1);
+						tmpB = IndexedVector3.Cross(relB, ax1);
 						if (m_hasStaticBody && (!rotAllowed))
 						{
 							tmpA *= m_factA;
@@ -593,14 +593,14 @@ namespace BulletXNA.BulletDynamics
 					}
 					else
 					{
-						Vector3 ltd;	// Linear Torque Decoupling vector
-						Vector3 c = m_calculatedTransformB.Translation - transA.Translation;
-						ltd = Vector3.Cross(c, ax1);
+						IndexedVector3 ltd;	// Linear Torque Decoupling vector
+						IndexedVector3 c = m_calculatedTransformB._origin - transA._origin;
+						ltd = IndexedVector3.Cross(c, ax1);
 						info.m_solverConstraints[row].m_relpos1CrossNormal = ltd;
 						MathUtil.ZeroCheckVector(info.m_solverConstraints[row].m_relpos1CrossNormal);
 
-						c = m_calculatedTransformB.Translation - transB.Translation;
-						ltd = -Vector3.Cross(c, ax1);
+						c = m_calculatedTransformB._origin - transB._origin;
+						ltd = -IndexedVector3.Cross(c, ax1);
 						info.m_solverConstraints[row].m_relpos2CrossNormal = ltd;
 						MathUtil.ZeroCheckVector(info.m_solverConstraints[row].m_relpos2CrossNormal);
 					}
@@ -665,13 +665,13 @@ namespace BulletXNA.BulletDynamics
 							float vel;
 							if (rotational != 0)
 							{
-								vel = Vector3.Dot(angVelA, ax1);
-								vel -= Vector3.Dot(angVelB, ax1);
+								vel = IndexedVector3.Dot(angVelA, ax1);
+								vel -= IndexedVector3.Dot(angVelB, ax1);
 							}
 							else
 							{
-								vel = Vector3.Dot(linVelA, ax1);
-								vel -= Vector3.Dot(linVelB, ax1);
+								vel = IndexedVector3.Dot(linVelA, ax1);
+								vel -= IndexedVector3.Dot(linVelB, ax1);
 							}
 							// only apply bounce if the velocity is incoming, and if the
 							// resulting c[] exceeds what we already have.
@@ -706,26 +706,26 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public void GetLinearLowerLimit(out Vector3 linearLower)
+		public void GetLinearLowerLimit(out IndexedVector3 linearLower)
 		{
 			linearLower = m_linearLimits.m_lowerLimit;
 		}
 
-		public void GetLinearUpperLimit(out Vector3 linearUpper)
+		public void GetLinearUpperLimit(out IndexedVector3 linearUpper)
 		{
 			linearUpper = m_linearLimits.m_upperLimit;
 		}
 
-		public void GetAngularLowerLimit(out Vector3 angularLower)
+		public void GetAngularLowerLimit(out IndexedVector3 angularLower)
 		{
-			angularLower = new Vector3(m_angularLimits[0].m_loLimit,
+			angularLower = new IndexedVector3(m_angularLimits[0].m_loLimit,
 			angularLower.Y = m_angularLimits[1].m_loLimit,
 			angularLower.Z = m_angularLimits[2].m_loLimit);
 		}
 
-		public void GetAngularUpperLimit(out Vector3 angularUpper)
+		public void GetAngularUpperLimit(out IndexedVector3 angularUpper)
 		{
-            angularUpper = new Vector3(
+            angularUpper = new IndexedVector3(
 			m_angularLimits[0].m_hiLimit,
 			m_angularLimits[1].m_hiLimit,
 			m_angularLimits[2].m_hiLimit);
@@ -733,18 +733,20 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public virtual void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public virtual void SetAxis(ref IndexedVector3 axis1, ref IndexedVector3 axis2)
 		{
-			Vector3 zAxis = Vector3.Normalize(axis1);
-			Vector3 yAxis = Vector3.Normalize(axis2);
-			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
+			IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
+			IndexedVector3 yAxis = IndexedVector3.Normalize(axis2);
+			IndexedVector3 xAxis = IndexedVector3.Cross(yAxis, zAxis); // we want right coordinate system
 
-			Matrix frameInW = Matrix.Identity;
-			MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+			IndexedMatrix frameInW = IndexedMatrix.Identity;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                   xAxis[2], yAxis[2], zAxis[2]);
 
 			// now get constraint frame in local coordinate systems
-			m_frameInA = MathUtil.InverseTimes(m_rbA.GetCenterOfMassTransform(), frameInW);
-			m_frameInB = MathUtil.InverseTimes(m_rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = m_rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 			CalculateTransforms();
 		}
@@ -752,19 +754,67 @@ namespace BulletXNA.BulletDynamics
 		public bool GetUseFrameOffset() { return m_useOffsetForConstraintFrame; }
 		public void SetUseFrameOffset(bool frameOffsetOnOff) { m_useOffsetForConstraintFrame = frameOffsetOnOff; }
 
-		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
+		public void SetFrames(ref IndexedMatrix frameA, ref IndexedMatrix frameB)
 		{
 			m_frameInA = frameA;
 			m_frameInB = frameB;
 			CalculateTransforms();
 		}
 
-
+        public void SetParam(ConstraintParams num, float value, int axis)
+        {
+            if ((axis >= 0) && (axis < 3))
+            {
+                switch (num)
+                {
+                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                        m_linearLimits.m_stopERP[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                        m_linearLimits.m_stopCFM[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                        m_linearLimits.m_normalCFM[axis] = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+            }
+            else if ((axis >= 3) && (axis < 6))
+            {
+                switch (num)
+                {
+                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                        m_angularLimits[axis - 3].m_stopERP = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                        m_angularLimits[axis - 3].m_stopCFM = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                        m_angularLimits[axis - 3].m_normalCFM = value;
+                        m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+        }
 
 		//! relative_frames
 		//!@{
-		protected Matrix m_frameInA = Matrix.Identity; //!< the constraint space w.r.t body A
-		protected Matrix m_frameInB = Matrix.Identity; //!< the constraint space w.r.t body B
+		protected IndexedMatrix m_frameInA = IndexedMatrix.Identity; //!< the constraint space w.r.t body A
+		protected IndexedMatrix m_frameInB = IndexedMatrix.Identity; //!< the constraint space w.r.t body B
 		//!@}
 
 		//! Jacobians
@@ -787,20 +837,20 @@ namespace BulletXNA.BulletDynamics
 		//! temporal variables
 		//!@{
 		protected float m_timeStep;
-		protected Matrix m_calculatedTransformA = Matrix.Identity;
-		protected Matrix m_calculatedTransformB = Matrix.Identity;
-		protected Vector3 m_calculatedAxisAngleDiff;
-		protected Vector3[] m_calculatedAxis = new Vector3[3];
-		protected Vector3 m_calculatedLinearDiff;
+		protected IndexedMatrix m_calculatedTransformA = IndexedMatrix.Identity;
+		protected IndexedMatrix m_calculatedTransformB = IndexedMatrix.Identity;
+		protected IndexedVector3 m_calculatedAxisAngleDiff;
+		protected IndexedVector3[] m_calculatedAxis = new IndexedVector3[3];
+		protected IndexedVector3 m_calculatedLinearDiff;
 		protected float m_factA;
 		protected float m_factB;
 		protected bool m_hasStaticBody;
 
-		protected Vector3 m_AnchorPos; // point betwen pivots of bodies A and B to solve linear axes
+		protected IndexedVector3 m_AnchorPos; // point betwen pivots of bodies A and B to solve linear axes
 
 		protected bool m_useLinearReferenceFrameA;
 		protected bool m_useOffsetForConstraintFrame;
-		protected int m_flags;
+        protected int m_flags;
 
 		public const int BT_6DOF_FLAGS_AXIS_SHIFT = 3; // bits per axis
 		public const bool D6_USE_FRAME_OFFSET = true;
@@ -917,7 +967,7 @@ namespace BulletXNA.BulletDynamics
 		}
 
 		//! apply the correction impulses for two bodies
-		public float SolveAngularLimits(float timeStep, ref Vector3 axis, float jacDiagABInv, RigidBody body0, RigidBody body1)
+		public float SolveAngularLimits(float timeStep, ref IndexedVector3 axis, float jacDiagABInv, RigidBody body0, RigidBody body1)
 		{
 			if (NeedApplyTorques() == false)
 			{
@@ -938,14 +988,14 @@ namespace BulletXNA.BulletDynamics
 
 			// current velocity difference
 
-			Vector3 angVelA = Vector3.Zero;
+			IndexedVector3 angVelA = IndexedVector3.Zero;
 			body0.InternalGetAngularVelocity(ref angVelA);
-			Vector3 angVelB = Vector3.Zero;
+			IndexedVector3 angVelB = IndexedVector3.Zero;
 			body1.InternalGetAngularVelocity(ref angVelB);
 
-			Vector3 vel_diff = angVelA - angVelB;
+			IndexedVector3 vel_diff = angVelA - angVelB;
 
-			float rel_vel = Vector3.Dot(axis, vel_diff);
+			float rel_vel = IndexedVector3.Dot(axis, vel_diff);
 
 			// correction velocity
 			float motor_relvel = m_limitSoftness * (target_velocity - m_damping * rel_vel);
@@ -983,13 +1033,13 @@ namespace BulletXNA.BulletDynamics
 
 			clippedMotorImpulse = m_accumulatedImpulse - oldaccumImpulse;
 
-			Vector3 motorImp = clippedMotorImpulse * axis;
+			IndexedVector3 motorImp = clippedMotorImpulse * axis;
 
 			//body0.applyTorqueImpulse(motorImp);
 			//body1.applyTorqueImpulse(-motorImp);
 
-			body0.InternalApplyImpulse(Vector3.Zero, Vector3.TransformNormal(axis, body0.GetInvInertiaTensorWorld()), clippedMotorImpulse);
-			body1.InternalApplyImpulse(Vector3.Zero, Vector3.TransformNormal(axis, body1.GetInvInertiaTensorWorld()), -clippedMotorImpulse);
+            body0.InternalApplyImpulse(IndexedVector3.Zero, body0.GetInvInertiaTensorWorld() * axis, clippedMotorImpulse, "Generic6DoF body0");
+            body1.InternalApplyImpulse(IndexedVector3.Zero, body1.GetInvInertiaTensorWorld() * axis, -clippedMotorImpulse, "Generic6DoF body1");
 
 			return clippedMotorImpulse;
 		}
@@ -997,30 +1047,30 @@ namespace BulletXNA.BulletDynamics
 
 	public class TranslationalLimitMotor
 	{
-		public Vector3 m_lowerLimit;//!< the constraint lower limits
-		public Vector3 m_upperLimit;//!< the constraint upper limits
-		public Vector3 m_accumulatedImpulse;
+		public IndexedVector3 m_lowerLimit;//!< the constraint lower limits
+		public IndexedVector3 m_upperLimit;//!< the constraint upper limits
+		public IndexedVector3 m_accumulatedImpulse;
 		public float m_limitSoftness;//!< Softness for linear limit
 		public float m_damping;//!< Damping for linear limit
 		public float m_restitution;//! Bounce parameter for linear limit
-		public Vector3 m_normalCFM;//!< Constraint force mixing factor
-		public Vector3 m_stopERP;//!< Error tolerance factor when joint is at limit
-		public Vector3 m_stopCFM;//!< Constraint force mixing factor when joint is at limit
+		public IndexedVector3 m_normalCFM;//!< Constraint force mixing factor
+		public IndexedVector3 m_stopERP;//!< Error tolerance factor when joint is at limit
+		public IndexedVector3 m_stopCFM;//!< Constraint force mixing factor when joint is at limit
 		public bool[] m_enableMotor = new bool[3];
-		public Vector3 m_targetVelocity;//!< target motor velocity
-		public Vector3 m_maxMotorForce;//!< max force on motor
-		public Vector3 m_currentLimitError;//!  How much is violated this limit
-		public Vector3 m_currentLinearDiff;//!  Current relative offset of constraint frames
+		public IndexedVector3 m_targetVelocity;//!< target motor velocity
+		public IndexedVector3 m_maxMotorForce;//!< max force on motor
+		public IndexedVector3 m_currentLimitError;//!  How much is violated this limit
+		public IndexedVector3 m_currentLinearDiff;//!  Current relative offset of constraint frames
 		public int[] m_currentLimit = new int[3];//!< 0=free, 1=at lower limit, 2=at upper limit
 
 		public TranslationalLimitMotor()
 		{
-			m_lowerLimit = Vector3.Zero;
-			m_upperLimit = Vector3.Zero;
-			m_accumulatedImpulse = Vector3.Zero;
-			m_normalCFM = Vector3.Zero;
-			m_stopERP = new Vector3(0.2f, 0.2f, 0.2f);
-			m_stopCFM = Vector3.Zero;
+			m_lowerLimit = IndexedVector3.Zero;
+			m_upperLimit = IndexedVector3.Zero;
+			m_accumulatedImpulse = IndexedVector3.Zero;
+			m_normalCFM = IndexedVector3.Zero;
+			m_stopERP = new IndexedVector3(0.2f, 0.2f, 0.2f);
+			m_stopCFM = IndexedVector3.Zero;
 
 			m_limitSoftness = 0.7f;
 			m_damping = 1f;
@@ -1030,8 +1080,8 @@ namespace BulletXNA.BulletDynamics
 			{
 				m_enableMotor[i] = false;
 			}
-			m_targetVelocity = Vector3.Zero;
-			m_maxMotorForce = Vector3.Zero;
+			m_targetVelocity = IndexedVector3.Zero;
+			m_maxMotorForce = IndexedVector3.Zero;
 		}
 
 		public TranslationalLimitMotor(TranslationalLimitMotor other)
@@ -1065,7 +1115,7 @@ namespace BulletXNA.BulletDynamics
 		*/
 		public bool IsLimited(int limitIndex)
 		{
-			return MathUtil.VectorComponent(ref m_upperLimit, limitIndex) >= MathUtil.VectorComponent(ref m_lowerLimit, limitIndex);
+			return m_upperLimit[limitIndex] >= m_lowerLimit[limitIndex];
 		}
 		public bool NeedApplyForce(int limitIndex)
 		{
@@ -1078,65 +1128,65 @@ namespace BulletXNA.BulletDynamics
 
 		public int TestLimitValue(int limitIndex, float test_value)
 		{
-			float loLimit = MathUtil.VectorComponent(ref m_lowerLimit, limitIndex);
-			float hiLimit = MathUtil.VectorComponent(ref m_upperLimit, limitIndex);
+			float loLimit = m_lowerLimit[limitIndex];
+			float hiLimit = m_upperLimit[limitIndex];
 			if (loLimit > hiLimit)
 			{
 				m_currentLimit[limitIndex] = 0;//Free from violation
-				MathUtil.VectorComponent(ref m_currentLimitError, limitIndex, 0f);
+				m_currentLimitError[limitIndex] =  0f;
 				return 0;
 			}
 
 			if (test_value < loLimit)
 			{
 				m_currentLimit[limitIndex] = 2;//low limit violation
-				MathUtil.VectorComponent(ref m_currentLimitError, limitIndex, test_value - loLimit);
+				m_currentLimitError[limitIndex] =  test_value - loLimit;
 				return 2;
 			}
 			else if (test_value > hiLimit)
 			{
 				m_currentLimit[limitIndex] = 1;//High limit violation
-				MathUtil.VectorComponent(ref m_currentLimitError, limitIndex, test_value - hiLimit);
+				m_currentLimitError[limitIndex] =  test_value - hiLimit;
 				return 1;
 			};
 
 			m_currentLimit[limitIndex] = 0;//Free from violation
-			MathUtil.VectorComponent(ref m_currentLimitError, limitIndex, 0f);
+			m_currentLimitError[limitIndex] = 0f;
 			return 0;
 		}
 
 		public float SolveLinearAxis(
 			float timeStep,
 			float jacDiagABInv,
-			RigidBody body1, ref Vector3 pointInA,
-			RigidBody body2, ref Vector3 pointInB,
+			RigidBody body1, ref IndexedVector3 pointInA,
+			RigidBody body2, ref IndexedVector3 pointInB,
 			int limit_index,
-			ref Vector3 axis_normal_on_a,
-			ref Vector3 anchorPos)
+			ref IndexedVector3 axis_normal_on_a,
+			ref IndexedVector3 anchorPos)
 		{
 			///find relative velocity
-			//    Vector3 rel_pos1 = pointInA - body1.getCenterOfMassPosition();
-			//    Vector3 rel_pos2 = pointInB - body2.getCenterOfMassPosition();
-			Vector3 rel_pos1 = anchorPos - body1.GetCenterOfMassPosition();
-			Vector3 rel_pos2 = anchorPos - body2.GetCenterOfMassPosition();
+			//    IndexedVector3 rel_pos1 = pointInA - body1.getCenterOfMassPosition();
+			//    IndexedVector3 rel_pos2 = pointInB - body2.getCenterOfMassPosition();
+			IndexedVector3 rel_pos1 = anchorPos - body1.GetCenterOfMassPosition();
+			IndexedVector3 rel_pos2 = anchorPos - body2.GetCenterOfMassPosition();
 
-			Vector3 vel1 = Vector3.Zero;
+			IndexedVector3 vel1 = IndexedVector3.Zero;
 			body1.InternalGetVelocityInLocalPointObsolete(ref rel_pos1, ref vel1);
-			Vector3 vel2 = Vector3.Zero; ;
+			IndexedVector3 vel2 = IndexedVector3.Zero; ;
 			body2.InternalGetVelocityInLocalPointObsolete(ref rel_pos2, ref vel2);
-			Vector3 vel = vel1 - vel2;
+			IndexedVector3 vel = vel1 - vel2;
 
-			float rel_vel = Vector3.Dot(axis_normal_on_a, vel);
+			float rel_vel = IndexedVector3.Dot(axis_normal_on_a, vel);
 
 			/// apply displacement correction
 
 			//positional error (zeroth order error)
-			float depth = -Vector3.Dot((pointInA - pointInB), axis_normal_on_a);
+			float depth = -IndexedVector3.Dot((pointInA - pointInB), axis_normal_on_a);
 			float lo = float.MinValue;
 			float hi = float.MaxValue;
 
-			float minLimit = MathUtil.VectorComponent(ref m_lowerLimit, limit_index);
-			float maxLimit = MathUtil.VectorComponent(ref m_upperLimit, limit_index);
+			float minLimit = m_lowerLimit[limit_index];
+			float maxLimit = m_upperLimit[limit_index];
 
 			//handle the limits
 			if (minLimit < maxLimit)
@@ -1165,24 +1215,28 @@ namespace BulletXNA.BulletDynamics
 
 			float normalImpulse = m_limitSoftness * (m_restitution * depth / timeStep - m_damping * rel_vel) * jacDiagABInv;
 
-			float oldNormalImpulse = MathUtil.VectorComponent(ref m_accumulatedImpulse, limit_index);
+			float oldNormalImpulse = m_accumulatedImpulse[limit_index];
 			float sum = oldNormalImpulse + normalImpulse;
-			MathUtil.VectorComponent(ref m_accumulatedImpulse, limit_index, (sum > hi ? 0f : sum < lo ? 0f : sum));
-			normalImpulse = MathUtil.VectorComponent(ref m_accumulatedImpulse, limit_index) - oldNormalImpulse;
+			m_accumulatedImpulse[limit_index] =  (sum > hi ? 0f : sum < lo ? 0f : sum);
+			normalImpulse = m_accumulatedImpulse[limit_index] - oldNormalImpulse;
 
-			Vector3 impulse_vector = axis_normal_on_a * normalImpulse;
+			IndexedVector3 impulse_vector = axis_normal_on_a * normalImpulse;
 			//body1.applyImpulse( impulse_vector, rel_pos1);
 			//body2.applyImpulse(-impulse_vector, rel_pos2);
 
-			Vector3 ftorqueAxis1 = Vector3.Cross(rel_pos1, axis_normal_on_a);
-			Vector3 ftorqueAxis2 = Vector3.Cross(rel_pos2, axis_normal_on_a);
-			body1.InternalApplyImpulse(axis_normal_on_a * body1.GetInvMass(), Vector3.TransformNormal(ftorqueAxis1, body1.GetInvInertiaTensorWorld()), normalImpulse);
-			body2.InternalApplyImpulse(axis_normal_on_a * body2.GetInvMass(), Vector3.TransformNormal(ftorqueAxis2, body2.GetInvInertiaTensorWorld()), -normalImpulse);
+			IndexedVector3 ftorqueAxis1 = IndexedVector3.Cross(rel_pos1, axis_normal_on_a);
+			IndexedVector3 ftorqueAxis2 = IndexedVector3.Cross(rel_pos2, axis_normal_on_a);
+            body1.InternalApplyImpulse(axis_normal_on_a * body1.GetInvMass(), body1.GetInvInertiaTensorWorld() * ftorqueAxis1, normalImpulse, "Generic6DoF body1");
+            body2.InternalApplyImpulse(axis_normal_on_a * body2.GetInvMass(), body2.GetInvInertiaTensorWorld() * ftorqueAxis2, -normalImpulse, "Generic6DoF body2");
 
 			return normalImpulse;
 
 		}
+
+
+
 	}
+
 
 	[Flags]
 	public enum SixDofFlags
@@ -1192,3 +1246,7 @@ namespace BulletXNA.BulletDynamics
 		BT_6DOF_FLAGS_ERP_STOP = 4
 	}
 }
+
+
+
+

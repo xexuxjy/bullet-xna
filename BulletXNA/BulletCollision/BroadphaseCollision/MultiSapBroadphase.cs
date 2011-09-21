@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -69,12 +70,12 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public virtual BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(IndexedVector3 aabbMin, IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             return CreateProxy(ref aabbMin, ref aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, dispatcher, multiSapProxy);
         }
 
-        public virtual BroadphaseProxy CreateProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             //void* ignoreMe -> we could think of recursive multi-sap, if someone is interested
 
@@ -93,7 +94,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public virtual void SetAabb(BroadphaseProxy proxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public virtual void SetAabb(BroadphaseProxy proxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             MultiSapProxy multiProxy = (MultiSapProxy)proxy;
             multiProxy.m_aabbMin = aabbMin;
@@ -108,8 +109,8 @@ namespace BulletXNA.BulletCollision
 
             for (int i = 0; i < multiProxy.m_bridgeProxies.Count; i++)
             {
-                Vector3 worldAabbMin;
-                Vector3 worldAabbMax;
+                IndexedVector3 worldAabbMin;
+                IndexedVector3 worldAabbMax;
                 multiProxy.m_bridgeProxies[i].m_childBroadphase.GetBroadphaseAabb(out worldAabbMin, out worldAabbMax);
                 bool overlapsBroadphase = AabbUtil2.TestAabbAgainstAabb2(ref worldAabbMin, ref worldAabbMax, ref multiProxy.m_aabbMin, ref multiProxy.m_aabbMax);
                 if (!overlapsBroadphase)
@@ -212,20 +213,20 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public virtual void GetAabb(BroadphaseProxy proxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy proxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             MultiSapProxy multiProxy = (MultiSapProxy)(proxy);
             aabbMin = multiProxy.m_aabbMin;
             aabbMax = multiProxy.m_aabbMax;
         }
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback)
         {
-            Vector3 min = MathUtil.MIN_VECTOR;
-            Vector3 max = MathUtil.MAX_VECTOR;
+            IndexedVector3 min = MathUtil.MIN_VECTOR;
+            IndexedVector3 max = MathUtil.MAX_VECTOR;
             RayTest(ref rayFrom, ref rayTo, rayCallback, ref min, ref max);
         }
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             for (int i = 0; i < m_multiSapProxies.Count; i++)
             {
@@ -233,7 +234,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public virtual void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback callback)
+        public virtual void AabbTest(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IBroadphaseAabbCallback callback)
         {
             // not sure why this isn't implemented in the c++ version?
         }
@@ -351,13 +352,13 @@ namespace BulletXNA.BulletCollision
 
         ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
         ///will add some transform later
-        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetBroadphaseAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             aabbMin = MathUtil.MIN_VECTOR;
             aabbMax = MathUtil.MAX_VECTOR;
         }
 
-        public void BuildTree(ref Vector3 bvhAabbMin, ref Vector3 bvhAabbMax)
+        public void BuildTree(ref IndexedVector3 bvhAabbMin, ref IndexedVector3 bvhAabbMax)
         {
             m_optimizedAabbTree = new QuantizedBvh();
             m_optimizedAabbTree.SetQuantizationValues(ref bvhAabbMin, ref bvhAabbMax);
@@ -365,8 +366,8 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < m_sapBroadphases.Count; i++)
             {
                 QuantizedBvhNode node = new QuantizedBvhNode();
-                Vector3 aabbMin;
-                Vector3 aabbMax;
+                IndexedVector3 aabbMin;
+                IndexedVector3 aabbMax;
                 m_sapBroadphases[i].GetBroadphaseAabb(out aabbMin, out aabbMax);
                 m_optimizedAabbTree.Quantize(out node.m_quantizedAabbMin, ref aabbMin, false);
                 m_optimizedAabbTree.Quantize(out node.m_quantizedAabbMax, ref aabbMax, true);
@@ -455,8 +456,8 @@ namespace BulletXNA.BulletCollision
     {
         ///array with all the entries that this proxy belongs to
         public IList<BridgeProxy> m_bridgeProxies;
-        //public Vector3	m_aabbMin;
-        //public Vector3	m_aabbMax;
+        //public IndexedVector3	m_aabbMin;
+        //public IndexedVector3	m_aabbMax;
 
         public BroadphaseNativeTypes m_shapeType;
 
@@ -464,7 +465,7 @@ namespace BulletXNA.BulletCollision
                 short int	m_collisionFilterGroup;
                 short int	m_collisionFilterMask;
         */
-        public MultiSapProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType,
+        public MultiSapProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType,
             Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask)
             : base(ref aabbMin, ref aabbMax, userPtr, collisionFilterGroup, collisionFilterMask, null)
         {

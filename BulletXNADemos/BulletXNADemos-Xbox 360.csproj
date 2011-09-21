@@ -75,8 +75,11 @@
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\DemoMeshes.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
+    <Compile Include="Demos\FractureDemo.cs" />
     <Compile Include="Demos\GImpactTestDemo.cs" />
+    <Compile Include="Demos\InternalEdgeDemo.cs" />
     <Compile Include="Demos\IslandStressDemo.cs" />
+    <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />

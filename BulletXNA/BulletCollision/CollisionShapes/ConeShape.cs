@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -40,32 +41,32 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
             return ConeLocalSupport(ref vec);
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
         {
             return ConeLocalSupport(ref vec);
         }
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        for (int i=0;i<numVectors;i++)
 	        {
-		        Vector3 vec = vectors[i];
-		        supportVerticesOut[i] = new Vector4(ConeLocalSupport(ref vec),0);
+		        IndexedVector3 vec = vectors[i];
+		        supportVerticesOut[i] = new Vector4(ConeLocalSupport(ref vec).ToVector3(),0);
 	        }
         }
 
-        public override void	SetLocalScaling(ref Vector3 scaling)
+        public override void	SetLocalScaling(ref IndexedVector3 scaling)
         {
 	        int axis = m_coneIndices[1];
 	        int r1 = m_coneIndices[0];
 	        int r2 = m_coneIndices[2];
-	        m_height *= MathUtil.VectorComponent(ref scaling,axis) / MathUtil.VectorComponent(ref m_localScaling,axis);
-	        m_radius *= (MathUtil.VectorComponent(ref scaling,r1) / MathUtil.VectorComponent(ref m_localScaling,r1) + MathUtil.VectorComponent(ref scaling,r2) / MathUtil.VectorComponent(ref m_localScaling,r2)) / 2;
-	        m_sinAngle = (m_radius / (float)Math.Sqrt(m_radius * m_radius + m_height * m_height));
+            m_height *= scaling[axis] / m_localScaling[axis];
+            m_radius *= (scaling[r1] / m_localScaling[r1] + scaling[r2] / m_localScaling[r2]) / 2;
+            m_sinAngle = (m_radius / (float)Math.Sqrt(m_radius * m_radius + m_height * m_height));
 	        base.SetLocalScaling(ref scaling);
         }
 
@@ -74,14 +75,14 @@ namespace BulletXNA.BulletCollision
 	    public float GetHeight()  { return m_height;}
 
 
-	    public override void CalculateLocalInertia(float mass, out Vector3 inertia) 
+	    public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia) 
 	    {
-            Matrix identity = Matrix.Identity;
-		    Vector3 aabbMin;
-            Vector3 aabbMax;
+            IndexedMatrix identity = IndexedMatrix.Identity;
+		    IndexedVector3 aabbMin;
+            IndexedVector3 aabbMax;
 		    GetAabb(ref identity,out aabbMin,out aabbMax);
 
-		    Vector3 halfExtents = (aabbMax-aabbMin)*0.5f;
+		    IndexedVector3 halfExtents = (aabbMax-aabbMin)*0.5f;
 
 		    float margin = GetMargin();
 
@@ -93,7 +94,7 @@ namespace BulletXNA.BulletCollision
             float z2 = lz*lz;
             float scaledmass = mass * 0.08333333f;
 
-            inertia = scaledmass * (new Vector3(y2+z2,x2+z2,x2+y2));
+            inertia = scaledmass * (new IndexedVector3(y2+z2,x2+z2,x2+y2));
 	    }
 
 
@@ -145,41 +146,40 @@ namespace BulletXNA.BulletCollision
 	    protected float m_height;
 	    protected int[] m_coneIndices = new int[3];
 
-        protected Vector3 ConeLocalSupport(ref Vector3 v)
+        protected IndexedVector3 ConeLocalSupport(ref IndexedVector3 v)
         {
 	        float halfHeight = m_height * 0.5f;
 
-            if (MathUtil.VectorComponent(ref v,m_coneIndices[1]) > v.Length() * m_sinAngle)
+         if (v[m_coneIndices[1]] > v.Length() * m_sinAngle)
+         {
+	        IndexedVector3 tmp = new IndexedVector3();
+
+	        tmp[m_coneIndices[0]] = 0.0f;
+	        tmp[m_coneIndices[1]] = halfHeight;
+	        tmp[m_coneIndices[2]] = 0.0f;
+	        return tmp;
+         }
+          else 
+         {
+            float s = (float)Math.Sqrt(v[m_coneIndices[0]] * v[m_coneIndices[0]] + v[m_coneIndices[2]] * v[m_coneIndices[2]]);
+            if (s > MathUtil.SIMD_EPSILON) 
             {
-                Vector3 tmp = Vector3.Zero;
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[0],0f);
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[1],halfHeight);
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[2],0f);
-                return tmp;
+              float d = m_radius / s;
+	        IndexedVector3 tmp = new IndexedVector3();
+	          tmp[m_coneIndices[0]] = v[m_coneIndices[0]] * d;
+	          tmp[m_coneIndices[1]] = -halfHeight;
+	          tmp[m_coneIndices[2]] = v[m_coneIndices[2]] * d;
+	          return tmp;
             }
-            else 
+            else  
             {
-                float v0 = MathUtil.VectorComponent(ref v,m_coneIndices[0]);
-                float v2 = MathUtil.VectorComponent(ref v,m_coneIndices[2]);
-                float s = (float)Math.Sqrt(v0 * v0 + v2 * v2);
-                if (s > MathUtil.SIMD_EPSILON) 
-                {
-                    Vector3 tmp = Vector3.Zero;
-                    float d = m_radius / s;
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[0],v0*d);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[1],-halfHeight);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[2],v2*d);
-                    return tmp;
-                }
-                else  
-                {
-                    Vector3 tmp = Vector3.Zero;
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[0],0f);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[1],-halfHeight);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[2],0f);
-                    return tmp;
-                }
-            }
+	        IndexedVector3 tmp = new IndexedVector3();
+		        tmp[m_coneIndices[0]] = 0.0f;
+		        tmp[m_coneIndices[1]] = -halfHeight;
+		        tmp[m_coneIndices[2]] = 0.0f;
+		        return tmp;
+	        }
+          }
 
         }
     }

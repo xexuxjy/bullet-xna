@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -47,22 +48,22 @@ namespace BulletXNA.BulletCollision
 		}
 
 	
-		public override Vector3	LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+		public override IndexedVector3	LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
 		{
 			return m_childConvexShape.LocalGetSupportingVertexWithoutMargin(ref vec);
 		}
 
-		public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
+		public override IndexedVector3	LocalGetSupportingVertex(ref IndexedVector3 vec)
 		{
 			return m_childConvexShape.LocalGetSupportingVertex(ref vec);
 		}
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
 		{
 			m_childConvexShape.BatchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
 		}
 
-		public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+		public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
 		{
             m_childConvexShape.CalculateLocalInertia(mass, out inertia);
 		}
@@ -84,22 +85,22 @@ namespace BulletXNA.BulletCollision
 
 
 		///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-		public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
+		public override void GetAabb(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)
 		{
 			m_childConvexShape.GetAabb(ref t,out aabbMin,out aabbMax);
 		}
 
-		public override void GetAabbSlow(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
+		public override void GetAabbSlow(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)
 		{
 			m_childConvexShape.GetAabbSlow(ref t,out aabbMin,out aabbMax);
 		}
 
-		public void SetLocalScaling(Vector3 scaling)
+		public void SetLocalScaling(IndexedVector3 scaling)
 		{
 			m_childConvexShape.SetLocalScaling(ref scaling);
 		}
 
-		public override Vector3 GetLocalScaling()
+		public override IndexedVector3 GetLocalScaling()
 		{
 			return m_childConvexShape.GetLocalScaling();
 		}
@@ -118,7 +119,7 @@ namespace BulletXNA.BulletCollision
 			return m_childConvexShape.GetNumPreferredPenetrationDirections();
 		}
 		
-		public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
+		public override void GetPreferredPenetrationDirection(int index, out IndexedVector3 penetrationVector)
 		{
             m_childConvexShape.GetPreferredPenetrationDirection(index, out penetrationVector);
 		}

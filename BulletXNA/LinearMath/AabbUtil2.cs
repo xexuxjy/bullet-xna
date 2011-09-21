@@ -30,17 +30,17 @@ namespace BulletXNA
 {
     public static class AabbUtil2
     {
-        public static void AabbExpand(ref Vector3 aabbMin,
-                                   ref Vector3 aabbMax,
-                                   ref Vector3 expansionMin,
-                                   ref Vector3 expansionMax)
+        public static void AabbExpand(ref IndexedVector3 aabbMin,
+                                   ref IndexedVector3 aabbMax,
+                                   ref IndexedVector3 expansionMin,
+                                   ref IndexedVector3 expansionMax)
         {
             aabbMin = aabbMin + expansionMin;
             aabbMax = aabbMax + expansionMax;
         }
 
         /// conservative test for overlap between two aabbs
-        public static bool TestPointAgainstAabb2(ref Vector3 aabbMin1, ref Vector3 aabbMax1, ref Vector3 point)
+        public static bool TestPointAgainstAabb2(ref IndexedVector3 aabbMin1, ref IndexedVector3 aabbMax1, ref IndexedVector3 point)
         {
             bool overlap = true;
             overlap = (aabbMin1.X > point.X || aabbMax1.X < point.X) ? false : overlap;
@@ -51,8 +51,8 @@ namespace BulletXNA
 
 
         /// conservative test for overlap between two aabbs
-        public static bool TestAabbAgainstAabb2(ref Vector3 aabbMin1, ref Vector3 aabbMax1,
-                                        ref Vector3 aabbMin2, ref Vector3 aabbMax2)
+        public static bool TestAabbAgainstAabb2(ref IndexedVector3 aabbMin1, ref IndexedVector3 aabbMax1,
+                                        ref IndexedVector3 aabbMin2, ref IndexedVector3 aabbMax2)
         {
             bool overlap = true;
             overlap = (aabbMin1.X > aabbMax2.X || aabbMax1.X < aabbMin2.X) ? false : overlap;
@@ -62,8 +62,8 @@ namespace BulletXNA
         }
 
         /// conservative test for overlap between triangle and aabb
-        public static bool TestTriangleAgainstAabb2(Vector3[] vertices,
-                                            ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public static bool TestTriangleAgainstAabb2(IndexedVector3[] vertices,
+                                            ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             if (Math.Min(Math.Min(vertices[0].X, vertices[1].X), vertices[2].X) > aabbMax.X) return false;
             if (Math.Max(Math.Max(vertices[0].X, vertices[1].X), vertices[2].X) < aabbMin.X) return false;
@@ -77,8 +77,8 @@ namespace BulletXNA
         }
 
 
-        //public static bool TestTriangleAgainstAabb2(IList<Vector3> vertices,
-        //                            ref Vector3 aabbMin, ref Vector3 aabbMax)
+        //public static bool TestTriangleAgainstAabb2(IList<IndexedVector3> vertices,
+        //                            ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         //{
         //    if (Math.Min(Math.Min(vertices[0].X, vertices[1].X), vertices[2].X) > aabbMax.X) return false;
         //    if (Math.Max(Math.Max(vertices[0].X, vertices[1].X), vertices[2].X) < aabbMin.X) return false;
@@ -94,7 +94,7 @@ namespace BulletXNA
 
 
 
-        public static int Outcode(ref Vector3 p, ref Vector3 halfExtent)
+        public static int Outcode(ref IndexedVector3 p, ref IndexedVector3 halfExtent)
         {
             return (p.X < -halfExtent.X ? 0x01 : 0x0) |
                    (p.X > halfExtent.X ? 0x08 : 0x0) |
@@ -106,10 +106,10 @@ namespace BulletXNA
 
 
 
-        public static bool RayAabb2(ref Vector3 rayFrom,
-                                  ref Vector3 rayInvDirection,
+        public static bool RayAabb2(ref IndexedVector3 rayFrom,
+                                  ref IndexedVector3 rayInvDirection,
                                   bool[] raySign,
-                                  Vector3[] bounds,
+                                  IndexedVector3[] bounds,
                                   out float tmin,
                                   float lambda_min,
                                   float lambda_max)
@@ -142,36 +142,36 @@ namespace BulletXNA
         }
 
 
-        public static bool RayAabb(Vector3 rayFrom,
-                                    Vector3 rayTo,
-                                    ref Vector3 aabbMin,
-                                    ref Vector3 aabbMax,
-                                    ref float param, out Vector3 normal)
+        public static bool RayAabb(IndexedVector3 rayFrom,
+                                    IndexedVector3 rayTo,
+                                    ref IndexedVector3 aabbMin,
+                                    ref IndexedVector3 aabbMax,
+                                    ref float param, out IndexedVector3 normal)
         {
             return RayAabb(ref rayFrom, ref rayTo, ref aabbMin, ref aabbMax, ref param, out normal);
         }
 
 
-        public static bool RayAabb(ref Vector3 rayFrom,
-                                    ref Vector3 rayTo,
-                                    ref Vector3 aabbMin,
-                                    ref Vector3 aabbMax,
-                                    ref float param, out Vector3 normal)
+        public static bool RayAabb(ref IndexedVector3 rayFrom,
+                                    ref IndexedVector3 rayTo,
+                                    ref IndexedVector3 aabbMin,
+                                    ref IndexedVector3 aabbMax,
+                                    ref float param, out IndexedVector3 normal)
         {
-            Vector3 aabbHalfExtent = (aabbMax - aabbMin) * 0.5f;
-            Vector3 aabbCenter = (aabbMax + aabbMin) * 0.5f;
-            Vector3 source = rayFrom - aabbCenter;
-            Vector3 target = rayTo - aabbCenter;
+            IndexedVector3 aabbHalfExtent = (aabbMax - aabbMin) * 0.5f;
+            IndexedVector3 aabbCenter = (aabbMax + aabbMin) * 0.5f;
+            IndexedVector3 source = rayFrom - aabbCenter;
+            IndexedVector3 target = rayTo - aabbCenter;
             int sourceOutcode = Outcode(ref source, ref aabbHalfExtent);
             int targetOutcode = Outcode(ref target, ref aabbHalfExtent);
             if ((sourceOutcode & targetOutcode) == 0x0)
             {
                 float lambda_enter = 0f;
                 float lambda_exit = param;
-                Vector3 r = target - source;
+                IndexedVector3 r = target - source;
                 int i;
                 float normSign = 1;
-                Vector3 hitNormal = Vector3.Zero;
+                IndexedVector3 hitNormal = IndexedVector3.Zero;
                 int bit = 1;
 
                 for (int j = 0; j < 2; j++)
@@ -180,22 +180,18 @@ namespace BulletXNA
                     {
                         if ((sourceOutcode & bit) != 0)
                         {
-                            float lambda = (-MathUtil.VectorComponent(ref source, i) -
-                                MathUtil.VectorComponent(ref aabbHalfExtent, i) * normSign) /
-                                MathUtil.VectorComponent(ref r, i);
+                            float lambda = (-source[i] - aabbHalfExtent[i] * normSign) / r[i];
 
                             if (lambda_enter <= lambda)
                             {
                                 lambda_enter = lambda;
-                                hitNormal = Vector3.Zero;
-                                MathUtil.VectorComponent(ref hitNormal, i, normSign);
+                                hitNormal = IndexedVector3.Zero;
+                                hitNormal[i] = normSign;
                             }
                         }
                         else if ((targetOutcode & bit) != 0)
                         {
-                            float lambda = (-MathUtil.VectorComponent(ref source, i) -
-                                MathUtil.VectorComponent(ref aabbHalfExtent, i) * normSign) /
-                                MathUtil.VectorComponent(ref r, i);
+                            float lambda = (-source[i] - aabbHalfExtent[i] * normSign) / r[i];
                             lambda_exit = Math.Min(lambda_exit, lambda);
                         }
                         bit <<= 1;
@@ -210,7 +206,7 @@ namespace BulletXNA
                 }
             }
             param = 0f;
-            normal = Vector3.Zero;
+            normal = IndexedVector3.Zero;
             return false;
         }
 
@@ -230,41 +226,60 @@ namespace BulletXNA
             return overlap;
         }
 
-        public static void TransformAabb(Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        public static void TransformAabb(IndexedVector3 halfExtents, float margin, ref IndexedMatrix t, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
         {
             TransformAabb(ref halfExtents, margin, ref t, out aabbMinOut, out aabbMaxOut);
         }
 
-        public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        public static void TransformAabb(ref IndexedVector3 halfExtents, float margin, ref IndexedMatrix t, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
         {
-            Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
-            Matrix abs_b = MathUtil.AbsoluteBasisMatrix(ref t);
-            Vector3 center = t.Translation;
+            IndexedVector3 halfExtentsWithMargin = halfExtents + new IndexedVector3(margin);
+            IndexedBasisMatrix  abs_b = t._basis.Absolute();
+            IndexedVector3 center = t._origin;
 
-            Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), halfExtentsWithMargin),
-                                        Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), halfExtentsWithMargin),
-                                        Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), halfExtentsWithMargin));
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtentsWithMargin),
+                                                        abs_b[1].Dot(ref halfExtentsWithMargin),
+                                                        abs_b[2].Dot(ref halfExtentsWithMargin));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
         }
 
-
-        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        public static void TransformAabb(IndexedVector3 localAabbMin, IndexedVector3 localAabbMax, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
         {
             Debug.Assert(localAabbMin.X <= localAabbMax.X);
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
             Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
-            Vector3 localHalfExtents = -.5f * (localAabbMax - localAabbMin);
-            localHalfExtents += new Vector3(margin);
+            IndexedVector3 localHalfExtents = -.5f * (localAabbMax - localAabbMin);
+            localHalfExtents += new IndexedVector3(margin);
 
-            Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
-            Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans);
-            Vector3 center = Vector3.Transform(localCenter, trans);
+            IndexedVector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+            IndexedVector3 center = trans * localCenter;
 
-            Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), localHalfExtents),
-                            Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), localHalfExtents),
-                            Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), localHalfExtents));
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
+                                                        abs_b[1].Dot(ref localHalfExtents),
+                                                        abs_b[2].Dot(ref localHalfExtents));
+
+            aabbMinOut = center - extent;
+            aabbMaxOut = center + extent;
+        }
+
+        public static void TransformAabb(ref IndexedVector3 localAabbMin, ref IndexedVector3 localAabbMax, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
+        {
+            Debug.Assert(localAabbMin.X <= localAabbMax.X);
+            Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
+            Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
+            IndexedVector3 localHalfExtents = 0.5f * (localAabbMax - localAabbMin);
+            localHalfExtents += new IndexedVector3(margin);
+
+            IndexedVector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+            IndexedVector3 center = trans * localCenter;
+
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
+                                                        abs_b[1].Dot(ref localHalfExtents),
+                                                        abs_b[2].Dot(ref localHalfExtents));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;

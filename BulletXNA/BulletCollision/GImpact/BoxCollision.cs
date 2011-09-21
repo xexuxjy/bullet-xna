@@ -83,10 +83,10 @@ namespace BulletXNA.BulletCollision
 
 
         // bool test_cross_edge_box(
-        //	 ref Vector3 edge,
-        //	 ref Vector3 absolute_edge,
-        //	 ref Vector3 pointa,
-        //	 ref Vector3 pointb,  ref Vector3 extend,
+        //	 ref IndexedVector3 edge,
+        //	 ref IndexedVector3 absolute_edge,
+        //	 ref IndexedVector3 pointa,
+        //	 ref IndexedVector3 pointb,  ref IndexedVector3 extend,
         //	int dir_index0,
         //	int dir_index1
         //	int component_index0,
@@ -112,10 +112,10 @@ namespace BulletXNA.BulletCollision
         //}
         //
         // bool test_cross_edge_box_X_axis(
-        //	 ref Vector3 edge,
-        //	 ref Vector3 absolute_edge,
-        //	 ref Vector3 pointa,
-        //	 ref Vector3 pointb, ref Vector3 extend)
+        //	 ref IndexedVector3 edge,
+        //	 ref IndexedVector3 absolute_edge,
+        //	 ref IndexedVector3 pointa,
+        //	 ref IndexedVector3 pointb, ref IndexedVector3 extend)
         //{
         //
         //	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,2,1,1,2);
@@ -123,60 +123,79 @@ namespace BulletXNA.BulletCollision
         //
         //
         // bool test_cross_edge_box_Y_axis(
-        //	 ref Vector3 edge,
-        //	 ref Vector3 absolute_edge,
-        //	 ref Vector3 pointa,
-        //	 ref Vector3 pointb, ref Vector3 extend)
+        //	 ref IndexedVector3 edge,
+        //	 ref IndexedVector3 absolute_edge,
+        //	 ref IndexedVector3 pointa,
+        //	 ref IndexedVector3 pointb, ref IndexedVector3 extend)
         //{
         //
         //	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,0,2,2,0);
         //}
         //
         // bool test_cross_edge_box_Z_axis(
-        //	 ref Vector3 edge,
-        //	 ref Vector3 absolute_edge,
-        //	 ref Vector3 pointa,
-        //	 ref Vector3 pointb, ref Vector3 extend)
+        //	 ref IndexedVector3 edge,
+        //	 ref IndexedVector3 absolute_edge,
+        //	 ref IndexedVector3 pointa,
+        //	 ref IndexedVector3 pointb, ref IndexedVector3 extend)
         //{
         //
         //	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,1,0,0,1);
         //}
 
 
-        public static bool TEST_CROSS_EDGE_BOX_MCR(ref Vector3 edge, ref Vector3 absolute_edge, ref Vector3 pointa, ref Vector3 pointb, ref Vector3 _extend, int i_dir_0, int i_dir_1, int i_comp_0, int i_comp_1)
+        public static bool TEST_CROSS_EDGE_BOX_MCR(ref IndexedVector3 edge, ref IndexedVector3 absolute_edge, ref IndexedVector3 pointa, ref IndexedVector3 pointb, ref IndexedVector3 _extend, int i_dir_0, int i_dir_1, int i_comp_0, int i_comp_1)
         {
-            float dir0 = -MathUtil.VectorComponent(ref edge, i_dir_0);
-            float dir1 = MathUtil.VectorComponent(ref edge, i_dir_1);
-            float pmin = MathUtil.VectorComponent(ref pointa, i_comp_0) * dir0 + MathUtil.VectorComponent(ref pointa, i_comp_1) * dir1;
-            float pmax = MathUtil.VectorComponent(ref pointb, i_comp_0) * dir0 + MathUtil.VectorComponent(ref pointb, i_comp_1) * dir1;
-            if (pmin > pmax)
-            {
-                pmin = pmin + pmax;
-                pmax = pmin - pmax;
-                pmin = pmin - pmax;
-            }
-            float abs_dir0 = MathUtil.VectorComponent(ref absolute_edge, i_dir_0);
-            float abs_dir1 = MathUtil.VectorComponent(ref absolute_edge, i_dir_1);
-            float rad = MathUtil.VectorComponent(ref _extend, i_comp_0) * abs_dir0 + MathUtil.VectorComponent(ref _extend, i_comp_1) * abs_dir1;
-            if (pmin > rad || -rad > pmax)
-            {
-                return false;
-            }
-            return true;
+	float dir0 = -edge[i_dir_0];
+	float dir1 = edge[i_dir_1];
+	float pmin = pointa[i_comp_0]*dir0 + pointa[i_comp_1]*dir1;
+	float pmax = pointb[i_comp_0]*dir0 + pointb[i_comp_1]*dir1;
+	if(pmin>pmax)
+	{
+        pmin = pmin + pmax;
+        pmax = pmin - pmax;
+        pmin = pmin - pmax;
+    }
+	float abs_dir0 = absolute_edge[i_dir_0];
+	float abs_dir1 = absolute_edge[i_dir_1];
+	float rad = _extend[i_comp_0] * abs_dir0 + _extend[i_comp_1] * abs_dir1;
+    if (pmin > rad || -rad > pmax)
+    {
+        return false;
+    }
+    return true;
         }
+        //    float dir0 = -MathUtil.VectorComponent(ref edge, i_dir_0);
+        //    float dir1 = MathUtil.VectorComponent(ref edge, i_dir_1);
+        //    float pmin = MathUtil.VectorComponent(ref pointa, i_comp_0) * dir0 + MathUtil.VectorComponent(ref pointa, i_comp_1) * dir1;
+        //    float pmax = MathUtil.VectorComponent(ref pointb, i_comp_0) * dir0 + MathUtil.VectorComponent(ref pointb, i_comp_1) * dir1;
+        //    if (pmin > pmax)
+        //    {
+        //        pmin = pmin + pmax;
+        //        pmax = pmin - pmax;
+        //        pmin = pmin - pmax;
+        //    }
+        //    float abs_dir0 = MathUtil.VectorComponent(ref absolute_edge, i_dir_0);
+        //    float abs_dir1 = MathUtil.VectorComponent(ref absolute_edge, i_dir_1);
+        //    float rad = MathUtil.VectorComponent(ref _extend, i_comp_0) * abs_dir0 + MathUtil.VectorComponent(ref _extend, i_comp_1) * abs_dir1;
+        //    if (pmin > rad || -rad > pmax)
+        //    {
+        //        return false;
+        //    }
+        //    return true;
+        //}
 
 
-        public static bool TEST_CROSS_EDGE_BOX_X_AXIS_MCR(ref Vector3 edge, ref Vector3 absolute_edge, ref Vector3 pointa, ref Vector3 pointb, ref Vector3 _extend)
+        public static bool TEST_CROSS_EDGE_BOX_X_AXIS_MCR(ref IndexedVector3 edge, ref IndexedVector3 absolute_edge, ref IndexedVector3 pointa, ref IndexedVector3 pointb, ref IndexedVector3 _extend)
         {
             return TEST_CROSS_EDGE_BOX_MCR(ref edge, ref absolute_edge, ref pointa, ref pointb, ref _extend, 2, 1, 1, 2);
         }
 
-        public static bool TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(ref Vector3 edge, ref Vector3 absolute_edge, ref Vector3 pointa, ref Vector3 pointb, ref Vector3 _extend)
+        public static bool TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(ref IndexedVector3 edge, ref IndexedVector3 absolute_edge, ref IndexedVector3 pointa, ref IndexedVector3 pointb, ref IndexedVector3 _extend)
         {
             return TEST_CROSS_EDGE_BOX_MCR(ref edge, ref absolute_edge, ref pointa, ref pointb, ref _extend, 0, 2, 2, 0);
         }
 
-        public static bool TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(ref Vector3 edge, ref Vector3 absolute_edge, ref Vector3 pointa, ref Vector3 pointb, ref Vector3 _extend)
+        public static bool TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(ref IndexedVector3 edge, ref IndexedVector3 absolute_edge, ref IndexedVector3 pointa, ref IndexedVector3 pointb, ref IndexedVector3 _extend)
         {
             return TEST_CROSS_EDGE_BOX_MCR(ref edge, ref absolute_edge, ref pointa, ref pointb, ref _extend, 1, 0, 0, 1);
         }
@@ -184,7 +203,7 @@ namespace BulletXNA.BulletCollision
 
         //! Returns the dot product between a vec3f and the col of a matrix
         // float bt_mat3_dot_col(
-        // btMatrix3x3 & mat,  ref Vector3 vec3, int colindex)
+        // btMatrix3x3 & mat,  ref IndexedVector3 vec3, int colindex)
         //{
         //    return vec3[0]*mat[0][colindex] + vec3[1]*mat[1][colindex] + vec3[2]*mat[2][colindex];
         //}
@@ -197,7 +216,7 @@ namespace BulletXNA.BulletCollision
 
 
         //! Compairison of transformation objects
-        bool CompareTransformsEqual(ref Matrix t1, ref Matrix t2)
+        bool CompareTransformsEqual(ref IndexedMatrix t1, ref IndexedMatrix t2)
         {
             return t1.Equals(t2);
         }
@@ -206,15 +225,15 @@ namespace BulletXNA.BulletCollision
     //! Axis aligned box
     public struct AABB
     {
-        public Vector3 m_min;
-        public Vector3 m_max;
+        public IndexedVector3 m_min;
+        public IndexedVector3 m_max;
 
-        public AABB(ref Vector3 V1,
-                 ref Vector3 V2,
-                 ref Vector3 V3)
+        public AABB(ref IndexedVector3 V1,
+                 ref IndexedVector3 V2,
+                 ref IndexedVector3 V3)
         {
-            m_min = new Vector3();
-            m_max = new Vector3();
+            m_min = new IndexedVector3();
+            m_max = new IndexedVector3();
 
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
@@ -225,10 +244,10 @@ namespace BulletXNA.BulletCollision
             m_max.Z = BoxCollision.BT_MAX3(V1.Z, V2.Z, V3.Z);
         }
 
-        public AABB(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3, float margin)
+        public AABB(ref IndexedVector3 V1, ref IndexedVector3 V2, ref IndexedVector3 V3, float margin)
         {
-            m_min = new Vector3();
-            m_max = new Vector3();
+            m_min = new IndexedVector3();
+            m_max = new IndexedVector3();
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
             m_min.Z = BoxCollision.BT_MIN3(V1.Z, V2.Z, V3.Z);
@@ -295,7 +314,7 @@ namespace BulletXNA.BulletCollision
             m_max.Z = other.m_max.Z + margin;
         }
 
-        public void CalcFromTriangle(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3)
+        public void CalcFromTriangle(ref IndexedVector3 V1, ref IndexedVector3 V2, ref IndexedVector3 V3)
         {
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
@@ -307,7 +326,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public void CalcFromTriangleMargin(ref Vector3 V1, ref Vector3 V2, ref Vector3 V3, float margin)
+        public void CalcFromTriangleMargin(ref IndexedVector3 V1, ref IndexedVector3 V2, ref IndexedVector3 V3, float margin)
         {
             m_min.X = BoxCollision.BT_MIN3(V1.X, V2.X, V3.X);
             m_min.Y = BoxCollision.BT_MIN3(V1.Y, V2.Y, V3.Y);
@@ -326,17 +345,16 @@ namespace BulletXNA.BulletCollision
         }
 
         //! Apply a transform to an AABB
-        public void ApplyTransform(ref Matrix trans)
+        public void ApplyTransform(ref IndexedMatrix trans)
         {
-            Vector3 center = (m_max + m_min) * 0.5f;
-            Vector3 extends = m_max - center;
+            IndexedVector3 center = (m_max + m_min) * 0.5f;
+            IndexedVector3 extends = m_max - center;
             // Compute new center
-            Vector3.Transform(ref center, ref trans, out center);
-            Matrix absMatrix = MathUtil.AbsoluteMatrix(trans);
+            center = trans * center;
 
-            Vector3 textends = new Vector3(Vector3.Dot(extends, absMatrix.Right),
-            Vector3.Dot(extends, absMatrix.Up),
-            Vector3.Dot(extends, absMatrix.Backward));
+            IndexedVector3 textends = new IndexedVector3(extends.Dot(trans._basis.GetRow(0).Absolute()),
+                 extends.Dot(trans._basis.GetRow(1).Absolute()),
+                 extends.Dot(trans._basis.GetRow(2).Absolute()));
 
             m_min = center - textends;
             m_max = center + textends;
@@ -344,18 +362,18 @@ namespace BulletXNA.BulletCollision
 
 
         //! Apply a transform to an AABB
-        public void AppyTransformTransCache(BT_BOX_BOX_TRANSFORM_CACHE trans)
+        public void ApplyTransformTransCache(ref BT_BOX_BOX_TRANSFORM_CACHE trans)
         {
-            Vector3 center = (m_max + m_min) * 0.5f;
-            Vector3 extends = m_max - center;
+            IndexedVector3 center = (m_max + m_min) * 0.5f;
+            IndexedVector3 extends = m_max - center;
             // Compute new center
             center = trans.Transform(ref center);
 
-            Matrix absMatrix = MathUtil.AbsoluteMatrix(trans.m_R1to0);
+            IndexedBasisMatrix absMatrix = trans.m_R1to0.Absolute();
 
-            Vector3 textends = new Vector3(Vector3.Dot(extends, absMatrix.Right),
-            Vector3.Dot(extends, absMatrix.Up),
-            Vector3.Dot(extends, absMatrix.Backward));
+		    IndexedVector3 textends = new IndexedVector3(extends.Dot(trans.m_R1to0.GetRow(0).Absolute()),
+ 				 extends.Dot(trans.m_R1to0.GetRow(1).Absolute()),
+				 extends.Dot(trans.m_R1to0.GetRow(2).Absolute()));
 
             m_min = center - textends;
             m_max = center + textends;
@@ -379,7 +397,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //! Merges a point
-        public void MergePoint(ref Vector3 point)
+        public void MergePoint(ref IndexedVector3 point)
         {
             m_min.X = BoxCollision.BT_MIN(m_min.X, point.X);
             m_min.Y = BoxCollision.BT_MIN(m_min.Y, point.Y);
@@ -394,15 +412,9 @@ namespace BulletXNA.BulletCollision
         public void GetCenterExtend(out IndexedVector3 center, out IndexedVector3 extend)
         {
             center = new IndexedVector3((m_max + m_min) * 0.5f);
-            extend = new IndexedVector3(new IndexedVector3(m_max) - center);
+            extend = new IndexedVector3(m_max - center);
         }
 
-
-        public void GetCenterExtend(out Vector3 center, out Vector3 extend)
-        {
-            center = (m_max + m_min) * 0.5f;
-            extend = m_max - center;
-        }
 
         //! Finds the intersecting box between this box and the other.
         public void FindIntersection(ref AABB other, ref AABB intersection)
@@ -436,9 +448,9 @@ namespace BulletXNA.BulletCollision
         \param vorigin A vec3f with the origin of the ray
         \param vdir A vec3f with the direction of the ray
         */
-        public bool CollideRay(ref Vector3 vorigin, ref Vector3 vdir)
+        public bool CollideRay(ref IndexedVector3 vorigin, ref IndexedVector3 vdir)
         {
-            Vector3 extents, center;
+            IndexedVector3 extents, center;
             GetCenterExtend(out center, out extents);
 
             float Dx = vorigin.X - center.X;
@@ -461,19 +473,17 @@ namespace BulletXNA.BulletCollision
 
         public void ProjectionInterval(ref Vector4 direction, out float vmin, out float vmax)
         {
-            Vector3 temp = new Vector3(direction.X, direction.Y, direction.Z);
+            IndexedVector3 temp = new IndexedVector3(direction.X, direction.Y, direction.Z);
             ProjectionInterval(ref temp, out vmin, out vmax);
         }
 
-        public void ProjectionInterval(ref Vector3 direction, out float vmin, out float vmax)
+        public void ProjectionInterval(ref IndexedVector3 direction, out float vmin, out float vmax)
         {
-            Vector3 center = (m_max + m_min) * 0.5f;
-            Vector3 extend = m_max - center;
-            Vector3 absDirection;
-            MathUtil.AbsoluteVector(ref direction, out absDirection);
+            IndexedVector3 center = (m_max + m_min) * 0.5f;
+            IndexedVector3 extend = m_max - center;
 
-            float _fOrigin = Vector3.Dot(direction, center);
-            float _fMaximumExtent = Vector3.Dot(extend, absDirection);
+            float _fOrigin = direction.Dot(ref center);
+            float _fMaximumExtent = extend.Dot(direction.Absolute());
             vmin = _fOrigin - _fMaximumExtent;
             vmax = _fOrigin + _fMaximumExtent;
         }
@@ -497,7 +507,7 @@ namespace BulletXNA.BulletCollision
             return BT_PLANE_INTERSECTION_TYPE.BT_CONST_FRONT_PLANE;//2
         }
 
-        public bool OverlappingTransConservative(ref AABB box, ref Matrix trans1_to_0)
+        public bool OverlappingTransConservative(ref AABB box, ref IndexedMatrix trans1_to_0)
         {
             AABB tbox = box;
             tbox.ApplyTransform(ref trans1_to_0);
@@ -508,7 +518,7 @@ namespace BulletXNA.BulletCollision
             BT_BOX_BOX_TRANSFORM_CACHE trans1_to_0)
         {
             AABB tbox = box;
-            tbox.AppyTransformTransCache(trans1_to_0);
+            tbox.ApplyTransformTransCache(ref trans1_to_0);
             return HasCollision(ref tbox);
         }
 
@@ -532,8 +542,9 @@ namespace BulletXNA.BulletCollision
 
             for (i = 0; i < 3; i++)
             {
-                T[i] = (IndexedVector3.Dot(MathUtil.MatrixColumn(ref transcache.m_R1to0, i), cb) + MathUtil.VectorComponent(ref transcache.m_T1to0, i) - ca[i]);
-                t = IndexedVector3.Dot(MathUtil.MatrixColumn(ref transcache.m_AR, i), eb) + ea[i];
+                T[i] = transcache.m_R1to0[i].Dot(ref cb) + transcache.m_T1to0[i] - ca[i];
+                t = transcache.m_AR[i].Dot(ref eb) + ea[i];
+
                 if (BoxCollision.BT_GREATER(T[i], t))
                 {
                     return false;
@@ -578,24 +589,15 @@ namespace BulletXNA.BulletCollision
             return true;
         }
 
-        public static float Mat3DotCol(ref Matrix m, ref IndexedVector3 v, int column)
+        public static float Mat3DotCol(ref IndexedBasisMatrix mat, ref IndexedVector3 vec3, int colindex)
         {
-            IndexedVector3 vcolumn;
-            if (column == 0)
-            {
-                vcolumn = new IndexedVector3(m.Left);
-            }
-            else if (column == 1)
-            {
-                vcolumn = new IndexedVector3(m.Up);
-            }
-            else
-            {
-                vcolumn = new IndexedVector3(m.Backward);
-            }
-            return IndexedVector3.Dot(ref v, ref vcolumn);
+            return vec3[0] * mat[0,colindex] + vec3[1] * mat[1,colindex] + vec3[2] * mat[2,colindex];
         }
 
+        public static float Mat3DotCol(IndexedBasisMatrix mat, ref IndexedVector3 vec3, int colindex)
+        {
+            return vec3[0] * mat[0, colindex] + vec3[1] * mat[1, colindex] + vec3[2] * mat[2, colindex];
+        }
 
         //! Simple test for planes.
         public bool CollidePlane(ref Vector4 plane)
@@ -605,24 +607,23 @@ namespace BulletXNA.BulletCollision
         }
 
         //! test for a triangle, with edges
-        public bool CollideTriangleExact(ref Vector3 p1, ref Vector3 p2, ref Vector3 p3, ref Vector4 triangle_plane)
+        public bool CollideTriangleExact(ref IndexedVector3 p1, ref IndexedVector3 p2, ref IndexedVector3 p3, ref Vector4 triangle_plane)
         {
             if (!CollidePlane(ref triangle_plane))
             {
                 return false;
             }
 
-            Vector3 center, extends;
+            IndexedVector3 center, extends;
             GetCenterExtend(out center, out extends);
 
-            Vector3 v1 = (p1 - center);
-            Vector3 v2 = (p2 - center);
-            Vector3 v3 = (p3 - center);
+            IndexedVector3 v1 = (p1 - center);
+            IndexedVector3 v2 = (p2 - center);
+            IndexedVector3 v3 = (p3 - center);
 
             //First axis
-            Vector3 diff = (v2 - v1);
-            Vector3 abs_diff;
-            MathUtil.AbsoluteVector(ref diff, out abs_diff);
+            IndexedVector3 diff = (v2 - v1);
+            IndexedVector3 abs_diff = diff.Absolute();
 
             //Test With X axis
             BoxCollision.TEST_CROSS_EDGE_BOX_X_AXIS_MCR(ref diff, ref abs_diff, ref v1, ref v3, ref extends);
@@ -633,7 +634,7 @@ namespace BulletXNA.BulletCollision
 
 
             diff = v3 - v2;
-            MathUtil.AbsoluteVector(ref diff, out abs_diff);
+            abs_diff = diff.Absolute();
             //Test With X axis
             BoxCollision.TEST_CROSS_EDGE_BOX_X_AXIS_MCR(ref diff, ref abs_diff, ref v2, ref v1, ref extends);
             //Test With Y axis
@@ -642,7 +643,7 @@ namespace BulletXNA.BulletCollision
             BoxCollision.TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(ref diff, ref abs_diff, ref v2, ref v1, ref extends);
 
             diff = v1 - v3;
-            MathUtil.AbsoluteVector(ref diff, out abs_diff);
+            abs_diff = diff.Absolute();
 
             //Test With X axis
             BoxCollision.TEST_CROSS_EDGE_BOX_X_AXIS_MCR(ref diff, ref abs_diff, ref v3, ref v2, ref extends);
@@ -657,13 +658,13 @@ namespace BulletXNA.BulletCollision
     //!  Class for transforming a model1 to the space of model0
     public struct BT_BOX_BOX_TRANSFORM_CACHE
     {
-        public Vector3 m_T1to0;//!< Transforms translation of model1 to model 0
-        public Matrix m_R1to0;//!< Transforms Rotation of model1 to model 0, equal  to R0' * R1
-        public Matrix m_AR;//!< Absolute value of m_R1to0
+        public IndexedVector3 m_T1to0;//!< Transforms translation of model1 to model 0
+        public IndexedBasisMatrix m_R1to0;//!< Transforms Rotation of model1 to model 0, equal  to R0' * R1
+        public IndexedBasisMatrix m_AR;//!< Absolute value of m_R1to0
 
         public void CalcAbsoluteMatrix()
         {
-            //		static  Vector3 vepsi(1e-6f,1e-6f,1e-6f);
+            //		static  IndexedVector3 vepsi(1e-6f,1e-6f,1e-6f);
             //		m_AR[0] = vepsi + m_R1to0[0].absolute();
             //		m_AR[1] = vepsi + m_R1to0[1].absolute();
             //		m_AR[2] = vepsi + m_R1to0[2].absolute();
@@ -674,43 +675,41 @@ namespace BulletXNA.BulletCollision
             {
                 for (j = 0; j < 3; j++)
                 {
-                    MathUtil.MatrixComponent(ref m_AR, i, j, 1e-6f + Math.Abs(MathUtil.MatrixComponent(ref m_R1to0, i, j)));
+                    m_AR[i,j] = 1e-6f + Math.Abs(m_R1to0[i,j]);
                 }
             }
         }
 
 
         //! Calc the transformation relative  1 to 0. Inverts matrics by transposing
-        public void CalcFromHomogenic(ref Matrix trans0, ref Matrix trans1)
+        public void CalcFromHomogenic(ref IndexedMatrix trans0, ref IndexedMatrix trans1)
         {
-            Matrix temp_trans;
-            Matrix.Invert(ref trans0, out temp_trans);
+            IndexedMatrix temp_trans = trans0.Inverse();
             temp_trans = temp_trans * trans1;
 
-            m_T1to0 = temp_trans.Translation;
-            MathUtil.BasisMatrix(ref temp_trans, out m_R1to0);
+            m_T1to0 = temp_trans._origin;
+            m_R1to0 = temp_trans._basis;
 
             CalcAbsoluteMatrix();
         }
 
         //! Calcs the full invertion of the matrices. Useful for scaling matrices
-        public void CalcFromFullInvert(ref Matrix trans0, ref Matrix trans1)
+        public void CalcFromFullInvert(ref IndexedMatrix trans0, ref IndexedMatrix trans1)
         {
-            m_R1to0 = Matrix.Invert(trans0);
-            m_T1to0 = Vector3.Transform(-trans0.Translation, m_R1to0);
+            m_R1to0 = trans0._basis.Inverse();
+            m_T1to0 = m_R1to0 * (-trans0._origin);
 
-            m_T1to0 += Vector3.Transform(trans1.Translation, m_R1to0);
-            // check me, order of multiply
-            m_R1to0 *= MathUtil.BasisMatrix(ref trans1);
+            m_T1to0 += m_R1to0 * trans1._origin;
+            m_R1to0 *= trans1._basis;
 
             CalcAbsoluteMatrix();
         }
 
-        public Vector3 Transform(ref Vector3 point)
+        public IndexedVector3 Transform(ref IndexedVector3 point)
         {
-            Matrix m = m_R1to0;
-            m.Translation = m_T1to0;
-            return Vector3.Transform(point, m);
+            return new IndexedVector3(m_R1to0[0].Dot(ref point) + m_T1to0.X,
+                m_R1to0[1].Dot(ref point) + m_T1to0.Y,
+                m_R1to0[2].Dot(ref point) + m_T1to0.Z);
         }
     }
 

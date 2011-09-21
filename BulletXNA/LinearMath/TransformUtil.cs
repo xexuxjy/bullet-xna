@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
@@ -37,12 +38,12 @@ namespace BulletXNA
             return list;
         }
 
-        public static IList<float> VectorToList(Vector3 vector)
+        public static IList<float> VectorToList(IndexedVector3 vector)
         {
             return VectorToList(ref vector);
         }
 
-        public static IList<float> VectorToList(ref Vector3 vector)
+        public static IList<float> VectorToList(ref IndexedVector3 vector)
         {
             IList<float> list = new List<float>();
             list.Add(vector.X);
@@ -51,66 +52,66 @@ namespace BulletXNA
             return list;
         }
 
-        public static IList<Vector3> VectorsFromList(IList<float> list)
+        public static IList<IndexedVector3> VectorsFromList(IList<float> list)
         {
-            IList<Vector3> vecList = new List<Vector3>();
+            IList<IndexedVector3> vecList = new List<IndexedVector3>();
             int numVectors = list.Count / 3;
             for(int i=0;i<numVectors;++i)
             {
-                Vector3 vec = new Vector3(list[3*i],list[(3*i)+1],list[(3*i)+2]);
+                IndexedVector3 vec = new IndexedVector3(list[3*i],list[(3*i)+1],list[(3*i)+2]);
                 vecList.Add(vec);
             }
             return vecList;
         }
 
-        //public static Vector3 InverseTransform(ref Vector3 v, ref Matrix m)
+        //public static IndexedVector3 InverseTransform(ref IndexedVector3 v, ref IndexedMatrix m)
         //{
-        //    return Vector3.Transform(v, Matrix.Invert(m));
+        //    return IndexedVector3.Transform(v, IndexedMatrix.Invert(m));
         //}
         
-        public static void PlaneSpace1(ref Vector3 n, out Vector3 p, out Vector3 q)
+        public static void PlaneSpace1(ref IndexedVector3 n, out IndexedVector3 p, out IndexedVector3 q)
         {
             if (Math.Abs(n.Z) > MathUtil.SIMDSQRT12)
             {
                 // choose p in y-z plane
                 float a = n.Y * n.Y + n.Z * n.Z;
                 float k = MathUtil.RecipSqrt(a);
-                p = new Vector3(0, -n.Z * k, n.Y * k);
+                p = new IndexedVector3(0, -n.Z * k, n.Y * k);
                 // set q = n x p
-                q = new Vector3(a * k, -n.X * p.Z, n.X * p.Y);
+                q = new IndexedVector3(a * k, -n.X * p.Z, n.X * p.Y);
             }
             else
             {
                 // choose p in x-y plane
                 float a = n.X * n.X + n.Y * n.Y;
                 float k = MathUtil.RecipSqrt(a);
-                p = new Vector3(-n.Y * k, n.X * k, 0);
+                p = new IndexedVector3(-n.Y * k, n.X * k, 0);
                 // set q = n x p
-                q = new Vector3(-n.Z * p.Y, n.Z * p.X, a * k);
+                q = new IndexedVector3(-n.Z * p.Y, n.Z * p.X, a * k);
             }
         }
 
 
-        public static Vector3 AabbSupport(ref Vector3 halfExtents,ref Vector3 supportDir)
+        public static IndexedVector3 AabbSupport(ref IndexedVector3 halfExtents,ref IndexedVector3 supportDir)
         {
-	        return new Vector3(supportDir.X < 0f ? -halfExtents.X : halfExtents.X,
+	        return new IndexedVector3(supportDir.X < 0f ? -halfExtents.X : halfExtents.X,
               supportDir.Y < 0f ? -halfExtents.Y : halfExtents.Y,
               supportDir.Z < 0f ? -halfExtents.Z : halfExtents.Z); 
         }
 
-        public static void IntegrateTransform(Matrix curTrans, Vector3 linvel, Vector3 angvel, float timeStep, out Matrix predictedTransform)
+        public static void IntegrateTransform(IndexedMatrix curTrans, IndexedVector3 linvel, IndexedVector3 angvel, float timeStep, out IndexedMatrix predictedTransform)
         {
             IntegrateTransform(ref curTrans, ref linvel, ref angvel, timeStep, out predictedTransform);
         }
 
-	    public static void IntegrateTransform(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep,out Matrix predictedTransform)
+	    public static void IntegrateTransform(ref IndexedMatrix curTrans,ref IndexedVector3 linvel,ref IndexedVector3 angvel,float timeStep,out IndexedMatrix predictedTransform)
 	    {
-            predictedTransform = Matrix.CreateTranslation(curTrans.Translation + linvel * timeStep);
+            predictedTransform = IndexedMatrix.CreateTranslation(curTrans._origin + linvel * timeStep);
     //	#define QUATERNION_DERIVATIVE
 	    #if QUATERNION_DERIVATIVE
-            Vector3 pos;
+            IndexedVector3 pos;
             Quaternion predictedOrn;
-            Vector3 scale;
+            IndexedVector3 scale;
 
             curTrans.Decompose(ref scale, ref predictedOrn, ref pos);
 
@@ -121,7 +122,7 @@ namespace BulletXNA
             //Exponential map
 		    //google for "Practical Parameterization of Rotations Using the Exponential Map", F. Sebastian Grassia
 
-		    Vector3 axis;
+		    IndexedVector3 axis;
 		    float	fAngle = angvel.Length(); 
 		    //limit the angular motion
 		    if (fAngle*timeStep > ANGULAR_MOTION_THRESHOLD)
@@ -141,35 +142,33 @@ namespace BulletXNA
 		    }
 		    Quaternion dorn = new Quaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
 
-            Quaternion orn0;
-            Vector3 component;
-            curTrans.Decompose(out component, out orn0, out component);
+            Quaternion orn0 = curTrans.GetRotation();
 
 		    Quaternion predictedOrn = dorn * orn0;
 		    predictedOrn.Normalize();
 	    #endif
 
-            Matrix newMatrix = Matrix.CreateFromQuaternion(predictedOrn);
-            CopyMatrixRotation(ref newMatrix, ref predictedTransform);
+            IndexedMatrix newMatrix = IndexedMatrix.CreateFromQuaternion(predictedOrn);
+            predictedTransform._basis = newMatrix._basis;
 	    }
 
-        public static void CalculateVelocityQuaternion(ref Vector3 pos0, ref Vector3 pos1, ref Quaternion orn0, ref Quaternion orn1, float timeStep, out Vector3 linVel, out Vector3 angVel)
+        public static void CalculateVelocityQuaternion(ref IndexedVector3 pos0, ref IndexedVector3 pos1, ref Quaternion orn0, ref Quaternion orn1, float timeStep, out IndexedVector3 linVel, out IndexedVector3 angVel)
         {
             linVel = (pos1 - pos0) / timeStep;
             if (orn0 != orn1)
             {
-                Vector3 axis;
+                IndexedVector3 axis;
                 float angle;
                 CalculateDiffAxisAngleQuaternion(ref orn0, ref orn1, out axis, out angle);
                 angVel = axis * (angle / timeStep);
             }
             else
             {
-                angVel = Vector3.Zero;
+                angVel = IndexedVector3.Zero;
             }
         }
 
-        public static void CalculateDiffAxisAngleQuaternion(ref Quaternion orn0, ref Quaternion orn1a, out Vector3 axis, out float angle)
+        public static void CalculateDiffAxisAngleQuaternion(ref Quaternion orn0, ref Quaternion orn1a, out IndexedVector3 axis, out float angle)
         {
             Quaternion orn1 = MathUtil.QuatFurthest(ref orn0, ref orn1a);
             Quaternion dorn = orn1 * MathUtil.QuaternionInverse(ref orn0);
@@ -177,13 +176,13 @@ namespace BulletXNA
             ///floating point inaccuracy can lead to w component > 1..., which breaks 
             dorn.Normalize();
             angle = MathUtil.QuatAngle(ref dorn);
-            axis = new Vector3(dorn.X, dorn.Y, dorn.Z);
+            axis = new IndexedVector3(dorn.X, dorn.Y, dorn.Z);
 
             //check for axis length
             float len = axis.LengthSquared();
             if (len < MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
             {
-                axis = new Vector3(1f, 0, 0);
+                axis = new IndexedVector3(1f, 0, 0);
             }
             else
             {
@@ -191,21 +190,21 @@ namespace BulletXNA
             }
         }
 
-        public static void CalculateVelocity(ref Matrix transform0, ref Matrix transform1, float timeStep, out Vector3 linVel, out Vector3 angVel)
+        public static void CalculateVelocity(ref IndexedMatrix transform0, ref IndexedMatrix transform1, float timeStep, out IndexedVector3 linVel, out IndexedVector3 angVel)
         {
-            linVel = (transform1.Translation - transform0.Translation) / timeStep;
+            linVel = (transform1._origin - transform0._origin) / timeStep;
             MathUtil.SanityCheckVector(ref linVel);
-            Vector3 axis;
+            IndexedVector3 axis;
             float angle;
             CalculateDiffAxisAngle(ref transform0, ref transform1, out axis, out angle);
             angVel = axis * (angle / timeStep);
             MathUtil.SanityCheckVector(ref angVel);
         }
 
-        public static void CalculateDiffAxisAngle(ref Matrix transform0, ref Matrix transform1, out Vector3 axis, out float angle)
+        public static void CalculateDiffAxisAngle(ref IndexedMatrix transform0, ref IndexedMatrix transform1, out IndexedVector3 axis, out float angle)
         {
-            //Matrix dmat = GetRotateMatrix(ref transform1) * Matrix.Invert(GetRotateMatrix(ref transform0));
-            Matrix dmat = MathUtil.BulletMatrixMultiplyBasis(transform1, Matrix.Invert(transform0));
+            //IndexedMatrix dmat = GetRotateMatrix(ref transform1) * IndexedMatrix.Invert(GetRotateMatrix(ref transform0));
+            IndexedBasisMatrix dmat = transform1._basis * transform0._basis.Inverse();
             Quaternion dorn = Quaternion.Identity;
             GetRotation(ref dmat, out dorn);
 
@@ -214,13 +213,13 @@ namespace BulletXNA
 
             angle = MathUtil.QuatAngle(ref dorn);
 
-            axis = new Vector3(dorn.X, dorn.Y, dorn.Z);
+            axis = new IndexedVector3(dorn.X, dorn.Y, dorn.Z);
             //axis[3] = float(0.);
             //check for axis length
             float len = axis.LengthSquared();
             if (len < MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
             {
-                axis = Vector3.Right;
+                axis = new IndexedVector3(1,0,0);
             }
             else
             {
@@ -228,42 +227,16 @@ namespace BulletXNA
             }
         }
 
-        public static void CopyMatrixRotation(ref Matrix from, ref Matrix to)
+
+
+        public static void GetRotation(ref IndexedBasisMatrix a, out Quaternion rot)
         {
-            to.Right = from.Right;
-            to.Up = from.Up;
-            to.Backward = from.Backward;
+            rot = a.GetRotation();
         }
 
-        //public static void GetRotateMatrix(ref Matrix a  , ref Matrix b)
-        //{
-        //    b = Matrix.Identity;
-        //    b.Right = a.Right;
-        //    b.Up = a.Up;
-        //    b.Backward = a.Backward;
-        //}
-
-        //public static Matrix GetRotateMatrix(ref Matrix a)
-        //{
-        //    Matrix b = Matrix.Identity;
-        //    b.Right = a.Right;
-        //    b.Up = a.Up;
-        //    b.Backward = a.Backward;
-        //    return b;
-        //}
-
-        public static void GetRotation(ref Matrix a, out Quaternion rot)
+        public static Quaternion GetRotation(ref IndexedBasisMatrix a)
         {
-            Vector3 component;
-            a.Decompose(out component, out rot, out component);
-        }
-
-        public static Quaternion GetRotation(ref Matrix a)
-        {
-            Vector3 component;
-            Quaternion rot;
-            a.Decompose(out component, out rot, out component);
-            return rot;
+            return a.GetRotation();
         }
 
         public static float ANGULAR_MOTION_THRESHOLD = .5f * MathUtil.SIMD_HALF_PI;
@@ -277,10 +250,10 @@ namespace BulletXNA
     {
         private Quaternion m_ornA;
         private Quaternion m_ornB;
-        private Vector3 m_posA;
-        private Vector3 m_posB;
+        private IndexedVector3 m_posA;
+        private IndexedVector3 m_posB;
 
-        private Vector3 m_separatingNormal;
+        private IndexedVector3 m_separatingNormal;
 
         private float m_boundingRadiusA;
         private float m_boundingRadiusB;
@@ -298,25 +271,25 @@ namespace BulletXNA
             return m_separatingDistance;
         }
 
-        public void UpdateSeparatingDistance(ref Matrix transA, ref Matrix transB)
+        public void UpdateSeparatingDistance(ref IndexedMatrix transA, ref IndexedMatrix transB)
         {
-            Vector3 toPosA = transA.Translation;
-            Vector3 toPosB = transB.Translation;
-            Quaternion toOrnA = TransformUtil.GetRotation(ref transA);
-            Quaternion toOrnB = TransformUtil.GetRotation(ref transB);
+            IndexedVector3 toPosA = transA._origin;
+            IndexedVector3 toPosB = transB._origin;
+            Quaternion toOrnA = transA.GetRotation();
+            Quaternion toOrnB = transB.GetRotation();
 
             if (m_separatingDistance > 0.0f)
             {
-                Vector3 linVelA;
-                Vector3 angVelA;
-                Vector3 linVelB;
-                Vector3 angVelB;
+                IndexedVector3 linVelA;
+                IndexedVector3 angVelA;
+                IndexedVector3 linVelB;
+                IndexedVector3 angVelB;
 
                 TransformUtil.CalculateVelocityQuaternion(ref m_posA, ref toPosA, ref m_ornA, ref toOrnA, 1f, out linVelA, out angVelA);
                 TransformUtil.CalculateVelocityQuaternion(ref m_posB, ref toPosB, ref m_ornB, ref toOrnB, 1f, out linVelB, out angVelB);
                 float maxAngularProjectedVelocity = angVelA.Length() * m_boundingRadiusA + angVelB.Length() * m_boundingRadiusB;
-                Vector3 relLinVel = (linVelB - linVelA);
-                float relLinVelocLength = Vector3.Dot((linVelB - linVelA), m_separatingNormal);
+                IndexedVector3 relLinVel = (linVelB - linVelA);
+                float relLinVelocLength = IndexedVector3.Dot((linVelB - linVelA), m_separatingNormal);
                 if (relLinVelocLength < 0f)
                 {
                     relLinVelocLength = 0f;
@@ -332,15 +305,15 @@ namespace BulletXNA
             m_ornB = toOrnB;
         }
 
-        void InitSeparatingDistance(ref Vector3 separatingVector, float separatingDistance, ref Matrix transA, ref Matrix transB)
+        void InitSeparatingDistance(ref IndexedVector3 separatingVector, float separatingDistance, ref IndexedMatrix transA, ref IndexedMatrix transB)
 	    {
 		    m_separatingNormal = separatingVector;
 		    m_separatingDistance = separatingDistance;
     		
-		    Vector3 toPosA = transA.Translation;
-		    Vector3 toPosB = transB.Translation;
-            Quaternion toOrnA = TransformUtil.GetRotation(ref transA);
-            Quaternion toOrnB = TransformUtil.GetRotation(ref transB);
+		    IndexedVector3 toPosA = transA._origin;
+		    IndexedVector3 toPosB = transB._origin;
+            Quaternion toOrnA = transA.GetRotation();
+            Quaternion toOrnB = transB.GetRotation();
 		    m_posA = toPosA;
 		    m_posB = toPosB;
 		    m_ornA = toOrnA;

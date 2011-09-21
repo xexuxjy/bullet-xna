@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -56,6 +57,8 @@ namespace BulletXNA.BulletDynamics
 
 		public const float DEFAULT_DEBUGDRAW_SIZE = 0.3f;
 
+        public String m_debugName;
+
 		private int m_userConstraintType;
 
 		// warning - these are unioned in the c++ version
@@ -85,7 +88,7 @@ namespace BulletXNA.BulletDynamics
 		//    m_appliedImpulse = 0f;
 		//    m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 		//    {
-		//        s_fixed.setMassProps(0f,Vector3.Zero);
+		//        s_fixed.setMassProps(0f,IndexedVector3.Zero);
 		//    }
 
 		//}
@@ -109,7 +112,7 @@ namespace BulletXNA.BulletDynamics
 			m_isEnabled = true;
 			m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 			{
-				s_fixed.SetMassProps(0f, Vector3.Zero);
+				s_fixed.SetMassProps(0f, IndexedVector3.Zero);
 			}
 		}
 
@@ -126,7 +129,7 @@ namespace BulletXNA.BulletDynamics
 			m_isEnabled = true;
 			m_dbgDrawSize = DEFAULT_DEBUGDRAW_SIZE;
 			{
-				GetFixedBody().SetMassProps(0f, Vector3.Zero);
+				GetFixedBody().SetMassProps(0f, IndexedVector3.Zero);
 			}
 
 		}
@@ -215,9 +218,9 @@ namespace BulletXNA.BulletDynamics
 			//s_fixed.setMassProps(float(0.),btVector3(float(0.),float(0.),float(0.)));
 			if (s_fixed == null)
 			{
-				s_fixed = new RigidBody(0f, null, null, Vector3.Zero);
+				s_fixed = new RigidBody(0f, null, null, IndexedVector3.Zero);
 			}
-			Vector3 inertia = Vector3.Zero;
+			IndexedVector3 inertia = IndexedVector3.Zero;
 			s_fixed.SetMassProps(0f, ref inertia);
 			return s_fixed;
 		}
@@ -338,6 +341,17 @@ namespace BulletXNA.BulletDynamics
 			m_isEnabled = enabled;
 		}
 
+    	///internal method used by the constraint solver, don't use them directly
+	    public virtual	void SolveConstraintObsolete(RigidBody bodyA,RigidBody bodyB,float timeStep) 
+        {
+
+        }
+
+        public virtual void BuildJacobian()
+        {
+
+
+        }
 
 		public static void PrintInfo1(StreamWriter writer, TypedConstraint constraint, ConstraintInfo1 info)
 		{
@@ -380,12 +394,12 @@ namespace BulletXNA.BulletDynamics
 			if (writer != null)
 			{
 				writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index,(String)constraint.m_solverBodyA.GetUserPointer(),(String)constraint.m_solverBodyB.GetUserPointer());
-				MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
-				MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
-				MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);
-				MathUtil.PrintVector3(writer, "m_angularComponentB", constraint.m_angularComponentB);
-				writer.WriteLine("Friction [{0:0.00000000}] jagDiag[{1:0.00000000}] rhs[{2:0.00000000}] cfm[{3:0.00000000}] lower[{4:0.00000000}] upper[{5:0.00000000}] rhsPen[{6:0.00000000}]", constraint.m_friction, constraint.m_jacDiagABInv,
-					constraint.m_rhs, constraint.m_cfm, constraint.m_lowerLimit, constraint.m_lowerLimit, constraint.m_rhsPenetration);
+                //MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
+                //MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
+                //MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);
+                //MathUtil.PrintVector3(writer, "m_angularComponentB", constraint.m_angularComponentB);
+                //writer.WriteLine("Friction [{0:0.00000000}] jagDiag[{1:0.00000000}] rhs[{2:0.00000000}] cfm[{3:0.00000000}] lower[{4:0.00000000}] upper[{5:0.00000000}] rhsPen[{6:0.00000000}]", constraint.m_friction, constraint.m_jacDiagABInv,
+                //    constraint.m_rhs, constraint.m_cfm, constraint.m_lowerLimit, constraint.m_lowerLimit, constraint.m_rhsPenetration);
 			}
 		}
 

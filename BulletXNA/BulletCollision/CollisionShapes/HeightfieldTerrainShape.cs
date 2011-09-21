@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -80,9 +81,9 @@ namespace BulletXNA.BulletCollision
      */
     public class HeightfieldTerrainShape : ConcaveShape
     {
-        protected Vector3 m_localAabbMin;
-        protected Vector3 m_localAabbMax;
-        protected Vector3 m_localOrigin;
+        protected BulletXNA.LinearMath.IndexedVector3 m_localAabbMin;
+        protected IndexedVector3 m_localAabbMax;
+        protected IndexedVector3 m_localOrigin;
 
         ///terrain data
         protected int m_heightStickWidth;
@@ -98,7 +99,7 @@ namespace BulletXNA.BulletCollision
         //{
         //    unsigned char*	m_heightfieldDataUnsignedChar;
         //    short*		m_heightfieldDataShort;
-        //    btScalar*			m_heightfieldDataFloat;
+        //    float*			m_heightfieldDataFloat;
         //    void*			m_heightfieldDataUnknown;
         //};
 
@@ -108,7 +109,7 @@ namespace BulletXNA.BulletCollision
 
         protected int m_upAxis;
 
-        protected Vector3 m_localScaling;
+        protected IndexedVector3 m_localScaling;
 
         protected virtual float GetRawHeightFieldValue(int x, int y)
         {
@@ -149,7 +150,7 @@ namespace BulletXNA.BulletCollision
 
 
         }
-        protected void QuantizeWithClamp(int[] output, ref Vector3 point, int isMax)
+        protected void QuantizeWithClamp(int[] output, ref IndexedVector3 point, int isMax)
         {
             /// given input vector, return quantized version
             /**
@@ -160,7 +161,7 @@ namespace BulletXNA.BulletCollision
               "with clamp" means that we restrict the point to be in the heightfield's
               axis-aligned bounding box.
              */
-            Vector3 clampedPoint = point;
+            IndexedVector3 clampedPoint = point;
             MathUtil.VectorClampMax(ref clampedPoint, ref m_localAabbMax);
             MathUtil.VectorClampMin(ref clampedPoint, ref m_localAabbMin);
 
@@ -170,7 +171,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        protected void GetVertex(int x, int y, out Vector3 vertex)
+        protected void GetVertex(int x, int y, out IndexedVector3 vertex)
         {
             Debug.Assert(x >= 0);
             Debug.Assert(y >= 0);
@@ -183,7 +184,7 @@ namespace BulletXNA.BulletCollision
             {
                 case 0:
                     {
-                        vertex = new Vector3(height - m_localOrigin.X,
+                        vertex = new IndexedVector3(height - m_localOrigin.X,
                             (-m_width / 2f) + x,
                             (-m_length / 2f) + y
                             );
@@ -191,7 +192,7 @@ namespace BulletXNA.BulletCollision
                     }
                 case 1:
                     {
-                        vertex = new Vector3(
+                        vertex = new IndexedVector3(
                         (-m_width / 2f) + x,
                         height - m_localOrigin.Y,
                         (-m_length / 2f) + y
@@ -200,7 +201,7 @@ namespace BulletXNA.BulletCollision
                     };
                 case 2:
                     {
-                        vertex = new Vector3(
+                        vertex = new IndexedVector3(
                         (-m_width / 2f) + x,
                         (-m_length / 2f) + y,
                         height - m_localOrigin.Z
@@ -211,7 +212,7 @@ namespace BulletXNA.BulletCollision
                     {
                         //need to get valid m_upAxis
                         Debug.Assert(false);
-                        vertex = Vector3.Zero;
+                        vertex = IndexedVector3.Zero;
                         break;
                     }
             }
@@ -256,27 +257,27 @@ namespace BulletXNA.BulletCollision
             m_flipQuadEdges = flipQuadEdges;
             m_useDiamondSubdivision = false;
             m_upAxis = upAxis;
-            m_localScaling = new Vector3(1f);
+            m_localScaling = new IndexedVector3(1f);
 
             // determine min/max axis-aligned bounding box (aabb) values
             switch (m_upAxis)
             {
                 case 0:
                     {
-                        m_localAabbMin = new Vector3(m_minHeight, 0, 0);
-                        m_localAabbMax = new Vector3(m_maxHeight, m_width, m_length);
+                        m_localAabbMin = new IndexedVector3(m_minHeight, 0, 0);
+                        m_localAabbMax = new IndexedVector3(m_maxHeight, m_width, m_length);
                         break;
                     }
                 case 1:
                     {
-                        m_localAabbMin = new Vector3(0, m_minHeight, 0);
-                        m_localAabbMax = new Vector3(m_width, m_maxHeight, m_length);
+                        m_localAabbMin = new IndexedVector3(0, m_minHeight, 0);
+                        m_localAabbMax = new IndexedVector3(m_width, m_maxHeight, m_length);
                         break;
                     };
                 case 2:
                     {
-                        m_localAabbMin = new Vector3(0, 0, m_minHeight);
-                        m_localAabbMax = new Vector3(m_width, m_length, m_maxHeight);
+                        m_localAabbMin = new IndexedVector3(0, 0, m_minHeight);
+                        m_localAabbMax = new IndexedVector3(m_width, m_length, m_maxHeight);
                         break;
                     }
                 default:
@@ -338,22 +339,21 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
-            Vector3 halfExtents = (m_localAabbMax - m_localAabbMin) * m_localScaling * 0.5f;
+            IndexedVector3 halfExtents = (m_localAabbMax - m_localAabbMin) * m_localScaling * 0.5f;
 
-            Vector3 localOrigin = Vector3.Zero;
-            MathUtil.VectorComponent(ref localOrigin, m_upAxis, (m_minHeight + m_maxHeight) * 0.5f);
+            IndexedVector3 localOrigin = IndexedVector3.Zero;
+            localOrigin[m_upAxis] =  (m_minHeight + m_maxHeight) * 0.5f;
             localOrigin *= m_localScaling;
 
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref t, out abs_b);
-            Vector3 center = t.Translation;
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents),
-                                            Vector3.Dot(abs_b.Up, halfExtents),
-                                            Vector3.Dot(abs_b.Backward, halfExtents));
+            IndexedBasisMatrix abs_b = t._basis.Absolute();
+            IndexedVector3 center = t._origin;
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtents),
+		                                                abs_b[1].Dot(ref halfExtents),
+		                                                abs_b[2].Dot(ref halfExtents));
 
-            extent += new Vector3(GetMargin());
+            extent += new IndexedVector3(GetMargin());
 
             aabbMin = center - extent;
             aabbMax = center + extent;
@@ -367,13 +367,13 @@ namespace BulletXNA.BulletCollision
             - convert input aabb to a range of heightfield grid points (quantize)
             - iterate over all triangles in that subset of the grid
          */
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             // scale down the input aabb's so they are in local (non-scaled) coordinates
-            Vector3 invScale = new Vector3(1f) / m_localScaling;
+            IndexedVector3 invScale = new IndexedVector3(1f) / m_localScaling;
 
-            Vector3 localAabbMin = aabbMin * invScale;
-            Vector3 localAabbMax = aabbMax * invScale;
+            IndexedVector3 localAabbMin = aabbMin * invScale;
+            IndexedVector3 localAabbMax = aabbMax * invScale;
 
             // account for local origin
             localAabbMin += m_localOrigin;
@@ -444,7 +444,7 @@ namespace BulletXNA.BulletCollision
                     }
             }
 
-            Vector3[] vertices = new Vector3[3];
+            IndexedVector3[] vertices = new IndexedVector3[3];
             for (int j = startJ; j < endJ; j++)
             {
                 for (int x = startX; x < endX; x++)
@@ -481,18 +481,18 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
             //moving concave objects not supported
-            inertia = Vector3.Zero;
+            inertia = IndexedVector3.Zero;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_localScaling = scaling;
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_localScaling;
         }

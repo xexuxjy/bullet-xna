@@ -55,7 +55,7 @@ public class ConvexPolyhedron
 
 	float TotalArea = 0.0f;
 	
-	m_localCenter = Vector3.Zero;
+	m_localCenter = IndexedVector3.Zero;
 	for(int i=0;i<m_faces.Count;i++)
 	{
 		int numVertices = m_faces[i].m_indices.Count;
@@ -65,7 +65,7 @@ public class ConvexPolyhedron
 			int k = (j+1)%numVertices;
 			InternalVertexPair vp = new InternalVertexPair(m_faces[i].m_indices[j],m_faces[i].m_indices[k]);
 			InternalEdge edptr = edges[vp];
-			Vector3 edge = m_vertices[vp.m_v1]-m_vertices[vp.m_v0];
+			IndexedVector3 edge = m_vertices[vp.m_v1]-m_vertices[vp.m_v0];
 			edge.Normalize();
 
 			bool found = false;
@@ -124,14 +124,14 @@ public class ConvexPolyhedron
 		int numVertices = m_faces[i].m_indices.Count;
 		int NbTris = numVertices-2;
 		
-		Vector3 p0 = m_vertices[m_faces[i].m_indices[0]];
+		IndexedVector3 p0 = m_vertices[m_faces[i].m_indices[0]];
 		for(int j=1;j<=NbTris;j++)
 		{
 			int k = (j+1)%numVertices;
-			Vector3 p1 = m_vertices[m_faces[i].m_indices[j]];
-			Vector3 p2 = m_vertices[m_faces[i].m_indices[k]];
-			float Area = Vector3.Cross((p0 - p1),(p0 - p2)).Length() * 0.5f;
-			Vector3 Center = (p0+p1+p2)/3.0f;
+			IndexedVector3 p1 = m_vertices[m_faces[i].m_indices[j]];
+			IndexedVector3 p2 = m_vertices[m_faces[i].m_indices[k]];
+			float Area = IndexedVector3.Cross((p0 - p1),(p0 - p2)).Length() * 0.5f;
+			IndexedVector3 Center = (p0+p1+p2)/3.0f;
 			m_localCenter += Area * Center;
 			TotalArea += Area;
 		}
@@ -141,15 +141,15 @@ public class ConvexPolyhedron
 
     }
 
-    public void Project(ref Matrix trans, ref Vector3 dir, out float min, out float max)
+    public void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, out float min, out float max)
     {
 	    min = float.MaxValue;
 	    max = float.MinValue;
 	    int numVerts = m_vertices.Count;
 	    for(int i=0;i<numVerts;i++)
 	    {
-            Vector3 pt = Vector3.Transform(m_vertices[i], trans);
-            float dp = Vector3.Dot(pt, dir);
+            IndexedVector3 pt = trans * m_vertices[i];
+            float dp = IndexedVector3.Dot(pt, dir);
 		    if(dp < min)	min = dp;
 		    if(dp > max)	max = dp;
 	    }
@@ -161,10 +161,10 @@ public class ConvexPolyhedron
 	    }
     }
 
-    public ObjectArray<Vector3> m_vertices = new ObjectArray<Vector3>();
+    public ObjectArray<IndexedVector3> m_vertices = new ObjectArray<IndexedVector3>();
 	public ObjectArray<Face>	m_faces = new ObjectArray<Face>();
-	public ObjectArray<Vector3>	 m_uniqueEdges= new ObjectArray<Vector3>();
-	public Vector3 m_localCenter;
+	public ObjectArray<IndexedVector3>	 m_uniqueEdges= new ObjectArray<IndexedVector3>();
+	public IndexedVector3 m_localCenter;
 }
 
 public class InternalVertexPair

@@ -40,7 +40,7 @@ namespace BulletXNA.BulletCollision
             base.Cleanup();
         }
 
-	    public void	Build(StridingMeshInterface triangles,bool useQuantizedAabbCompression, ref Vector3 bvhAabbMin, ref Vector3 bvhAabbMax)
+	    public void	Build(StridingMeshInterface triangles,bool useQuantizedAabbCompression, ref IndexedVector3 bvhAabbMin, ref IndexedVector3 bvhAabbMax)
         {
 	        int numLeafNodes = 0;
             m_useQuantization = useQuantizedAabbCompression;
@@ -66,8 +66,8 @@ namespace BulletXNA.BulletCollision
 	        {
 		        NodeTriangleCallback callback = new NodeTriangleCallback(m_leafNodes);
 
-		        Vector3 aabbMin = MathUtil.MIN_VECTOR;
-		        Vector3 aabbMax = MathUtil.MAX_VECTOR;
+		        IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
+		        IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
 
 		        triangles.InternalProcessAllTriangles(callback,ref aabbMin,ref aabbMax);
 
@@ -108,7 +108,7 @@ namespace BulletXNA.BulletCollision
 	        m_leafNodes.Clear();
         }
 
-        public void Refit(StridingMeshInterface meshInterface, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public void Refit(StridingMeshInterface meshInterface, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             if (m_useQuantization)
             {
@@ -131,7 +131,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-	    public void	RefitPartial(StridingMeshInterface meshInterface,ref Vector3 aabbMin, ref Vector3 aabbMax)
+	    public void	RefitPartial(StridingMeshInterface meshInterface,ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
 	        //incrementally initialize quantization values
             if (!m_useQuantization)
@@ -189,9 +189,9 @@ namespace BulletXNA.BulletCollision
 		    int numfaces = 0;
 		    PHY_ScalarType indicestype = PHY_ScalarType.PHY_INTEGER;
 
-		    Vector3[]	triangleVerts = new Vector3[3];
-		    Vector3	aabbMin,aabbMax;
-		    Vector3 meshScaling = meshInterface.GetScaling();
+		    IndexedVector3[]	triangleVerts = new IndexedVector3[3];
+		    IndexedVector3	aabbMin,aabbMax;
+		    IndexedVector3 meshScaling = meshInterface.GetScaling();
     		
 
 		    for (int i=endNode-1;i>=firstNode;i--)
@@ -218,9 +218,9 @@ namespace BulletXNA.BulletCollision
                     //unsigned int* gfxbase = (unsigned int*)(indexbase+nodeTriangleIndex*indexstride);
                     int[] indexBase = (indexBaseObject as ObjectArray<int>).GetRawArray();
 
-                    if (vertexBaseObject is IList<Vector3>)
+                    if (vertexBaseObject is IList<IndexedVector3>)
                     {
-                        Vector3[] vertexBase = (vertexBaseObject as ObjectArray<Vector3>).GetRawArray();
+                        IndexedVector3[] vertexBase = (vertexBaseObject as ObjectArray<IndexedVector3>).GetRawArray();
                         for (int j = 2; j >= 0; j--)
                         {
                             int graphicsIndex = indexBase[gfxBaseIndex+j];
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletCollision
                             {
                                 int graphicsBaseIndex = (graphicsIndex * stride);
                                 //IList<float> graphicsbase = (float*)(vertexbase+graphicsindex*stride);
-                                triangleVerts[j] = new Vector3(
+                                triangleVerts[j] = new IndexedVector3(
                                     vertexBase[graphicsBaseIndex] * meshScaling.X,
                                     vertexBase[graphicsBaseIndex + 1] * meshScaling.Y,
                                     vertexBase[graphicsBaseIndex + 2] * meshScaling.Z);
@@ -331,11 +331,11 @@ namespace BulletXNA.BulletCollision
             m_triangleNodes = triangleNodes;
 		}
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
 			OptimizedBvhNode node = new OptimizedBvhNode();
-			Vector3	aabbMin = MathUtil.MAX_VECTOR;
-            Vector3 aabbMax = MathUtil.MIN_VECTOR;
+			IndexedVector3	aabbMin = MathUtil.MAX_VECTOR;
+            IndexedVector3 aabbMax = MathUtil.MIN_VECTOR;
             MathUtil.VectorMax(ref triangle[0], ref aabbMax);
             MathUtil.VectorMin(ref triangle[0], ref aabbMin);
             MathUtil.VectorMax(ref triangle[1], ref aabbMax);
@@ -377,7 +377,7 @@ namespace BulletXNA.BulletCollision
             m_optimizedTree = tree;
         }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
 			// The partId and triangle index must fit in the same (positive) integer
 			Debug.Assert(partId < (1<<MAX_NUM_PARTS_IN_BITS));
@@ -386,7 +386,7 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(triangleIndex >= 0);
 
             QuantizedBvhNode node = new QuantizedBvhNode();
-			Vector3	aabbMin,aabbMax;
+			IndexedVector3	aabbMin,aabbMax;
 			aabbMin = MathUtil.MAX_VECTOR;
             aabbMax = MathUtil.MIN_VECTOR;
 

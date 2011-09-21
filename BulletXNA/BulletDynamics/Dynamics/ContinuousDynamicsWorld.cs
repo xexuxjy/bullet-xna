@@ -23,6 +23,7 @@
 
 using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -32,8 +33,8 @@ namespace BulletXNA.BulletDynamics
         protected void UpdateTemporalAabbs(float timeStep)
         {
 
-            Vector3 temporalAabbMin;
-            Vector3 temporalAabbMax = Vector3.Zero;
+            IndexedVector3 temporalAabbMin;
+            IndexedVector3 temporalAabbMax = IndexedVector3.Zero;
 
 	        foreach(CollisionObject colObj in m_collisionObjects)
 	        {
@@ -41,18 +42,18 @@ namespace BulletXNA.BulletDynamics
 		        if (body != null)
 		        {
 			        body.GetCollisionShape().GetAabb(colObj.GetWorldTransform(),out temporalAabbMin,out temporalAabbMax);
-			        Vector3 linvel = body.GetLinearVelocity();
+			        IndexedVector3 linvel = body.GetLinearVelocity();
 
 			        //make the AABB temporal
-                    //btScalar temporalAabbMaxx = temporalAabbMax.getX();
-                    //btScalar temporalAabbMaxy = temporalAabbMax.getY();
-                    //btScalar temporalAabbMaxz = temporalAabbMax.getZ();
-                    //btScalar temporalAabbMinx = temporalAabbMin.getX();
-                    //btScalar temporalAabbMiny = temporalAabbMin.getY();
-                    //btScalar temporalAabbMinz = temporalAabbMin.getZ();
+                    //float temporalAabbMaxx = temporalAabbMax.getX();
+                    //float temporalAabbMaxy = temporalAabbMax.getY();
+                    //float temporalAabbMaxz = temporalAabbMax.getZ();
+                    //float temporalAabbMinx = temporalAabbMin.getX();
+                    //float temporalAabbMiny = temporalAabbMin.getY();
+                    //float temporalAabbMinz = temporalAabbMin.getZ();
 
 			        // add linear motion
-			        Vector3 linMotion = linvel*timeStep;
+			        IndexedVector3 linMotion = linvel*timeStep;
         		
 			        if (linMotion.X > 0f)
 				        temporalAabbMax.X += linMotion.X; 
@@ -69,7 +70,7 @@ namespace BulletXNA.BulletDynamics
 
 			        //add conservative angular motion
 			        float angularMotion = 0f;// = angvel.length() * GetAngularMotionDisc() * timeStep;
-			        Vector3 angularMotion3d = new Vector3(angularMotion);
+			        IndexedVector3 angularMotion3d = new IndexedVector3(angularMotion);
 
 			        temporalAabbMin -= angularMotion3d;
 			        temporalAabbMax += angularMotion3d;

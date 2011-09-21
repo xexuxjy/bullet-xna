@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -17,8 +18,8 @@ namespace BulletXNA.BulletDynamics
 
 		protected bool m_useOffsetForConstraintFrame;
 
-		protected Matrix m_frameInA = Matrix.Identity;
-		protected Matrix m_frameInB = Matrix.Identity;
+		protected IndexedMatrix m_frameInA = IndexedMatrix.Identity;
+		protected IndexedMatrix m_frameInB = IndexedMatrix.Identity;
 		// use frameA fo define limits, if true
 		protected bool m_useLinearReferenceFrameA;
 		// linear limits
@@ -76,17 +77,17 @@ namespace BulletXNA.BulletDynamics
 		protected JacobianEntry[] m_jacAng = new JacobianEntry[3];
 
 		protected float m_timeStep;
-		protected Matrix m_calculatedTransformA = Matrix.Identity;
-		protected Matrix m_calculatedTransformB = Matrix.Identity;
+		protected IndexedMatrix m_calculatedTransformA = IndexedMatrix.Identity;
+		protected IndexedMatrix m_calculatedTransformB = IndexedMatrix.Identity;
 
-		protected Vector3 m_sliderAxis;
-		protected Vector3 m_realPivotAInW;
-		protected Vector3 m_realPivotBInW;
-		protected Vector3 m_projPivotInW;
-		protected Vector3 m_delta;
-		protected Vector3 m_depth;
-		protected Vector3 m_relPosA;
-		protected Vector3 m_relPosB;
+		protected IndexedVector3 m_sliderAxis;
+		protected IndexedVector3 m_realPivotAInW;
+		protected IndexedVector3 m_realPivotBInW;
+		protected IndexedVector3 m_projPivotInW;
+		protected IndexedVector3 m_delta;
+		protected IndexedVector3 m_depth;
+		protected IndexedVector3 m_relPosA;
+		protected IndexedVector3 m_relPosB;
 
 		protected float m_linPos;
 		protected float m_angPos;
@@ -107,7 +108,7 @@ namespace BulletXNA.BulletDynamics
 		//------------------------    
 
 		// constructors
-		public SliderConstraint(RigidBody rbA, RigidBody rbB, ref Matrix frameInA, ref Matrix frameInB, bool useLinearReferenceFrameA)
+		public SliderConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix frameInA, ref IndexedMatrix frameInB, bool useLinearReferenceFrameA)
 			: base(TypedConstraintType.SLIDER_CONSTRAINT_TYPE, rbA, rbB)
 		{
 			m_frameInA = frameInA;
@@ -116,11 +117,11 @@ namespace BulletXNA.BulletDynamics
 			InitParams();
 
 		}
-		public SliderConstraint(RigidBody rbB, ref Matrix frameInB, bool useLinearReferenceFrameA)
+		public SliderConstraint(RigidBody rbB, ref IndexedMatrix frameInB, bool useLinearReferenceFrameA)
 			: base(TypedConstraintType.SLIDER_CONSTRAINT_TYPE, GetFixedBody(), rbB)
 		{
 			m_frameInB = frameInB;
-			m_frameInA = MathUtil.BulletMatrixMultiply(rbB.GetCenterOfMassTransform(), m_frameInB);
+			m_frameInA = rbB.GetCenterOfMassTransform() *  m_frameInB;
 			InitParams();
 		}
 
@@ -211,11 +212,11 @@ namespace BulletXNA.BulletDynamics
 			GetInfo2NonVirtual(info, m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform(), m_rbA.GetLinearVelocity(), m_rbB.GetLinearVelocity(), m_rbA.GetInvMass(), m_rbB.GetInvMass());
 		}
 
-		public void GetInfo2NonVirtual(ConstraintInfo2 info, Matrix transA, Matrix transB, Vector3 linVelA, Vector3 linVelB, float rbAinvMass, float rbBinvMass)
+		public void GetInfo2NonVirtual(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 linVelA, IndexedVector3 linVelB, float rbAinvMass, float rbBinvMass)
 		{
 
-			Matrix trA = GetCalculatedTransformA();
-			Matrix trB = GetCalculatedTransformB();
+			IndexedMatrix trA = GetCalculatedTransformA();
+			IndexedMatrix trB = GetCalculatedTransformB();
 
 			Debug.Assert(!m_useSolveConstraintObsolete);
 			int i, s = 1;
@@ -223,7 +224,7 @@ namespace BulletXNA.BulletDynamics
 			float signFact = m_useLinearReferenceFrameA ? 1.0f : -1.0f;
 
 			// difference between frames in WCS
-			Vector3 ofs = trB.Translation - trA.Translation;
+			IndexedVector3 ofs = trB._origin - trA._origin;
 			// now get weight factors depending on masses
 			float miA = rbAinvMass;
 			float miB = rbBinvMass;
@@ -239,9 +240,9 @@ namespace BulletXNA.BulletDynamics
 				factA = 0.5f;
 			}
 			factB = 1.0f - factA;
-			Vector3 ax1 = Vector3.Zero, p, q;
-			Vector3 ax1A = MathUtil.MatrixColumn(ref trA, 0);
-			Vector3 ax1B = MathUtil.MatrixColumn(ref trB, 0);
+			IndexedVector3 ax1 = IndexedVector3.Zero, p, q;
+            IndexedVector3 ax1A = trA._basis.GetColumn(0);
+            IndexedVector3 ax1B = trB._basis.GetColumn(0);
 			if (m_useOffsetForConstraintFrame)
 			{
 				// get the desired direction of slider axis
@@ -253,10 +254,10 @@ namespace BulletXNA.BulletDynamics
 			}
 			else
 			{ // old way - use frameA
-				ax1 = MathUtil.MatrixColumn(ref trA, 0);
+                ax1 = trA._basis.GetColumn(0);
 				// get 2 orthos to slider axis (Y, Z)
-				p = MathUtil.MatrixColumn(ref trA, 1);
-				q = MathUtil.MatrixColumn(ref trA, 2);
+                p = trA._basis.GetColumn(1);
+                q = trA._basis.GetColumn(2);
 			}
 			// make rotations around these orthos equal
 			// the slider axis should be the only unconstrained
@@ -291,9 +292,9 @@ namespace BulletXNA.BulletDynamics
 			float currERP = ((m_flags & (int)SliderFlags.BT_SLIDER_FLAGS_ERP_ORTANG) != 0) ? m_softnessOrthoAng : m_softnessOrthoAng * info.erp;
 			float k = info.fps * currERP;
 
-			Vector3 u = Vector3.Cross(ax1A, ax1B);
-			info.m_solverConstraints[0].m_rhs = k * Vector3.Dot(u, p);
-			info.m_solverConstraints[s].m_rhs = k * Vector3.Dot(u, q);
+			IndexedVector3 u = IndexedVector3.Cross(ax1A, ax1B);
+			info.m_solverConstraints[0].m_rhs = k * IndexedVector3.Dot(u, p);
+			info.m_solverConstraints[s].m_rhs = k * IndexedVector3.Dot(u, q);
 			if ((m_flags & (int)SliderFlags.BT_SLIDER_FLAGS_CFM_ORTANG) != 0)
 			{
 				info.m_solverConstraints[0].m_cfm = m_cfmOrthoAng;
@@ -310,29 +311,29 @@ namespace BulletXNA.BulletDynamics
 			// we want: velA + wA x relA == velB + wB x relB ... but this would
 			// result in three equations, so we project along two orthos to the slider axis
 
-			Matrix bodyA_trans = transA;
-			Matrix bodyB_trans = transB;
+			IndexedMatrix bodyA_trans = transA;
+			IndexedMatrix bodyB_trans = transB;
 			nrow++;
 			int s2 = nrow * s;
 			nrow++;
 			int s3 = nrow * s;
-			Vector3 tmpA = Vector3.Zero, tmpB = Vector3.Zero, relA = Vector3.Zero, relB = Vector3.Zero, c = Vector3.Zero;
+			IndexedVector3 tmpA = IndexedVector3.Zero, tmpB = IndexedVector3.Zero, relA = IndexedVector3.Zero, relB = IndexedVector3.Zero, c = IndexedVector3.Zero;
 			if (m_useOffsetForConstraintFrame)
 			{
 				// get vector from bodyB to frameB in WCS
-				relB = trB.Translation - bodyB_trans.Translation;
+				relB = trB._origin - bodyB_trans._origin;
 				// get its projection to slider axis
-				Vector3 projB = ax1 * Vector3.Dot(relB, ax1);
+				IndexedVector3 projB = ax1 * IndexedVector3.Dot(relB, ax1);
 				// get vector directed from bodyB to slider axis (and orthogonal to it)
-				Vector3 orthoB = relB - projB;
+				IndexedVector3 orthoB = relB - projB;
 				// same for bodyA
-				relA = trA.Translation - bodyA_trans.Translation;
-				Vector3 projA = ax1 * Vector3.Dot(relA, ax1);
-				Vector3 orthoA = relA - projA;
+				relA = trA._origin - bodyA_trans._origin;
+				IndexedVector3 projA = ax1 * IndexedVector3.Dot(relA, ax1);
+				IndexedVector3 orthoA = relA - projA;
 				// get desired offset between frames A and B along slider axis
 				float sliderOffs = m_linPos - m_depth.X;
 				// desired vector from projection of center of bodyA to projection of center of bodyB to slider axis
-				Vector3 totalDist = projA + ax1 * sliderOffs - projB;
+				IndexedVector3 totalDist = projA + ax1 * sliderOffs - projB;
 				// get offset vectors relA and relB
 				relA = orthoA + totalDist * factA;
 				relB = orthoB - totalDist * factB;
@@ -345,19 +346,19 @@ namespace BulletXNA.BulletDynamics
 				}
 				else
 				{
-					p = MathUtil.MatrixColumn(ref trA, 1);
+					p = trA._basis.GetColumn(1);
 				}
 				// make one more ortho
-				q = Vector3.Cross(ax1, p);
+				q = IndexedVector3.Cross(ax1, p);
 				// fill two rows
-				tmpA = Vector3.Cross(relA, p);
-				tmpB = Vector3.Cross(relB, p);
+				tmpA = IndexedVector3.Cross(relA, p);
+				tmpB = IndexedVector3.Cross(relB, p);
 
 				info.m_solverConstraints[s2].m_relpos1CrossNormal = tmpA;
 				info.m_solverConstraints[s2].m_relpos2CrossNormal = -tmpB;
 
-				tmpA = Vector3.Cross(relA, q);
-				tmpB = Vector3.Cross(relB, q);
+				tmpA = IndexedVector3.Cross(relA, q);
+				tmpB = IndexedVector3.Cross(relB, q);
 
 				if (hasStaticBody && GetSolveAngLimit())
 				{ // to make constraint between static and dynamic objects more rigid
@@ -374,12 +375,12 @@ namespace BulletXNA.BulletDynamics
 			{
 				// old way - maybe incorrect if bodies are not on the slider axis
 				// see discussion "Bug in slider constraint" http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=4024&start=0
-				Vector3 tmp = Vector3.Cross(c, p);
+				IndexedVector3 tmp = IndexedVector3.Cross(c, p);
 
 				info.m_solverConstraints[s2].m_relpos1CrossNormal = factA * tmp;
 				info.m_solverConstraints[s2].m_relpos2CrossNormal = factB * tmp;
 
-				tmp = Vector3.Cross(c, q);
+				tmp = IndexedVector3.Cross(c, q);
 				info.m_solverConstraints[s3].m_relpos1CrossNormal = factA * tmp;
 				info.m_solverConstraints[s3].m_relpos2CrossNormal = factB * tmp;
 
@@ -392,9 +393,9 @@ namespace BulletXNA.BulletDynamics
 			currERP = ((m_flags & (int)SliderFlags.BT_SLIDER_FLAGS_ERP_ORTLIN) != 0) ? m_softnessOrthoLin : m_softnessOrthoLin * info.erp;
 			k = info.fps * currERP;
 
-			float rhs = k * Vector3.Dot(p, ofs);
+			float rhs = k * IndexedVector3.Dot(p, ofs);
 			info.m_solverConstraints[s2].m_rhs = rhs;
-			rhs = k * Vector3.Dot(q, ofs);
+			rhs = k * IndexedVector3.Dot(q, ofs);
 			info.m_solverConstraints[s3].m_rhs = rhs;
 			if ((m_flags & (int)SliderFlags.BT_SLIDER_FLAGS_CFM_ORTLIN) != 0)
 			{
@@ -433,8 +434,8 @@ namespace BulletXNA.BulletDynamics
 					// this is needed only when bodyA and bodyB are both dynamic.
 					if (!hasStaticBody)
 					{
-						tmpA = Vector3.Cross(relA, ax1);
-						tmpB = Vector3.Cross(relB, ax1);
+						tmpA = IndexedVector3.Cross(relA, ax1);
+						tmpB = IndexedVector3.Cross(relB, ax1);
 						info.m_solverConstraints[srow].m_relpos1CrossNormal = tmpA;
 						info.m_solverConstraints[srow].m_relpos2CrossNormal = -tmpB;
 					}
@@ -442,7 +443,7 @@ namespace BulletXNA.BulletDynamics
 				else
 				{
 					// The old way. May be incorrect if bodies are not on the slider axis
-					Vector3 ltd = Vector3.Cross(c, ax1); // Linear Torque Decoupling vector (a torque)
+					IndexedVector3 ltd = IndexedVector3.Cross(c, ax1); // Linear Torque Decoupling vector (a torque)
 					info.m_solverConstraints[nrow].m_relpos1CrossNormal = factA * ltd;
 					info.m_solverConstraints[nrow].m_relpos2CrossNormal = factB * ltd;
 				}
@@ -498,8 +499,8 @@ namespace BulletXNA.BulletDynamics
 
 					if (bounce > 0.0f)
 					{
-						float vel = Vector3.Dot(linVelA, ax1);
-						vel -= Vector3.Dot(linVelB, ax1);
+						float vel = IndexedVector3.Dot(linVelA, ax1);
+						vel -= IndexedVector3.Dot(linVelB, ax1);
 						vel *= signFact;
 						// only apply bounce if the velocity is incoming, and if the
 						// resulting c[] exceeds what we already have.
@@ -597,8 +598,8 @@ namespace BulletXNA.BulletDynamics
 					float bounce = Math.Abs(1.0f - GetDampingLimAng());
 					if (bounce > 0.0f)
 					{
-						float vel = Vector3.Dot(m_rbA.GetAngularVelocity(), ax1);
-						vel -= Vector3.Dot(m_rbB.GetAngularVelocity(), ax1);
+						float vel = IndexedVector3.Dot(m_rbA.GetAngularVelocity(), ax1);
+						vel -= IndexedVector3.Dot(m_rbB.GetAngularVelocity(), ax1);
 						// only apply bounce if the velocity is incoming, and if the
 						// resulting c[] exceeds what we already have.
 						if (limit == 1)
@@ -638,10 +639,10 @@ namespace BulletXNA.BulletDynamics
 
 
 		// access
-		public Matrix GetCalculatedTransformA() { return m_calculatedTransformA; }
-		public Matrix GetCalculatedTransformB() { return m_calculatedTransformB; }
-		public Matrix GetFrameOffsetA() { return m_frameInA; }
-		public Matrix GetFrameOffsetB() { return m_frameInB; }
+		public IndexedMatrix GetCalculatedTransformA() { return m_calculatedTransformA; }
+		public IndexedMatrix GetCalculatedTransformB() { return m_calculatedTransformB; }
+		public IndexedMatrix GetFrameOffsetA() { return m_frameInA; }
+		public IndexedMatrix GetFrameOffsetB() { return m_frameInB; }
 		public float GetLowerLinLimit() { return m_lowerLinLimit; }
 		public void SetLowerLinLimit(float lowerLimit) { m_lowerLinLimit = lowerLimit; }
 		public float GetUpperLinLimit() { return m_upperLinLimit; }
@@ -707,7 +708,7 @@ namespace BulletXNA.BulletDynamics
 		public bool GetSolveAngLimit() { return m_solveAngLim; }
 		public float GetAngDepth() { return m_angDepth; }
 
-		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
+		public void SetFrames(ref IndexedMatrix frameA, ref IndexedMatrix frameB)
 		{
 			m_frameInA = frameA;
 			m_frameInB = frameB;
@@ -717,27 +718,27 @@ namespace BulletXNA.BulletDynamics
 
 
 		// shared code used by ODE solver
-		public void CalculateTransforms(Matrix transA, Matrix transB)
+		public void CalculateTransforms(IndexedMatrix transA, IndexedMatrix transB)
 		{
 			CalculateTransforms(ref transA, ref transB);
 		}
 
-		public void CalculateTransforms(ref Matrix transA, ref Matrix transB)
+		public void CalculateTransforms(ref IndexedMatrix transA, ref IndexedMatrix transB)
 		{
 			if (m_useLinearReferenceFrameA || (!m_useSolveConstraintObsolete))
 			{
-				m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transA, m_frameInA);
-				m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transB, m_frameInB);
-			}
+                m_calculatedTransformA = transA * m_frameInA;
+                m_calculatedTransformB = transB * m_frameInB;
+            }
 			else
 			{
-				m_calculatedTransformA = MathUtil.BulletMatrixMultiply(transB, m_frameInB);
-				m_calculatedTransformB = MathUtil.BulletMatrixMultiply(transA, m_frameInA);
-			}
-			m_realPivotAInW = m_calculatedTransformA.Translation;
-			m_realPivotBInW = m_calculatedTransformB.Translation;
+                m_calculatedTransformA = transB * m_frameInB;
+                m_calculatedTransformB = transA * m_frameInA;
+            }
+			m_realPivotAInW = m_calculatedTransformA._origin;
+			m_realPivotBInW = m_calculatedTransformB._origin;
 
-			m_sliderAxis = MathUtil.MatrixColumn(ref m_calculatedTransformA, 0); // along X
+            m_sliderAxis = m_calculatedTransformA._basis.GetColumn(0); // along X
 
 			if (m_useLinearReferenceFrameA || m_useSolveConstraintObsolete)
 			{
@@ -747,13 +748,13 @@ namespace BulletXNA.BulletDynamics
 			{
 				m_delta = m_realPivotAInW - m_realPivotBInW;
 			}
-			m_projPivotInW = m_realPivotAInW + Vector3.Dot(m_sliderAxis, m_delta) * m_sliderAxis;
-			Vector3 normalWorld;
+			m_projPivotInW = m_realPivotAInW + IndexedVector3.Dot(m_sliderAxis, m_delta) * m_sliderAxis;
+			IndexedVector3 normalWorld;
 			//linear part
 			for (int i = 0; i < 3; i++)
 			{
-				normalWorld = MathUtil.MatrixColumn(ref m_calculatedTransformA, i);
-				MathUtil.VectorComponent(ref m_depth, i, Vector3.Dot(m_delta, normalWorld));
+                normalWorld = m_calculatedTransformA._basis.GetColumn(i);
+                m_depth[i] = m_delta.Dot(ref normalWorld);
 			}
 		}
 
@@ -793,10 +794,10 @@ namespace BulletXNA.BulletDynamics
 			m_solveAngLim = false;
 			if (m_lowerAngLimit <= m_upperAngLimit)
 			{
-				Vector3 axisA0 = MathUtil.MatrixColumn(ref m_calculatedTransformA, 1);
-				Vector3 axisA1 = MathUtil.MatrixColumn(ref m_calculatedTransformA, 2);
-				Vector3 axisB0 = MathUtil.MatrixColumn(ref m_calculatedTransformB, 1);
-				float rot = (float)Math.Atan2(Vector3.Dot(axisB0, axisA1), Vector3.Dot(axisB0, axisA0));
+                IndexedVector3 axisA0 = m_calculatedTransformA._basis.GetColumn(1);
+                IndexedVector3 axisA1 = m_calculatedTransformA._basis.GetColumn(2);
+                IndexedVector3 axisB0 = m_calculatedTransformB._basis.GetColumn(1);
+				float rot = (float)Math.Atan2(IndexedVector3.Dot(axisB0, axisA1), IndexedVector3.Dot(axisB0, axisA0));
 				rot = AdjustAngleToLimits(rot, m_lowerAngLimit, m_upperAngLimit);
 
 				m_angPos = rot;
@@ -813,15 +814,16 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 		// access for PE Solver
-		public Vector3 GetAncorInA()
+		public IndexedVector3 GetAncorInA()
 		{
-			Vector3 ancorInA = m_realPivotAInW + (m_lowerLinLimit + m_upperLinLimit) * 0.5f * m_sliderAxis;
-			ancorInA = Vector3.Transform(ancorInA, Matrix.Invert(m_rbA.GetCenterOfMassTransform()));
+			IndexedVector3 ancorInA = m_realPivotAInW + (m_lowerLinLimit + m_upperLinLimit) * 0.5f * m_sliderAxis;
+            ancorInA = m_rbA.GetCenterOfMassTransform().Inverse() * ancorInA;
 			return ancorInA;
 		}
-		public Vector3 GetAncorInB()
+
+		public IndexedVector3 GetAncorInB()
 		{
-			return m_frameInB.Translation;
+			return m_frameInB._origin;
 		}
 
 		// access for UseFrameOffset

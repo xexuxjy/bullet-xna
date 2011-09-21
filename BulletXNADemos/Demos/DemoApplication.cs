@@ -36,6 +36,8 @@ namespace BulletXNADemos.Demos
 {
     public class DemoApplication : Microsoft.Xna.Framework.Game
     {
+        protected int numiterations = 0;
+        protected int maxiterations = 0;
         protected IProfileManager m_profileManager;
         protected IProfileIterator m_profileIterator;
         protected IDebugDraw m_debugDraw;
@@ -47,7 +49,7 @@ namespace BulletXNADemos.Demos
         protected IConstraintSolver m_constraintSolver;
         protected DefaultCollisionConfiguration m_collisionConfiguration;
         protected DynamicsWorld m_dynamicsWorld;
-        protected Vector3 m_defaultGravity = new Vector3(0, -10, 0);
+        protected IndexedVector3 m_defaultGravity = new IndexedVector3(0, -10, 0);
 
         public const float STEPSIZEROTATE = MathUtil.SIMD_PI / 3f; // 60 deg a second
         public const float STEPSIZETRANSLATE = 20f; 
@@ -55,8 +57,8 @@ namespace BulletXNADemos.Demos
         public const float mousePickClamping = 30f;
 
         public static int gPickingConstraintId = 0;
-        public static Vector3 gOldPickingPos;
-		public static Vector3 gHitPos = new Vector3(-1f);
+        public static IndexedVector3 gOldPickingPos;
+		public static IndexedVector3 gHitPos = new IndexedVector3(-1f);
 
         public static float gOldPickingDist = 0f;
         public static RigidBody pickedBody = null;//for deactivation state
@@ -72,8 +74,8 @@ namespace BulletXNADemos.Demos
         public static int gNumClampedCcdMotions;
 
         // public for now to test camera acccess in xna shape draw.
-        public Matrix m_lookAt = Matrix.Identity;
-        public Matrix m_perspective = Matrix.Identity;
+        public IndexedMatrix m_lookAt = IndexedMatrix.Identity;
+        public IndexedMatrix m_perspective = IndexedMatrix.Identity;
 
         ///constraint for mouse picking
         protected TypedConstraint m_pickConstraint;
@@ -86,14 +88,14 @@ namespace BulletXNADemos.Demos
         protected float m_pitch;
         protected float m_yaw;
 
-        protected Vector3 m_cameraPosition;
-        protected Vector3 m_cameraTargetPosition;//look at
+        protected IndexedVector3 m_cameraPosition;
+        protected IndexedVector3 m_cameraTargetPosition;//look at
 		protected Boolean m_ortho = false;
 
 
         protected float m_scaleBottom;
         protected float m_scaleFactor;
-        protected Vector3 m_cameraUp;
+        protected IndexedVector3 m_cameraUp;
         protected int m_forwardAxis;
 
         protected int m_glutScreenWidth;
@@ -111,10 +113,10 @@ namespace BulletXNADemos.Demos
 
         protected XNA_ShapeDrawer m_shapeDrawer;
         protected bool m_enableshadows;
-        protected Vector3 m_lightDirection;
-        protected Vector3 m_lightPosition;
-        protected Matrix m_lightView;
-        protected Matrix m_lightProjection;
+        protected IndexedVector3 m_lightDirection;
+        protected IndexedVector3 m_lightPosition;
+        protected IndexedMatrix m_lightView;
+        protected IndexedMatrix m_lightProjection;
 
         protected float m_lightPower = 0.5f;
         protected Vector4 m_ambientLight = new Vector4(0.1f,0.1f,0.1f,1f);
@@ -125,19 +127,20 @@ namespace BulletXNADemos.Demos
         protected float m_aspect;
 
 
+        protected bool use6Dof = false;
 
         //----------------------------------------------------------------------------------------------
 
         protected void UpdateLights()
         {
             
-            //Vector3 target = m_lightPosition + m_lightDirection * 10;
-            Vector3 target = Vector3.Zero;
+            //IndexedVector3 target = m_lightPosition + m_lightDirection * 10;
+            IndexedVector3 target = IndexedVector3.Zero;
             float aspect = m_glutScreenWidth / m_glutScreenHeight;
             float fov = MathHelper.ToRadians(40.0f);
 
-            m_lightView = Matrix.CreateLookAt(m_lightPosition, target, Vector3.Up);
-            m_lightProjection = Matrix.CreatePerspectiveFieldOfView(fov, aspect, 1f, 500f);
+            m_lightView = IndexedMatrix.CreateLookAt(m_lightPosition, target, new IndexedVector3(0,1,0));
+            m_lightProjection = IndexedMatrix.CreatePerspectiveFieldOfView(fov, aspect, 1f, 500f);
         }
 
         //----------------------------------------------------------------------------------------------
@@ -156,8 +159,8 @@ namespace BulletXNADemos.Demos
             }
             m_dynamicsWorld.DebugDrawWorld();
             RenderScenePass(0, gameTime);
-            Vector3 location = new Vector3(10, 10, 0);
-            Vector3 colour = new Vector3(1,1,1);
+            IndexedVector3 location = new IndexedVector3(10, 10, 0);
+            IndexedVector3 colour = new IndexedVector3(1,1,1);
             m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)), location, colour);
             int	xOffset = 10;
             int yStart = 20;
@@ -165,16 +168,17 @@ namespace BulletXNADemos.Demos
 
             ShowProfileInfo(xOffset, yStart, yIncr);
 
-
-            m_shapeDrawer.RenderOthers(gameTime, ref m_lookAt, ref m_perspective);
+            
+            m_shapeDrawer.RenderOthers(gameTime, m_lookAt, m_perspective);
         }
+
 
         protected virtual void RenderScenePass(int pass, GameTime gameTime)
         {
-	        Matrix m = Matrix.Identity;
-	        Matrix rot = Matrix.Identity;
+	        IndexedMatrix m = IndexedMatrix.Identity;
+	        IndexedBasisMatrix rot = IndexedBasisMatrix.Identity;
 	        int numObjects = m_dynamicsWorld.GetNumCollisionObjects();
-	        Vector3 wireColor = new Vector3(1,0,0);
+	        IndexedVector3 wireColor = new IndexedVector3(1,0,0);
 
             for(int i=0;i<numObjects;i++)
 	        {
@@ -185,67 +189,65 @@ namespace BulletXNADemos.Demos
 			        DefaultMotionState myMotionState = (DefaultMotionState)body.GetMotionState();
                     //myMotionState.m_graphicsWorldTrans.getOpenGLMatrix(m);
                     m = myMotionState.m_graphicsWorldTrans;
-			        rot=MathUtil.BasisMatrix(ref myMotionState.m_graphicsWorldTrans);
+			        rot=myMotionState.m_graphicsWorldTrans._basis;
 		        }
 		        else
 		        {
                     //colObj.getWorldTransform().getOpenGLMatrix(m);
-			        rot=MathUtil.BasisMatrix(colObj.GetWorldTransform());
+			        rot=colObj.GetWorldTransform()._basis;
 		        }
-		        wireColor = new Vector3(1.0f,1.0f,0.5f); //wants deactivation
-		        if((i&1) != 0) wireColor= new Vector3(0f,0f,1f);
+		        wireColor = new IndexedVector3(1.0f,1.0f,0.5f); //wants deactivation
+		        if((i&1) != 0) wireColor= new IndexedVector3(0f,0f,1f);
 		        ///color differently for active, sleeping, wantsdeactivation states
 		        if (colObj.GetActivationState() == ActivationState.ACTIVE_TAG) //active
 		        {
 			        if ((i & 1) != 0)
 			        {
-				        wireColor += new Vector3(1f,0f,0f);
+				        wireColor += new IndexedVector3(1f,0f,0f);
 			        }
 			        else
 			        {			
-				        wireColor += new Vector3(.5f,0f,0f);
+				        wireColor += new IndexedVector3(.5f,0f,0f);
 			        }
 		        }
 		        if(colObj.GetActivationState()==ActivationState.ISLAND_SLEEPING) //ISLAND_SLEEPING
 		        {
                     if ((i & 1) != 0)
                     {
-				        wireColor += new Vector3 (0f,1f, 0f);
+				        wireColor += new IndexedVector3 (0f,1f, 0f);
 			        }
 			        else
 			        {
-				        wireColor += new Vector3(0f,05f,0f);
+				        wireColor += new IndexedVector3(0f,05f,0f);
 			        }
 		        }
 
-                Vector3 aabbMin, aabbMax;
-		        m_dynamicsWorld.GetBroadphase().GetBroadphaseAabb(out aabbMin,out aabbMax);
+                IndexedVector3 min,max;
+		        m_dynamicsWorld.GetBroadphase().GetBroadphaseAabb(out min,out max);
 
-                aabbMin -= MathUtil.MAX_VECTOR;
-                aabbMax += MathUtil.MAX_VECTOR;
+                min -= MathUtil.MAX_VECTOR;
+                max += MathUtil.MAX_VECTOR;
         //		printf("aabbMin=(%f,%f,%f)\n",aabbMin.getX(),aabbMin.getY(),aabbMin.getZ());
         //		printf("aabbMax=(%f,%f,%f)\n",aabbMax.getX(),aabbMax.getY(),aabbMax.getZ());
         //		m_dynamicsWorld.getDebugDrawer().drawAabb(aabbMin,aabbMax,btVector3(1,1,1));
 
-
-
-		        switch(pass)
+                switch(pass)
 		        {
                     case 0:
                         {
-                            m_shapeDrawer.DrawXNA(ref m, colObj.GetCollisionShape(), ref wireColor, GetDebugMode(), ref aabbMin, ref aabbMax, ref m_lookAt, ref m_perspective);
+                            m_shapeDrawer.DrawXNA(ref m, colObj.GetCollisionShape(), ref wireColor, GetDebugMode(), ref min, ref max, ref m_lookAt, ref m_perspective);
                             break;
                         }
                     case 1:
                         {
-                            Vector3 shadow = Vector3.Transform(m_lightDirection, rot);
-                            m_shapeDrawer.DrawShadow(ref m, ref shadow, colObj.GetCollisionShape(), ref aabbMin, ref aabbMax);
+                            IndexedVector3 shadow = rot * m_lightDirection;
+                            m_shapeDrawer.DrawShadow(ref m, ref shadow, colObj.GetCollisionShape(), ref min, ref max);
                             break;
                         }
 		            case	2:
                         {
-                            Vector3 adjustedWireColor = wireColor * 0.3f;
-                            m_shapeDrawer.DrawXNA(ref m,colObj.GetCollisionShape(),ref adjustedWireColor,0,ref aabbMin,ref aabbMax,ref m_lookAt,ref m_perspective);
+                            IndexedVector3 adjustedWireColor = wireColor * 0.3f;
+                            m_shapeDrawer.DrawXNA(ref m,colObj.GetCollisionShape(),ref adjustedWireColor,0,ref min,ref max,ref m_lookAt,ref m_perspective);
                             break;
                         }
 		        }
@@ -284,11 +286,11 @@ namespace BulletXNADemos.Demos
             m_debugMode = 0;
             m_pitch =(20f/360f)*MathUtil.SIMD_2_PI;
             m_yaw = 0f;
-            m_cameraPosition = Vector3.Zero;
-            m_cameraTargetPosition = Vector3.Zero;
+            m_cameraPosition = IndexedVector3.Zero;
+            m_cameraTargetPosition = IndexedVector3.Zero;
             m_scaleBottom = 0.5f;
             m_scaleFactor = 2f;
-            m_cameraUp = Vector3.Up;
+            m_cameraUp = new IndexedVector3(0, 1, 0);
             m_forwardAxis = 2;
             m_glutScreenWidth = 0;
             m_glutScreenHeight = 0;
@@ -297,9 +299,9 @@ namespace BulletXNADemos.Demos
             m_singleStep = false;
             m_idle = false;
             m_enableshadows = true;
-            m_lightPosition = new Vector3(5,5,5);
-            //m_lightDirection = Vector3.Down;
-            m_lightDirection = new Vector3(.5f, -.5f, .5f);
+            m_lightPosition = new IndexedVector3(5, 5, 5);
+            //m_lightDirection = IndexedVector3.Down;
+            m_lightDirection = new IndexedVector3(.5f, -.5f, .5f);
             m_lightDirection.Normalize();
 
             //#ifndef BT_NO_PROFILE
@@ -317,7 +319,7 @@ namespace BulletXNADemos.Demos
             m_farClip = 1000f;
 
             m_aspect = m_glutScreenWidth / m_glutScreenHeight;
-            m_perspective = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f),m_aspect, m_nearClip, m_farClip);
+            m_perspective = IndexedMatrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
         }
 
         //----------------------------------------------------------------------------------------------
@@ -334,28 +336,28 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
-        public Vector3 GetLightDirection()
+        public IndexedVector3 GetLightDirection()
         {
             return m_lightDirection;
         }
 
         //----------------------------------------------------------------------------------------------
 
-        public Vector3 GetLightPosition()
+        public IndexedVector3 GetLightPosition()
         {
             return m_lightPosition;
         }
 
         //----------------------------------------------------------------------------------------------
 
-        public Matrix GetLightViewMatrix()
+        public IndexedMatrix GetLightViewMatrix()
         {
             return m_lightView;
         }
 
         //----------------------------------------------------------------------------------------------
 
-        public Matrix GetLightProjectionMatrix()
+        public IndexedMatrix GetLightProjectionMatrix()
         {
             return m_lightProjection;
         }
@@ -466,7 +468,7 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
-        public void SetCameraUp(Vector3 camUp)
+        public void SetCameraUp(IndexedVector3 camUp)
         {
             m_cameraUp = camUp;
         }
@@ -524,29 +526,27 @@ namespace BulletXNADemos.Demos
             float rele = m_pitch;
             float razi = m_yaw;
 
-            Quaternion rot = Quaternion.CreateFromAxisAngle(m_cameraUp, razi);
+            Quaternion rot = Quaternion.CreateFromAxisAngle(m_cameraUp.ToVector3(), razi);
             
-            Vector3 eyePos = Vector3.Zero;
-            MathUtil.VectorComponent(ref eyePos, m_forwardAxis, -m_cameraDistance);
+            IndexedVector3 eyePos = new IndexedVector3();
+            eyePos[m_forwardAxis] = -m_cameraDistance;
 
-            Vector3 forward = eyePos;
+            IndexedVector3 forward = eyePos;
             if (forward.LengthSquared() < MathUtil.SIMD_EPSILON)
             {
-                forward = Vector3.Forward;
+                forward = new IndexedVector3(0,0,-1);
             }
-            Vector3 right = Vector3.Cross(m_cameraUp, Vector3.Normalize(forward));
-            Quaternion roll = Quaternion.CreateFromAxisAngle(right, -rele);
+            IndexedVector3 right = IndexedVector3.Cross(m_cameraUp, IndexedVector3.Normalize(forward));
+            Quaternion roll = Quaternion.CreateFromAxisAngle(right.ToVector3(), -rele);
             rot.Normalize();
             roll.Normalize();
 
-            Matrix m1 = Matrix.CreateFromQuaternion(rot);
-            Matrix m2 = Matrix.CreateFromQuaternion(roll);
-            Matrix m3 = m2 * m1;
+            IndexedMatrix m1 = IndexedMatrix.CreateFromQuaternion(rot);
+            IndexedMatrix m2 = IndexedMatrix.CreateFromQuaternion(roll);
+            IndexedMatrix m3 = m1 * m2;
 
-            Vector3 eyePos2 = eyePos;
 
-            eyePos = Vector3.Transform(eyePos, (rot * roll));
-            eyePos2 = Vector3.Transform(eyePos2, m3);
+            eyePos = new IndexedVector3(Vector3.Transform(eyePos.ToVector3(),(rot * roll)));
 
             //m_cameraTargetPosition = m_cameraPosition + eyePos;
             m_cameraPosition = eyePos;
@@ -556,21 +556,29 @@ namespace BulletXNADemos.Demos
             if (m_glutScreenWidth == 0 && m_glutScreenHeight == 0)
                 return;
 
-            m_lookAt = Matrix.CreateLookAt(m_cameraPosition, m_cameraTargetPosition, m_cameraUp);
-                        
+            m_lookAt = IndexedMatrix.CreateLookAt(m_cameraPosition, m_cameraTargetPosition, m_cameraUp);
+            Matrix t = Matrix.CreateLookAt(m_cameraPosition.ToVector3(), m_cameraTargetPosition.ToVector3(), m_cameraUp.ToVector3());
+            Matrix t2 = m_lookAt.ToMatrix();
+
+            if (t != t2)
+            {
+                int ibreak2 = 0;
+            }
+
+
             int ibreak = 0;
         }
 
         //----------------------------------------------------------------------------------------------
 
-        public Vector3 GetCameraPosition()
+        public IndexedVector3 GetCameraPosition()
         {
             return m_cameraPosition;
         }
         
         //----------------------------------------------------------------------------------------------
 
-        public Vector3 GetCameraTargetPosition()
+        public IndexedVector3 GetCameraTargetPosition()
         {
             return m_cameraTargetPosition;
         }
@@ -620,11 +628,17 @@ namespace BulletXNADemos.Demos
         {
             //simple dynamics world doesn't handle fixed-time-stepping
             float ms = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+            //ms *= 0.1f;
             ///step the simulation
             if (m_dynamicsWorld != null)
             {
                 m_dynamicsWorld.StepSimulation(ms, 1);
+                numiterations++;
+                if (maxiterations > 0 && numiterations > maxiterations)
+                {
+                    Cleanup();
+                    Exit();
+                }
             }
 
             //renderme();
@@ -679,7 +693,7 @@ namespace BulletXNADemos.Demos
 
 			        if (!body.IsStaticObject())
 			        {
-                        Vector3 zero = Vector3.Zero;
+                        IndexedVector3 zero = IndexedVector3.Zero;
 				        body.SetLinearVelocity(ref zero);
 				        body.SetAngularVelocity(ref zero);
 			        }
@@ -700,11 +714,11 @@ namespace BulletXNADemos.Demos
             {
                 //#define TEST_UNIFORM_SCALING_SHAPE 1
 #if TEST_UNIFORM_SCALING_SHAPE
-			    ConvexShape childShape = new BoxShape(new Vector3(1f,1f,1f));
+			    ConvexShape childShape = new BoxShape(new IndexedVector3(1f,1f,1f));
 			    m_shootBoxShape = new UniformScalingShape(childShape,0.5f);
 #else
                 //m_shootBoxShape = new SphereShape(1f);//BoxShape(btVector3(1.f,1.f,1.f));
-                m_shootBoxShape = new BoxShape(new Vector3(0.5f, 0.5f, 0.5f));
+                m_shootBoxShape = new BoxShape(new IndexedVector3(0.5f, 0.5f, 0.5f));
 
 #endif//
             }
@@ -712,27 +726,27 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
-        public void ShootBox(Vector3 destination)
+        public void ShootBox(IndexedVector3 destination)
         {
             if (m_dynamicsWorld != null)
             {
                 float mass = 1f;
-                Matrix startTransform = Matrix.Identity;
-                Vector3 camPos = GetCameraPosition();
-                startTransform.Translation = camPos;
+                IndexedMatrix startTransform = IndexedMatrix.Identity;
+                IndexedVector3 camPos = new IndexedVector3(GetCameraPosition());
+                startTransform._origin = camPos;
 
                 SetShootBoxShape();
                 RigidBody body = LocalCreateRigidBody(mass, ref startTransform, m_shootBoxShape);
-                body.SetLinearFactor(Vector3.One);
-                Vector3 linVel = destination - camPos;
+                body.SetLinearFactor(IndexedVector3.One);
+                IndexedVector3 linVel = destination - camPos;
                 linVel.Normalize();
                 linVel *= m_ShootBoxInitialSpeed;
 
-                Matrix newMatrix = Matrix.CreateFromQuaternion(new Quaternion(0,0,0,1));
-                newMatrix.Translation = camPos;
+                IndexedMatrix newMatrix = IndexedMatrix.CreateFromQuaternion(new Quaternion(0,0,0,1));
+                newMatrix._origin = camPos;
                 body.SetWorldTransform(ref newMatrix);
                 body.SetLinearVelocity(ref linVel);
-                Vector3 temp = Vector3.Zero;
+                IndexedVector3 temp = IndexedVector3.Zero;
                 body.SetAngularVelocity(ref temp);
                 body.SetCcdMotionThreshold(1f);
                 body.SetCcdSweptSphereRadius(0.2f);
@@ -741,21 +755,21 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
-        public Vector3 GetRayTo(int x, int y)
+        public IndexedVector3 GetRayTo(int x, int y)
         {
             float fov = MathHelper.ToRadians(40.0f);
 
-            Vector3 rayFrom = GetCameraPosition();
-            Vector3 rayForward = (GetCameraTargetPosition() - GetCameraPosition());
+            IndexedVector3 rayFrom = new IndexedVector3(GetCameraPosition());
+            IndexedVector3 rayForward = new IndexedVector3((GetCameraTargetPosition() - GetCameraPosition()));
             rayForward.Normalize();
             float farPlane = 10000f;
             rayForward *= farPlane;
 
-            Vector3 vertical = m_cameraUp;
+            IndexedVector3 vertical = new IndexedVector3(m_cameraUp);
 
-            Vector3 hor = Vector3.Cross(rayForward, vertical);
+            IndexedVector3 hor = IndexedVector3.Cross(rayForward, vertical);
             hor.Normalize();
-            vertical = Vector3.Cross(hor, rayForward);
+            vertical = IndexedVector3.Cross(hor, rayForward);
             vertical.Normalize();
 
             float tanfov = (float)Math.Tan(0.5f * fov);
@@ -776,34 +790,34 @@ namespace BulletXNADemos.Demos
                 vertical *= aspect;
             }
 
-            Vector3 rayToCenter = rayFrom + rayForward;
-            Vector3 dHor = hor * 1f / (float)m_glutScreenWidth;
-            Vector3 dVert = vertical * 1f / (float)m_glutScreenHeight;
+            IndexedVector3 rayToCenter = rayFrom + rayForward;
+            IndexedVector3 dHor = hor * 1f / (float)m_glutScreenWidth;
+            IndexedVector3 dVert = vertical * 1f / (float)m_glutScreenHeight;
 
-            Vector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * vertical;
+            IndexedVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * vertical;
             rayTo += x * dHor;
             rayTo -= y * dVert;
             return rayTo;
         }
 
         //----------------------------------------------------------------------------------------------
-        public RigidBody LocalCreateRigidBody(float mass, Matrix startTransform, CollisionShape shape)
+        public RigidBody LocalCreateRigidBody(float mass, IndexedMatrix startTransform, CollisionShape shape)
         {
             return LocalCreateRigidBody(mass, ref startTransform, shape);
         }
 
-        public RigidBody LocalCreateRigidBody(float mass, Matrix startTransform, CollisionShape shape,bool addToWorld)
+        public RigidBody LocalCreateRigidBody(float mass, IndexedMatrix startTransform, CollisionShape shape,bool addToWorld)
         {
             return LocalCreateRigidBody(mass, ref startTransform, shape,addToWorld);
         }
 
 
-        public RigidBody LocalCreateRigidBody(float mass, ref Matrix startTransform, CollisionShape shape)
+        public RigidBody LocalCreateRigidBody(float mass, ref IndexedMatrix startTransform, CollisionShape shape)
         {
             return LocalCreateRigidBody(mass, ref startTransform, shape, true);
         }
 
-        public RigidBody LocalCreateRigidBody(float mass, ref Matrix startTransform, CollisionShape shape,bool addToWorld)
+        public RigidBody LocalCreateRigidBody(float mass, ref IndexedMatrix startTransform, CollisionShape shape,bool addToWorld)
         {
 			
             Debug.Assert((shape == null || shape.GetShapeType() != BroadphaseNativeTypes.INVALID_SHAPE_PROXYTYPE));
@@ -811,7 +825,7 @@ namespace BulletXNADemos.Demos
             //rigidbody is dynamic if and only if mass is non zero, otherwise static
             bool isDynamic = !MathUtil.CompareFloat(mass, 0f);
 
-            Vector3 localInertia = Vector3.Zero;
+            IndexedVector3 localInertia = IndexedVector3.Zero;
             if (isDynamic)
             {
                 shape.CalculateLocalInertia(mass, out localInertia);
@@ -820,7 +834,7 @@ namespace BulletXNADemos.Demos
 
             //#define USE_MOTIONSTATE 1
             //#ifdef USE_MOTIONSTATE
-            DefaultMotionState myMotionState = new DefaultMotionState(startTransform, Matrix.Identity);
+            DefaultMotionState myMotionState = new DefaultMotionState(startTransform, IndexedMatrix.Identity);
 
             RigidBodyConstructionInfo cInfo = new RigidBodyConstructionInfo(mass, myMotionState, shape, localInertia);
 
@@ -1083,7 +1097,7 @@ namespace BulletXNADemos.Demos
 
         public virtual void MouseFunc(ref MouseState oldMouseState, ref MouseState newMouseState)
         {
-            Vector3 rayTo = GetRayTo(newMouseState.X, newMouseState.Y);
+            IndexedVector3 rayTo = GetRayTo(newMouseState.X, newMouseState.Y);
 
             if (WasReleased(ref oldMouseState,ref newMouseState,2))
             {
@@ -1094,19 +1108,21 @@ namespace BulletXNADemos.Demos
                 //apply an impulse
                 if (m_dynamicsWorld != null)
                 {
-                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(m_cameraPosition, rayTo);
-                    m_dynamicsWorld.RayTest(ref m_cameraPosition, ref rayTo, rayCallback);
+                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(new IndexedVector3(m_cameraPosition), rayTo);
+                    IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
+                    IndexedVector3 ivTo = new IndexedVector3(rayTo);
+                    m_dynamicsWorld.RayTest(ref ivPos,ref ivTo, rayCallback);
                     if (rayCallback.HasHit())
                     {
                         RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
                         if (body != null)
                         {
                             body.SetActivationState(ActivationState.ACTIVE_TAG);
-                            Vector3 impulse = rayTo;
+                            IndexedVector3 impulse = rayTo;
                             impulse.Normalize();
                             float impulseStrength = 10f;
                             impulse *= impulseStrength;
-                            Vector3 relPos = rayCallback.m_hitPointWorld - body.GetCenterOfMassPosition();
+                            IndexedVector3 relPos = rayCallback.m_hitPointWorld - body.GetCenterOfMassPosition();
                             body.ApplyImpulse(ref impulse, ref relPos);
                         }
                     }
@@ -1118,7 +1134,7 @@ namespace BulletXNADemos.Demos
                 if (m_dynamicsWorld != null)
                 {
 
-					Vector3 rayFrom;
+					IndexedVector3 rayFrom;
 					if (m_ortho)
 					{
 						rayFrom = rayTo;
@@ -1126,12 +1142,14 @@ namespace BulletXNADemos.Demos
 					}
 					else
 					{
-						rayFrom = m_cameraPosition;
+						rayFrom = new IndexedVector3(m_cameraPosition);
 					}
 
 
                     ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(ref rayFrom, ref rayTo);
-                    m_dynamicsWorld.RayTest(ref m_cameraPosition, ref rayTo, rayCallback);
+                    IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
+                    IndexedVector3 ivTo = new IndexedVector3(rayTo);
+                    m_dynamicsWorld.RayTest(ref ivPos, ref ivTo, rayCallback);
                     if (rayCallback.HasHit())
                     {
                         RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
@@ -1144,18 +1162,52 @@ namespace BulletXNADemos.Demos
                                 pickedBody.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 
 
-                                Vector3 pickPos = rayCallback.m_hitPointWorld;
+                                IndexedVector3 pickPos = rayCallback.m_hitPointWorld;
 
-                                Vector3 localPivot = Vector3.Transform(pickPos, Matrix.Invert(body.GetCenterOfMassTransform()));
+                                IndexedVector3 localPivot = body.GetCenterOfMassTransform().Inverse() * pickPos;
 
-                                Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
-								m_dynamicsWorld.AddConstraint(p2p, false);
+                                if (use6Dof)
+                                {
+                                    IndexedMatrix tr = IndexedMatrix.Identity;
+                                    tr._origin = localPivot;
+                                    Generic6DofConstraint dof6 = new Generic6DofConstraint(body, ref tr, false);
+                                    dof6.SetLinearLowerLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetLinearUpperLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetAngularLowerLimit(new IndexedVector3(0, 0, 0));
+                                    dof6.SetAngularUpperLimit(new IndexedVector3(0, 0, 0));
 
-                                p2p.m_setting.m_impulseClamp = mousePickClamping;
-								p2p.m_setting.m_tau = 0.001f;
+                                    m_dynamicsWorld.AddConstraint(dof6);
+                                    m_pickConstraint = dof6;
 
-                                m_pickConstraint = p2p;
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 0);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 1);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 2);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 3);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 4);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_CFM, 0.8f, 5);
 
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 0);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 1);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 2);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 3);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 4);
+                                    dof6.SetParam(ConstraintParams.BT_CONSTRAINT_STOP_ERP, 0.1f, 5);
+                                }
+                                else
+                                {
+                                    Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
+                                    m_dynamicsWorld.AddConstraint(p2p, false);
+
+                                    p2p.m_setting.m_impulseClamp = mousePickClamping;
+                                    p2p.m_setting.m_tau = 0.001f;
+
+
+                                    if (m_pickConstraint != null)
+                                    {
+                                        int ibreak = 0;
+                                    }
+                                    m_pickConstraint = p2p;
+                                }
                                 //save mouse position for dragging
                                 gOldPickingPos = rayTo;
 								gHitPos = pickPos;
@@ -1196,10 +1248,10 @@ namespace BulletXNADemos.Demos
                 {
                     //keep it at the same picking distance
 
-                    Vector3 newRayTo = GetRayTo(mouseState.X, mouseState.Y);
-					Vector3 rayFrom;
-					Vector3 oldPivotInB = p2p.GetPivotInB();
-					Vector3 newPivotB;
+                    IndexedVector3 newRayTo = GetRayTo(mouseState.X, mouseState.Y);
+					IndexedVector3 rayFrom;
+					IndexedVector3 oldPivotInB = p2p.GetPivotInB();
+					IndexedVector3 newPivotB;
 					if (m_ortho)
 					{
 						newPivotB = oldPivotInB;
@@ -1208,8 +1260,8 @@ namespace BulletXNADemos.Demos
 					}
 					else
 					{
-						rayFrom = m_cameraPosition;
-						Vector3 dir = newRayTo - rayFrom;
+						rayFrom = new IndexedVector3(m_cameraPosition);
+						IndexedVector3 dir = newRayTo - rayFrom;
 						dir.Normalize();
 						dir *= gOldPickingDist;
 						newPivotB = rayFrom + dir;
@@ -1361,13 +1413,13 @@ namespace BulletXNADemos.Demos
             {
                 Vector2 left = current.ThumbSticks.Left * STEPSIZETRANSLATE * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                Vector3 forward = m_cameraTargetPosition - m_cameraPosition;
+                IndexedVector3 forward = m_cameraTargetPosition - m_cameraPosition;
                 forward.Normalize();
 
                 float rele = m_pitch;
                 float razi = m_yaw;
 
-                Vector3 right = Vector3.Cross(forward,m_cameraUp);
+                IndexedVector3 right = IndexedVector3.Cross(forward, m_cameraUp);
 
                 m_cameraPosition += forward * left.Y;
                 m_cameraPosition += right * left.X;
@@ -1557,7 +1609,7 @@ namespace BulletXNADemos.Demos
 
         private void DisplayProfileString(int xOffset, int yStart, String message)
         {
-            m_shapeDrawer.DrawText(message,new Vector3(xOffset,yStart,0),new Vector3(1,1,1));
+            m_shapeDrawer.DrawText(message,new IndexedVector3(xOffset,yStart,0),new IndexedVector3(1,1,1));
         }
 
         //----------------------------------------------------------------------------------------------

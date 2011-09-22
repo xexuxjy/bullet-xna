@@ -757,7 +757,7 @@ namespace BulletXNA.BulletDynamics
 				SolverConstraint solverConstr = m_tmpSolverNonContactConstraintPool[j];
 				TypedConstraint constr = solverConstr.m_originalContactPointConstraint ;
 				constr.InternalSetAppliedImpulse(solverConstr.m_appliedImpulse);
-				if (solverConstr.m_appliedImpulse > constr.GetBreakingImpulseThreshold())
+				if (Math.Abs(solverConstr.m_appliedImpulse) >= constr.GetBreakingImpulseThreshold())
 				{
 					constr.SetEnabled(false);
 				}
@@ -956,17 +956,6 @@ namespace BulletXNA.BulletDynamics
 
 
 
-                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit > constraints[i].GetBreakingImpulseThreshold())
-							{
-                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
-							}
-
-                            if (m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit < -constraints[i].GetBreakingImpulseThreshold())
-							{
-                                m_tmpSolverNonContactConstraintPool.GetRawArray()[currentRow].m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
-							}
-
-
 							///finalize the constraint setup
 							///
 
@@ -980,6 +969,20 @@ namespace BulletXNA.BulletDynamics
 							for (int j = 0; j < (info1a.m_numConstraintRows); j++)
 							{
 								SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[currentRow + j];
+
+
+                                if (solverConstraint.m_upperLimit >= constraints[i].GetBreakingImpulseThreshold())
+                                {
+                                    solverConstraint.m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
+                                }
+
+                                if (solverConstraint.m_lowerLimit <= -constraints[i].GetBreakingImpulseThreshold())
+                                {
+                                    solverConstraint.m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
+                                }
+
+
+
 								solverConstraint.m_originalContactPointConstraint = constraint;
 
 								{

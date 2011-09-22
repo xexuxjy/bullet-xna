@@ -641,114 +641,6 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 		
-		protected virtual void AddSpeculativeContacts(float timeStep)
-		{
-			BulletGlobals.StartProfile("AddSpeculativeContacts");
-	IndexedMatrix predictedTrans;
-	for ( int i=0;i<m_nonStaticRigidBodies.Count;i++)
-	{
-		RigidBody body = m_nonStaticRigidBodies[i];
-		body.SetHitFraction(1.0f);
-
-		if (body.IsActive() && (!body.IsStaticOrKinematicObject()))
-		{
-			body.PredictIntegratedTransform(timeStep, out predictedTrans);
-			float squareMotion = (predictedTrans._origin-body.GetWorldTransform()._origin).LengthSquared();
-
-			if (body.GetCcdSquareMotionThreshold() != 0.0f && body.GetCcdSquareMotionThreshold() < squareMotion)
-			{
-				BulletGlobals.StartProfile("search speculative contacts");
-				if (body.GetCollisionShape().IsConvex())
-				{
-					gNumClampedCcdMotions++;
-					
-					ClosestNotMeConvexResultCallback sweepResults = new ClosestNotMeConvexResultCallback(body,body.GetWorldTransform()._origin,predictedTrans._origin,GetBroadphase().GetOverlappingPairCache(),GetDispatcher());
-					//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-					SphereShape tmpSphere = new SphereShape(body.GetCcdSweptSphereRadius());//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-
-					sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
-					sweepResults.m_collisionFilterMask  = body.GetBroadphaseProxy().m_collisionFilterMask;
-                    IndexedMatrix modifiedPredictedTrans = IndexedMatrix.Identity;
-                    modifiedPredictedTrans._basis = body.GetWorldTransform()._basis;
-					modifiedPredictedTrans._origin= predictedTrans._origin;
-
-					ConvexSweepTest(tmpSphere,body.GetWorldTransform(),modifiedPredictedTrans,sweepResults,0f);
-					if (sweepResults.HasHit() && (sweepResults.m_closestHitFraction < 1.0f))
-					{
-						BroadphaseProxy proxy0 = body.GetBroadphaseHandle();
-						BroadphaseProxy proxy1 = sweepResults.m_hitCollisionObject.GetBroadphaseHandle();
-						BroadphasePair pair = sweepResults.m_pairCache.FindPair(proxy0,proxy1);
-						if (pair != null)
-						{
-							if (pair.m_algorithm != null)
-							{
-								ObjectArray<PersistentManifold> contacts = new ObjectArray<PersistentManifold>();
-								pair.m_algorithm.GetAllContactManifolds(contacts);
-								if (contacts.Count > 0)
-								{
-									ManifoldResult result = new ManifoldResult(body,sweepResults.m_hitCollisionObject);
-									result.SetPersistentManifold(contacts[0]);
-
-									IndexedVector3 vec = (modifiedPredictedTrans._origin-body.GetWorldTransform()._origin);
-									vec*=sweepResults.m_closestHitFraction;
-									
-									float lenSqr = vec.LengthSquared();
-									float depth = 0.0f;
-									IndexedVector3 pointWorld = sweepResults.m_hitPointWorld;
-									if (lenSqr>MathUtil.SIMD_EPSILON)
-									{
-										depth = (float)Math.Sqrt(lenSqr);
-										pointWorld -= vec;
-										vec /= depth;
-									}
-
-									if (contacts[0].GetBody0()==body)
-									{
-										result.AddContactPoint(sweepResults.m_hitNormalWorld,pointWorld,depth);
-#if false
-										debugContacts.Add(sweepResults.m_hitPointWorld);//sweepResults.m_hitPointWorld);
-										debugNormals.Add(sweepResults.m_hitNormalWorld);
-#endif
-									} else
-									{
-										//swapped
-										result.AddContactPoint(-sweepResults.m_hitNormalWorld,pointWorld,depth);
-										//sweepResults.m_hitPointWorld,depth);
-										
-#if false
-										if (1)//firstHit==1)
-										{
-											firstHit=0;
-											debugNormals.push_back(sweepResults.m_hitNormalWorld);
-											debugContacts.push_back(pointWorld);//sweepResults.m_hitPointWorld);
-											debugNormals.push_back(sweepResults.m_hitNormalWorld);
-											debugContacts.push_back(sweepResults.m_hitPointWorld);
-										}
-										firstHit--;
-#endif
-									}
-								}
-
-							} else
-							{
-								//no algorithm, use dispatcher to create one
-
-							}
-
-
-						} else
-						{
-							//add an overlapping pair
-							//printf("pair missing\n");
-
-						}
-					}
-				}
-			}
-			
-		}
-	}
-		}
 
 
 	    protected virtual void	CalculateSimulationIslands()
@@ -914,12 +806,6 @@ namespace BulletXNA.BulletDynamics
 
 	        ///perform collision detection
 	        PerformDiscreteCollisionDetection();
-
-			if (GetDispatchInfo().m_useContinuous)
-			{
-				AddSpeculativeContacts(timeStep);
-			}
-
 
 	        CalculateSimulationIslands();
         	

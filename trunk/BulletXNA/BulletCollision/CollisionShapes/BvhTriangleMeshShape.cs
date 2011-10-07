@@ -146,6 +146,11 @@ namespace BulletXNA.BulletCollision
 #endif
         }
 
+        public void RefitTree(Vector3 aabbMin, Vector3 aabbMax)
+        {
+            RefitTree(ref aabbMin, ref aabbMax);
+        }
+
         public void RefitTree(ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
             if (m_bvh != null)

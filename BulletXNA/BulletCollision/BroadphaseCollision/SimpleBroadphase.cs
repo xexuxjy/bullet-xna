@@ -275,7 +275,7 @@ namespace BulletXNA.BulletCollision
         public virtual void DestroyProxy(BroadphaseProxy proxy, IDispatcher dispatcher)
         {
             SimpleBroadphaseProxy proxy0 = (SimpleBroadphaseProxy)(proxy);
-            //freeHandle(proxy0);
+            FreeHandle(proxy0);
             m_pairCache.RemoveOverlappingPairsContainingProxy(proxy, dispatcher);
         }
 

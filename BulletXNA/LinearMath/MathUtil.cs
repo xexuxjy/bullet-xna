@@ -1412,6 +1412,13 @@ namespace BulletXNA
 				a.Z + (b.Z - a.Z) * t);
 		}
 
+        public static float Vector3Distance2XZ(Vector3 x, Vector3 y)
+        {
+            Vector3 xa = new Vector3(x.X, 0, x.Z);
+            Vector3 ya = new Vector3(y.X, 0, y.Z);
+            return (xa - ya).LengthSquared();
+        }
+
 
         //public const float SIMD_EPSILON = 0.0000001f;
         public const float SIMD_EPSILON = 1.192092896e-07f;

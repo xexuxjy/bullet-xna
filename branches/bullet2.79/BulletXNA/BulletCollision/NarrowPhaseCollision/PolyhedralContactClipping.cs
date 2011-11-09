@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿#define TEST_INTERNAL_OBJECTS
+using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 
@@ -16,7 +17,7 @@ namespace BulletXNA.BulletCollision
 
 #if TEST_INTERNAL_OBJECTS
 
-public static void BoxSupport(IndexedVector3 extents, IndexedVector3 sv, IndexedVector3 p)
+public static void BoxSupport(ref IndexedVector3 extents, ref IndexedVector3 sv, ref IndexedVector3 p)
 {
 	// This version is ~11.000 cycles (4%) faster overall in one of the tests.
 //	IR(p[0]) = IR(extents[0])|(IR(sv[0])&SIGN_BITMASK);
@@ -27,47 +28,49 @@ public static void BoxSupport(IndexedVector3 extents, IndexedVector3 sv, Indexed
 	p[2] = sv[2] < 0.0f ? -extents[2] : extents[2];
 }
 
-void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, ref IndexedMatrix tr)
+public static void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 input, ref IndexedMatrix tr)
 {
-	const btMatrix3x3& rot = tr.getBasis();
-	const btVector3& r0 = rot[0];
-	const btVector3& r1 = rot[1];
-	const btVector3& r2 = rot[2];
+	IndexedBasisMatrix rot = tr._basis;
+	IndexedVector3 r0 = rot[0];
+	IndexedVector3 r1 = rot[1];
+	IndexedVector3 r2 = rot[2];
 
-	const btScalar x = r0.x()*in.x() + r1.x()*in.y() + r2.x()*in.z();
-	const btScalar y = r0.y()*in.x() + r1.y()*in.y() + r2.y()*in.z();
-	const btScalar z = r0.z()*in.x() + r1.z()*in.y() + r2.z()*in.z();
+	float x = r0.X*input.X + r1.X*input.Y + r2.X*input.Z;
+	float y = r0.Y*input.X + r1.Y*input.Y + r2.Y*input.Z;
+	float z = r0.Z*input.X + r1.Z*input.Y + r2.Z*input.Z;
 
-	out.setValue(x, y, z);
+	outVec = new IndexedVector3(x, y, z);
 }
 
- bool TestInternalObjects( const btTransform& trans0, const btTransform& trans1, const btVector3& delta_c, const btVector3& axis, const btConvexPolyhedron& convex0, const btConvexPolyhedron& convex1, btScalar dmin)
+public static bool TestInternalObjects( ref IndexedMatrix trans0, ref IndexedMatrix trans1, ref IndexedVector3 delta_c, ref IndexedVector3 axis, ConvexPolyhedron convex0, ConvexPolyhedron convex1, float dmin)
 {
-	const btScalar dp = delta_c.dot(axis);
+	float dp = delta_c.Dot(ref axis);
 
-	btVector3 localAxis0;
-	InverseTransformPoint3x3(localAxis0, axis,trans0);
-	btVector3 localAxis1;
-	InverseTransformPoint3x3(localAxis1, axis,trans1);
+	IndexedVector3 localAxis0;
+	InverseTransformPoint3x3(out localAxis0, ref axis,ref trans0);
+	IndexedVector3 localAxis1;
+	InverseTransformPoint3x3(out localAxis1, ref axis,ref trans1);
 
-	btScalar p0[3];
-	BoxSupport(convex0.m_extents, localAxis0, p0);
-	btScalar p1[3];
-	BoxSupport(convex1.m_extents, localAxis1, p1);
+	IndexedVector3 p0 = IndexedVector3.Zero;
+    BoxSupport(ref convex0.m_extents, ref localAxis0, ref p0);
+    IndexedVector3 p1 = IndexedVector3.Zero;
+    BoxSupport(ref convex1.m_extents, ref localAxis1, ref p1);
 
-	const btScalar Radius0 = p0[0]*localAxis0.x() + p0[1]*localAxis0.y() + p0[2]*localAxis0.z();
-	const btScalar Radius1 = p1[0]*localAxis1.x() + p1[1]*localAxis1.y() + p1[2]*localAxis1.z();
+	float Radius0 = p0[0]*localAxis0.X + p0[1]*localAxis0.Y + p0[2]*localAxis0.Z;
+	float Radius1 = p1[0]*localAxis1.X + p1[1]*localAxis1.Y + p1[2]*localAxis1.Z;
 
-	const btScalar MinRadius = Radius0>convex0.m_radius ? Radius0 : convex0.m_radius;
-	const btScalar MaxRadius = Radius1>convex1.m_radius ? Radius1 : convex1.m_radius;
+	float MinRadius = Radius0>convex0.m_radius ? Radius0 : convex0.m_radius;
+	float MaxRadius = Radius1>convex1.m_radius ? Radius1 : convex1.m_radius;
 
-	const btScalar MinMaxRadius = MaxRadius + MinRadius;
-	const btScalar d0 = MinMaxRadius + dp;
-	const btScalar d1 = MinMaxRadius - dp;
+	float MinMaxRadius = MaxRadius + MinRadius;
+	float d0 = MinMaxRadius + dp;
+	float d1 = MinMaxRadius - dp;
 
-	const btScalar depth = d0<d1 ? d0:d1;
-	if(depth>dmin)
-		return false;
+	float depth = d0<d1 ? d0:d1;
+    if (depth > dmin)
+    {
+        return false;
+    }
 	return true;
 }
 #endif //TEST_INTERNAL_OBJECTS
@@ -79,13 +82,18 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
             ClipHullAgainstHull(ref separatingNormal, hullA, hullB, ref transA, ref transB, minDist, maxDist, resultOut);
         }
 
-        public static void ClipHullAgainstHull(ref IndexedVector3 separatingNormal, ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref IndexedMatrix transA, ref IndexedMatrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
+        public static void ClipHullAgainstHull(ref IndexedVector3 separatingNormal1, ConvexPolyhedron hullA, ConvexPolyhedron hullB, ref IndexedMatrix transA, ref IndexedMatrix transB, float minDist, float maxDist, IDiscreteCollisionDetectorInterfaceResult resultOut)
         {
+
+            IndexedVector3 separatingNormal = separatingNormal1.Normalized();
+            IndexedVector3 c0 = transA * hullA.m_localCenter;
+            IndexedVector3 c1 = transB * hullB.m_localCenter;
+            IndexedVector3 DeltaC2 = c0 - c1;
             float curMaxDist = maxDist;
             int closestFaceB = -1;
+            float dmax = float.MinValue;
 
             {
-                float dmax = float.MinValue;
                 for (int face = 0; face < hullB.m_faces.Count; face++)
                 {
                     IndexedVector3 Normal = new IndexedVector3(hullB.m_faces[face].m_plane[0], hullB.m_faces[face].m_plane[1], hullB.m_faces[face].m_plane[2]);
@@ -100,10 +108,6 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
                 }
             }
 
-            if (closestFaceB < 0)
-            {
-                return;
-            }
 
             // setup initial clip face (minimizing face from hull B)
             ObjectArray<IndexedVector3> worldVertsB1 = new ObjectArray<IndexedVector3>();
@@ -117,8 +121,10 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
                     worldVertsB1.Add(transB * b);
                 }
             }
-
-            ClipFaceAgainstHull(ref separatingNormal, hullA, ref transA, worldVertsB1, minDist, maxDist, resultOut);
+            if (closestFaceB >= 0)
+            {
+                ClipFaceAgainstHull(ref separatingNormal, hullA, ref transA, worldVertsB1, minDist, maxDist, resultOut);
+            }
 
         }
 
@@ -161,19 +167,29 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
             int numVerticesA = polyA.m_indices.Count;
             for (int e0 = 0; e0 < numVerticesA; e0++)
             {
-                /*const IndexedVector3& a = hullA.m_vertices[polyA.m_indices[e0]];
-                const IndexedVector3& b = hullA.m_vertices[polyA.m_indices[(e0+1)%numVerticesA]];
-                const IndexedVector3 edge0 = a - b;
-                const IndexedVector3 WorldEdge0 = transA.getBasis() * edge0;
-                */
+		        IndexedVector3 a = hullA.m_vertices[polyA.m_indices[e0]];
+                IndexedVector3 b = hullA.m_vertices[polyA.m_indices[(e0 + 1) % numVerticesA]];
+                IndexedVector3 edge0 = a - b;
+                IndexedVector3 WorldEdge0 = transA._basis * edge0;
+                IndexedVector3 worldPlaneAnormal1 = transA._basis * new IndexedVector3(polyA.m_plane[0], polyA.m_plane[1], polyA.m_plane[2]);
 
-                int otherFace = polyA.m_connectedFaces[e0];
-                IndexedVector3 localPlaneNormal = new IndexedVector3(hullA.m_faces[otherFace].m_plane[0], hullA.m_faces[otherFace].m_plane[1], hullA.m_faces[otherFace].m_plane[2]);
-                float localPlaneEq = hullA.m_faces[otherFace].m_plane[3];
+                IndexedVector3 planeNormalWS1 = -WorldEdge0.Cross(worldPlaneAnormal1);//.cross(WorldEdge0);
+                IndexedVector3 worldA1 = transA * a;
+		        float planeEqWS1 = -worldA1.Dot(planeNormalWS1);
+		
+//int otherFace=0;
+#if BLA1
+		int otherFace = polyA.m_connectedFaces[e0];
+		btVector3 localPlaneNormal (hullA.m_faces[otherFace].m_plane[0],hullA.m_faces[otherFace].m_plane[1],hullA.m_faces[otherFace].m_plane[2]);
+		btScalar localPlaneEq = hullA.m_faces[otherFace].m_plane[3];
 
-                IndexedVector3 planeNormalWS = transA._basis * localPlaneNormal;
-                float planeEqWS = localPlaneEq - IndexedVector3.Dot(planeNormalWS, transA._origin);
-                //clip face
+		btVector3 planeNormalWS = transA.getBasis()*localPlaneNormal;
+		btScalar planeEqWS=localPlaneEq-planeNormalWS.dot(transA.getOrigin());
+#else 
+                IndexedVector3 planeNormalWS = planeNormalWS1;
+		float planeEqWS=planeEqWS1;
+		
+#endif                //clip face
 
                 ClipFace(pVtxIn, pVtxOut, ref planeNormalWS, planeEqWS);
 
@@ -202,6 +218,12 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
                 {
 
                     float depth = IndexedVector3.Dot(planeNormalWS, pVtxIn[i]) + planeEqWS;
+                    if (depth <= minDist)
+                    {
+                        //				printf("clamped: depth=%f to minDist=%f\n",depth,minDist);
+                        depth = minDist;
+                    }
+
                     if (depth <= maxDist && depth >= minDist)
                     {
                         IndexedVector3 point2 = pVtxIn[i];
@@ -241,8 +263,8 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
             // dummy value to satisfy exit points.
             sep = new IndexedVector3(0, 1, 0);
 #if TEST_INTERNAL_OBJECTS
-	IndexedVector3 c0 = IndexedVector3.Transform(hullA.mLocalCenter,transA);
-	IndexedVector3 c1 = IndexedVector3.Transform(hullB.mLocalCenter,transB);
+            IndexedVector3 c0 = transA * hullA.m_localCenter;
+            IndexedVector3 c1 = transB * hullB.m_localCenter;
 	IndexedVector3 DeltaC2 = c0 - c1;
 #endif
 
@@ -259,7 +281,7 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
                 curPlaneTests++;
 #if TEST_INTERNAL_OBJECTS
 		gExpectedNbTests++;
-		if(gUseInternalObject && !TestInternalObjects(ref transA,ref transB,DeltaC2, ref faceANormalWS, hullA, hullB, dmin))
+		if(gUseInternalObject && !TestInternalObjects(ref transA,ref transB,ref DeltaC2, ref faceANormalWS, hullA, hullB, dmin))
 			continue;
 		gActualNbTests++;
 #endif
@@ -285,7 +307,7 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
                 curPlaneTests++;
 #if TEST_INTERNAL_OBJECTS
 		gExpectedNbTests++;
-		if(gUseInternalObject && !TestInternalObjects(ref transA,ref transB,DeltaC2, ref WorldNormal, hullA, hullB, dmin))
+		if(gUseInternalObject && !TestInternalObjects(ref transA,ref transB,ref DeltaC2, ref WorldNormal, hullA, hullB, dmin))
 			continue;
 		gActualNbTests++;
 #endif
@@ -322,7 +344,7 @@ void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 in, 
 
 #if TEST_INTERNAL_OBJECTS
 				gExpectedNbTests++;
-				if(gUseInternalObject && !TestInternalObjects(transA,transB,DeltaC2, Cross, hullA, hullB, dmin))
+				if(gUseInternalObject && !TestInternalObjects(ref transA,ref transB,ref DeltaC2, ref Cross, hullA, hullB, dmin))
 					continue;
 				gActualNbTests++;
 #endif

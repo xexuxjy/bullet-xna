@@ -493,6 +493,12 @@ namespace BulletXNA.LinearMath
                 Z = v.Z;
             }
         }
+
+        public int MaxAxis()
+        {
+            return X < Y ? (Y < Z ? 2 : 1) : (X < Z ? 2 : 0);
+        }
+
  
         
         private static IndexedVector3 _zero = new IndexedVector3();

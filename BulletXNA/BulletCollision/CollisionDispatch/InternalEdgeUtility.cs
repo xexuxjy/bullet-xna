@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-using BulletXNA.BulletCollision.CollisionShapes;
 using System.Diagnostics;
 
 
@@ -540,7 +539,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (colObj0.GetRootCollisionShape().GetShapeType() == BroadphaseNativeTypes.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
             {
-                trimesh = ((ScaledBvhTriangleMeshShape)colObj0.GetRootCollisionShape()).GetChildShape();
+                //trimesh = ((ScaledBvhTriangleMeshShape)colObj0.GetRootCollisionShape()).GetChildShape();
             }
             else
             {

@@ -351,13 +351,9 @@ namespace BulletXNA.BulletCollision
 
         public bool ValidContactDistance(ref ManifoldPoint pt)
         {
-            if (pt.m_lifeTime > 1)
-            {
-                return pt.GetDistance() <= GetContactBreakingThreshold();
-            }
-            return pt.m_distance1 <= GetContactProcessingThreshold();
-
+            return pt.m_distance1 <= GetContactBreakingThreshold();
         }
+
         /// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
         public void RefreshContactPoints(ref IndexedMatrix trA, ref IndexedMatrix trB)
         {

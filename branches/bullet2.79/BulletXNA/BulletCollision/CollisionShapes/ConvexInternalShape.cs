@@ -27,6 +27,12 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
+    ///The btConvexInternalShape uses a default collision margin set to CONVEX_DISTANCE_MARGIN.
+    ///This collision margin used by Gjk and some other algorithms, see also btCollisionMargin.h
+    ///Note that when creating small shapes (derived from btConvexInternalShape), 
+    ///you need to make sure to set a smaller collision margin, using the 'setMargin' API
+    ///There is a automatic mechanism 'setSafeMargin' used by btBoxShape and btCylinderShape
+
     public abstract class ConvexInternalShape : ConvexShape
     {
         public ConvexInternalShape()
@@ -61,6 +67,35 @@ namespace BulletXNA.BulletCollision
         {
             return m_implicitShapeDimensions;
         }
+
+        public void SetSafeMargin(float minDimension)
+        {
+            SetSafeMargin(minDimension, 0.1f);
+        }
+
+	    public void	SetSafeMargin(float minDimension, float defaultMarginMultiplier)
+	    {
+		    float safeMargin = defaultMarginMultiplier*minDimension;
+		    if (safeMargin < GetMargin())
+		    {
+			    SetMargin(safeMargin);
+		    }
+	    }
+
+	    public void SetSafeMargin(ref IndexedVector3 halfExtents)
+        {
+            SetSafeMargin(ref halfExtents,0.1f);
+        }
+	    
+        public void SetSafeMargin(ref IndexedVector3 halfExtents, float defaultMarginMultiplier)
+	    {
+		    //see http://code.google.com/p/bullet/issues/detail?id=349
+		    //this margin check could could be added to other collision shapes too,
+		    //or add some assert/warning somewhere
+		    float minDimension=halfExtents[halfExtents.MinAxis()]; 		
+		    SetSafeMargin(minDimension, defaultMarginMultiplier);
+	    }
+
 
 	    ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
 	    public override void GetAabb(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)

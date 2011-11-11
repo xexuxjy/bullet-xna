@@ -207,6 +207,52 @@ namespace BulletXNA.BulletCollision
             RecalcLocalAabb();
         }
 
+
+        public void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, ref float min, ref float max)
+        {
+        #if true
+	        min = float.MaxValue;
+	        max = float.MinValue;
+            IndexedVector3 witnesPtMin;
+            IndexedVector3 witnesPtMax;
+
+	        int numVerts = m_unscaledPoints.Count;
+	        for(int i=0;i<numVerts;i++)
+	        {
+                IndexedVector3 vtx = m_unscaledPoints[i] * m_localScaling;
+                IndexedVector3 pt = trans * vtx;
+		        float dp = pt.Dot(dir);
+		        if(dp < min)	
+		        {
+			        min = dp;
+			        witnesPtMin = pt;
+		        }
+		        if(dp > max)	
+		        {
+			        max = dp;
+			        witnesPtMax=pt;
+		        }
+	        }
+        #else
+	        btVector3 localAxis = dir*trans.getBasis();
+	        btVector3 vtx1 = trans(localGetSupportingVertex(localAxis));
+	        btVector3 vtx2 = trans(localGetSupportingVertex(-localAxis));
+
+	        min = vtx1.dot(dir);
+	        max = vtx2.dot(dir);
+        #endif
+
+	        if(min>max)
+	        {
+		        float tmp = min;
+		        min = max;
+		        max = tmp;
+	        }
+
+
+        }
+
+
         private IList<IndexedVector3> m_unscaledPoints;
     }
 

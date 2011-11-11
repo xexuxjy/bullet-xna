@@ -74,17 +74,37 @@ namespace BulletXNA.BulletCollision
             ConvexShape convexShape = convexObj.GetCollisionShape() as ConvexShape;
             StaticPlaneShape planeShape = planeObj.GetCollisionShape() as StaticPlaneShape;
 
-            //bool hasCollision = false;
-            IndexedVector3 planeNormal = planeShape.GetPlaneNormal();
-            //float planeConstant = planeShape.getPlaneConstant();
+            bool hasCollision = false;
+	        IndexedVector3 planeNormal = planeShape.GetPlaneNormal();
+	        float planeConstant = planeShape.GetPlaneConstant();
+	        IndexedMatrix planeInConvex;
+	        planeInConvex= convexObj.GetWorldTransform().Inverse() * planeObj.GetWorldTransform();
+            IndexedMatrix convexInPlaneTrans;
+	        convexInPlaneTrans= planeObj.GetWorldTransform().Inverse() * convexObj.GetWorldTransform();
 
+	        IndexedVector3 vtx = convexShape.LocalGetSupportingVertex(planeInConvex._basis*-planeNormal);
+	        IndexedVector3 vtxInPlane = convexInPlaneTrans * vtx;
+	        float distance = (planeNormal.Dot(vtxInPlane) - planeConstant);
+
+	        IndexedVector3 vtxInPlaneProjected = vtxInPlane - distance*planeNormal;
+	        IndexedVector3 vtxInPlaneWorld = planeObj.GetWorldTransform() * vtxInPlaneProjected;
+
+	        hasCollision = distance < m_manifoldPtr.GetContactBreakingThreshold();
+	        resultOut.SetPersistentManifold(m_manifoldPtr);
+	        if (hasCollision)
+	        {
+		        /// report a contact. internally this will be kept persistent, and contact reduction is done
+		        IndexedVector3 normalOnSurfaceB = planeObj.GetWorldTransform()._basis * planeNormal;
+		        IndexedVector3 pOnB = vtxInPlaneWorld;
+		        resultOut.AddContactPoint(normalOnSurfaceB,pOnB,distance);
+	        }
             //first perform a collision query with the non-perturbated collision objects
             {
                 Quaternion rotq = Quaternion.Identity;
                 CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
             }
 
-            if (resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
+            if (convexShape.IsPolyhedral() && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
             {
                 IndexedVector3 v0;
                 IndexedVector3 v1;
@@ -188,7 +208,7 @@ namespace BulletXNA.BulletCollision
         public ConvexPlaneCreateFunc()
         {
             m_numPerturbationIterations = 1;
-            m_minimumPointsPerturbationThreshold = 1;
+            m_minimumPointsPerturbationThreshold = 0;
         }
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)

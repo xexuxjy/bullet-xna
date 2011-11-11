@@ -499,6 +499,10 @@ namespace BulletXNA.LinearMath
             return X < Y ? (Y < Z ? 2 : 1) : (X < Z ? 2 : 0);
         }
 
+        public int MinAxis()
+        {
+            return X < Y ? (Y < Z ? 0 : 2) : (X < Z ? 1 : 2);
+        }
  
         
         private static IndexedVector3 _zero = new IndexedVector3();

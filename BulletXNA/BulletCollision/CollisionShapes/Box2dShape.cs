@@ -101,6 +101,14 @@ namespace BulletXNA.BulletCollision
 			m_normals[2] = new IndexedVector3(0,1,0);
 			m_normals[3] = new IndexedVector3(-1,0,0);
 
+
+            float minDimension = boxHalfExtents.X;
+            if (minDimension > boxHalfExtents.Y)
+            {
+                minDimension = boxHalfExtents.Y;
+            }
+            SetSafeMargin(minDimension);
+
 			m_shapeType = BroadphaseNativeTypes.BOX_2D_SHAPE_PROXYTYPE;
 			IndexedVector3 margin = new IndexedVector3(GetMargin());
 			m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;

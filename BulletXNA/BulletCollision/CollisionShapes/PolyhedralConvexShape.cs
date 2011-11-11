@@ -43,10 +43,10 @@ namespace BulletXNA.BulletCollision
             base.Cleanup();
         }
 
-#if USE_CONVEX_HULL_COMPUTER
         ///optional method mainly used to generate multiple contact points by clipping polyhedral features (faces/edges)
         public virtual bool InitializePolyhedralFeatures()
         {
+#if USE_CONVEX_HULL_COMPUTER
             if (m_polyhedron != null)
             {
                 m_polyhedron = null;
@@ -87,14 +87,14 @@ namespace BulletXNA.BulletCollision
             {
                 int face = convexUtil.faces[i];
                 //printf("face=%d\n",face);
-                LinearMath.Edge firstEdge = convexUtil.edges[face];
-                LinearMath.Edge edge = firstEdge;
+                Edge firstEdge = convexUtil.edges[face];
+                Edge edge = firstEdge;
 
                 IndexedVector3[] edges = new IndexedVector3[3];
                 int numEdges = 0;
                 //compute face normals
 
-                float maxCross2 = 0.f;
+                float maxCross2 = 0.0f;
                 int chosenEdge = -1;
 
                 do
@@ -178,10 +178,10 @@ namespace BulletXNA.BulletCollision
 
             m_polyhedron.Initialize();
 
+#endif
             return true;
 
         }
-#endif
 
         public ConvexPolyhedron GetConvexPolyhedron()
         {

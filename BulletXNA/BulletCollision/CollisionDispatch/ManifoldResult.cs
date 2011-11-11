@@ -112,8 +112,8 @@ namespace BulletXNA.BulletCollision
 	        }
 
 
-            //if (depth > m_manifoldPtr.GetContactBreakingThreshold())
-            if (depth > m_manifoldPtr.GetContactProcessingThreshold())
+            //if (depth > m_manifoldPtr.GetContactProcessingThreshold())
+            if (depth > m_manifoldPtr.GetContactBreakingThreshold())
             {
                 return;
             }

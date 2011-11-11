@@ -171,13 +171,10 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 		PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
 		if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
 		{
-			gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-			
-
 			float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-			float minDist = 0.0f;
-			IndexedVector3 sepNormalWorldSpace;
+            float minDist = float.MinValue;
+			IndexedVector3 sepNormalWorldSpace = new IndexedVector3(0,1,0);
 			bool foundSepAxis  = true;
 
 			if (dispatchInfo.m_enableSatConvex)
@@ -189,8 +186,28 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 					out sepNormalWorldSpace);
 			} else
 			{
-				sepNormalWorldSpace = IndexedVector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
-				minDist = gjkPairDetector.GetCachedSeparatingDistance();
+
+#if ZERO_MARGIN
+                gjkPairDetector.SetIgnoreMargin(true);
+                gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+
+                gjkPairDetector.GetClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
+#endif
+
+				float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+				if (l2>MathUtil.SIMD_EPSILON)
+				{
+					sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+					//minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();
+					minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.GetMargin()-min1.GetMargin();
+	
+#if ZERO_MARGIN
+					foundSepAxis = true;//gjkPairDetector.getCachedSeparatingDistance()<0.f;
+#else
+					foundSepAxis = gjkPairDetector.GetCachedSeparatingDistance()<(min0.GetMargin()+min1.GetMargin());
+#endif
+                }
 			}
 			if (foundSepAxis)
 			{
@@ -207,27 +224,62 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 			}
 			return;
 
-		} else
+		} 
+        else
 		{
+
 			//we can also deal with convex versus triangle (without connectivity data)
 			if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE)
 			{
-				gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-		
-				IndexedVector3 sepNormalWorldSpace = IndexedVector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
-
-				ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
-				TriangleShape tri = polyhedronB as TriangleShape;
-				vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
+                ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
+                TriangleShape tri = polyhedronB as TriangleShape;
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
                 vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
                 vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
+                
+                float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+                IndexedVector3 sepNormalWorldSpace = new IndexedVector3(0, 1, 0); ;
+				float minDist = float.MinValue;
+				float maxDist = threshold;
+				
+				bool foundSepAxis = false;
+				if (false)
+				{
+					polyhedronB.InitializePolyhedralFeatures();
+                    foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+					body0.GetWorldTransform(), 
+					body1.GetWorldTransform(),
+					out sepNormalWorldSpace);
+				//	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
 
-				float threshold = m_manifoldPtr.GetContactBreakingThreshold();
-				float minDist = gjkPairDetector.GetCachedSeparatingDistance();
+				} else
+				{
+#if ZERO_MARGIN
+					gjkPairDetector.SetIgnoreMargin(true);
+					gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+					gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+#endif//ZERO_MARGIN
+					
+					float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+					if (l2>MathUtil.SIMD_EPSILON)
+					{
+						sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+						//minDist = gjkPairDetector.getCachedSeparatingDistance();
+						//maxDist = threshold;
+						minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.GetMargin()-min1.GetMargin();
+						foundSepAxis = true;
+					}
+				}
+
+				
+			if (foundSepAxis)
+			{
 				PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), 
-					body0.GetWorldTransform(), vertices, minDist-threshold, threshold, resultOut);
-				
-				
+					body0.GetWorldTransform(), vertices, minDist-threshold, maxDist, resultOut);
+			}
+								
 				if (m_ownManifold)
 				{
 					resultOut.RefreshContactPoints();

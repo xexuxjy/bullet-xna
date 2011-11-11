@@ -85,9 +85,9 @@ namespace BulletXNA.BulletCollision
 		    : base()
 	    {
 		    m_shapeType = BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE;
+            SetSafeMargin(ref boxHalfExtents);
             IndexedVector3 margin = new IndexedVector3(GetMargin());
 		    m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
-            int ibreak = 0;
 	    }
 
 	    public override void SetMargin(float collisionMargin)

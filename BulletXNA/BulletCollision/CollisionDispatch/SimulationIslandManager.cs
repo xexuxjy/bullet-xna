@@ -62,19 +62,22 @@ namespace BulletXNA.BulletCollision
         {
             ObjectArray<BroadphasePair> list = collisionWorld.GetPairCache().GetOverlappingPairArray();
             int length = list.Count;
-            BroadphasePair[] rawList = list.GetRawArray();
-            for (int i = 0; i < length; ++i)
+            if (length > 0)
             {
-                BroadphasePair collisionPair = rawList[i];
-                CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
-                CollisionObject colObj1 = collisionPair.m_pProxy1.m_clientObject as CollisionObject;
-
-                if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
-                    ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
+                BroadphasePair[] rawList = list.GetRawArray();
+                for (int i = 0; i < length; ++i)
                 {
+                    BroadphasePair collisionPair = rawList[i];
+                    CollisionObject colObj0 = collisionPair.m_pProxy0.m_clientObject as CollisionObject;
+                    CollisionObject colObj1 = collisionPair.m_pProxy1.m_clientObject as CollisionObject;
 
-                    m_unionFind.Unite((colObj0).GetIslandTag(),
-                        (colObj1).GetIslandTag());
+                    if (((colObj0 != null) && ((colObj0).MergesSimulationIslands())) &&
+                        ((colObj1 != null) && ((colObj1).MergesSimulationIslands())))
+                    {
+
+                        m_unionFind.Unite((colObj0).GetIslandTag(),
+                            (colObj1).GetIslandTag());
+                    }
                 }
             }
         }

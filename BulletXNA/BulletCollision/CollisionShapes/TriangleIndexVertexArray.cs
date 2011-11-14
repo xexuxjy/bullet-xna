@@ -31,10 +31,10 @@ namespace BulletXNA.BulletCollision
     public class IndexedMesh
     {
         public int m_numTriangles;
-        public ObjectArray<int> m_triangleIndexBase = new ObjectArray<int>();
+        public Object m_triangleIndexBase;
         public int m_triangleIndexStride;
         public int m_numVertices;
-        public Object m_vertexBase = null;
+        public Object m_vertexBase;
         public int m_vertexStride;
         //// The index type is set when adding an indexed mesh to the
         //// btTriangleIndexVertexArray, do not set it manually

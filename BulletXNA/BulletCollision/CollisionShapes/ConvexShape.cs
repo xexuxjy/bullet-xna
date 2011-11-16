@@ -423,6 +423,23 @@ namespace BulletXNA.BulletCollision
 
         }
 
+        public virtual void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, ref float min, ref float max)
+        {
+            IndexedVector3 localAxis = dir * trans._basis;
+            IndexedVector3 vtx1 = trans * LocalGetSupportingVertex(localAxis);
+            IndexedVector3 vtx2 = trans * LocalGetSupportingVertex(-localAxis);
+
+            min = vtx1.Dot(dir);
+            max = vtx2.Dot(dir);
+
+            if (min > max)
+            {
+                float tmp = min;
+                min = max;
+                max = tmp;
+            }
+        }
+
 
         //notice that the vectors should be unit length
 		public abstract void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors);

@@ -38,6 +38,7 @@ namespace BulletXNA.BulletCollision
 		public CylinderShape (ref IndexedVector3 halfExtents)
         {
             m_upAxis = 1;
+            SetSafeMargin(ref halfExtents);
             m_shapeType = BroadphaseNativeTypes.CYLINDER_SHAPE_PROXYTYPE;
 	        IndexedVector3 margin = new IndexedVector3(GetMargin());
 	        m_implicitShapeDimensions = (halfExtents * m_localScaling) - margin;

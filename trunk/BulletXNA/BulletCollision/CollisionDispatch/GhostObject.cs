@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -41,17 +42,18 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(m_overlappingObjects.Count == 0);
         }
 
-        public void ConvexSweepTest(ConvexShape castShape, ref Matrix convexFromWorld, ref Matrix convexToWorld, ConvexResultCallback resultCallback, float allowedCcdPenetration)
+        public void ConvexSweepTest(ConvexShape castShape, ref IndexedMatrix convexFromWorld, ref IndexedMatrix convexToWorld, ConvexResultCallback resultCallback, float allowedCcdPenetration)
         {
-            Matrix convexFromTrans = convexFromWorld;
-            Matrix convexToTrans = convexToWorld;
+            IndexedMatrix convexFromTrans = convexFromWorld;
+            IndexedMatrix convexToTrans = convexToWorld;
 
-            Vector3 castShapeAabbMin;
-            Vector3 castShapeAabbMax;
+            IndexedVector3 castShapeAabbMin;
+            IndexedVector3 castShapeAabbMax;
             /* Compute AABB that encompasses angular movement */
-            Vector3 linVel, angVel;
+            IndexedVector3 linVel, angVel;
             TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
-            Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
+            IndexedMatrix R = IndexedMatrix.Identity;
+            R._basis = convexFromTrans._basis;
             castShape.CalculateTemporalAabb(ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 
             /// go over all objects, and if the ray intersects their aabb + cast shape aabb,
@@ -63,17 +65,17 @@ namespace BulletXNA.BulletCollision
                 if (resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle()))
                 {
                     //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
-                    Vector3 collisionObjectAabbMin;
-                    Vector3 collisionObjectAabbMax;
-                    Matrix t = collisionObject.GetWorldTransform();
+                    IndexedVector3 collisionObjectAabbMin;
+                    IndexedVector3 collisionObjectAabbMax;
+                    IndexedMatrix t = collisionObject.GetWorldTransform();
                     collisionObject.GetCollisionShape().GetAabb(ref t, out collisionObjectAabbMin, out collisionObjectAabbMax);
                     AabbUtil2.AabbExpand(ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref castShapeAabbMin, ref castShapeAabbMax);
                     float hitLambda = 1f; //could use resultCallback.m_closestHitFraction, but needs testing
-                    Vector3 hitNormal;
+                    IndexedVector3 hitNormal;
 
-                    if (AabbUtil2.RayAabb(convexFromWorld.Translation, convexToWorld.Translation, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, out hitNormal))
+                    if (AabbUtil2.RayAabb(convexFromWorld._origin, convexToWorld._origin, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, out hitNormal))
                     {
-                        Matrix wt = collisionObject.GetWorldTransform();
+                        IndexedMatrix wt = collisionObject.GetWorldTransform();
                         CollisionWorld.ObjectQuerySingle(castShape, ref convexFromTrans, ref convexToTrans,
                             collisionObject,
                                 collisionObject.GetCollisionShape(),
@@ -86,7 +88,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public void RayTest(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, RayResultCallback resultCallback)
+        public void RayTest(ref IndexedVector3 rayFromWorld, ref IndexedVector3 rayToWorld, RayResultCallback resultCallback)
         {
         }
 

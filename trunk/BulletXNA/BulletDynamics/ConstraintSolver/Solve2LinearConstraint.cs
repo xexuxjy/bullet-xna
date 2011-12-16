@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -41,19 +42,19 @@ namespace BulletXNA.BulletDynamics
 	    //
 	    // solve unilateral raint (equality, direct method)
 	    //
-        public void ResolveUnilateralPairConstraint(RigidBody body0, RigidBody body1, ref Matrix world2A,
-                            ref Matrix world2B,
-                            ref Vector3 invInertiaADiag,
+        public void ResolveUnilateralPairConstraint(RigidBody body0, RigidBody body1, ref IndexedBasisMatrix world2A,
+                            ref IndexedBasisMatrix world2B,
+                            ref IndexedVector3 invInertiaADiag,
                             float invMassA,
-                            ref Vector3 linvelA, ref Vector3 angvelA,
-                            ref Vector3 rel_posA1,
-                            ref Vector3 invInertiaBDiag,
+                            ref IndexedVector3 linvelA, ref IndexedVector3 angvelA,
+                            ref IndexedVector3 rel_posA1,
+                            ref IndexedVector3 invInertiaBDiag,
                             float invMassB,
-                            ref Vector3 linvelB, ref Vector3 angvelB,
-                            ref Vector3 rel_posA2,
-                            float depthA, ref Vector3 normalA,
-                            ref Vector3 rel_posB1, ref Vector3 rel_posB2,
-                            float depthB, ref Vector3 normalB,
+                            ref IndexedVector3 linvelB, ref IndexedVector3 angvelB,
+                            ref IndexedVector3 rel_posA2,
+                            float depthA, ref IndexedVector3 normalA,
+                            ref IndexedVector3 rel_posB1, ref IndexedVector3 rel_posB2,
+                            float depthB, ref IndexedVector3 normalB,
                             out float imp0, out float imp1)
         {
             //(void)linvelA;
@@ -79,8 +80,8 @@ namespace BulletXNA.BulletDynamics
 	        // float vel0 = jacA.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
 	        // float vel1 = jacB.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
 
-	        float vel0 = Vector3.Dot(normalA,(body0.GetVelocityInLocalPoint(ref rel_posA1)-body1.GetVelocityInLocalPoint(ref rel_posA1)));
-	        float vel1 = Vector3.Dot(normalB,(body0.GetVelocityInLocalPoint(ref rel_posB1)-body1.GetVelocityInLocalPoint(ref rel_posB1)));
+	        float vel0 = IndexedVector3.Dot(normalA,(body0.GetVelocityInLocalPoint(ref rel_posA1)-body1.GetVelocityInLocalPoint(ref rel_posA1)));
+	        float vel1 = IndexedVector3.Dot(normalB,(body0.GetVelocityInLocalPoint(ref rel_posB1)-body1.GetVelocityInLocalPoint(ref rel_posB1)));
 
         //	float penetrationImpulse = (depth*contactTau*timeCorrection)  * massTerm;//jacDiagABInv
 	        float massTerm = 1f / (invMassA + invMassB);
@@ -122,19 +123,19 @@ namespace BulletXNA.BulletDynamics
 	    //
 	    // solving 2x2 lcp problem (inequality, direct solution )
 	    //
-        void ResolveBilateralPairraint(RigidBody body0, RigidBody body1, ref Matrix world2A,
-                            ref Matrix world2B,
-                            ref Vector3 invInertiaADiag,
+        void ResolveBilateralPairraint(RigidBody body0, RigidBody body1, ref IndexedBasisMatrix world2A,
+                            ref IndexedBasisMatrix world2B,
+                            ref IndexedVector3 invInertiaADiag,
                             float invMassA,
-                            ref Vector3 linvelA, ref Vector3 angvelA,
-                            ref Vector3 rel_posA1,
-                            ref Vector3 invInertiaBDiag,
+                            ref IndexedVector3 linvelA, ref IndexedVector3 angvelA,
+                            ref IndexedVector3 rel_posA1,
+                            ref IndexedVector3 invInertiaBDiag,
                             float invMassB,
-                            ref Vector3 linvelB, ref Vector3 angvelB,
-                            ref Vector3 rel_posA2,
-                          float depthA, ref Vector3 normalA,
-                          ref Vector3 rel_posB1, ref Vector3 rel_posB2,
-                          float depthB, ref Vector3 normalB,
+                            ref IndexedVector3 linvelB, ref IndexedVector3 angvelB,
+                            ref IndexedVector3 rel_posA2,
+                          float depthA, ref IndexedVector3 normalA,
+                          ref IndexedVector3 rel_posB1, ref IndexedVector3 rel_posB2,
+                          float depthB, ref IndexedVector3 normalB,
                           ref float imp0, ref float imp1)
         {
 	        imp0 = 0f;
@@ -156,8 +157,8 @@ namespace BulletXNA.BulletDynamics
 	        // float vel0 = jacA.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
 	        // float vel1 = jacB.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
 
-	        float vel0 = Vector3.Dot(normalA,(body0.GetVelocityInLocalPoint(ref rel_posA1)-body1.GetVelocityInLocalPoint(ref rel_posA1)));
-	        float vel1 = Vector3.Dot(normalB,(body0.GetVelocityInLocalPoint(ref rel_posB1)-body1.GetVelocityInLocalPoint(ref rel_posB1)));
+	        float vel0 = IndexedVector3.Dot(normalA,(body0.GetVelocityInLocalPoint(ref rel_posA1)-body1.GetVelocityInLocalPoint(ref rel_posA1)));
+	        float vel1 = IndexedVector3.Dot(normalB,(body0.GetVelocityInLocalPoint(ref rel_posB1)-body1.GetVelocityInLocalPoint(ref rel_posB1)));
 
 	        // calculate rhs (or error) terms
 	         float dv0 = depthA  * m_tau - vel0 * m_damping;
@@ -233,18 +234,18 @@ namespace BulletXNA.BulletDynamics
         }
 
     /*
-	    void resolveAngularraint(	ref Matrix invInertiaAWS,
+	    void resolveAngularraint(	ref IndexedMatrix invInertiaAWS,
 						     float invMassA,
-						    ref Vector3 linvelA,ref Vector3 angvelA,
-						    ref Vector3 rel_posA1,
-						    ref Matrix invInertiaBWS,
+						    ref IndexedVector3 linvelA,ref IndexedVector3 angvelA,
+						    ref IndexedVector3 rel_posA1,
+						    ref IndexedMatrix invInertiaBWS,
 						     float invMassB,
-						    ref Vector3 linvelB,ref Vector3 angvelB,
-						    ref Vector3 rel_posA2,
+						    ref IndexedVector3 linvelB,ref IndexedVector3 angvelB,
+						    ref IndexedVector3 rel_posA2,
 
-					      float depthA, ref Vector3 normalA, 
-					      ref Vector3 rel_posB1,ref Vector3 rel_posB2,
-					      float depthB, ref Vector3 normalB, 
+					      float depthA, ref IndexedVector3 normalA, 
+					      ref IndexedVector3 rel_posB1,ref IndexedVector3 rel_posB2,
+					      float depthB, ref IndexedVector3 normalB, 
 					      float& imp0,float& imp1);
 
     */

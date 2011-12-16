@@ -25,6 +25,7 @@ using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {
@@ -32,9 +33,9 @@ namespace BulletXNADemos.Demos
     {
 
         const float CUBE_HALF_EXTENTS = 1.0f;
-        Matrix sliderTransform = Matrix.Identity;
-        Vector3 lowerSliderLimit = new Vector3(-10,0,0);
-        Vector3 hiSliderLimit = new Vector3(10,0,0);
+        IndexedMatrix sliderTransform = IndexedMatrix.Identity;
+        IndexedVector3 lowerSliderLimit = new IndexedVector3(-10,0,0);
+        IndexedVector3 hiSliderLimit = new IndexedVector3(10,0,0);
 
         RigidBody d6body0 = null;
         HingeConstraint spDoorHinge = null;
@@ -47,8 +48,8 @@ namespace BulletXNADemos.Demos
         {
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
-	        Vector3 worldMin = new Vector3(-1000,-1000,-1000);
-	        Vector3 worldMax = new Vector3(1000,1000,1000);
+	        IndexedVector3 worldMin = new IndexedVector3(-1000,-1000,-1000);
+	        IndexedVector3 worldMax = new IndexedVector3(1000,1000,1000);
             m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
 	        m_constraintSolver = new SequentialImpulseConstraintSolver();
 	        m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_constraintSolver,m_collisionConfiguration);
@@ -56,18 +57,18 @@ namespace BulletXNADemos.Demos
 
             SetCameraDistance(26f);
 
-            //CollisionShape groundShape = new BoxShape(new Vector3(50f, 40f, 50f));
-            CollisionShape groundShape = new StaticPlaneShape(new Vector3(0, 1, 0), 40);
+            //CollisionShape groundShape = new BoxShape(new IndexedVector3(50f, 40f, 50f));
+            CollisionShape groundShape = new StaticPlaneShape(new IndexedVector3(0, 1, 0), 40);
 
             m_collisionShapes.Add(groundShape);
-            Matrix groundTransform = Matrix.Identity;
-            groundTransform.Translation = new Vector3(0, -56, 0);
+            IndexedMatrix groundTransform = IndexedMatrix.Identity;
+            groundTransform._origin = new IndexedVector3(0, -56, 0);
             RigidBody groundBody = LocalCreateRigidBody(0, ref groundTransform, groundShape);
 
-            CollisionShape shape = new BoxShape(new Vector3(CUBE_HALF_EXTENTS, CUBE_HALF_EXTENTS, CUBE_HALF_EXTENTS));
+            CollisionShape shape = new BoxShape(new IndexedVector3(CUBE_HALF_EXTENTS, CUBE_HALF_EXTENTS, CUBE_HALF_EXTENTS));
             m_collisionShapes.Add(shape);
-            Matrix trans = Matrix.Identity;
-            trans.Translation = new Vector3(0, 20, 0);
+            IndexedMatrix trans = IndexedMatrix.Identity;
+            trans._origin = new IndexedVector3(0, 20, 0);
 
 	        float mass = 1f;
         #if true
@@ -75,17 +76,17 @@ namespace BulletXNADemos.Demos
 			//SEEMS OK
 	        {
 		        RigidBody body0 = LocalCreateRigidBody( mass,ref trans,shape);
-		        trans.Translation = new Vector3(2*CUBE_HALF_EXTENTS,20,0);
+		        trans._origin = new IndexedVector3(2*CUBE_HALF_EXTENTS,20,0);
 
 		        mass = 1f;
 		        RigidBody body1 = null;//localCreateRigidBody( mass,trans,shape);
 
-		        Vector3 pivotInA = new Vector3(CUBE_HALF_EXTENTS,-CUBE_HALF_EXTENTS,-CUBE_HALF_EXTENTS);
-		        Vector3 axisInA = new Vector3(0,0,1);
+		        IndexedVector3 pivotInA = new IndexedVector3(CUBE_HALF_EXTENTS,-CUBE_HALF_EXTENTS,-CUBE_HALF_EXTENTS);
+		        IndexedVector3 axisInA = new IndexedVector3(0,0,1);
 
-		        Vector3 pivotInB = body1 != null ? Vector3.Transform((Vector3.Transform(pivotInA,body0.GetCenterOfMassTransform())),Matrix.Invert(body1.GetCenterOfMassTransform())) : pivotInA;
-		        Vector3 axisInB = body1 != null ? Vector3.Transform((Vector3.TransformNormal(axisInA,body1.GetCenterOfMassTransform())),Matrix.Invert(MathUtil.BasisMatrix(body1.GetCenterOfMassTransform()))) : 
-                    Vector3.TransformNormal( axisInA,body0.GetCenterOfMassTransform());
+                IndexedVector3 pivotInB = body1 != null ? body1.GetCenterOfMassTransform().Inverse() * (body0.GetCenterOfMassTransform() * (pivotInA)) : pivotInA;
+                IndexedVector3 axisInB = body1 != null ? (body1.GetCenterOfMassTransform()._basis.Inverse() * (body1.GetCenterOfMassTransform()._basis * axisInA)) :
+                body0.GetCenterOfMassTransform()._basis * axisInA;
 
 		        HingeConstraint hinge = new HingeConstraint(body0,ref pivotInA,ref axisInA,false);
         		
@@ -104,12 +105,12 @@ namespace BulletXNADemos.Demos
 			// SEEMS OK
 	        {
 		        mass = 1f;
-		        Vector3 sliderWorldPos = new Vector3(0,10,0);
-		        Vector3 sliderAxis = new Vector3(1,0,0);
+		        IndexedVector3 sliderWorldPos = new IndexedVector3(0,10,0);
+		        IndexedVector3 sliderAxis = new IndexedVector3(1,0,0);
 		        float angle=0f;//SIMD_RADS_PER_DEG * 10.f;
-		        Matrix  sliderOrientation = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(sliderAxis ,angle));
-		        trans = Matrix.Identity;
-		        trans.Translation = sliderWorldPos;
+		        IndexedBasisMatrix sliderOrientation = new IndexedBasisMatrix(Quaternion.CreateFromAxisAngle(sliderAxis.ToVector3() ,angle));
+		        trans = IndexedMatrix.Identity;
+		        trans._origin = sliderWorldPos;
 		        //trans.setBasis(sliderOrientation);
 		        sliderTransform = trans;
 
@@ -118,11 +119,11 @@ namespace BulletXNADemos.Demos
 		        RigidBody fixedBody1 = LocalCreateRigidBody(0,ref trans,null);
 		        m_dynamicsWorld.AddRigidBody(fixedBody1);
 
-		        Matrix frameInA, frameInB;
-		        frameInA = Matrix.Identity;
-		        frameInB = Matrix.Identity;
-                frameInA.Translation = new Vector3(0, 5, 0);
-                frameInB.Translation = new Vector3(0, 5, 0);
+		        IndexedMatrix frameInA, frameInB;
+		        frameInA = IndexedMatrix.Identity;
+		        frameInB = IndexedMatrix.Identity;
+                frameInA._origin = new IndexedVector3(0, 5, 0);
+                frameInB._origin = new IndexedVector3(0, 5, 0);
 
         //		bool useLinearReferenceFrameA = false;//use fixed frame B for linear llimits
 		        bool useLinearReferenceFrameA = true;//use fixed frame A for linear llimits
@@ -131,12 +132,12 @@ namespace BulletXNADemos.Demos
                 spSlider6Dof.SetLinearUpperLimit(ref hiSliderLimit);
 
 		        //range should be small, otherwise singularities will 'explode' the constraint
-                Vector3 angularLower = new Vector3(-1.5f,0,0);
-                Vector3 angularUpper = -angularLower;
+                IndexedVector3 angularLower = new IndexedVector3(-1.5f,0,0);
+                IndexedVector3 angularUpper = -angularLower;
                 spSlider6Dof.SetAngularLowerLimit(ref angularLower);
                 spSlider6Dof.SetAngularUpperLimit(ref angularUpper);
-        //		slider.setAngularLowerLimit(Vector3(0,0,0));
-        //		slider.setAngularUpperLimit(Vector3(0,0,0));
+        //		slider.setAngularLowerLimit(IndexedVector3(0,0,0));
+        //		slider.setAngularUpperLimit(IndexedVector3(0,0,0));
 
                 spSlider6Dof.GetTranslationalLimitMotor().m_enableMotor[0] = true;
                 spSlider6Dof.GetTranslationalLimitMotor().m_targetVelocity.X = -5.0f;
@@ -150,14 +151,14 @@ namespace BulletXNADemos.Demos
 #endif
 #if true
 	        { // create a door using hinge constraint attached to the world
-		        CollisionShape pDoorShape = new BoxShape(new Vector3(2.0f, 5.0f, 0.2f));
+		        CollisionShape pDoorShape = new BoxShape(new IndexedVector3(2.0f, 5.0f, 0.2f));
 		        m_collisionShapes.Add(pDoorShape);
-		        Matrix doorTrans = Matrix.Identity;
-		        doorTrans.Translation = new Vector3(-5.0f, -2.0f, 0.0f);
+		        IndexedMatrix doorTrans = IndexedMatrix.Identity;
+		        doorTrans._origin = new IndexedVector3(-5.0f, -2.0f, 0.0f);
 		        RigidBody pDoorBody = LocalCreateRigidBody( 1.0f, ref doorTrans, pDoorShape);
 		        pDoorBody.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
-		        Vector3 btPivotA = new Vector3( 10f+2.1f, -2.0f, 0.0f ); // right next to the door slightly outside
-		        Vector3 btAxisA = new Vector3( 0.0f, 1.0f, 0.0f ); // pointing upwards, aka Y-axis
+		        IndexedVector3 btPivotA = new IndexedVector3( 10f+2.1f, -2.0f, 0.0f ); // right next to the door slightly outside
+		        IndexedVector3 btAxisA = new IndexedVector3( 0.0f, 1.0f, 0.0f ); // pointing upwards, aka Y-axis
 
 		        spDoorHinge = new HingeConstraint( pDoorBody, ref btPivotA, ref btAxisA,false );
 
@@ -170,62 +171,62 @@ namespace BulletXNADemos.Demos
 #if true
             { // create a generic 6DOF constraint
 				// SEEMS OK - But debug draw a bit wrong?
-		        Matrix tr = Matrix.Identity;
-		        tr.Translation = new Vector3(10f, 6f, 0f);
+		        IndexedMatrix tr = IndexedMatrix.Identity;
+		        tr._origin = new IndexedVector3(10f, 6f, 0f);
                 //tr.getBasis().setEulerZYX(0,0,0);
         //		RigidBody pBodyA = localCreateRigidBody( mass, tr, shape);
 		        RigidBody pBodyA = LocalCreateRigidBody( 0.0f, ref tr, shape);
         //		RigidBody pBodyA = localCreateRigidBody( 0.0, tr, 0);
 		        pBodyA.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 
-                tr = Matrix.Identity;
-		        tr.Translation = new Vector3(0f, 6f, 0f);		        
+                tr = IndexedMatrix.Identity;
+		        tr._origin = new IndexedVector3(0f, 6f, 0f);		        
                 //tr.getBasis().setEulerZYX(0,0,0);
 		        RigidBody pBodyB = LocalCreateRigidBody(mass, ref tr, shape);
 		        pBodyB.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 
-		        Matrix frameInA, frameInB;
-		        frameInA = Matrix.CreateTranslation(-5,0,0);
-		        frameInB = Matrix.CreateTranslation(5,0,0);
+		        IndexedMatrix frameInA, frameInB;
+		        frameInA = IndexedMatrix.CreateTranslation(-5,0,0);
+		        frameInB = IndexedMatrix.CreateTranslation(5,0,0);
 
 		        Generic6DofConstraint pGen6DOF = new Generic6DofConstraint(pBodyA, pBodyB, ref frameInA, ref frameInB, true);
         //		btGeneric6DofConstraint* pGen6DOF = new btGeneric6DofConstraint(*pBodyA, *pBodyB, frameInA, frameInB, false);
-		        Vector3 linearLower = new Vector3(-10, -2, -1);
+		        IndexedVector3 linearLower = new IndexedVector3(-10, -2, -1);
                 pGen6DOF.SetLinearLowerLimit(ref linearLower);
-                Vector3 linearUpper = new Vector3(10,2,1);
+                IndexedVector3 linearUpper = new IndexedVector3(10,2,1);
 		        pGen6DOF.SetLinearUpperLimit(ref linearUpper);
                 // ? why again?
-                //linearLower = new Vector3(-10,0,0);
+                //linearLower = new IndexedVector3(-10,0,0);
                 //pGen6DOF.setLinearLowerLimit(ref linearLower);
-        //		pGen6DOF.setLinearUpperLimit(Vector3(10., 0., 0.));
-        //		pGen6DOF.setLinearLowerLimit(Vector3(0., 0., 0.));
-        //		pGen6DOF.setLinearUpperLimit(Vector3(0., 0., 0.));
+        //		pGen6DOF.setLinearUpperLimit(IndexedVector3(10., 0., 0.));
+        //		pGen6DOF.setLinearLowerLimit(IndexedVector3(0., 0., 0.));
+        //		pGen6DOF.setLinearUpperLimit(IndexedVector3(0., 0., 0.));
 
         //		pGen6DOF.getTranslationalLimitMotor().m_enableMotor[0] = true;
         //		pGen6DOF.getTranslationalLimitMotor().m_targetVelocity[0] = 5.0f;
         //		pGen6DOF.getTranslationalLimitMotor().m_maxMotorForce[0] = 0.1f;
 
 
-        //		pGen6DOF.setAngularLowerLimit(Vector3(0., SIMD_HALF_PI*0.9, 0.));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0., -SIMD_HALF_PI*0.9, 0.));
-        //		pGen6DOF.setAngularLowerLimit(Vector3(0., 0., -SIMD_HALF_PI));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0., 0., SIMD_HALF_PI));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(0., SIMD_HALF_PI*0.9, 0.));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0., -SIMD_HALF_PI*0.9, 0.));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(0., 0., -SIMD_HALF_PI));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0., 0., SIMD_HALF_PI));
 
-                Vector3 angularLower = new Vector3(-MathUtil.SIMD_HALF_PI * 0.5f, -0.75f, -MathUtil.SIMD_HALF_PI * 0.8f);
-                Vector3 angularUpper = -angularLower;
+                IndexedVector3 angularLower = new IndexedVector3(-MathUtil.SIMD_HALF_PI * 0.5f, -0.75f, -MathUtil.SIMD_HALF_PI * 0.8f);
+                IndexedVector3 angularUpper = -angularLower;
 		        pGen6DOF.SetAngularLowerLimit(ref angularLower);
 		        pGen6DOF.SetAngularUpperLimit(ref angularUpper);
-        //		pGen6DOF.setAngularLowerLimit(Vector3(0.f, -0.75, SIMD_HALF_PI * 0.8f));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0.f, 0.75, -SIMD_HALF_PI * 0.8f));
-        //		pGen6DOF.setAngularLowerLimit(Vector3(0.f, -SIMD_HALF_PI * 0.8f, SIMD_HALF_PI * 1.98f));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0.f, SIMD_HALF_PI * 0.8f,  -SIMD_HALF_PI * 1.98f));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(0.f, -0.75, SIMD_HALF_PI * 0.8f));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0.f, 0.75, -SIMD_HALF_PI * 0.8f));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(0.f, -SIMD_HALF_PI * 0.8f, SIMD_HALF_PI * 1.98f));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0.f, SIMD_HALF_PI * 0.8f,  -SIMD_HALF_PI * 1.98f));
 
         		
         		
-        //		pGen6DOF.setAngularLowerLimit(Vector3(-0.75,-0.5, -0.5));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0.75,0.5, 0.5));
-        //		pGen6DOF.setAngularLowerLimit(Vector3(-0.75,0., 0.));
-        //		pGen6DOF.setAngularUpperLimit(Vector3(0.75,0., 0.));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(-0.75,-0.5, -0.5));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0.75,0.5, 0.5));
+        //		pGen6DOF.setAngularLowerLimit(IndexedVector3(-0.75,0., 0.));
+        //		pGen6DOF.setAngularUpperLimit(IndexedVector3(0.75,0., 0.));
 
 		        m_dynamicsWorld.AddConstraint(pGen6DOF, true);
 		        pGen6DOF.SetDbgDrawSize(5.0f);
@@ -234,20 +235,20 @@ namespace BulletXNADemos.Demos
 #if true
             { // create a ConeTwist constraint
 
-		        Matrix tr = Matrix.CreateTranslation(-10,5,0);
+		        IndexedMatrix tr = IndexedMatrix.CreateTranslation(-10,5,0);
 
 		        RigidBody pBodyA = LocalCreateRigidBody( 1.0f, ref tr, shape);
 		        pBodyA.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 
-		        tr = Matrix.CreateTranslation(-10,-5,0);
+		        tr = IndexedMatrix.CreateTranslation(-10,-5,0);
 
 		        RigidBody pBodyB = LocalCreateRigidBody(0.0f, ref tr, shape);
 
-		        Matrix frameInA, frameInB;
+		        IndexedMatrix frameInA, frameInB;
                 frameInA = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-                frameInA.Translation = new Vector3(0, -5, 0);
+                frameInA._origin = new IndexedVector3(0, -5, 0);
 				frameInB = MathUtil.SetEulerZYX(0, 0, MathUtil.SIMD_HALF_PI);
-                frameInB.Translation = new Vector3(0, 5, 0);
+                frameInB._origin = new IndexedVector3(0, 5, 0);
 
 		        ConeTwistConstraint pCT = new ConeTwistConstraint(pBodyA, pBodyB, ref frameInA, ref frameInB);
 		        pCT.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_PI * 0.8f, 1.0f,0.3f,1.0f); // soft limit == hard limit
@@ -258,11 +259,11 @@ namespace BulletXNADemos.Demos
 #if true
             { // Hinge connected to the world, with motor (to hinge motor with new and old constraint solver)
 				// WORKS OK
-		        Matrix tr = Matrix.Identity;
+		        IndexedMatrix tr = IndexedMatrix.Identity;
 		        RigidBody pBody = LocalCreateRigidBody( 1.0f, ref tr, shape);
 		        pBody.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
-		        Vector3 btPivotA = new Vector3( 10.0f, 0.0f, 0.0f );
-		        Vector3 btAxisA = new Vector3( 0.0f, 0.0f, 1.0f );
+		        IndexedVector3 btPivotA = new IndexedVector3( 10.0f, 0.0f, 0.0f );
+		        IndexedVector3 btAxisA = new IndexedVector3( 0.0f, 0.0f, 1.0f );
 
 		        HingeConstraint pHinge = new HingeConstraint(pBody, ref btPivotA, ref btAxisA,false);
         //		pHinge.enableAngularMotor(true, -1.0, 0.165); // use for the old solver
@@ -277,17 +278,17 @@ namespace BulletXNADemos.Demos
 		// create a universal joint using generic 6DOF constraint
 		// create two rigid bodies
 		// static bodyA (parent) on top:
-		Matrix tr = Matrix.CreateTranslation(20,4,0);
+		IndexedMatrix tr = IndexedMatrix.CreateTranslation(20,4,0);
 		RigidBody pBodyA = LocalCreateRigidBody( 0.0f, ref tr, shape);
 		pBodyA.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// dynamic bodyB (child) below it :
-		tr = Matrix.CreateTranslation(20,0,0);
+		tr = IndexedMatrix.CreateTranslation(20,0,0);
 		RigidBody pBodyB = LocalCreateRigidBody(1.0f, ref tr, shape);
 		pBodyB.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// add some (arbitrary) data to build constraint frames
-		Vector3 parentAxis = new Vector3(1.0f, 0.0f, 0.0f); 
-		Vector3 childAxis = new Vector3(0.0f, 0.0f, 1.0f);
-        Vector3 anchor = new Vector3(20.0f, 2.0f, 0.0f);
+		IndexedVector3 parentAxis = new IndexedVector3(1.0f, 0.0f, 0.0f); 
+		IndexedVector3 childAxis = new IndexedVector3(0.0f, 0.0f, 1.0f);
+        IndexedVector3 anchor = new IndexedVector3(20.0f, 2.0f, 0.0f);
 
 		UniversalConstraint pUniv = new UniversalConstraint(pBodyA, pBodyB, ref anchor, ref parentAxis, ref childAxis);
         pUniv.SetLowerLimit(-MathUtil.SIMD_HALF_PI * 0.5f, -MathUtil.SIMD_HALF_PI * 0.5f);
@@ -303,7 +304,7 @@ namespace BulletXNADemos.Demos
             // WORKS OK
 	{ // create a generic 6DOF constraint with springs 
 
-		Matrix tr = Matrix.CreateTranslation(-20f,16f,0f);
+		IndexedMatrix tr = IndexedMatrix.CreateTranslation(-20f,16f,0f);
         //tr.setIdentity();
         //tr.setOrigin(btVector3(btScalar(-20.), btScalar(16.), btScalar(0.)));
         //tr.getBasis().setEulerZYX(0,0,0);
@@ -313,19 +314,19 @@ namespace BulletXNADemos.Demos
         //tr.setIdentity();
         //tr.setOrigin(btVector3(btScalar(-10.), btScalar(16.), btScalar(0.)));
         //tr.getBasis().setEulerZYX(0,0,0);
-        tr = Matrix.CreateTranslation(-10,16,0);
+        tr = IndexedMatrix.CreateTranslation(-10,16,0);
 		RigidBody pBodyB = LocalCreateRigidBody(1.0f, ref tr, shape);
 		pBodyB.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 
-        Matrix frameInA = Matrix.CreateTranslation(10f,0f,0f);
-        Matrix frameInB = Matrix.CreateTranslation(0f,0f,0f);
+        IndexedMatrix frameInA = IndexedMatrix.CreateTranslation(10f,0f,0f);
+        IndexedMatrix frameInB = IndexedMatrix.CreateTranslation(0f,0f,0f);
 
 		Generic6DofSpringConstraint pGen6DOFSpring = new Generic6DofSpringConstraint(pBodyA, pBodyB, ref frameInA, ref frameInB, true);
-		pGen6DOFSpring.SetLinearUpperLimit(new Vector3(5f, 0f, 0f));
-		pGen6DOFSpring.SetLinearLowerLimit(new Vector3(-5f, 0f, 0f));
+		pGen6DOFSpring.SetLinearUpperLimit(new IndexedVector3(5f, 0f, 0f));
+		pGen6DOFSpring.SetLinearLowerLimit(new IndexedVector3(-5f, 0f, 0f));
 
-		pGen6DOFSpring.SetAngularLowerLimit(new Vector3(0f, 0f, -1.5f));
-		pGen6DOFSpring.SetAngularUpperLimit(new Vector3(0f, 0f, 1.5f));
+		pGen6DOFSpring.SetAngularLowerLimit(new IndexedVector3(0f, 0f, -1.5f));
+		pGen6DOFSpring.SetAngularUpperLimit(new IndexedVector3(0f, 0f, 1.5f));
 
 		m_dynamicsWorld.AddConstraint(pGen6DOFSpring, true);
 		pGen6DOFSpring.SetDbgDrawSize(5.0f);
@@ -345,18 +346,18 @@ namespace BulletXNADemos.Demos
 		// create a Hinge2 joint
 		// create two rigid bodies
 		// static bodyA (parent) on top:
-		Matrix tr = Matrix.CreateTranslation(-20f,4f,0f);
+		IndexedMatrix tr = IndexedMatrix.CreateTranslation(-20f,4f,0f);
         
         RigidBody pBodyA = LocalCreateRigidBody( 0.0f, ref tr, shape);
 		pBodyA.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// dynamic bodyB (child) below it :
-		tr = Matrix.CreateTranslation(-20f,0f,0f);
+		tr = IndexedMatrix.CreateTranslation(-20f,0f,0f);
         RigidBody pBodyB = LocalCreateRigidBody(1.0f, ref tr, shape);
 		pBodyB.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// add some data to build constraint frames
-		Vector3 parentAxis = new Vector3(0.0f, 1.0f, 0.0f); 
-		Vector3 childAxis = new Vector3(1.0f, 0.0f, 0.0f);
-        Vector3 anchor = new Vector3(-20.0f, 0.0f, 0.0f);
+		IndexedVector3 parentAxis = new IndexedVector3(0.0f, 1.0f, 0.0f); 
+		IndexedVector3 childAxis = new IndexedVector3(1.0f, 0.0f, 0.0f);
+        IndexedVector3 anchor = new IndexedVector3(-20.0f, 0.0f, 0.0f);
 		Hinge2Constraint pHinge2 = new Hinge2Constraint(pBodyA, pBodyB, ref anchor, ref parentAxis, ref childAxis);
 		pHinge2.SetLowerLimit(-MathUtil.SIMD_HALF_PI * 0.5f);
         pHinge2.SetUpperLimit(MathUtil.SIMD_HALF_PI * 0.5f);
@@ -372,18 +373,18 @@ namespace BulletXNADemos.Demos
 		// create a Hinge joint between two dynamic bodies
 		// create two rigid bodies
 		// static bodyA (parent) on top:
-		Matrix tr = Matrix.CreateTranslation(-20f,-2f,0f);
+		IndexedMatrix tr = IndexedMatrix.CreateTranslation(-20f,-2f,0f);
 		RigidBody pBodyA = LocalCreateRigidBody( 1.0f, ref tr, shape);
 		pBodyA.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// dynamic bodyB:
-		tr = Matrix.CreateTranslation(-30f,-2f,0f);
+		tr = IndexedMatrix.CreateTranslation(-30f,-2f,0f);
 		RigidBody pBodyB = LocalCreateRigidBody(10.0f, ref tr, shape);
 		pBodyB.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
 		// add some data to build constraint frames
-		Vector3 axisA = new Vector3(0.0f, 1.0f, 0.0f); 
-		Vector3 axisB = new Vector3(0.0f, 1.0f, 0.0f); 
-		Vector3 pivotA = new Vector3(-5.0f, 0.0f, 0.0f);
-        Vector3 pivotB = new Vector3(5.0f, 0.0f, 0.0f);
+		IndexedVector3 axisA = new IndexedVector3(0.0f, 1.0f, 0.0f); 
+		IndexedVector3 axisB = new IndexedVector3(0.0f, 1.0f, 0.0f); 
+		IndexedVector3 pivotA = new IndexedVector3(-5.0f, 0.0f, 0.0f);
+        IndexedVector3 pivotB = new IndexedVector3(5.0f, 0.0f, 0.0f);
 		
         spHingeDynAB = new HingeConstraint(pBodyA, pBodyB, ref pivotA, ref pivotB, ref axisA, ref axisB);
         spHingeDynAB.SetLimit(-MathUtil.SIMD_HALF_PI * 0.5f, MathUtil.SIMD_HALF_PI * 0.5f);

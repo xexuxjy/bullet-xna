@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -35,25 +36,25 @@ namespace BulletXNA.BulletCollision
             m_shapeType = BroadphaseNativeTypes.TETRAHEDRAL_SHAPE_PROXYTYPE;
         }
 
-	    public BU_Simplex1to4(ref Vector3 pt0)
+	    public BU_Simplex1to4(ref IndexedVector3 pt0)
         {
             m_shapeType = BroadphaseNativeTypes.TETRAHEDRAL_SHAPE_PROXYTYPE;
             AddVertex(ref pt0);
         }
-	    public BU_Simplex1to4(ref Vector3 pt0,ref Vector3 pt1)
+	    public BU_Simplex1to4(ref IndexedVector3 pt0,ref IndexedVector3 pt1)
         {
             m_shapeType = BroadphaseNativeTypes.TETRAHEDRAL_SHAPE_PROXYTYPE;
             AddVertex(ref pt0);
             AddVertex(ref pt1);
         }
-	    public BU_Simplex1to4(ref Vector3 pt0,ref Vector3 pt1,ref Vector3 pt2)
+	    public BU_Simplex1to4(ref IndexedVector3 pt0,ref IndexedVector3 pt1,ref IndexedVector3 pt2)
         {
             m_shapeType = BroadphaseNativeTypes.TETRAHEDRAL_SHAPE_PROXYTYPE;
             AddVertex(ref pt0);
             AddVertex(ref pt1);
             AddVertex(ref pt2);
         }
-	    public BU_Simplex1to4(ref Vector3 pt0,ref Vector3 pt1,ref Vector3 pt2,ref Vector3 pt3)
+	    public BU_Simplex1to4(ref IndexedVector3 pt0,ref IndexedVector3 pt1,ref IndexedVector3 pt2,ref IndexedVector3 pt3)
         {
             m_shapeType = BroadphaseNativeTypes.TETRAHEDRAL_SHAPE_PROXYTYPE;
             AddVertex(ref pt0);
@@ -69,7 +70,7 @@ namespace BulletXNA.BulletCollision
 	    }
 
 
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             #if true
 	            base.GetAabb(ref t,out aabbMin,out aabbMax);
@@ -80,7 +81,7 @@ namespace BulletXNA.BulletCollision
 	            //just transform the vertices in worldspace, and take their AABB
 	            for (int i=0;i<m_numVertices;i++)
 	            {
-		            Vector3 worldVertex = Vector3.Transformt(m_vertices[i],t);
+		            IndexedVector3 worldVertex = IndexedVector3.Transformt(m_vertices[i],t);
                     MathUtil.vectorMin(ref worldVertex, ref aabbMin);
                     MathUtil.vectorMin(ref worldVertex,ref aabbMax);
 	            }
@@ -88,7 +89,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-	    public void AddVertex(ref Vector3 pt)
+	    public void AddVertex(ref IndexedVector3 pt)
         {
             m_vertices[m_numVertices++] = pt;
             RecalcLocalAabb();
@@ -118,7 +119,7 @@ namespace BulletXNA.BulletCollision
             return 0;
         }
 
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
         {
             switch (m_numVertices)
             {
@@ -175,11 +176,11 @@ namespace BulletXNA.BulletCollision
                     }
                     break;
             }
-            pa = Vector3.Zero;
-            pb = Vector3.Zero;
+            pa = IndexedVector3.Zero;
+            pb = IndexedVector3.Zero;
         }
 
-        public override void GetVertex(int i, out Vector3 vtx) 
+        public override void GetVertex(int i, out IndexedVector3 vtx) 
         {
             vtx = m_vertices[i];
         }
@@ -205,10 +206,10 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport,int i)
+	    public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport,int i)
         {
-            planeNormal = Vector3.Up;
-            planeSupport = Vector3.Zero;
+            planeNormal = new IndexedVector3(0, 1, 0); ;
+            planeSupport = IndexedVector3.Zero;
         }
 
 	    public virtual int GetIndex(int i)
@@ -216,7 +217,7 @@ namespace BulletXNA.BulletCollision
             return 0;
         }
 
-        public override bool IsInside(ref Vector3 pt, float tolerance)
+        public override bool IsInside(ref IndexedVector3 pt, float tolerance)
         {
             return false;
         }
@@ -229,7 +230,7 @@ namespace BulletXNA.BulletCollision
         }
 
 	    protected int	m_numVertices;
-	    protected Vector3[]	m_vertices = new Vector3[4];
+	    protected IndexedVector3[]	m_vertices = new IndexedVector3[4];
 
 
     }

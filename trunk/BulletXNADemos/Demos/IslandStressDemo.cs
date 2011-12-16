@@ -2,6 +2,7 @@
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {
@@ -35,7 +36,7 @@ namespace BulletXNADemos.Demos
 
             m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
-            Vector3 gravity = new Vector3(0, -10, 0);
+            IndexedVector3 gravity = new IndexedVector3(0, -10, 0);
             m_dynamicsWorld.SetGravity(ref gravity);
 
             m_profileManager = new BasicProfileManager();
@@ -43,20 +44,20 @@ namespace BulletXNADemos.Demos
             m_profileIterator = m_profileManager.getIterator();
 
             ///create a few basic rigid bodies
-            Vector3 halfExtents = new Vector3(50, 50, 50);
-            //Vector3 halfExtents = new Vector3(10, 10, 10);
+            IndexedVector3 halfExtents = new IndexedVector3(50, 50, 50);
+            //IndexedVector3 halfExtents = new IndexedVector3(10, 10, 10);
             //CollisionShape groundShape = new BoxShape(ref halfExtents);
-            CollisionShape groundShape = new StaticPlaneShape(Vector3.Up, 0);
-            LocalCreateRigidBody(0f, Matrix.Identity, groundShape);
+            CollisionShape groundShape = new StaticPlaneShape(new IndexedVector3(0,1,0), 0);
+            LocalCreateRigidBody(0f, IndexedMatrix.Identity, groundShape);
             //CollisionShape groundShape = BuildLargeMesh();
             m_collisionShapes.Add(groundShape);
             CollisionShape sphereShape = new SphereShape(0.2f);
-            int size = 32;// 5; // 16
+            int size = 16;// 5; // 16
             for (int i = 0; i < size; ++i)
             {
                 for (int j = 0; j < size; ++j)
                 {
-                    Matrix m = Matrix.CreateTranslation(new Vector3(i, 1, j));
+                    IndexedMatrix m = IndexedMatrix.CreateTranslation(new IndexedVector3(i, 1, j));
                     RigidBody rb = LocalCreateRigidBody(1f, m, sphereShape);
                     rb.SetActivationState(ActivationState.ISLAND_SLEEPING);
                 }

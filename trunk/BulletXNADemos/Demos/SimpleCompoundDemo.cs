@@ -26,6 +26,7 @@ using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {
@@ -39,7 +40,7 @@ namespace BulletXNADemos.Demos
             m_cameraHeight = 4.0f;
             m_minCameraDistance = 3.0f;
             m_maxCameraDistance = 10.0f;
-            m_cameraPosition = new Vector3(30, 30, 30);
+            m_cameraPosition = new IndexedVector3(30, 30, 30);
             m_useDefaultCamera = true;
         }
 
@@ -47,62 +48,62 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
-            CollisionShape groundShape = new BoxShape(new Vector3(50, 3, 50));
-            //CollisionShape groundShape = new StaticPlaneShape(Vector3.Up, 0f);
+            CollisionShape groundShape = new BoxShape(new IndexedVector3(50, 3, 50));
+            //CollisionShape groundShape = new StaticPlaneShape(IndexedVector3.Up, 0f);
 
 
             m_collisionShapes.Add(groundShape);
             m_collisionConfiguration = new DefaultCollisionConfiguration();
             m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
-            Vector3 worldMin = new Vector3(-1000, -1000, -1000);
-            Vector3 worldMax = new Vector3(1000, 1000, 1000);
+            IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
+            IndexedVector3 worldMax = new IndexedVector3(1000, 1000, 1000);
             //m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
             m_broadphase = new SimpleBroadphase(100, null);
 
             m_constraintSolver = new SequentialImpulseConstraintSolver();
             m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
-            //m_dynamicsWorld.setGravity(new Vector3(0,0,0));
-            Matrix tr = Matrix.CreateTranslation(0, -10, 0);
+            //m_dynamicsWorld.setGravity(new IndexedVector3(0,0,0));
+            IndexedMatrix tr = IndexedMatrix.CreateTranslation(0, -10, 0);
 
             //either use heightfield or triangle mesh
 
             //create ground object
             LocalCreateRigidBody(0f, ref tr, groundShape);
 
-            CollisionShape chassisShape = new BoxShape(new Vector3(1.0f, 0.5f, 2.0f));
+            CollisionShape chassisShape = new BoxShape(new IndexedVector3(1.0f, 0.5f, 2.0f));
             m_collisionShapes.Add(chassisShape);
 
             CompoundShape compound = new CompoundShape();
             m_collisionShapes.Add(compound);
             //localTrans effectively shifts the center of mass with respect to the chassis
-            Matrix localTrans = Matrix.CreateTranslation(0, 1, 0);
+            IndexedMatrix localTrans = IndexedMatrix.CreateTranslation(0, 1, 0);
 
             compound.AddChildShape(ref localTrans, chassisShape);
 
             {
-                CollisionShape suppShape = new BoxShape(new Vector3(0.5f, 0.1f, 0.5f));
+                CollisionShape suppShape = new BoxShape(new IndexedVector3(0.5f, 0.1f, 0.5f));
                 //localTrans effectively shifts the center of mass with respect to the chassis
-                Matrix suppLocalTrans = Matrix.CreateTranslation(0f, 1.0f, 2.5f);
+                IndexedMatrix suppLocalTrans = IndexedMatrix.CreateTranslation(0f, 1.0f, 2.5f);
                 compound.AddChildShape(ref suppLocalTrans, suppShape);
             }
 
-            tr.Translation = Vector3.Zero;
+            tr._origin = IndexedVector3.Zero;
 
             m_carChassis = LocalCreateRigidBody(800f, ref tr, compound);//chassisShape);
             //m_carChassis = LocalCreateRigidBody(800f, ref tr, chassisShape);//chassisShape);
-            //CollisionShape liftShape = new BoxShape(new Vector3(0.5f, 2.0f, 0.05f));
+            //CollisionShape liftShape = new BoxShape(new IndexedVector3(0.5f, 2.0f, 0.05f));
             //m_collisionShapes.Add(liftShape);
-            //m_liftStartPos = new Vector3(0.0f, 2.5f, 3.05f);
+            //m_liftStartPos = new IndexedVector3(0.0f, 2.5f, 3.05f);
 
-            //Matrix liftTrans = Matrix.CreateTranslation(m_liftStartPos);
+            //IndexedMatrix liftTrans = IndexedMatrix.CreateTranslation(m_liftStartPos);
             //m_liftBody = LocalCreateRigidBody(10f, ref liftTrans, liftShape);
 
-            //Matrix localA = MathUtil.SetEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
-            //localA.Translation = new Vector3(0f, 1.0f, 3.05f);
+            //IndexedMatrix localA = MathUtil.SetEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
+            //localA._origin = new IndexedVector3(0f, 1.0f, 3.05f);
 
-            //Matrix localB = MathUtil.SetEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
-            //localB.Translation = new Vector3(0f, -1.5f, -0.05f);
+            //IndexedMatrix localB = MathUtil.SetEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
+            //localB._origin = new IndexedVector3(0f, -1.5f, -0.05f);
 
             //m_liftHinge = new HingeConstraint(m_carChassis, m_liftBody, ref localA, ref localB);
             ////		m_liftHinge.setLimit(-LIFT_EPS, LIFT_EPS);
@@ -113,39 +114,39 @@ namespace BulletXNADemos.Demos
             //CompoundShape forkCompound = new CompoundShape();
             //m_collisionShapes.Add(forkCompound);
 
-            //Matrix forkLocalTrans = Matrix.Identity;
-            //CollisionShape forkShapeA = new BoxShape(new Vector3(1.0f, 0.1f, 0.1f));
+            //IndexedMatrix forkLocalTrans = IndexedMatrix.Identity;
+            //CollisionShape forkShapeA = new BoxShape(new IndexedVector3(1.0f, 0.1f, 0.1f));
             //m_collisionShapes.Add(forkShapeA);
             //forkCompound.AddChildShape(ref forkLocalTrans, forkShapeA);
 
-            //CollisionShape forkShapeB = new BoxShape(new Vector3(0.1f, 0.02f, 0.6f));
+            //CollisionShape forkShapeB = new BoxShape(new IndexedVector3(0.1f, 0.02f, 0.6f));
             //m_collisionShapes.Add(forkShapeB);
-            //forkLocalTrans = Matrix.CreateTranslation(-0.9f, -0.08f, 0.7f);
+            //forkLocalTrans = IndexedMatrix.CreateTranslation(-0.9f, -0.08f, 0.7f);
             //forkCompound.AddChildShape(ref forkLocalTrans, forkShapeB);
 
-            //CollisionShape forkShapeC = new BoxShape(new Vector3(0.1f, 0.02f, 0.6f));
+            //CollisionShape forkShapeC = new BoxShape(new IndexedVector3(0.1f, 0.02f, 0.6f));
             //m_collisionShapes.Add(forkShapeC);
-            //forkLocalTrans = Matrix.CreateTranslation(0.9f, -0.08f, 0.7f);
+            //forkLocalTrans = IndexedMatrix.CreateTranslation(0.9f, -0.08f, 0.7f);
             //forkCompound.AddChildShape(ref forkLocalTrans, forkShapeC);
 
-            //m_forkStartPos = new Vector3(0.0f, 0.6f, 3.2f);
-            //Matrix forkTrans = Matrix.CreateTranslation(m_forkStartPos);
+            //m_forkStartPos = new IndexedVector3(0.0f, 0.6f, 3.2f);
+            //IndexedMatrix forkTrans = IndexedMatrix.CreateTranslation(m_forkStartPos);
 
             //m_forkBody = LocalCreateRigidBody(5f, ref forkTrans, forkCompound);
 
             //localA = MathUtil.SetEulerZYX(0f, 0f, MathUtil.SIMD_HALF_PI);
-            //localA.Translation = new Vector3(0.0f, -1.9f, 0.05f);
+            //localA._origin = new IndexedVector3(0.0f, -1.9f, 0.05f);
 
-            //Vector3 col0 = MathUtil.matrixColumn(ref localA, 0);
-            //Vector3 col1 = MathUtil.matrixColumn(ref localA, 1);
-            //Vector3 col2 = MathUtil.matrixColumn(ref localA, 2);
+            //IndexedVector3 col0 = MathUtil.matrixColumn(ref localA, 0);
+            //IndexedVector3 col1 = MathUtil.matrixColumn(ref localA, 1);
+            //IndexedVector3 col2 = MathUtil.matrixColumn(ref localA, 2);
 
 
 
 
             ////localB = MathUtil.setEulerZYX(0f, 0f, MathUtil.SIMD_HALF_PI);
             //localB = MathUtil.SetEulerZYX(0f, 0f, MathUtil.SIMD_HALF_PI);
-            //localB.Translation = new Vector3(0.0f, 0.0f, -0.1f);
+            //localB._origin = new IndexedVector3(0.0f, 0.0f, -0.1f);
 
             //m_forkSlider = new SliderConstraint(m_liftBody, m_forkBody, ref localA, ref localB, true);
 
@@ -156,8 +157,8 @@ namespace BulletXNADemos.Demos
             //m_forkSlider.SetLowerAngLimit(0.0f);
             //m_forkSlider.SetUpperAngLimit(0.0f);
 
-            //Matrix localAVec = Matrix.Identity;
-            //Matrix localBVec = Matrix.Identity;
+            //IndexedMatrix localAVec = IndexedMatrix.Identity;
+            //IndexedMatrix localBVec = IndexedMatrix.Identity;
 
             //m_forkSlider2 = new HingeConstraint(m_liftBody, m_forkBody, ref localAVec, ref localBVec);
             //m_dynamicsWorld.AddConstraint(m_forkSlider, true);
@@ -166,20 +167,20 @@ namespace BulletXNADemos.Demos
 
             CompoundShape loadCompound = new CompoundShape(true);
             m_collisionShapes.Add(loadCompound);
-            CollisionShape loadShapeA = new BoxShape(new Vector3(2.0f, 0.5f, 0.5f));
+            CollisionShape loadShapeA = new BoxShape(new IndexedVector3(2.0f, 0.5f, 0.5f));
             m_collisionShapes.Add(loadShapeA);
-            Matrix loadTrans = Matrix.Identity;
+            IndexedMatrix loadTrans = IndexedMatrix.Identity;
             loadCompound.AddChildShape(ref loadTrans, loadShapeA);
-            CollisionShape loadShapeB = new BoxShape(new Vector3(0.1f, 1.0f, 1.0f));
+            CollisionShape loadShapeB = new BoxShape(new IndexedVector3(0.1f, 1.0f, 1.0f));
             m_collisionShapes.Add(loadShapeB);
-            loadTrans = Matrix.CreateTranslation(2.1f, 0.0f, 0.0f);
+            loadTrans = IndexedMatrix.CreateTranslation(2.1f, 0.0f, 0.0f);
             loadCompound.AddChildShape(ref loadTrans, loadShapeB);
-            CollisionShape loadShapeC = new BoxShape(new Vector3(0.1f, 1.0f, 1.0f));
+            CollisionShape loadShapeC = new BoxShape(new IndexedVector3(0.1f, 1.0f, 1.0f));
             m_collisionShapes.Add(loadShapeC);
-            loadTrans = Matrix.CreateTranslation(-2.1f, 0.0f, 0.0f);
+            loadTrans = IndexedMatrix.CreateTranslation(-2.1f, 0.0f, 0.0f);
             loadCompound.AddChildShape(ref loadTrans, loadShapeC);
-            m_loadStartPos = new Vector3(0.0f, -3.5f, 7.0f);
-            loadTrans = Matrix.CreateTranslation(m_loadStartPos);
+            m_loadStartPos = new IndexedVector3(0.0f, -3.5f, 7.0f);
+            loadTrans = IndexedMatrix.CreateTranslation(m_loadStartPos);
 
             m_loadBody = LocalCreateRigidBody(4f, ref loadTrans, loadCompound);
 
@@ -187,49 +188,49 @@ namespace BulletXNADemos.Demos
 #if false
 
             {
-                CollisionShape liftShape = new BoxShape(new Vector3(0.5f, 2.0f, 0.05f));
+                CollisionShape liftShape = new BoxShape(new IndexedVector3(0.5f, 2.0f, 0.05f));
                 m_collisionShapes.Add(liftShape);
-                Matrix liftTrans = Matrix.CreateTranslation(m_liftStartPos);
+                IndexedMatrix liftTrans = IndexedMatrix.CreateTranslation(m_liftStartPos);
                 m_liftBody = localCreateRigidBody(10f, ref liftTrans, liftShape);
 
-                Matrix localA = MathUtil.setEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
-                localA.Translation = new Vector3(0f, 1.0f, 3.05f);
+                IndexedMatrix localA = MathUtil.setEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
+                localA._origin = new IndexedVector3(0f, 1.0f, 3.05f);
 
-                Matrix localB = MathUtil.setEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
-                localB.Translation = new Vector3(0f, -1.5f, -0.05f);
+                IndexedMatrix localB = MathUtil.setEulerZYX(0f, MathUtil.SIMD_HALF_PI, 0f);
+                localB._origin = new IndexedVector3(0f, -1.5f, -0.05f);
 
                 m_liftHinge = new HingeConstraint(m_carChassis, m_liftBody, ref localA, ref localB);
                 //		m_liftHinge.setLimit(-LIFT_EPS, LIFT_EPS);
                 m_liftHinge.setLimit(0.0f, 0.0f);
                 m_dynamicsWorld.addConstraint(m_liftHinge, true);
 
-                CollisionShape forkShapeA = new BoxShape(new Vector3(1.0f, 0.1f, 0.1f));
+                CollisionShape forkShapeA = new BoxShape(new IndexedVector3(1.0f, 0.1f, 0.1f));
                 m_collisionShapes.Add(forkShapeA);
                 CompoundShape forkCompound = new CompoundShape();
                 m_collisionShapes.Add(forkCompound);
-                Matrix forkLocalTrans = Matrix.Identity;
+                IndexedMatrix forkLocalTrans = IndexedMatrix.Identity;
                 forkCompound.addChildShape(ref forkLocalTrans, forkShapeA);
 
-                CollisionShape forkShapeB = new BoxShape(new Vector3(0.1f, 0.02f, 0.6f));
+                CollisionShape forkShapeB = new BoxShape(new IndexedVector3(0.1f, 0.02f, 0.6f));
                 m_collisionShapes.Add(forkShapeB);
-                forkLocalTrans = Matrix.CreateTranslation(-0.9f, -0.08f, 0.7f);
+                forkLocalTrans = IndexedMatrix.CreateTranslation(-0.9f, -0.08f, 0.7f);
                 forkCompound.addChildShape(ref forkLocalTrans, forkShapeB);
 
-                CollisionShape forkShapeC = new BoxShape(new Vector3(0.1f, 0.02f, 0.6f));
+                CollisionShape forkShapeC = new BoxShape(new IndexedVector3(0.1f, 0.02f, 0.6f));
                 m_collisionShapes.Add(forkShapeC);
-                forkLocalTrans = Matrix.CreateTranslation(0.9f, -0.08f, 0.7f);
+                forkLocalTrans = IndexedMatrix.CreateTranslation(0.9f, -0.08f, 0.7f);
                 forkCompound.addChildShape(ref forkLocalTrans, forkShapeC);
 
-                m_forkStartPos = new Vector3(0.0f, 0.6f, 3.2f);
-                Matrix forkTrans = Matrix.CreateTranslation(m_forkStartPos);
+                m_forkStartPos = new IndexedVector3(0.0f, 0.6f, 3.2f);
+                IndexedMatrix forkTrans = IndexedMatrix.CreateTranslation(m_forkStartPos);
 
                 m_forkBody = localCreateRigidBody(5f, ref forkTrans, forkCompound);
 
                 localA = MathUtil.setEulerZYX(0f, 0f, MathUtil.SIMD_HALF_PI);
-                localA.Translation = new Vector3(0.0f, -1.9f, 0.05f);
+                localA._origin = new IndexedVector3(0.0f, -1.9f, 0.05f);
 
                 localB = MathUtil.setEulerZYX(0f, 0f, MathUtil.SIMD_HALF_PI);
-                localB.Translation = new Vector3(0.0f, 0.0f, -0.1f);
+                localB._origin = new IndexedVector3(0.0f, 0.0f, -0.1f);
 
                 m_forkSlider = new SliderConstraint(m_liftBody, m_forkBody, ref localA, ref localB, true);
                 m_forkSlider.setLowerLinLimit(0.1f);
@@ -243,20 +244,20 @@ namespace BulletXNADemos.Demos
 
                 CompoundShape loadCompound = new CompoundShape();
                 m_collisionShapes.Add(loadCompound);
-                CollisionShape loadShapeA = new BoxShape(new Vector3(2.0f, 0.5f, 0.5f));
+                CollisionShape loadShapeA = new BoxShape(new IndexedVector3(2.0f, 0.5f, 0.5f));
                 m_collisionShapes.Add(loadShapeA);
-                Matrix loadTrans = Matrix.Identity;
+                IndexedMatrix loadTrans = IndexedMatrix.Identity;
                 loadCompound.addChildShape(ref loadTrans, loadShapeA);
-                CollisionShape loadShapeB = new BoxShape(new Vector3(0.1f, 1.0f, 1.0f));
+                CollisionShape loadShapeB = new BoxShape(new IndexedVector3(0.1f, 1.0f, 1.0f));
                 m_collisionShapes.Add(loadShapeB);
-                loadTrans = Matrix.CreateTranslation(2.1f, 0.0f, 0.0f);
+                loadTrans = IndexedMatrix.CreateTranslation(2.1f, 0.0f, 0.0f);
                 loadCompound.addChildShape(ref loadTrans, loadShapeB);
-                CollisionShape loadShapeC = new BoxShape(new Vector3(0.1f, 1.0f, 1.0f));
+                CollisionShape loadShapeC = new BoxShape(new IndexedVector3(0.1f, 1.0f, 1.0f));
                 m_collisionShapes.Add(loadShapeC);
-                loadTrans = Matrix.CreateTranslation(-2.1f, 0.0f, 0.0f);
+                loadTrans = IndexedMatrix.CreateTranslation(-2.1f, 0.0f, 0.0f);
                 loadCompound.addChildShape(ref loadTrans, loadShapeC);
-                m_loadStartPos = new Vector3(0.0f, -3.5f, 7.0f);
-                loadTrans = Matrix.CreateTranslation(m_loadStartPos);
+                m_loadStartPos = new IndexedVector3(0.0f, -3.5f, 7.0f);
+                loadTrans = IndexedMatrix.CreateTranslation(m_loadStartPos);
 
                 m_loadBody = localCreateRigidBody(4f, ref loadTrans, loadCompound);
             }
@@ -446,12 +447,12 @@ namespace BulletXNADemos.Demos
 
         //protected override void renderSceneAll(GameTime gameTime)
         //{
-        //    Vector3 halfExtents = new Vector3(wheelWidth, wheelRadius, wheelRadius);
+        //    IndexedVector3 halfExtents = new IndexedVector3(wheelWidth, wheelRadius, wheelRadius);
         //    CylinderShapeX wheelShape = new CylinderShapeX(ref halfExtents);
-        //    Vector3 wheelColor = new Vector3(1, 0, 0);
+        //    IndexedVector3 wheelColor = new IndexedVector3(1, 0, 0);
 
 
-        //    Vector3 worldBoundsMin = Vector3.Zero, worldBoundsMax = Vector3.Zero;
+        //    IndexedVector3 worldBoundsMin = IndexedVector3.Zero, worldBoundsMax = IndexedVector3.Zero;
         //    getDynamicsWorld().getBroadphase().getBroadphaseAabb(ref worldBoundsMin, ref worldBoundsMax);
 
         //    for (int i = 0; i < m_vehicle.getNumWheels(); i++)
@@ -459,7 +460,7 @@ namespace BulletXNADemos.Demos
         //        //synchronize the wheels with the (interpolated) chassis worldtransform
         //        m_vehicle.updateWheelTransform(i, true);
         //        //draw wheels (cylinders)
-        //        Matrix m = m_vehicle.getWheelInfo(i).m_worldTransform;
+        //        IndexedMatrix m = m_vehicle.getWheelInfo(i).m_worldTransform;
         //        m_shapeDrawer.drawXNA(ref m, m_wheelShape, ref wheelColor, getDebugMode(), ref worldBoundsMin, ref worldBoundsMax, ref m_lookAt, ref m_perspective);
         //    }
         //    base.renderSceneAll(gameTime);
@@ -476,15 +477,15 @@ namespace BulletXNADemos.Demos
                 return;
             }
 
-            Matrix chassisWorldTrans;
+            IndexedMatrix chassisWorldTrans;
 
             //look at the vehicle
             m_carChassis.GetMotionState().GetWorldTransform(out chassisWorldTrans);
-            m_cameraTargetPosition = chassisWorldTrans.Translation;
+            m_cameraTargetPosition = chassisWorldTrans._origin;
 
             m_cameraPosition.Y = (15.0f * m_cameraPosition.Y + m_cameraTargetPosition.Y + m_cameraHeight) / 16.0f;
 
-            Vector3 camToObject = m_cameraTargetPosition - m_cameraPosition;
+            IndexedVector3 camToObject = m_cameraTargetPosition - m_cameraPosition;
 
             //keep distance between min and max distance
             float cameraDistance = camToObject.Length();
@@ -500,7 +501,7 @@ namespace BulletXNADemos.Demos
             m_cameraPosition -= correctionFactor * camToObject;
 
 
-            m_lookAt = Matrix.CreateLookAt(m_cameraPosition, m_cameraTargetPosition, m_cameraUp);
+            m_lookAt = IndexedMatrix.CreateLookAt(m_cameraPosition, m_cameraTargetPosition, m_cameraUp);
 
         }
 
@@ -509,15 +510,15 @@ namespace BulletXNADemos.Demos
         public override void ClientResetScene()
         {
             base.ClientResetScene();
-            Matrix ident = Matrix.Identity;
+            IndexedMatrix ident = IndexedMatrix.Identity;
             m_carChassis.SetCenterOfMassTransform(ref ident);
-            Vector3 zero = Vector3.Zero;
+            IndexedVector3 zero = IndexedVector3.Zero;
             m_carChassis.SetLinearVelocity(ref zero);
             m_carChassis.SetAngularVelocity(ref zero);
             m_dynamicsWorld.GetBroadphase().GetOverlappingPairCache().CleanProxyFromPairs(m_carChassis.GetBroadphaseHandle(), GetDynamicsWorld().GetDispatcher());
             if (m_liftBody != null)
             {
-                Matrix liftTrans = Matrix.CreateTranslation(m_liftStartPos);
+                IndexedMatrix liftTrans = IndexedMatrix.CreateTranslation(m_liftStartPos);
                 m_liftBody.Activate();
                 m_liftBody.SetCenterOfMassTransform(ref liftTrans);
                 m_liftBody.SetLinearVelocity(ref zero);
@@ -526,7 +527,7 @@ namespace BulletXNADemos.Demos
 
             if (m_forkBody != null)
             {
-                Matrix forkTrans = Matrix.CreateTranslation(m_forkStartPos);
+                IndexedMatrix forkTrans = IndexedMatrix.CreateTranslation(m_forkStartPos);
                 m_forkBody.Activate();
                 m_forkBody.SetCenterOfMassTransform(ref forkTrans);
                 m_forkBody.SetLinearVelocity(ref zero);
@@ -549,7 +550,7 @@ namespace BulletXNADemos.Demos
 
             if (m_loadBody != null)
             {
-                Matrix loadTrans = Matrix.CreateTranslation(m_loadStartPos);
+                IndexedMatrix loadTrans = IndexedMatrix.CreateTranslation(m_loadStartPos);
                 m_loadBody.Activate();
                 m_loadBody.SetCenterOfMassTransform(ref loadTrans);
                 m_loadBody.SetLinearVelocity(ref zero);
@@ -569,16 +570,16 @@ namespace BulletXNADemos.Demos
         private RigidBody m_carChassis;
 
         private RigidBody m_liftBody;
-        private Vector3 m_liftStartPos;
+        private IndexedVector3 m_liftStartPos;
         private HingeConstraint m_liftHinge;
 
         private RigidBody m_forkBody;
-        private Vector3 m_forkStartPos;
+        private IndexedVector3 m_forkStartPos;
         private SliderConstraint m_forkSlider;
 		private HingeConstraint m_forkSlider2;
 
         private RigidBody m_loadBody;
-        private Vector3 m_loadStartPos;
+        private IndexedVector3 m_loadStartPos;
 
         private bool m_useDefaultCamera;
 

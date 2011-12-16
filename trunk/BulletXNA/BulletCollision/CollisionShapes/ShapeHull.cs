@@ -44,7 +44,7 @@ namespace BulletXNA.BulletCollision
 		        {
 			        for (int i=0;i<numPDA;i++)
 			        {
-				        Vector3 norm;
+				        IndexedVector3 norm;
 				        m_shape.GetPreferredPenetrationDirection(i, out norm);
 				        UnitSpherePoints[numSampleDirections] = norm;
 				        numSampleDirections++;
@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision
 		        }
 	        }
 
-	        Vector3[] supportPoints = new Vector3[NUM_UNITSPHERE_POINTS+ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS*2];
+	        IndexedVector3[] supportPoints = new IndexedVector3[NUM_UNITSPHERE_POINTS+ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS*2];
 	        
 	        for (int i = 0; i < numSampleDirections; i++)
 	        {
@@ -128,77 +128,77 @@ namespace BulletXNA.BulletCollision
             return m_indices.Count;
         }
 
-        public IList<Vector3> m_vertices = new ObjectArray<Vector3>();
+        public IList<IndexedVector3> m_vertices = new ObjectArray<IndexedVector3>();
         public IList<int> m_indices = new ObjectArray<int>();
         public ConvexShape m_shape;
 
         const int NUM_UNITSPHERE_POINTS = 42;
 
-        //static Vector3[] UnitSpherePoints = new Vector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];  
-        static Vector3[] UnitSpherePoints = new Vector3[]  
+        //static IndexedVector3[] UnitSpherePoints = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];  
+        static IndexedVector3[] UnitSpherePoints = new IndexedVector3[]  
         {
-	        new Vector3(0.000000f, -0.000000f,-1.000000f),
-	        new Vector3(0.723608f, -0.525725f,-0.447219f),
-	        new Vector3(-0.276388f, -0.850649f,-0.447219f),
-	        new Vector3(-0.894426f, -0.000000f,-0.447216f),
-	        new Vector3(-0.276388f, 0.850649f,-0.447220f),
-	        new Vector3(0.723608f, 0.525725f,-0.447219f),
-	        new Vector3(0.276388f, -0.850649f,0.447220f),
-	        new Vector3(-0.723608f, -0.525725f,0.447219f),
-	        new Vector3(-0.723608f, 0.525725f,0.447219f),
-	        new Vector3(0.276388f, 0.850649f,0.447219f),
-	        new Vector3(0.894426f, 0.000000f,0.447216f),
-	        new Vector3(-0.000000f, 0.000000f,1.000000f),
-	        new Vector3(0.425323f, -0.309011f,-0.850654f),
-	        new Vector3(-0.162456f, -0.499995f,-0.850654f),
-	        new Vector3(0.262869f, -0.809012f,-0.525738f),
-	        new Vector3(0.425323f, 0.309011f,-0.850654f),
-	        new Vector3(0.850648f, -0.000000f,-0.525736f),
-	        new Vector3(-0.525730f, -0.000000f,-0.850652f),
-	        new Vector3(-0.688190f, -0.499997f,-0.525736f),
-	        new Vector3(-0.162456f, 0.499995f,-0.850654f),
-	        new Vector3(-0.688190f, 0.499997f,-0.525736f),
-	        new Vector3(0.262869f, 0.809012f,-0.525738f),
-	        new Vector3(0.951058f, 0.309013f,0.000000f),
-	        new Vector3(0.951058f, -0.309013f,0.000000f),
-	        new Vector3(0.587786f, -0.809017f,0.000000f),
-	        new Vector3(0.000000f, -1.000000f,0.000000f),
-	        new Vector3(-0.587786f, -0.809017f,0.000000f),
-	        new Vector3(-0.951058f, -0.309013f,-0.000000f),
-	        new Vector3(-0.951058f, 0.309013f,-0.000000f),
-	        new Vector3(-0.587786f, 0.809017f,-0.000000f),
-	        new Vector3(-0.000000f, 1.000000f,-0.000000f),
-	        new Vector3(0.587786f, 0.809017f,-0.000000f),
-	        new Vector3(0.688190f, -0.499997f,0.525736f),
-	        new Vector3(-0.262869f, -0.809012f,0.525738f),
-	        new Vector3(-0.850648f, 0.000000f,0.525736f),
-	        new Vector3(-0.262869f, 0.809012f,0.525738f),
-	        new Vector3(0.688190f, 0.499997f,0.525736f),
-	        new Vector3(0.525730f, 0.000000f,0.850652f),
-	        new Vector3(0.162456f, -0.499995f,0.850654f),
-	        new Vector3(-0.425323f, -0.309011f,0.850654f),
-	        new Vector3(-0.425323f, 0.309011f,0.850654f),
-	        new Vector3(0.162456f, 0.499995f,0.850654f),
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero,
-            Vector3.Zero
+	        new IndexedVector3(0.000000f, -0.000000f,-1.000000f),
+	        new IndexedVector3(0.723608f, -0.525725f,-0.447219f),
+	        new IndexedVector3(-0.276388f, -0.850649f,-0.447219f),
+	        new IndexedVector3(-0.894426f, -0.000000f,-0.447216f),
+	        new IndexedVector3(-0.276388f, 0.850649f,-0.447220f),
+	        new IndexedVector3(0.723608f, 0.525725f,-0.447219f),
+	        new IndexedVector3(0.276388f, -0.850649f,0.447220f),
+	        new IndexedVector3(-0.723608f, -0.525725f,0.447219f),
+	        new IndexedVector3(-0.723608f, 0.525725f,0.447219f),
+	        new IndexedVector3(0.276388f, 0.850649f,0.447219f),
+	        new IndexedVector3(0.894426f, 0.000000f,0.447216f),
+	        new IndexedVector3(-0.000000f, 0.000000f,1.000000f),
+	        new IndexedVector3(0.425323f, -0.309011f,-0.850654f),
+	        new IndexedVector3(-0.162456f, -0.499995f,-0.850654f),
+	        new IndexedVector3(0.262869f, -0.809012f,-0.525738f),
+	        new IndexedVector3(0.425323f, 0.309011f,-0.850654f),
+	        new IndexedVector3(0.850648f, -0.000000f,-0.525736f),
+	        new IndexedVector3(-0.525730f, -0.000000f,-0.850652f),
+	        new IndexedVector3(-0.688190f, -0.499997f,-0.525736f),
+	        new IndexedVector3(-0.162456f, 0.499995f,-0.850654f),
+	        new IndexedVector3(-0.688190f, 0.499997f,-0.525736f),
+	        new IndexedVector3(0.262869f, 0.809012f,-0.525738f),
+	        new IndexedVector3(0.951058f, 0.309013f,0.000000f),
+	        new IndexedVector3(0.951058f, -0.309013f,0.000000f),
+	        new IndexedVector3(0.587786f, -0.809017f,0.000000f),
+	        new IndexedVector3(0.000000f, -1.000000f,0.000000f),
+	        new IndexedVector3(-0.587786f, -0.809017f,0.000000f),
+	        new IndexedVector3(-0.951058f, -0.309013f,-0.000000f),
+	        new IndexedVector3(-0.951058f, 0.309013f,-0.000000f),
+	        new IndexedVector3(-0.587786f, 0.809017f,-0.000000f),
+	        new IndexedVector3(-0.000000f, 1.000000f,-0.000000f),
+	        new IndexedVector3(0.587786f, 0.809017f,-0.000000f),
+	        new IndexedVector3(0.688190f, -0.499997f,0.525736f),
+	        new IndexedVector3(-0.262869f, -0.809012f,0.525738f),
+	        new IndexedVector3(-0.850648f, 0.000000f,0.525736f),
+	        new IndexedVector3(-0.262869f, 0.809012f,0.525738f),
+	        new IndexedVector3(0.688190f, 0.499997f,0.525736f),
+	        new IndexedVector3(0.525730f, 0.000000f,0.850652f),
+	        new IndexedVector3(0.162456f, -0.499995f,0.850654f),
+	        new IndexedVector3(-0.425323f, -0.309011f,0.850654f),
+	        new IndexedVector3(-0.425323f, 0.309011f,0.850654f),
+	        new IndexedVector3(0.162456f, 0.499995f,0.850654f),
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero,
+            IndexedVector3.Zero
         };
     }
 

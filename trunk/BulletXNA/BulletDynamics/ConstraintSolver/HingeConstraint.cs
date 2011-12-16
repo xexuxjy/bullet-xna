@@ -25,6 +25,8 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -32,13 +34,10 @@ namespace BulletXNA.BulletDynamics
 	{
 		private const bool HINGE_USE_FRAME_OFFSET = true;
 
-		private static Vector3 vHinge = new Vector3(0, 0, 1);
+		private static IndexedVector3 vHinge = new IndexedVector3(0, 0, 1);
 
-		private JacobianEntry[] m_jac = new JacobianEntry[3]; //3 orthogonal linear constraints
-		private JacobianEntry[] m_jacAng = new JacobianEntry[3]; //2 orthogonal angular constraints+ 1 for limit/motor
-
-		private Matrix m_rbAFrame = Matrix.Identity; // constraint axii. Assumes z is hinge axis.
-		private Matrix m_rbBFrame = Matrix.Identity;
+        private IndexedMatrix m_rbAFrame = IndexedMatrix.Identity; // constraint axii. Assumes z is hinge axis.
+		private IndexedMatrix m_rbBFrame = IndexedMatrix.Identity;
 
 		private float m_motorTargetVelocity;
 		private float m_maxMotorImpulse;
@@ -76,14 +75,14 @@ namespace BulletXNA.BulletDynamics
 		private float m_normalCFM;
 		private float m_stopCFM;
 		private float m_stopERP;
-
-		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref Vector3 pivotInA, ref Vector3 pivotInB, ref Vector3 axisInA, ref Vector3 axisInB)
+        
+        public HingeConstraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 pivotInA, ref IndexedVector3 pivotInB, ref IndexedVector3 axisInA, ref IndexedVector3 axisInB)
 			: this(rbA, rbB, ref pivotInA, ref pivotInB, ref axisInA, ref axisInB, false)
 		{
 		}
 
 
-		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref Vector3 pivotInA, ref Vector3 pivotInB, ref Vector3 axisInA, ref Vector3 axisInB, bool useReferenceFrameA)
+		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 pivotInA, ref IndexedVector3 pivotInB, ref IndexedVector3 axisInA, ref IndexedVector3 axisInB, bool useReferenceFrameA)
 			: base(TypedConstraintType.HINGE_CONSTRAINT_TYPE, rbA, rbB)
 		{
 			m_angularOnly = false;
@@ -92,7 +91,7 @@ namespace BulletXNA.BulletDynamics
 
 			m_useReferenceFrameA = useReferenceFrameA;
 
-			m_rbAFrame.Translation = pivotInA;
+			m_rbAFrame._origin = pivotInA;
 #if	_BT_USE_CENTER_LIMIT_
 			m_limit = new AngularLimit();
 #endif
@@ -101,39 +100,46 @@ namespace BulletXNA.BulletDynamics
 			m_flags = 0;
 
 			// since no frame is given, assume this to be zero angle and just pick rb transform axis
-			Vector3 rbAxisA1 = MathUtil.MatrixColumn(rbA.GetCenterOfMassTransform(), 0);
+            IndexedVector3 rbAxisA1 = rbA.GetCenterOfMassTransform()._basis.GetColumn(0);
 
-			Vector3 rbAxisA2 = Vector3.Zero;
-			float projection = Vector3.Dot(axisInA, rbAxisA1);
+			IndexedVector3 rbAxisA2 = IndexedVector3.Zero;
+			float projection = IndexedVector3.Dot(axisInA, rbAxisA1);
 			if (projection >= 1.0f - MathUtil.SIMD_EPSILON)
 			{
-				rbAxisA1 = -MathUtil.MatrixColumn(rbA.GetCenterOfMassTransform(), 2);
-				rbAxisA2 = MathUtil.MatrixColumn(rbA.GetCenterOfMassTransform(), 1);
-			}
+                rbAxisA1 = -rbA.GetCenterOfMassTransform()._basis.GetColumn(2);
+                rbAxisA2 = rbA.GetCenterOfMassTransform()._basis.GetColumn(1);
+            }
 			else if (projection <= -1.0f + MathUtil.SIMD_EPSILON)
 			{
-				rbAxisA1 = MathUtil.MatrixColumn(rbA.GetCenterOfMassTransform(), 2);
-				rbAxisA2 = MathUtil.MatrixColumn(rbA.GetCenterOfMassTransform(), 1);
-			}
+                rbAxisA1 = rbA.GetCenterOfMassTransform()._basis.GetColumn(2);
+                rbAxisA2 = rbA.GetCenterOfMassTransform()._basis.GetColumn(1);
+            }
 			else
 			{
-				rbAxisA2 = Vector3.Cross(axisInA, rbAxisA1);
-				rbAxisA1 = Vector3.Cross(rbAxisA2, axisInA);
+				rbAxisA2 = IndexedVector3.Cross(axisInA, rbAxisA1);
+				rbAxisA1 = IndexedVector3.Cross(rbAxisA2, axisInA);
 			}
 
-			MathUtil.SetBasis(ref m_rbAFrame, ref rbAxisA1, ref rbAxisA2, ref axisInA);
+            
+            //m_rbAFrame._basis = new IndexedBasisMatrix(ref rbAxisA1, ref rbAxisA2, ref axisInA);
+            m_rbAFrame._basis = new IndexedBasisMatrix(rbAxisA1.X, rbAxisA2.X, axisInA.X,
+                                    rbAxisA1.Y, rbAxisA2.Y, axisInA.Y,
+                                    rbAxisA1.Z, rbAxisA2.Z, axisInA.Z);
 
 			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
-			Vector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
-			Vector3 rbAxisB2 = Vector3.Cross(axisInB, rbAxisB1);
+			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
+			IndexedVector3 rbAxisB2 = IndexedVector3.Cross(axisInB, rbAxisB1);
 
-			m_rbBFrame.Translation = pivotInB;
-			MathUtil.SetBasis(ref m_rbBFrame, ref rbAxisB1, ref rbAxisB2, ref axisInB);
+			m_rbBFrame._origin = pivotInB;
+            //m_rbBFrame._basis = new IndexedBasisMatrix(ref rbAxisB1, ref rbAxisB2, ref axisInB);
+            m_rbBFrame._basis = new IndexedBasisMatrix(rbAxisB1.X, rbAxisB2.X, axisInB.X,
+                                    rbAxisB1.Y, rbAxisB2.Y, axisInB.Y,
+                                    rbAxisB1.Z, rbAxisB2.Z, axisInB.Z);
 
 #if!	_BT_USE_CENTER_LIMIT_
 	//start with free
-	m_lowerLimit = btScalar(1.0f);
-	m_upperLimit = btScalar(-1.0f);
+	m_lowerLimit = float(1.0f);
+	m_upperLimit = float(-1.0f);
 	m_biasFactor = 0.3f;
 	m_relaxationFactor = 1.0f;
 	m_limitSoftness = 0.9f;
@@ -142,7 +148,7 @@ namespace BulletXNA.BulletDynamics
 			m_referenceSign = m_useReferenceFrameA ? -1f : 1f;
 		}
 
-		public HingeConstraint(RigidBody rbA, ref Vector3 pivotInA, ref Vector3 axisInA, bool useReferenceFrameA)
+		public HingeConstraint(RigidBody rbA, ref IndexedVector3 pivotInA, ref IndexedVector3 axisInA, bool useReferenceFrameA)
 			: base(TypedConstraintType.HINGE_CONSTRAINT_TYPE, rbA)
 		{
 			m_angularOnly = false;
@@ -157,20 +163,26 @@ namespace BulletXNA.BulletDynamics
 
 			// since no frame is given, assume this to be zero angle and just pick rb transform axis
 			// fixed axis in worldspace
-			Vector3 rbAxisA1, rbAxisA2;
+			IndexedVector3 rbAxisA1, rbAxisA2;
 			TransformUtil.PlaneSpace1(ref axisInA, out rbAxisA1, out rbAxisA2);
 
-			m_rbAFrame.Translation = pivotInA;
-			MathUtil.SetBasis(ref m_rbAFrame, ref rbAxisA1, ref rbAxisA2, ref axisInA);
+			m_rbAFrame._origin = pivotInA;
+            //m_rbAFrame._basis = new IndexedBasisMatrix(ref rbAxisA1, ref rbAxisA2, ref axisInA);
+            m_rbAFrame._basis = new IndexedBasisMatrix(rbAxisA1.X, rbAxisA2.X, axisInA.X,
+                                                rbAxisA1.Y, rbAxisA2.Y, axisInA.Y,
+                                                rbAxisA1.Z, rbAxisA2.Z, axisInA.Z);
 
-			Vector3 axisInB = Vector3.TransformNormal(axisInA, rbA.GetCenterOfMassTransform());
+            IndexedVector3 axisInB = rbA.GetCenterOfMassTransform()._basis * axisInA;
 
 			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
-			Vector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
-			Vector3 rbAxisB2 = Vector3.Cross(axisInB, rbAxisB1);
+			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
+			IndexedVector3 rbAxisB2 = IndexedVector3.Cross(axisInB, rbAxisB1);
 
-			m_rbBFrame.Translation = Vector3.Transform(pivotInA, rbA.GetCenterOfMassTransform());
-			MathUtil.SetBasis(ref m_rbBFrame, ref rbAxisB1, ref rbAxisB2, ref axisInB);
+            m_rbBFrame._origin = rbA.GetCenterOfMassTransform() * pivotInA;
+            //m_rbBFrame._basis = new IndexedBasisMatrix(ref rbAxisB1, ref rbAxisB2, ref axisInB);
+            m_rbBFrame._basis = new IndexedBasisMatrix(rbAxisB1.X, rbAxisB2.X, axisInB.X,
+                        rbAxisB1.Y, rbAxisB2.Y, axisInB.Y,
+                        rbAxisB1.Z, rbAxisB2.Z, axisInB.Z);
 
 			//start with free
 #if!	_BT_USE_CENTER_LIMIT_
@@ -185,12 +197,12 @@ namespace BulletXNA.BulletDynamics
 			m_referenceSign = m_useReferenceFrameA ? -1.0f : 1.0f;
 		}
 
-		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref Matrix rbAFrame, ref Matrix rbBFrame)
+		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix rbAFrame, ref IndexedMatrix rbBFrame)
 			: this(rbA, rbB, ref rbAFrame, ref rbBFrame, false)
 		{
 		}
 
-		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref Matrix rbAFrame, ref Matrix rbBFrame, bool useReferenceFrameA)
+		public HingeConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix rbAFrame, ref IndexedMatrix rbBFrame, bool useReferenceFrameA)
 			: base(TypedConstraintType.HINGE_CONSTRAINT_TYPE, rbA, rbB)
 		{
 			m_rbAFrame = rbAFrame;
@@ -216,12 +228,12 @@ namespace BulletXNA.BulletDynamics
 			m_referenceSign = m_useReferenceFrameA ? -1.0f : 1.0f;
 		}
 
-		public HingeConstraint(RigidBody rbA, ref Matrix rbAFrame)
+		public HingeConstraint(RigidBody rbA, ref IndexedMatrix rbAFrame)
 			: this(rbA, ref rbAFrame, false)
 		{
 		}
 
-		public HingeConstraint(RigidBody rbA, ref Matrix rbAFrame, bool useReferenceFrameA)
+		public HingeConstraint(RigidBody rbA, ref IndexedMatrix rbAFrame, bool useReferenceFrameA)
 			: base(TypedConstraintType.HINGE_CONSTRAINT_TYPE, rbA)
 		{
 			m_rbAFrame = rbAFrame;
@@ -233,7 +245,8 @@ namespace BulletXNA.BulletDynamics
 			m_useReferenceFrameA = useReferenceFrameA;
 			m_flags = 0;
 
-			m_rbBFrame.Translation = Vector3.Transform(m_rbAFrame.Translation, m_rbA.GetCenterOfMassTransform());
+            m_rbBFrame._origin = m_rbA.GetCenterOfMassTransform() * (m_rbAFrame._origin);
+
 #if	_BT_USE_CENTER_LIMIT_
 			m_limit = new AngularLimit();
 #else
@@ -251,17 +264,17 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public Matrix GetFrameOffsetA()
+		public IndexedMatrix GetFrameOffsetA()
 		{
 			return m_rbAFrame;
 		}
 
-		public Matrix GetFrameOffsetB()
+		public IndexedMatrix GetFrameOffsetB()
 		{
 			return m_rbBFrame;
 		}
 
-		public void setFrames(ref Matrix frameA, ref Matrix frameB)
+		public void setFrames(ref IndexedMatrix frameA, ref IndexedMatrix frameB)
 		{
             m_rbAFrame = frameA;
             m_rbBFrame = frameB;
@@ -270,31 +283,30 @@ namespace BulletXNA.BulletDynamics
 
 		public override void GetInfo1(ConstraintInfo1 info)
 		{
-			info.m_numConstraintRows = 5; // Fixed 3 linear + 2 angular
-			info.nub = 1;
-			//prepare constraint
-			TestLimit(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
-			if (GetSolveLimit() || GetEnableAngularMotor())
-			{
-				info.m_numConstraintRows++; // limit 3rd anguar as well
-				info.nub--;
-			}
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
-			{
-				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
-			}
-
+            info.m_numConstraintRows = 5; // Fixed 3 linear + 2 angular
+            info.nub = 1;
+            //prepare constraint
+            TestLimit(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
+            if (GetSolveLimit() || GetEnableAngularMotor())
+            {
+                info.m_numConstraintRows++; // limit 3rd anguar as well
+                info.nub--;
+            }
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+            {
+                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
+            }
 		}
 
 		public void GetInfo1NonVirtual(ConstraintInfo1 info)
 		{
-			//always add the 'limit' row, to avoid computation (data is not available yet)
-			info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
-			info.nub = 0;
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
-			{
-				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
-			}
+            //always add the 'limit' row, to avoid computation (data is not available yet)
+            info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
+            info.nub = 0;
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+            {
+                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
+            }
 		}
 
 		public override void GetInfo2(ConstraintInfo2 info)
@@ -309,23 +321,21 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
-		public void GetInfo2NonVirtual(ConstraintInfo2 info, Matrix transA, Matrix transB, Vector3 angVelA, Vector3 angVelB)
+		public void GetInfo2NonVirtual(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 angVelA, IndexedVector3 angVelB)
 		{
 			///the regular (virtual) implementation getInfo2 already performs 'testLimit' during getInfo1, so we need to do it now
 			TestLimit(ref transA, ref transB);
 			GetInfo2Internal(info, transA, transB, angVelA, angVelB);
 		}
 
-		public void GetInfo2Internal(ConstraintInfo2 info, Matrix transA, Matrix transB, Vector3 angVelA, Vector3 angVelB)
+		public void GetInfo2Internal(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 angVelA, IndexedVector3 angVelB)
 		{
 			// transforms in world space
-
-
-			Matrix trA = MathUtil.BulletMatrixMultiply(ref transA, ref m_rbAFrame);
-			Matrix trB = MathUtil.BulletMatrixMultiply(ref transB, ref m_rbBFrame);
+            IndexedMatrix trA = transA * m_rbAFrame;
+            IndexedMatrix trB = transB * m_rbBFrame;
 			// pivot point
-			Vector3 pivotAInW = trA.Translation;
-			Vector3 pivotBInW = trB.Translation;
+			IndexedVector3 pivotAInW = trA._origin;
+			IndexedVector3 pivotBInW = trB._origin;
 
 			// linear (all fixed)
 			//info.m_J1linearAxis[0] = 1;
@@ -338,9 +348,9 @@ namespace BulletXNA.BulletDynamics
 				info.m_solverConstraints[2].m_contactNormal.Z = 1f;
 			}
 
-			Vector3 a1 = pivotAInW - transA.Translation;
+			IndexedVector3 a1 = pivotAInW - transA._origin;
 			{
-				Vector3 a1neg = -a1;
+				IndexedVector3 a1neg = -a1;
 				MathUtil.GetSkewSymmetricMatrix(ref a1neg,
 					out info.m_solverConstraints[0].m_relpos1CrossNormal,
 					out info.m_solverConstraints[1].m_relpos1CrossNormal,
@@ -352,7 +362,7 @@ namespace BulletXNA.BulletDynamics
 				int ibreak = 0;
 
 			}
-			Vector3 a2 = pivotBInW - transB.Translation;
+			IndexedVector3 a2 = pivotBInW - transB._origin;
 			{
 				MathUtil.GetSkewSymmetricMatrix(ref a2,
 					out info.m_solverConstraints[0].m_relpos2CrossNormal,
@@ -365,7 +375,7 @@ namespace BulletXNA.BulletDynamics
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					float val = k * (MathUtil.VectorComponent(ref pivotBInW, i) - MathUtil.VectorComponent(ref pivotAInW, i));
+					float val = k * (pivotBInW[i] - pivotAInW[i]);
 					info.m_solverConstraints[i].m_rhs = val;
 				}
 			}
@@ -378,10 +388,10 @@ namespace BulletXNA.BulletDynamics
 			// where p and q are unit vectors normal to the hinge axis, and w1 and w2
 			// are the angular velocity vectors of the two bodies.
 			// get hinge axis (Z)
-			Vector3 ax1 = MathUtil.MatrixColumn(ref trA, 2);
+            IndexedVector3 ax1 = trA._basis.GetColumn(2);
 			// get 2 orthos to hinge axis (X, Y)
-			Vector3 p = MathUtil.MatrixColumn(ref trA, 0);
-			Vector3 q = MathUtil.MatrixColumn(ref trA, 1);
+            IndexedVector3 p = trA._basis.GetColumn(0);
+            IndexedVector3 q = trA._basis.GetColumn(1);
 			// set the two hinge angular rows 
 
 
@@ -413,11 +423,11 @@ namespace BulletXNA.BulletDynamics
 			//    angular_velocity  = (erp*fps) * (ax1 x ax2)
 			// ax1 x ax2 is in the plane space of ax1, so we project the angular
 			// velocity to p and q to find the right hand side.
-			Vector3 ax2 = MathUtil.MatrixColumn(ref trB, 2);
-			Vector3 u = Vector3.Cross(ax1, ax2);
+            IndexedVector3 ax2 = trB._basis.GetColumn(2); 
+			IndexedVector3 u = IndexedVector3.Cross(ax1, ax2);
 
-			info.m_solverConstraints[s3].m_rhs = k * Vector3.Dot(u, p);
-			info.m_solverConstraints[s4].m_rhs = k * Vector3.Dot(u, q);
+			info.m_solverConstraints[s3].m_rhs = k * IndexedVector3.Dot(u, p);
+			info.m_solverConstraints[s4].m_rhs = k * IndexedVector3.Dot(u, q);
 
 			// check angular limits
 			int nrow = 4; // last filled row
@@ -500,8 +510,8 @@ namespace BulletXNA.BulletDynamics
 
 					if (bounce > 0f)
 					{
-						float vel = Vector3.Dot(angVelA, ax1);
-						vel -= Vector3.Dot(angVelB, ax1);
+						float vel = IndexedVector3.Dot(angVelA, ax1);
+						vel -= IndexedVector3.Dot(angVelB, ax1);
 						// only apply bounce if the velocity is incoming, and if the
 						// resulting c[] exceeds what we already have.
 						if (limit == 1)
@@ -544,7 +554,7 @@ namespace BulletXNA.BulletDynamics
 
 		}
 
-		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
+		public void SetFrames(ref IndexedMatrix frameA, ref IndexedMatrix frameB)
 		{
 			m_rbAFrame = frameA;
 			m_rbBFrame = frameB;
@@ -552,12 +562,12 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, Matrix transA, Matrix transB, Vector3 angVelA, Vector3 angVelB)
+		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 angVelA, IndexedVector3 angVelB)
 		{
 			GetInfo2InternalUsingFrameOffset(info, ref transA, ref transB, ref angVelA, ref angVelB);
 		}
 
-		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref Matrix transA, ref Matrix transB, ref Vector3 angVelA, ref Vector3 angVelB)
+		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 angVelA, ref IndexedVector3 angVelB)
 		{
 			// transforms in world space
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
@@ -568,8 +578,8 @@ namespace BulletXNA.BulletDynamics
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transB", transB);
 			}
 
-			Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
-			Matrix trB = MathUtil.BulletMatrixMultiply(transB, m_rbBFrame);
+            IndexedMatrix trA = transA * m_rbAFrame;
+            IndexedMatrix trB = transB * m_rbBFrame;
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
@@ -577,11 +587,11 @@ namespace BulletXNA.BulletDynamics
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trB", trB);
 			}
 			// pivot point
-			Vector3 pivotAInW = trA.Translation;
-			Vector3 pivotBInW = trB.Translation;
+			IndexedVector3 pivotAInW = trA._origin;
+			IndexedVector3 pivotBInW = trB._origin;
 #if true
 			// difference between frames in WCS
-			Vector3 ofs = trB.Translation - trA.Translation;
+			IndexedVector3 ofs = trB._origin - trA._origin;
 			// now get weight factors depending on masses
 			float miA = GetRigidBodyA().GetInvMass();
 			float miB = GetRigidBodyB().GetInvMass();
@@ -599,31 +609,31 @@ namespace BulletXNA.BulletDynamics
 			factB = 1.0f - factA;
 			// get the desired direction of hinge axis
 			// as weighted sum of Z-orthos of frameA and frameB in WCS
-			Vector3 ax1A = MathUtil.MatrixColumn(ref trA, 2);
-			Vector3 ax1B = MathUtil.MatrixColumn(ref trB, 2);
+            IndexedVector3 ax1A = trA._basis.GetColumn(2);
+            IndexedVector3 ax1B = trB._basis.GetColumn(2);
 
-			Vector3 ax1 = ax1A * factA + ax1B * factB;
+			IndexedVector3 ax1 = ax1A * factA + ax1B * factB;
 			ax1.Normalize();
 			// fill first 3 rows 
 			// we want: velA + wA x relA == velB + wB x relB
-			Matrix bodyA_trans = transA;
-			Matrix bodyB_trans = transB;
+			IndexedMatrix bodyA_trans = transA;
+			IndexedMatrix bodyB_trans = transB;
 			int s0 = 0;
 			int s1 = 1;
 			int s2 = 2;
 			int nrow = 2; // last filled row
-			Vector3 tmpA, tmpB, relA, relB, p, q;
+			IndexedVector3 tmpA, tmpB, relA, relB, p, q;
 			// get vector from bodyB to frameB in WCS
-			relB = trB.Translation - bodyB_trans.Translation;
+			relB = trB._origin - bodyB_trans._origin;
 			// get its projection to hinge axis
-			Vector3 projB = ax1 * Vector3.Dot(relB, ax1);
+			IndexedVector3 projB = ax1 * IndexedVector3.Dot(relB, ax1);
 			// get vector directed from bodyB to hinge axis (and orthogonal to it)
-			Vector3 orthoB = relB - projB;
+			IndexedVector3 orthoB = relB - projB;
 			// same for bodyA
-			relA = trA.Translation - bodyA_trans.Translation;
-			Vector3 projA = ax1 * Vector3.Dot(relA, ax1);
-			Vector3 orthoA = relA - projA;
-			Vector3 totalDist = projA - projB;
+			relA = trA._origin - bodyA_trans._origin;
+			IndexedVector3 projA = ax1 * IndexedVector3.Dot(relA, ax1);
+			IndexedVector3 orthoA = relA - projA;
+			IndexedVector3 totalDist = projA - projB;
 			// get offset vectors relA and relB
 			relA = orthoA + totalDist * factA;
 			relB = orthoB - totalDist * factB;
@@ -636,20 +646,20 @@ namespace BulletXNA.BulletDynamics
 			}
 			else
 			{
-				p = MathUtil.MatrixColumn(ref trA, 1);
+                p = trA._basis.GetColumn(1);
 			}
 			// make one more ortho
-			q = Vector3.Cross(ax1, p);
+			q = IndexedVector3.Cross(ax1, p);
 			// fill three rows
-			tmpA = Vector3.Cross(relA, p);
-			tmpB = Vector3.Cross(relB, p);
+			tmpA = IndexedVector3.Cross(relA, p);
+			tmpB = IndexedVector3.Cross(relB, p);
 
 
 			info.m_solverConstraints[s0].m_relpos1CrossNormal = tmpA;
 			info.m_solverConstraints[s0].m_relpos2CrossNormal = -tmpB;
 
-			tmpA = Vector3.Cross(relA, q);
-			tmpB = Vector3.Cross(relB, q);
+            tmpA = IndexedVector3.Cross(ref relA, ref q);
+            tmpB = IndexedVector3.Cross(ref relB, ref q);
 			if (hasStaticBody && GetSolveLimit())
 			{ // to make constraint between static and dynamic objects more rigid
 				// remove wA (or wB) from equation if angular limit is hit
@@ -660,8 +670,8 @@ namespace BulletXNA.BulletDynamics
 			info.m_solverConstraints[s1].m_relpos1CrossNormal = tmpA;
 			info.m_solverConstraints[s1].m_relpos2CrossNormal = -tmpB;
 
-			tmpA = Vector3.Cross(relA, ax1);
-			tmpB = Vector3.Cross(relB, ax1);
+            tmpA = IndexedVector3.Cross(ref relA, ref ax1);
+            tmpB = IndexedVector3.Cross(ref relB, ref ax1);
 			if (hasStaticBody)
 			{ // to make constraint between static and dynamic objects more rigid
 				// remove wA (or wB) from equation
@@ -680,11 +690,11 @@ namespace BulletXNA.BulletDynamics
 				info.m_solverConstraints[s2].m_contactNormal = ax1;
 
 				// compute three elements of right hand side
-				float rhs = k * Vector3.Dot(p, ofs);
+                float rhs = k * IndexedVector3.Dot(ref p, ref ofs);
 				info.m_solverConstraints[s0].m_rhs = rhs;
-				rhs = k * Vector3.Dot(q, ofs);
+                rhs = k * IndexedVector3.Dot(ref q, ref ofs);
 				info.m_solverConstraints[s1].m_rhs = rhs;
-				rhs = k * Vector3.Dot(ax1, ofs);
+                rhs = k * IndexedVector3.Dot(ref ax1, ref ofs);
 				info.m_solverConstraints[s2].m_rhs = rhs;
 			}
 
@@ -719,9 +729,9 @@ namespace BulletXNA.BulletDynamics
 			// ax1 x ax2 is in the plane space of ax1, so we project the angular
 			// velocity to p and q to find the right hand side.
 			k = info.fps * info.erp;
-			Vector3 u = Vector3.Cross(ax1A, ax1B);
-			info.m_solverConstraints[s3].m_rhs = k * Vector3.Dot(u, p);
-			info.m_solverConstraints[s4].m_rhs = k * Vector3.Dot(u, q);
+            IndexedVector3 u = IndexedVector3.Cross(ref ax1A, ref ax1B);
+			info.m_solverConstraints[s3].m_rhs = k * IndexedVector3.Dot(u, p);
+			info.m_solverConstraints[s4].m_rhs = k * IndexedVector3.Dot(u, q);
 #endif
 			// check angular limits
 			nrow = 4; // last filled row
@@ -803,8 +813,8 @@ namespace BulletXNA.BulletDynamics
 
 					if (bounce > 0f)
 					{
-						float vel = Vector3.Dot(angVelA, ax1);
-						vel -= Vector3.Dot(angVelB, ax1);
+                        float vel = IndexedVector3.Dot(ref angVelA, ref ax1);
+                        vel -= IndexedVector3.Dot(ref angVelB, ref ax1);
 						// only apply bounce if the velocity is incoming, and if the
 						// resulting c[] exceeds what we already have.
 						if (limit == 1)
@@ -878,14 +888,15 @@ namespace BulletXNA.BulletDynamics
 		public void SetMotorTarget(ref Quaternion qAinB, float dt) // qAinB is rotation of body A wrt body B.
 		{
 			// convert target from body to constraint space
-			Quaternion qConstraint = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(Quaternion.CreateFromRotationMatrix(m_rbBFrame)), MathUtil.QuaternionMultiply(qAinB, Quaternion.CreateFromRotationMatrix(m_rbAFrame)));
-			qConstraint.Normalize();
+            Quaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation())* qAinB * m_rbAFrame.GetRotation();
+
+            qConstraint.Normalize();
 
 			// extract "pure" hinge component
-			Vector3 vNoHinge = MathUtil.QuatRotate(ref qConstraint, ref vHinge);
+			IndexedVector3 vNoHinge = MathUtil.QuatRotate(ref qConstraint, ref vHinge);
 			vNoHinge.Normalize();
 			Quaternion qNoHinge = MathUtil.ShortestArcQuat(ref vHinge, ref vNoHinge);
-			Quaternion qHinge = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(ref qNoHinge), qConstraint);
+			Quaternion qHinge = MathUtil.QuaternionInverse(ref qNoHinge) * qConstraint;
 			qHinge.Normalize();
 
 			// compute angular target, clamped to limits
@@ -950,25 +961,29 @@ namespace BulletXNA.BulletDynamics
 #endif
 		}
 
-		public void SetAxis(ref Vector3 axisInA)
+		public void SetAxis(ref IndexedVector3 axisInA)
 		{
-			Vector3 rbAxisA1, rbAxisA2;
+			IndexedVector3 rbAxisA1, rbAxisA2;
 			TransformUtil.PlaneSpace1(ref axisInA, out rbAxisA1, out rbAxisA2);
-			Vector3 pivotInA = m_rbAFrame.Translation;
-			//		m_rbAFrame.Translation = pivotInA;
+			IndexedVector3 pivotInA = m_rbAFrame._origin;
+			//		m_rbAFrame._origin = pivotInA;
 
 			//MathUtil.setBasis(ref m_rbAFrame,ref axisInA,ref rbAxisA1,ref rbAxisA2);
-			MathUtil.SetBasis(ref m_rbAFrame, ref rbAxisA1, ref rbAxisA2, ref axisInA);
+			m_rbAFrame._basis = new IndexedBasisMatrix(rbAxisA1.X, rbAxisA2.X, axisInA.X,
+                                    rbAxisA1.Y, rbAxisA2.Y, axisInA.Y,
+                                    rbAxisA1.Z, rbAxisA2.Z, axisInA.Z);
 
-			Vector3 axisInB = Vector3.TransformNormal(axisInA, m_rbA.GetCenterOfMassTransform());
+            IndexedVector3 axisInB = m_rbA.GetCenterOfMassTransform()._basis * axisInA;
 
 			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
-			Vector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
-			Vector3 rbAxisB2 = Vector3.Cross(axisInB, rbAxisB1);
+			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
+            IndexedVector3 rbAxisB2 = IndexedVector3.Cross(ref axisInB, ref rbAxisB1);
 
-			m_rbBFrame.Translation = Vector3.Transform(Vector3.Transform(pivotInA, m_rbA.GetCenterOfMassTransform()), Matrix.Invert(m_rbB.GetCenterOfMassTransform()));
+            m_rbBFrame._origin = m_rbB.GetCenterOfMassTransform().Inverse() * (m_rbA.GetCenterOfMassTransform() * (pivotInA));
 
-			MathUtil.SetBasis(ref m_rbBFrame, ref rbAxisB1, ref rbAxisB2, ref axisInB);
+            m_rbBFrame._basis = new IndexedBasisMatrix(rbAxisB1.X, rbAxisB2.X, axisInB.X,
+                                    rbAxisB1.Y, rbAxisB2.Y, axisInB.Y,
+                                    rbAxisB1.Z, rbAxisB2.Z, axisInB.Z);
 		}
 
 		public float GetLowerLimit()
@@ -995,26 +1010,40 @@ namespace BulletXNA.BulletDynamics
 			return GetHingeAngle(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
 		}
 
-		public float GetHingeAngle(Matrix transA, Matrix transB)
+		public float GetHingeAngle(IndexedMatrix transA, IndexedMatrix transB)
 		{
 			return GetHingeAngle(ref transA, ref transB);
 		}
 
-		public float GetHingeAngle(ref Matrix transA, ref Matrix transB)
+		public float GetHingeAngle(ref IndexedMatrix transA, ref IndexedMatrix transB)
 		{
-			Vector3 refAxis0 = Vector3.TransformNormal(MathUtil.MatrixColumn(ref m_rbAFrame, 0), transA);
-			Vector3 refAxis1 = Vector3.TransformNormal(MathUtil.MatrixColumn(ref m_rbAFrame, 1), transA);
-			Vector3 swingAxis = Vector3.TransformNormal(MathUtil.MatrixColumn(ref m_rbBFrame, 1), transB);
-			float angle = (float)Math.Atan2(Vector3.Dot(swingAxis, refAxis0), Vector3.Dot(swingAxis, refAxis1));
-			return m_referenceSign * angle;
+            IndexedVector3 refAxis0 = transA._basis * m_rbAFrame._basis.GetColumn(0);
+            IndexedVector3 refAxis1 = transA._basis * m_rbAFrame._basis.GetColumn(1);
+            IndexedVector3 swingAxis = transB._basis * m_rbBFrame._basis.GetColumn(1);
+
+            refAxis0.Normalize();
+            refAxis1.Normalize();
+            swingAxis.Normalize();
+
+            float a = IndexedVector3.Dot(ref swingAxis, ref refAxis0);
+            float b = IndexedVector3.Dot(ref swingAxis, ref refAxis1);
+
+            float angle = (float)Math.Atan2(a,b );
+
+            float result = m_referenceSign * angle;
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GetHingeAngle [{0:0.00000000}][{1:0.00000000}][{2:0.00000000}][{3:0.00000000}]", a,b,m_referenceSign,result);
+            }
+            return result;
 		}
 
-		public void TestLimit(Matrix transA, Matrix transB)
+		public void TestLimit(IndexedMatrix transA, IndexedMatrix transB)
 		{
 			TestLimit(ref transA, ref transB);
 		}
 
-		public void TestLimit(ref Matrix transA, ref Matrix transB)
+		public void TestLimit(ref IndexedMatrix transA, ref IndexedMatrix transB)
 		{
 			// Compute limit information
 			m_hingeAngle = GetHingeAngle(ref transA, ref transB);
@@ -1046,8 +1075,8 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public Matrix GetAFrame() { return m_rbAFrame; }
-		public Matrix GetBFrame() { return m_rbBFrame; }
+		public IndexedMatrix GetAFrame() { return m_rbAFrame; }
+		public IndexedMatrix GetBFrame() { return m_rbBFrame; }
 
 		public bool GetSolveLimit()
 		{
@@ -1097,6 +1126,8 @@ namespace BulletXNA.BulletDynamics
 		{
 			m_useOffsetForConstraintFrame = frameOffsetOnOff;
 		}
+
+
 	}
 
 	public enum HingeFlags

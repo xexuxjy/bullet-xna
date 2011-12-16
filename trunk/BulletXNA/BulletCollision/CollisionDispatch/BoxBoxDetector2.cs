@@ -45,8 +45,8 @@
 
 //        public virtual void GetClosestPoints(ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
 //        {
-//            Matrix transformA = input.m_transformA;
-//            Matrix transformB = input.m_transformB;
+//            IndexedMatrix transformA = input.m_transformA;
+//            IndexedMatrix transformB = input.m_transformB;
 
 //            if (BulletGlobals.g_streamWriter != null && debugBoxBox)
 //            {
@@ -58,12 +58,12 @@
 
 //            int skip = 0;
 //            Object contact = null;
-//            Matrix rotateA = Matrix.Identity;
+//            IndexedMatrix rotateA = IndexedMatrix.Identity;
 //            rotateA.Backward = transformA.Backward;
 //            rotateA.Right = transformA.Right;
 //            rotateA.Up = transformA.Up;
 
-//            Matrix rotateB = Matrix.Identity;
+//            IndexedMatrix rotateB = IndexedMatrix.Identity;
 //            rotateB.Backward = transformB.Backward;
 //            rotateB.Right = transformB.Right;
 //            rotateB.Up = transformB.Up;
@@ -73,18 +73,18 @@
 //            int return_code = -1;
 //            int maxc = 4;
 
-//            Vector3 translationA = transformA.Translation;
-//            Vector3 translationB = transformB.Translation;
+//            IndexedVector3 translationA = transformA._origin;
+//            IndexedVector3 translationB = transformB._origin;
 
-//            Vector3 debugExtents = new Vector3(2f, 2f, 2f);
+//            IndexedVector3 debugExtents = new IndexedVector3(2f, 2f, 2f);
 
-//            Vector3 box1Margin = 2f * m_box1.GetHalfExtentsWithMargin();
-//            Vector3 box2Margin = 2f * m_box2.GetHalfExtentsWithMargin();
+//            IndexedVector3 box1Margin = 2f * m_box1.GetHalfExtentsWithMargin();
+//            IndexedVector3 box2Margin = 2f * m_box2.GetHalfExtentsWithMargin();
 
-//            //Vector3 box1Margin = 2f * debugExtents;
-//            //Vector3 box2Margin = 2f * debugExtents;
-//            rotateA = Matrix.Transpose(rotateA);
-//            rotateB = Matrix.Transpose(rotateB);
+//            //IndexedVector3 box1Margin = 2f * debugExtents;
+//            //IndexedVector3 box2Margin = 2f * debugExtents;
+//            rotateA = IndexedMatrix.Transpose(rotateA);
+//            rotateB = IndexedMatrix.Transpose(rotateB);
 
 //            float[] temp1 = new float[12];
 //            float[] temp2 = new float[12];
@@ -127,12 +127,12 @@
 //        }
 
 //        private static int DBoxBox2(float[] p1, float[] R1,
-//        ref Vector3 side1, float[] p2,
-//        float[] R2, ref Vector3 side2,
+//        ref IndexedVector3 side1, float[] p2,
+//        float[] R2, ref IndexedVector3 side2,
 //        float[] normal, ref float depth, ref int return_code,
 //        int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output)
 //        {
-//            Vector3 centerDifference = Vector3.Zero, ppv = Vector3.Zero;
+//            IndexedVector3 centerDifference = IndexedVector3.Zero, ppv = IndexedVector3.Zero;
 //            float[] normalR = null;
 //            int normalROffsetResult = 0;
 
@@ -188,8 +188,8 @@
 //            invert_normal = false;
 //            code = 0;
 
-//            //Matrix m1 = Matrix.Identity;
-//            //Matrix m2 = Matrix.Identity;
+//            //IndexedMatrix m1 = IndexedMatrix.Identity;
+//            //IndexedMatrix m2 = IndexedMatrix.Identity;
 //            //MathUtil.matrixFromFloat(ref m1, R1);
 //            //MathUtil.matrixFromFloat(ref m2, R2); 
 
@@ -207,7 +207,7 @@
 //            // note: cross product axes need to be scaled when s is computed.
 //            // normal (n1,n2,n3) is relative to box 1.
 //            // separating axis = u1 x (v1,v2,v3)
-//            //private static bool TST2(float expr1,float expr2,ref Vector3 normal, ref Vector3 normalC,int cc,ref int code)
+//            //private static bool TST2(float expr1,float expr2,ref IndexedVector3 normal, ref IndexedVector3 normalC,int cc,ref int code)
 
 //            float[] normalC = new float[3];
 
@@ -287,8 +287,8 @@
 
 
 //                float alpha = 0f, beta = 0f;
-//                float[] ua = MathUtil.FloatFromVector3(Vector3.Zero);
-//                float[] ub = MathUtil.FloatFromVector3(Vector3.Zero);
+//                float[] ua = MathUtil.FloatFromVector3(IndexedVector3.Zero);
+//                float[] ub = MathUtil.FloatFromVector3(IndexedVector3.Zero);
 //                for (int i = 0; i < 3; i++)
 //                {
 //                    ua[i] = R1[((code) - 7) / 3 + i * 4];
@@ -312,15 +312,15 @@
 //                {
 //                    //contact[0].pos[i] = float(0.5)*(pa[i]+pb[i]);
 //                    //contact[0].depth = *depth;
-//                    Vector3 pointInWorld = new Vector3();
+//                    IndexedVector3 pointInWorld = new IndexedVector3();
 
 //#if USE_CENTER_POINT
 //            pointInWorld = (pa + pb) * 0.5f;
 //            output.addContactPoint(-normal,pointInWorld,-depth);
 //#else
-//                    Vector3 pbv = Vector3.Zero;
+//                    IndexedVector3 pbv = IndexedVector3.Zero;
 //                    MathUtil.Vector3FromFloat(ref pbv, pb1);
-//                    output.AddContactPoint(-new Vector3(normal[0], normal[1], normal[2]), pbv, -depth);
+//                    output.AddContactPoint(-new IndexedVector3(normal[0], normal[1], normal[2]), pbv, -depth);
 //#endif //
 //                    return_code = code;
 //                }
@@ -559,14 +559,14 @@
 //                        {
 //                            pointInWorldFA[i] = point[j * 3 + i] + pa[i];
 //                        }
-//                        Vector3 pointInWorld = Vector3.Zero;
+//                        IndexedVector3 pointInWorld = IndexedVector3.Zero;
 //                        MathUtil.Vector3FromFloat(ref pointInWorld, pointInWorldFA);
 //                        if (BulletGlobals.g_streamWriter != null && debugBoxBox)
 //                        {
 //                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
 //                        }
 
-//                        output.AddContactPoint(-new Vector3(normal[0], normal[1], normal[2]), pointInWorld, -dep[j]);
+//                        output.AddContactPoint(-new IndexedVector3(normal[0], normal[1], normal[2]), pointInWorld, -dep[j]);
 //                    }
 //                }
 //                else
@@ -574,7 +574,7 @@
 //                    // we have less contacts than we need, so we use them all
 //                    for (int j = 0; j < cnum; j++)
 //                    {
-//                        Vector3 pointInWorld = Vector3.Zero;
+//                        IndexedVector3 pointInWorld = IndexedVector3.Zero;
 //                        pointInWorld.X = point[j * 3 + 0] + pa[0] - normal[0] * dep[j];
 //                        pointInWorld.Y = point[j * 3 + 1] + pa[1] - normal[1] * dep[j];
 //                        pointInWorld.Z = point[j * 3 + 2] + pa[2] - normal[2] * dep[j];
@@ -583,7 +583,7 @@
 //                        {
 //                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
 //                        }
-//                        output.AddContactPoint(-new Vector3(normal[0], normal[1], normal[2]), pointInWorld, -dep[j]);
+//                        output.AddContactPoint(-new IndexedVector3(normal[0], normal[1], normal[2]), pointInWorld, -dep[j]);
 //                    }
 //                }
 //            }
@@ -615,7 +615,7 @@
 //                    {
 //                        posInWorldFA[i] = point[iret[j] * 3 + i] + pa[i];
 //                    }
-//                    Vector3 posInWorld = Vector3.Zero;
+//                    IndexedVector3 posInWorld = IndexedVector3.Zero;
 //                    MathUtil.Vector3FromFloat(ref posInWorld, posInWorldFA);
 
 //                    if (BulletGlobals.g_streamWriter != null && debugBoxBox)
@@ -624,7 +624,7 @@
 //                    }
 
 
-//                    output.AddContactPoint(-new Vector3(normal[0], normal[1], normal[2]), posInWorld, -dep[iret[j]]);
+//                    output.AddContactPoint(-new IndexedVector3(normal[0], normal[1], normal[2]), posInWorld, -dep[iret[j]]);
 //                }
 //                cnum = maxc;
 //            }

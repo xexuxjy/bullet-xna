@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -37,7 +38,7 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleRaycastCallback : ITriangleCallback
     {
-        public TriangleRaycastCallback(ref Vector3 from, ref Vector3 to, EFlags flags)
+        public TriangleRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
         {
             m_from = from;
             m_to = to;
@@ -51,24 +52,21 @@ namespace BulletXNA.BulletCollision
             return false;
         }
 
-        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
-            Vector3 v10;
-            Vector3 v20;
+            IndexedVector3 v10 = triangle[1] - triangle[0];
+            IndexedVector3 v20 = triangle[2] - triangle[0];
 
-            Vector3.Subtract(ref triangle[1], ref triangle[0], out v10);
-            Vector3.Subtract(ref triangle[2], ref triangle[0], out v20);
 
-            Vector3 triangleNormal;
-            Vector3.Cross(ref v10, ref v20, out triangleNormal);
+            IndexedVector3 triangleNormal = v10.Cross(ref v20);
 
             float dist;
-            Vector3.Dot(ref triangle[0], ref triangleNormal, out dist);
+            IndexedVector3.Dot(ref triangle[0], ref triangleNormal, out dist);
             float dist_a;
-            Vector3.Dot(ref triangleNormal, ref m_from, out dist_a);
+            IndexedVector3.Dot(ref triangleNormal, ref m_from, out dist_a);
             dist_a -= dist;
             float dist_b;
-            Vector3.Dot(ref triangleNormal, ref m_to, out dist_b);
+            IndexedVector3.Dot(ref triangleNormal, ref m_to, out dist_b);
             dist_b -= dist;
 
             if (dist_a * dist_b >= 0f)
@@ -93,35 +91,29 @@ namespace BulletXNA.BulletCollision
             {
                 float edge_tolerance = triangleNormal.LengthSquared();
                 edge_tolerance *= -0.0001f;
-                Vector3 point;
+                IndexedVector3 point;
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
-                    Vector3 v0p;
-                    Vector3.Subtract(ref triangle[0], ref point, out v0p);
-                    Vector3 v1p;
-                    Vector3.Subtract(ref triangle[1], ref point, out v1p);
+                    IndexedVector3 v0p = triangle[0] - point;
+                    IndexedVector3 v1p = triangle[1] - point; ;
 
-                    Vector3 cp0;
-                    Vector3.Cross(ref v0p, ref v1p, out cp0);
+                    IndexedVector3 cp0 = v0p.Cross(ref v1p);
 
                     float dot;
-                    Vector3.Dot(ref cp0, ref triangleNormal, out dot);
+                    IndexedVector3.Dot(ref cp0, ref triangleNormal, out dot);
                     if (dot >= edge_tolerance)
                     {
-                        Vector3 v2p;
-                        Vector3.Subtract(ref triangle[2], ref point, out v2p);
-                        Vector3 cp1; //= Vector3.Cross(v1p,v2p);
-                        Vector3.Cross(ref v1p, ref v2p, out cp1);
+                        IndexedVector3 v2p = triangle[2] - point;
+                        IndexedVector3 cp1 = v1p.Cross(ref v2p);//= IndexedVector3.Cross(v1p,v2p);
 
                         float dot2;
-                        Vector3.Dot(ref cp1, ref triangleNormal, out dot2);
+                        IndexedVector3.Dot(ref cp1, ref triangleNormal, out dot2);
 
                         if (dot2 >= edge_tolerance)
                         {
-                            Vector3 cp2;
-                            Vector3.Cross(ref v2p, ref v0p, out cp2);
+                            IndexedVector3 cp2 = v2p.Cross(ref v0p);
                             float dot3;
-                            Vector3.Dot(ref cp2, ref triangleNormal, out dot3);
+                            IndexedVector3.Dot(ref cp2, ref triangleNormal, out dot3);
 
                             if (dot3 >= edge_tolerance)
                             {
@@ -132,7 +124,7 @@ namespace BulletXNA.BulletCollision
                                 //@BP Mod - Allow for unflipped normal when raycasting against backfaces
                                 if (((m_flags & EFlags.kF_KeepUnflippedNormal) != 0) || (dist_a <= 0.0f))
                                 {
-                                    Vector3 negNormal = -triangleNormal;
+                                    IndexedVector3 negNormal = -triangleNormal;
                                     m_hitFraction = ReportHit(ref negNormal, distance, partId, triangleIndex);
                                 }
                                 else
@@ -146,14 +138,14 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public abstract float ReportHit(ref Vector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex);
+        public abstract float ReportHit(ref IndexedVector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex);
 
         public virtual void Cleanup()
         {
         }
 
-        public Vector3 m_from;
-        public Vector3 m_to;
+        public IndexedVector3 m_from;
+        public IndexedVector3 m_to;
         public EFlags m_flags;
         public float m_hitFraction;
 
@@ -161,7 +153,7 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleConvexcastCallback : ITriangleCallback
     {
-        public TriangleConvexcastCallback(ConvexShape convexShape, ref Matrix convexShapeFrom, ref Matrix convexShapeTo, ref Matrix triangleToWorld, float triangleCollisionMargin)
+        public TriangleConvexcastCallback(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin)
         {
             m_convexShape = convexShape;
             m_convexShapeFrom = convexShapeFrom;
@@ -176,7 +168,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
             TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
             triangleShape.SetMargin(m_triangleCollisionMargin);
@@ -221,12 +213,12 @@ namespace BulletXNA.BulletCollision
         {
         }
 
-        public abstract float ReportHit(ref Vector3 hitNormalLocal, ref Vector3 hitPointLocal, float hitFraction, int partId, int triangleIndex);
+        public abstract float ReportHit(ref IndexedVector3 hitNormalLocal, ref IndexedVector3 hitPointLocal, float hitFraction, int partId, int triangleIndex);
 
         public ConvexShape m_convexShape;
-        public Matrix m_convexShapeFrom;
-        public Matrix m_convexShapeTo;
-        public Matrix m_triangleToWorld;
+        public IndexedMatrix m_convexShapeFrom;
+        public IndexedMatrix m_convexShapeTo;
+        public IndexedMatrix m_triangleToWorld;
         public float m_hitFraction;
         public float m_triangleCollisionMargin;
         public float m_allowedPenetration;

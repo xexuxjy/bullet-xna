@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -34,7 +35,7 @@ namespace BulletXNA.BulletDynamics
         // constructor
     	// anchor, axis1 and axis2 are in world coordinate system
 	    // axis1 must be orthogonal to axis2
-        public Hinge2Constraint(RigidBody rbA, RigidBody rbB, ref Vector3 anchor, ref Vector3 axis1, ref Vector3 axis2) : base(rbA,rbB,Matrix.Identity,Matrix.Identity,true)
+        public Hinge2Constraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 anchor, ref IndexedVector3 axis1, ref IndexedVector3 axis2) : base(rbA,rbB,IndexedMatrix.Identity,IndexedMatrix.Identity,true)
         {
             m_anchor = anchor;
             m_axis1 = axis1;
@@ -48,23 +49,25 @@ namespace BulletXNA.BulletDynamics
             // new position of X, allowed limits are (-PI,PI);
             // So to simulate ODE Universal joint we should use parent axis as Z, child axis as Y and limit all other DOFs
             // Build the frame in world coordinate system first
-            Vector3 zAxis = Vector3.Normalize(axis1);
-            Vector3 xAxis = Vector3.Normalize(axis2);
-            Vector3 yAxis = Vector3.Cross(zAxis,xAxis); // we want right coordinate system
+            IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
+            IndexedVector3 xAxis = IndexedVector3.Normalize(axis2);
+            IndexedVector3 yAxis = IndexedVector3.Cross(zAxis,xAxis); // we want right coordinate system
 
-            Matrix frameInW = Matrix.Identity;
-            MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
-            frameInW.Translation = anchor;
+            IndexedMatrix frameInW = IndexedMatrix.Identity;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                   xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._origin = anchor;
 
             // now get constraint frame in local coordinate systems
-            m_frameInA = MathUtil.InverseTimes(rbA.GetCenterOfMassTransform(),frameInW);
-            m_frameInB = MathUtil.InverseTimes(rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = rbB.GetCenterOfMassTransform().Inverse() * frameInW;
             // sei limits
-            SetLinearLowerLimit(new Vector3(0.0f, 0.0f, -1.0f));
-            SetLinearUpperLimit(new Vector3(0.0f, 0.0f, 1.0f));
+            SetLinearLowerLimit(new IndexedVector3(0.0f, 0.0f, -1.0f));
+            SetLinearUpperLimit(new IndexedVector3(0.0f, 0.0f, 1.0f));
             // like front wheels of a car
-            SetAngularLowerLimit(new Vector3(1.0f, 0.0f, -MathUtil.SIMD_HALF_PI * 0.5f));
-            SetAngularUpperLimit(new Vector3(-1.0f, 0.0f, MathUtil.SIMD_HALF_PI * 0.5f));
+            SetAngularLowerLimit(new IndexedVector3(1.0f, 0.0f, -MathUtil.SIMD_HALF_PI * 0.5f));
+            SetAngularUpperLimit(new IndexedVector3(-1.0f, 0.0f, MathUtil.SIMD_HALF_PI * 0.5f));
             // enable suspension
             EnableSpring(2, true);
             SetStiffness(2, MathUtil.SIMD_PI * MathUtil.SIMD_PI * 4.0f); // period 1 sec for 1 kilogramm weel :-)
@@ -73,19 +76,19 @@ namespace BulletXNA.BulletDynamics
 
         }
 	    // access
-	    public Vector3 GetAnchor() { return m_calculatedTransformA.Translation; }
-	    public Vector3 GetAnchor2() { return m_calculatedTransformB.Translation; }
-	    public Vector3 GetAxis1() { return m_axis1; }
-	    public Vector3 GetAxis2() { return m_axis2; }
+	    public IndexedVector3 GetAnchor() { return m_calculatedTransformA._origin; }
+	    public IndexedVector3 GetAnchor2() { return m_calculatedTransformB._origin; }
+	    public IndexedVector3 GetAxis1() { return m_axis1; }
+	    public IndexedVector3 GetAxis2() { return m_axis2; }
 	    public float GetAngle1() { return GetAngle(2); }
         public float GetAngle2() { return GetAngle(0); }
 	    // limits
-        public void SetUpperLimit(float ang1max) { SetAngularUpperLimit(new Vector3(-1.0f, 0.0f, ang1max)); }
-        public void SetLowerLimit(float ang1min) { SetAngularLowerLimit(new Vector3(1.0f, 0.0f, ang1min)); }
+        public void SetUpperLimit(float ang1max) { SetAngularUpperLimit(new IndexedVector3(-1.0f, 0.0f, ang1max)); }
+        public void SetLowerLimit(float ang1min) { SetAngularLowerLimit(new IndexedVector3(1.0f, 0.0f, ang1min)); }
     
-        protected Vector3	m_anchor;
-	    protected Vector3	m_axis1;
-	    protected Vector3	m_axis2;
+        protected IndexedVector3	m_anchor;
+	    protected IndexedVector3	m_axis1;
+	    protected IndexedVector3	m_axis2;
 
     }
 }

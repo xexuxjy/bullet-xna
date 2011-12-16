@@ -28,48 +28,49 @@ namespace BulletXNA.LinearMath
 {
     public interface IDebugDraw
     {
-        void DrawLine(Vector3 from, Vector3 to, Vector3 fromColor);
-        void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor);
-        void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor, ref Vector3 toColor);
-        //void drawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Vector3 color);
-        void DrawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Matrix trans, ref Vector3 color);
-        void DrawBox(ref Vector3 bbMin, ref Vector3 bbMax, ref Matrix transform, ref Vector3 color, float alpha);
-        void DrawSphere(Vector3 p, float radius, Vector3 color);
-        void DrawSphere(ref Vector3 p, float radius, ref Vector3 color);
-        void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 color, float alpha);
-        void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 color, float alpha);
-        void DrawContactPoint(Vector3 pointOnB, Vector3 normalOnB, float distance, int lifeTime, Vector3 color);
-        void DrawContactPoint(ref Vector3 pointOnB, ref Vector3 normalOnB, float distance, int lifeTime, ref Vector3 color);
+        void DrawText(String text, IndexedVector3 location, IndexedVector3 color);
+        void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 fromColor);
+        void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor);
+        void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor);
+        //void drawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedVector3 color);
+        void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedMatrix trans, ref IndexedVector3 color);
+        void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha);
+        void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color);
+        void DrawSphere(ref IndexedVector3 p, float radius, ref IndexedVector3 color);
+        void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 n0, ref IndexedVector3 n1, ref IndexedVector3 n2, ref IndexedVector3 color, float alpha);
+        void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 color, float alpha);
+        void DrawContactPoint(IndexedVector3 pointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color);
+        void DrawContactPoint(ref IndexedVector3 pointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color);
         void ReportErrorWarning(String warningString);
-        void Draw3dText(ref Vector3 location, String textString);
+        void Draw3dText(ref IndexedVector3 location, String textString);
         void SetDebugMode(DebugDrawModes debugMode);
 
         DebugDrawModes GetDebugMode();
 
-        void DrawAabb(Vector3 from, Vector3 to, Vector3 color);
+        void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color);
 
-        void DrawAabb(ref Vector3 from, ref Vector3 to, ref Vector3 color);
+        void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color);
 
-        void DrawTransform(ref Matrix transform, float orthoLen);
+        void DrawTransform(ref IndexedMatrix transform, float orthoLen);
 
-        void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
-            ref Vector3 color, bool drawSect);
+        void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
+            ref IndexedVector3 color, bool drawSect);
         //{
         //    drawArc(ref center,ref normal,ref axis,radiusA,radiusB,minAngle,maxAngle,ref color,drawSect,10f);
         //}
 
-        void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
-            ref Vector3 color, bool drawSect, float stepDegrees);
+        void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
+            ref IndexedVector3 color, bool drawSect, float stepDegrees);
 
-        void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius,
-            float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color);
+        void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
+            float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color);
         //{
         //    drawSpherePatch(ref center,ref up,ref axis,radius,minTh,maxTh,minPs,maxPs,ref color,10.0f);
         //}
 
 
-        void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius,
-            float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color, float stepDegrees);
+        void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
+            float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees);
     }
 
     /*-------------------------------------------------------------------------------------*/

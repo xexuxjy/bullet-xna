@@ -37,8 +37,8 @@ namespace BulletXNA.BulletCollision
         public const float CONTACT_DIFF_EPSILON = 0.00001f;
 
 
-        public Vector3 m_point;
-        public Vector3 m_normal;
+        public IndexedVector3 m_point;
+        public IndexedVector3 m_normal;
         public float m_depth;//Positive value indicates interpenetration
         //public float m_distance;//Padding not for use
         public int m_feature1;//Face number
@@ -53,7 +53,7 @@ namespace BulletXNA.BulletCollision
             m_feature2 = contact.m_feature2;
         }
 
-        public GIM_CONTACT(ref Vector3 point, ref Vector3 normal,
+        public GIM_CONTACT(ref IndexedVector3 point, ref IndexedVector3 normal,
                         float depth, int feature1, int feature2)
         {
             m_point = point;
@@ -80,9 +80,9 @@ namespace BulletXNA.BulletCollision
             return _hash;
         }
 
-        public void InterpolateNormals(Vector3[] normals, int normal_count)
+        public void InterpolateNormals(IndexedVector3[] normals, int normal_count)
         {
-            Vector3 vec_sum = m_normal;
+            IndexedVector3 vec_sum = m_normal;
             for (int i = 0; i < normal_count; i++)
             {
                 vec_sum += normals[i];
@@ -108,16 +108,16 @@ namespace BulletXNA.BulletCollision
         {
         }
 
-        void PushContact(ref Vector3 point, ref Vector3 normal,
+        void PushContact(ref IndexedVector3 point, ref IndexedVector3 normal,
             float depth, int feature1, int feature2)
         {
             Add(new GIM_CONTACT(ref point, ref normal, depth, feature1, feature2));
         }
 
-        void PushContact(ref Vector3 point, ref Vector4 normal,
+        void PushContact(ref IndexedVector3 point, ref Vector4 normal,
             float depth, int feature1, int feature2)
         {
-            Vector3 temp = new Vector3(normal.X, normal.Y, normal.Z);
+            IndexedVector3 temp = new IndexedVector3(normal.X, normal.Y, normal.Z);
             Add(new GIM_CONTACT(ref point, ref temp, depth, feature1, feature2));
         }
 
@@ -170,7 +170,7 @@ namespace BulletXNA.BulletCollision
 
             // Merge contacts
             int coincident_count = 0;
-            Vector3[] coincident_normals = new Vector3[MAX_COINCIDENT];
+            IndexedVector3[] coincident_normals = new IndexedVector3[MAX_COINCIDENT];
 
             uint last_key = keycontacts[0].m_key;
             uint key = 0;

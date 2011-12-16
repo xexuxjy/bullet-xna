@@ -24,18 +24,19 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
 	public class ConeTwistConstraint : TypedConstraint
 	{
 		public const float CONETWIST_DEF_FIX_THRESH = .05f;
-		public static Vector3 vTwist = new Vector3(1, 0, 0); // twist axis in constraint's space
+		public static IndexedVector3 vTwist = new IndexedVector3(1, 0, 0); // twist axis in constraint's space
 
 		public JacobianEntry[] m_jac = new JacobianEntry[3]; //3 orthogonal linear constraints
 
-		public Matrix m_rbAFrame = Matrix.Identity;
-		public Matrix m_rbBFrame = Matrix.Identity;
+		public IndexedMatrix m_rbAFrame = IndexedMatrix.Identity;
+		public IndexedMatrix m_rbBFrame = IndexedMatrix.Identity;
 
 		public float m_limitSoftness;
 		public float m_biasFactor;
@@ -49,8 +50,8 @@ namespace BulletXNA.BulletDynamics
 
 		public float m_fixThresh;
 
-		public Vector3 m_swingAxis;
-		public Vector3 m_twistAxis;
+		public IndexedVector3 m_swingAxis;
+		public IndexedVector3 m_twistAxis;
 
 		public float m_kSwing;
 		public float m_kTwist;
@@ -71,14 +72,14 @@ namespace BulletXNA.BulletDynamics
 		// not yet used...
 		public float m_swingLimitRatio;
 		public float m_twistLimitRatio;
-		public Vector3 m_twistAxisA;
+		public IndexedVector3 m_twistAxisA;
 
 		// motor
 		public bool m_bMotorEnabled;
 		public bool m_bNormalizedMotorStrength;
 		public Quaternion m_qTarget = Quaternion.Identity;
 		public float m_maxMotorImpulse;
-		public Vector3 m_accMotorImpulse;
+		public IndexedVector3 m_accMotorImpulse;
 
 		// parameters
 		public int m_flags;
@@ -86,7 +87,12 @@ namespace BulletXNA.BulletDynamics
 		public float m_linERP;
 		public float m_angCFM;
 
-		public ConeTwistConstraint(RigidBody rbA, RigidBody rbB, ref Matrix rbAFrame, ref Matrix rbBFrame) :
+        private bool m_useSolveConstraintObsolete = false;
+        static bool bDoTorque = true;
+
+
+
+		public ConeTwistConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix rbAFrame, ref IndexedMatrix rbBFrame) :
 			base(TypedConstraintType.CONETWIST_CONSTRAINT_TYPE, rbA, rbB)
 		{
 			m_angularOnly = false;
@@ -95,7 +101,7 @@ namespace BulletXNA.BulletDynamics
 			Init();
 		}
 
-		public ConeTwistConstraint(RigidBody rbA, ref Matrix rbAFrame)
+		public ConeTwistConstraint(RigidBody rbA, ref IndexedMatrix rbAFrame)
 			: base(TypedConstraintType.CONETWIST_CONSTRAINT_TYPE, rbA)
 		{
 			m_rbAFrame = rbAFrame;
@@ -123,44 +129,54 @@ namespace BulletXNA.BulletDynamics
 
 
 
-		public static float ComputeAngularImpulseDenominator(ref Vector3 axis, ref Matrix invInertiaWorld)
+        public static float ComputeAngularImpulseDenominator(ref IndexedVector3 axis, ref IndexedBasisMatrix invInertiaWorld)
 		{
-			Vector3 vec = MathUtil.TransposeTransformNormal(axis, invInertiaWorld);
-			return Vector3.Dot(axis, vec);
+            //IndexedVector3 vec = MathUtil.TransposeTransformNormal(axis, invInertiaWorld);
+            IndexedVector3 vec = axis* invInertiaWorld;
+			return axis.Dot(ref vec);
 		}
 
 
 		public void GetInfo1NonVirtual(ConstraintInfo1 info)
 		{
-			//always reserve 6 rows: object transform is not available on SPU
-			info.m_numConstraintRows = 6;
-			info.nub = 0;
+            //always reserve 6 rows: object transform is not available on SPU
+            info.m_numConstraintRows = 6;
+            info.nub = 0;
 		}
 
 		public override void GetInfo1(ConstraintInfo1 info)
 		{
-			info.m_numConstraintRows = 3;
-			info.nub = 3;
-
-			CalcAngleInfo2(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform(), m_rbA.GetInvInertiaTensorWorld(), m_rbB.GetInvInertiaTensorWorld());
-			if (m_solveSwingLimit)
-			{
-				info.m_numConstraintRows++;
-				info.nub--;
-				if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
-				{
-					info.m_numConstraintRows++;
-					info.nub--;
-				}
-			}
-			if (m_solveTwistLimit)
-			{
-				info.m_numConstraintRows++;
-				info.nub--;
-			}
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+            if (m_useSolveConstraintObsolete)
             {
-                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
+                info.m_numConstraintRows = 0;
+                info.nub = 0;
+            }
+            else
+            {
+
+                info.m_numConstraintRows = 3;
+                info.nub = 3;
+
+                CalcAngleInfo2(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform(), m_rbA.GetInvInertiaTensorWorld(), m_rbB.GetInvInertiaTensorWorld());
+                if (m_solveSwingLimit)
+                {
+                    info.m_numConstraintRows++;
+                    info.nub--;
+                    if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
+                    {
+                        info.m_numConstraintRows++;
+                        info.nub--;
+                    }
+                }
+                if (m_solveTwistLimit)
+                {
+                    info.m_numConstraintRows++;
+                    info.nub--;
+                }
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
+                {
+                    PrintInfo1(BulletGlobals.g_streamWriter, this, info);
+                }
             }
         }
 
@@ -172,25 +188,28 @@ namespace BulletXNA.BulletDynamics
 								m_rbB.GetInvInertiaTensorWorld());
 		}
 
-		public void GetInfo2NonVirtual(ConstraintInfo2 info, Matrix transA, Matrix transB, Matrix invInertiaWorldA, Matrix invInertiaWorldB)
+        public void GetInfo2NonVirtual(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedBasisMatrix invInertiaWorldA, IndexedBasisMatrix invInertiaWorldB)
 		{
 			CalcAngleInfo2(ref transA, ref transB, ref invInertiaWorldA, ref invInertiaWorldB);
+
+            Debug.Assert(!m_useSolveConstraintObsolete);
+
 
 			// set jacobian
 			info.m_solverConstraints[0].m_contactNormal.X = 1f;
 			info.m_solverConstraints[1].m_contactNormal.Y = 1f;
 			info.m_solverConstraints[2].m_contactNormal.Z = 1f;
 
-			Vector3 a1 = Vector3.TransformNormal(m_rbAFrame.Translation, transA);
+			IndexedVector3 a1 = transA._basis * m_rbAFrame._origin;
 			{
-				Vector3 a1neg = -a1;
+				IndexedVector3 a1neg = -a1;
 				MathUtil.GetSkewSymmetricMatrix(ref a1neg,
 					out info.m_solverConstraints[0].m_relpos1CrossNormal,
 					out info.m_solverConstraints[1].m_relpos1CrossNormal,
 					out info.m_solverConstraints[2].m_relpos1CrossNormal);
 			}
 
-			Vector3 a2 = Vector3.TransformNormal(m_rbBFrame.Translation, transB);
+            IndexedVector3 a2 = transB._basis * m_rbBFrame._origin;
 			{
 				MathUtil.GetSkewSymmetricMatrix(ref a2,
 					out info.m_solverConstraints[0].m_relpos2CrossNormal,
@@ -204,7 +223,7 @@ namespace BulletXNA.BulletDynamics
 
 			for (int j = 0; j < 3; j++)
 			{
-				info.m_solverConstraints[j].m_rhs = k * (MathUtil.VectorComponent(ref a2, j) + MathUtil.VectorComponent(transB.Translation, j) - MathUtil.VectorComponent(ref a1, j) - MathUtil.VectorComponent(transA.Translation, j));
+				info.m_solverConstraints[j].m_rhs = k * (a2[j] + transB._origin[j] - a1[j] - transA._origin[j]);
 				info.m_solverConstraints[j].m_lowerLimit = -MathUtil.SIMD_INFINITY;
 				info.m_solverConstraints[j].m_upperLimit = MathUtil.SIMD_INFINITY;
 				if ((m_flags & (int)ConeTwistFlags.BT_CONETWIST_FLAGS_LIN_CFM) != 0)
@@ -214,24 +233,24 @@ namespace BulletXNA.BulletDynamics
 			}
 			int row = 3;
 
-			Vector3 ax1;
+			IndexedVector3 ax1;
 			// angular limits
 			if (m_solveSwingLimit)
 			{
 				if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
 				{
-					Matrix trA = MathUtil.BulletMatrixMultiply(transA, m_rbAFrame);
+					IndexedMatrix trA = transA *  m_rbAFrame;
 
-					Vector3 p = MathUtil.MatrixColumn(ref trA, 1);
-					Vector3 q = MathUtil.MatrixColumn(ref trA, 2);
+					IndexedVector3 p = trA._basis.GetColumn(1);
+					IndexedVector3 q = trA._basis.GetColumn(2);
 					info.m_solverConstraints[row].m_relpos1CrossNormal = p;
 					info.m_solverConstraints[row + 1].m_relpos1CrossNormal = q;
 					info.m_solverConstraints[row].m_relpos2CrossNormal = -p;
 					info.m_solverConstraints[row + 1].m_relpos2CrossNormal = -q;
 
 					float fact = info.fps * m_relaxationFactor;
-					info.m_solverConstraints[row].m_rhs = fact * Vector3.Dot(m_swingAxis, p);
-					info.m_solverConstraints[row + 1].m_rhs = fact * Vector3.Dot(m_swingAxis, q);
+					info.m_solverConstraints[row].m_rhs = fact * m_swingAxis.Dot(ref p);
+					info.m_solverConstraints[row + 1].m_rhs = fact * m_swingAxis.Dot(ref q);
 					info.m_solverConstraints[row].m_lowerLimit = -MathUtil.SIMD_INFINITY;
 					info.m_solverConstraints[row].m_upperLimit = MathUtil.SIMD_INFINITY;
 					info.m_solverConstraints[row + 1].m_lowerLimit = -MathUtil.SIMD_INFINITY;
@@ -347,8 +366,8 @@ namespace BulletXNA.BulletDynamics
 			m_relaxationFactor = _relaxationFactor;
 		}
 
-		public Matrix GetAFrame() { return m_rbAFrame; }
-		public Matrix GetBFrame() { return m_rbBFrame; }
+		public IndexedMatrix GetAFrame() { return m_rbAFrame; }
+		public IndexedMatrix GetBFrame() { return m_rbBFrame; }
 
 		public bool GetSolveTwistLimit()
 		{
@@ -372,14 +391,14 @@ namespace BulletXNA.BulletDynamics
 			m_solveTwistLimit = false;
 			m_solveSwingLimit = false;
 
-			Vector3 b1Axis1 = Vector3.Zero, b1Axis2 = Vector3.Zero, b1Axis3 = Vector3.Zero;
-			Vector3 b2Axis1 = Vector3.Zero, b2Axis2 = Vector3.Zero;
+			IndexedVector3 b1Axis1 = IndexedVector3.Zero, b1Axis2 = IndexedVector3.Zero, b1Axis3 = IndexedVector3.Zero;
+			IndexedVector3 b2Axis1 = IndexedVector3.Zero, b2Axis2 = IndexedVector3.Zero;
 
-			Matrix transA = GetRigidBodyA().GetCenterOfMassTransform();
-			Matrix transB = GetRigidBodyB().GetCenterOfMassTransform();
+			IndexedMatrix transA = GetRigidBodyA().GetCenterOfMassTransform();
+			IndexedMatrix transB = GetRigidBodyB().GetCenterOfMassTransform();
 
-			b1Axis1 = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 0), transA);
-			b2Axis1 = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbBFrame, 0), transB);
+            b1Axis1 = GetRigidBodyA().GetCenterOfMassTransform()._basis * m_rbAFrame._basis.GetColumn(0);
+            b2Axis1 = GetRigidBodyB().GetCenterOfMassTransform()._basis * m_rbBFrame._basis.GetColumn(0);
 
 			float swing1 = 0f, swing2 = 0f;
 
@@ -390,9 +409,9 @@ namespace BulletXNA.BulletDynamics
 			// Get Frame into world space
 			if (m_swingSpan1 >= 0.05f)
 			{
-				b1Axis2 = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 1), transA);
-				swx = Vector3.Dot(b2Axis1, b1Axis1);
-				swy = Vector3.Dot(b2Axis1, b1Axis2);
+                b1Axis2 = GetRigidBodyA().GetCenterOfMassTransform()._basis * m_rbAFrame._basis.GetColumn(1);
+				swx = b2Axis1.Dot(ref b1Axis1);
+				swy = b2Axis1.Dot(ref b1Axis2);
 				swing1 = (float)Math.Atan2(swy, swx);
 				fact = (swy * swy + swx * swx) * thresh * thresh;
 				fact = fact / (fact + 1f);
@@ -401,9 +420,9 @@ namespace BulletXNA.BulletDynamics
 
 			if (m_swingSpan2 >= 0.05f)
 			{
-				b1Axis3 = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 2), transA);
-				swx = Vector3.Dot(b2Axis1, b1Axis1);
-				swy = Vector3.Dot(b2Axis1, b1Axis3);
+                b1Axis3 = GetRigidBodyA().GetCenterOfMassTransform()._basis * m_rbAFrame._basis.GetColumn(2);
+				swx = b2Axis1.Dot(ref b1Axis1);
+				swy = b2Axis1.Dot(ref b1Axis3);
 				swing2 = (float)Math.Atan2(swy, swx);
 				fact = (swy * swy + swx * swx) * thresh * thresh;
 				fact = fact / (fact + 1f);
@@ -419,19 +438,19 @@ namespace BulletXNA.BulletDynamics
 				m_swingCorrection = EllipseAngle - 1.0f;
 				m_solveSwingLimit = true;
 				// Calculate necessary axis & factors
-				m_swingAxis = Vector3.Cross(b2Axis1, (b1Axis2 * Vector3.Dot(b2Axis1, b1Axis2) + b1Axis3 * Vector3.Dot(b2Axis1, b1Axis3)));
+				m_swingAxis = b2Axis1.Cross(b1Axis2 * b2Axis1.Dot(ref b1Axis2) + b1Axis3 * b2Axis1.Dot(ref b1Axis3));
 				m_swingAxis.Normalize();
-				float swingAxisSign = (Vector3.Dot(b2Axis1, b1Axis1) >= 0.0f) ? 1.0f : -1.0f;
+				float swingAxisSign = (b2Axis1.Dot(ref b1Axis1) >= 0.0f) ? 1.0f : -1.0f;
 				m_swingAxis *= swingAxisSign;
 			}
 
 			// Twist limits
 			if (m_twistSpan >= 0f)
 			{
-				Vector3 b2Axis2a = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbBFrame, 1), transB);
+                IndexedVector3 b2Axis2a = GetRigidBodyB().GetCenterOfMassTransform()._basis * m_rbBFrame._basis.GetColumn(1); 
 				Quaternion rotationArc = MathUtil.ShortestArcQuat(ref b2Axis1, ref b1Axis1);
-				Vector3 TwistRef = MathUtil.QuatRotate(ref rotationArc, ref b2Axis2a);
-				float twist = (float)Math.Atan2(Vector3.Dot(TwistRef, b1Axis3), Vector3.Dot(TwistRef, b1Axis2));
+				IndexedVector3 TwistRef = MathUtil.QuatRotate(ref rotationArc, ref b2Axis2a);
+				float twist = (float)Math.Atan2(TwistRef.Dot(ref b1Axis3), TwistRef.Dot(ref b1Axis2));
 				m_twistAngle = twist;
 
 				//		float lockedFreeFactor = (m_twistSpan > float(0.05f)) ? m_limitSoftness : float(0.);
@@ -455,12 +474,12 @@ namespace BulletXNA.BulletDynamics
 
 		}
 
-		public void CalcAngleInfo2(Matrix transA, Matrix transB, Matrix invInertiaWorldA, Matrix invInertiaWorldB)
+        public void CalcAngleInfo2(IndexedMatrix transA, IndexedMatrix transB, IndexedBasisMatrix invInertiaWorldA, IndexedBasisMatrix invInertiaWorldB)
 		{
 			CalcAngleInfo2(ref transA, ref transB, ref invInertiaWorldA, ref invInertiaWorldB);
 		}
 
-		public void CalcAngleInfo2(ref Matrix transA, ref Matrix transB, ref Matrix invInertiaWorldA, ref Matrix invInertiaWorldB)
+        public void CalcAngleInfo2(ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedBasisMatrix invInertiaWorldA, ref IndexedBasisMatrix invInertiaWorldB)
 		{
 			m_swingCorrection = 0;
 			m_twistLimitSign = 0;
@@ -468,17 +487,17 @@ namespace BulletXNA.BulletDynamics
 			m_solveSwingLimit = false;
 
 			// compute rotation of A wrt B (in constraint space)
-			if (m_bMotorEnabled)
+            if (m_bMotorEnabled && (!m_useSolveConstraintObsolete))
 			{	// it is assumed that setMotorTarget() was alredy called 
 				// and motor target m_qTarget is within constraint limits
 				// TODO : split rotation to pure swing and pure twist
 				// compute desired transforms in world
-				Matrix trPose = Matrix.CreateFromQuaternion(m_qTarget);
-				Matrix trA = MathUtil.BulletMatrixMultiply(ref transA, ref m_rbAFrame);
-				Matrix trB = MathUtil.BulletMatrixMultiply(ref transB, ref m_rbBFrame);
-				Matrix trDeltaAB = MathUtil.BulletMatrixMultiply(trB, MathUtil.BulletMatrixMultiply(trPose, Matrix.Invert(trA)));
-				Quaternion qDeltaAB = Quaternion.CreateFromRotationMatrix(trDeltaAB);
-				Vector3 swingAxis = new Vector3(qDeltaAB.X, qDeltaAB.Y, qDeltaAB.Z);
+				IndexedMatrix trPose = IndexedMatrix.CreateFromQuaternion(m_qTarget);
+				IndexedMatrix trA = transA * m_rbAFrame;
+				IndexedMatrix trB = transB * m_rbBFrame;
+                IndexedMatrix trDeltaAB = trB * trPose * trA.Inverse();
+				Quaternion qDeltaAB = trDeltaAB.GetRotation();
+				IndexedVector3 swingAxis = new IndexedVector3(qDeltaAB.X, qDeltaAB.Y, qDeltaAB.Z);
 				m_swingAxis = swingAxis;
 				m_swingAxis.Normalize();
 				m_swingCorrection = MathUtil.QuatAngle(ref qDeltaAB);
@@ -494,18 +513,14 @@ namespace BulletXNA.BulletDynamics
 
 				// compute rotation of A wrt B (in constraint space)
 				// Not sure if these need order swapping as well?
-				Quaternion q1 = Quaternion.CreateFromRotationMatrix(transA);
-				Quaternion q2 = Quaternion.CreateFromRotationMatrix(m_rbAFrame);
-				Quaternion q3 = Quaternion.CreateFromRotationMatrix(transB);
-				Quaternion q4 = Quaternion.CreateFromRotationMatrix(m_rbBFrame);
-
-				Quaternion qA = Quaternion.CreateFromRotationMatrix(transA) * Quaternion.CreateFromRotationMatrix(m_rbAFrame);
-				Quaternion qB = Quaternion.CreateFromRotationMatrix(transB) * Quaternion.CreateFromRotationMatrix(m_rbBFrame);
-				Quaternion qAB = MathUtil.QuaternionInverse(qB) * qA;
+                Quaternion qA = transA.GetRotation() * m_rbAFrame.GetRotation();
+                Quaternion qB = transB.GetRotation() * m_rbBFrame.GetRotation();
+                
+                Quaternion qAB = MathUtil.QuaternionInverse(qB) * qA;
 
 				// split rotation into cone and twist
 				// (all this is done from B's perspective. Maybe I should be averaging axes...)
-				Vector3 vConeNoTwist = MathUtil.QuatRotate(ref qAB, ref vTwist);
+				IndexedVector3 vConeNoTwist = MathUtil.QuatRotate(ref qAB, ref vTwist);
 				vConeNoTwist.Normalize();
 				Quaternion qABCone = MathUtil.ShortestArcQuat(ref vTwist, ref vConeNoTwist);
 				qABCone.Normalize();
@@ -515,7 +530,7 @@ namespace BulletXNA.BulletDynamics
 				if (m_swingSpan1 >= m_fixThresh && m_swingSpan2 >= m_fixThresh)
 				{
 					float swingAngle = 0f, swingLimit = 0f;
-					Vector3 swingAxis = Vector3.Zero;
+					IndexedVector3 swingAxis = IndexedVector3.Zero;
 					ComputeConeLimitInfo(ref qABCone, ref swingAngle, ref swingAxis, ref swingLimit);
 
 					if (swingAngle > swingLimit * m_limitSoftness)
@@ -541,7 +556,7 @@ namespace BulletXNA.BulletDynamics
 						// Calculate necessary axis & factors		
 						m_swingAxis = MathUtil.QuatRotate(qB, -swingAxis);
 
-						m_twistAxisA = Vector3.Zero;
+						m_twistAxisA = IndexedVector3.Zero;
 
 						m_kSwing = 1f /
 							(ComputeAngularImpulseDenominator(ref m_swingAxis, ref invInertiaWorldA) +
@@ -554,20 +569,21 @@ namespace BulletXNA.BulletDynamics
 					// or you're trying to set at least one of the swing limits too small. (if so, do you really want a conetwist constraint?)
 					// anyway, we have either hinge or fixed joint
 
-					Vector3 ivA = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 0), transA);
-					Vector3 jvA = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 1), transA);
-					Vector3 kvA = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbAFrame, 2), transA);
-					Vector3 ivB = Vector3.TransformNormal(MathUtil.MatrixColumn(this.m_rbBFrame, 0), transB);
-					Vector3 target = Vector3.Zero;
-					float x = Vector3.Dot(ivB, ivA);
-					float y = Vector3.Dot(ivB, jvA);
-					float z = Vector3.Dot(ivB, kvA);
+                    IndexedVector3 ivA = transA._basis * m_rbAFrame._basis.GetColumn(0);
+                    IndexedVector3 jvA = transA._basis * m_rbAFrame._basis.GetColumn(1);
+                    IndexedVector3 kvA = transA._basis * m_rbAFrame._basis.GetColumn(2);
+                    IndexedVector3 ivB = transB._basis * m_rbBFrame._basis.GetColumn(0);
+                    
+                    IndexedVector3 target = IndexedVector3.Zero;
+					float x = ivB.Dot(ref ivA);
+					float y = ivB.Dot(ref jvA);
+					float z = ivB.Dot(ref kvA);
 					if ((m_swingSpan1 < m_fixThresh) && (m_swingSpan2 < m_fixThresh))
 					{ // fixed. We'll need to add one more row to constraint
 						if ((!MathUtil.FuzzyZero(y)) || (!(MathUtil.FuzzyZero(z))))
 						{
 							m_solveSwingLimit = true;
-							m_swingAxis = -Vector3.Cross(ivB, ivA);
+							m_swingAxis = -ivB.Cross(ref ivA);
 						}
 					}
 					else
@@ -620,7 +636,7 @@ namespace BulletXNA.BulletDynamics
 						target.Y = x * ivA.Y + y * jvA.Y + z * kvA.Y;
 						target.Z = x * ivA.Z + y * jvA.Z + z * kvA.Z;
 						target.Normalize();
-						m_swingAxis = -Vector3.Cross(ivB, target);
+						m_swingAxis = -(ivB.Cross(ref target));
 						m_swingCorrection = m_swingAxis.Length();
 						m_swingAxis.Normalize();
 					}
@@ -628,7 +644,7 @@ namespace BulletXNA.BulletDynamics
 
 				if (m_twistSpan >= 0f)
 				{
-					Vector3 twistAxis;
+					IndexedVector3 twistAxis;
 					ComputeTwistLimitInfo(ref qABTwist, out m_twistAngle, out twistAxis);
 
 					if (m_twistAngle > m_twistSpan * m_limitSoftness)
@@ -721,14 +737,15 @@ namespace BulletXNA.BulletDynamics
 		// note: don't forget to enableMotor()
 		public void SetMotorTarget(ref Quaternion q)
 		{
-			Matrix trACur = m_rbA.GetCenterOfMassTransform();
-			Matrix trBCur = m_rbB.GetCenterOfMassTransform();
-			Matrix trABCur = MathUtil.BulletMatrixMultiply(Matrix.Invert(trBCur), trACur);
-			Quaternion qABCur = Quaternion.CreateFromRotationMatrix(trABCur);
-			Matrix trConstraintCur = MathUtil.BulletMatrixMultiply(Matrix.Invert(MathUtil.BulletMatrixMultiply(ref trBCur, ref m_rbBFrame)), MathUtil.BulletMatrixMultiply(ref trACur, ref m_rbAFrame));
-			Quaternion qConstraintCur = Quaternion.CreateFromRotationMatrix(trConstraintCur);
+			IndexedMatrix trACur = m_rbA.GetCenterOfMassTransform();
+			IndexedMatrix trBCur = m_rbB.GetCenterOfMassTransform();
+			IndexedMatrix trABCur = trBCur.Inverse() * trACur;
+			Quaternion qABCur = trABCur.GetRotation();
+            IndexedMatrix trConstraintCur = (trBCur * m_rbBFrame).Inverse() * (trACur * m_rbAFrame);
+                
+			Quaternion qConstraintCur = trConstraintCur.GetRotation();
 
-			Quaternion qConstraint = MathUtil.QuaternionInverse(Quaternion.CreateFromRotationMatrix(m_rbBFrame)) * q * Quaternion.CreateFromRotationMatrix(m_rbAFrame);
+            Quaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation()) * q * m_rbAFrame.GetRotation();
 			SetMotorTargetInConstraintSpace(ref qConstraint);
 		}
 
@@ -742,7 +759,7 @@ namespace BulletXNA.BulletDynamics
 				float softness = 1f;//m_limitSoftness;
 
 				// split into twist and cone
-				Vector3 vTwisted = MathUtil.QuatRotate(ref m_qTarget, ref vTwist);
+				IndexedVector3 vTwisted = MathUtil.QuatRotate(ref m_qTarget, ref vTwist);
 				Quaternion qTargetCone = MathUtil.ShortestArcQuat(ref vTwist, ref vTwisted);
 				qTargetCone.Normalize();
 				Quaternion qTargetTwist = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(qTargetCone), m_qTarget);
@@ -751,7 +768,7 @@ namespace BulletXNA.BulletDynamics
 				// clamp cone
 				if (m_swingSpan1 >= 0.05f && m_swingSpan2 >= 0.05f)
 				{
-					float swingAngle = 0f, swingLimit = 0f; Vector3 swingAxis = Vector3.Zero;
+					float swingAngle = 0f, swingLimit = 0f; IndexedVector3 swingAxis = IndexedVector3.Zero;
 					ComputeConeLimitInfo(ref qTargetCone, ref swingAngle, ref swingAxis, ref swingLimit);
 
 					if (Math.Abs(swingAngle) > MathUtil.SIMD_EPSILON)
@@ -764,14 +781,14 @@ namespace BulletXNA.BulletDynamics
 						{
 							swingAngle = -swingLimit * softness;
 						}
-						qTargetCone = Quaternion.CreateFromAxisAngle(swingAxis, swingAngle);
+						qTargetCone = Quaternion.CreateFromAxisAngle(swingAxis.ToVector3(), swingAngle);
 					}
 				}
 
 				// clamp twist
 				if (m_twistSpan >= 0.05f)
 				{
-					float twistAngle; Vector3 twistAxis;
+					float twistAngle; IndexedVector3 twistAxis;
 					ComputeTwistLimitInfo(ref qTargetTwist, out twistAngle, out twistAxis);
 
 					if (Math.Abs(twistAngle) > MathUtil.SIMD_EPSILON)
@@ -785,7 +802,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							twistAngle = -m_twistSpan * softness;
 						}
-						qTargetTwist = Quaternion.CreateFromAxisAngle(twistAxis, twistAngle);
+						qTargetTwist = Quaternion.CreateFromAxisAngle(twistAxis.ToVector3(), twistAngle);
 					}
 				}
 
@@ -795,7 +812,7 @@ namespace BulletXNA.BulletDynamics
 
 		}
 
-		public Vector3 GetPointForAngle(float fAngleInRadians, float fLength)
+		public IndexedVector3 GetPointForAngle(float fAngleInRadians, float fLength)
 		{
 			// compute x/y in ellipse using cone angle (0 -> 2*PI along surface of cone)
 			float xEllipse = (float)Math.Cos(fAngleInRadians);
@@ -820,19 +837,19 @@ namespace BulletXNA.BulletDynamics
 
 			// convert into point in constraint space:
 			// note: twist is x-axis, swing 1 and 2 are along the z and y axes respectively
-			Vector3 vSwingAxis = new Vector3(0, xEllipse, -yEllipse);
-			Quaternion qSwing = Quaternion.CreateFromAxisAngle(vSwingAxis, swingLimit);
-			Vector3 vPointInConstraintSpace = new Vector3(fLength, 0, 0);
+			IndexedVector3 vSwingAxis = new IndexedVector3(0, xEllipse, -yEllipse);
+			Quaternion qSwing = Quaternion.CreateFromAxisAngle(vSwingAxis.ToVector3(), swingLimit);
+			IndexedVector3 vPointInConstraintSpace = new IndexedVector3(fLength, 0, 0);
 			return MathUtil.QuatRotate(ref qSwing, ref vPointInConstraintSpace);
 		}
 
 		protected void ComputeConeLimitInfo(ref Quaternion qCone, // in
-			ref float swingAngle, ref Vector3 vSwingAxis, ref float swingLimit) // all outs
+			ref float swingAngle, ref IndexedVector3 vSwingAxis, ref float swingLimit) // all outs
 		{
 			swingAngle = MathUtil.QuatAngle(ref qCone);
 			if (swingAngle > MathUtil.SIMD_EPSILON)
 			{
-				vSwingAxis = new Vector3(qCone.X, qCone.Y, qCone.Z);
+				vSwingAxis = new IndexedVector3(qCone.X, qCone.Y, qCone.Z);
 				vSwingAxis.Normalize();
 				if (Math.Abs(vSwingAxis.X) > MathUtil.SIMD_EPSILON)
 				{
@@ -871,12 +888,12 @@ namespace BulletXNA.BulletDynamics
 				/*swingLimit = m_swingSpan2;
 				if (fabs(vSwingAxis.z()) > SIMD_EPSILON)
 				{
-				btScalar mag_2 = m_swingSpan1*m_swingSpan1 + m_swingSpan2*m_swingSpan2;
-				btScalar sinphi = m_swingSpan2 / sqrt(mag_2);
-				btScalar phi = asin(sinphi);
-				btScalar theta = atan2(fabs(vSwingAxis.y()),fabs(vSwingAxis.z()));
-				btScalar alpha = 3.14159f - theta - phi;
-				btScalar sinalpha = sin(alpha);
+				float mag_2 = m_swingSpan1*m_swingSpan1 + m_swingSpan2*m_swingSpan2;
+				float sinphi = m_swingSpan2 / sqrt(mag_2);
+				float phi = asin(sinphi);
+				float theta = atan2(fabs(vSwingAxis.y()),fabs(vSwingAxis.z()));
+				float alpha = 3.14159f - theta - phi;
+				float sinalpha = sin(alpha);
 				swingLimit = m_swingSpan1 * sinphi/sinalpha;
 				}*/
 			}
@@ -888,7 +905,7 @@ namespace BulletXNA.BulletDynamics
 		}
 
 		protected void ComputeTwistLimitInfo(ref Quaternion qTwist, // in
-			out float twistAngle, out Vector3 vTwistAxis) // all outs
+			out float twistAngle, out IndexedVector3 vTwistAxis) // all outs
 		{
 			Quaternion qMinTwist = qTwist;
 			twistAngle = MathUtil.QuatAngle(ref qTwist);
@@ -904,14 +921,14 @@ namespace BulletXNA.BulletDynamics
 				Debug.Assert(false);
 			}
 
-			vTwistAxis = new Vector3(qMinTwist.X, qMinTwist.Y, qMinTwist.Z);
+			vTwistAxis = new IndexedVector3(qMinTwist.X, qMinTwist.Y, qMinTwist.Z);
 			if (twistAngle > MathUtil.SIMD_EPSILON)
 			{
 				vTwistAxis.Normalize();
 			}
 		}
 
-		protected void AdjustSwingAxisToUseEllipseNormal(ref Vector3 vSwingAxis)
+		protected void AdjustSwingAxisToUseEllipseNormal(ref IndexedVector3 vSwingAxis)
 		{
 			// the swing axis is computed as the "twist-free" cone rotation,
 			// but the cone limit is not circular, but elliptical (if swingspan1 != swingspan2).
@@ -948,25 +965,282 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public Matrix GetFrameOffsetA()
+		public IndexedMatrix GetFrameOffsetA()
 		{
 			return m_rbAFrame;
 		}
 
-		public Matrix GetFrameOffsetB()
+		public IndexedMatrix GetFrameOffsetB()
 		{
 			return m_rbBFrame;
 		}
 
 
-		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
+		public void SetFrames(ref IndexedMatrix frameA, ref IndexedMatrix frameB)
 		{
 			m_rbAFrame = frameA;
 			m_rbBFrame = frameB;
 			// obsolete
-			//BuildJacobian();
-			//calculateTransforms();
+			BuildJacobian();
+            //CalculateTransforms();
 		}
+
+
+        public override void BuildJacobian()
+        {
+            if (m_useSolveConstraintObsolete)
+            {
+                m_appliedImpulse = 0.0f;
+                m_accTwistLimitImpulse = 0.0f;
+                m_accSwingLimitImpulse = 0.0f;
+                m_accMotorImpulse = IndexedVector3.Zero;
+
+                if (!m_angularOnly)
+                {
+                    IndexedVector3 pivotAInW = m_rbA.GetCenterOfMassTransform() * m_rbAFrame._origin;
+                    IndexedVector3 pivotBInW = m_rbB.GetCenterOfMassTransform() * m_rbBFrame._origin;
+                    IndexedVector3 relPos = pivotBInW - pivotAInW;
+
+                    IndexedVector3[] normal = new IndexedVector3[3];
+                    if (relPos.LengthSquared() > MathUtil.SIMD_EPSILON)
+                    {
+                        normal[0] = relPos.Normalized();
+                    }
+                    else
+                    {
+                        normal[0] = new IndexedVector3(1.0f, 0, 0);
+                    }
+
+                    TransformUtil.PlaneSpace1(ref normal[0], out normal[1], out normal[2]);
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        m_jac[i] = new JacobianEntry(
+                        m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
+                        m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
+                        pivotAInW - m_rbA.GetCenterOfMassPosition(),
+                        pivotBInW - m_rbB.GetCenterOfMassPosition(),
+                        normal[i],
+                        m_rbA.GetInvInertiaDiagLocal(),
+                        m_rbA.GetInvMass(),
+                        m_rbB.GetInvInertiaDiagLocal(),
+                        m_rbB.GetInvMass());
+                    }
+                }
+
+                CalcAngleInfo2(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform(), m_rbA.GetInvInertiaTensorWorld(), m_rbB.GetInvInertiaTensorWorld());
+            }
+        }
+
+
+
+        public void solveConstraintObsolete(RigidBody bodyA, RigidBody bodyB, float timeStep)
+{
+	if (m_useSolveConstraintObsolete)
+	{
+		IndexedVector3 pivotAInW = m_rbA.GetCenterOfMassTransform()*m_rbAFrame._origin;
+		IndexedVector3 pivotBInW = m_rbB.GetCenterOfMassTransform()*m_rbBFrame._origin;
+
+		float tau = 0.3f;
+
+		//linear part
+		if (!m_angularOnly)
+		{
+			IndexedVector3 rel_pos1 = pivotAInW - m_rbA.GetCenterOfMassPosition(); 
+			IndexedVector3 rel_pos2 = pivotBInW - m_rbB.GetCenterOfMassPosition();
+
+            IndexedVector3 vel1 = IndexedVector3.Zero;
+			bodyA.InternalGetVelocityInLocalPointObsolete(ref rel_pos1,ref vel1);
+            IndexedVector3 vel2 = IndexedVector3.Zero;
+			bodyB.InternalGetVelocityInLocalPointObsolete(ref rel_pos2,ref vel2);
+			IndexedVector3 vel = vel1 - vel2;
+
+			for (int i=0;i<3;i++)
+			{		
+				IndexedVector3 normal = m_jac[i].m_linearJointAxis;
+				float jacDiagABInv = 1.0f / m_jac[i].GetDiagonal();
+
+				float rel_vel = normal.Dot(ref vel);
+				//positional error (zeroth order error)
+				float depth = -(pivotAInW - pivotBInW).Dot(ref normal); //this is the error projected on the normal
+				float impulse = depth*tau/timeStep  * jacDiagABInv -  rel_vel * jacDiagABInv;
+				m_appliedImpulse += impulse;
+				
+				IndexedVector3 ftorqueAxis1 = rel_pos1.Cross(ref normal);
+				IndexedVector3 ftorqueAxis2 = rel_pos2.Cross(ref normal);
+				bodyA.InternalApplyImpulse(normal*m_rbA.GetInvMass(), m_rbA.GetInvInertiaTensorWorld()*ftorqueAxis1,impulse,null);
+				bodyB.InternalApplyImpulse(normal*m_rbB.GetInvMass(), m_rbB.GetInvInertiaTensorWorld()*ftorqueAxis2,-impulse,null);
+		
+			}
+		}
+
+		// apply motor
+		if (m_bMotorEnabled)
+		{
+			// compute current and predicted transforms
+			IndexedMatrix trACur = m_rbA.GetCenterOfMassTransform();
+			IndexedMatrix trBCur = m_rbB.GetCenterOfMassTransform();
+			IndexedVector3 omegaA = IndexedVector3.Zero; bodyA.InternalGetAngularVelocity(ref omegaA);
+            IndexedVector3 omegaB = IndexedVector3.Zero; bodyB.InternalGetAngularVelocity(ref omegaB);
+			IndexedMatrix trAPred;
+			IndexedVector3 zerovec = new IndexedVector3(0,0,0);
+			TransformUtil.IntegrateTransform(trACur, zerovec, omegaA, timeStep, out trAPred);
+			IndexedMatrix trBPred;
+			TransformUtil.IntegrateTransform(trBCur, zerovec, omegaB, timeStep, out trBPred);
+
+			// compute desired transforms in world
+			IndexedMatrix trPose = IndexedMatrix.CreateFromQuaternion(m_qTarget);
+			IndexedMatrix trABDes = m_rbBFrame * trPose * m_rbAFrame.Inverse();
+			IndexedMatrix trADes = trBPred * trABDes;
+			IndexedMatrix trBDes = trAPred * trABDes.Inverse();
+
+			// compute desired omegas in world
+			IndexedVector3 omegaADes, omegaBDes;
+			
+			TransformUtil.CalculateVelocity(ref trACur, ref trADes, timeStep, out zerovec, out omegaADes);
+			TransformUtil.CalculateVelocity(ref trBCur, ref trBDes, timeStep, out zerovec, out omegaBDes);
+
+			// compute delta omegas
+			IndexedVector3 dOmegaA = omegaADes - omegaA;
+			IndexedVector3 dOmegaB = omegaBDes - omegaB;
+
+			// compute weighted avg axis of dOmega (weighting based on inertias)
+            IndexedVector3 axisA = IndexedVector3.Zero, axisB = IndexedVector3.Zero;
+			float kAxisAInv = 0, kAxisBInv = 0;
+
+			if (dOmegaA.LengthSquared() > MathUtil.SIMD_EPSILON)
+			{
+				axisA = dOmegaA.Normalized();
+				kAxisAInv = GetRigidBodyA().ComputeAngularImpulseDenominator(ref axisA);
+			}
+
+			if (dOmegaB.LengthSquared() > MathUtil.SIMD_EPSILON)
+			{
+				axisB = dOmegaB.Normalized();
+				kAxisBInv = GetRigidBodyB().ComputeAngularImpulseDenominator(ref axisB);
+			}
+
+			IndexedVector3 avgAxis = kAxisAInv * axisA + kAxisBInv * axisB;
+
+			if (bDoTorque && avgAxis.LengthSquared() > MathUtil.SIMD_EPSILON)
+			{
+				avgAxis.Normalize();
+				kAxisAInv = GetRigidBodyA().ComputeAngularImpulseDenominator(ref avgAxis);
+				kAxisBInv = GetRigidBodyB().ComputeAngularImpulseDenominator(ref avgAxis);
+				float kInvCombined = kAxisAInv + kAxisBInv;
+
+				IndexedVector3 impulse = (kAxisAInv * dOmegaA - kAxisBInv * dOmegaB) /
+									(kInvCombined * kInvCombined);
+
+				if (m_maxMotorImpulse >= 0)
+				{
+					float fMaxImpulse = m_maxMotorImpulse;
+					if (m_bNormalizedMotorStrength)
+						fMaxImpulse = fMaxImpulse/kAxisAInv;
+
+					IndexedVector3 newUnclampedAccImpulse = m_accMotorImpulse + impulse;
+					float  newUnclampedMag = newUnclampedAccImpulse.Length();
+					if (newUnclampedMag > fMaxImpulse)
+					{
+						newUnclampedAccImpulse.Normalize();
+						newUnclampedAccImpulse *= fMaxImpulse;
+						impulse = newUnclampedAccImpulse - m_accMotorImpulse;
+					}
+					m_accMotorImpulse += impulse;
+				}
+
+				float  impulseMag  = impulse.Length();
+				IndexedVector3 impulseAxis =  impulse / impulseMag;
+
+				bodyA.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbA.GetInvInertiaTensorWorld()*impulseAxis, impulseMag,null);
+				bodyB.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbB.GetInvInertiaTensorWorld()*impulseAxis, -impulseMag,null);
+
+			}
+		}
+		else if (m_damping > MathUtil.SIMD_EPSILON) // no motor: do a little damping
+		{
+			IndexedVector3 angVelA = IndexedVector3.Zero; bodyA.InternalGetAngularVelocity(ref angVelA);
+			IndexedVector3 angVelB= IndexedVector3.Zero; bodyB.InternalGetAngularVelocity(ref angVelB);
+			IndexedVector3 relVel = angVelB - angVelA;
+			if (relVel.LengthSquared() > MathUtil.SIMD_EPSILON)
+			{
+				IndexedVector3 relVelAxis = relVel.Normalized();
+				float m_kDamping =  1.0f /
+					(GetRigidBodyA().ComputeAngularImpulseDenominator(ref relVelAxis) +
+					 GetRigidBodyB().ComputeAngularImpulseDenominator(ref relVelAxis));
+				IndexedVector3 impulse = m_damping * m_kDamping * relVel;
+
+				float  impulseMag  = impulse.Length();
+				IndexedVector3 impulseAxis = impulse / impulseMag;
+				bodyA.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbA.GetInvInertiaTensorWorld()*impulseAxis, impulseMag,null);
+				bodyB.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbB.GetInvInertiaTensorWorld()*impulseAxis, -impulseMag,null);
+			}
+		}
+
+		// joint limits
+		{
+			///solve angular part
+			IndexedVector3 angVelA = IndexedVector3.Zero;
+			bodyA.InternalGetAngularVelocity(ref angVelA);
+			IndexedVector3 angVelB= IndexedVector3.Zero;
+			bodyB.InternalGetAngularVelocity(ref angVelB);
+
+			// solve swing limit
+			if (m_solveSwingLimit)
+			{
+				float amplitude = m_swingLimitRatio * m_swingCorrection*m_biasFactor/timeStep;
+				float relSwingVel = (angVelB - angVelA).Dot(ref m_swingAxis);
+				if (relSwingVel > 0)
+					amplitude += m_swingLimitRatio * relSwingVel * m_relaxationFactor;
+				float impulseMag = amplitude * m_kSwing;
+
+				// Clamp the accumulated impulse
+				float temp = m_accSwingLimitImpulse;
+				m_accSwingLimitImpulse = Math.Max(m_accSwingLimitImpulse + impulseMag, 0.0f);
+				impulseMag = m_accSwingLimitImpulse - temp;
+
+				IndexedVector3 impulse = m_swingAxis * impulseMag;
+
+				// don't let cone response affect twist
+				// (this can happen since body A's twist doesn't match body B's AND we use an elliptical cone limit)
+				{
+					IndexedVector3 impulseTwistCouple = impulse.Dot(ref m_twistAxisA) * m_twistAxisA;
+					IndexedVector3 impulseNoTwistCouple = impulse - impulseTwistCouple;
+					impulse = impulseNoTwistCouple;
+				}
+
+				impulseMag = impulse.Length();
+				IndexedVector3 noTwistSwingAxis = impulse / impulseMag;
+
+				bodyA.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbA.GetInvInertiaTensorWorld()*noTwistSwingAxis, impulseMag,null);
+				bodyB.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbB.GetInvInertiaTensorWorld()*noTwistSwingAxis, -impulseMag,null);
+			}
+
+
+			// solve twist limit
+			if (m_solveTwistLimit)
+			{
+				float amplitude = m_twistLimitRatio * m_twistCorrection*m_biasFactor/timeStep;
+				float relTwistVel = (angVelB - angVelA).Dot( ref m_twistAxis );
+				if (relTwistVel > 0) // only damp when moving towards limit (m_twistAxis flipping is important)
+					amplitude += m_twistLimitRatio * relTwistVel * m_relaxationFactor;
+				float impulseMag = amplitude * m_kTwist;
+
+				// Clamp the accumulated impulse
+				float temp = m_accTwistLimitImpulse;
+				m_accTwistLimitImpulse = Math.Max(m_accTwistLimitImpulse + impulseMag, 0.0f );
+				impulseMag = m_accTwistLimitImpulse - temp;
+
+				IndexedVector3 impulse = m_twistAxis * impulseMag;
+
+				bodyA.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbA.GetInvInertiaTensorWorld()*m_twistAxis,impulseMag,null);
+				bodyB.InternalApplyImpulse(new IndexedVector3(0,0,0), m_rbB.GetInvInertiaTensorWorld()*m_twistAxis,-impulseMag,null);
+			}		
+		}
+	}
+
+}
+
 
 
 	}

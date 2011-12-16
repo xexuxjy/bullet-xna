@@ -60,7 +60,7 @@ namespace BulletXNA.BulletCollision
 
             if (m_use4componentVertices)
             {
-                m_4componentVertices = new ObjectArray<Vector3>();
+                m_4componentVertices = new ObjectArray<IndexedVector3>();
                 m_indexedMeshes[0].m_numVertices = m_4componentVertices.Count;
                 m_indexedMeshes[0].m_vertexStride = 1;
                 m_indexedMeshes[0].m_vertexBase = m_4componentVertices;
@@ -77,13 +77,19 @@ namespace BulletXNA.BulletCollision
         ///findOrAddVertex is an internal method, use addTriangle instead
         public int FindOrAddVertex(ref Vector3 vertex, bool removeDuplicateVertices)
         {
+            IndexedVector3 iv3 = new IndexedVector3(vertex);
+            return FindOrAddVertex(ref iv3,removeDuplicateVertices);
+        }
+
+        public int FindOrAddVertex(ref IndexedVector3 vertex, bool removeDuplicateVertices)
+        {
             //return index of new/existing vertex
             ///@todo: could use acceleration structure for this
             if (m_use4componentVertices)
             {
                 if (removeDuplicateVertices)
                 {
-                    Vector3[] rawVertices = m_4componentVertices.GetRawArray();
+                    IndexedVector3[] rawVertices = m_4componentVertices.GetRawArray();
                     for (int i = 0; i < m_4componentVertices.Count; i++)
                     {
                         if ((rawVertices[i] - vertex).LengthSquared() <= m_weldingThreshold)
@@ -94,7 +100,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_indexedMeshes[0].m_numVertices++;
                 m_4componentVertices.Add(vertex);
-                (m_indexedMeshes[0].m_vertexBase as ObjectArray<Vector3>).Add(vertex);
+                (m_indexedMeshes[0].m_vertexBase as ObjectArray<IndexedVector3>).Add(vertex);
                 return m_4componentVertices.Count - 1;
             }
             else
@@ -104,7 +110,7 @@ namespace BulletXNA.BulletCollision
                     float[] rawVertices = m_3componentVertices.GetRawArray();
                     for (int i = 0; i < m_3componentVertices.Count; i += 3)
                     {
-                        Vector3 vtx = new Vector3(rawVertices[i], rawVertices[i + 1], rawVertices[i + 2]);
+                        IndexedVector3 vtx = new IndexedVector3(rawVertices[i], rawVertices[i + 1], rawVertices[i + 2]);
                         if ((vtx - vertex).LengthSquared() <= m_weldingThreshold)
                         {
                             return i / 3;
@@ -187,7 +193,7 @@ namespace BulletXNA.BulletCollision
             //(void) numindices;
         }
 
-        private ObjectArray<Vector3> m_4componentVertices;
+        private ObjectArray<IndexedVector3> m_4componentVertices;
         private ObjectArray<float> m_3componentVertices;
         private ObjectArray<int> m_32bitIndices;
         private ObjectArray<short> m_16bitIndices;

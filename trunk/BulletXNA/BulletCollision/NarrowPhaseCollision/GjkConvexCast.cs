@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -34,40 +35,40 @@ namespace BulletXNA.BulletCollision
             m_simplexSolver = simplexSolver;
         }
 
-        public virtual bool CalcTimeOfImpact(Matrix fromA, Matrix toA, Matrix fromB, Matrix toB, CastResult result)
+        public virtual bool CalcTimeOfImpact(IndexedMatrix fromA, IndexedMatrix toA, IndexedMatrix fromB, IndexedMatrix toB, CastResult result)
         {
             return CalcTimeOfImpact(ref fromA, ref toA, ref fromB, ref toB, result);
         }
 
-        public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
+        public virtual bool CalcTimeOfImpact(ref IndexedMatrix fromA, ref IndexedMatrix toA, ref IndexedMatrix fromB, ref IndexedMatrix toB, CastResult result)
         {
             m_simplexSolver.Reset();
 
             /// compute linear velocity for this interval, to interpolate
             //assume no rotation/angular velocity, assert here?
-            Vector3 linVelA, linVelB;
-            linVelA = toA.Translation - fromA.Translation;
-            linVelB = toB.Translation - fromB.Translation;
+            IndexedVector3 linVelA, linVelB;
+            linVelA = toA._origin - fromA._origin;
+            linVelB = toB._origin - fromB._origin;
 
             float radius = 0.001f;
             float lambda = 0f;
-            Vector3 v = new Vector3(1, 0, 0);
+            IndexedVector3 v = new IndexedVector3(1, 0, 0);
 
             int maxIter = MAX_ITERATIONS;
 
-            Vector3 n = Vector3.Zero;
+            IndexedVector3 n = IndexedVector3.Zero;
             bool hasResult = false;
-            Vector3 c;
-            Vector3 r = (linVelA - linVelB);
+            IndexedVector3 c;
+            IndexedVector3 r = (linVelA - linVelB);
 
             float lastLambda = lambda;
-            //btScalar epsilon = btScalar(0.001);
+            //float epsilon = float(0.001);
 
             int numIter = 0;
             //first solution, using GJK
 
 
-            Matrix identityTrans = Matrix.Identity;
+            IndexedMatrix identityTrans = IndexedMatrix.Identity;
 
         //	result.drawCoordSystem(sphereTr);
 
@@ -102,7 +103,7 @@ namespace BulletXNA.BulletCollision
                     }
                     float dLambda = 0f;
 
-                    float projectedLinearVelocity = Vector3.Dot(r, n);
+                    float projectedLinearVelocity = IndexedVector3.Dot(r, n);
 
                     dLambda = dist / (projectedLinearVelocity);
 
@@ -122,8 +123,8 @@ namespace BulletXNA.BulletCollision
 
                     //interpolate to next lambda
                     result.DebugDraw(lambda);
-                    input.m_transformA.Translation = MathUtil.Interpolate3(fromA.Translation, toA.Translation, lambda);
-                    input.m_transformB.Translation = MathUtil.Interpolate3(fromB.Translation, toB.Translation, lambda);
+                    input.m_transformA._origin = MathUtil.Interpolate3(fromA._origin, toA._origin, lambda);
+                    input.m_transformB._origin = MathUtil.Interpolate3(fromB._origin, toB._origin, lambda);
 
                     gjk.GetClosestPoints(input, pointCollector, null, false);
                     if (pointCollector.m_hasResult)
@@ -149,7 +150,7 @@ namespace BulletXNA.BulletCollision
 
                 //is n normalized?
                 //don't report time of impact for motion away from the contact normal (or causes minor penetration)
-                if (Vector3.Dot(n, r) >= -result.m_allowedPenetration)
+                if (IndexedVector3.Dot(n, r) >= -result.m_allowedPenetration)
                 {
                     return false;
                 }

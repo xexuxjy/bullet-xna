@@ -22,6 +22,7 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -38,14 +39,14 @@ namespace BulletXNA.BulletDynamics
 
         private const float UNIV_EPS = 0.01f;
 
-	    protected Vector3 m_anchor;
-	    protected Vector3 m_axis1;
-	    protected Vector3 m_axis2;
+	    protected IndexedVector3 m_anchor;
+	    protected IndexedVector3 m_axis1;
+	    protected IndexedVector3 m_axis2;
 
         // constructor
 	    // anchor, axis1 and axis2 are in world coordinate system
 	    // axis1 must be orthogonal to axis2
-        public UniversalConstraint(RigidBody rbA, RigidBody rbB, ref Vector3 anchor, ref Vector3 axis1, ref Vector3 axis2)
+        public UniversalConstraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 anchor, ref IndexedVector3 axis1, ref IndexedVector3 axis2)
             : base(rbA, rbB, ref BulletGlobals.IdentityMatrix, ref BulletGlobals.IdentityMatrix, true)
         {
             m_anchor = anchor;
@@ -62,48 +63,52 @@ namespace BulletXNA.BulletDynamics
 	        // new position of X, allowed limits are (-PI,PI);
 	        // So to simulate ODE Universal joint we should use parent axis as Z, child axis as Y and limit all other DOFs
 	        // Build the frame in world coordinate system first
-	        Vector3 zAxis = Vector3.Normalize(axis1);
-	        Vector3 yAxis = Vector3.Normalize(axis2);
-	        Vector3 xAxis = Vector3.Cross(yAxis,zAxis); // we want right coordinate system
-	        Matrix frameInW = Matrix.Identity;
-            MathUtil.SetBasis(ref frameInW,ref xAxis,ref yAxis,ref zAxis);
-	        frameInW.Translation = anchor;
+	        IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
+	        IndexedVector3 yAxis = IndexedVector3.Normalize(axis2);
+	        IndexedVector3 xAxis = IndexedVector3.Cross(yAxis,zAxis); // we want right coordinate system
+	        IndexedMatrix frameInW = IndexedMatrix.Identity;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                    xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._origin = anchor;
 	        // now get constraint frame in local coordinate systems
 			//m_frameInA = MathUtil.inverseTimes(rbA.getCenterOfMassTransform(),frameInW);
 			//m_frameInB = MathUtil.inverseTimes(rbB.getCenterOfMassTransform(),frameInW);
-			m_frameInA = MathUtil.BulletMatrixMultiply(Matrix.Invert(rbA.GetCenterOfMassTransform()), frameInW);
-			m_frameInB = MathUtil.BulletMatrixMultiply(Matrix.Invert(rbB.GetCenterOfMassTransform()), frameInW);
+			m_frameInA = rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+			m_frameInB = rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 	        // sei limits
-	        SetLinearLowerLimit(Vector3.Zero);
-	        SetLinearUpperLimit(Vector3.Zero);
-	        SetAngularLowerLimit(new Vector3(0.0f, -MathUtil.SIMD_HALF_PI + UNIV_EPS, -MathUtil.SIMD_PI + UNIV_EPS));
-	        SetAngularUpperLimit(new Vector3(0.0f,  MathUtil.SIMD_HALF_PI - UNIV_EPS,  MathUtil.SIMD_PI - UNIV_EPS));
+	        SetLinearLowerLimit(IndexedVector3.Zero);
+	        SetLinearUpperLimit(IndexedVector3.Zero);
+	        SetAngularLowerLimit(new IndexedVector3(0.0f, -MathUtil.SIMD_HALF_PI + UNIV_EPS, -MathUtil.SIMD_PI + UNIV_EPS));
+	        SetAngularUpperLimit(new IndexedVector3(0.0f,  MathUtil.SIMD_HALF_PI - UNIV_EPS,  MathUtil.SIMD_PI - UNIV_EPS));
         }
 
 	    // access
-	    public Vector3 GetAnchor() { return m_calculatedTransformA.Translation; }
-	    public Vector3 GetAnchor2() { return m_calculatedTransformB.Translation; }
-	    public Vector3 GetAxis1() { return m_axis1; }
-	    public Vector3 GetAxis2() { return m_axis2; }
+	    public IndexedVector3 GetAnchor() { return m_calculatedTransformA._origin; }
+	    public IndexedVector3 GetAnchor2() { return m_calculatedTransformB._origin; }
+	    public IndexedVector3 GetAxis1() { return m_axis1; }
+	    public IndexedVector3 GetAxis2() { return m_axis2; }
 	    public float GetAngle1() { return GetAngle(2); }
 	    public float GetAngle2() { return GetAngle(1); }
 	    // limits
-	    public void SetUpperLimit(float ang1max, float ang2max) { SetAngularUpperLimit(new Vector3(0.0f, ang1max, ang2max)); }
-	    public void SetLowerLimit(float ang1min, float ang2min) { SetAngularLowerLimit(new Vector3(0.0f, ang1min, ang2min)); }
+	    public void SetUpperLimit(float ang1max, float ang2max) { SetAngularUpperLimit(new IndexedVector3(0.0f, ang1max, ang2max)); }
+	    public void SetLowerLimit(float ang1min, float ang2min) { SetAngularLowerLimit(new IndexedVector3(0.0f, ang1min, ang2min)); }
 
-		public override void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public override void SetAxis(ref IndexedVector3 axis1, ref IndexedVector3 axis2)
 		{
-			Vector3 zAxis = Vector3.Normalize(axis1);
-			Vector3 yAxis = Vector3.Normalize(axis2);
-			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
+			IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
+			IndexedVector3 yAxis = IndexedVector3.Normalize(axis2);
+			IndexedVector3 xAxis = IndexedVector3.Cross(yAxis, zAxis); // we want right coordinate system
 
-			Matrix frameInW = Matrix.Identity;
-			MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+			IndexedMatrix frameInW = IndexedMatrix.Identity;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                xAxis[1], yAxis[1], zAxis[1],
+                                xAxis[2], yAxis[2], zAxis[2]);
 
 			// now get constraint frame in local coordinate systems
-			m_frameInA = MathUtil.InverseTimes(m_rbA.GetCenterOfMassTransform(), frameInW);
-			m_frameInB = MathUtil.InverseTimes(m_rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = m_rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 			CalculateTransforms();
 		}

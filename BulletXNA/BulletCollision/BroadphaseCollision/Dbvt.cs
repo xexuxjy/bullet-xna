@@ -30,14 +30,14 @@ namespace BulletXNA.BulletCollision
 {
     public class Dbvt
     {
-        public static void SetMin(ref Vector3 a, ref Vector3 b)
+        public static void SetMin(ref IndexedVector3 a, ref IndexedVector3 b)
         {
             a.X = Math.Min(a.X, b.X);
             a.Y = Math.Min(a.Y, b.Y);
             a.Z = Math.Min(a.Z, b.Z);
         }
 
-        public static void SetMax(ref Vector3 a, ref Vector3 b)
+        public static void SetMax(ref IndexedVector3 a, ref IndexedVector3 b)
         {
             a.X = Math.Max(a.X, b.X);
             a.Y = Math.Max(a.Y, b.Y);
@@ -70,10 +70,10 @@ namespace BulletXNA.BulletCollision
 
         //public static bool Intersect(ref DbvtAabbMm a, ref DbvtAabbMm b)
         //{
-        //    Vector3 amin = a.Mins();
-        //    Vector3 amax = a.Maxs();
-        //    Vector3 bmin = b.Mins();
-        //    Vector3 bmax = b.Maxs();
+        //    IndexedVector3 amin = a.Mins();
+        //    IndexedVector3 amax = a.Maxs();
+        //    IndexedVector3 bmin = b.Mins();
+        //    IndexedVector3 bmax = b.Maxs();
         //    return ((amin.X <= bmin.X) &&
         //        (amin.Y <= bmax.Y) &&
         //        (amin.Z <= bmax.Z) &&
@@ -84,10 +84,10 @@ namespace BulletXNA.BulletCollision
 
 
 
-        //public static bool Intersect(ref DbvtAabbMm a, ref Vector3 b)
+        //public static bool Intersect(ref DbvtAabbMm a, ref IndexedVector3 b)
         //{
-        //    Vector3 amin = a.Mins();
-        //    Vector3 amax = a.Maxs();
+        //    IndexedVector3 amin = a.Mins();
+        //    IndexedVector3 amax = a.Maxs();
 
         //    return ((b.X >= amin.X) &&
         //            (b.Y >= amin.Y) &&
@@ -99,12 +99,12 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public static bool Intersect(ref DbvtAabbMm a, ref Vector3 org, ref Vector3 invdir, int[] signs)
+        public static bool Intersect(ref DbvtAabbMm a, ref IndexedVector3 org, ref IndexedVector3 invdir, int[] signs)
         {
-            Vector3 amin = a.Mins();
-            Vector3 amax = a.Maxs();
+            IndexedVector3 amin = a.Mins();
+            IndexedVector3 amax = a.Maxs();
 
-            Vector3[] bounds = new Vector3[] { amin, amax };
+            IndexedVector3[] bounds = new IndexedVector3[] { amin, amax };
             float txmin = (bounds[signs[0]].X - org.X) * invdir.X;
             float txmax = (bounds[1 - signs[0]].X - org.X) * invdir.X;
             float tymin = (bounds[signs[1]].Y - org.Y) * invdir.Y;
@@ -251,13 +251,13 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public bool Update(DbvtNode leaf, ref DbvtAabbMm volume, ref Vector3 velocity, float margin)
+        public bool Update(DbvtNode leaf, ref DbvtAabbMm volume, ref IndexedVector3 velocity, float margin)
         {
             if (leaf.volume.Contain(ref volume))
             {
                 return (false);
             }
-            volume.Expand(new Vector3(margin));
+            volume.Expand(new IndexedVector3(margin));
             volume.SignedExpand(velocity);
             Update(leaf, ref volume);
             return (true);
@@ -265,7 +265,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public bool Update(DbvtNode leaf, ref DbvtAabbMm volume, ref Vector3 velocity)
+        public bool Update(DbvtNode leaf, ref DbvtAabbMm volume, ref IndexedVector3 velocity)
         {
             if (leaf.volume.Contain(ref volume))
             {
@@ -284,7 +284,7 @@ namespace BulletXNA.BulletCollision
             {
                 return (false);
             }
-            volume.Expand(new Vector3(margin));
+            volume.Expand(new IndexedVector3(margin));
             Update(leaf, ref volume);
             return (true);
         }
@@ -321,13 +321,13 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public static void Split(List<DbvtNode> leafs, List<DbvtNode> left, List<DbvtNode> right, ref Vector3 org, ref Vector3 axis)
+        public static void Split(List<DbvtNode> leafs, List<DbvtNode> left, List<DbvtNode> right, ref IndexedVector3 org, ref IndexedVector3 axis)
         {
             left.Clear();
             right.Clear();
             for (int i = 0, ni = leafs.Count; i < ni; ++i)
             {
-                if (Vector3.Dot(axis, leafs[i].volume.Center() - org) < 0)
+                if (IndexedVector3.Dot(axis, leafs[i].volume.Center() - org) < 0)
                 {
                     left.Add(leafs[i]);
                 }
@@ -439,23 +439,23 @@ namespace BulletXNA.BulletCollision
 
 
         public static void RayTest(DbvtNode root,
-                                ref Vector3 rayFrom,
-                                ref Vector3 rayTo,
+                                ref IndexedVector3 rayFrom,
+                                ref IndexedVector3 rayTo,
                                 Collide policy)
         {
             if (root != null)
             {
-                Vector3 rayDir = (rayTo - rayFrom);
+                IndexedVector3 rayDir = (rayTo - rayFrom);
                 rayDir.Normalize();
 
                 ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
-                Vector3 rayDirectionInverse = new Vector3(
+                IndexedVector3 rayDirectionInverse = new IndexedVector3(
                     rayDir.X == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X,
                     rayDir.Y == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y,
                     rayDir.Z == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z);
                 bool[] signs = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
 
-                float lambda_max = Vector3.Dot(rayDir, (rayTo - rayFrom));
+                float lambda_max = IndexedVector3.Dot(rayDir, (rayTo - rayFrom));
 
                 ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
 
@@ -464,7 +464,7 @@ namespace BulletXNA.BulletCollision
 
                 stack.Resize(DOUBLE_STACKSIZE);
                 stack[0] = root;
-                Vector3[] bounds = new Vector3[2];
+                IndexedVector3[] bounds = new IndexedVector3[2];
                 do
                 {
                     DbvtNode node = stack[--depth];
@@ -506,26 +506,26 @@ namespace BulletXNA.BulletCollision
 
 
         public void RayTestInternal(DbvtNode root,
-                                    ref Vector3 rayFrom,
-                                    ref Vector3 rayTo,
-                                    ref Vector3 rayDirectionInverse,
+                                    ref IndexedVector3 rayFrom,
+                                    ref IndexedVector3 rayTo,
+                                    ref IndexedVector3 rayDirectionInverse,
                                     bool[] signs,
                                     float lambda_max,
-                                    ref Vector3 aabbMin,
-                                    ref Vector3 aabbMax,
+                                    ref IndexedVector3 aabbMin,
+                                    ref IndexedVector3 aabbMax,
                                     Collide policy)
         {
             //    (void) rayTo;
             //DBVT_CHECKTYPE
             if (root != null)
             {
-                Vector3 resultNormal = Vector3.Up;
+                IndexedVector3 resultNormal = new IndexedVector3(0,1,0);
 
                 int depth = 1;
                 int treshold = DOUBLE_STACKSIZE - 2;
                 ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>(DOUBLE_STACKSIZE);
                 stack[0] = root;
-                Vector3[] bounds = new Vector3[2];
+                IndexedVector3[] bounds = new IndexedVector3[2];
                 do
                 {
                     DbvtNode node = stack[--depth];
@@ -583,13 +583,13 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public static void CollideRAY(DbvtNode root, ref Vector3 origin, ref Vector3 direction, Collide collideable)
+        public static void CollideRAY(DbvtNode root, ref IndexedVector3 origin, ref IndexedVector3 direction, Collide collideable)
         {
             if (root != null)
             {
-                Vector3 normal = direction;
+                IndexedVector3 normal = direction;
                 normal.Normalize();
-                Vector3 invdir = new Vector3(1 / normal.X, 1 / normal.Y, 1 / normal.Z);
+                IndexedVector3 invdir = new IndexedVector3(1 / normal.X, 1 / normal.Y, 1 / normal.Z);
                 int[] signs = new int[] { direction.X < 0f ? 1 : 0, direction.Y < 0f ? 1 : 0, direction.Z < 0f ? 1 : 0 };
                 Stack<DbvtNode> stack = new Stack<DbvtNode>(SIMPLE_STACKSIZE);
                 stack.Push(root);
@@ -614,7 +614,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public static void CollideKDOP(DbvtNode root, Vector3[] normals, float[] offsets, int count, Collide collideable)
+        public static void CollideKDOP(DbvtNode root, IndexedVector3[] normals, float[] offsets, int count, Collide collideable)
         {
             if (root != null)
             {
@@ -666,7 +666,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public static void CollideOCL(DbvtNode root, Vector3[] normals, float[] offsets, ref Vector3 sortaxis, int count, Collide collideable)
+        public static void CollideOCL(DbvtNode root, IndexedVector3[] normals, float[] offsets, ref IndexedVector3 sortaxis, int count, Collide collideable)
         {
             if (root != null)
             {
@@ -819,7 +819,7 @@ namespace BulletXNA.BulletCollision
 
         //
 
-        public static Vector3[] axis = { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+        public static IndexedVector3[] axis = { new IndexedVector3(1, 0, 0), new IndexedVector3(0, 1, 0), new IndexedVector3(0, 0, 1) };
 
         public static DbvtNode TopDown(Dbvt pdbvt, List<DbvtNode> leafs, int bu_treshold)
         {
@@ -828,7 +828,7 @@ namespace BulletXNA.BulletCollision
                 if (leafs.Count > bu_treshold)
                 {
                     DbvtAabbMm volume = Bounds(leafs);
-                    Vector3 org = volume.Center();
+                    IndexedVector3 org = volume.Center();
                     List<DbvtNode>[] sets = { new List<DbvtNode>(), new List<DbvtNode>() };
                     int bestaxis = -1;
                     int bestmidp = leafs.Count;
@@ -839,10 +839,10 @@ namespace BulletXNA.BulletCollision
                     int[][] splitcount = new int[][] { a1, a2, a3 };
                     for (int i = 0; i < leafs.Count; ++i)
                     {
-                        Vector3 x = leafs[i].volume.Center() - org;
+                        IndexedVector3 x = leafs[i].volume.Center() - org;
                         for (int j = 0; j < 3; ++j)
                         {
-                            ++splitcount[j][Vector3.Dot(x, axis[j]) > 0 ? 1 : 0];
+                            ++splitcount[j][IndexedVector3.Dot(x, axis[j]) > 0 ? 1 : 0];
                         }
                     }
                     for (int i = 0; i < 3; ++i)
@@ -1013,7 +1013,7 @@ namespace BulletXNA.BulletCollision
         // volume+edge lengths
         public static float Size(ref DbvtAabbMm a)
         {
-            Vector3 edges = a.Lengths();
+            IndexedVector3 edges = a.Lengths();
             return (edges.X * edges.Y * edges.Z +
                 edges.X + edges.Y + edges.Z);
         }
@@ -1091,15 +1091,15 @@ namespace BulletXNA.BulletCollision
 
     public struct DbvtAabbMm
     {
-        public Vector3 Center() { return (_max + _min) / 2f; }
-        public Vector3 Extent() { return (_max - _min) / 2f; }
-        public Vector3 Mins() { return _min; }    // should be ref?
-        public Vector3 Maxs() { return _max; }    // should be ref?
-        public Vector3 Lengths() { return new Vector3(); }
+        public IndexedVector3 Center() { return (_max + _min) / 2f; }
+        public IndexedVector3 Extent() { return (_max - _min) / 2f; }
+        public IndexedVector3 Mins() { return _min; }    // should be ref?
+        public IndexedVector3 Maxs() { return _max; }    // should be ref?
+        public IndexedVector3 Lengths() { return new IndexedVector3(); }
 
         public static float Proximity(ref DbvtAabbMm a, ref DbvtAabbMm b)
         {
-            Vector3 d = (a._min + a._max) - (b._min + b._max);
+            IndexedVector3 d = (a._min + a._max) - (b._min + b._max);
             return (Math.Abs(d.X) + Math.Abs(d.Y) + Math.Abs(d.Z));
         }
 
@@ -1133,31 +1133,31 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public static DbvtAabbMm FromCE(ref Vector3 c, ref Vector3 e)
+        public static DbvtAabbMm FromCE(ref IndexedVector3 c, ref IndexedVector3 e)
         {
             DbvtAabbMm box;
             box._min = c - e; box._max = c + e;
             return (box);
         }
-        public static DbvtAabbMm FromCR(ref Vector3 c, float r)
+        public static DbvtAabbMm FromCR(ref IndexedVector3 c, float r)
         {
-            Vector3 temp = new Vector3(r);
+            IndexedVector3 temp = new IndexedVector3(r);
             return (FromCE(ref c, ref temp));
         }
-        public static DbvtAabbMm FromMM(ref Vector3 mi, ref Vector3 mx)
+        public static DbvtAabbMm FromMM(ref IndexedVector3 mi, ref IndexedVector3 mx)
         {
             DbvtAabbMm box;
             box._min = mi; box._max = mx;
             return (box);
         }
 
-        public static DbvtAabbMm FromPoints(List<Vector3> points)
+        public static DbvtAabbMm FromPoints(List<IndexedVector3> points)
         {
             DbvtAabbMm box;
             box._min = box._max = points[0];
             for (int i = 1; i < points.Count; ++i)
             {
-                Vector3 temp = points[i];
+                IndexedVector3 temp = points[i];
                 //SetMin(ref box._min, ref temp);
                 //SetMax(ref box._max, ref temp);
                 MathUtil.VectorMin(ref temp, ref box._min);
@@ -1168,17 +1168,17 @@ namespace BulletXNA.BulletCollision
             return (box);
         }
 
-        public static DbvtAabbMm FromPoints(List<List<Vector3>> points)
+        public static DbvtAabbMm FromPoints(List<List<IndexedVector3>> points)
         {
             return new DbvtAabbMm();
         }
 
-        public void Expand(Vector3 e)
+        public void Expand(IndexedVector3 e)
         {
             _min -= e; _max += e;
         }
 
-        public void SignedExpand(Vector3 e)
+        public void SignedExpand(IndexedVector3 e)
         {
             if (e.X > 0) _max.X = _max.X + e.X; else _min.X = _min.X + e.X;
             if (e.Y > 0) _max.Y = _max.Y + e.Y; else _min.Y = _min.Y + e.Y;
@@ -1204,7 +1204,7 @@ namespace BulletXNA.BulletCollision
                 (a._max.Z >= b._min.Z));
         }
 
-        public static bool Intersect(DbvtAabbMm a, ref Vector3 b)
+        public static bool Intersect(DbvtAabbMm a, ref IndexedVector3 b)
         {
             return ((b.X >= a._min.X) &&
                 (b.Y >= a._min.Y) &&
@@ -1216,76 +1216,76 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public int Classify(ref Vector3 n, float o, int s)
+        public int Classify(ref IndexedVector3 n, float o, int s)
         {
-            Vector3 pi, px;
+            IndexedVector3 pi, px;
             switch (s)
             {
                 case (0 + 0 + 0):
                     {
-                        px = new Vector3(_min.X, _min.Y, _min.Z);
-                        pi = new Vector3(_max.X, _max.Y, _max.Z);
+                        px = new IndexedVector3(_min.X, _min.Y, _min.Z);
+                        pi = new IndexedVector3(_max.X, _max.Y, _max.Z);
                         break;
                     }
                 case (1 + 0 + 0):
                     {
-                        px = new Vector3(_max.X, _min.Y, _min.Z);
-                        pi = new Vector3(_min.X, _max.Y, _max.Z); break;
+                        px = new IndexedVector3(_max.X, _min.Y, _min.Z);
+                        pi = new IndexedVector3(_min.X, _max.Y, _max.Z); break;
                     }
                 case (0 + 2 + 0):
                     {
-                        px = new Vector3(_min.X, _max.Y, _min.Z);
-                        pi = new Vector3(_max.X, _min.Y, _max.Z); break;
+                        px = new IndexedVector3(_min.X, _max.Y, _min.Z);
+                        pi = new IndexedVector3(_max.X, _min.Y, _max.Z); break;
                     }
                 case (1 + 2 + 0):
                     {
-                        px = new Vector3(_max.X, _max.Y, _min.Z);
-                        pi = new Vector3(_min.X, _min.Y, _max.Z); break;
+                        px = new IndexedVector3(_max.X, _max.Y, _min.Z);
+                        pi = new IndexedVector3(_min.X, _min.Y, _max.Z); break;
                     }
                 case (0 + 0 + 4):
                     {
-                        px = new Vector3(_min.X, _min.Y, _max.Z);
-                        pi = new Vector3(_max.X, _max.Y, _min.Z); break;
+                        px = new IndexedVector3(_min.X, _min.Y, _max.Z);
+                        pi = new IndexedVector3(_max.X, _max.Y, _min.Z); break;
                     }
                 case (1 + 0 + 4):
                     {
-                        px = new Vector3(_max.X, _min.Y, _max.Z);
-                        pi = new Vector3(_min.X, _max.Y, _min.Z); break;
+                        px = new IndexedVector3(_max.X, _min.Y, _max.Z);
+                        pi = new IndexedVector3(_min.X, _max.Y, _min.Z); break;
                     }
                 case (0 + 2 + 4):
                     {
-                        px = new Vector3(_min.X, _max.Y, _max.Z);
-                        pi = new Vector3(_max.X, _min.Y, _min.Z); break;
+                        px = new IndexedVector3(_min.X, _max.Y, _max.Z);
+                        pi = new IndexedVector3(_max.X, _min.Y, _min.Z); break;
                     }
                 case (1 + 2 + 4):
                     {
-                        px = new Vector3(_max.X, _max.Y, _max.Z);
-                        pi = new Vector3(_min.X, _min.Y, _min.Z); break;
+                        px = new IndexedVector3(_max.X, _max.Y, _max.Z);
+                        pi = new IndexedVector3(_min.X, _min.Y, _min.Z); break;
                     }
                 default:
                     {
-                        px = new Vector3();
-                        pi = new Vector3();
+                        px = new IndexedVector3();
+                        pi = new IndexedVector3();
                         break;
                     }
             }
-            if ((Vector3.Dot(n, px) + o) < 0) return (-1);
-            if ((Vector3.Dot(n, pi) + o) >= 0) return (+1);
+            if ((IndexedVector3.Dot(n, px) + o) < 0) return (-1);
+            if ((IndexedVector3.Dot(n, pi) + o) >= 0) return (+1);
             return (0);
         }
 
-        public float ProjectMinimum(ref Vector3 v, uint signs)
+        public float ProjectMinimum(ref IndexedVector3 v, uint signs)
         {
-            Vector3[] b = { _max, _min };
-            Vector3 p = new Vector3(b[(signs >> 0) & 1].X,
+            IndexedVector3[] b = { _max, _min };
+            IndexedVector3 p = new IndexedVector3(b[(signs >> 0) & 1].X,
                                     b[(signs >> 1) & 1].Y,
                                     b[(signs >> 2) & 1].Z);
-            return (Vector3.Dot(p, v));
+            return (IndexedVector3.Dot(p, v));
         }
 
 
-        public Vector3 _min;
-        public Vector3 _max;
+        public IndexedVector3 _min;
+        public IndexedVector3 _max;
     }
 
     public class Collide

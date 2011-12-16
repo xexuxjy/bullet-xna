@@ -22,14 +22,15 @@
  */
 
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
     public interface IMotionState
     {
-        void GetWorldTransform(out Matrix worldTrans);
+        void GetWorldTransform(out IndexedMatrix worldTrans);
 		//Bullet only calls the update of worldtransform for active objects
-        void SetWorldTransform(Matrix worldTrans);
-        void SetWorldTransform(ref Matrix worldTrans);
+        void SetWorldTransform(IndexedMatrix worldTrans);
+        void SetWorldTransform(ref IndexedMatrix worldTrans);
     }
 }

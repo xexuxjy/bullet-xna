@@ -27,6 +27,7 @@ using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.IO;
 
 namespace BulletXNADemos.Demos
 {
@@ -38,7 +39,7 @@ namespace BulletXNADemos.Demos
 	        {
 		        for (int j=0;j<NUM_VERTS_Y;j++)
 		        {
-			        gVertices[i+j*NUM_VERTS_X] = new Vector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+			        gVertices[i+j*NUM_VERTS_X] = new IndexedVector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
                         //0.0f,
                         (float)(waveheight * Math.Sin((float)i + offset) * Math.Cos((float)j + offset)),
 				        (j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
@@ -69,16 +70,20 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
+            //string filename = @"E:\users\man\bullet\xna-concaveray-output-1.txt";
+            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+
 			m_cameraDistance = 400f;
 			m_farClip = 1500f;
-			m_perspective = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
+            m_perspective = IndexedMatrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
 
 
             m_animatedMesh = true;
 			base.InitializeDemo();
 			int totalTriangles = 2 * (NUM_VERTS_X - 1) * (NUM_VERTS_Y - 1);
 
-			gVertices = new ObjectArray<Vector3>(totalVerts);
+			gVertices = new ObjectArray<IndexedVector3>(totalVerts);
 			int indicesTotal = totalTriangles * 3;
             gIndices = new ObjectArray<int>(indicesTotal);
 
@@ -128,37 +133,37 @@ namespace BulletXNADemos.Demos
 			float minZ = NUM_VERTS_Y * TRIANGLE_SIZE * 0.5f;
 
 			//OptimizedBvh bvh = new OptimizedBvh();
-	        Vector3 aabbMin = new Vector3(-minX,-5,-minZ);
-	        Vector3 aabbMax = new Vector3(minX,5,minZ);
+	        IndexedVector3 aabbMin = new IndexedVector3(-minX,-5,-minZ);
+	        IndexedVector3 aabbMax = new IndexedVector3(minX,5,minZ);
 
 
 
 
             m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression, ref aabbMin, ref aabbMax, true);
             //m_trimeshShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression,true);
-	        Vector3 scaling = Vector3.One;
+	        IndexedVector3 scaling = IndexedVector3.One;
 			CollisionShape groundShape = m_trimeshShape;
             //groundShape = new TriangleMeshShape(indexVertexArrays);
-			//groundShape = new StaticPlaneShape(Vector3.Up, 0f);
-            Vector3 up = new Vector3(0.4f,1,0);
+			//groundShape = new StaticPlaneShape(IndexedVector3.Up, 0f);
+            IndexedVector3 up = new IndexedVector3(0.4f,1,0);
             up.Normalize();
 			//groundShape = new StaticPlaneShape(up, 0f);
-			//groundShape = new BoxShape(new Vector3(1000, 10, 1000));
+			//groundShape = new BoxShape(new IndexedVector3(1000, 10, 1000));
 			m_collisionConfiguration = new DefaultCollisionConfiguration();
 			m_dispatcher = new	CollisionDispatcher(m_collisionConfiguration);
 
-			Vector3 worldMin = aabbMin;
-			Vector3 worldMax = aabbMax;
+			IndexedVector3 worldMin = aabbMin;
+			IndexedVector3 worldMax = aabbMax;
 
 			m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
 			m_constraintSolver = new SequentialImpulseConstraintSolver();
 			m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
 			float mass = 0f;
-			Matrix startTransform = Matrix.CreateTranslation(new Vector3(2,-2,0));
+			IndexedMatrix startTransform = IndexedMatrix.CreateTranslation(new IndexedVector3(2,-2,0));
 
 
-			startTransform = Matrix.Identity;
+			startTransform = IndexedMatrix.Identity;
 			staticBody = LocalCreateRigidBody(mass, ref startTransform,groundShape);
 
 			staticBody.SetCollisionFlags(staticBody.GetCollisionFlags() | CollisionFlags.CF_KINEMATIC_OBJECT);//STATIC_OBJECT);
@@ -191,8 +196,8 @@ namespace BulletXNADemos.Demos
 				
 				int i;
 				int j;
-				Vector3 aabbMin = MathUtil.MAX_VECTOR;
-				Vector3 aabbMax = MathUtil.MIN_VECTOR;
+				IndexedVector3 aabbMin = MathUtil.MAX_VECTOR;
+				IndexedVector3 aabbMax = MathUtil.MIN_VECTOR;
 
 				//for ( i=NUM_VERTS_X/2-3;i<NUM_VERTS_X/2+2;i++)
 				//{
@@ -206,7 +211,7 @@ namespace BulletXNADemos.Demos
 				//        float cos = (float)Math.Cos((float)j + m_offset);
 
 
-				//        gVertices[i+j*NUM_VERTS_X] = new Vector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+				//        gVertices[i+j*NUM_VERTS_X] = new IndexedVector3((i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
 				//            //0.f,
 				//            waveheight * sin * cos,
 				//            (j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
@@ -240,7 +245,7 @@ namespace BulletXNADemos.Demos
         public BvhTriangleMeshShape m_trimeshShape = null;
         private bool m_animatedMesh;
         private btRaycastBar m_raycastBar = null;
-        private ObjectArray<Vector3> gVertices = null;
+        private ObjectArray<IndexedVector3> gVertices = null;
         private ObjectArray<int> gIndices = null;
         private BvhTriangleMeshShape trimeshShape =null;
         private RigidBody staticBody = null;
@@ -258,11 +263,11 @@ public class btRaycastBar
 {
     public IDebugDraw m_debugDraw;
     const int NUMRAYS_IN_BAR  = 30;
-	public Vector3[] source = new Vector3[NUMRAYS_IN_BAR];
-	public Vector3[] dest = new Vector3[NUMRAYS_IN_BAR];
-	public Vector3[] direction = new Vector3[NUMRAYS_IN_BAR];
-	public Vector3[] hit = new Vector3[NUMRAYS_IN_BAR];
-	public Vector3[] normal = new Vector3[NUMRAYS_IN_BAR];
+	public IndexedVector3[] source = new IndexedVector3[NUMRAYS_IN_BAR];
+	public IndexedVector3[] dest = new IndexedVector3[NUMRAYS_IN_BAR];
+	public IndexedVector3[] direction = new IndexedVector3[NUMRAYS_IN_BAR];
+	public IndexedVector3[] hit = new IndexedVector3[NUMRAYS_IN_BAR];
+	public IndexedVector3[] normal = new IndexedVector3[NUMRAYS_IN_BAR];
 
 	public int frame_counter;
 	public int ms;
@@ -311,9 +316,9 @@ public class btRaycastBar
 		for (int i = 0; i < NUMRAYS_IN_BAR; i++)
 		{
 			float z = (max_z-min_z)/(((float)(NUMRAYS_IN_BAR)) * i) + min_z;
-			source[i] = new Vector3(min_x, max_y, z);
-			dest[i] = new Vector3(min_x + ray_length, min_y, z);
-			normal[i] = new Vector3(1.0f, 0.0f, 0.0f);
+			source[i] = new IndexedVector3(min_x, max_y, z);
+			dest[i] = new IndexedVector3(min_x + ray_length, min_y, z);
+			normal[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
 		}
 	}
     //  min_y = -1000, max_y = 10
@@ -342,14 +347,14 @@ public class btRaycastBar
 		{
 			float alpha = dalpha * i;
 			// rotate around by alpha degrees y 
-            Matrix tr = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.Up,alpha));
-			direction[i] = new Vector3(1.0f, 0.0f, 0.0f);
-			direction[i] = Vector3.Transform(direction[i],tr);
+            IndexedMatrix tr = IndexedMatrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.Up,alpha));
+			direction[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
+			direction[i] = tr * direction[i];
 			direction[i] = direction[i] * ray_length;
-			source[i] = new Vector3(startX, max_y, z);
+			source[i] = new IndexedVector3(startX, max_y, z);
 			dest[i] = source[i] + direction[i];
 			dest[i].Y = min_y;
-			normal[i] = new Vector3(1.0f, 0.0f, 0.0f);
+			normal[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
 		}
 	}
 
@@ -361,11 +366,11 @@ public class btRaycastBar
         }
 		for (int i = 0; i < NUMRAYS_IN_BAR; i++)
 		{
-            Vector3 tempSource = source[i];
+            IndexedVector3 tempSource = source[i];
 			tempSource.X += dx * dt * sign;
             source[i] = tempSource;
 
-            Vector3 tempDest = dest[i];
+            IndexedVector3 tempDest = dest[i];
 			tempDest.X += dx * dt * sign;
             dest[i] = tempDest;
 		}
@@ -414,12 +419,12 @@ public class btRaycastBar
 			{
 				hit[i] = cb.m_hitPointWorld;
 				normal[i] = cb.m_hitNormalWorld;
-			    normal[i] = Vector3.Normalize(normal[i]);
+			    normal[i] = IndexedVector3.Normalize(normal[i]);
 			} 
             else 
             {
 				hit[i] = dest[i];
-				normal[i] = new Vector3(1.0f, 0.0f, 0.0f);
+				normal[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
 			}
 
 		}
@@ -449,16 +454,16 @@ public class btRaycastBar
 
 		    for (i = 0; i < NUMRAYS_IN_BAR; i++)
 		    {
-                m_debugDraw.DrawLine(source[i],hit[i],new Vector3(0,1,0));
+                m_debugDraw.DrawLine(source[i],hit[i],new IndexedVector3(0,1,0));
 		    }
 		    for (i = 0; i < NUMRAYS_IN_BAR; i++)
 		    {
-                m_debugDraw.DrawLine(hit[i],hit[i]+(normal[i] * 5),new Vector3(1,1,1));
+                m_debugDraw.DrawLine(hit[i],hit[i]+(normal[i] * 5),new IndexedVector3(1,1,1));
 		    }
-            Vector3 pointSize = new Vector3(0.5f,0.5f,0.5f);
+            IndexedVector3 pointSize = new IndexedVector3(0.5f,0.5f,0.5f);
 		    for ( i = 0; i < NUMRAYS_IN_BAR; i++)
 		    {
-                m_debugDraw.DrawLine(hit[i],hit[i]+pointSize,new Vector3(0,1,1));
+                m_debugDraw.DrawLine(hit[i],hit[i]+pointSize,new IndexedVector3(0,1,1));
 		    }
         }
 	}

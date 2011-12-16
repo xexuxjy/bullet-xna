@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -42,19 +43,19 @@ namespace BulletXNA.BulletCollision
 	    ///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
         ///
         public virtual void GetAabb
-            (Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
+            (IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax)
         {
             // t isn't assigned to as we're just getting the bounds.
             GetAabb(ref t,out aabbMin,out aabbMax);
         }
 
-        public abstract void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax);
+        public abstract void GetAabb(ref IndexedMatrix t,out IndexedVector3 aabbMin,out IndexedVector3 aabbMax);
 
-	    public virtual void GetBoundingSphere(out Vector3 center, out float radius)
+	    public virtual void GetBoundingSphere(out IndexedVector3 center, out float radius)
         {
-	        Matrix tr = Matrix.Identity;
-	        Vector3 aabbMin;
-            Vector3 aabbMax;
+	        IndexedMatrix tr = IndexedMatrix.Identity;
+	        IndexedVector3 aabbMin;
+            IndexedVector3 aabbMax;
 
 	        GetAabb(ref tr,out aabbMin,out aabbMax);
 
@@ -65,7 +66,7 @@ namespace BulletXNA.BulletCollision
 	    ///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	    public virtual float GetAngularMotionDisc()
         {
-	        Vector3	center;
+	        IndexedVector3	center;
 	        float disc;
             GetBoundingSphere(out center, out disc);
 	        disc += (center).Length();
@@ -80,7 +81,7 @@ namespace BulletXNA.BulletCollision
 
         ///calculateTemporalAabb calculates the enclosing aabb for the moving object over interval [0..timeStep)
 	    ///result is conservative
-	    public void CalculateTemporalAabb(ref Matrix curTrans,ref Vector3 linvel,ref Vector3 angvel,float timeStep, out Vector3 temporalAabbMin,out Vector3 temporalAabbMax)
+	    public void CalculateTemporalAabb(ref IndexedMatrix curTrans,ref IndexedVector3 linvel,ref IndexedVector3 angvel,float timeStep, out IndexedVector3 temporalAabbMin,out IndexedVector3 temporalAabbMax)
         {
 	        //start with static aabb
 	        GetAabb(ref curTrans,out temporalAabbMin,out temporalAabbMax);
@@ -93,7 +94,7 @@ namespace BulletXNA.BulletCollision
 	        float temporalAabbMinz = temporalAabbMin.Z;
 
 	        // add linear motion
-	        Vector3 linMotion = linvel*timeStep;
+	        IndexedVector3 linMotion = linvel*timeStep;
 	        ///@todo: simd would have a vector max/min operation, instead of per-element access
 	        if (linMotion.X > 0f)
 		        temporalAabbMaxx += linMotion.X; 
@@ -110,9 +111,9 @@ namespace BulletXNA.BulletCollision
 
 	        //add conservative angular motion
 	        float angularMotion = angvel.Length() * GetAngularMotionDisc() * timeStep;
-            Vector3 angularMotion3d = new Vector3(angularMotion);
-	        temporalAabbMin = new Vector3(temporalAabbMinx,temporalAabbMiny,temporalAabbMinz);
-	        temporalAabbMax = new Vector3(temporalAabbMaxx,temporalAabbMaxy,temporalAabbMaxz);
+            IndexedVector3 angularMotion3d = new IndexedVector3(angularMotion);
+	        temporalAabbMin = new IndexedVector3(temporalAabbMinx,temporalAabbMiny,temporalAabbMinz);
+	        temporalAabbMax = new IndexedVector3(temporalAabbMaxx,temporalAabbMaxy,temporalAabbMaxz);
 
 	        temporalAabbMin -= angularMotion3d;
 	        temporalAabbMax += angularMotion3d;
@@ -160,16 +161,16 @@ namespace BulletXNA.BulletCollision
 	    }
 
         // defining these as virtual rather then abstract as the whole impementation agains _SPU_ seems odd
-        public virtual void SetLocalScaling(ref Vector3 scaling)
+        public virtual void SetLocalScaling(ref IndexedVector3 scaling)
         {
         }
-        public virtual Vector3 GetLocalScaling()
+        public virtual IndexedVector3 GetLocalScaling()
         {
-            return new Vector3(1);
+            return new IndexedVector3(1);
         }
-        public virtual void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public virtual void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
-            inertia = Vector3.Zero;
+            inertia = IndexedVector3.Zero;
         }
 
         //debugging support

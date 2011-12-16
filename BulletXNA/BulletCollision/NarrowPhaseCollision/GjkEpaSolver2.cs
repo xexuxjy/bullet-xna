@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -31,22 +32,22 @@ namespace BulletXNA.BulletCollision
     {
         static EPA epa = new EPA();
 
-        public static void Initialize(ConvexShape shape0,ref Matrix wtrs0,
-            ConvexShape shape1,ref Matrix wtrs1,
+        public static void Initialize(ConvexShape shape0,ref IndexedMatrix wtrs0,
+            ConvexShape shape1,ref IndexedMatrix wtrs1,
             GjkEpaSolver2Results results,
             GjkEpaSolver2MinkowskiDiff shapeR,
             bool withmargins)
         {
             /* Results		*/ 
-            results.witnesses0 = Vector3.Zero;
-            results.witnesses1 = Vector3.Zero;
+            results.witnesses0 = IndexedVector3.Zero;
+            results.witnesses1 = IndexedVector3.Zero;
             results.status = GjkEpaSolver2Status.Separated;
             /* Shape		*/ 
             shapeR.m_shapes[0] =	shape0;
             shapeR.m_shapes[1] =	shape1;
 
-            shapeR.m_toshape1 = MathUtil.TransposeTimesBasis(ref wtrs1, ref wtrs0);
-            shapeR.m_toshape0 = MathUtil.InverseTimes(ref wtrs0, ref wtrs1);
+            shapeR.m_toshape1 = wtrs1._basis.TransposeTimes(ref wtrs0._basis);
+            shapeR.m_toshape0 = wtrs0.InverseTimes(ref wtrs1);
 
 
 
@@ -66,7 +67,7 @@ namespace BulletXNA.BulletCollision
 
         
         
-        public static bool	Distance(ConvexShape shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,GjkEpaSolver2Results	results)
+        public static bool	Distance(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results	results)
         {
             GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
             Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
@@ -74,18 +75,18 @@ namespace BulletXNA.BulletCollision
             GJKStatus gjk_status= gjk.Evaluate(shape,ref guess);
             if(gjk_status == GJKStatus.Valid)
             {
-                Vector3	w0 = Vector3.Zero;
-                Vector3	w1 = Vector3.Zero;
+                IndexedVector3	w0 = IndexedVector3.Zero;
+                IndexedVector3	w1 = IndexedVector3.Zero;
                 for(uint i=0;i<gjk.m_simplex.rank;++i)
                 {
                     float p=gjk.m_simplex.p[i];
                     w0+=shape.Support(ref gjk.m_simplex.c[i].d,0)*p;
-                    Vector3 temp = -gjk.m_simplex.c[i].d;
+                    IndexedVector3 temp = -gjk.m_simplex.c[i].d;
                     w1+=shape.Support(ref temp,1)*p;
                 }
-                results.witnesses0	= Vector3.Transform(w0,wtrs0);
-                results.witnesses1	= Vector3.Transform(w1,wtrs0);
-                results.normal = w0-w1;
+                results.witnesses0 = wtrs0 * w0;
+                results.witnesses1 = wtrs0 * w1;
+                results.normal = w0 - w1;
                 results.distance =	results.normal.Length();
                 results.normal	/=	results.distance>GJK_MIN_DISTANCE?results.distance:1;
                 return(true);
@@ -98,17 +99,17 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public static bool Penetration(ConvexShape shape0, ref Matrix wtrs0, ConvexShape shape1, ref Matrix wtrs1, ref Vector3 guess, GjkEpaSolver2Results results)
+        public static bool Penetration(ConvexShape shape0, ref IndexedMatrix wtrs0, ConvexShape shape1, ref IndexedMatrix wtrs1, ref IndexedVector3 guess, GjkEpaSolver2Results results)
         {
             return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, results, true);
         }
 
-        public static bool Penetration(ConvexShape shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,GjkEpaSolver2Results results,bool usemargins)
+        public static bool Penetration(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results results,bool usemargins)
         {
             GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
             Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results, shape,usemargins);
             GJK	gjk = new GJK();	
-            Vector3 minusGuess = -guess;
+            IndexedVector3 minusGuess = -guess;
             GJKStatus	gjk_status=gjk.Evaluate(shape,ref minusGuess);
             switch(gjk_status)
             {
@@ -118,15 +119,15 @@ namespace BulletXNA.BulletCollision
                     eStatus	epa_status=epa.Evaluate(gjk,ref minusGuess);
                     if(epa_status!=eStatus.Failed)
                     {
-                        Vector3	w0 = Vector3.Zero;
+                        IndexedVector3	w0 = IndexedVector3.Zero;
                         for(uint i=0;i<epa.m_result.rank;++i)
                         {
                             // order of results here is 'different' , EPA.evaluate.
                             w0+=shape.Support(ref epa.m_result.c[i].d,0)*epa.m_result.p[i];
                         }
                         results.status			=	GjkEpaSolver2Status.Penetrating;
-                        results.witnesses0	=	Vector3.Transform(w0,wtrs0);
-                        results.witnesses1	=	Vector3.Transform((w0-epa.m_normal*epa.m_depth),wtrs0);
+                        results.witnesses0 = wtrs0 * w0;
+                        results.witnesses1 = wtrs0 * (w0 - epa.m_normal * epa.m_depth);
                         results.normal			=	-epa.m_normal;
                         results.distance		=	-epa.m_depth;
                         return(true);
@@ -141,31 +142,31 @@ namespace BulletXNA.BulletCollision
         }
 
         //
-        public float SignedDistance(ref Vector3 position, float margin, ConvexShape shape0, ref Matrix wtrs0, GjkEpaSolver2Results results)
+        public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, GjkEpaSolver2Results results)
         {
             GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
             SphereShape	shape1 = new SphereShape(margin);
-            Matrix wtrs1 = Matrix.CreateFromQuaternion(Quaternion.Identity);
-            wtrs0.Translation = position;
+            IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(Quaternion.Identity);
+            wtrs0._origin = position;
 	        
             Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
             GJK	gjk = new GJK();	
-            Vector3 guess = new Vector3(1);
+            IndexedVector3 guess = new IndexedVector3(1);
             GJKStatus	gjk_status=gjk.Evaluate(shape,ref guess);
             if(gjk_status==GJKStatus.Valid)
             {
-                Vector3	w0=Vector3.Zero;
-                Vector3	w1=Vector3.Zero;
+                IndexedVector3	w0=IndexedVector3.Zero;
+                IndexedVector3	w1=IndexedVector3.Zero;
                 for(int i=0;i<gjk.m_simplex.rank;++i)
                 {
                     float p=gjk.m_simplex.p[i];
                     w0+=shape.Support( ref gjk.m_simplex.c[i].d,0)*p;
-                    Vector3 temp = -gjk.m_simplex.c[i].d;
+                    IndexedVector3 temp = -gjk.m_simplex.c[i].d;
                     w1+=shape.Support(ref temp,1)*p;
                 }
-                results.witnesses0 = Vector3.Transform(w0,wtrs0);
-                results.witnesses1 = Vector3.Transform(w1,wtrs0);
-                Vector3	delta=	results.witnesses1-results.witnesses0;
+                results.witnesses0 = wtrs0 * w0;
+                results.witnesses1 = wtrs0 * w1;
+                IndexedVector3	delta=	results.witnesses1-results.witnesses0;
                 float margin2 = shape0.GetMarginNonVirtual()+shape1.GetMarginNonVirtual();
                 float length = delta.Length();	
                 results.normal = delta/length;
@@ -178,7 +179,7 @@ namespace BulletXNA.BulletCollision
                 {
                     if(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref gjk.m_ray,results))
                     {
-                        Vector3	delta=	results.witnesses0-results.witnesses1;
+                        IndexedVector3	delta=	results.witnesses0-results.witnesses1;
                         float length= delta.Length();
                         if (length >= MathUtil.SIMD_EPSILON)
                             results.normal	=	delta/length;			
@@ -190,7 +191,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //
-        public bool SignedDistance(ConvexShape	shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,GjkEpaSolver2Results results)
+        public bool SignedDistance(ConvexShape	shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results results)
         {
             if(!Distance(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,results))
                 return(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,results,false));
@@ -230,9 +231,9 @@ namespace BulletXNA.BulletCollision
     public class GjkEpaSolver2Results
     {
         public GjkEpaSolver2Status status;
-        public Vector3 witnesses0;
-        public Vector3 witnesses1;
-        public Vector3	normal;
+        public IndexedVector3 witnesses0;
+        public IndexedVector3 witnesses1;
+        public IndexedVector3	normal;
         public float distance;
     }
 
@@ -248,7 +249,7 @@ namespace BulletXNA.BulletCollision
         {
             m_enableMargin = enable;
         }	
-        public Vector3 Support0(ref Vector3 d)
+        public IndexedVector3 Support0(ref IndexedVector3 d)
         {
             if(m_enableMargin)
             {
@@ -257,23 +258,23 @@ namespace BulletXNA.BulletCollision
             return m_shapes[0].LocalGetSupportVertexWithoutMarginNonVirtual(ref d);
         }
 
-        public Vector3 Support1(ref Vector3 d)
+        public IndexedVector3 Support1(ref IndexedVector3 d)
         {
-            Vector3 dcopy = Vector3.TransformNormal(d, m_toshape1);
-            Vector3 temp = m_enableMargin?m_shapes[1].LocalGetSupportVertexNonVirtual(ref dcopy) :
+            IndexedVector3 dcopy = m_toshape1 * d;
+            IndexedVector3 temp = m_enableMargin?m_shapes[1].LocalGetSupportVertexNonVirtual(ref dcopy) :
                                             m_shapes[1].LocalGetSupportVertexWithoutMarginNonVirtual(ref dcopy);
 
-            return Vector3.Transform(temp,m_toshape0);
+            return m_toshape0 * temp;
         }
 
-        public Vector3 Support(ref Vector3 d)
+        public IndexedVector3 Support(ref IndexedVector3 d)
         {
-            Vector3 minusD = -d;
-            Vector3 temp = Support1(ref minusD);
+            IndexedVector3 minusD = -d;
+            IndexedVector3 temp = Support1(ref minusD);
             return(Support0(ref d)-temp);
         }
         
-        public Vector3	Support(ref Vector3 d,uint index)
+        public IndexedVector3	Support(ref IndexedVector3 d,uint index)
         {
             if(index > 0)
                 return(Support1(ref d));
@@ -283,15 +284,15 @@ namespace BulletXNA.BulletCollision
 
         public bool m_enableMargin;
         public ConvexShape[] m_shapes = new ConvexShape[2];
-        public Matrix m_toshape1 = Matrix.Identity;
-        public Matrix m_toshape0 = Matrix.Identity;
+        public IndexedBasisMatrix m_toshape1 = IndexedBasisMatrix.Identity;
+        public IndexedMatrix m_toshape0 = IndexedMatrix.Identity;
 
     }
 
     public struct sSV
     {
-        public Vector3 d;
-        public Vector3 w;
+        public IndexedVector3 d;
+        public IndexedVector3 w;
     }
 
     public class sSimplex
@@ -324,7 +325,7 @@ namespace BulletXNA.BulletCollision
         
         public void Initialise()
         {
-            m_ray = Vector3.Zero;
+            m_ray = IndexedVector3.Zero;
             m_nfree		=	0;
             m_status	=	GJKStatus.Failed;
             m_current	=	0;
@@ -345,12 +346,12 @@ namespace BulletXNA.BulletCollision
             //}
         }
 
-        public GJKStatus Evaluate(GjkEpaSolver2MinkowskiDiff shapearg, ref Vector3 guess)
+        public GJKStatus Evaluate(GjkEpaSolver2MinkowskiDiff shapearg, ref IndexedVector3 guess)
         {
             uint iterations=0;
             float sqdist=0f;
             float alpha=0f;
-            Vector3[] lastw = new Vector3[4];
+            IndexedVector3[] lastw = new IndexedVector3[4];
             uint clastw=0;
             /* Initialize solver		*/ 
             m_free[0] =	m_store[0];
@@ -366,7 +367,7 @@ namespace BulletXNA.BulletCollision
             m_simplices[0].rank	= 0;
             m_ray =	guess;
             float sqrl=	m_ray.LengthSquared();
-            Vector3 temp = sqrl>0?-m_ray:new Vector3(1,0,0);
+            IndexedVector3 temp = sqrl>0?-m_ray:new IndexedVector3(1,0,0);
             AppendVertice(m_simplices[0],ref temp);
             m_simplices[0].p[0]	= 1;
             m_ray =	m_simplices[0].c[0].w;	
@@ -386,9 +387,9 @@ namespace BulletXNA.BulletCollision
                     break;
                 }
                 /* Append new vertice in -'v' direction	*/ 
-                Vector3 temp2 = -m_ray;
+                IndexedVector3 temp2 = -m_ray;
                 AppendVertice(cs,ref temp2);
-                Vector3	w = cs.c[cs.rank-1].w;
+                IndexedVector3	w = cs.c[cs.rank-1].w;
                 bool found = false;
                 for(int i=0;i<4;++i)
                 {
@@ -408,7 +409,7 @@ namespace BulletXNA.BulletCollision
                     lastw[clastw=(clastw+1)&3]=w;
                 }
                 /* Check for termination				*/ 
-                float omega=Vector3.Dot(m_ray,w)/rl;
+                float omega=IndexedVector3.Dot(m_ray,w)/rl;
                 alpha=Math.Max(omega,alpha);
                 if (((rl - alpha) - (GjkEpaSolver2.GJK_ACCURARY * rl)) <= 0)
                 {/* Return old simplex				*/ 
@@ -440,7 +441,7 @@ namespace BulletXNA.BulletCollision
                 if(sqdist>=0)
                 {/* Valid	*/ 
                     ns.rank	= 0;
-                    m_ray =	Vector3.Zero;
+                    m_ray =	IndexedVector3.Zero;
                     m_current =	next;
                     for(uint i=0,ni=cs.rank;i<ni;++i)
                     {
@@ -504,15 +505,15 @@ namespace BulletXNA.BulletCollision
                 {
                     for(int i=0;i<3;++i)
                     {
-                        Vector3 axis= Vector3.Zero;
-                        MathUtil.VectorComponent(ref axis,i,1f);
+                        IndexedVector3 axis= IndexedVector3.Zero;
+                        axis[i] = 1f;
                         AppendVertice(m_simplex, ref axis);
                         if(EncloseOrigin())
                         {
                             return(true);
                         }
                         RemoveVertice(m_simplex);
-                        Vector3 temp = -axis;
+                        IndexedVector3 temp = -axis;
                         AppendVertice(m_simplex,ref temp);
                         if(EncloseOrigin())	
                         {
@@ -524,12 +525,12 @@ namespace BulletXNA.BulletCollision
                 }
                 case	2:
                 {
-                    Vector3	d=m_simplex.c[1].w-m_simplex.c[0].w;
+                    IndexedVector3	d=m_simplex.c[1].w-m_simplex.c[0].w;
                     for(int i=0;i<3;++i)
                     {
-                        Vector3 axis= Vector3.Zero;
-                        MathUtil.VectorComponent(ref axis,i,1f);
-                        Vector3	p= Vector3.Cross(d,axis);
+                        IndexedVector3 axis= IndexedVector3.Zero;
+                        axis[i] =1f;
+                        IndexedVector3	p= IndexedVector3.Cross(d,axis);
                         if(p.LengthSquared()>0)
                         {
                             AppendVertice(m_simplex, ref p);
@@ -538,7 +539,7 @@ namespace BulletXNA.BulletCollision
                                 return(true);
                             }
                             RemoveVertice(m_simplex);
-                            Vector3 temp = -p;
+                            IndexedVector3 temp = -p;
                             AppendVertice(m_simplex,ref temp);
                             if(EncloseOrigin())
                             {
@@ -551,7 +552,7 @@ namespace BulletXNA.BulletCollision
                 }
                 case 3:
                 {
-                    Vector3	n = Vector3.Cross(m_simplex.c[1].w-m_simplex.c[0].w,
+                    IndexedVector3	n = IndexedVector3.Cross(m_simplex.c[1].w-m_simplex.c[0].w,
                         m_simplex.c[2].w-m_simplex.c[0].w);
                     if(n.LengthSquared()>0)
                     {
@@ -561,7 +562,7 @@ namespace BulletXNA.BulletCollision
                             return(true);
                         }
                         RemoveVertice(m_simplex);
-                        Vector3 temp = -n;
+                        IndexedVector3 temp = -n;
                         AppendVertice(m_simplex,ref temp);
                         if(EncloseOrigin())
                         {
@@ -587,7 +588,7 @@ namespace BulletXNA.BulletCollision
             return(false);
         }
 
-        public void	GetSupport(ref Vector3 d,ref sSV sv)
+        public void	GetSupport(ref IndexedVector3 d,ref sSV sv)
         {
             sv.d = d/d.Length();
             sv.w = m_shape.Support(ref sv.d);
@@ -597,7 +598,7 @@ namespace BulletXNA.BulletCollision
             m_free[m_nfree++]=simplex.c[--simplex.rank];
         }
 
-        public void AppendVertice(sSimplex simplex,ref Vector3 v)
+        public void AppendVertice(sSimplex simplex,ref IndexedVector3 v)
         {
             simplex.p[simplex.rank]=0;
             simplex.c[simplex.rank]=m_free[--m_nfree];
@@ -605,25 +606,25 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public static float Det(Vector3 a, Vector3 b, Vector3 c)
+        public static float Det(IndexedVector3 a, IndexedVector3 b, IndexedVector3 c)
         {
             return Det(ref a, ref b, ref c);
         }
 
-        public static float Det(ref Vector3 a,ref Vector3 b,ref Vector3 c)
+        public static float Det(ref IndexedVector3 a,ref IndexedVector3 b,ref IndexedVector3 c)
         {
             return(	a.Y*b.Z*c.X+a.Z*b.X*c.Y-
                 a.X*b.Z*c.Y-a.Y*b.X*c.Z+
                 a.X*b.Y*c.Z-a.Z*b.Y*c.X);
         }
 
-        public static float ProjectOrigin(ref Vector3 a,ref Vector3 b,ref Vector4 w,ref uint m)
+        public static float ProjectOrigin(ref IndexedVector3 a,ref IndexedVector3 b,ref Vector4 w,ref uint m)
         {
-            Vector3	d=b-a;
+            IndexedVector3	d=b-a;
             float l=d.LengthSquared();
             if (l > GjkEpaSolver2.GJK_SIMPLEX2_EPS)
             {
-                float t = (l>0f?(-Vector3.Dot(a,d)/l):0f);
+                float t = (l>0f?(-IndexedVector3.Dot(a,d)/l):0f);
                 if(t>=1)		
                 { 
                     w.X=0f;
@@ -649,15 +650,15 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public static float ProjectOrigin(ref Vector3 a,
-            ref Vector3 b,
-            ref Vector3 c,
+        public static float ProjectOrigin(ref IndexedVector3 a,
+            ref IndexedVector3 b,
+            ref IndexedVector3 c,
             ref Vector4 w,ref uint m)
         {
             uint[] imd3 = {1,2,0};
-            Vector3[] vt  = {a,b,c};
-            Vector3[] dl = {a-b,b-c,c-a};
-            Vector3	n= Vector3.Cross(dl[0],dl[1]);
+            IndexedVector3[] vt  = {a,b,c};
+            IndexedVector3[] dl = {a-b,b-c,c-a};
+            IndexedVector3	n= IndexedVector3.Cross(dl[0],dl[1]);
             float l=n.LengthSquared();
             if (l > GjkEpaSolver2.GJK_SIMPLEX3_EPS)
             {
@@ -666,7 +667,7 @@ namespace BulletXNA.BulletCollision
                 uint subm = 0;
                 for(int i=0;i<3;++i)
                 {
-                    if(Vector3.Dot(vt[i],Vector3.Cross(dl[i],n))>0)
+                    if(IndexedVector3.Dot(vt[i],IndexedVector3.Cross(dl[i],n))>0)
                     {
                         uint j = imd3[i];
                         float subd = GJK.ProjectOrigin(ref vt[i],ref vt[j],ref subw,ref subm);
@@ -683,13 +684,13 @@ namespace BulletXNA.BulletCollision
                 }
                 if(mindist<0)
                 {
-                    float d = Vector3.Dot(a,n);	
+                    float d = IndexedVector3.Dot(a,n);	
                     float s = (float)Math.Sqrt(l);
-                    Vector3	p = n * (d/l);
+                    IndexedVector3	p = n * (d/l);
                     mindist	=	p.LengthSquared();
                     m =	7;
-                    w.X	= (Vector3.Cross(dl[1],b-p)).Length()/s;
-                    w.Y	= (Vector3.Cross(dl[2],c-p)).Length()/s;
+                    w.X	= (IndexedVector3.Cross(dl[1],b-p)).Length()/s;
+                    w.Y	= (IndexedVector3.Cross(dl[2],c-p)).Length()/s;
                     w.Z	= 1-(w.X+w.Y);
                 }
                 return(mindist);
@@ -697,18 +698,18 @@ namespace BulletXNA.BulletCollision
             return(-1);
         }
 
-        public static float ProjectOrigin(ref Vector3 a,
-            ref Vector3 b,
-            ref Vector3 c,
-            ref Vector3 d,
+        public static float ProjectOrigin(ref IndexedVector3 a,
+            ref IndexedVector3 b,
+            ref IndexedVector3 c,
+            ref IndexedVector3 d,
             ref Vector4 w,ref uint m)
         {
             uint[] imd3 ={1,2,0};
-            Vector3[]	vt = {a,b,c,d};
-            Vector3[]	dl= {a-d,b-d,c-d};
+            IndexedVector3[]	vt = {a,b,c,d};
+            IndexedVector3[]	dl= {a-d,b-d,c-d};
             float vl= Det(dl[0],dl[1],dl[2]);
             
-            bool ng=(vl*Vector3.Dot(a,Vector3.Cross(b-c,a-b)))<=0;
+            bool ng=(vl*IndexedVector3.Dot(a,IndexedVector3.Cross(b-c,a-b)))<=0;
             if (ng && (Math.Abs(vl) > GjkEpaSolver2.GJK_SIMPLEX4_EPS))
             {
                 float mindist=-1;
@@ -717,7 +718,7 @@ namespace BulletXNA.BulletCollision
                 for(int i=0;i<3;++i)
                 {
                     uint j= imd3[i];
-                    float s=vl*Vector3.Dot(d,Vector3.Cross(dl[i],dl[j]));
+                    float s=vl*IndexedVector3.Dot(d,IndexedVector3.Cross(dl[i],dl[j]));
                     if(s>0)
                     {
                         float subd=GJK.ProjectOrigin(ref vt[i],ref vt[j],ref d,ref subw,ref subm);
@@ -749,7 +750,7 @@ namespace BulletXNA.BulletCollision
         }
 
         public GjkEpaSolver2MinkowskiDiff m_shape;
-        public Vector3 m_ray;
+        public IndexedVector3 m_ray;
         public float m_distance;
         public sSimplex[] m_simplices = new sSimplex[2];
         public sSV[] m_store = new sSV[4];
@@ -767,7 +768,7 @@ namespace BulletXNA.BulletCollision
             /* Fields		*/ 
             public eStatus	m_status;
             public sSimplex	m_result;
-            public Vector3	m_normal;
+            public IndexedVector3	m_normal;
             public float m_depth;
             public sSV[] m_sv_store = new sSV[GjkEpaSolver2.EPA_MAX_VERTICES];
             public sFace[] m_fc_store = new sFace[GjkEpaSolver2.EPA_MAX_FACES];
@@ -784,7 +785,7 @@ namespace BulletXNA.BulletCollision
             public void Initialize()
             {
                 m_status = eStatus.Failed;
-                m_normal = Vector3.Zero;
+                m_normal = IndexedVector3.Zero;
                 m_depth = 0;
                 m_nextsv = 0;
                 m_result = new sSimplex();
@@ -846,7 +847,7 @@ namespace BulletXNA.BulletCollision
                 array[b] = temp;
             }
 
-        public eStatus Evaluate(GJK gjk,ref Vector3 guess)
+        public eStatus Evaluate(GJK gjk,ref IndexedVector3 guess)
         {
             sSimplex simplex=gjk.m_simplex;
             if((simplex.rank>1)&&gjk.EncloseOrigin())
@@ -896,7 +897,7 @@ namespace BulletXNA.BulletCollision
                             bool valid = true;					
                             best.pass =	(uint)(++pass);
                             gjk.GetSupport(ref best.n,ref w);
-                            float wdist=Vector3.Dot(best.n,w.w)-best.d;
+                            float wdist=IndexedVector3.Dot(best.n,w.w)-best.d;
                             if (wdist > GjkEpaSolver2.EPA_ACCURACY)
                             {
                                 for(int j=0;(j<3)&&valid;++j)
@@ -934,18 +935,18 @@ namespace BulletXNA.BulletCollision
                             break; 
                         }
                     }
-                    Vector3	projection=outer.n*outer.d;
+                    IndexedVector3	projection=outer.n*outer.d;
                     m_normal	=	outer.n;
                     m_depth		=	outer.d;
                     m_result.rank	=	3;
                     m_result.c[0]	=	outer.c[0];
                     m_result.c[1]	=	outer.c[1];
                     m_result.c[2]	=	outer.c[2];
-                    m_result.p[0]	=	Vector3.Cross(	outer.c[1].w-projection,
+                    m_result.p[0]	=	IndexedVector3.Cross(	outer.c[1].w-projection,
                         outer.c[2].w-projection).Length();
-                    m_result.p[1] = Vector3.Cross(outer.c[2].w - projection,
+                    m_result.p[1] = IndexedVector3.Cross(outer.c[2].w - projection,
                         outer.c[0].w-projection).Length();
-                    m_result.p[2] = Vector3.Cross(outer.c[0].w - projection,
+                    m_result.p[2] = IndexedVector3.Cross(outer.c[0].w - projection,
                         outer.c[1].w-projection).Length();
                     float sum=m_result.p[0]+m_result.p[1]+m_result.p[2];
                     m_result.p[0]	/=	sum;
@@ -964,7 +965,7 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                m_normal = new Vector3(1,0,0);
+                m_normal = new IndexedVector3(1,0,0);
             }
 
             m_depth	=	0;
@@ -985,18 +986,18 @@ namespace BulletXNA.BulletCollision
                 face.c[0]	=	a;
                 face.c[1]	=	b;
                 face.c[2]	=	c;
-                face.n		=	Vector3.Cross(b.w-a.w,c.w-a.w);
+                face.n		=	IndexedVector3.Cross(b.w-a.w,c.w-a.w);
                 float l=face.n.Length();
                 bool v = l > GjkEpaSolver2.EPA_ACCURACY;
                 face.p = Math.Min(Math.Min(
-                    Vector3.Dot(a.w,Vector3.Cross(face.n,a.w-b.w)),
-                    Vector3.Dot(b.w,Vector3.Cross(face.n,b.w-c.w))),
-                    Vector3.Dot(c.w,Vector3.Cross(face.n,c.w-a.w)))	/
+                    IndexedVector3.Dot(a.w,IndexedVector3.Cross(face.n,a.w-b.w)),
+                    IndexedVector3.Dot(b.w,IndexedVector3.Cross(face.n,b.w-c.w))),
+                    IndexedVector3.Dot(c.w,IndexedVector3.Cross(face.n,c.w-a.w)))	/
                     (v?l:1);
                 face.p = face.p >= -GjkEpaSolver2.EPA_INSIDE_EPS ? 0 : face.p;
                 if(v)
                 {
-                    face.d = Vector3.Dot(a.w,face.n)/l;
+                    face.d = IndexedVector3.Dot(a.w,face.n)/l;
                     face.n /= l;
                     if (forced || (face.d >= -GjkEpaSolver2.EPA_PLANE_EPS))
                     {
@@ -1047,7 +1048,7 @@ namespace BulletXNA.BulletCollision
             if(f.pass!=pass)
             {
                 uint e1 = i1m3[e];
-                if ((Vector3.Dot(f.n, w.w) - f.d) < -GjkEpaSolver2.EPA_PLANE_EPS)
+                if ((IndexedVector3.Dot(f.n, w.w) - f.d) < -GjkEpaSolver2.EPA_PLANE_EPS)
                 {
                     sFace nf = NewFace(f.c[e1],f.c[e],w,false);
                     if(nf != null)
@@ -1085,7 +1086,7 @@ namespace BulletXNA.BulletCollision
     
     public class sFace
     {
-        public Vector3	n;
+        public IndexedVector3	n;
         public float d;
         public float p;
         public sSV[] c = new sSV[3];

@@ -31,19 +31,19 @@ namespace BulletXNA.BulletDynamics
 {
 	public class KinematicCharacterController : ICharacterControllerInterface
 	{
-		protected Vector3 ComputeReflectionDirection(ref Vector3 direction, ref Vector3 normal)
+		protected IndexedVector3 ComputeReflectionDirection(ref IndexedVector3 direction, ref IndexedVector3 normal)
 		{
-			return Vector3.Reflect(direction, normal);
+            return direction - (2.0f * direction.Dot(ref normal)) * normal;
 		}
 
-		protected Vector3 ParallelComponent(ref Vector3 direction, ref Vector3 normal)
+		protected IndexedVector3 ParallelComponent(ref IndexedVector3 direction, ref IndexedVector3 normal)
 		{
-			float magnitude = Vector3.Dot(direction, normal);
+			float magnitude = IndexedVector3.Dot(direction, normal);
 			return normal * magnitude;
 		}
-		protected Vector3 PerpindicularComponent(ref Vector3 direction, ref Vector3 normal)
+		protected IndexedVector3 PerpindicularComponent(ref IndexedVector3 direction, ref IndexedVector3 normal)
 		{
-			float magnitude = 1f - Vector3.Dot(direction, normal);
+			float magnitude = 1f - IndexedVector3.Dot(direction, normal);
 			return normal * magnitude;
 		}
 
@@ -53,7 +53,7 @@ namespace BulletXNA.BulletDynamics
 
 			collisionWorld.GetDispatcher().DispatchAllCollisionPairs(m_ghostObject.GetOverlappingPairCache(), collisionWorld.GetDispatchInfo(), collisionWorld.GetDispatcher());
 
-			m_currentPosition = m_ghostObject.GetWorldTransform().Translation;
+			m_currentPosition = m_ghostObject.GetWorldTransform()._origin;
 
 			float maxPen = 0f;
 			for (int i = 0; i < m_ghostObject.GetOverlappingPairCache().GetNumOverlappingPairs(); i++)
@@ -97,8 +97,8 @@ namespace BulletXNA.BulletDynamics
 					//manifold->clearManifold();
 				}
 			}
-			Matrix newTrans = m_ghostObject.GetWorldTransform();
-			newTrans.Translation = m_currentPosition;
+			IndexedMatrix newTrans = m_ghostObject.GetWorldTransform();
+			newTrans._origin = m_currentPosition;
 			m_ghostObject.SetWorldTransform(ref newTrans);
 			//	printf("m_touchingNormal = %f,%f,%f\n",m_touchingNormal[0],m_touchingNormal[1],m_touchingNormal[2]);
 			return penetration;
@@ -107,13 +107,13 @@ namespace BulletXNA.BulletDynamics
 		protected void StepUp(CollisionWorld collisionWorld)
 		{
 			// phase 1: up
-			Matrix start = Matrix.Identity, end = Matrix.Identity;
+			IndexedMatrix start = IndexedMatrix.Identity, end = IndexedMatrix.Identity;
 			m_targetPosition = m_currentPosition + upAxisDirection[m_upAxis] * (m_stepHeight + (m_verticalOffset > 0.9f ? m_verticalOffset : 0.0f));
 
 
 			/* FIXME: Handle penetration properly */
-			start.Translation = (m_currentPosition + upAxisDirection[m_upAxis] * 0.1f);
-			end.Translation = m_targetPosition;
+			start._origin = (m_currentPosition + upAxisDirection[m_upAxis] * 0.1f);
+			end._origin = m_targetPosition;
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, -upAxisDirection[m_upAxis], 0.7071f);
 			callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
@@ -131,7 +131,7 @@ namespace BulletXNA.BulletDynamics
 			if (callback.HasHit())
 			{
 				// Only modify the position if the hit was a slope and not a wall or ceiling.
-				if (Vector3.Dot(callback.m_hitNormalWorld, upAxisDirection[m_upAxis]) > 0.0)
+				if (IndexedVector3.Dot(callback.m_hitNormalWorld, upAxisDirection[m_upAxis]) > 0.0)
 				{
 					// we moved up only a fraction of the step height
 					m_currentStepOffset = m_stepHeight * callback.m_closestHitFraction;
@@ -147,18 +147,18 @@ namespace BulletXNA.BulletDynamics
 			}
 
 		}
-		protected void UpdateTargetPositionBasedOnCollision(ref Vector3 hitNormal, float tangentMag, float normalMag)
+		protected void UpdateTargetPositionBasedOnCollision(ref IndexedVector3 hitNormal, float tangentMag, float normalMag)
 		{
-			Vector3 movementDirection = m_targetPosition - m_currentPosition;
+			IndexedVector3 movementDirection = m_targetPosition - m_currentPosition;
 			float movementLength = movementDirection.Length();
 			if (movementLength > MathUtil.SIMD_EPSILON)
 			{
 				movementDirection.Normalize();
 
-				Vector3 reflectDir = ComputeReflectionDirection(ref movementDirection, ref hitNormal);
+				IndexedVector3 reflectDir = ComputeReflectionDirection(ref movementDirection, ref hitNormal);
 				reflectDir.Normalize();
 
-				Vector3 parallelDir, perpindicularDir;
+				IndexedVector3 parallelDir, perpindicularDir;
 
 				parallelDir = ParallelComponent(ref reflectDir, ref hitNormal);
 				perpindicularDir = PerpindicularComponent(ref reflectDir, ref hitNormal);
@@ -166,14 +166,14 @@ namespace BulletXNA.BulletDynamics
 				m_targetPosition = m_currentPosition;
 				if (false)//tangentMag != 0.0)
 				{
-					Vector3 parComponent = parallelDir * (tangentMag * movementLength);
+					IndexedVector3 parComponent = parallelDir * (tangentMag * movementLength);
 					//			printf("parComponent=%f,%f,%f\n",parComponent[0],parComponent[1],parComponent[2]);
 					m_targetPosition += parComponent;
 				}
 
 				if (normalMag != 0.0f)
 				{
-					Vector3 perpComponent = perpindicularDir * (normalMag * movementLength);
+					IndexedVector3 perpComponent = perpindicularDir * (normalMag * movementLength);
 					//			printf("perpComponent=%f,%f,%f\n",perpComponent[0],perpComponent[1],perpComponent[2]);
 					m_targetPosition += perpComponent;
 				}
@@ -184,11 +184,11 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
-		protected void StepForwardAndStrafe(CollisionWorld collisionWorld, ref Vector3 walkMove)
+		protected void StepForwardAndStrafe(CollisionWorld collisionWorld, ref IndexedVector3 walkMove)
 		{
 			//	printf("originalDir=%f,%f,%f\n",originalDir[0],originalDir[1],originalDir[2]);
 			// phase 2: forward and strafe
-			Matrix start = Matrix.Identity, end = Matrix.Identity;
+			IndexedMatrix start = IndexedMatrix.Identity, end = IndexedMatrix.Identity;
 			m_targetPosition = m_currentPosition + walkMove;
 
 			float fraction = 1.0f;
@@ -197,7 +197,7 @@ namespace BulletXNA.BulletDynamics
 
 			if (m_touchingContact)
 			{
-				if (Vector3.Dot(m_normalizedDirection, m_touchingNormal) > 0.0f)
+				if (IndexedVector3.Dot(m_normalizedDirection, m_touchingNormal) > 0.0f)
 				{
 					UpdateTargetPositionBasedOnCollision(ref m_touchingNormal, 0.0f, 1.0f);
 				}
@@ -207,10 +207,10 @@ namespace BulletXNA.BulletDynamics
 
 			while (fraction > 0.01f && maxIter-- > 0)
 			{
-				start.Translation = (m_currentPosition);
-				end.Translation = (m_targetPosition);
+				start._origin = (m_currentPosition);
+				end._origin = (m_targetPosition);
 
-				Vector3 sweepDirNegative = m_currentPosition - m_targetPosition;
+				IndexedVector3 sweepDirNegative = m_currentPosition - m_targetPosition;
 
 				KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, sweepDirNegative, 0f);
 				callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
@@ -241,13 +241,13 @@ namespace BulletXNA.BulletDynamics
 					float hitDistance = (callback.m_hitPointWorld - m_currentPosition).Length();
 
 					UpdateTargetPositionBasedOnCollision(ref callback.m_hitNormalWorld, 0f, 1f);
-					Vector3 currentDir = m_targetPosition - m_currentPosition;
+					IndexedVector3 currentDir = m_targetPosition - m_currentPosition;
 					distance2 = currentDir.LengthSquared();
 					if (distance2 > MathUtil.SIMD_EPSILON)
 					{
 						currentDir.Normalize();
 						/* See Quake2: "If velocity is against original velocity, stop ead to avoid tiny oscilations in sloping corners." */
-						if (Vector3.Dot(currentDir, m_normalizedDirection) <= 0.0f)
+						if (IndexedVector3.Dot(currentDir, m_normalizedDirection) <= 0.0f)
 						{
 							break;
 						}
@@ -272,12 +272,12 @@ namespace BulletXNA.BulletDynamics
 		}
 		protected void StepDown(CollisionWorld collisionWorld, float dt)
 		{
-			Matrix start = Matrix.Identity, end = Matrix.Identity;
+			IndexedMatrix start = IndexedMatrix.Identity, end = IndexedMatrix.Identity;
 
 			// phase 3: down
-			/*btScalar additionalDownStep = (m_wasOnGround && !onGround()) ? m_stepHeight : 0.0;
+			/*float additionalDownStep = (m_wasOnGround && !onGround()) ? m_stepHeight : 0.0;
 			btVector3 step_drop = getUpAxisDirections()[m_upAxis] * (m_currentStepOffset + additionalDownStep);
-			btScalar downVelocity = (additionalDownStep == 0.0 && m_verticalVelocity<0.0?-m_verticalVelocity:0.0) * dt;
+			float downVelocity = (additionalDownStep == 0.0 && m_verticalVelocity<0.0?-m_verticalVelocity:0.0) * dt;
 			btVector3 gravity_drop = getUpAxisDirections()[m_upAxis] * downVelocity; 
 			m_targetPosition -= (step_drop + gravity_drop);*/
 
@@ -288,11 +288,11 @@ namespace BulletXNA.BulletDynamics
 				downVelocity = m_stepHeight;
 			}
 
-			Vector3 step_drop = upAxisDirection[m_upAxis] * (m_currentStepOffset + downVelocity);
+			IndexedVector3 step_drop = upAxisDirection[m_upAxis] * (m_currentStepOffset + downVelocity);
 			m_targetPosition -= step_drop;
 
-			start.Translation = m_currentPosition;
-			end.Translation = m_targetPosition;
+			start._origin = m_currentPosition;
+			end._origin = m_targetPosition;
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, upAxisDirection[m_upAxis], m_maxSlopeCosine);
 			callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
@@ -323,7 +323,7 @@ namespace BulletXNA.BulletDynamics
 		{
 			m_upAxis = upAxis;
 			m_addedMargin = 0.02f;
-			m_walkDirection = Vector3.Zero;
+			m_walkDirection = IndexedVector3.Zero;
 			m_useGhostObjectSweepTest = true;
 			m_ghostObject = ghostObject;
 			m_stepHeight = stepHeight;
@@ -362,14 +362,14 @@ namespace BulletXNA.BulletDynamics
 			m_upAxis = axis;
 		}
 
-		public virtual void SetWalkDirection(ref Vector3 walkDirection)
+		public virtual void SetWalkDirection(ref IndexedVector3 walkDirection)
 		{
 			m_useWalkDirection = true;
 			m_walkDirection = walkDirection;
 			m_normalizedDirection = GetNormalizedVector(ref m_walkDirection);
 		}
 
-		public void SetVelocityForTimeInterval(ref Vector3 velocity, float timeInterval)
+		public void SetVelocityForTimeInterval(ref IndexedVector3 velocity, float timeInterval)
 		{
 			//	printf("setVelocity!\n");
 			//	printf("  interval: %f\n", timeInterval);
@@ -388,9 +388,9 @@ namespace BulletXNA.BulletDynamics
 		{
 		}
 
-		public void Warp(ref Vector3 origin)
+		public void Warp(ref IndexedVector3 origin)
 		{
-			Matrix m = Matrix.CreateTranslation(origin);
+			IndexedMatrix m = IndexedMatrix.CreateTranslation(origin);
 			m_ghostObject.SetWorldTransform(ref m);
 		}
 
@@ -409,7 +409,7 @@ namespace BulletXNA.BulletDynamics
 				}
 			}
 
-			m_currentPosition = m_ghostObject.GetWorldTransform().Translation;
+			m_currentPosition = m_ghostObject.GetWorldTransform()._origin;
 			m_targetPosition = m_currentPosition;
 
 		}
@@ -438,7 +438,7 @@ namespace BulletXNA.BulletDynamics
 			m_verticalOffset = m_verticalVelocity * dt;
 
 
-			Matrix xform = m_ghostObject.GetWorldTransform();
+			IndexedMatrix xform = m_ghostObject.GetWorldTransform();
 
 			//	printf("walkDirection(%f,%f,%f)\n",walkDirection[0],walkDirection[1],walkDirection[2]);
 			//	printf("walkSpeed=%f\n",walkSpeed);
@@ -457,7 +457,7 @@ namespace BulletXNA.BulletDynamics
 				m_velocityTimeInterval -= dt;
 
 				// how far will we move while we are moving?
-				Vector3 move = m_walkDirection * dtMoving;
+				IndexedVector3 move = m_walkDirection * dtMoving;
 
 				// printf("  dtMoving: %f", dtMoving);
 
@@ -466,7 +466,7 @@ namespace BulletXNA.BulletDynamics
 			}
 			StepDown(collisionWorld, dt);
 
-			xform.Translation = m_currentPosition;
+			xform._origin = m_currentPosition;
 			m_ghostObject.SetWorldTransform(ref xform);
 		}
 
@@ -498,9 +498,9 @@ namespace BulletXNA.BulletDynamics
 				m_wasJumping = true;
 
 				//currently no jumping.
-				//Matrix xform;
+				//IndexedMatrix xform;
 				//m_rigidBody.getMotionState().getWorldTransform (out xform);
-				//Vector3 up = xform.Up;
+				//IndexedVector3 up = xform.Up;
 				//up.Normalize ();
 				//float magnitude = (1.0f/m_rigidBody.getInvMass()) * 8.0f;
 				//m_rigidBody.applyCentralImpulse (up * magnitude);
@@ -548,12 +548,12 @@ namespace BulletXNA.BulletDynamics
 			return m_verticalVelocity == 0.0f && m_verticalOffset == 0.0f;
 		}
 
-		public static Vector3 GetNormalizedVector(ref Vector3 v)
+		public static IndexedVector3 GetNormalizedVector(ref IndexedVector3 v)
 		{
-			Vector3 n = Vector3.Normalize(v);
+			IndexedVector3 n = IndexedVector3.Normalize(v);
 			if (n.Length() < MathUtil.SIMD_EPSILON)
 			{
-				n = Vector3.Zero;
+				n = IndexedVector3.Zero;
 			}
 			return n;
 		}
@@ -582,19 +582,19 @@ namespace BulletXNA.BulletDynamics
 		protected float m_addedMargin;//@todo: remove this and fix the code
 
 		///this is the desired walk direction, set by the user
-		protected Vector3 m_walkDirection;
-		protected Vector3 m_normalizedDirection;
+		protected IndexedVector3 m_walkDirection;
+		protected IndexedVector3 m_normalizedDirection;
 
 		//some internal variables
-		protected Vector3 m_currentPosition;
+		protected IndexedVector3 m_currentPosition;
 		float m_currentStepOffset;
-		protected Vector3 m_targetPosition;
+		protected IndexedVector3 m_targetPosition;
 
 		///keep track of the contact manifolds
 		protected ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
 
 		protected bool m_touchingContact;
-		protected Vector3 m_touchingNormal;
+		protected IndexedVector3 m_touchingNormal;
 		protected bool m_wasOnGround;
 		protected bool m_wasJumping;
 
@@ -607,7 +607,7 @@ namespace BulletXNA.BulletDynamics
 
 
 
-		protected static Vector3[] upAxisDirection = { Vector3.Right, Vector3.Up, Vector3.Backward };
+        protected static IndexedVector3[] upAxisDirection = { new IndexedVector3(1, 0, 0), new IndexedVector3(0, 1, 0), new IndexedVector3(0, 0, 1) };
 
 	}
 
@@ -622,7 +622,7 @@ namespace BulletXNA.BulletDynamics
 	{
 
 		public KinematicClosestNotMeRayResultCallback(CollisionObject me)
-			: base(Vector3.Zero, Vector3.Zero)
+			: base(IndexedVector3.Zero, IndexedVector3.Zero)
 		{
 			m_me = me;
 		}
@@ -641,8 +641,8 @@ namespace BulletXNA.BulletDynamics
 	public class KinematicClosestNotMeConvexResultCallback : ClosestConvexResultCallback
 	{
 
-		public KinematicClosestNotMeConvexResultCallback(CollisionObject me, Vector3 up, float minSlopeDot)
-			: base(Vector3.Zero, Vector3.Zero)
+		public KinematicClosestNotMeConvexResultCallback(CollisionObject me, IndexedVector3 up, float minSlopeDot)
+			: base(IndexedVector3.Zero, IndexedVector3.Zero)
 		{
 			m_me = me;
 			m_up = up;
@@ -656,17 +656,17 @@ namespace BulletXNA.BulletDynamics
 				return 1.0f;
 			}
 
-			Vector3 hitNormalWorld;
+			IndexedVector3 hitNormalWorld;
 			if (normalInWorldSpace)
 			{
 				hitNormalWorld = convexResult.m_hitNormalLocal;
 			} else
 			{
 				///need to transform normal into worldspace
-				hitNormalWorld = Vector3.TransformNormal(convexResult.m_hitNormalLocal,convexResult.m_hitCollisionObject.GetWorldTransform());
+                hitNormalWorld = convexResult.m_hitCollisionObject.GetWorldTransform()._basis * convexResult.m_hitNormalLocal;
 			}
 
-			float dotUp = Vector3.Dot(m_up,hitNormalWorld);
+			float dotUp = IndexedVector3.Dot(m_up,hitNormalWorld);
 			if (dotUp < m_minSlopeDot) 
 			{
 				return 1.0f;
@@ -676,7 +676,7 @@ namespace BulletXNA.BulletDynamics
 	    }
 
 		protected CollisionObject m_me;
-		protected Vector3 m_up;
+		protected IndexedVector3 m_up;
 		protected float m_minSlopeDot;
 	}
 

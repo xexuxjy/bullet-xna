@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -61,7 +62,7 @@ namespace BulletXNA.BulletCollision
         public DbvtProxy[] links = new DbvtProxy[2];
         public int stage;
         /* ctor			*/
-        public DbvtProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask) :
+        public DbvtProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask) :
             base(ref aabbMin, ref aabbMax, userPtr, collisionFilterGroup, collisionFilterMask, null)
         {
             links[0] = links[1] = null;
@@ -293,12 +294,12 @@ namespace BulletXNA.BulletCollision
         }
 
         /* btBroadphaseInterface Implementation	*/
-        public virtual BroadphaseProxy CreateProxy(Vector3 aabbMin, Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(IndexedVector3 aabbMin, IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             return CreateProxy(ref aabbMin, ref aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, dispatcher, multiSapProxy);
         }
 
-        public virtual BroadphaseProxy CreateProxy(ref Vector3 aabbMin, ref Vector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
+        public virtual BroadphaseProxy CreateProxy(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, BroadphaseNativeTypes shapeType, Object userPtr, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             DbvtProxy proxy = new DbvtProxy(ref aabbMin, ref aabbMax, userPtr, collisionFilterGroup, collisionFilterMask);
 
@@ -344,7 +345,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public virtual void SetAabb(BroadphaseProxy absproxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public virtual void SetAabb(BroadphaseProxy absproxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             DbvtProxy proxy = absproxy as DbvtProxy;
             DbvtAabbMm aabb = DbvtAabbMm.FromMM(ref aabbMin, ref aabbMax);
@@ -365,8 +366,8 @@ namespace BulletXNA.BulletCollision
                     if (DbvtAabbMm.Intersect(ref proxy.leaf.volume, ref aabb))
                     {/* Moving				*/
 
-                        Vector3 delta = aabbMin - proxy.m_aabbMin;
-                        Vector3 velocity = (((proxy.m_aabbMax - proxy.m_aabbMin) / 2f) * m_prediction);
+                        IndexedVector3 delta = aabbMin - proxy.m_aabbMin;
+                        IndexedVector3 velocity = (((proxy.m_aabbMax - proxy.m_aabbMin) / 2f) * m_prediction);
                         if (delta.X < 0) velocity.X = -velocity.X;
                         if (delta.Y < 0) velocity.Y = -velocity.Y;
                         if (delta.Z < 0) velocity.Z = -velocity.Z;
@@ -409,7 +410,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 
         }
 
-        public virtual void AabbTest(ref Vector3 aabbMin, ref Vector3 aabbMax, IBroadphaseAabbCallback aabbCallback)
+        public virtual void AabbTest(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IBroadphaseAabbCallback aabbCallback)
         {
             BroadphaseAabbTester callback = new BroadphaseAabbTester(aabbCallback);
             DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref aabbMin, ref aabbMax);
@@ -418,14 +419,14 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         }
 
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback)
         {
-            Vector3 min = MathUtil.MIN_VECTOR;
-            Vector3 max = MathUtil.MAX_VECTOR;
+            IndexedVector3 min = MathUtil.MIN_VECTOR;
+            IndexedVector3 max = MathUtil.MAX_VECTOR;
             RayTest(ref rayFrom, ref rayTo, rayCallback, ref min, ref max);
         }
 
-        public virtual void RayTest(ref Vector3 rayFrom, ref Vector3 rayTo, BroadphaseRayCallback rayCallback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
@@ -450,7 +451,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 callback);
         }
 
-        public virtual void GetAabb(BroadphaseProxy absproxy, out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetAabb(BroadphaseProxy absproxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             DbvtProxy proxy = absproxy as DbvtProxy;
             aabbMin = proxy.GetMinAABB();
@@ -462,7 +463,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         ///it is not part of the btBroadphaseInterface but specific to btDbvtBroadphase.
         ///it bypasses certain optimizations that prevent aabb updates (when the aabb shrinks), see
         ///http://code.google.com/p/bullet/issues/detail?id=223
-        public void setAabbForceUpdate(BroadphaseProxy absproxy, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
+        public void setAabbForceUpdate(BroadphaseProxy absproxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             DbvtProxy proxy = absproxy as DbvtProxy;
             DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref aabbMin, ref aabbMax);
@@ -530,7 +531,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             return m_paircache;
         }
 
-        public virtual void GetBroadphaseAabb(out Vector3 aabbMin, out Vector3 aabbMax)
+        public virtual void GetBroadphaseAabb(out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             DbvtAabbMm bounds = new DbvtAabbMm();
 
@@ -551,7 +552,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             }
             else
             {
-                Vector3 temp = Vector3.Zero;
+                IndexedVector3 temp = IndexedVector3.Zero;
                 bounds = DbvtAabbMm.FromCR(ref temp, 0);
             }
             aabbMin = bounds.Mins();
@@ -829,8 +830,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         public static BroadphaseBenchmarkExperiment[] s_experiments =
 	        {
 		        new BroadphaseBenchmarkExperiment("1024o.10%",1024,10,0,8192,0.005f,100f),
-		        /*{"4096o.10%",4096,10,0,8192,(btScalar)0.005,(btScalar)100},
-		        {"8192o.10%",8192,10,0,8192,(btScalar)0.005,(btScalar)100},*/
+		        /*{"4096o.10%",4096,10,0,8192,(float)0.005,(float)100},
+		        {"8192o.10%",8192,10,0,8192,(float)0.005,(float)100},*/
 	        };
 
 
@@ -877,8 +878,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 
     public class BroadphaseBenchmarkObject
     {
-        public Vector3 center;
-        public Vector3 extents;
+        public IndexedVector3 center;
+        public IndexedVector3 extents;
         public BroadphaseProxy proxy;
         public float time;
         public void update(float speed, float amplitude, IBroadphaseInterface pbi)
@@ -887,8 +888,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             center.X = (float)(Math.Cos(time * 2.17f) * amplitude + Math.Sin(time) * amplitude / 2f);
             center.Y = (float)(Math.Cos(time * 1.38f) * amplitude + Math.Sin(time) * amplitude);
             center.Z = (float)(Math.Sin(time * 0.777f) * amplitude);
-            Vector3 temp1 = center - extents;
-            Vector3 temp2 = center + extents;
+            IndexedVector3 temp1 = center - extents;
+            IndexedVector3 temp2 = center + extents;
             pbi.SetAabb(proxy, ref temp1, ref temp2, null);
         }
     }

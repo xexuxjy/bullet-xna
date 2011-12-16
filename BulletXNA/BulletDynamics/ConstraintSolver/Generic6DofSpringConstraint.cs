@@ -34,18 +34,19 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
     public class Generic6DofSpringConstraint : Generic6DofConstraint
     {
-        public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, Matrix frameInA, Matrix frameInB, bool useLinearReferenceFrameA)
+        public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, IndexedMatrix frameInA, IndexedMatrix frameInB, bool useLinearReferenceFrameA)
             : this(rbA, rbB, ref frameInA, ref frameInB, useLinearReferenceFrameA)
         {
         }
 
         
-        public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, ref Matrix frameInA, ref Matrix frameInB ,bool useLinearReferenceFrameA) : base(rbA,rbB,ref frameInA,ref frameInB,useLinearReferenceFrameA)
+        public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix frameInA, ref IndexedMatrix frameInB ,bool useLinearReferenceFrameA) : base(rbA,rbB,ref frameInA,ref frameInB,useLinearReferenceFrameA)
         {
             m_constraintType = TypedConstraintType.D6_SPRING_CONSTRAINT_TYPE;
 			for (int i = 0; i < s_degreesOfFreedom; ++i)
@@ -61,20 +62,20 @@ namespace BulletXNA.BulletDynamics
         protected void InternalUpdateSprings(ConstraintInfo2 info)
         {
             // it is assumed that calculateTransforms() have been called before this call
-            Vector3 relVel = m_rbB.GetLinearVelocity() - m_rbA.GetLinearVelocity();
+            IndexedVector3 relVel = m_rbB.GetLinearVelocity() - m_rbA.GetLinearVelocity();
             for (int i = 0; i < 3; i++)
             {
                 if (m_springEnabled[i])
                 {
                     // get current position of constraint
-                    float currPos = MathUtil.VectorComponent(ref m_calculatedLinearDiff,i);
+                    float currPos = m_calculatedLinearDiff[i];
                     // calculate difference
                     float delta = currPos - m_equilibriumPoint[i];
                     // spring force is (delta * m_stiffness) according to Hooke's Law
                     float force = delta * m_springStiffness[i];
                     float velFactor = info.fps * m_springDamping[i] / (float)info.m_numIterations;
-                    MathUtil.VectorComponent(ref m_linearLimits.m_targetVelocity,i,velFactor * force);
-                    MathUtil.VectorComponent(ref m_linearLimits.m_maxMotorForce,i,Math.Abs(force) / info.fps);
+                    m_linearLimits.m_targetVelocity[i] = velFactor * force;
+                    m_linearLimits.m_maxMotorForce[i] = Math.Abs(force) / info.fps;
                 }
             }
             for (int i = 0; i < 3; i++)
@@ -82,7 +83,7 @@ namespace BulletXNA.BulletDynamics
                 if (m_springEnabled[i + 3])
                 {
                     // get current position of constraint
-                    float currPos = MathUtil.VectorComponent(ref m_calculatedAxisAngleDiff,i);
+                    float currPos = m_calculatedAxisAngleDiff[i];
                     // calculate difference
                     float delta = currPos - m_equilibriumPoint[i + 3];
                     // spring force is (-delta * m_stiffness) according to Hooke's Law
@@ -128,11 +129,11 @@ namespace BulletXNA.BulletDynamics
 
             for (int i = 0; i < 3; i++)
             {
-                m_equilibriumPoint[i] = MathUtil.VectorComponent(ref m_calculatedLinearDiff,i);
+                m_equilibriumPoint[i] = m_calculatedLinearDiff[i];
             }
             for (int i = 0; i < 3; i++)
             {
-                m_equilibriumPoint[i + 3] = MathUtil.VectorComponent(ref m_calculatedAxisAngleDiff,i);
+                m_equilibriumPoint[i + 3] = m_calculatedAxisAngleDiff[i];
             }
         }
 	    
@@ -142,11 +143,11 @@ namespace BulletXNA.BulletDynamics
             CalculateTransforms();
             if (index < 3)
             {
-                m_equilibriumPoint[index] = MathUtil.VectorComponent(ref m_calculatedLinearDiff,index);
+                m_equilibriumPoint[index] = m_calculatedLinearDiff[index];
             }
             else
             {
-                m_equilibriumPoint[index] = MathUtil.VectorComponent(ref m_calculatedAxisAngleDiff,index - 3);
+                m_equilibriumPoint[index] = m_calculatedAxisAngleDiff[index - 3];
             }
         }
 
@@ -164,18 +165,20 @@ namespace BulletXNA.BulletDynamics
             base.GetInfo2(info);
         }
 
-		public override void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
+		public override void SetAxis(ref IndexedVector3 axis1, ref IndexedVector3 axis2)
 		{
-			Vector3 zAxis = Vector3.Normalize(axis1);
-			Vector3 yAxis = Vector3.Normalize(axis2);
-			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
+			IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
+			IndexedVector3 yAxis = IndexedVector3.Normalize(axis2);
+			IndexedVector3 xAxis = IndexedVector3.Cross(yAxis, zAxis); // we want right coordinate system
 
-			Matrix frameInW = Matrix.Identity;
-			MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+			IndexedMatrix frameInW = IndexedMatrix.Identity;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                   xAxis[2], yAxis[2], zAxis[2]);
 
 			// now get constraint frame in local coordinate systems
-			m_frameInA = MathUtil.InverseTimes(m_rbA.GetCenterOfMassTransform(), frameInW);
-			m_frameInB = MathUtil.InverseTimes(m_rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = m_rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 			CalculateTransforms();
 		}

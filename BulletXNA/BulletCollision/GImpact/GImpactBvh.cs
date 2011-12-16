@@ -168,7 +168,7 @@ namespace BulletXNA.BulletCollision
 
         //! returns the indices of the primitives in the m_primitive_manager
         public bool BoxQueryTrans(ref AABB box,
-         ref Matrix transform, ObjectArray<int> collided_results)
+         ref IndexedMatrix transform, ObjectArray<int> collided_results)
         {
             AABB transbox = box;
             transbox.ApplyTransform(ref transform);
@@ -176,7 +176,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //! returns the indices of the primitives in the m_primitive_manager
-        public bool RayQuery(ref Vector3 ray_dir, ref Vector3 ray_origin,
+        public bool RayQuery(ref IndexedVector3 ray_dir, ref IndexedVector3 ray_origin,
             ObjectArray<int> collided_results)
         {
             int curIndex = 0;
@@ -287,8 +287,8 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public static void FindCollision(GImpactBvh boxset1, ref Matrix trans1,
-            GImpactBvh boxset2, ref Matrix trans2,
+        public static void FindCollision(GImpactBvh boxset1, ref IndexedMatrix trans1,
+            GImpactBvh boxset2, ref IndexedMatrix trans2,
             PairSet collision_pairs)
         {
             if (boxset1.GetNodeCount() == 0 || boxset2.GetNodeCount() == 0) return;
@@ -545,24 +545,24 @@ namespace BulletXNA.BulletCollision
             // average of centers
             float splitValue = 0.0f;
 
-            Vector3 means = Vector3.Zero;
+            IndexedVector3 means = IndexedVector3.Zero;
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
                 means += center;
             }
             means *= (1.0f) / (float)numIndices;
 
-            splitValue = MathUtil.VectorComponent(ref means, splitAxis);
+            splitValue = means[splitAxis];
 
 
             //sort leafNodes so all values larger then splitValue comes first, and smaller values start from 'splitIndex'.
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
-                if (MathUtil.VectorComponent(ref center, splitAxis) > splitValue)
+                if (center[splitAxis] > splitValue)
                 {
                     //swap
                     primitive_boxes.Swap(i, splitIndex);
@@ -599,13 +599,13 @@ namespace BulletXNA.BulletCollision
         {
             int i;
 
-            Vector3 means = Vector3.Zero;
-            Vector3 variance = Vector3.Zero;
+            IndexedVector3 means = IndexedVector3.Zero;
+            IndexedVector3 variance = IndexedVector3.Zero;
             int numIndices = endIndex - startIndex;
 
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
                 means += center;
             }
@@ -613,9 +613,9 @@ namespace BulletXNA.BulletCollision
 
             for (i = startIndex; i < endIndex; i++)
             {
-                Vector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
+                IndexedVector3 center = 0.5f * (primitive_boxes[i].m_bound.m_max +
                              primitive_boxes[i].m_bound.m_min);
-                Vector3 diff2 = center - means;
+                IndexedVector3 diff2 = center - means;
                 diff2 = diff2 * diff2;
                 variance += diff2;
             }

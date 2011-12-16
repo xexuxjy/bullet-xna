@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -35,14 +36,14 @@ namespace BulletXNA.BulletCollision
             m_shapeType = BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE;
         }
 
-        public TriangleShape(Vector3 p0, Vector3 p1, Vector3 p2)
+        public TriangleShape(IndexedVector3 p0, IndexedVector3 p1, IndexedVector3 p2)
             : this(ref p0, ref p1, ref p2)
         {
         }
 
 
 
-	    public TriangleShape(ref Vector3 p0,ref Vector3 p1,ref Vector3 p2) : base ()
+	    public TriangleShape(ref IndexedVector3 p0,ref IndexedVector3 p1,ref IndexedVector3 p2) : base ()
         {
 		    m_shapeType = BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE;
             m_vertices1[0] = p0;
@@ -51,7 +52,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
+        public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
 	    {
             GetPlaneEquation(i, out planeNormal, out planeSupport);
 	    }
@@ -61,33 +62,33 @@ namespace BulletXNA.BulletCollision
 		    return 1;
 	    }
 
-        public void CalcNormal(out Vector3 normal) 
+        public void CalcNormal(out IndexedVector3 normal) 
 	    {
-            normal = Vector3.Cross(m_vertices1[1]-m_vertices1[0],m_vertices1[2]-m_vertices1[0]);
+            normal = IndexedVector3.Cross(m_vertices1[1]-m_vertices1[0],m_vertices1[2]-m_vertices1[0]);
 		    normal.Normalize();
 	    }
 
-        public virtual void GetPlaneEquation(int i, out Vector3 planeNormal, out Vector3 planeSupport)
+        public virtual void GetPlaneEquation(int i, out IndexedVector3 planeNormal, out IndexedVector3 planeSupport)
 	    {
             CalcNormal(out planeNormal);
 		    planeSupport = m_vertices1[0];
 	    }
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
 	    {
 		    Debug.Assert(false);
-		    inertia = Vector3.Zero;
+		    inertia = IndexedVector3.Zero;
 	    }
 
-        public override bool IsInside(ref Vector3 pt, float tolerance)
+        public override bool IsInside(ref IndexedVector3 pt, float tolerance)
 	    {
-		    Vector3 normal;
+		    IndexedVector3 normal;
 		    CalcNormal(out normal);
 		    //distance to plane
             float dist;
-            Vector3.Dot(ref pt,ref normal,out dist);
+            IndexedVector3.Dot(ref pt,ref normal,out dist);
 		    float planeconst;
-            Vector3.Dot(ref m_vertices1[0],ref normal,out planeconst);
+            IndexedVector3.Dot(ref m_vertices1[0],ref normal,out planeconst);
 		    dist -= planeconst;
 		    if (dist >= -tolerance && dist <= tolerance)
 		    {
@@ -95,16 +96,15 @@ namespace BulletXNA.BulletCollision
 			    int i;
 			    for (i=0;i<3;i++)
 			    {
-				    Vector3 pa, pb;
+				    IndexedVector3 pa, pb;
                     GetEdge(i, out pa, out pb);
-				    Vector3 edge = pb-pa;
-                    Vector3 edgeNormal;
-                    Vector3.Cross(ref edge,ref normal,out edgeNormal);
+				    IndexedVector3 edge = pb-pa;
+                    IndexedVector3 edgeNormal = edge.Cross(ref normal);
 				    edgeNormal.Normalize();
                     float dist2;
-                    Vector3.Dot(ref pt, ref edgeNormal,out dist2);
+                    IndexedVector3.Dot(ref pt, ref edgeNormal,out dist2);
 				    float edgeConst;
-                    Vector3.Dot(ref pa, ref edgeNormal,out edgeConst);
+                    IndexedVector3.Dot(ref pa, ref edgeNormal,out edgeConst);
 				    dist2 -= edgeConst;
 				    if (dist2 < -tolerance)
                     {
@@ -128,7 +128,7 @@ namespace BulletXNA.BulletCollision
 		    return 2;
 	    }
 
-        public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
+        public override void GetPreferredPenetrationDirection(int index, out IndexedVector3 penetrationVector)
         {
 	        CalcNormal(out penetrationVector);
 	        if (index > 0)
@@ -142,12 +142,12 @@ namespace BulletXNA.BulletCollision
             return 3;
         }
 
-        public virtual Vector3[] GetVertexPtr(int i)
+        public virtual IndexedVector3[] GetVertexPtr(int i)
         {
             return m_vertices1;
         }
 
-        public override void GetVertex(int i, out Vector3 vert)
+        public override void GetVertex(int i, out IndexedVector3 vert)
         {
             vert = m_vertices1[i];
         }
@@ -157,42 +157,42 @@ namespace BulletXNA.BulletCollision
             return 3;
         }
 
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
         {
             GetVertex(i, out pa);
             GetVertex((i + 1) % 3, out pb);
         }
 
-        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix trans, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
             GetAabbSlow(ref trans, out aabbMin, out aabbMax);
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 dir)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 dir)
 	    {
             float a,b,c;
-            Vector3.Dot(ref dir, ref m_vertices1[0], out a);
-            Vector3.Dot(ref dir, ref m_vertices1[1], out b);
-            Vector3.Dot(ref dir, ref m_vertices1[2], out c);
-            Vector3 dots = new Vector3(a, b, c);
+            IndexedVector3.Dot(ref dir, ref m_vertices1[0], out a);
+            IndexedVector3.Dot(ref dir, ref m_vertices1[1], out b);
+            IndexedVector3.Dot(ref dir, ref m_vertices1[2], out c);
+            IndexedVector3 dots = new IndexedVector3(a, b, c);
             return m_vertices1[MathUtil.MaxAxis(ref dots)];
 	    }
 
-	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
+	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
 	    {
 		    for (int i=0;i<numVectors;i++)
 		    {
-			    Vector3 dir = vectors[i];
+			    IndexedVector3 dir = vectors[i];
                 float a, b, c;
-                Vector3.Dot(ref dir, ref m_vertices1[0],out a);
-                Vector3.Dot(ref dir, ref m_vertices1[1],out b);
-                Vector3.Dot(ref dir, ref m_vertices1[2],out c);
+                IndexedVector3.Dot(ref dir, ref m_vertices1[0],out a);
+                IndexedVector3.Dot(ref dir, ref m_vertices1[1],out b);
+                IndexedVector3.Dot(ref dir, ref m_vertices1[2],out c);
 
-                Vector3 dots = new Vector3(a, b, c);
-                supportVerticesOut[i] = new Vector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
+                IndexedVector3 dots = new IndexedVector3(a, b, c);
+                supportVerticesOut[i] = new Vector4(m_vertices1[MathUtil.MaxAxis(ref dots)].ToVector3(),0);
 		    }
 	    }
 
-        public Vector3[] m_vertices1 = new Vector3[3];
+        public IndexedVector3[] m_vertices1 = new IndexedVector3[3];
     }
 }

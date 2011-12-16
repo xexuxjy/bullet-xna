@@ -25,14 +25,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
     public class ConvexHullShape : PolyhedralConvexAabbCachingShape
     {
-        public ConvexHullShape(IList<Vector3> points, int numPoints)
+        public ConvexHullShape(IList<IndexedVector3> points, int numPoints)
         {
-            m_unscaledPoints = new List<Vector3>(numPoints);
+            m_unscaledPoints = new List<IndexedVector3>(numPoints);
             m_shapeType = BroadphaseNativeTypes.CONVEX_HULL_SHAPE_PROXYTYPE;
             for (int i = 0; i < numPoints; ++i)
             {
@@ -44,29 +45,29 @@ namespace BulletXNA.BulletCollision
         
         public ConvexHullShape(IList<float>points,int numPoints)
         {
-            m_unscaledPoints = new List<Vector3>(numPoints);
+            m_unscaledPoints = new List<IndexedVector3>(numPoints);
             m_shapeType = BroadphaseNativeTypes.CONVEX_HULL_SHAPE_PROXYTYPE;
             for (int i = 0; i < numPoints/3; ++i)
             {
-                m_unscaledPoints.Add(new Vector3(points[i * 3], points[i * 3] + 1, points[i * 3] + 2));
+                m_unscaledPoints.Add(new IndexedVector3(points[i * 3], points[i * 3] + 1, points[i * 3] + 2));
             }
             RecalcLocalAabb();
         }
 
-        public void AddPoint(ref Vector3 point)
+        public void AddPoint(ref IndexedVector3 point)
         {
             m_unscaledPoints.Add(point);
             RecalcLocalAabb();
         }
 
 	
-	    public IList<Vector3> GetUnscaledPoints()
+	    public IList<IndexedVector3> GetUnscaledPoints()
 	    {
 		    return m_unscaledPoints;
 	    }
 
 
-	    public Vector3 GetScaledPoint(int i)
+	    public IndexedVector3 GetScaledPoint(int i)
 	    {
 		    return m_unscaledPoints[i] * m_localScaling;
 	    }
@@ -76,9 +77,9 @@ namespace BulletXNA.BulletCollision
 		    return m_unscaledPoints.Count;
 	    }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
         {
-	        Vector3 supVec = Vector3.Zero;
+	        IndexedVector3 supVec = IndexedVector3.Zero;
 	        float newDot,maxDot = float.MinValue;
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexHull)
@@ -94,9 +95,9 @@ namespace BulletXNA.BulletCollision
 
 	        for (int i=0;i<m_unscaledPoints.Count;i++)
 	        {
-		        Vector3 vtx = m_unscaledPoints[i] * m_localScaling;
+		        IndexedVector3 vtx = m_unscaledPoints[i] * m_localScaling;
 
-		        newDot = Vector3.Dot(vec,vtx);
+		        newDot = IndexedVector3.Dot(vec,vtx);
 		        if (newDot > maxDot)
 		        {
 			        maxDot = newDot;
@@ -106,16 +107,16 @@ namespace BulletXNA.BulletCollision
 	        return supVec;
         }
         
-        public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-	        Vector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
+	        IndexedVector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
 
 	        if ( GetMargin()!=0f)
 	        {
-		        Vector3 vecnorm = vec;
+		        IndexedVector3 vecnorm = vec;
                 if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
 		        {
-			        vecnorm = new Vector3(-1f);
+			        vecnorm = new IndexedVector3(-1f);
 		        } 
 		        vecnorm.Normalize();
 		        supVertex += GetMargin() * vecnorm;
@@ -123,7 +124,7 @@ namespace BulletXNA.BulletCollision
 	        return supVertex;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        float newDot;
 	        //use 'w' component of supportVerticesOut?
@@ -137,17 +138,17 @@ namespace BulletXNA.BulletCollision
 	        }
 	        for (int i=0;i<m_unscaledPoints.Count;i++)
 	        {
-		        Vector3 vtx = GetScaledPoint(i);
+		        IndexedVector3 vtx = GetScaledPoint(i);
 
 		        for (int j=0;j<numVectors;j++)
 		        {
-			        Vector3 vec = vectors[j];
+			        IndexedVector3 vec = vectors[j];
         			
-			        newDot = Vector3.Dot(vec,vtx);
+			        newDot = IndexedVector3.Dot(vec,vtx);
 			        if (newDot > supportVerticesOut[j].W)
 			        {
 				        //WARNING: don't swap next lines, the w component would get overwritten!
-				        supportVerticesOut[j] = new Vector4(vtx,newDot);
+				        supportVerticesOut[j] = new Vector4(vtx.ToVector3(),newDot);
 			        }
 		        }
 	        }
@@ -168,7 +169,7 @@ namespace BulletXNA.BulletCollision
         {
             return m_unscaledPoints.Count;
         }
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
         {
             int index0 = i % m_unscaledPoints.Count;
             int index1 = (i + 1) % m_unscaledPoints.Count;
@@ -176,7 +177,7 @@ namespace BulletXNA.BulletCollision
             pb = GetScaledPoint(index1);
         }
 
-        public override void GetVertex(int i, out Vector3 vtx)
+        public override void GetVertex(int i, out IndexedVector3 vtx)
         {
             vtx = GetScaledPoint(i);
         }
@@ -186,27 +187,73 @@ namespace BulletXNA.BulletCollision
             return 0;
         }
 
-        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
+        public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
         {
             Debug.Assert(false);
-            planeNormal = Vector3.Zero;
-            planeSupport = Vector3.Zero;
+            planeNormal = IndexedVector3.Zero;
+            planeSupport = IndexedVector3.Zero;
         }
 
-        public override bool IsInside(ref Vector3 pt, float tolerance)
+        public override bool IsInside(ref IndexedVector3 pt, float tolerance)
         {
             Debug.Assert(false);
             return false;
         }
 
 	    ///in case we receive negative scaling
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_localScaling = scaling;
             RecalcLocalAabb();
         }
 
-        private IList<Vector3> m_unscaledPoints;
+
+        public void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, ref float min, ref float max)
+        {
+        #if true
+	        min = float.MaxValue;
+	        max = float.MinValue;
+            IndexedVector3 witnesPtMin;
+            IndexedVector3 witnesPtMax;
+
+	        int numVerts = m_unscaledPoints.Count;
+	        for(int i=0;i<numVerts;i++)
+	        {
+                IndexedVector3 vtx = m_unscaledPoints[i] * m_localScaling;
+                IndexedVector3 pt = trans * vtx;
+		        float dp = pt.Dot(dir);
+		        if(dp < min)	
+		        {
+			        min = dp;
+			        witnesPtMin = pt;
+		        }
+		        if(dp > max)	
+		        {
+			        max = dp;
+			        witnesPtMax=pt;
+		        }
+	        }
+        #else
+	        btVector3 localAxis = dir*trans.getBasis();
+	        btVector3 vtx1 = trans(localGetSupportingVertex(localAxis));
+	        btVector3 vtx2 = trans(localGetSupportingVertex(-localAxis));
+
+	        min = vtx1.dot(dir);
+	        max = vtx2.dot(dir);
+        #endif
+
+	        if(min>max)
+	        {
+		        float tmp = min;
+		        min = max;
+		        max = tmp;
+	        }
+
+
+        }
+
+
+        private IList<IndexedVector3> m_unscaledPoints;
     }
 
 }

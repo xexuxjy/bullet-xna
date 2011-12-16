@@ -23,17 +23,18 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
     public class DefaultMotionState : IMotionState
     {
         public DefaultMotionState()
-            : this(Matrix.Identity, Matrix.Identity)
+            : this(IndexedMatrix.Identity, IndexedMatrix.Identity)
         {
         }
 
-        public DefaultMotionState(Matrix startTrans, Matrix centerOfMassOffset)
+        public DefaultMotionState(IndexedMatrix startTrans, IndexedMatrix centerOfMassOffset)
         {
             m_graphicsWorldTrans = startTrans;
             m_startWorldTrans = startTrans;
@@ -42,25 +43,25 @@ namespace BulletXNA
         }
 
         ///synchronizes world transform from user to physics
-        public virtual void GetWorldTransform(out Matrix centerOfMassWorldTrans)
+        public virtual void GetWorldTransform(out IndexedMatrix centerOfMassWorldTrans)
         {
-            centerOfMassWorldTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_centerOfMassOffset), m_graphicsWorldTrans);
+            centerOfMassWorldTrans = m_centerOfMassOffset.Inverse() *  m_graphicsWorldTrans;
         }
 
         ///synchronizes world transform from physics to user
         ///Bullet only calls the update of worldtransform for active objects
-        public virtual void SetWorldTransform(Matrix centerOfMassWorldTrans)
+        public virtual void SetWorldTransform(IndexedMatrix centerOfMassWorldTrans)
         {
             SetWorldTransform(ref centerOfMassWorldTrans);
         }
 
-        public virtual void SetWorldTransform(ref Matrix centerOfMassWorldTrans)
+        public virtual void SetWorldTransform(ref IndexedMatrix centerOfMassWorldTrans)
         {
-            m_graphicsWorldTrans = MathUtil.BulletMatrixMultiply(centerOfMassWorldTrans, m_centerOfMassOffset);
+            m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
         }
-        public Matrix m_graphicsWorldTrans;
-        public Matrix m_centerOfMassOffset;
-        public Matrix m_startWorldTrans;
+        public IndexedMatrix m_graphicsWorldTrans;
+        public IndexedMatrix m_centerOfMassOffset;
+        public IndexedMatrix m_startWorldTrans;
         public Object m_userPointer;
     }
 }

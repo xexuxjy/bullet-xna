@@ -70,8 +70,8 @@ namespace BulletXNA.BulletCollision
             ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
             ConvexShape min1 = body1.GetCollisionShape() as ConvexShape;
 
-            Vector3 normalOnB = Vector3.Zero;
-            Vector3 pointOnBWorld = Vector3.Zero;
+            IndexedVector3 normalOnB = IndexedVector3.Zero;
+            IndexedVector3 pointOnBWorld = IndexedVector3.Zero;
 
             {
                 ClosestPointInput input = new ClosestPointInput();
@@ -119,8 +119,8 @@ namespace BulletXNA.BulletCollision
             float resultFraction = 1.0f;
 
 
-            float squareMot0 = (body0.GetInterpolationWorldTransform().Translation - body0.GetWorldTransform().Translation).LengthSquared();
-            float squareMot1 = (body1.GetInterpolationWorldTransform().Translation - body1.GetWorldTransform().Translation).LengthSquared();
+            float squareMot0 = (body0.GetInterpolationWorldTransform()._origin - body0.GetWorldTransform()._origin).LengthSquared();
+            float squareMot1 = (body1.GetInterpolationWorldTransform()._origin - body1.GetWorldTransform()._origin).LengthSquared();
 
             if (squareMot0 < body0.GetCcdSquareMotionThreshold() &&
                 squareMot1 < body1.GetCcdSquareMotionThreshold())

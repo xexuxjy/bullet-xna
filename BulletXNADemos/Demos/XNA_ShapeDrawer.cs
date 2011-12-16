@@ -34,7 +34,7 @@ namespace BulletXNADemos.Demos
 {
 	public class Edge 
     { 
-        public Vector3[] n = new Vector3[2];
+        public IndexedVector3[] n = new IndexedVector3[2];
         public int[] v = new int[2]; 
     }
     
@@ -64,6 +64,7 @@ namespace BulletXNADemos.Demos
         {
 			m_debugEffect = new BasicEffect(m_game.GraphicsDevice);
 			m_debugEffect.VertexColorEnabled = true;
+
             m_game.Content.RootDirectory = "./content";
 			//m_effect = m_game.Content.Load<Effect>("Standard");
 			m_modelEffect = new BasicEffect(m_game.GraphicsDevice);
@@ -151,19 +152,23 @@ namespace BulletXNADemos.Demos
             return m_textureEnabled;
         }
 
-        //public void startDraw(GraphicsDevice graphicsDevice,ref Matrix view, ref Matrix projection)
+        //public void startDraw(GraphicsDevice graphicsDevice,ref IndexedMatrix view, ref IndexedMatrix projection)
         //{
         //    ((DefaultDebugDraw)m_debugDraw).update(graphicsDevice, ref view, ref projection);
         //}
+        public virtual void DrawShadow(IndexedMatrix m, IndexedVector3 extrusion, CollisionShape shape, IndexedVector3 worldBoundsMin, IndexedVector3 worldBoundsMax)
+        {
+            DrawShadow(m, extrusion, shape, worldBoundsMin, worldBoundsMax);
+        }
 
-		public virtual void	DrawShadow(ref Matrix m, ref Vector3 extrusion,CollisionShape shape,ref Vector3 worldBoundsMin,ref Vector3 worldBoundsMax)
+		public virtual void	DrawShadow(ref IndexedMatrix m, ref IndexedVector3 extrusion,CollisionShape shape,ref IndexedVector3 worldBoundsMin,ref IndexedVector3 worldBoundsMax)
         {
 	        if(shape.GetShapeType() == BroadphaseNativeTypes.UNIFORM_SCALING_SHAPE_PROXYTYPE)
 	        {
 		        UniformScalingShape scalingShape = (UniformScalingShape)(shape);
 		        ConvexShape convexShape = scalingShape.GetChildShape();
 		        float	scalingFactor = (float)scalingShape.GetUniformScalingFactor();
-		        Matrix tmpScaling = Matrix.CreateScale(scalingFactor);
+		        IndexedMatrix tmpScaling = IndexedMatrix.CreateScale(scalingFactor);
                 tmpScaling *= m;
 		        DrawShadow(ref tmpScaling,ref extrusion,convexShape,ref worldBoundsMin,ref worldBoundsMax);
 
@@ -174,11 +179,11 @@ namespace BulletXNADemos.Demos
 		        CompoundShape compoundShape = (CompoundShape)(shape);
 		        for (int i=compoundShape.GetNumChildShapes()-1;i>=0;i--)
 		        {
-			        Matrix childTrans = compoundShape.GetChildTransform(i);
+			        IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
 			        CollisionShape colShape = compoundShape.GetChildShape(i);
                     //float childMat[16];
                     //childTrans.getOpenGLMatrix(childMat);
-                    Vector3 transformedExtrude = Vector3.TransformNormal(extrusion,childTrans);
+                    IndexedVector3 transformedExtrude = childTrans._basis * extrusion;
 			        DrawShadow(ref childTrans,ref transformedExtrude,colShape,ref worldBoundsMin,ref worldBoundsMax);
 		        }
 	        }
@@ -192,17 +197,17 @@ namespace BulletXNADemos.Demos
                     //glBegin(GL_QUADS);
                     for(int i=0;i<sc.m_edges.Count;++i)
                     {			
-                        float d=Vector3.Dot(sc.m_edges[i].n[0],extrusion);
-                        if((d*Vector3.Dot(sc.m_edges[i].n[1],extrusion))<0)
+                        float d=IndexedVector3.Dot(sc.m_edges[i].n[0],extrusion);
+                        if((d*IndexedVector3.Dot(sc.m_edges[i].n[1],extrusion))<0)
                         {
                             int	q=	d<0?1:0;
-                            Vector3	a=	hull.m_vertices[sc.m_edges[i].v[q]];
-                            Vector3	b=	hull.m_vertices[sc.m_edges[i].v[1-q]];
-                            Vector3 ae = a + extrusion;
-                            Vector3 be = b + extrusion;
+                            IndexedVector3	a=	hull.m_vertices[sc.m_edges[i].v[q]];
+                            IndexedVector3	b=	hull.m_vertices[sc.m_edges[i].v[1-q]];
+                            IndexedVector3 ae = a + extrusion;
+                            IndexedVector3 be = b + extrusion;
                             Vector2 tex = new Vector2(0,0);
                             // fix me.
-                            Vector3 normal = Vector3.Up;
+                            IndexedVector3 normal = new IndexedVector3(0,1,0);
                             // gl_quad turned into two triangles.
                             AddVertex(ref a, ref normal,ref tex);
                             AddVertex(ref b, ref normal, ref tex);
@@ -233,51 +238,51 @@ namespace BulletXNADemos.Demos
 
         }
 
-        public void DrawSolidCube(ref Vector3 halfExtents, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
+        public void DrawSolidCube(ref IndexedVector3 halfExtents, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection, ref IndexedVector3 color)
         {
 			ModelScalingData modelScalingData = new ModelScalingData(m_cubeModel,halfExtents,matrix);
 			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }
 
-        private void AddVertex(Vector3 vec, Vector3 normal, Vector2 tex)
+        private void AddVertex(IndexedVector3 vec, IndexedVector3 normal, Vector2 tex)
         {
             AddVertex(ref vec,ref normal, ref tex);
         }
 
-        private void AddVertex(ref Vector3 vec, ref Vector3 normal, ref Vector2 tex)
+        private void AddVertex(ref IndexedVector3 vec, ref IndexedVector3 normal, ref Vector2 tex)
         {
             if(m_texturedVertexCount < m_textureVertexMaxSize-1)
             {
-                m_texturedVertices[m_texturedVertexCount++] = new VertexPositionNormalTexture(vec, normal,tex);
+                m_texturedVertices[m_texturedVertexCount++] = new VertexPositionNormalTexture(vec.ToVector3(), normal.ToVector3(),tex);
             }
         }
 
-        public void DrawText(String text, Vector3 position, Vector3 color)
+        public void DrawText(String text, IndexedVector3 position, IndexedVector3 color)
         {
             DrawText(text, ref position, ref color);
         }
 
-        public void DrawText(String text, ref Vector3 position, ref Vector3 color)
+        public void DrawText(String text, ref IndexedVector3 position, ref IndexedVector3 color)
         {
             TextPositionColor tpc = new TextPositionColor();
             tpc.m_text = text;
             tpc.m_position = new Vector2(position.X, position.Y);
-            tpc.m_color = new Color(color);
+            tpc.m_color = new Color(color.ToVector3());
 
             m_textPositionColours.Add(tpc);
         }
 
-        public void DrawSolidTriangle(Vector3[] points)
+        public void DrawSolidTriangle(IndexedVector3[] points)
         {
-            Vector3 d = points[1] - points[0];
-            Vector3 e = points[2] - points[0];
+            IndexedVector3 d = points[1] - points[0];
+            IndexedVector3 e = points[2] - points[0];
             // Reverse the cross here to account for winding, shouldn't change the way rest of bullet works.
-            //Vector3 normal = Vector3.Cross(d, e);
-            Vector3 normal = Vector3.Cross(e, d);
+            //IndexedVector3 normal = IndexedVector3.Cross(d, e);
+            IndexedVector3 normal = IndexedVector3.Cross(e, d);
 
             normal.Normalize();
-            //AddVertex(points[0], normal,new Vector2(0,0));
+            //AddVertex(points[0], normal, new Vector2(0, 0));
             //AddVertex(points[1], normal, new Vector2(0, 1));
             //AddVertex(points[2], normal, new Vector2(1, 1));
             AddVertex(points[0], normal, new Vector2(0, 0));
@@ -293,18 +298,18 @@ namespace BulletXNADemos.Demos
         //}
 
 
-        public void DrawSolidSphere(float radius, int slices, int stacks, ref Matrix matrix, ref Matrix view, ref Matrix projection,ref Vector3 color)
+        public void DrawSolidSphere(float radius, int slices, int stacks, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection,ref IndexedVector3 color)
         {
 
-			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new Vector3(radius),matrix);
+			ModelScalingData modelScalingData = new ModelScalingData(m_sphereModel,new IndexedVector3(radius),matrix);
 			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
         }
 
 
-		public void DrawSolidCone(float height, float radius, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
+		public void DrawSolidCone(float height, float radius, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection, ref IndexedVector3 color)
         {
-			Vector3 scale = new Vector3(radius, height, radius);
+			IndexedVector3 scale = new IndexedVector3(radius, height, radius);
 			ModelScalingData modelScalingData = new ModelScalingData(m_coneModel, scale, matrix);
 			modelScalingData.color = color;
 			m_modelScalingData.Add(modelScalingData);
@@ -312,34 +317,34 @@ namespace BulletXNADemos.Demos
 
 
 
-		public void DrawCylinder(float radius, float halfHeight, int upAxis, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
+		public void DrawCylinder(float radius, float halfHeight, int upAxis, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection, ref IndexedVector3 color)
         {
             DrawCylinder(radius, radius, halfHeight, upAxis, ref matrix, ref view, ref projection,ref color);
         }
 
 
-		public void DrawCylinder(float topRadius, float bottomRadius, float halfHeight, int upAxis, ref Matrix matrix, ref Matrix view, ref Matrix projection, ref Vector3 color)
+		public void DrawCylinder(float topRadius, float bottomRadius, float halfHeight, int upAxis, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection, ref IndexedVector3 color)
         {
-			Vector3 scale = new Vector3(topRadius, halfHeight, bottomRadius);
-			Matrix rotate = Matrix.Identity;
+			IndexedVector3 scale = new IndexedVector3(topRadius, halfHeight, bottomRadius);
+			IndexedMatrix rotate = IndexedMatrix.Identity;
 
             if (upAxis == 0)
             {
-                rotate = Matrix.CreateRotationZ(MathUtil.SIMD_HALF_PI);
+                rotate = IndexedMatrix.CreateRotationZ(MathUtil.SIMD_HALF_PI);
             }
             if (upAxis == 1)
 			{
-				rotate = Matrix.CreateRotationY(MathUtil.SIMD_HALF_PI);
+				rotate = IndexedMatrix.CreateRotationY(MathUtil.SIMD_HALF_PI);
 			}
 			else if (upAxis == 2)
 			{
-				rotate = Matrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
+				rotate = IndexedMatrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
 			}
 
-			Matrix copy = matrix;
-			copy.Translation = Vector3.Zero;
-			copy = rotate * copy;
-			copy.Translation = matrix.Translation;
+			IndexedMatrix copy = matrix;
+			copy._origin = IndexedVector3.Zero;
+			copy = copy * rotate;
+            copy._origin = matrix._origin;
 
 			ModelScalingData modelScalingData = new ModelScalingData(m_cylinderModel, scale, copy);
 			modelScalingData.color = color;
@@ -351,7 +356,12 @@ namespace BulletXNADemos.Demos
 
         }
 
-        public void DrawXNA(ref Matrix m, CollisionShape shape, ref Vector3 color, DebugDrawModes debugMode, ref Vector3 worldBoundsMin, ref Vector3 worldBoundsMax, ref Matrix view, ref Matrix projection)
+        public void DrawXNA(IndexedMatrix m, CollisionShape shape, IndexedVector3 color, DebugDrawModes debugMode, IndexedVector3 worldBoundsMin, IndexedVector3 worldBoundsMax, IndexedMatrix view, IndexedMatrix projection)
+        {
+            DrawXNA(ref m, shape, ref color, debugMode, ref worldBoundsMin, ref worldBoundsMax, ref view, ref projection);
+        }
+
+        public void DrawXNA(ref IndexedMatrix m, CollisionShape shape, ref IndexedVector3 color, DebugDrawModes debugMode, ref IndexedVector3 worldBoundsMin, ref IndexedVector3 worldBoundsMax, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             //btglMultMatrix(m);
             if (shape == null)
@@ -364,8 +374,8 @@ namespace BulletXNADemos.Demos
                 UniformScalingShape scalingShape = (UniformScalingShape)shape;
                 ConvexShape convexShape = scalingShape.GetChildShape();
                 float scalingFactor = scalingShape.GetUniformScalingFactor();
-                Matrix scaleMatrix = Matrix.CreateScale(scalingFactor);
-                Matrix finalMatrix = scaleMatrix * m;
+                IndexedMatrix scaleMatrix = IndexedMatrix.CreateScale(scalingFactor);
+                IndexedMatrix finalMatrix = scaleMatrix * m;
                 DrawXNA(ref finalMatrix, convexShape, ref color, debugMode, ref worldBoundsMin, ref worldBoundsMax,ref view,ref projection);
                 return;
             }
@@ -374,13 +384,13 @@ namespace BulletXNADemos.Demos
                 CompoundShape compoundShape = (CompoundShape)shape;
                 for (int i = compoundShape.GetNumChildShapes() - 1; i >= 0; i--)
                 {
-                    Matrix childTrans = compoundShape.GetChildTransform(i);
+                    IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
                     CollisionShape colShape = compoundShape.GetChildShape(i);
-                    Matrix childMat = childTrans;
+                    IndexedMatrix childMat = childTrans;
 
 					//childMat = MathUtil.bulletMatrixMultiply(m, childMat);
-					childMat = childMat * m;
-					//childMat = m * childMat;
+                    //childMat = childMat * m;
+                    childMat = m * childMat;
 
                     
 					
@@ -403,14 +413,14 @@ namespace BulletXNADemos.Demos
                         case BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE:
                             {
                                 BoxShape boxShape = shape as BoxShape;
-                                Vector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
+                                IndexedVector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
 
                                 DrawSolidCube(ref halfExtents, ref m, ref view, ref projection,ref color);
                                 //drawSolidSphere(halfExtents.X, 10, 10, ref m, ref view, ref projection);
                                 //drawCylinder(halfExtents.X, halfExtents.Y, 1, ref m, ref view, ref projection);
                                 //drawSolidCone(halfExtents.Y, halfExtents.X, ref m, ref view, ref projection);
 
-                                DrawText("Hello World", new Vector3(20, 20, 0), new Vector3(255, 255, 255));
+                                //DrawText("Hello World", new IndexedVector3(20, 20, 0), new IndexedVector3(255, 255, 255));
                                 useWireframeFallback = false;
                                 break;
                             }
@@ -429,28 +439,28 @@ namespace BulletXNADemos.Demos
 		                    {
                                 CapsuleShape capsuleShape = shape as CapsuleShape;
 
-			                    float radius = capsuleShape.getRadius();
-			                    float halfHeight = capsuleShape.getHalfHeight();
+			                    float radius = capsuleShape.GetRadius();
+			                    float halfHeight = capsuleShape.GetHalfHeight();
 
 			                    int upAxis = capsuleShape.GetUpAxis();
 
-			                    Vector3 capStart = Vector3.Zero;
-			                    MathUtil.VectorComponent(ref capStart,upAxis,-halfHeight);
+			                    IndexedVector3 capStart = IndexedVector3.Zero;
+			                    capStart[upAxis] = -halfHeight;
 
-                                Vector3 capEnd = Vector3.Zero;
-                                MathUtil.VectorComponent(ref capEnd, upAxis, halfHeight);
+                                IndexedVector3 capEnd = IndexedVector3.Zero;
+                                capEnd[upAxis] = halfHeight;
 
 			                    // Draw the ends
 			                    {
 
-				                    Matrix childTransform = Matrix.Identity;
-				                    childTransform.Translation = Vector3.Transform(capStart,m);
+				                    IndexedMatrix childTransform = IndexedMatrix.Identity;
+                                    childTransform._origin = m * capStart;
 									DrawSolidSphere(radius, 5, 5, ref childTransform, ref view, ref projection, ref color);
 			                    }
 
 			                    {
-                                    Matrix childTransform = Matrix.Identity;
-                                    childTransform.Translation = Vector3.Transform(capEnd, m);
+                                    IndexedMatrix childTransform = IndexedMatrix.Identity;
+                                    childTransform._origin = m * capEnd;
 									DrawSolidSphere(radius, 5, 5, ref childTransform, ref view, ref projection, ref color);
                                 }
 
@@ -463,16 +473,16 @@ namespace BulletXNADemos.Demos
                                 int upIndex = coneShape.GetConeUpIndex();
                                 float radius = coneShape.GetRadius();//+coneShape.getMargin();
                                 float height = coneShape.GetHeight();//+coneShape.getMargin();
-                                Matrix rotateMatrix = Matrix.Identity;
+                                IndexedMatrix rotateMatrix = IndexedMatrix.Identity;
 
 
                                 switch (upIndex)
                                 {
                                     case 0:
-                                        rotateMatrix = Matrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
+                                        rotateMatrix = IndexedMatrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
                                         break;
                                     case 1:
-                                        rotateMatrix = Matrix.CreateRotationX(-MathUtil.SIMD_HALF_PI);
+                                        rotateMatrix = IndexedMatrix.CreateRotationX(-MathUtil.SIMD_HALF_PI);
                                         break;
                                     case 2:
                                         break;
@@ -482,9 +492,9 @@ namespace BulletXNADemos.Demos
                                         }
                                 };
 
-                                Matrix translationMatrix = Matrix.CreateTranslation(0f, 0f, -0.5f * height);
+                                IndexedMatrix translationMatrix = IndexedMatrix.CreateTranslation(0f, 0f, -0.5f * height);
 
-                                Matrix resultant = translationMatrix * rotateMatrix * m;
+                                IndexedMatrix resultant = translationMatrix * rotateMatrix * m;
 								DrawSolidCone(radius, height, ref resultant, ref view, ref projection, ref color);
                                 useWireframeFallback = false;
                                 break;
@@ -496,18 +506,18 @@ namespace BulletXNADemos.Demos
                             {
                                 StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
                                 float planeConst = staticPlaneShape.GetPlaneConstant();
-                                Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
-                                Vector3 planeOrigin = planeNormal * planeConst;
-                                Vector3 vec0, vec1;
+                                IndexedVector3 planeNormal = staticPlaneShape.GetPlaneNormal();
+                                IndexedVector3 planeOrigin = planeNormal * planeConst;
+                                IndexedVector3 vec0, vec1;
                                 TransformUtil.PlaneSpace1(ref planeNormal, out vec0, out vec1);
                                 float vecLen = 100f;
-                                Vector3 pt0 = planeOrigin + vec0 * vecLen;
-                                Vector3 pt1 = planeOrigin - vec0 * vecLen;
-                                Vector3 pt2 = planeOrigin + vec1 * vecLen;
-                                Vector3 pt3 = planeOrigin - vec1 * vecLen;
+                                IndexedVector3 pt0 = planeOrigin + vec0 * vecLen;
+                                IndexedVector3 pt1 = planeOrigin - vec0 * vecLen;
+                                IndexedVector3 pt2 = planeOrigin + vec1 * vecLen;
+                                IndexedVector3 pt3 = planeOrigin - vec1 * vecLen;
 
                                 // Fallback to debug draw - needs tidying
-                                Vector3 colour = new Vector3(255, 255, 255);
+                                IndexedVector3 colour = new IndexedVector3(255, 255, 255);
                                 DrawLine(ref pt0, ref pt1, ref colour);
                                 DrawLine(ref pt1, ref pt2, ref colour);
                                 DrawLine(ref pt2, ref pt3, ref colour);
@@ -523,7 +533,7 @@ namespace BulletXNADemos.Demos
                                 int upAxis = cylinder.GetUpAxis();
 
                                 float radius = cylinder.GetRadius();
-                                float halfHeight = MathUtil.VectorComponent(cylinder.GetHalfExtentsWithMargin(), upAxis);
+                                float halfHeight = cylinder.GetHalfExtentsWithMargin()[upAxis];
 								DrawCylinder(radius, halfHeight, upAxis, ref m, ref view, ref projection, ref color);
                                 break;
                             }
@@ -546,7 +556,7 @@ namespace BulletXNADemos.Demos
                                         {
                                             int index = 0;
                                             IList<int> idx = hull.m_indices;
-                                            IList<Vector3> vtx = hull.m_vertices;
+                                            IList<IndexedVector3> vtx = hull.m_vertices;
 
                                             for (int i = 0; i < numTriangles; i++)
                                             {
@@ -564,10 +574,10 @@ namespace BulletXNADemos.Demos
                                                     index2 < numVertices &&
                                                     index3 < numVertices);
 
-                                                Vector3 v1 = Vector3.Transform(vtx[index1],m);
-                                                Vector3 v2 = Vector3.Transform(vtx[index2],m);
-                                                Vector3 v3 = Vector3.Transform(vtx[index3],m);
-                                                Vector3 normal = Vector3.Cross((v3-v1),(v2-v1));
+                                                IndexedVector3 v1 = m * vtx[index1];
+                                                IndexedVector3 v2 = m * vtx[index2];
+                                                IndexedVector3 v3 = m * vtx[index3];
+                                                IndexedVector3 normal = IndexedVector3.Cross((v3-v1),(v2-v1));
                                                 normal.Normalize();
 
                                                 Vector2 tex = new Vector2(0,0);
@@ -590,10 +600,10 @@ namespace BulletXNADemos.Demos
                         {
                             //BMF_DrawString(BMF_GetFont(BMF_kHelvetica10),polyshape.getExtraDebugInfo());
 
-                            Vector3 colour = new Vector3(255, 255, 255);
+                            IndexedVector3 colour = new IndexedVector3(255, 255, 255);
                             for (int i = 0; i < polyshape.GetNumVertices(); i++)
                             {
-                                Vector3 vtx;
+                                IndexedVector3 vtx;
                                 polyshape.GetVertex(i, out vtx);
                                 String buf = " " + i;
                                 DrawText(buf, ref vtx, ref colour);
@@ -601,10 +611,10 @@ namespace BulletXNADemos.Demos
 
                             for (int i = 0; i < polyshape.GetNumPlanes(); i++)
                             {
-                                Vector3 normal;
-                                Vector3 vtx;
+                                IndexedVector3 normal;
+                                IndexedVector3 vtx;
                                 polyshape.GetPlane(out normal, out vtx, i);
-                                float d = Vector3.Dot(vtx, normal);
+                                float d = IndexedVector3.Dot(vtx, normal);
                                 vtx *= d;
 
                                 String buf = " plane " + i;
@@ -629,8 +639,8 @@ namespace BulletXNADemos.Demos
                     //glRasterPos3f(0,0,0);//mvtx.x(),  vtx.y(),  vtx.z());
                     if ((debugMode & DebugDrawModes.DBG_DrawText) != 0)
                     {
-                        Vector3 position = Vector3.Zero;
-                        Vector3 colour = new Vector3(255, 255, 255);
+                        IndexedVector3 position = IndexedVector3.Zero;
+                        IndexedVector3 colour = new IndexedVector3(255, 255, 255);
                         DrawText(shape.GetName(), ref position, ref colour);
                     }
 
@@ -661,11 +671,11 @@ namespace BulletXNADemos.Demos
 		        int	ni=sc.m_shapehull.NumIndices();
 		        int	nv=sc.m_shapehull.NumVertices();
 		        IList<int>	pi=sc.m_shapehull.m_indices;
-		        IList<Vector3> pv=sc.m_shapehull.m_vertices;
+		        IList<IndexedVector3> pv=sc.m_shapehull.m_vertices;
 		        IList<Edge> edges = new ObjectArray<Edge>(ni);
 		        for(int i=0;i<ni;i+=3)
 		        {
-			        Vector3	nrm= Vector3.Normalize(Vector3.Cross(pv[pi[i+1]]-pv[pi[i]],pv[pi[i+2]]-pv[pi[i]]));
+			        IndexedVector3	nrm= IndexedVector3.Normalize(IndexedVector3.Cross(pv[pi[i+1]]-pv[pi[i]],pv[pi[i+2]]-pv[pi[i]]));
 			        for(int j=2,k=0;k<3;j=k++)
 			        {
 				        int	a=pi[i+j];
@@ -688,7 +698,7 @@ namespace BulletXNADemos.Demos
 	        return(sc);
         }
 
-        public void RenderStandard(GameTime gameTime, ref Matrix view, ref Matrix projection)
+        public void RenderStandard(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             // Always clear?
             m_game.GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -698,7 +708,12 @@ namespace BulletXNADemos.Demos
             }
         }
 
-        public void RenderOthers(GameTime gameTime, ref Matrix view, ref Matrix projection)
+        public void RenderOthers(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection)
+        {
+            RenderOthers(gameTime, ref view, ref projection);
+        }
+
+        public void RenderOthers(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             m_spriteBatch.Begin();
             for (int i = 0; i < m_textPositionColours.Count; ++i)
@@ -706,26 +721,27 @@ namespace BulletXNADemos.Demos
                 m_spriteBatch.DrawString(m_spriteFont, m_textPositionColours[i].m_text, m_textPositionColours[i].m_position, m_textPositionColours[i].m_color);
             }
 
-			// set mouse cursor to true so we can see where we're aiming/picking.
-			m_game.IsMouseVisible = true;
-			//if(m_game.Mou
+            // set mouse cursor to true so we can see where we're aiming/picking.
+            m_game.IsMouseVisible = true;
+            //if(m_game.Mou
 
 
             m_spriteBatch.End();
             m_textPositionColours.Clear();
-			// restore from sprite batch changes.
-			m_game.GraphicsDevice.BlendState = BlendState.Opaque;
-			m_game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            // restore from sprite batch changes.
+            m_game.GraphicsDevice.BlendState = BlendState.Opaque;
+            m_game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
         }
 
 
-        private void DrawPrimitives(GameTime gameTime, ref Matrix view, ref Matrix projection)
+        private void DrawPrimitives(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
 			if(m_texturedVertexCount > 0)
 			{
-                m_vertexEffect.View = view;
-                m_vertexEffect.Projection = projection;
+                m_vertexEffect.View = view.ToMatrix();
+                m_vertexEffect.Projection = projection.ToMatrixProjection();
+
                 foreach (EffectPass pass in m_vertexEffect.CurrentTechnique.Passes)
 				{
 					pass.Apply();
@@ -736,7 +752,7 @@ namespace BulletXNADemos.Demos
 
             foreach (ModelScalingData modelScalingData in m_modelScalingData)
             {
-                //Matrix scale = Matrix.CreateScale(modelScalingData.scale);
+                //IndexedMatrix scale = IndexedMatrix.CreateScale(modelScalingData.scale);
                 Matrix[] transforms = new Matrix[modelScalingData.model.Bones.Count];
                 foreach (ModelMesh mesh in modelScalingData.model.Meshes)
                 {
@@ -744,9 +760,21 @@ namespace BulletXNADemos.Demos
                     foreach (BasicEffect effect in mesh.Effects)
                     {
 						effect.Texture = GetTexture(ref modelScalingData.color);
-                        effect.View = view;
-                        effect.Projection = projection;
-                        effect.World = transforms[mesh.ParentBone.Index] * modelScalingData.transform;
+                        effect.View = view.ToMatrix();
+                        effect.Projection = projection.ToMatrixProjection();
+
+
+                        effect.World = transforms[mesh.ParentBone.Index] * modelScalingData.transform.ToMatrix();
+                        //effect.World = modelScalingData.transform.ToMatrix() * transforms[mesh.ParentBone.Index];
+
+                        //if (BulletGlobals.g_streamWriter != null)
+                        //{
+                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-bone", transforms[mesh.ParentBone.Index]);
+                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-model", modelScalingData.transform.ToMatrix());
+                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-view", effect.View);
+                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-proj", effect.Projection);
+                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-world", effect.World);
+                        //}
                     }
                     mesh.Draw();
                 }
@@ -754,11 +782,11 @@ namespace BulletXNADemos.Demos
 			m_modelScalingData.Clear();
         }
 
-        public void RenderDebugLines(GameTime gameTime, ref Matrix view, ref Matrix projection)
+        public void RenderDebugLines(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             m_debugEffect.World = Matrix.Identity;
-            m_debugEffect.View = view;
-            m_debugEffect.Projection = projection;
+            m_debugEffect.View = view.ToMatrix();
+            m_debugEffect.Projection = projection.ToMatrixProjection();
 
             if (m_lineIndex > 0)
             {
@@ -789,100 +817,82 @@ namespace BulletXNADemos.Demos
         }
 
         #region IDebugDraw Members
-        public void DrawLine(Vector3 from, Vector3 to, Vector3 fromColor)
+        public void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 fromColor)
         {
             DrawLine(ref from, ref to, ref fromColor);
         }
 
-        public void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor)
+        public void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor)
         {
             DrawLine(ref from, ref to, ref fromColor, ref fromColor);
         }
 
-        public void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor, ref Vector3 toColor)
+        public void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor)
         {
             if (m_lineIndex < m_lineVertexMaxSize - 2)
             {
-                m_lineVertices[m_lineIndex].Position = from;
-                m_lineVertices[m_lineIndex++].Color = new Color(fromColor);
+                m_lineVertices[m_lineIndex].Position = from.ToVector3();
+                m_lineVertices[m_lineIndex++].Color = new Color(fromColor.ToVector3());
 
-                m_lineVertices[m_lineIndex].Position = to;
-                m_lineVertices[m_lineIndex++].Color = new Color(toColor);
+                m_lineVertices[m_lineIndex].Position = to.ToVector3();
+                m_lineVertices[m_lineIndex++].Color = new Color(toColor.ToVector3());
             }
         }
-        public void DrawBox(ref Vector3 boxMin, ref Vector3 boxMax, ref Matrix trans, ref Vector3 color)
+        public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix trans, ref IndexedVector3 color)
         {
             DrawBox(ref boxMin, ref boxMax, ref trans, ref color, 1f);
         }
 
-        public void DrawBox(ref Vector3 boxMin, ref Vector3 boxMax, ref Matrix transform, ref Vector3 color, float alpha)
+        public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha)
         {
-            Vector3 sideLengths = boxMax - boxMin;
-            Vector3 position = boxMin + (sideLengths * 0.5f);
+			DrawLine(transform * (new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)) , transform * (new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
+			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
 
-			Vector3 min = Vector3.Transform(boxMin, transform);
-			Vector3 max = Vector3.Transform(boxMax, transform);
-
-			DrawLine(new Vector3(min.X, min.Y, min.Z), new Vector3(max.X, min.Y, min.Z), color);
-			DrawLine(new Vector3(max.X, min.Y, min.Z), new Vector3(max.X, max.Y, min.Z), color);
-			DrawLine(new Vector3(max.X, max.Y, min.Z), new Vector3(min.X, max.Y, min.Z), color);
-			DrawLine(new Vector3(min.X, max.Y, min.Z), new Vector3(min.X, min.Y, min.Z), color);
-			DrawLine(new Vector3(min.X, min.Y, min.Z), new Vector3(min.X, min.Y, max.Z), color);
-			DrawLine(new Vector3(max.X, min.Y, min.Z), new Vector3(max.X, min.Y, max.Z), color);
-			DrawLine(new Vector3(max.X, max.Y, min.Z), new Vector3(max.X, max.Y, max.Z), color);
-			DrawLine(new Vector3(min.X, max.Y, min.Z), new Vector3(min.X, max.Y, max.Z), color);
-			DrawLine(new Vector3(min.X, min.Y, max.Z), new Vector3(max.X, min.Y, max.Z), color);
-			DrawLine(new Vector3(max.X, min.Y, max.Z), new Vector3(max.X, max.Y, max.Z), color);
-			DrawLine(new Vector3(max.X, max.Y, max.Z), new Vector3(min.X, max.Y, max.Z), color);
-			DrawLine(new Vector3(min.X, max.Y, max.Z), new Vector3(min.X, min.Y, max.Z), color);
-
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMin.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMin.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMin.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMin.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMin.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMax.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMin.Y, boxMax.Z),transform), Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMax.X, boxMax.Y, boxMax.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMax.Z),transform), color);
-			//drawLine(Vector3.Transform(new Vector3(boxMin.X, boxMax.Y, boxMax.Z),transform), Vector3.Transform(new Vector3(boxMin.X, boxMin.Y, boxMax.Z), transform), color);
-
-            //m_shapeList.Add(DrawHelper.createBox(position, sideLengths, new Color(color), ref transform));
         }
 
 
-        public void DrawSphere(Vector3 p, float radius, Vector3 color)
+        public void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color)
         {
             DrawSphere(ref p, radius, ref color);
         }
 
-        public void DrawSphere(ref Vector3 p, float radius, ref Vector3 color)
+        public void DrawSphere(ref IndexedVector3 p, float radius, ref IndexedVector3 color)
         {
             //throw new NotImplementedException();
         }
 
-        public void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 color, float alpha)
+        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 n0, ref IndexedVector3 n1, ref IndexedVector3 n2, ref IndexedVector3 color, float alpha)
         {
             DrawTriangle(ref v0, ref v1, ref v2, ref color, alpha);
         }
 
-        public void DrawTriangle(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2, ref Vector3 color, float alpha)
+        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 color, float alpha)
         {
             DrawLine(ref v0, ref v1, ref color);
             DrawLine(ref v1, ref v2, ref color);
             DrawLine(ref v2, ref v0, ref color);
         }
 
-        public void DrawContactPoint(Vector3 PointOnB, Vector3 normalOnB, float distance, int lifeTime, Vector3 color)
+        public void DrawContactPoint(IndexedVector3 PointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color)
         {
             DrawContactPoint(ref PointOnB, ref normalOnB, distance, lifeTime, ref color);
         }
 
-        public void DrawContactPoint(ref Vector3 PointOnB, ref Vector3 normalOnB, float distance, int lifeTime, ref Vector3 color)
+        public void DrawContactPoint(ref IndexedVector3 PointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color)
         {
-            //throw new NotImplementedException();
+            IndexedVector3 from = PointOnB;
+            IndexedVector3 to = PointOnB + (normalOnB * 1f);
+            DrawLine(ref from, ref to, ref color);
         }
 
         public void ReportErrorWarning(string warningString)
@@ -890,7 +900,7 @@ namespace BulletXNADemos.Demos
             //throw new NotImplementedException();
         }
 
-        public void Draw3dText(ref Vector3 location, string textString)
+        public void Draw3dText(ref IndexedVector3 location, string textString)
         {
             //throw new NotImplementedException();
         }
@@ -905,47 +915,47 @@ namespace BulletXNADemos.Demos
             return m_game.GetDebugMode();
         }
 
-        public void DrawAabb(Vector3 from, Vector3 to, Vector3 color)
+        public void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
         {
             DrawAabb(ref from, ref to, ref color);
         }
 
-        public void DrawAabb(ref Vector3 from, ref Vector3 to, ref Vector3 color)
+        public void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
         {
-            Matrix identity = Matrix.Identity;
+            IndexedMatrix identity = IndexedMatrix.Identity;
             DrawBox(ref from, ref to, ref identity, ref color, 0f);
         }
 
-        public void DrawTransform(ref Matrix transform, float orthoLen)
+        public void DrawTransform(ref IndexedMatrix transform, float orthoLen)
         {
-            Vector3 start = transform.Translation;
-            Vector3 temp = start + Vector3.TransformNormal(new Vector3(orthoLen, 0, 0), transform);
-            Vector3 colour = new Vector3(0.7f, 0, 0);
+            IndexedVector3 start = transform._origin;
+            IndexedVector3 temp = start + transform._basis * new IndexedVector3(orthoLen, 0, 0);
+            IndexedVector3 colour = new IndexedVector3(0.7f, 0, 0);
             DrawLine(ref start, ref temp, ref colour);
-            temp = start + Vector3.TransformNormal(new Vector3(0, orthoLen, 0), transform);
-            colour = new Vector3(0, 0.7f, 0);
+            temp = start + transform._basis * new IndexedVector3(0, orthoLen, 0);
+            colour = new IndexedVector3(0, 0.7f, 0);
             DrawLine(ref start, ref temp, ref colour);
-            temp = start + Vector3.TransformNormal(new Vector3(0, 0, orthoLen), transform);
-            colour = new Vector3(0, 0, 0.7f);
+            temp = start + transform._basis * new IndexedVector3(0, 0, orthoLen);
+            colour = new IndexedVector3(0, 0, 0.7f);
             DrawLine(ref start, ref temp, ref colour);
         }
 
-        public void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref Vector3 color, bool drawSect)
+        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref IndexedVector3 color, bool drawSect)
         {
             DrawArc(ref center, ref normal, ref axis, radiusA, radiusB, minAngle, maxAngle, ref color, drawSect, 10f);
         }
 
-        public void DrawArc(ref Vector3 center, ref Vector3 normal, ref Vector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref Vector3 color, bool drawSect, float stepDegrees)
+        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref IndexedVector3 color, bool drawSect, float stepDegrees)
         {
-            Vector3 vx = axis;
-            Vector3 vy = Vector3.Cross(normal, axis);
+            IndexedVector3 vx = axis;
+            IndexedVector3 vy = IndexedVector3.Cross(normal, axis);
             float step = stepDegrees * MathUtil.SIMD_RADS_PER_DEG;
             int nSteps = (int)((maxAngle - minAngle) / step);
             if (nSteps == 0)
             {
                 nSteps = 1;
             }
-            Vector3 prev = center + radiusA * vx * (float)Math.Cos(minAngle) + radiusB * vy * (float)Math.Sin(minAngle);
+            IndexedVector3 prev = center + radiusA * vx * (float)Math.Cos(minAngle) + radiusB * vy * (float)Math.Sin(minAngle);
             if (drawSect)
             {
                 DrawLine(ref center, ref prev, ref color);
@@ -953,7 +963,7 @@ namespace BulletXNADemos.Demos
             for (int i = 1; i <= nSteps; i++)
             {
                 float angle = minAngle + (maxAngle - minAngle) * i / nSteps;
-                Vector3 next = center + radiusA * vx * (float)Math.Cos(angle) + radiusB * vy * (float)Math.Sin(angle);
+                IndexedVector3 next = center + radiusA * vx * (float)Math.Cos(angle) + radiusB * vy * (float)Math.Sin(angle);
                 DrawLine(ref prev, ref next, ref color);
                 prev = next;
             }
@@ -963,24 +973,24 @@ namespace BulletXNADemos.Demos
             }
         }
 
-        public void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color)
+        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color)
         {
             DrawSpherePatch(ref center, ref up, ref axis, radius, minTh, maxTh, minPs, maxPs, ref color, 10);
         }
 
-        public void DrawSpherePatch(ref Vector3 center, ref Vector3 up, ref Vector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref Vector3 color, float stepDegrees)
+        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees)
         {
-            Vector3[] vA;
-            Vector3[] vB;
-            Vector3[] pvA, pvB, pT;
-            Vector3 npole = center + up * radius;
-            Vector3 spole = center - up * radius;
-            Vector3 arcStart = Vector3.Zero;
+            IndexedVector3[] vA;
+            IndexedVector3[] vB;
+            IndexedVector3[] pvA, pvB, pT;
+            IndexedVector3 npole = center + up * radius;
+            IndexedVector3 spole = center - up * radius;
+            IndexedVector3 arcStart = IndexedVector3.Zero;
             float step = stepDegrees * MathUtil.SIMD_RADS_PER_DEG;
-            Vector3 kv = up;
-            Vector3 iv = axis;
+            IndexedVector3 kv = up;
+            IndexedVector3 iv = axis;
 
-            Vector3 jv = Vector3.Cross(kv, iv);
+            IndexedVector3 jv = IndexedVector3.Cross(kv, iv);
             bool drawN = false;
             bool drawS = false;
             if (minTh <= -MathUtil.SIMD_HALF_PI)
@@ -1020,8 +1030,8 @@ namespace BulletXNADemos.Demos
             int n_vert = (int)((maxPs - minPs) / step) + 1;
             if (n_vert < 2) n_vert = 2;
 
-            vA = new Vector3[n_vert];
-            vB = new Vector3[n_vert];
+            vA = new IndexedVector3[n_vert];
+            vB = new IndexedVector3[n_vert];
             pvA = vA; pvB = vB;
 
             float step_v = (maxPs - minPs) / (float)(n_vert - 1);
@@ -1111,21 +1121,21 @@ namespace BulletXNADemos.Demos
         private Model m_lightModel;
         private Texture2D m_lightTexture;
 
-		private Texture2D GetTexture(ref Vector3 color)
+		private Texture2D GetTexture(ref IndexedVector3 color)
 		{
 			if(!m_colorMap.ContainsKey(color))
 			{
 				Texture2D newTexture = new Texture2D(m_game.GraphicsDevice,1,1);
 				Color[] colorData = new Color[1];
 				newTexture.GetData<Color>(colorData);
-				colorData[0] = new Color(color);
+				colorData[0] = new Color(color.ToVector3());
 				newTexture.SetData(colorData);
 				m_colorMap[color] = newTexture;
 			}
 			return m_colorMap[color];
 		}
 
-		private Dictionary<Vector3, Texture2D> m_colorMap = new Dictionary<Vector3, Texture2D>();
+		private Dictionary<IndexedVector3, Texture2D> m_colorMap = new Dictionary<IndexedVector3, Texture2D>();
 
 
 
@@ -1149,21 +1159,23 @@ namespace BulletXNADemos.Demos
 	class ModelScalingData
 	{
 		public ModelScalingData() { }
-		public ModelScalingData(Model _model, Vector3 _scale, Matrix _transform)
+		public ModelScalingData(Model _model, IndexedVector3 _scale, IndexedMatrix _transform)
 		{
-			Matrix scale = Matrix.CreateScale(_scale);
-			Matrix copy = _transform;
-			copy.Translation = Vector3.Zero;
-			copy = scale * copy;
-			copy.Translation = _transform.Translation;
-			model = _model;
+			IndexedMatrix scale = IndexedMatrix.CreateScale(_scale);
+			IndexedMatrix copy = _transform;
+			copy._origin = IndexedVector3.Zero;
+            copy = copy * scale;
+            copy._origin = _transform._origin;
+
+            model = _model;
 			transform = copy;
-			color = Vector3.One;
+
+			color = IndexedVector3.One;
 		}
 
 		public Model model;
-		public Matrix transform;
-		public Vector3 color;
+		public IndexedMatrix transform;
+		public IndexedVector3 color;
 	}
 
 
@@ -1189,24 +1201,24 @@ namespace BulletXNADemos.Demos
 
 	    public bool	m_wireframe;
         private XNA_ShapeDrawer m_shapeDrawer;
-        private static Vector3 RED = new Vector3(1, 0, 0);
-        private static Vector3 BLUE = new Vector3(0, 1, 0);
-        private static Vector3 GREEN = new Vector3(0, 0, 1);
-		private Matrix matrix; // not included up till now
+        private static IndexedVector3 RED = new IndexedVector3(1, 0, 0);
+        private static IndexedVector3 BLUE = new IndexedVector3(0, 1, 0);
+        private static IndexedVector3 GREEN = new IndexedVector3(0, 0, 1);
+		private IndexedMatrix matrix; // not included up till now
         
-	    public XNADrawcallback(XNA_ShapeDrawer shapeDrawer,ref Matrix m)
+	    public XNADrawcallback(XNA_ShapeDrawer shapeDrawer,ref IndexedMatrix m)
 	    {
             m_wireframe = false;
             m_shapeDrawer = shapeDrawer;
 			matrix = m;
 	    }
 
-        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
 	    {
 		    if (m_wireframe)
 		    {
 				// put them in object space.
-				Vector3.Transform(triangle, ref matrix, triangle);
+				IndexedVector3.Transform(triangle, ref matrix, triangle);
 
 
                 m_shapeDrawer.DrawLine(ref triangle[0], ref triangle[1], ref RED);
@@ -1214,15 +1226,15 @@ namespace BulletXNADemos.Demos
                 m_shapeDrawer.DrawLine(ref triangle[2], ref triangle[0], ref BLUE);
 
                 //draw normal?
-                Vector3 d = triangle[1] - triangle[0];
-                Vector3 e = triangle[2] - triangle[0];
+                IndexedVector3 d = triangle[1] - triangle[0];
+                IndexedVector3 e = triangle[2] - triangle[0];
                 // Reverse the cross here to account for winding, shouldn't change the way rest of bullet works.
-				Vector3 cross = Vector3.Cross(d, e);
-				//Vector3 cross = Vector3.Cross(e,d);
+				IndexedVector3 cross = IndexedVector3.Cross(d, e);
+				//IndexedVector3 cross = IndexedVector3.Cross(e,d);
 
-                Vector3 colour = new Vector3(1, 0, 1);
+                IndexedVector3 colour = new IndexedVector3(1, 0, 1);
                 int ibreak = 0;
-                Vector3 center = (triangle[0]+triangle[1]+triangle[2])*(1.0f/3.0f);
+                IndexedVector3 center = (triangle[0]+triangle[1]+triangle[2])*(1.0f/3.0f);
 
                 cross += center;
                 //m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
@@ -1230,7 +1242,7 @@ namespace BulletXNADemos.Demos
 		    } 
             else
 		    {
-                Vector3.Transform(triangle, ref matrix, triangle);
+                IndexedVector3.Transform(triangle, ref matrix, triangle);
                 m_shapeDrawer.DrawSolidTriangle(triangle);
 		    }
 	    }
@@ -1254,7 +1266,7 @@ namespace BulletXNADemos.Demos
             m_shapeDrawer = shapeDrawer;
         }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 	    {
             m_shapeDrawer.DrawSolidTriangle(triangle);
 	    }

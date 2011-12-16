@@ -23,6 +23,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -35,28 +36,28 @@ namespace BulletXNA.BulletCollision
 		    m_collisionMargin = radius;
 	    }
 	
-	    public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
+	    public override IndexedVector3	LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-	        Vector3 supVertex;
+	        IndexedVector3 supVertex;
 	        supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
 
-	        Vector3 vecnorm = vec;
+	        IndexedVector3 vecnorm = vec;
 	        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 	        {
-		        vecnorm = new Vector3(-1f);
+		        vecnorm = new IndexedVector3(-1f);
 	        } 
 	        vecnorm.Normalize();
 	        supVertex+= GetMargin() * vecnorm;
 	        return supVertex;
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
         {
-            return Vector3.Zero;
+            return IndexedVector3.Zero;
         }
 
         //notice that the vectors should be unit length
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors) 
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors) 
         {
 	        for (int i=0;i<numVectors;i++)
 	        {
@@ -65,17 +66,17 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+        public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
             float elem = 0.4f * mass * GetMargin()*GetMargin();
-            inertia = new Vector3(elem);
+            inertia = new IndexedVector3(elem);
         }
 
-        public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
-	        Vector3 center = t.Translation;
+	        IndexedVector3 center = t._origin;
             float margin = GetMargin();
-	        Vector3 extent = new Vector3(margin);
+	        IndexedVector3 extent = new IndexedVector3(margin);
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;
         }

@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -46,16 +47,16 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public virtual Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+        public virtual IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-	        Vector3 supportVertex;
+	        IndexedVector3 supportVertex;
 
-            Matrix ident = Matrix.Identity;
+            IndexedMatrix ident = IndexedMatrix.Identity;
 
 	        SupportVertexCallback supportCallback = new SupportVertexCallback(ref vec,ref ident);
 
-	        Vector3 aabbMax = MathUtil.MAX_VECTOR;
-            Vector3 aabbMin = MathUtil.MIN_VECTOR;
+	        IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+            IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
             // URGGHHH!
             if (m_inConstructor)
@@ -73,7 +74,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-	    public virtual Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
+	    public virtual IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec)
 	    {
 		    Debug.Assert(false);
 		    return LocalGetSupportingVertex(ref vec);
@@ -81,49 +82,49 @@ namespace BulletXNA.BulletCollision
 
 	    public void	RecalcLocalAabb()
         {
-		    Vector3 vec = new Vector3(1,0,0);
-		    Vector3 tmp = LocalGetSupportingVertex(ref vec);
+		    IndexedVector3 vec = new IndexedVector3(1,0,0);
+		    IndexedVector3 tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMax.X = tmp.X + m_collisionMargin;
-            vec = new Vector3(-1, 0, 0);
+            vec = new IndexedVector3(-1, 0, 0);
             tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMin.X = tmp.X - m_collisionMargin;
 
-            vec = new Vector3(0, 1, 0);
+            vec = new IndexedVector3(0, 1, 0);
             tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMax.Y = tmp.Y + m_collisionMargin;
-            vec = new Vector3(0, -1, 0);
+            vec = new IndexedVector3(0, -1, 0);
             tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMin.Y = tmp.Y - m_collisionMargin;
 
-            vec = new Vector3(0, 0, 1);
+            vec = new IndexedVector3(0, 0, 1);
             tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMax.Z = tmp.Z + m_collisionMargin;
-            vec = new Vector3(0, 0, -1);
+            vec = new IndexedVector3(0, 0, -1);
             tmp = LocalGetSupportingVertex(ref vec);
             m_localAabbMin.Z = tmp.Z - m_collisionMargin;
         }
 
-        public override void GetAabb(ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
+        public override void GetAabb(ref IndexedMatrix trans, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
-            Vector3 localHalfExtents = 0.5f * (m_localAabbMax - m_localAabbMin);
+            IndexedVector3 localHalfExtents = 0.5f * (m_localAabbMax - m_localAabbMin);
             float margin = GetMargin();
-            localHalfExtents += new Vector3(margin);
-            Vector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
+            localHalfExtents += new IndexedVector3(margin);
+            IndexedVector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
 
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
-            //Vector3 center = trans.Translation;
-            Vector3 center;
-            Vector3.Transform(ref localCenter,ref trans,out center);
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
-                                            Vector3.Dot(abs_b.Up, localHalfExtents),
-                                            Vector3.Dot(abs_b.Backward, localHalfExtents));
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+
+            IndexedVector3 center = trans * localCenter;
+
+            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
+                   abs_b[1].Dot(ref localHalfExtents),
+                  abs_b[2].Dot(ref localHalfExtents));
+
             aabbMin = center - extent;
             aabbMax = center + extent;
 
         }
         // yuck yuck yuck
-        public void ProcessAllTrianglesCtor(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public void ProcessAllTrianglesCtor(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             FilteredCallback filterCallback = new FilteredCallback(callback, ref aabbMin, ref aabbMax);
             m_meshInterface.InternalProcessAllTriangles(filterCallback, ref aabbMin, ref aabbMax);
@@ -131,27 +132,27 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
+        public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
         	FilteredCallback filterCallback = new FilteredCallback(callback,ref aabbMin,ref aabbMax);
             m_meshInterface.InternalProcessAllTriangles(filterCallback,ref aabbMin,ref aabbMax);
             filterCallback.Cleanup();
         }
 
-	    public override void CalculateLocalInertia(float mass, out Vector3 inertia)
+	    public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
 	        //moving concave objects not supported
 	        Debug.Assert(false);
-	        inertia = Vector3.Zero;
+	        inertia = IndexedVector3.Zero;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_meshInterface.SetScaling(ref scaling);
             RecalcLocalAabb();
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_meshInterface.GetScaling();
         }
@@ -161,12 +162,12 @@ namespace BulletXNA.BulletCollision
 		    return m_meshInterface;
 	    }
 
-	    public Vector3 GetLocalAabbMin()
+	    public IndexedVector3 GetLocalAabbMin()
 	    {
 		    return m_localAabbMin;
 	    }
 
-        public Vector3 GetLocalAabbMax()
+        public IndexedVector3 GetLocalAabbMax()
 	    {
 		    return m_localAabbMax;
 	    }
@@ -178,8 +179,8 @@ namespace BulletXNA.BulletCollision
         }
 
         private bool m_inConstructor;  // hacky attempt to get correct callback in construction
-        protected Vector3 m_localAabbMin;
-        protected Vector3 m_localAabbMax;
+        protected IndexedVector3 m_localAabbMin;
+        protected IndexedVector3 m_localAabbMax;
         protected StridingMeshInterface m_meshInterface;
     }
 
@@ -187,10 +188,10 @@ namespace BulletXNA.BulletCollision
     public class SupportVertexCallback : ITriangleCallback
     {
 
-	    private Vector3 m_supportVertexLocal;
-        public Matrix m_worldTrans;
+	    private IndexedVector3 m_supportVertexLocal;
+        public IndexedMatrix m_worldTrans;
 	    public float m_maxDot;
-	    public Vector3 m_supportVecLocal;
+	    public IndexedVector3 m_supportVecLocal;
 
         public virtual bool graphics()
         {
@@ -198,21 +199,21 @@ namespace BulletXNA.BulletCollision
         }
 
 
-	    public SupportVertexCallback(ref Vector3 supportVecWorld,ref Matrix trans)
+	    public SupportVertexCallback(ref IndexedVector3 supportVecWorld,ref IndexedMatrix trans)
 	    {
-            m_supportVertexLocal = Vector3.Zero;
+            m_supportVertexLocal = IndexedVector3.Zero;
             m_worldTrans = trans;
             m_maxDot = -MathUtil.BT_LARGE_FLOAT;
-            m_supportVecLocal = MathUtil.TransposeTransformNormal(supportVecWorld, m_worldTrans);
-            //m_supportVecLocal = Vector3.TransformNormal(supportVecWorld, m_worldTrans);
+            m_supportVecLocal = supportVecWorld * m_worldTrans._basis;
+            //m_supportVecLocal = IndexedVector3.TransformNormal(supportVecWorld, m_worldTrans);
 	    }
 
-	    public virtual void ProcessTriangle(Vector3[] triangle,int partId, int triangleIndex)
+	    public virtual void ProcessTriangle(IndexedVector3[] triangle,int partId, int triangleIndex)
 	    {
 		    for (int i=0;i<3;i++)
 		    {
 			    float dot;
-                Vector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
+                IndexedVector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;
@@ -221,13 +222,12 @@ namespace BulletXNA.BulletCollision
 		    }
 	    }
 
-	    public Vector3 GetSupportVertexWorldSpace()
+	    public IndexedVector3 GetSupportVertexWorldSpace()
 	    {
-            return Vector3.Transform(m_supportVertexLocal, m_worldTrans);
-            //return MathUtil.transposeTransformNormal(m_supportVertexLocal, m_worldTrans);
+            return m_worldTrans * m_supportVertexLocal;
 	    }
 
-	    public Vector3 GetSupportVertexLocal()
+	    public IndexedVector3 GetSupportVertexLocal()
 	    {
 		    return m_supportVertexLocal;
 	    }
@@ -240,10 +240,10 @@ namespace BulletXNA.BulletCollision
     public class FilteredCallback : IInternalTriangleIndexCallback
 	{
 		public ITriangleCallback m_callback;
-		public Vector3 m_aabbMin;
-		public Vector3 m_aabbMax;
+		public IndexedVector3 m_aabbMin;
+		public IndexedVector3 m_aabbMax;
 
-		public FilteredCallback(ITriangleCallback callback,ref Vector3 aabbMin,ref Vector3 aabbMax)
+		public FilteredCallback(ITriangleCallback callback,ref IndexedVector3 aabbMin,ref IndexedVector3 aabbMax)
 		{
             m_callback = callback;
             m_aabbMin = aabbMin;
@@ -256,7 +256,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-		public virtual void InternalProcessTriangleIndex(Vector3[] triangle,int partId,int triangleIndex)
+		public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle,int partId,int triangleIndex)
 		{
             if (AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax))
             {
@@ -265,7 +265,6 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                int ibreak = 0;
                 AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax);
             }
 			

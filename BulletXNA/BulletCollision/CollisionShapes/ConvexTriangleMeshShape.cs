@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -50,16 +51,16 @@ namespace BulletXNA.BulletCollision
 		    return m_stridingMesh;
 	    }
 
-	    public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)
+	    public override IndexedVector3 LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
-	        Vector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
+	        IndexedVector3 supVertex = LocalGetSupportingVertexWithoutMargin(ref vec);
 
 	        if (GetMargin() != 0f)
 	        {
-		        Vector3 vecnorm = vec;
+		        IndexedVector3 vecnorm = vec;
 		        if (vecnorm.LengthSquared() < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 		        {
-			        vecnorm = new Vector3(-1f);
+			        vecnorm = new IndexedVector3(-1f);
 		        } 
 		        vecnorm.Normalize();
 		        supVertex+= GetMargin() * vecnorm;
@@ -68,15 +69,15 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec0)
+        public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 vec0)
         {
-	        Vector3 supVec = Vector3.Zero;
+	        IndexedVector3 supVec = IndexedVector3.Zero;
 
-	        Vector3 vec = vec0;
+	        IndexedVector3 vec = vec0;
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+                vec = new IndexedVector3(1, 0, 0);
 	        } 
             else
 	        {
@@ -86,25 +87,25 @@ namespace BulletXNA.BulletCollision
             }
 
 	        LocalSupportVertexCallback supportCallback = new LocalSupportVertexCallback(ref vec);
-	        Vector3 aabbMax = new Vector3(float.MaxValue);
-            Vector3 aabbMin = -aabbMax;
+	        IndexedVector3 aabbMax = new IndexedVector3(float.MaxValue);
+            IndexedVector3 aabbMin = -aabbMax;
 	        m_stridingMesh.InternalProcessAllTriangles(supportCallback,ref aabbMin,ref aabbMax);
 	        supVec = supportCallback.GetSupportVertexLocal();
 
 	        return supVec;
 
         }
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
         {
 	        for (int j=0;j<numVectors;j++)
 	        {
-		        Vector3 vec = vectors[j];
+		        IndexedVector3 vec = vectors[j];
 		        LocalSupportVertexCallback	supportCallback = new LocalSupportVertexCallback(ref vec);
-                Vector3 aabbMax = MathUtil.MAX_VECTOR;
-                Vector3 aabbMin = MathUtil.MIN_VECTOR;
+                IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+                IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 		        m_stridingMesh.InternalProcessAllTriangles(supportCallback,ref aabbMin,ref aabbMax);
-		        supportVerticesOut[j] = new Vector4(supportCallback.GetSupportVertexLocal(),0);
+		        supportVerticesOut[j] = new Vector4(supportCallback.GetSupportVertexLocal().ToVector3(),0);
 	        }
         }
 	
@@ -123,42 +124,42 @@ namespace BulletXNA.BulletCollision
         {
             return 0;
         }
-        public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
+        public override void GetEdge(int i, out IndexedVector3 pa, out IndexedVector3 pb)
         {
             Debug.Assert(false);
-            pa = Vector3.Zero;
-            pb = Vector3.Zero;
+            pa = IndexedVector3.Zero;
+            pb = IndexedVector3.Zero;
         }
-        public override void GetVertex(int i, out Vector3 vtx)
+        public override void GetVertex(int i, out IndexedVector3 vtx)
         {
             Debug.Assert(false);
-            vtx = Vector3.Zero;
+            vtx = IndexedVector3.Zero;
         }
         public override int GetNumPlanes()
         {
             return 0;
         }
 
-        public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
+        public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
         {
             Debug.Assert(false);
-            planeNormal = Vector3.Zero;
-            planeSupport = Vector3.Zero;
+            planeNormal = IndexedVector3.Zero;
+            planeSupport = IndexedVector3.Zero;
         }
 
-        public override bool IsInside(ref Vector3 pt, float tolerance)
+        public override bool IsInside(ref IndexedVector3 pt, float tolerance)
         {
             Debug.Assert(false);
             return false;
         }
 
-        public override void SetLocalScaling(ref Vector3 scaling)
+        public override void SetLocalScaling(ref IndexedVector3 scaling)
         {
             m_stridingMesh.SetScaling(ref scaling);
             RecalcLocalAabb();
         }
 
-        public override Vector3 GetLocalScaling()
+        public override IndexedVector3 GetLocalScaling()
         {
             return m_stridingMesh.GetScaling();
         }
@@ -168,23 +169,23 @@ namespace BulletXNA.BulletCollision
 	    ///by the mass. The resulting transform "principal" has to be applied inversely to the mesh in order for the local coordinate system of the
 	    ///shape to be centered at the center of mass and to coincide with the principal axes. This also necessitates a correction of the world transform
 	    ///of the collision object by the principal transform. This method also computes the volume of the convex mesh.
-        public void CalculatePrincipalAxisTransform(ref Matrix principal, out Vector3 inertia, float volume)
+        public void CalculatePrincipalAxisTransform(ref IndexedMatrix principal, out IndexedVector3 inertia, float volume)
         {
             CenterCallback centerCallback = new CenterCallback();
-            Vector3 aabbMax = MathUtil.MAX_VECTOR;
-            Vector3 aabbMin = MathUtil.MIN_VECTOR;
+            IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+            IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
             m_stridingMesh.InternalProcessAllTriangles(centerCallback, ref aabbMin, ref aabbMax);
-            Vector3 center = centerCallback.GetCenter();
-            principal.Translation = center;
+            IndexedVector3 center = centerCallback.GetCenter();
+            principal._origin = center;
             volume = centerCallback.GetVolume();
 
             InertiaCallback inertiaCallback = new InertiaCallback(ref center);
             m_stridingMesh.InternalProcessAllTriangles(inertiaCallback, ref aabbMax, ref aabbMax);
 
-            Matrix i = inertiaCallback.GetInertia();
-            MathUtil.Diagonalize(ref i, ref principal, 0.00001f, 20);
+            IndexedBasisMatrix i = inertiaCallback.GetInertia();
+            i.Diagonalize(out principal, 0.00001f, 20);
             //i.diagonalize(principal.getBasis(), 0.00001f, 20);
-            inertia = new Vector3(i.M11,i.M22,i.M33);
+            inertia = new IndexedVector3(i[0,0],i[1,1],i[2,2]);
             inertia /= volume;
         }
 
@@ -201,19 +202,18 @@ namespace BulletXNA.BulletCollision
             return false;
         }
 
-	    public LocalSupportVertexCallback(ref Vector3 supportVecLocal)
+	    public LocalSupportVertexCallback(ref IndexedVector3 supportVecLocal)
 	    {
-            m_supportVertexLocal = Vector3.Zero;
+            m_supportVertexLocal = IndexedVector3.Zero;
             m_supportVecLocal = supportVecLocal;
             m_maxDot = float.MinValue;
 	    }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 	    {
 		    for (int i=0;i<3;i++)
 		    {
-			    float dot;
-                Vector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
+			    float dot = m_supportVecLocal.Dot(ref triangle[i]);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;
@@ -222,7 +222,7 @@ namespace BulletXNA.BulletCollision
 		    }
 	    }
     	
-	    public Vector3 GetSupportVertexLocal()
+	    public IndexedVector3 GetSupportVertexLocal()
 	    {
 		    return m_supportVertexLocal;
 	    }
@@ -231,9 +231,9 @@ namespace BulletXNA.BulletCollision
         {
         }
 
-	    private Vector3 m_supportVertexLocal;
+	    private IndexedVector3 m_supportVertexLocal;
 	    public float m_maxDot;
-	    public Vector3 m_supportVecLocal;
+	    public IndexedVector3 m_supportVecLocal;
 
     };
 
@@ -242,8 +242,8 @@ namespace BulletXNA.BulletCollision
         public CenterCallback()
         {
             first = true;
-            reference = new Vector3();
-            sum = new Vector3();
+            reference = new IndexedVector3();
+            sum = new IndexedVector3();
             volume = 0f;
         }
 
@@ -252,7 +252,7 @@ namespace BulletXNA.BulletCollision
             return false;
         }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
             if (first)
             {
@@ -261,16 +261,16 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                Vector3 a = triangle[0] - reference;
-                Vector3 b = triangle[1] - reference;
-                Vector3 c = triangle[2] - reference;
-                float vol = Math.Abs(MathUtil.Vector3Triple(ref a,ref b,ref c));
+                IndexedVector3 a = triangle[0] - reference;
+                IndexedVector3 b = triangle[1] - reference;
+                IndexedVector3 c = triangle[2] - reference;
+                float vol = Math.Abs(a.Triple(ref b,ref c));
                 sum += (.25f * vol) * ((triangle[0] + triangle[1] + triangle[2] + reference));
                 volume += vol;
             }
         }
       
-        public Vector3 GetCenter()
+        public IndexedVector3 GetCenter()
         {
             return (volume > 0) ? sum / volume : reference;
         }
@@ -287,8 +287,8 @@ namespace BulletXNA.BulletCollision
 
 
         bool first;
-        Vector3 reference;
-        Vector3 sum;
+        IndexedVector3 reference;
+        IndexedVector3 sum;
         float volume;
 
     }
@@ -301,49 +301,39 @@ namespace BulletXNA.BulletCollision
             return false;
         }
 
-        public InertiaCallback(ref Vector3 center)
+        public InertiaCallback(ref IndexedVector3 center)
         {
-            m_sum = new Matrix();
+            m_sum = new IndexedBasisMatrix();
             m_center = center;
         }
 
-        public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
-            Matrix i = new Matrix();
-            Vector3 a = triangle[0] - m_center;
-            Vector3 b = triangle[1] - m_center;
-            Vector3 c = triangle[2] - m_center;
-            float volNeg = -Math.Abs(MathUtil.Vector3Triple(ref a,ref b,ref c) * (1f / 6f));
-            for (int j = 0; j < 3; j++)
-            {
+            IndexedBasisMatrix i = new IndexedBasisMatrix();
+            IndexedVector3 a = triangle[0] - m_center;
+            IndexedVector3 b = triangle[1] - m_center;
+            IndexedVector3 c = triangle[2] - m_center;
+            float volNeg = -Math.Abs(a.Triple(ref b, ref c)) * (1.0f / 6.0f);
+             for (int j = 0; j < 3; j++)
+             {
                 for (int k = 0; k <= j; k++)
                 {
-                    float aj = MathUtil.VectorComponent(ref a,j);
-                    float ak = MathUtil.VectorComponent(ref a,k);
-                    float bj = MathUtil.VectorComponent(ref b,j);
-                    float bk = MathUtil.VectorComponent(ref b,k);
-                    float cj = MathUtil.VectorComponent(ref c,j);
-                    float ck = MathUtil.VectorComponent(ref c,k);
-
-                    float temp = volNeg * (.1f * (aj * ak + bj * bk + cj * ck)
-                    + .05f * (aj * bk + ak * bj + aj * ck + ak * cj + bj * ck + bk * cj));
-
-                    MathUtil.MatrixComponent(ref i,j,k,temp);
-                    MathUtil.MatrixComponent(ref i,k,j,temp);
+                   i[j,k] = i[k,j] = volNeg * (0.1f * (a[j] * a[k] + b[j] * b[k] + c[j] * c[k])
+                      + 0.05f * (a[j] * b[k] + a[k] * b[j] + a[j] * c[k] + a[k] * c[j] + b[j] * c[k] + b[k] * c[j]));
                 }
-            }
-            float i00 = -i.M11;
-            float i11 = -i.M22;
-            float i22 = -i.M33;
-            i.M11 = i11 + i22; 
-            i.M22 = i22 + i00; 
-            i.M33 = i00 + i11;
-            m_sum.Right += i.Right;
-            m_sum.Up += i.Up;
-            m_sum.Backward += i.Backward;
+             }
+         float i00 = -i[0][0];
+         float i11 = -i[1][1];
+         float i22 = -i[2][2];
+         i[0,0] = i11 + i22; 
+         i[1,1] = i22 + i00; 
+         i[2,2] = i00 + i11;
+         m_sum[0] += i[0];
+         m_sum[1] += i[1];
+         m_sum[2] += i[2];
         }
 
-        public Matrix GetInertia()
+        public IndexedBasisMatrix GetInertia()
         {
             return m_sum;
         }
@@ -353,8 +343,8 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        Matrix m_sum;
-        Vector3 m_center;
+        IndexedBasisMatrix m_sum;
+        IndexedVector3 m_center;
     }
 
 }

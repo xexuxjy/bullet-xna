@@ -34,19 +34,20 @@ namespace BulletXNA.BulletCollision
     {
         public static void GetPlaneEquation(StaticPlaneShape plane,out Vector4 equation)
         {
-            equation = new Vector4(plane.GetPlaneNormal(),plane.GetPlaneConstant());
+            equation = new Vector4(plane.GetPlaneNormal().ToVector3(),plane.GetPlaneConstant());
 
         }
 
 
-        public static void GetPlaneEquationTransformed(StaticPlaneShape plane,ref Matrix trans, out Vector4 equation)
+        public static void GetPlaneEquationTransformed(StaticPlaneShape plane,ref IndexedMatrix trans, out Vector4 equation)
         {
             equation = new Vector4();
-            Vector3 planeNormal = plane.GetPlaneNormal();
-            equation.X = Vector3.Dot(MathUtil.MatrixRow(ref trans, 0), planeNormal);
-            equation.Y = Vector3.Dot(MathUtil.MatrixRow(ref trans, 1), planeNormal);
-            equation.Z = Vector3.Dot(MathUtil.MatrixRow(ref trans, 2), planeNormal);
-            equation.W = Vector3.Dot(trans.Translation, planeNormal) + plane.GetPlaneConstant();
+            IndexedVector3 planeNormal = plane.GetPlaneNormal();
+
+            equation.X = trans._basis.GetRow(0).Dot(ref planeNormal);
+            equation.Y = trans._basis.GetRow(1).Dot(ref planeNormal);
+            equation.Z = trans._basis.GetRow(2).Dot(ref planeNormal);
+            equation.W = trans._origin.Dot(ref planeNormal) + plane.GetPlaneConstant();
         }
     }
 
@@ -146,8 +147,8 @@ namespace BulletXNA.BulletCollision
 
         protected void AddContactPoint(CollisionObject body0,
                         CollisionObject body1,
-                        Vector3 point,
-                        Vector3 normal,
+                        IndexedVector3 point,
+                        IndexedVector3 normal,
                         float distance)
         {
             AddContactPoint(body0, body1, ref point, ref normal, distance);
@@ -155,8 +156,8 @@ namespace BulletXNA.BulletCollision
 
         protected void AddContactPoint(CollisionObject body0,
                         CollisionObject body1,
-                        ref Vector3 point,
-                        ref Vector3 normal,
+                        ref IndexedVector3 point,
+                        ref IndexedVector3 normal,
                         float distance)
         {
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
@@ -228,8 +229,8 @@ namespace BulletXNA.BulletCollision
                           GImpactMeshShapePart shape1,
                           PairSet pairs, int pair_count)
         {
-            Matrix orgtrans0 = body0.GetWorldTransform();
-            Matrix orgtrans1 = body1.GetWorldTransform();
+            IndexedMatrix orgtrans0 = body0.GetWorldTransform();
+            IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
             PrimitiveTriangle ptri0 = new PrimitiveTriangle();
             PrimitiveTriangle ptri1 = new PrimitiveTriangle();
@@ -281,7 +282,7 @@ namespace BulletXNA.BulletCollision
 
                             AddContactPoint(body0, body1,
                                         contact_data.m_points[j],
-                                        MathUtil.Vector4ToVector3(contact_data.m_separating_normal),
+                                        MathUtil.Vector4ToVector3(ref contact_data.m_separating_normal),
                                         -contact_data.m_penetration_depth);
                         }
                     }
@@ -370,8 +371,8 @@ namespace BulletXNA.BulletCollision
 
 
         protected void GImpactVsGImpactFindPairs(
-                          ref Matrix trans0,
-                          ref Matrix trans1,
+                          ref IndexedMatrix trans0,
+                          ref IndexedMatrix trans1,
                           GImpactShapeInterface shape0,
                           GImpactShapeInterface shape1, PairSet pairset)
         {
@@ -408,8 +409,8 @@ namespace BulletXNA.BulletCollision
         }
 
         protected void GImpactVsShapeFindPairs(
-                          ref Matrix trans0,
-                          ref Matrix trans1,
+                          ref IndexedMatrix trans0,
+                          ref IndexedMatrix trans1,
                           GImpactShapeInterface shape0,
                           CollisionShape shape1,
                           ObjectArray<int> collided_primitives)
@@ -419,10 +420,17 @@ namespace BulletXNA.BulletCollision
 
             if (shape0.HasBoxSet())
             {
-                Matrix trans1to0 = Matrix.Invert(trans0);
+                IndexedMatrix trans1to0 = trans0.Inverse();
                 //trans1to0 *= trans1;
-                trans1to0 = MathUtil.BulletMatrixMultiply(trans1to0, trans1);
+                trans1to0 = trans1to0 * trans1;
+                //trans1to0 = MathUtil.BulletMatrixMultiply(trans1,trans1to0);
                 shape1.GetAabb(ref trans1to0, out boxshape.m_min, out boxshape.m_max);
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+                {
+                    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "GImpactAglo::GImpactVsShapeFindPairs trans1to0", trans1to0);
+                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "box min", boxshape.m_min);
+                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "box max", boxshape.m_max);
+                }
                 shape0.GetBoxSet().BoxQuery(ref boxshape, collided_primitives);
             }
             else
@@ -454,8 +462,8 @@ namespace BulletXNA.BulletCollision
                           GImpactMeshShapePart shape0,
                           StaticPlaneShape shape1, bool swapped)
         {
-            Matrix orgtrans0 = body0.GetWorldTransform();
-            Matrix orgtrans1 = body1.GetWorldTransform();
+            IndexedMatrix orgtrans0 = body0.GetWorldTransform();
+            IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
             Vector4 plane;
             PlaneShape.GetPlaneEquationTransformed(shape1,ref orgtrans1, out plane);
@@ -472,14 +480,14 @@ namespace BulletXNA.BulletCollision
 
             float margin = shape0.GetMargin() + shape1.GetMargin();
 
-            Vector3 vertex;
+            IndexedVector3 vertex;
             int vi = shape0.GetVertexCount();
             while (vi-- != 0)
             {
                 shape0.GetVertex(vi, out vertex);
-                Vector3.Transform(ref vertex, ref orgtrans0, out vertex);
+                vertex = orgtrans0 * vertex;
 
-                float distance = Vector3.Dot(vertex, MathUtil.Vector4ToVector3(plane)) - plane.W - margin;
+                float distance = IndexedVector3.Dot(vertex, MathUtil.Vector4ToVector3(ref plane)) - plane.W - margin;
 
                 if (distance < 0.0f)//add contact
                 {
@@ -494,7 +502,7 @@ namespace BulletXNA.BulletCollision
                     {
                         AddContactPoint(body0, body1,
                             vertex,
-                            MathUtil.Vector4ToVector3(plane),
+                            MathUtil.Vector4ToVector3(ref plane),
                             distance);
                     }
                 }
@@ -651,14 +659,20 @@ namespace BulletXNA.BulletCollision
             }
 
 
-            Matrix orgtrans0 = body0.GetWorldTransform();
-            Matrix orgtrans1 = body1.GetWorldTransform();
+            IndexedMatrix orgtrans0 = body0.GetWorldTransform();
+            IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
             PairSet pairset = new PairSet();
 
             GImpactVsGImpactFindPairs(ref orgtrans0, ref orgtrans1, shape0, shape1, pairset);
 
             if (pairset.Count == 0) return;
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsGImpact [{0}]",pairset.Count);
+            }
 
             if (shape0.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE_PART &&
                 shape1.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE_PART)
@@ -697,12 +711,12 @@ namespace BulletXNA.BulletCollision
 
                 if (child_has_transform0)
                 {
-                    body0.SetWorldTransform(MathUtil.BulletMatrixMultiply(orgtrans0, shape0.GetChildTransform(m_triface0)));
+                    body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(m_triface0));
                 }
 
                 if (child_has_transform1)
                 {
-                    body1.SetWorldTransform(MathUtil.BulletMatrixMultiply(orgtrans1, shape1.GetChildTransform(m_triface1)));
+                    body1.SetWorldTransform(orgtrans1 * shape1.GetChildTransform(m_triface1));
                 }
 
                 //collide two convex shapes
@@ -794,9 +808,9 @@ namespace BulletXNA.BulletCollision
             }
 
 
-            Matrix orgtrans0 = body0.GetWorldTransform();
+            IndexedMatrix orgtrans0 = body0.GetWorldTransform();
 
-            Matrix orgtrans1 = body1.GetWorldTransform();
+            IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
             ObjectArray<int> collided_results = new ObjectArray<int>();
 
@@ -815,6 +829,12 @@ namespace BulletXNA.BulletCollision
 
             int i = collided_results.Count;
 
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape [{0}]", collided_results.Count);
+            }
+
+
             while (i-- != 0)
             {
                 int child_index = collided_results[i];
@@ -827,7 +847,7 @@ namespace BulletXNA.BulletCollision
 
                 if (child_has_transform0)
                 {
-                    body0.SetWorldTransform(MathUtil.BulletMatrixMultiply(orgtrans0, shape0.GetChildTransform(child_index)));
+                    body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(child_index));
                 }
 
                 //collide two shapes
@@ -856,7 +876,7 @@ namespace BulletXNA.BulletCollision
                           GImpactShapeInterface shape0,
                           CompoundShape shape1, bool swapped)
         {
-            Matrix orgtrans1 = body1.GetWorldTransform();
+            IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
@@ -869,7 +889,7 @@ namespace BulletXNA.BulletCollision
             {
 
                 CollisionShape colshape1 = shape1.GetChildShape(i);
-                Matrix childtrans1 = orgtrans1 * shape1.GetChildTransform(i);
+                IndexedMatrix childtrans1 = orgtrans1 * shape1.GetChildTransform(i);
 
                 body1.SetWorldTransform(ref childtrans1);
 
@@ -899,11 +919,11 @@ namespace BulletXNA.BulletCollision
             tricallback.margin = shape1.GetMargin();
 
             //getting the trimesh AABB
-            Matrix gimpactInConcaveSpace;
+            IndexedMatrix gimpactInConcaveSpace;
 
-            gimpactInConcaveSpace = MathUtil.BulletMatrixMultiply(Matrix.Invert(body1.GetWorldTransform()), body0.GetWorldTransform());
+            gimpactInConcaveSpace = body1.GetWorldTransform().Inverse() * body0.GetWorldTransform();
 
-            Vector3 minAABB, maxAABB;
+            IndexedVector3 minAABB, maxAABB;
             shape0.GetAabb(gimpactInConcaveSpace, out minAABB, out maxAABB);
 
             shape1.ProcessAllTriangles(tricallback, ref minAABB, ref maxAABB);
@@ -960,7 +980,7 @@ namespace BulletXNA.BulletCollision
         public bool swapped;
         public float margin;
 
-        public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
+        public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
             TriangleShapeEx tri1 = new TriangleShapeEx(ref triangle[0], ref triangle[1], ref triangle[2]);
             tri1.SetMargin(margin);

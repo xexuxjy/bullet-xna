@@ -24,6 +24,7 @@
 using System;
 using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -60,7 +61,7 @@ namespace BulletXNA.BulletDynamics
 		///By default, Bullet will subdivide the timestep in constant substeps of each 'fixedTimeStep'.
 		///in order to keep the simulation real-time, the maximum number of substeps can be clamped to 'maxSubSteps'.
 		///You can disable subdividing the timestep/substepping by passing maxSubSteps=0 as second argument to stepSimulation, but in that case you have to keep the timeStep constant.
-        ///public override int	stepSimulation(float timeStep,int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.))=0;
+        ///public override int	stepSimulation(float timeStep,int maxSubSteps=1, float fixedTimeStep=float(1.)/float(60.))=0;
         public abstract int StepSimulation(float timeStep, int maxSubSteps);
         public abstract int StepSimulation(float timeStep, int maxSubSteps, float fixedTimeStep);
 
@@ -91,9 +92,9 @@ namespace BulletXNA.BulletDynamics
 
 		//once a rigidbody is added to the dynamics world, it will get this gravity assigned
 		//existing rigidbodies in the world get gravity assigned too, during this method
-		public abstract void SetGravity(ref Vector3 gravity);
+		public abstract void SetGravity(ref IndexedVector3 gravity);
 
-        public abstract Vector3 GetGravity();
+        public abstract IndexedVector3 GetGravity();
 
         public abstract void SynchronizeMotionStates();
 

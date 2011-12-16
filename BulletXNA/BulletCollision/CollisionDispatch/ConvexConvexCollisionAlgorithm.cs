@@ -96,20 +96,20 @@ namespace BulletXNA.BulletCollision
 
             ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
             ConvexShape min1 = body1.GetCollisionShape() as ConvexShape;
-            Vector3 normalOnB = Vector3.Up;
-            Vector3 pointOnBWorld = Vector3.Zero;
+            IndexedVector3 normalOnB = new IndexedVector3(0,1,0);
+            IndexedVector3 pointOnBWorld = IndexedVector3.Zero;
 #if !BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
             if ((min0.GetShapeType() == BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE) && (min1.GetShapeType() == BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE))
             {
                 CapsuleShape capsuleA = min0 as CapsuleShape;
                 CapsuleShape capsuleB = min1 as CapsuleShape;
-                Vector3 localScalingA = capsuleA.GetLocalScaling();
-                Vector3 localScalingB = capsuleB.GetLocalScaling();
+                IndexedVector3 localScalingA = capsuleA.GetLocalScaling();
+                IndexedVector3 localScalingB = capsuleB.GetLocalScaling();
 
                 float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.getHalfHeight(), capsuleA.getRadius(),
-                    capsuleB.getHalfHeight(), capsuleB.getRadius(), capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
+                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.GetHalfHeight(), capsuleA.GetRadius(),
+                    capsuleB.GetHalfHeight(), capsuleB.GetRadius(), capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
                     body0.GetWorldTransform(), body1.GetWorldTransform(), threshold);
 
                 if (dist < threshold)
@@ -171,13 +171,10 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 		PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
 		if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
 		{
-			gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-			
-
 			float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-			float minDist = 0.0f;
-			Vector3 sepNormalWorldSpace;
+            float minDist = float.MinValue;
+			IndexedVector3 sepNormalWorldSpace = new IndexedVector3(0,1,0);
 			bool foundSepAxis  = true;
 
 			if (dispatchInfo.m_enableSatConvex)
@@ -189,8 +186,28 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 					out sepNormalWorldSpace);
 			} else
 			{
-				sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
-				minDist = gjkPairDetector.GetCachedSeparatingDistance();
+
+#if ZERO_MARGIN
+                gjkPairDetector.SetIgnoreMargin(true);
+                gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+
+                gjkPairDetector.GetClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
+#endif
+
+				float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+				if (l2>MathUtil.SIMD_EPSILON)
+				{
+					sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+					//minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();
+					minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.GetMargin()-min1.GetMargin();
+	
+#if ZERO_MARGIN
+					foundSepAxis = true;//gjkPairDetector.getCachedSeparatingDistance()<0.f;
+#else
+					foundSepAxis = gjkPairDetector.GetCachedSeparatingDistance()<(min0.GetMargin()+min1.GetMargin());
+#endif
+                }
 			}
 			if (foundSepAxis)
 			{
@@ -207,27 +224,62 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 			}
 			return;
 
-		} else
+		} 
+        else
 		{
+
 			//we can also deal with convex versus triangle (without connectivity data)
 			if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetShapeType()==BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE)
 			{
-				gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-		
-				Vector3 sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
+                ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
+                TriangleShape tri = polyhedronB as TriangleShape;
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
+                
+                float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+                IndexedVector3 sepNormalWorldSpace = new IndexedVector3(0, 1, 0); ;
+				float minDist = float.MinValue;
+				float maxDist = threshold;
+				
+				bool foundSepAxis = false;
+				if (false)
+				{
+					polyhedronB.InitializePolyhedralFeatures();
+                    foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+					body0.GetWorldTransform(), 
+					body1.GetWorldTransform(),
+					out sepNormalWorldSpace);
+				//	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
 
-				ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
-				TriangleShape tri = polyhedronB as TriangleShape;
-				vertices.Add(Vector3.Transform(tri.m_vertices1[0],body1.GetWorldTransform()));
-				vertices.Add(Vector3.Transform(tri.m_vertices1[1],body1.GetWorldTransform()));
-				vertices.Add(Vector3.Transform(tri.m_vertices1[2],body1.GetWorldTransform()));
+				} else
+				{
+#if ZERO_MARGIN
+					gjkPairDetector.SetIgnoreMargin(true);
+					gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+					gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+#endif//ZERO_MARGIN
+					
+					float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+					if (l2>MathUtil.SIMD_EPSILON)
+					{
+						sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+						//minDist = gjkPairDetector.getCachedSeparatingDistance();
+						//maxDist = threshold;
+						minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.GetMargin()-min1.GetMargin();
+						foundSepAxis = true;
+					}
+				}
 
-				float threshold = m_manifoldPtr.GetContactBreakingThreshold();
-				float minDist = gjkPairDetector.GetCachedSeparatingDistance();
+				
+			if (foundSepAxis)
+			{
 				PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), 
-					body0.GetWorldTransform(), vertices, minDist-threshold, threshold, resultOut);
-				
-				
+					body0.GetWorldTransform(), vertices, minDist-threshold, maxDist, resultOut);
+			}
+								
 				if (m_ownManifold)
 				{
 					resultOut.RefreshContactPoints();
@@ -261,9 +313,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                 //perform perturbation when more then 'm_minimumPointsPerturbationThreshold' points
                 if (m_numPerturbationIterations > 0 && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
                 {
-                    Vector3 v0, v1;
+                    IndexedVector3 v0, v1;
 
-                    Vector3 sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis();
+                    IndexedVector3 sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis();
                     sepNormalWorldSpace.Normalize();
                     TransformUtil.PlaneSpace1(ref sepNormalWorldSpace, out v0, out v1);
 
@@ -287,7 +339,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                         perturbeAngle = angleLimit;
                     }
 
-                    Matrix unPerturbedTransform;
+                    IndexedMatrix unPerturbedTransform;
                     if (perturbeA)
                     {
                         unPerturbedTransform = input.m_transformA;
@@ -302,15 +354,15 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                         if (v0.LengthSquared() > MathUtil.SIMD_EPSILON)
                         {
 
-                            Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0, perturbeAngle);
+                            Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
                             float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                            Quaternion rotq = Quaternion.CreateFromAxisAngle(sepNormalWorldSpace, iterationAngle);
+                            Quaternion rotq = Quaternion.CreateFromAxisAngle(sepNormalWorldSpace.ToVector3(), iterationAngle);
 
                             if (perturbeA)
                             {
-                                //input.m_transformA.setBasis(  btMatrix3x3(rotq.inverse()*perturbeRot*rotq)*body0.getWorldTransform().getBasis());
-                                Quaternion temp = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(ref rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
-                                input.m_transformA = MathUtil.BulletMatrixMultiplyBasis(Matrix.CreateFromQuaternion(temp), body0.GetWorldTransform());
+                                input.m_transformA._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body0.GetWorldTransform()._basis);
+                                input.m_transformB = body1.GetWorldTransform();
+                              
                                 input.m_transformB = body1.GetWorldTransform();
 #if DEBUG_CONTACTS
                                 dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformA, 10.0f);
@@ -319,9 +371,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                             else
                             {
                                 input.m_transformA = body0.GetWorldTransform();
-                                //input.m_transformB.setBasis( btMatrix3x3(rotq.inverse()*perturbeRot*rotq)*body1.getWorldTransform().getBasis());
-                                Quaternion temp = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(ref rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
-                                input.m_transformB = MathUtil.BulletMatrixMultiplyBasis(Matrix.CreateFromQuaternion(temp), body1.GetWorldTransform());
+                                input.m_transformB._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body1.GetWorldTransform()._basis);
 #if DEBUG_CONTACTS
                                 dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformB, 10.0f);
 #endif
@@ -363,8 +413,8 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             ///body0.m_worldTransform,
             float resultFraction = 1.0f;
 
-            float squareMot0 = (body0.GetInterpolationWorldTransform().Translation - body0.GetWorldTransform().Translation).LengthSquared();
-            float squareMot1 = (body1.GetInterpolationWorldTransform().Translation - body1.GetWorldTransform().Translation).LengthSquared();
+            float squareMot0 = (body0.GetInterpolationWorldTransform()._origin - body0.GetWorldTransform()._origin).LengthSquared();
+            float squareMot1 = (body1.GetInterpolationWorldTransform()._origin - body1.GetWorldTransform()._origin).LengthSquared();
 
             if (squareMot0 < body0.GetCcdSquareMotionThreshold() &&
                 squareMot1 < body1.GetCcdSquareMotionThreshold())
@@ -473,19 +523,19 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
         }
 
         public static void SegmentsClosestPoints(
-            out Vector3 ptsVector,
-            out Vector3 offsetA,
-            out Vector3 offsetB,
+            out IndexedVector3 ptsVector,
+            out IndexedVector3 offsetA,
+            out IndexedVector3 offsetB,
             out float tA, out float tB,
-            ref Vector3 translation,
-            ref Vector3 dirA, float hlenA,
-            ref Vector3 dirB, float hlenB)
+            ref IndexedVector3 translation,
+            ref IndexedVector3 dirA, float hlenA,
+            ref IndexedVector3 dirB, float hlenB)
         {
             // compute the parameters of the closest points on each line segment
 
-            float dirA_dot_dirB = Vector3.Dot(dirA, dirB);
-            float dirA_dot_trans = Vector3.Dot(dirA, translation);
-            float dirB_dot_trans = Vector3.Dot(dirB, translation);
+            float dirA_dot_dirB = IndexedVector3.Dot(dirA, dirB);
+            float dirA_dot_trans = IndexedVector3.Dot(dirA, translation);
+            float dirB_dot_trans = IndexedVector3.Dot(dirB, translation);
 
             float denom = 1.0f - dirA_dot_dirB * dirA_dot_dirB;
 
@@ -546,16 +596,16 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
         }
 
         public static float CapsuleCapsuleDistance(
-            ref Vector3 normalOnB,
-            ref Vector3 pointOnB,
+            ref IndexedVector3 normalOnB,
+            ref IndexedVector3 pointOnB,
             float capsuleLengthA,
             float capsuleRadiusA,
             float capsuleLengthB,
             float capsuleRadiusB,
             int capsuleAxisA,
             int capsuleAxisB,
-            Matrix transformA,
-            Matrix transformB,
+            IndexedMatrix transformA,
+            IndexedMatrix transformB,
             float distanceThreshold)
         {
             return CapsuleCapsuleDistance(ref normalOnB, ref pointOnB, capsuleLengthA,
@@ -564,32 +614,32 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
         }
 
         public static float CapsuleCapsuleDistance(
-            ref Vector3 normalOnB,
-            ref Vector3 pointOnB,
+            ref IndexedVector3 normalOnB,
+            ref IndexedVector3 pointOnB,
             float capsuleLengthA,
             float capsuleRadiusA,
             float capsuleLengthB,
             float capsuleRadiusB,
             int capsuleAxisA,
             int capsuleAxisB,
-            ref Matrix transformA,
-            ref Matrix transformB,
+            ref IndexedMatrix transformA,
+            ref IndexedMatrix transformB,
             float distanceThreshold)
         {
-            Vector3 directionA = MathUtil.MatrixColumn(ref transformA, capsuleAxisA);
-            Vector3 translationA = transformA.Translation;
-            Vector3 directionB = MathUtil.MatrixColumn(ref transformB, capsuleAxisB);
-            Vector3 translationB = transformB.Translation;
+            IndexedVector3 directionA = transformA._basis.GetColumn(capsuleAxisA);
+            IndexedVector3 translationA = transformA._origin;
+            IndexedVector3 directionB = transformB._basis.GetColumn(capsuleAxisB);
+            IndexedVector3 translationB = transformB._origin;
 
             // translation between centers
 
-            Vector3 translation = translationB - translationA;
+            IndexedVector3 translation = translationB - translationA;
 
             // compute the closest points of the capsule line segments
 
-            Vector3 ptsVector;           // the vector between the closest points
+            IndexedVector3 ptsVector;           // the vector between the closest points
 
-            Vector3 offsetA, offsetB;    // offsets from segment centers to their closest points
+            IndexedVector3 offsetA, offsetB;    // offsets from segment centers to their closest points
             float tA, tB;              // parameters on line segment
 
             SegmentsClosestPoints(out ptsVector, out offsetA, out offsetB, out tA, out tB, ref translation,
@@ -606,7 +656,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             if (lenSqr <= (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
             {
                 //degenerate case where 2 capsules are likely at the same location: take a vector tangential to 'directionA'
-                Vector3 q;
+                IndexedVector3 q;
                 TransformUtil.PlaneSpace1(ref directionA, out normalOnB, out q);
             }
             else
@@ -614,7 +664,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                 // compute the contact normal
                 normalOnB = ptsVector * -MathUtil.RecipSqrt(lenSqr);
             }
-            pointOnB = transformB.Translation + offsetB + normalOnB * capsuleRadiusB;
+            pointOnB = transformB._origin + offsetB + normalOnB * capsuleRadiusB;
 
             return distance;
         }
@@ -648,14 +698,14 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
     public class PerturbedContactResult : ManifoldResult
     {
         public ManifoldResult m_originalManifoldResult;
-        public Matrix m_transformA;
-        public Matrix m_transformB;
-        public Matrix m_unPerturbedTransform;
+        public IndexedMatrix m_transformA;
+        public IndexedMatrix m_transformB;
+        public IndexedMatrix m_unPerturbedTransform;
         public bool m_perturbA;
         public IDebugDraw m_debugDrawer;
 
 
-        public PerturbedContactResult(ManifoldResult originalResult, ref Matrix transformA, ref Matrix transformB, ref Matrix unPerturbedTransform, bool perturbA, IDebugDraw debugDrawer)
+        public PerturbedContactResult(ManifoldResult originalResult, ref IndexedMatrix transformA, ref IndexedMatrix transformB, ref IndexedMatrix unPerturbedTransform, bool perturbA, IDebugDraw debugDrawer)
         {
             m_originalManifoldResult = originalResult;
             m_transformA = transformA;
@@ -665,31 +715,31 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             m_debugDrawer = debugDrawer;
         }
 
-        public override void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float orgDepth)
+        public override void AddContactPoint(ref IndexedVector3 normalOnBInWorld, ref IndexedVector3 pointInWorld, float orgDepth)
         {
-            Vector3 endPt, startPt;
+            IndexedVector3 endPt, startPt;
             float newDepth;
-            Vector3 newNormal = Vector3.Up;
+            IndexedVector3 newNormal = new IndexedVector3(0, 1, 0);
 
             if (m_perturbA)
             {
-                Vector3 endPtOrg = pointInWorld + normalOnBInWorld * orgDepth;
-                endPt = Vector3.Transform(endPtOrg, (MathUtil.BulletMatrixMultiply(m_unPerturbedTransform, Matrix.Invert(m_transformA))));
-                newDepth = Vector3.Dot((endPt - pointInWorld), normalOnBInWorld);
+                IndexedVector3 endPtOrg = pointInWorld + normalOnBInWorld * orgDepth;
+                endPt = (m_unPerturbedTransform * m_transformA.Inverse()) * (endPtOrg);
+                newDepth = IndexedVector3.Dot((endPt - pointInWorld), normalOnBInWorld);
                 startPt = endPt + normalOnBInWorld * newDepth;
             }
             else
             {
                 endPt = pointInWorld + normalOnBInWorld * orgDepth;
-                startPt = Vector3.Transform(pointInWorld, (MathUtil.BulletMatrixMultiply(m_unPerturbedTransform, Matrix.Invert(m_transformB))));
-                newDepth = Vector3.Dot((endPt - startPt), normalOnBInWorld);
+                startPt = (m_unPerturbedTransform * m_transformB.Inverse()) * (pointInWorld);
+                newDepth = IndexedVector3.Dot((endPt - startPt), normalOnBInWorld);
             }
 
             //#define DEBUG_CONTACTS 1
 #if DEBUG_CONTACTS
-            m_debugDrawer.DrawLine(startPt, endPt, new Vector3(1, 0, 0));
-            m_debugDrawer.DrawSphere(startPt, 0.5f, new Vector3(0, 1, 0));
-            m_debugDrawer.DrawSphere(endPt, 0.5f, new Vector3(0, 0, 1));
+            m_debugDrawer.DrawLine(startPt, endPt, new IndexedVector3(1, 0, 0));
+            m_debugDrawer.DrawSphere(startPt, 0.5f, new IndexedVector3(0, 1, 0));
+            m_debugDrawer.DrawSphere(endPt, 0.5f, new IndexedVector3(0, 0, 1));
 #endif //DEBUG_CONTACTS
 
 
@@ -703,11 +753,11 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 			public void SetShapeIdentifiersA(int partId0,int index0){}
 			public void SetShapeIdentifiersB(int partId1,int index1){}
 
-			public void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+			public void AddContactPoint(IndexedVector3 normalOnBInWorld, IndexedVector3 pointInWorld, float depth)
 			{
 			}
 
-			public void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth) 
+			public void AddContactPoint(ref IndexedVector3 normalOnBInWorld,ref IndexedVector3 pointInWorld,float depth) 
 			{
 			}
 		}

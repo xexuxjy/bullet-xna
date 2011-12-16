@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.GImpactTestDemo</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.JengaDemo</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>
@@ -118,8 +118,11 @@
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\DemoMeshes.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
+    <Compile Include="Demos\FrameRateCounter.cs" />
     <Compile Include="Demos\GImpactTestDemo.cs" />
+    <Compile Include="Demos\InternalEdgeDemo.cs" />
     <Compile Include="Demos\IslandStressDemo.cs" />
+    <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
@@ -186,9 +189,9 @@
       <Project>{4E1937EE-3139-44CB-989D-F050BC099CE6}</Project>
       <Name>BulletXNA-Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="Content\Content.contentproj">
+    <ProjectReference Include="Content\BulletXNADemoContent.contentproj">
       <Project>{19F18FB0-6BA5-4076-9E7E-934437CAC410}</Project>
-      <Name>Content</Name>
+      <Name>BulletXNADemoContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
   </ItemGroup>

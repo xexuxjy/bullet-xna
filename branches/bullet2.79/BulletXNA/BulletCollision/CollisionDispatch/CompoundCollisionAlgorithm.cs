@@ -30,8 +30,8 @@ namespace BulletXNA.BulletCollision
 {
     public class CompoundCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public CompoundCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-            : base(ci, body0, body1)
+        public CompoundCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+            : base(createFunc,ci, body0, body1)
         {
             m_isSwapped = isSwapped;
             m_sharedManifold = ci.GetManifold();
@@ -46,6 +46,7 @@ namespace BulletXNA.BulletCollision
         public override void Cleanup()
         {
             RemoveChildAlgorithms();
+            base.Cleanup();
         }
 
         private void RemoveChildAlgorithms()
@@ -389,7 +390,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(ci, body0, body1, false);
+            return new CompoundCollisionAlgorithm(this,ci, body0, body1, false);
         }
     }
 
@@ -397,7 +398,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(ci, body0, body1, true);
+            return new CompoundCollisionAlgorithm(this,ci, body0, body1, true);
         }
     }
 

@@ -27,19 +27,28 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereTriangleCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public SphereTriangleCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
-            : base(ci, body0, body1)
+        public SphereTriangleCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
+            : base(createFunc,ci, body0, body1)
         {
             m_ownManifold = false;
             m_manifoldPtr = mf;
             m_swapped = swapped;
         }
 
-        public SphereTriangleCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
-            : base(ci)
+        public SphereTriangleCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci)
+            : base(createFunc,ci)
         {
 
         }
+
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
+        {
+            base.Initialize(createFunc, ci, body0, body1);
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_swapped = swapped;
+        }
+
 
         public override void Cleanup()
         {
@@ -110,7 +119,16 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new SphereTriangleCollisionAlgorithm(ci.GetManifold(), ci, body0, body1, m_swapped);
+            SphereTriangleCollisionAlgorithm alg = Aquire() as SphereTriangleCollisionAlgorithm;
+            if (alg == null)
+            {
+                alg = new SphereTriangleCollisionAlgorithm(this, ci.GetManifold(), ci, body0, body1, m_swapped);
+            }
+            else
+            {
+                alg.Initialize(this, ci.GetManifold(), ci, body0, body1, m_swapped);
+            }
+            return alg;
         }
     }
 }

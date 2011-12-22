@@ -25,14 +25,19 @@ namespace BulletXNA.BulletCollision
 {
     public abstract class ActivatingCollisionAlgorithm : CollisionAlgorithm
     {
-        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
-            : base(ci)
+        public ActivatingCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci)
+            : base(createFunc,ci)
         {
         }
 
-        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
-            : base(ci)
+        public ActivatingCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
+            : base(createFunc,ci)
         {
+        }
+
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
+        {
+            base.Initialize(createFunc, ci);
         }
     }
 }

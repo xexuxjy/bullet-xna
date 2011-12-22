@@ -28,9 +28,21 @@ namespace BulletXNA.BulletCollision
 {
     public class Convex2dConvex2dAlgorithm : ActivatingCollisionAlgorithm
     {
-        public Convex2dConvex2dAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
-            : base(ci, body0, body1)
+        public Convex2dConvex2dAlgorithm(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+            : base(createFunc,ci, body0, body1)
         {
+            m_simplexSolver = simplexSolver;
+            m_pdSolver = pdSolver;
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_lowLevelOfDetail = false;
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+        }
+
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(createFunc, ci, body0, body1);
             m_simplexSolver = simplexSolver;
             m_pdSolver = pdSolver;
             m_ownManifold = false;
@@ -256,7 +268,16 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new Convex2dConvex2dAlgorithm(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            Convex2dConvex2dAlgorithm alg = Aquire() as Convex2dConvex2dAlgorithm;
+            if (alg == null)
+            {
+                alg = new Convex2dConvex2dAlgorithm(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            }
+            else
+            {
+                alg.Initialize(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            }
+            return alg;
         }
         IConvexPenetrationDepthSolver m_pdSolver;
         ISimplexSolverInterface m_simplexSolver;

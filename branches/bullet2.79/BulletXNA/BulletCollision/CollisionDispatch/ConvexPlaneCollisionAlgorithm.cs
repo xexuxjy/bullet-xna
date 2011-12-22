@@ -28,8 +28,8 @@ namespace BulletXNA.BulletCollision
 {
     public class ConvexPlaneCollisionAlgorithm : CollisionAlgorithm
     {
-        public ConvexPlaneCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
-            : base(ci)
+        public ConvexPlaneCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+            : base(createFunc,ci)
         {
             m_manifoldPtr = mf;
             m_ownManifold = false;
@@ -45,7 +45,25 @@ namespace BulletXNA.BulletCollision
                 m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj, planeObj);
                 m_ownManifold = true;
             }
+        }
 
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(createFunc, ci);
+            m_manifoldPtr = mf;
+            m_ownManifold = false;
+            m_isSwapped = isSwapped;
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+            CollisionObject convexObj = m_isSwapped ? col1 : col0;
+            CollisionObject planeObj = m_isSwapped ? col0 : col1;
+
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(convexObj, planeObj))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj, planeObj);
+                m_ownManifold = true;
+            }
         }
 
         public override void Cleanup()
@@ -213,14 +231,16 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            if (!m_swapped)
+            ConvexPlaneCollisionAlgorithm alg = Aquire() as ConvexPlaneCollisionAlgorithm;
+            if(alg == null)
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                alg = new ConvexPlaneCollisionAlgorithm(this,null, ci, body0, body1, m_swapped, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
             else
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                alg.Initialize(this, null, ci, body0, body1, m_swapped, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
+            return alg;
         }
     };
 }

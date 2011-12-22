@@ -30,8 +30,8 @@ namespace BulletXNA.BulletCollision
 
     public class ConvexConcaveCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-            : base(ci, body0, body1)
+        public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+            : base(createFunc,ci, body0, body1)
         {
             m_isSwapped = isSwapped;
             m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
@@ -444,7 +444,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, false);
+            return new ConvexConcaveCollisionAlgorithm(this,ci, body0, body1, false);
         }
     }
 
@@ -452,7 +452,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, true);
+            return new ConvexConcaveCollisionAlgorithm(this,ci, body0, body1, true);
         }
     }
 

@@ -43,6 +43,20 @@ namespace BulletXNA.BulletCollision
             PreallocateChildAlgorithms(body0, body1);
         }
 
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            base.Initialize(createFunc, ci, body0, body1);
+            m_isSwapped = isSwapped;
+            m_sharedManifold = ci.GetManifold();
+            m_ownsManifold = false;
+            CollisionObject colObj = m_isSwapped ? body1 : body0;
+            Debug.Assert(colObj.GetCollisionShape().IsCompound());
+            CompoundShape compoundShape = (CompoundShape)(colObj.GetCollisionShape());
+            m_compoundShapeRevision = compoundShape.GetUpdateRevision();
+            PreallocateChildAlgorithms(body0, body1);
+        }
+
+
         public override void Cleanup()
         {
             RemoveChildAlgorithms();
@@ -390,7 +404,16 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(this,ci, body0, body1, false);
+            CompoundCollisionAlgorithm alg = Aquire() as CompoundCollisionAlgorithm;
+            if (alg == null)
+            {
+                alg = new CompoundCollisionAlgorithm(this, ci, body0, body1, false);
+            }
+            else
+            {
+                alg.Initialize(this,ci,body0,body1,false);
+            }
+            return alg;
         }
     }
 
@@ -398,7 +421,16 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(this,ci, body0, body1, true);
+            CompoundCollisionAlgorithm alg = Aquire() as CompoundCollisionAlgorithm;
+            if (alg == null)
+            {
+                alg = new CompoundCollisionAlgorithm(this, ci, body0, body1, true);
+            }
+            else
+            {
+                alg.Initialize(this,ci,body0,body1,true);
+            }
+            return alg;
         }
     }
 

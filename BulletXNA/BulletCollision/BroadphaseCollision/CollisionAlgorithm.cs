@@ -73,17 +73,23 @@ namespace BulletXNA.BulletCollision
 
     ///btCollisionAlgorithm is an collision interface that is compatible with the Broadphase and btDispatcher.
     ///It is persistent over frames
-    public abstract class CollisionAlgorithm
+    public abstract class  CollisionAlgorithm
     {
-
         public CollisionAlgorithm()
         {
             int ibreak = 0;
         }
 
-        public CollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
+        public CollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci)
         {
             m_dispatcher = ci.GetDispatcher();
+            m_createFunc = createFunc;
+        }
+
+        public virtual void Initialize(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci)
+        {
+            m_dispatcher = ci.GetDispatcher();
+            m_createFunc = createFunc;
         }
 
         public abstract void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
@@ -94,6 +100,10 @@ namespace BulletXNA.BulletCollision
 
         public virtual void Cleanup()
         {
+            if (m_createFunc != null)
+            {
+                m_createFunc.Release(this);
+            }
         }
 
         protected int GetDispatcherId()
@@ -102,6 +112,7 @@ namespace BulletXNA.BulletCollision
         }
 
         protected IDispatcher m_dispatcher;
+        protected CollisionAlgorithmCreateFunc m_createFunc;
 
     }
 }

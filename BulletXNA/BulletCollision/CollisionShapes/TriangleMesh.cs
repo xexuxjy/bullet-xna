@@ -44,12 +44,14 @@ namespace BulletXNA.BulletCollision
 
             if (m_use32bitIndices)
             {
+                m_32bitIndices = new ObjectArray<int>();
                 m_indexedMeshes[0].m_numTriangles = m_32bitIndices.Count / 3;
                 m_indexedMeshes[0].m_indexType = PHY_ScalarType.PHY_INTEGER;
                 m_indexedMeshes[0].m_triangleIndexStride = 3;
             }
             else
             {
+                m_16bitIndices = new ObjectArray<short>();
                 m_indexedMeshes[0].m_numTriangles = m_16bitIndices.Count / 3;
                 m_indexedMeshes[0].m_triangleIndexBase = null;
                 m_indexedMeshes[0].m_indexType = PHY_ScalarType.PHY_SHORT;
@@ -58,17 +60,27 @@ namespace BulletXNA.BulletCollision
 
             if (m_use4componentVertices)
             {
+                m_4componentVertices = new ObjectArray<IndexedVector3>();
                 m_indexedMeshes[0].m_numVertices = m_4componentVertices.Count;
                 m_indexedMeshes[0].m_vertexStride = 1;
+                m_indexedMeshes[0].m_vertexBase = m_4componentVertices;
             }
             else
             {
+                m_3componentVertices = new ObjectArray<float>();
                 m_indexedMeshes[0].m_numVertices = m_3componentVertices.Count / 3;
                 m_indexedMeshes[0].m_vertexStride = 3;
+                m_indexedMeshes[0].m_vertexBase = m_3componentVertices;
             }
 
         }
         ///findOrAddVertex is an internal method, use addTriangle instead
+        public int FindOrAddVertex(ref Vector3 vertex, bool removeDuplicateVertices)
+        {
+            IndexedVector3 iv3 = new IndexedVector3(vertex);
+            return FindOrAddVertex(ref iv3,removeDuplicateVertices);
+        }
+
         public int FindOrAddVertex(ref IndexedVector3 vertex, bool removeDuplicateVertices)
         {
             //return index of new/existing vertex
@@ -127,10 +139,9 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                m_16bitIndices.Add((uint)index);
+                m_16bitIndices.Add((short)index);
                 // not really supported yet.
-                Debug.Assert(false);
-                //m_indexedMeshes[0].m_triangleIndexBase = (unsigned char*) &m_16bitIndices[0];
+                m_indexedMeshes[0].m_triangleIndexBase = m_16bitIndices;
             }
         }
 
@@ -147,17 +158,6 @@ namespace BulletXNA.BulletCollision
         ///By default addTriangle won't search for duplicate vertices, because the search is very slow for large triangle meshes.
         ///In general it is better to directly use btTriangleIndexVertexArray instead.
 
-        public void AddTriangle(IndexedVector3 vertex0, IndexedVector3 vertex1, IndexedVector3 vertex2)
-        {
-            AddTriangle(ref vertex0, ref vertex1, ref vertex2);
-        }
-
-        public void AddTriangle(ref IndexedVector3 vertex0, ref IndexedVector3 vertex1, ref IndexedVector3 vertex2)
-        {
-            AddTriangle(ref vertex0, ref vertex1, ref vertex2, false);
-        }
-
-
         public void AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
         {
             AddTriangle(ref vertex0, ref vertex1, ref vertex2);
@@ -165,10 +165,9 @@ namespace BulletXNA.BulletCollision
 
         public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2)
         {
-            AddTriangle(new IndexedVector3(vertex0), new IndexedVector3(vertex1), new IndexedVector3(vertex2));
+            AddTriangle(ref vertex0, ref vertex1, ref vertex2, false);
         }
-
-        public void AddTriangle(ref IndexedVector3 vertex0, ref IndexedVector3 vertex1, ref IndexedVector3 vertex2, bool removeDuplicateVertices)
+        public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2, bool removeDuplicateVertices)
         {
             m_indexedMeshes[0].m_numTriangles++;
             AddIndex(FindOrAddVertex(ref vertex0, removeDuplicateVertices));
@@ -194,10 +193,10 @@ namespace BulletXNA.BulletCollision
             //(void) numindices;
         }
 
-        private ObjectArray<IndexedVector3> m_4componentVertices = new ObjectArray<IndexedVector3>();
-        private ObjectArray<float> m_3componentVertices = new ObjectArray<float>();
-        private ObjectArray<int> m_32bitIndices = new ObjectArray<int>();
-        private ObjectArray<uint> m_16bitIndices = new ObjectArray<uint>();
+        private ObjectArray<IndexedVector3> m_4componentVertices;
+        private ObjectArray<float> m_3componentVertices;
+        private ObjectArray<int> m_32bitIndices;
+        private ObjectArray<short> m_16bitIndices;
         private bool m_use32bitIndices;
         private bool m_use4componentVertices;
 

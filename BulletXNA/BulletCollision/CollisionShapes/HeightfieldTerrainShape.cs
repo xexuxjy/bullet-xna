@@ -94,7 +94,8 @@ namespace BulletXNA.BulletCollision
         protected float m_length;
         protected float m_heightScale;
 
-        protected byte[] m_heightFieldData;
+        protected byte[] m_heightFieldDataByte;
+        protected float[] m_heightFieldDataFloat;
         //union
         //{
         //    unsigned char*	m_heightfieldDataUnsignedChar;
@@ -111,6 +112,56 @@ namespace BulletXNA.BulletCollision
 
         protected IndexedVector3 m_localScaling;
 
+
+        /// preferred constructor
+        /**
+          This constructor supports a range of heightfield
+          data types, and allows for a non-zero minimum height value.
+          heightScale is needed for any integer-based heightfield data types.
+         */
+        public HeightfieldTerrainShape(int heightStickWidth, int heightStickLength,
+                                  byte[] heightfieldData, float heightScale,
+                                  float minHeight, float maxHeight,
+                                  int upAxis, PHY_ScalarType heightDataType,
+                                  bool flipQuadEdges)
+        {
+            Initialize(heightStickWidth, heightStickLength, heightfieldData, heightScale, minHeight, maxHeight, upAxis, heightDataType, flipQuadEdges);
+        }
+
+        /// legacy constructor
+        /**
+          The legacy constructor assumes the heightfield has a minimum height
+          of zero.  Only unsigned char or floats are supported.  For legacy
+          compatibility reasons, heightScale is calculated as maxHeight / 65535 
+          (and is only used when useFloatData = false).
+         */
+        public HeightfieldTerrainShape(int heightStickWidth, int heightStickLength, byte[] heightfieldData, float maxHeight, int upAxis, bool useFloatData, bool flipQuadEdges)
+        {
+            // legacy constructor: support only float or unsigned char,
+            // 	and min height is zero
+            PHY_ScalarType hdt = (useFloatData) ? PHY_ScalarType.PHY_FLOAT : PHY_ScalarType.PHY_UCHAR;
+            float minHeight = 0.0f;
+
+            // previously, height = uchar * maxHeight / 65535.
+            // So to preserve legacy behavior, heightScale = maxHeight / 65535
+            float heightScale = maxHeight / 65535;
+
+            Initialize(heightStickWidth, heightStickLength, heightfieldData,
+                       heightScale, minHeight, maxHeight, upAxis, hdt,
+                       flipQuadEdges);
+
+        }
+
+        public HeightfieldTerrainShape(int heightStickWidth, int heightStickLength,
+                                  float[] heightfieldData, float heightScale,
+                                  float minHeight, float maxHeight,
+                                  int upAxis, bool flipQuadEdges)
+        {
+            Initialize(heightStickWidth, heightStickLength, heightfieldData, heightScale, minHeight, maxHeight, upAxis, PHY_ScalarType.PHY_FLOAT, flipQuadEdges);
+        }
+
+
+
         protected virtual float GetRawHeightFieldValue(int x, int y)
         {
             float val = 0f;
@@ -118,23 +169,32 @@ namespace BulletXNA.BulletCollision
             {
                 case PHY_ScalarType.PHY_FLOAT:
                     {
+                    if(m_heightFieldDataFloat != null)
+                    {
+                            // float offset (4 for sizeof)
+                            int index = ((y * m_heightStickWidth) + x);
+                            val = m_heightFieldDataFloat[index];
+                    }
+                    else
+                    {
                         // float offset (4 for sizeof)
                         int index = ((y * m_heightStickWidth) + x) * 4;
-                        val = BitConverter.ToSingle(m_heightFieldData, index);
+                        val = BitConverter.ToSingle(m_heightFieldDataByte, index);
+                    }
                         break;
                     }
 
                 case PHY_ScalarType.PHY_UCHAR:
                     {
-                        byte heightFieldValue = m_heightFieldData[(y * m_heightStickWidth) + x];
+                        byte heightFieldValue = m_heightFieldDataByte[(y * m_heightStickWidth) + x];
                         val = heightFieldValue * m_heightScale;
                         break;
                     }
 
                 case PHY_ScalarType.PHY_SHORT:
                     {
-                        int index = ((y * m_heightStickWidth) + x)*2;
-                        short hfValue = BitConverter.ToInt16(m_heightFieldData,index);
+                        int index = ((y * m_heightStickWidth) + x) * 2;
+                        short hfValue = BitConverter.ToInt16(m_heightFieldDataByte, index);
                         val = hfValue * m_heightScale;
                         break;
                     }
@@ -147,9 +207,8 @@ namespace BulletXNA.BulletCollision
             }
 
             return val;
-
-
         }
+
         protected void QuantizeWithClamp(int[] output, ref IndexedVector3 point, int isMax)
         {
             /// given input vector, return quantized version
@@ -228,7 +287,7 @@ namespace BulletXNA.BulletCollision
           backwards-compatible without a lot of copy/paste.
          */
         protected void Initialize(int heightStickWidth, int heightStickLength,
-                        byte[] heightfieldData, float heightScale,
+                        Object heightfieldData, float heightScale,
                         float minHeight, float maxHeight, int upAxis,
                         PHY_ScalarType hdt, bool flipQuadEdges)
         {
@@ -252,8 +311,11 @@ namespace BulletXNA.BulletCollision
             m_width = (heightStickWidth - 1);
             m_length = (heightStickLength - 1);
             m_heightScale = heightScale;
-            m_heightFieldData = heightfieldData;
+            // copy the data in 
+            m_heightFieldDataByte = heightfieldData as byte[];
+            m_heightFieldDataFloat = heightfieldData as float[]; 
             m_heightDataType = hdt;
+
             m_flipQuadEdges = flipQuadEdges;
             m_useDiamondSubdivision = false;
             m_upAxis = upAxis;
@@ -294,45 +356,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        /// preferred constructor
-        /**
-          This constructor supports a range of heightfield
-          data types, and allows for a non-zero minimum height value.
-          heightScale is needed for any integer-based heightfield data types.
-         */
-        public HeightfieldTerrainShape(int heightStickWidth, int heightStickLength,
-                                  byte[] heightfieldData, float heightScale,
-                                  float minHeight, float maxHeight,
-                                  int upAxis, PHY_ScalarType heightDataType,
-                                  bool flipQuadEdges)
-        {
-            Initialize(heightStickWidth, heightStickLength, heightfieldData, heightScale, minHeight, maxHeight, upAxis, heightDataType, flipQuadEdges);
-        }
-
-        /// legacy constructor
-        /**
-          The legacy constructor assumes the heightfield has a minimum height
-          of zero.  Only unsigned char or floats are supported.  For legacy
-          compatibility reasons, heightScale is calculated as maxHeight / 65535 
-          (and is only used when useFloatData = false).
-         */
-        public HeightfieldTerrainShape(int heightStickWidth, int heightStickLength, byte[] heightfieldData, float maxHeight, int upAxis, bool useFloatData, bool flipQuadEdges)
-        {
-            // legacy constructor: support only float or unsigned char,
-            // 	and min height is zero
-            PHY_ScalarType hdt = (useFloatData) ? PHY_ScalarType.PHY_FLOAT : PHY_ScalarType.PHY_UCHAR;
-            float minHeight = 0.0f;
-
-            // previously, height = uchar * maxHeight / 65535.
-            // So to preserve legacy behavior, heightScale = maxHeight / 65535
-            float heightScale = maxHeight / 65535;
-
-            Initialize(heightStickWidth, heightStickLength, heightfieldData,
-                       heightScale, minHeight, maxHeight, upAxis, hdt,
-                       flipQuadEdges);
-
-        }
-
+ 
         public void SetUseDiamondSubdivision(bool useDiamondSubdivision)
         {
             m_useDiamondSubdivision = useDiamondSubdivision;

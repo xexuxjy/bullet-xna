@@ -21,6 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+using System.Collections.Generic;
 namespace BulletXNA.BulletCollision
 {
     public abstract class CollisionAlgorithmCreateFunc
@@ -31,6 +32,21 @@ namespace BulletXNA.BulletCollision
             return null;
         }
 
+        public CollisionAlgorithm Aquire()
+        {
+            if (m_pool.Count > 0)
+            {
+                return m_pool.Pop();
+            }
+            return null;
+        }
+
+        public void Release(CollisionAlgorithm collisionAlgorithm)
+        {
+            m_pool.Push(collisionAlgorithm);
+        }
+
+        private Stack<CollisionAlgorithm> m_pool = new Stack<CollisionAlgorithm>();
 
         public bool m_swapped;
     }

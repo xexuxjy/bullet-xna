@@ -31,7 +31,7 @@ namespace BulletXNA.BulletCollision
     public class IndexedMesh
     {
         public int m_numTriangles;
-        public ObjectArray<int> m_triangleIndexBase = new ObjectArray<int>();
+        public Object m_triangleIndexBase;
         public int m_triangleIndexStride;
         public int m_numVertices;
         public Object m_vertexBase = null;

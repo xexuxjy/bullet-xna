@@ -28,8 +28,8 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereSphereCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public SphereSphereCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-            : base(ci, body0, body1)
+        public SphereSphereCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+            : base(createFunc,ci, body0, body1)
         {
             /*
                 if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
@@ -48,8 +48,19 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public SphereSphereCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
-            : base(ci)
+        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            base.Initialize(createFunc, ci, body0, body1);
+            if (m_manifoldPtr == null)
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
+        }
+
+
+        public SphereSphereCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci)
+            : base(createFunc,ci)
         {
 
         }
@@ -145,7 +156,16 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new SphereSphereCollisionAlgorithm(null, ci, body0, body1);
+            SphereSphereCollisionAlgorithm alg = Aquire() as SphereSphereCollisionAlgorithm;
+            if(alg == null)
+            {
+                alg = new SphereSphereCollisionAlgorithm(this,null, ci, body0, body1);
+            }
+            else
+            {
+                alg.Initialize(this,null, ci,body0,body1);
+            }
+            return alg;
         }
     }
 }

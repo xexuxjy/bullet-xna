@@ -691,7 +691,16 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConvexAlgorithm(this,ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            ConvexConvexAlgorithm alg = Aquire() as ConvexConvexAlgorithm;
+            if (alg == null)
+            {
+                alg = new ConvexConvexAlgorithm(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            }
+            else
+            {
+                alg.Initialize(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            }
+            return alg;
         }
 
         public IConvexPenetrationDepthSolver m_pdSolver;

@@ -205,7 +205,7 @@ namespace BulletXNA.BulletDynamics
 				float denom1 = 0f;
 				if (rb0 != null)
 				{
-					vec = IndexedVector3.Cross((solverConstraint.m_angularComponentA), rel_pos1);
+					vec = IndexedVector3.Cross(ref solverConstraint.m_angularComponentA, ref rel_pos1);
 					denom0 = rb0.GetInvMass() + IndexedVector3.Dot(cp.GetNormalWorldOnB(), vec);
 				}
 				if (rb1 != null)
@@ -1092,19 +1092,6 @@ namespace BulletXNA.BulletDynamics
             ///solve all joint constraints
             ///
             int poolSize = m_tmpSolverNonContactConstraintPool.Count;
-            //if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
-            //{
-            //    BulletGlobals.g_streamWriter.WriteLine("PreSolve");
-            //    for (int j = 0; j < poolSize; j++)
-            //    {
-            //        SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[j];
-
-            //        TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, constraint, 777);
-            //    }
-
-            //}
-
-
 
 			//should traverse the contacts random order...
 			{
@@ -1116,22 +1103,6 @@ namespace BulletXNA.BulletDynamics
 				}
 
 			}
-
-            //rawTmpSolverNonContactConstraintPool = m_tmpSolverNonContactConstraintPool.GetRawArray();
-            /////solve all joint constraints
-            /////
-            //poolSize = m_tmpSolverNonContactConstraintPool.Count;
-            //if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
-            //{
-            //    BulletGlobals.g_streamWriter.WriteLine("PostSolve");
-            //    for (int j = 0; j < poolSize; j++)
-            //    {
-            //        SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[j];
-
-            //        TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, constraint, 888);
-            //    }
-            //}
-
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
             {
@@ -1178,22 +1149,9 @@ namespace BulletXNA.BulletDynamics
 			{
 				SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[j];
 
-                //if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
-                //{
-                //    TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, constraint, 999);
-                //}
-
-
 				ResolveSingleConstraintRowGeneric(constraint.m_solverBodyA, constraint.m_solverBodyB, ref constraint);
 				rawTmpSolverNonContactConstraintPool[j] = constraint;
 			}
-
-            //for (int j = 0; j < numConstraints; j++)
-            //{
-            //    constraints[j].SolveConstraintObsolete(constraints[j].GetRigidBodyA(), constraints[j].GetRigidBodyB(), infoGlobal.m_timeStep);
-            //}
-
-
 
 			///solve all contact constraints
 			///

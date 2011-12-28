@@ -122,5 +122,12 @@ namespace BulletXNA
         public const bool debugDispatcher = false;
         public const bool debugManifoldResult = false;
 
+
+        // tracking
+        public static int s_collisionAlgorithmInstanceCount = 0;
+
+
+
+
     }
 }

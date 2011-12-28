@@ -78,12 +78,13 @@ namespace BulletXNA.BulletCollision
 
         public CollisionAlgorithm()
         {
-            int ibreak = 0;
+            ++BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
 
         public CollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
         {
             m_dispatcher = ci.GetDispatcher();
+            ++BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
 
         public abstract void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);

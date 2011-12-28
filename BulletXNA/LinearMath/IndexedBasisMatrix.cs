@@ -21,7 +21,7 @@ namespace BulletXNA.LinearMath
             return new IndexedBasisMatrix(_Row0.X * s.X, _Row0.Y * s.Y, _Row0.Z * s.Z,
                                         _Row1.X * s.X, _Row1.Y * s.Y, _Row1.Z * s.Z,
                                         _Row2.X * s.X, _Row2.Y * s.Y, _Row2.Z * s.Z);
-        
+
         }
 
         public IndexedBasisMatrix Scaled(ref IndexedVector3 s)
@@ -117,123 +117,123 @@ namespace BulletXNA.LinearMath
         }
 
 
-                public float this[int i,int j]
+        public float this[int i, int j]
+        {
+            get
+            {
+                switch (i)
                 {
-                    get
-                    {
-                        switch (i)
+                    case (0):
                         {
-                            case (0):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            return _Row0.X;
-                                        case (1):
-                                            return _Row0.Y;
-                                        case (2):
-                                            return _Row0.Z;
-                                        default:
-                                            break;
-                                    }
+                            switch (j)
+                            {
+                                case (0):
+                                    return _Row0.X;
+                                case (1):
+                                    return _Row0.Y;
+                                case (2):
+                                    return _Row0.Z;
+                                default:
                                     break;
-                                }
-                            case (1):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            return _Row1.X;
-                                        case (1):
-                                            return _Row1.Y;
-                                        case (2):
-                                            return _Row1.Z;
-                                        default:
-                                            break;
-                                    }
-                                    break;
-                                }
-                            case (2):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            return _Row2.X;
-                                        case (1):
-                                            return _Row2.Y;
-                                        case (2):
-                                            return _Row2.Z;
-                                        default:
-                                            break;
-                                    }
-                                    break;
-                                }
+                            }
+                            break;
                         }
-                        Debug.Assert(false);
-                        return 0.0f;
-                }
-                    set
-                    {
-                        switch (i)
+                    case (1):
                         {
-                            case (0):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            _Row0.X = value;
-                                            break;
-                                        case (1):
-                                            _Row0.Y = value;
-                                            break;
-                                        case (2):
-                                            _Row0.Z = value;
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                            switch (j)
+                            {
+                                case (0):
+                                    return _Row1.X;
+                                case (1):
+                                    return _Row1.Y;
+                                case (2):
+                                    return _Row1.Z;
+                                default:
                                     break;
-                                }
-                            case (1):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            _Row1.X = value;
-                                            break;
-                                        case (1):
-                                            _Row1.Y = value;
-                                            break;
-                                        case (2):
-                                            _Row1.Z = value;
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                            }
+                            break;
+                        }
+                    case (2):
+                        {
+                            switch (j)
+                            {
+                                case (0):
+                                    return _Row2.X;
+                                case (1):
+                                    return _Row2.Y;
+                                case (2):
+                                    return _Row2.Z;
+                                default:
                                     break;
-                                }
-                            case (2):
-                                {
-                                    switch (j)
-                                    {
-                                        case (0):
-                                            _Row2.X = value;
-                                            break;
-                                        case (1):
-                                            _Row2.Y = value;
-                                            break;
-                                        case (2):
-                                            _Row2.Z = value;
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    break;
-                                }
+                            }
+                            break;
                         }
                 }
+                Debug.Assert(false);
+                return 0.0f;
+            }
+            set
+            {
+                switch (i)
+                {
+                    case (0):
+                        {
+                            switch (j)
+                            {
+                                case (0):
+                                    _Row0.X = value;
+                                    break;
+                                case (1):
+                                    _Row0.Y = value;
+                                    break;
+                                case (2):
+                                    _Row0.Z = value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                    case (1):
+                        {
+                            switch (j)
+                            {
+                                case (0):
+                                    _Row1.X = value;
+                                    break;
+                                case (1):
+                                    _Row1.Y = value;
+                                    break;
+                                case (2):
+                                    _Row1.Z = value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                    case (2):
+                        {
+                            switch (j)
+                            {
+                                case (0):
+                                    _Row2.X = value;
+                                    break;
+                                case (1):
+                                    _Row2.Y = value;
+                                    break;
+                                case (2):
+                                    _Row2.Z = value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                }
+            }
 
-                }
+        }
 
 
         public IndexedVector3 this[int i]
@@ -303,117 +303,117 @@ namespace BulletXNA.LinearMath
                 matrix1._Row2 != matrix2._Row2;
         }
 
-    public static IndexedVector3 operator *(IndexedBasisMatrix m, IndexedVector3 v) 
-    {
-	    return new IndexedVector3(m._Row0.Dot(ref v), m._Row1.Dot(ref v), m._Row2.Dot(ref v));
-    }
+        public static IndexedVector3 operator *(IndexedBasisMatrix m, IndexedVector3 v)
+        {
+            return new IndexedVector3(m._Row0.Dot(ref v), m._Row1.Dot(ref v), m._Row2.Dot(ref v));
+        }
 
-    public static IndexedVector3 operator *(IndexedVector3 v, IndexedBasisMatrix m)
-    {
-        return new IndexedVector3(m.TDotX(ref v), m.TDotY(ref v), m.TDotZ(ref v));
-    }
+        public static IndexedVector3 operator *(IndexedVector3 v, IndexedBasisMatrix m)
+        {
+            return new IndexedVector3(m.TDotX(ref v), m.TDotY(ref v), m.TDotZ(ref v));
+        }
 
-    public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, IndexedBasisMatrix m2)
-{
-    return new IndexedBasisMatrix(
-        m2.TDotX(ref m1._Row0), m2.TDotY(ref m1._Row0), m2.TDotZ(ref m1._Row0),
-        m2.TDotX(ref m1._Row1), m2.TDotY(ref m1._Row1), m2.TDotZ(ref m1._Row1),
-        m2.TDotX(ref m1._Row2), m2.TDotY(ref m1._Row2), m2.TDotZ(ref m1._Row2));
-}
+        public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, IndexedBasisMatrix m2)
+        {
+            return new IndexedBasisMatrix(
+                m2.TDotX(ref m1._Row0), m2.TDotY(ref m1._Row0), m2.TDotZ(ref m1._Row0),
+                m2.TDotX(ref m1._Row1), m2.TDotY(ref m1._Row1), m2.TDotZ(ref m1._Row1),
+                m2.TDotX(ref m1._Row2), m2.TDotY(ref m1._Row2), m2.TDotZ(ref m1._Row2));
+        }
 
 
-	public void SetEulerZYX(float eulerX,float eulerY,float eulerZ) 
-    { 
-        float ci = (float)Math.Cos(eulerX); 
-		float cj = (float)Math.Cos(eulerY); 
-		float ch = (float)Math.Cos( eulerZ); 
-		float si = (float)Math.Sin(eulerX); 
-		float sj = (float)Math.Sin(eulerY); 
-		float sh = (float)Math.Sin(eulerZ); 
-		float cc = ci * ch; 
-		float cs = ci * sh; 
-		float sc = si * ch; 
-		float ss = si * sh;
+        public void SetEulerZYX(float eulerX, float eulerY, float eulerZ)
+        {
+            float ci = (float)Math.Cos(eulerX);
+            float cj = (float)Math.Cos(eulerY);
+            float ch = (float)Math.Cos(eulerZ);
+            float si = (float)Math.Sin(eulerX);
+            float sj = (float)Math.Sin(eulerY);
+            float sh = (float)Math.Sin(eulerZ);
+            float cc = ci * ch;
+            float cs = ci * sh;
+            float sc = si * ch;
+            float ss = si * sh;
 
-        SetValue(cj * ch, sj * sc - cs, sj * cc + ss,cj * sh, sj * ss + cc, sj * cs - sc,-sj,      cj * si,      cj * ci);
+            SetValue(cj * ch, sj * sc - cs, sj * cc + ss, cj * sh, sj * ss + cc, sj * cs - sc, -sj, cj * si, cj * ci);
 
-    }
+        }
 
-	public float TDotX(ref IndexedVector3 v)
-	{
-		return _Row0.X * v.X + _Row1.X * v.Y + _Row2.X * v.Z;
-	}
-	public float TDotY(ref IndexedVector3 v)
-	{
-		return _Row0.Y * v.X + _Row1.Y * v.Y + _Row2.Y * v.Z;
-	}
-    public float TDotZ(ref IndexedVector3 v)
-	{
-		return _Row0.Z * v.X + _Row1.Z * v.Y + _Row2.Z * v.Z;
-	}
+        public float TDotX(ref IndexedVector3 v)
+        {
+            return _Row0.X * v.X + _Row1.X * v.Y + _Row2.X * v.Z;
+        }
+        public float TDotY(ref IndexedVector3 v)
+        {
+            return _Row0.Y * v.X + _Row1.Y * v.Y + _Row2.Y * v.Z;
+        }
+        public float TDotZ(ref IndexedVector3 v)
+        {
+            return _Row0.Z * v.X + _Row1.Z * v.Y + _Row2.Z * v.Z;
+        }
 
-    public IndexedBasisMatrix Inverse()
-    {
-	    IndexedVector3 co = new IndexedVector3(Cofac(1, 1, 2, 2), Cofac(1, 2, 2, 0), Cofac(1, 0, 2, 1));
-	    float det = this[0].Dot(co);
-	    Debug.Assert(det != 0.0f);
-	    float s = 1.0f / det;
-	    return new IndexedBasisMatrix(co.X * s, Cofac(0, 2, 2, 1) * s, Cofac(0, 1, 1, 2) * s,
-		    co.Y * s, Cofac(0, 0, 2, 2) * s, Cofac(0, 2, 1, 0) * s,
-		    co.Z * s, Cofac(0, 1, 2, 0) * s, Cofac(0, 0, 1, 1) * s);
+        public IndexedBasisMatrix Inverse()
+        {
+            IndexedVector3 co = new IndexedVector3(Cofac(1, 1, 2, 2), Cofac(1, 2, 2, 0), Cofac(1, 0, 2, 1));
+            float det = this[0].Dot(co);
+            Debug.Assert(det != 0.0f);
+            float s = 1.0f / det;
+            return new IndexedBasisMatrix(co.X * s, Cofac(0, 2, 2, 1) * s, Cofac(0, 1, 1, 2) * s,
+                co.Y * s, Cofac(0, 0, 2, 2) * s, Cofac(0, 2, 1, 0) * s,
+                co.Z * s, Cofac(0, 1, 2, 0) * s, Cofac(0, 0, 1, 1) * s);
 
-    }
+        }
 
-	public float Cofac(int r1, int c1, int r2, int c2)
-	{
-        // slow?
-		return this[r1][c1] * this[r2][c2] - this[r1][c2] * this[r2][c1];
-	}
+        public float Cofac(int r1, int c1, int r2, int c2)
+        {
+            // slow?
+            return this[r1][c1] * this[r2][c2] - this[r1][c2] * this[r2][c1];
+        }
 
-    public IndexedBasisMatrix TransposeTimes(IndexedBasisMatrix m)
-    {
-        return new IndexedBasisMatrix(
-    _Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
-    _Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
-    _Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
-    _Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
-    _Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
-    _Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
-    _Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
-    _Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
-    _Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
+        public IndexedBasisMatrix TransposeTimes(IndexedBasisMatrix m)
+        {
+            return new IndexedBasisMatrix(
+        _Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
+        _Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
+        _Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
+        _Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
+        _Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
+        _Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
+        _Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
+        _Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
+        _Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
 
-    }
+        }
 
         public IndexedBasisMatrix TransposeTimes(ref IndexedBasisMatrix m)
         {
             return new IndexedBasisMatrix(
-		_Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
-		_Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
-		_Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
-		_Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
-		_Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
-		_Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
-		_Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
-		_Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
-		_Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
+        _Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
+        _Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
+        _Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
+        _Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
+        _Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
+        _Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
+        _Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
+        _Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
+        _Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
 
         }
 
-        public IndexedBasisMatrix TimesTranspose(IndexedBasisMatrix  m)
+        public IndexedBasisMatrix TimesTranspose(IndexedBasisMatrix m)
         {
-	        return new IndexedBasisMatrix (
-		        _Row0.Dot(m._Row0), _Row0.Dot(m._Row1), _Row0.Dot(m._Row2),
-		        _Row1.Dot(m._Row0), _Row1.Dot(m._Row1), _Row1.Dot(m._Row2),
-		        _Row2.Dot(m._Row0), _Row2.Dot(m._Row1), _Row2.Dot(m._Row2));
+            return new IndexedBasisMatrix(
+                _Row0.Dot(m._Row0), _Row0.Dot(m._Row1), _Row0.Dot(m._Row2),
+                _Row1.Dot(m._Row0), _Row1.Dot(m._Row1), _Row1.Dot(m._Row2),
+                _Row2.Dot(m._Row0), _Row2.Dot(m._Row1), _Row2.Dot(m._Row2));
         }
 
 
         public IndexedBasisMatrix Transpose()
         {
             return new IndexedBasisMatrix(_Row0.X, _Row1.X, _Row2.X,
-		        _Row0.Y, _Row1.Y, _Row2.Y,
-		        _Row0.Z, _Row1.Z, _Row2.Z);
+                _Row0.Y, _Row1.Y, _Row2.Y,
+                _Row0.Z, _Row1.Z, _Row2.Z);
         }
 
 
@@ -425,68 +425,68 @@ namespace BulletXNA.LinearMath
 
         public Quaternion GetRotation()
         {
-         float trace = _Row0.X + _Row1.Y + _Row2.Z;
-		 float[] temp = new float[4];
+            float trace = _Row0.X + _Row1.Y + _Row2.Z;
+            IndexedVector3 temp = new IndexedVector3();
+            float temp2 = 0f;
+            if (trace > 0.0f)
+            {
+                float s = (float)Math.Sqrt(trace + 1.0f);
+                temp2 = (s * 0.5f);
+                s = 0.5f / s;
 
-		if (trace > 0.0f) 
-		{
-            float s = (float)Math.Sqrt(trace + 1.0f);
-			temp[3]=(s * 0.5f);
-			s = 0.5f / s;
+                temp[0] = ((_Row2.Y - _Row1.Z) * s);
+                temp[1] = ((_Row0.Z - _Row2.X) * s);
+                temp[2] = ((_Row1.X - _Row0.Y) * s);
+            }
+            else
+            {
+                int i = _Row0.X < _Row1.Y ?
+                    (_Row1.Y < _Row2.Z ? 2 : 1) :
+                    (_Row0.X < _Row2.Z ? 2 : 0);
+                int j = (i + 1) % 3;
+                int k = (i + 2) % 3;
 
-			temp[0]=((_Row2.Y - _Row1.Z) * s);
-			temp[1]=((_Row0.Z - _Row2.X) * s);
-			temp[2]=((_Row1.X - _Row0.Y) * s);
-		} 
-		else 
-		{
-            int i = _Row0.X < _Row1.Y ?
-                (_Row1.Y < _Row2.Z ? 2 : 1) :
-                (_Row0.X < _Row2.Z ? 2 : 0); 
-			int j = (i + 1) % 3;  
-			int k = (i + 2) % 3;
+                float s = (float)Math.Sqrt(this[i][i] - this[j][j] - this[k][k] + 1.0f);
+                temp[i] = s * 0.5f;
+                s = 0.5f / s;
 
-			float s = (float)Math.Sqrt(this[i][i] - this[j][j] - this[k][k] + 1.0f);
-			temp[i] = s * 0.5f;
-			s = 0.5f / s;
-
-            temp[3] = (this[k][j] - this[j][k]) * s;
-            temp[j] = (this[j][i] + this[i][j]) * s;
-            temp[k] = (this[k][i] + this[i][k]) * s;
-		}
-		return new Quaternion(temp[0],temp[1],temp[2],temp[3]);
+                temp2 = (this[k][j] - this[j][k]) * s;
+                temp[j] = (this[j][i] + this[i][j]) * s;
+                temp[k] = (this[k][i] + this[i][k]) * s;
+            }
+            return new Quaternion(temp[0], temp[1], temp[2], temp2);
 
         }
 
 
 
-	public void SetRotation(Quaternion q) 
-	{
-		float d = q.LengthSquared();
-		Debug.Assert(d != 0.0f);
-		float s = 2.0f / d;
-		float xs = q.X * s,   ys = q.Y * s,   zs = q.Z * s;
-		float wx = q.W * xs,  wy = q.W * ys,  wz = q.W * zs;
-		float xx = q.X * xs,  xy = q.X * ys,  xz = q.X * zs;
-		float yy = q.Y * ys,  yz = q.Y * zs,  zz = q.Z * zs;
-		SetValue(1.0f - (yy + zz), xy - wz, xz + wy,
-			xy + wz, 1.0f - (xx + zz), yz - wx,
-			xz - wy, yz + wx, 1.0f - (xx + yy));
-	}
+        public void SetRotation(Quaternion q)
+        {
+            float d = q.LengthSquared();
+            Debug.Assert(d != 0.0f);
+            float s = 2.0f / d;
+            float xs = q.X * s, ys = q.Y * s, zs = q.Z * s;
+            float wx = q.W * xs, wy = q.W * ys, wz = q.W * zs;
+            float xx = q.X * xs, xy = q.X * ys, xz = q.X * zs;
+            float yy = q.Y * ys, yz = q.Y * zs, zz = q.Z * zs;
+            SetValue(1.0f - (yy + zz), xy - wz, xz + wy,
+                xy + wz, 1.0f - (xx + zz), yz - wx,
+                xz - wy, yz + wx, 1.0f - (xx + yy));
+        }
 
-    public void SetRotation(ref Quaternion q)
-    {
-        float d = q.LengthSquared();
-        Debug.Assert(d != 0.0f);
-        float s = 2.0f / d;
-        float xs = q.X * s, ys = q.Y * s, zs = q.Z * s;
-        float wx = q.W * xs, wy = q.W * ys, wz = q.W * zs;
-        float xx = q.X * xs, xy = q.X * ys, xz = q.X * zs;
-        float yy = q.Y * ys, yz = q.Y * zs, zz = q.Z * zs;
-        SetValue(1.0f - (yy + zz), xy - wz, xz + wy,
-            xy + wz, 1.0f - (xx + zz), yz - wx,
-            xz - wy, yz + wx, 1.0f - (xx + yy));
-    }
+        public void SetRotation(ref Quaternion q)
+        {
+            float d = q.LengthSquared();
+            Debug.Assert(d != 0.0f);
+            float s = 2.0f / d;
+            float xs = q.X * s, ys = q.Y * s, zs = q.Z * s;
+            float wx = q.W * xs, wy = q.W * ys, wz = q.W * zs;
+            float xx = q.X * xs, xy = q.X * ys, xz = q.X * zs;
+            float yy = q.Y * ys, yz = q.Y * zs, zz = q.Z * zs;
+            SetValue(1.0f - (yy + zz), xy - wz, xz + wy,
+                xy + wz, 1.0f - (xx + zz), yz - wx,
+                xz - wy, yz + wx, 1.0f - (xx + yy));
+        }
 
 
 
@@ -570,10 +570,10 @@ namespace BulletXNA.LinearMath
                 // apply rotation to rot (rot = rot * J)
                 for (int i = 0; i < 3; i++)
                 {
-                    mrp = this[i,p];
-                    mrq = this[i,q];
-                    this[i,p] = cos * mrp - sin * mrq;
-                    this[i,q] = cos * mrq + sin * mrp;
+                    mrp = this[i, p];
+                    mrq = this[i, q];
+                    this[i, p] = cos * mrp - sin * mrq;
+                    this[i, q] = cos * mrq + sin * mrp;
                 }
             }
         }

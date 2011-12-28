@@ -503,8 +503,21 @@ namespace BulletXNA.LinearMath
         {
             return X < Y ? (Y < Z ? 0 : 2) : (X < Z ? 1 : 2);
         }
- 
-        
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator Vector3(IndexedVector3 v)
+        {
+            return new Vector3(v.X, v.Y, v.Z);
+        }
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator IndexedVector3(Vector3 v)
+        {
+            return new IndexedVector3(v.X, v.Y, v.Z);
+        }
+
+
+
         private static IndexedVector3 _zero = new IndexedVector3();
         private static IndexedVector3 _one = new IndexedVector3(1);
 

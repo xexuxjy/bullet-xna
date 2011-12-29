@@ -925,6 +925,13 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
         }
 
+        public void Initialize(ref IndexedVector3 rayFromWorld, ref IndexedVector3 rayToWorld)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+        }
+
+
         public IndexedVector3 m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
         public IndexedVector3 m_rayToWorld;
 

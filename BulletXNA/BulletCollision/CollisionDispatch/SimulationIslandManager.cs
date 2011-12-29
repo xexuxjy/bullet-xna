@@ -128,7 +128,8 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 			{
 				collisionObject.SetIslandTag( m_unionFind.Find(index) );
 				//Set the correct object offset in Collision Object Array
-				m_unionFind.GetElement(index).m_sz = i;
+                //m_unionFind.GetElement(index).m_sz = i;
+                m_unionFind.SetElementSize(index, i);
 				collisionObject.SetCompanionId(-1);
 				index++;
 			} else

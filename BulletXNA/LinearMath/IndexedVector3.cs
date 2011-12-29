@@ -211,6 +211,44 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
+        public static IndexedVector3 operator +(Vector3 value1, IndexedVector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X + value2.X;
+            vector.Y = value1.Y + value2.Y;
+            vector.Z = value1.Z + value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator +(IndexedVector3 value1, Vector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X + value2.X;
+            vector.Y = value1.Y + value2.Y;
+            vector.Z = value1.Z + value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator -(Vector3 value1, IndexedVector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X - value2.X;
+            vector.Y = value1.Y - value2.Y;
+            vector.Z = value1.Z - value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator -(IndexedVector3 value1, Vector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X - value2.X;
+            vector.Y = value1.Y - value2.Y;
+            vector.Z = value1.Z - value2.Z;
+            return vector;
+        }
+
+
+
         public static IndexedVector3 operator -(IndexedVector3 value1, IndexedVector3 value2)
         {
             IndexedVector3 vector;
@@ -372,7 +410,7 @@ namespace BulletXNA.LinearMath
         }
 
 
-
+        // FIXME - try this as a switch??
         public float this[int i]
         {
             get
@@ -454,6 +492,25 @@ namespace BulletXNA.LinearMath
             }
         }
 
+        public static IndexedVector3 Up
+        {
+            get
+            {
+                return IndexedVector3._up;
+            }
+        }
+
+        public static IndexedVector3 Down
+        {
+            get
+            {
+                return -IndexedVector3._up;
+            }
+        }
+
+
+
+
 
 
         public float Dot(ref IndexedVector3 v)
@@ -533,6 +590,7 @@ namespace BulletXNA.LinearMath
 
         private static IndexedVector3 _zero = new IndexedVector3();
         private static IndexedVector3 _one = new IndexedVector3(1);
+        private static IndexedVector3 _up = new IndexedVector3(0,1,0);
 
 
         public float X;

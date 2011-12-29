@@ -28,6 +28,29 @@ namespace BulletXNA.LinearMath
             return matrix;
         }
 
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator Matrix(IndexedMatrix im)
+        {
+            Matrix matrix = Matrix.Identity;
+            matrix.Right = im._basis.GetColumn(0).ToVector3();
+            matrix.Up = im._basis.GetColumn(1).ToVector3();
+            matrix.Backward = im._basis.GetColumn(2).ToVector3();
+            matrix.Translation = im._origin.ToVector3();
+            return matrix;
+        }
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator IndexedMatrix(Matrix m)
+        {
+            IndexedMatrix im = new IndexedMatrix();
+            im._origin = new IndexedVector3(m.Translation);
+            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
+            im._basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
+            return im;
+        }
+
+
+
         public Matrix ToMatrixProjection()
         {
             Matrix matrix = Matrix.Identity;
@@ -417,6 +440,8 @@ namespace BulletXNA.LinearMath
             i._basis.SetRotation(ref q);
             return i;
         }
+
+
 
         public IndexedBasisMatrix _basis;
         public IndexedVector3 _origin;

@@ -37,7 +37,7 @@ namespace BulletXNADemos.Demos
     public class DemoApplication : Microsoft.Xna.Framework.Game
     {
         protected int numiterations = 0;
-        protected int maxiterations = 0;
+        protected int maxiterations = 500;
         protected IProfileManager m_profileManager;
         protected IProfileIterator m_profileIterator;
         protected IDebugDraw m_debugDraw;
@@ -83,7 +83,6 @@ namespace BulletXNADemos.Demos
         protected CollisionShape m_shootBoxShape;
 
         protected float m_cameraDistance;
-        protected DebugDrawModes m_debugMode;
 
         protected float m_pitch;
         protected float m_yaw;
@@ -235,7 +234,7 @@ namespace BulletXNADemos.Demos
 		        {
                     case 0:
                         {
-                            m_shapeDrawer.DrawXNA(ref m, colObj.GetCollisionShape(), ref wireColor, GetDebugMode(), ref min, ref max, ref m_lookAt, ref m_perspective);
+                            m_shapeDrawer.DrawXNA(ref m, colObj.GetCollisionShape(), ref wireColor, m_debugDraw.GetDebugMode(), ref min, ref max, ref m_lookAt, ref m_perspective);
                             break;
                         }
                     case 1:
@@ -283,7 +282,6 @@ namespace BulletXNADemos.Demos
             m_pickConstraint = null;
             m_shootBoxShape = null;
             m_cameraDistance = 30f;
-            m_debugMode = 0;
             m_pitch =(20f/360f)*MathUtil.SIMD_2_PI;
             m_yaw = 0f;
             m_cameraPosition = IndexedVector3.Zero;
@@ -329,7 +327,7 @@ namespace BulletXNADemos.Demos
             //#ifndef BT_NO_PROFILE
             //    CProfileManager::Release_Iterator(m_profileIterator);
             //#endif //BT_NO_PROFILE
-
+            int i = BulletGlobals.s_collisionAlgorithmInstanceCount;
             m_shootBoxShape = null;
             m_shapeDrawer = null;
         }
@@ -443,20 +441,6 @@ namespace BulletXNADemos.Demos
         public bool GetShadows()
         {
             return m_enableshadows;
-        }
-
-        //----------------------------------------------------------------------------------------------
-
-        public DebugDrawModes GetDebugMode()
-        {
-            return m_debugMode;
-        }
-
-        //----------------------------------------------------------------------------------------------
-
-        public void SetDebugMode(DebugDrawModes mode)
-        {
-            m_debugMode = mode;
         }
 
         //----------------------------------------------------------------------------------------------
@@ -888,6 +872,8 @@ namespace BulletXNADemos.Demos
             }
 #endif //BT_NO_PROFILE
 
+            DebugDrawModes debugMode = m_debugDraw.GetDebugMode();
+
             switch (key)
             {
                 case Keys.Q:
@@ -905,83 +891,83 @@ namespace BulletXNADemos.Demos
                 case Keys.G: m_enableshadows = !m_enableshadows; break;
                 case Keys.U: m_shapeDrawer.EnableTexture(!m_shapeDrawer.EnableTexture(false)); break;
                 case Keys.H:
-                    if ((m_debugMode & DebugDrawModes.DBG_NoHelpText) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_NoHelpText);
+                    if ((debugMode & DebugDrawModes.DBG_NoHelpText) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_NoHelpText);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_NoHelpText;
+                        debugMode |= DebugDrawModes.DBG_NoHelpText;
                     break;
 
                 case Keys.W:
-                    if ((m_debugMode & DebugDrawModes.DBG_DrawWireframe) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawWireframe);
+                    if ((debugMode & DebugDrawModes.DBG_DrawWireframe) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DrawWireframe);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DrawWireframe;
+                        debugMode |= DebugDrawModes.DBG_DrawWireframe;
                     break;
 
                 case Keys.P:
-                    if ((m_debugMode & DebugDrawModes.DBG_ProfileTimings) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_ProfileTimings);
+                    if ((debugMode & DebugDrawModes.DBG_ProfileTimings) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_ProfileTimings);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_ProfileTimings;
+                        debugMode |= DebugDrawModes.DBG_ProfileTimings;
                     break;
 
                 case Keys.M:
-                    if ((m_debugMode & DebugDrawModes.DBG_EnableSatComparison) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_EnableSatComparison);
+                    if ((debugMode & DebugDrawModes.DBG_EnableSatComparison) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_EnableSatComparison);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_EnableSatComparison;
+                        debugMode |= DebugDrawModes.DBG_EnableSatComparison;
                     break;
 
                 case Keys.N:
-                    if ((m_debugMode & DebugDrawModes.DBG_DisableBulletLCP) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DisableBulletLCP);
+                    if ((debugMode & DebugDrawModes.DBG_DisableBulletLCP) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DisableBulletLCP);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DisableBulletLCP;
+                        debugMode |= DebugDrawModes.DBG_DisableBulletLCP;
                     break;
 
                 case Keys.T:
-                    if ((m_debugMode & DebugDrawModes.DBG_DrawText) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawText);
+                    if ((debugMode & DebugDrawModes.DBG_DrawText) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DrawText);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DrawText;
+                        debugMode |= DebugDrawModes.DBG_DrawText;
                     break;
                 case Keys.Y:
-                    if ((m_debugMode & DebugDrawModes.DBG_DrawFeaturesText) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawFeaturesText);
+                    if ((debugMode & DebugDrawModes.DBG_DrawFeaturesText) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DrawFeaturesText);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DrawFeaturesText;
+                        debugMode |= DebugDrawModes.DBG_DrawFeaturesText;
                     break;
                 case Keys.A:
-                    if ((m_debugMode & DebugDrawModes.DBG_DrawAabb) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawAabb);
+                    if ((debugMode & DebugDrawModes.DBG_DrawAabb) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DrawAabb);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DrawAabb;
+                        debugMode |= DebugDrawModes.DBG_DrawAabb;
                     break;
                 case Keys.C:
-                    if ((m_debugMode & DebugDrawModes.DBG_DrawContactPoints) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawContactPoints);
+                    if ((debugMode & DebugDrawModes.DBG_DrawContactPoints) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_DrawContactPoints);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_DrawContactPoints;
+                        debugMode |= DebugDrawModes.DBG_DrawContactPoints;
                     break;
                 //case 'C' : 
-                //    if (m_debugMode & DebugDrawModes.DBG_DrawConstraints)
-                //        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawConstraints);
+                //    if (debugMode & DebugDrawModes.DBG_DrawConstraints)
+                //        debugMode = debugMode & (~DebugDrawModes.DBG_DrawConstraints);
                 //    else
-                //        m_debugMode |= DebugDrawModes.DBG_DrawConstraints;
+                //        debugMode |= DebugDrawModes.DBG_DrawConstraints;
                 //    break;
                 //case 'L' : 
-                //    if (m_debugMode & DebugDrawModes.DBG_DrawConstraintLimits)
-                //        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_DrawConstraintLimits);
+                //    if (debugMode & DebugDrawModes.DBG_DrawConstraintLimits)
+                //        debugMode = debugMode & (~DebugDrawModes.DBG_DrawConstraintLimits);
                 //    else
-                //        m_debugMode |= DebugDrawModes.DBG_DrawConstraintLimits;
+                //        debugMode |= DebugDrawModes.DBG_DrawConstraintLimits;
                 //    break;
 
                 case Keys.D:
-                    if ((m_debugMode & DebugDrawModes.DBG_NoDeactivation) != 0)
-                        m_debugMode = m_debugMode & (~DebugDrawModes.DBG_NoDeactivation);
+                    if ((debugMode & DebugDrawModes.DBG_NoDeactivation) != 0)
+                        debugMode = debugMode & (~DebugDrawModes.DBG_NoDeactivation);
                     else
-                        m_debugMode |= DebugDrawModes.DBG_NoDeactivation;
-                    if ((m_debugMode & DebugDrawModes.DBG_NoDeactivation) != 0)
+                        debugMode |= DebugDrawModes.DBG_NoDeactivation;
+                    if ((debugMode & DebugDrawModes.DBG_NoDeactivation) != 0)
                     {
                         BulletGlobals.gDisableDeactivation = true;
                     }
@@ -1003,10 +989,10 @@ namespace BulletXNADemos.Demos
                     break;
                 case Keys.D1:
                     {
-                        if ((m_debugMode & DebugDrawModes.DBG_EnableCCD) != 0)
-                            m_debugMode = m_debugMode & (~DebugDrawModes.DBG_EnableCCD);
+                        if ((debugMode & DebugDrawModes.DBG_EnableCCD) != 0)
+                            debugMode = debugMode & (~DebugDrawModes.DBG_EnableCCD);
                         else
-                            m_debugMode |= DebugDrawModes.DBG_EnableCCD;
+                            debugMode |= DebugDrawModes.DBG_EnableCCD;
                         break;
                     }
 
@@ -1069,9 +1055,9 @@ namespace BulletXNADemos.Demos
                     break;
             }
 
-            if (GetDynamicsWorld() != null && GetDynamicsWorld().GetDebugDrawer() != null)
+            if (m_debugDraw != null)
             {
-                GetDynamicsWorld().GetDebugDrawer().SetDebugMode(m_debugMode);
+                m_debugDraw.SetDebugMode(debugMode);
             }
         }
 
@@ -1624,10 +1610,11 @@ namespace BulletXNADemos.Demos
             //BasicEffect basicEffect = new BasicEffect(GraphicsDevice, null);
             //m_debugDraw = new DefaultDebugDraw(vertexDeclaration,basicEffect);
 
-            //m_debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
-            m_debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            //debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;
+            m_debugDraw.SetDebugMode(debugMode);
             BulletGlobals.gDebugDraw = m_debugDraw;
             m_shapeDrawer.LoadContent();
             m_shapeDrawer.EnableTexture(true);

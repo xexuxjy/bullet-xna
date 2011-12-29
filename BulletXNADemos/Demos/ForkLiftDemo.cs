@@ -500,7 +500,7 @@ namespace BulletXNADemos.Demos
                 m_vehicle.UpdateWheelTransform(i, true);
                 //draw wheels (cylinders)
                 IndexedMatrix m = m_vehicle.GetWheelInfo(i).m_worldTransform;
-                m_shapeDrawer.DrawXNA(ref m, m_wheelShape, ref wheelColor, GetDebugMode(), ref worldBoundsMin, ref worldBoundsMax, ref m_lookAt, ref m_perspective);
+                m_shapeDrawer.DrawXNA(ref m, m_wheelShape, ref wheelColor, m_debugDraw.GetDebugMode(), ref worldBoundsMin, ref worldBoundsMax, ref m_lookAt, ref m_perspective);
             }
             base.RenderSceneAll(gameTime);
         }

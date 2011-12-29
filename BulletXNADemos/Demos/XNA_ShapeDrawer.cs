@@ -54,7 +54,7 @@ namespace BulletXNADemos.Demos
     public class XNA_ShapeDrawer : IDebugDraw
     {
 
-        public XNA_ShapeDrawer(DemoApplication game)
+        public XNA_ShapeDrawer(Game game)
         {
             m_game = game;
         }
@@ -700,13 +700,23 @@ namespace BulletXNADemos.Demos
 
         public void RenderStandard(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
+            RenderStandard(gameTime, ref view, ref projection, true);
+        }
+
+        public void RenderStandard(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection, bool clear)
+        {
             // Always clear?
-            m_game.GraphicsDevice.Clear(Color.CornflowerBlue);
+            if (clear)
             {
-				DrawPrimitives(gameTime, ref view, ref projection);
+                m_game.GraphicsDevice.Clear(Color.CornflowerBlue);
+            }
+
+            {
+                DrawPrimitives(gameTime, ref view, ref projection);
                 m_texturedVertexCount = 0;
             }
         }
+
 
         public void RenderOthers(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection)
         {
@@ -907,12 +917,12 @@ namespace BulletXNADemos.Demos
 
         public void SetDebugMode(DebugDrawModes debugMode)
         {
-            m_game.SetDebugMode(debugMode);
+            m_debugDrawModes = debugMode;
         }
 
         public DebugDrawModes GetDebugMode()
         {
-            return m_game.GetDebugMode();
+            return m_debugDrawModes;
         }
 
         public void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
@@ -1121,6 +1131,8 @@ namespace BulletXNADemos.Demos
         private Model m_lightModel;
         private Texture2D m_lightTexture;
 
+        private DebugDrawModes m_debugDrawModes;
+
 		private Texture2D GetTexture(ref IndexedVector3 color)
 		{
 			if(!m_colorMap.ContainsKey(color))
@@ -1149,7 +1161,7 @@ namespace BulletXNADemos.Demos
 		private Viewport m_pipViewport;
         private Viewport m_defaultViewport;
 
-        private DemoApplication m_game;
+        private Game m_game;
 		//private BasicEffect m_lightEffect;
 		private BasicEffect m_debugEffect;
 		private BasicEffect m_modelEffect;
@@ -1276,7 +1288,7 @@ namespace BulletXNADemos.Demos
         }
 
         private XNA_ShapeDrawer m_shapeDrawer;
-
+        
 
 
     }

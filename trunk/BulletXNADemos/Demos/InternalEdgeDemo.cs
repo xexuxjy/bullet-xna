@@ -177,7 +177,7 @@ namespace BulletXNADemos.Demos
 
 	        //enable custom material callback
 	        staticBody.SetCollisionFlags(staticBody.GetCollisionFlags()  | CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-	        SetDebugMode(DebugDrawModes.DBG_DrawText|DebugDrawModes.DBG_NoHelpText|DebugDrawModes.DBG_DrawWireframe|DebugDrawModes.DBG_DrawContactPoints);
+            m_debugDraw.SetDebugMode(DebugDrawModes.DBG_DrawText | DebugDrawModes.DBG_NoHelpText | DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawContactPoints);
 
 
 

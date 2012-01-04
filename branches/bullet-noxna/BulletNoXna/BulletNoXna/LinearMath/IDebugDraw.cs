@@ -22,12 +22,12 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.LinearMath
 {
     public interface IDebugDraw
     {
+        void DrawText(String text, Vector3 location, Vector3 color);
         void DrawLine(Vector3 from, Vector3 to, Vector3 fromColor);
         void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor);
         void DrawLine(ref Vector3 from, ref Vector3 to, ref Vector3 fromColor, ref Vector3 toColor);

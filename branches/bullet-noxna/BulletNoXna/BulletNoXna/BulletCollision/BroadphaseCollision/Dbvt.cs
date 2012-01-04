@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -519,7 +518,7 @@ namespace BulletXNA.BulletCollision
             //DBVT_CHECKTYPE
             if (root != null)
             {
-                Vector3 resultNormal = Vector3.Up;
+                Vector3 resultNormal = new Vector3(0,1,0);
 
                 int depth = 1;
                 int treshold = DOUBLE_STACKSIZE - 2;

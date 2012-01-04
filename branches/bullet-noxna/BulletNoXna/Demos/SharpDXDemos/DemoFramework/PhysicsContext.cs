@@ -2,7 +2,7 @@
 using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace DemoFramework
 {
@@ -100,7 +100,7 @@ namespace DemoFramework
             return body;
         }
 
-        public virtual void ShootBox(Microsoft.Xna.Framework.Vector3 camPos, Microsoft.Xna.Framework.Vector3 destination)
+        public virtual void ShootBox(Vector3 camPos, Vector3 destination)
         {
             if (World == null)
                 return;

@@ -20,183 +20,299 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-
+#define TEST_INTERNAL_OBJECTS
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
 
 
-public class Face
-{
-	public ObjectArray<int>	m_indices = new ObjectArray<int>();
-	public ObjectArray<int>	m_connectedFaces = new ObjectArray<int>();
-	public float[]	m_plane = new float[4];
-}
-
-
-public class ConvexPolyhedron
-{
-	public ConvexPolyhedron()
+    public class Face
     {
-    }
-	public virtual void Cleanup()
-    {
-
+        public ObjectArray<int> m_indices = new ObjectArray<int>();
+        //public ObjectArray<int>	m_connectedFaces = new ObjectArray<int>();
+        public float[] m_plane = new float[4];
     }
 
 
-	public void	Initialize()
+    public class ConvexPolyhedron
     {
-	Dictionary<InternalVertexPair,InternalEdge> edges = new Dictionary<InternalVertexPair,InternalEdge>();
+        public ConvexPolyhedron()
+        {
+        }
+        public virtual void Cleanup()
+        {
 
-	float TotalArea = 0.0f;
-	
-	m_localCenter = Vector3.Zero;
-	for(int i=0;i<m_faces.Count;i++)
+        }
+
+
+        public void Initialize()
+        {
+            Dictionary<InternalVertexPair, InternalEdge> edges = new Dictionary<InternalVertexPair, InternalEdge>();
+
+            float TotalArea = 0.0f;
+
+            m_localCenter = Vector3.Zero;
+            for (int i = 0; i < m_faces.Count; i++)
+            {
+                int numVertices = m_faces[i].m_indices.Count;
+                int NbTris = numVertices;
+                for (int j = 0; j < NbTris; j++)
+                {
+                    int k = (j + 1) % numVertices;
+                    InternalVertexPair vp = new InternalVertexPair(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
+                    InternalEdge edptr = edges[vp];
+                    Vector3 edge = m_vertices[vp.m_v1] - m_vertices[vp.m_v0];
+                    edge.Normalize();
+
+                    bool found = false;
+
+                    for (int p = 0; p < m_uniqueEdges.Count; p++)
+                    {
+
+                        if (MathUtil.IsAlmostZero(m_uniqueEdges[p] - edge) ||
+                            MathUtil.IsAlmostZero(m_uniqueEdges[p] + edge))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        m_uniqueEdges.Add(edge);
+                    }
+
+                    if (edptr != null)
+                    {
+                        Debug.Assert(edptr.m_face0 >= 0);
+                        Debug.Assert(edptr.m_face1 < 0);
+                        edptr.m_face1 = (int)i;
+                    }
+                    else
+                    {
+                        InternalEdge ed = new InternalEdge();
+                        ed.m_face0 = i;
+                        edges[vp] = ed;
+                    }
+                }
+            }
+
+#if USE_CONNECTED_FACES
+            for (int i = 0; i < m_faces.Count; i++)
+            {
+                int numVertices = m_faces[i].m_indices.Count;
+                m_faces[i].m_connectedFaces.Resize(numVertices);
+
+                for (int j = 0; j < numVertices; j++)
+                {
+                    int k = (j + 1) % numVertices;
+                    InternalVertexPair vp = new InternalVertexPair(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
+                    InternalEdge edptr = edges[vp];
+                    Debug.Assert(edptr != null);
+                    Debug.Assert(edptr.m_face0 >= 0);
+                    Debug.Assert(edptr.m_face1 >= 0);
+
+                    int connectedFace = (edptr.m_face0 == i) ? edptr.m_face1 : edptr.m_face0;
+                    m_faces[i].m_connectedFaces[j] = connectedFace;
+                }
+            }
+#endif
+            for (int i = 0; i < m_faces.Count; i++)
+            {
+                int numVertices = m_faces[i].m_indices.Count;
+                int NbTris = numVertices - 2;
+
+                Vector3 p0 = m_vertices[m_faces[i].m_indices[0]];
+                for (int j = 1; j <= NbTris; j++)
+                {
+                    int k = (j + 1) % numVertices;
+                    Vector3 p1 = m_vertices[m_faces[i].m_indices[j]];
+                    Vector3 p2 = m_vertices[m_faces[i].m_indices[k]];
+                    float Area = Vector3.Cross((p0 - p1), (p0 - p2)).Length() * 0.5f;
+                    Vector3 Center = (p0 + p1 + p2) / 3.0f;
+                    m_localCenter += Area * Center;
+                    TotalArea += Area;
+                }
+            }
+            m_localCenter /= TotalArea;
+
+
+#if TEST_INTERNAL_OBJECTS
+	if(true)
 	{
-		int numVertices = m_faces[i].m_indices.Count;
-		int NbTris = numVertices;
-		for(int j=0;j<NbTris;j++)
+		m_radius = float.MaxValue;
+		for(int i=0;i<m_faces.Count;i++)
 		{
-			int k = (j+1)%numVertices;
-			InternalVertexPair vp = new InternalVertexPair(m_faces[i].m_indices[j],m_faces[i].m_indices[k]);
-			InternalEdge edptr = edges[vp];
-			Vector3 edge = m_vertices[vp.m_v1]-m_vertices[vp.m_v0];
-			edge.Normalize();
+			Vector3 Normal = new Vector3(m_faces[i].m_plane[0], m_faces[i].m_plane[1], m_faces[i].m_plane[2]);
+			float dist = Math.Abs(m_localCenter.Dot(Normal) + m_faces[i].m_plane[3]);
+			if(dist<m_radius)
+            {
+				m_radius = dist;
+            }
+		}
 
-			bool found = false;
+	
+		float MinX = float.MaxValue;
+		float MinY = float.MaxValue;
+		float MinZ = float.MaxValue;
+		float MaxX = float.MinValue;
+		float MaxY = float.MinValue;
+		float MaxZ = float.MinValue;
+		for(int i=0; i<m_vertices.Count; i++)
+		{
+            Vector3 pt = m_vertices[i];
+			if(pt.X<MinX)	MinX = pt.X;
+			if(pt.X>MaxX)	MaxX = pt.X;
+			if(pt.Y<MinY)	MinY = pt.Y;
+			if(pt.Y>MaxY)	MaxY = pt.Y;
+			if(pt.Z<MinZ)	MinZ = pt.Z;
+			if(pt.Z>MaxZ)	MaxZ = pt.Z;
+		}
+		mC = new Vector3(MaxX+MinX, MaxY+MinY, MaxZ+MinZ);
+		mE = new Vector3(MaxX-MinX, MaxY-MinY, MaxZ-MinZ);
 
-			for (int p=0;p<m_uniqueEdges.Count;p++)
+
+
+//		const float r = m_radius / sqrtf(2.0f);
+		float r = m_radius / (float)Math.Sqrt(3.0f);
+		int LargestExtent = mE.MaxAxis();
+		float Step = (mE[LargestExtent]*0.5f - r)/1024.0f;
+		m_extents[0] = m_extents[1] = m_extents[2] = r;
+		m_extents[LargestExtent] = mE[LargestExtent]*0.5f;
+		bool FoundBox = false;
+		for(int j=0;j<1024;j++)
+		{
+			if(TestContainment())
 			{
-				
-				if (MathUtil.IsAlmostZero(m_uniqueEdges[p]-edge) || 
-					MathUtil.IsAlmostZero(m_uniqueEdges[p]+edge))
+				FoundBox = true;
+				break;
+			}
+
+			m_extents[LargestExtent] -= Step;
+		}
+		if(!FoundBox)
+		{
+			m_extents[0] = m_extents[1] = m_extents[2] = r;
+		}
+		else
+		{
+			// Refine the box
+			float innerStep = (m_radius - r)/1024.0f;
+			int e0 = (1<<LargestExtent) & 3;
+			int e1 = (1<<e0) & 3;
+
+			for(int j=0;j<1024;j++)
+			{
+				float Saved0 = m_extents[e0];
+				float Saved1 = m_extents[e1];
+                m_extents[e0] += innerStep;
+                m_extents[e1] += innerStep;
+
+				if(!TestContainment())
 				{
-					found = true;
+					m_extents[e0] = Saved0;
+					m_extents[e1] = Saved1;
 					break;
 				}
 			}
-
-			if (!found)
-			{
-				m_uniqueEdges.Add(edge);
-			}
-
-			if (edptr != null)
-			{
-				Debug.Assert(edptr.m_face0>=0);
-				Debug.Assert(edptr.m_face1<0);
-				edptr.m_face1 = (int)i;
-			} else
-			{
-				InternalEdge ed = new InternalEdge();
-				ed.m_face0 = i;
-				edges[vp] =ed;
-			}
 		}
 	}
+#endif
 
-	for(int i=0;i<m_faces.Count;i++)
-	{
-		int numVertices = m_faces[i].m_indices.Count;
-		m_faces[i].m_connectedFaces.Resize(numVertices);
+        }
+#if TEST_INTERNAL_OBJECTS
+        public bool TestContainment()
+        {
+	        for(int p=0;p<8;p++)
+	        {
+		        Vector3 LocalPt = Vector3.Zero;
+		        if(p==0)		LocalPt = m_localCenter + new Vector3(m_extents[0], m_extents[1], m_extents[2]);
+		        else if(p==1)	LocalPt = m_localCenter + new Vector3(m_extents[0], m_extents[1], -m_extents[2]);
+		        else if(p==2)	LocalPt = m_localCenter + new Vector3(m_extents[0], -m_extents[1], m_extents[2]);
+		        else if(p==3)	LocalPt = m_localCenter + new Vector3(m_extents[0], -m_extents[1], -m_extents[2]);
+		        else if(p==4)	LocalPt = m_localCenter + new Vector3(-m_extents[0], m_extents[1], m_extents[2]);
+		        else if(p==5)	LocalPt = m_localCenter + new Vector3(-m_extents[0], m_extents[1], -m_extents[2]);
+		        else if(p==6)	LocalPt = m_localCenter + new Vector3(-m_extents[0], -m_extents[1], m_extents[2]);
+		        else if(p==7)	LocalPt = m_localCenter + new Vector3(-m_extents[0], -m_extents[1], -m_extents[2]);
 
-		for(int j=0;j<numVertices;j++)
-		{
-			int k = (j+1)%numVertices;
-			InternalVertexPair vp = new InternalVertexPair(m_faces[i].m_indices[j],m_faces[i].m_indices[k]);
-			InternalEdge edptr = edges[vp];
-			Debug.Assert(edptr != null);
-			Debug.Assert(edptr.m_face0>=0);
-			Debug.Assert(edptr.m_face1>=0);
+		        for(int i=0;i<m_faces.Count;i++)
+		        {
+			        Vector3 Normal = new Vector3(m_faces[i].m_plane[0], m_faces[i].m_plane[1], m_faces[i].m_plane[2]);
+			        float d = LocalPt.Dot(Normal) + m_faces[i].m_plane[3];
+                    if (d > 0.0f)
+                    {
+                        return false;
+                    }
+                }
+	        }
+	        return true;
+        }
+#endif
 
-			int connectedFace = (edptr.m_face0==i)?edptr.m_face1:edptr.m_face0;
-			m_faces[i].m_connectedFaces[j] = connectedFace;
-		}
-	}
+        public void Project(ref Matrix trans, ref Vector3 dir, out float min, out float max)
+        {
+            min = float.MaxValue;
+            max = float.MinValue;
+            int numVerts = m_vertices.Count;
+            for (int i = 0; i < numVerts; i++)
+            {
+                Vector3 pt = trans * m_vertices[i];
+                float dp = Vector3.Dot(pt, dir);
+                if (dp < min) min = dp;
+                if (dp > max) max = dp;
+            }
+            if (min > max)
+            {
+                float tmp = min;
+                min = max;
+                max = tmp;
+            }
+        }
 
-	for(int i=0;i<m_faces.Count;i++)
-	{
-		int numVertices = m_faces[i].m_indices.Count;
-		int NbTris = numVertices-2;
-		
-		Vector3 p0 = m_vertices[m_faces[i].m_indices[0]];
-		for(int j=1;j<=NbTris;j++)
-		{
-			int k = (j+1)%numVertices;
-			Vector3 p1 = m_vertices[m_faces[i].m_indices[j]];
-			Vector3 p2 = m_vertices[m_faces[i].m_indices[k]];
-			float Area = Vector3.Cross((p0 - p1),(p0 - p2)).Length() * 0.5f;
-			Vector3 Center = (p0+p1+p2)/3.0f;
-			m_localCenter += Area * Center;
-			TotalArea += Area;
-		}
-	}
-	m_localCenter /= TotalArea;
-
-
+        public ObjectArray<Vector3> m_vertices = new ObjectArray<Vector3>();
+        public ObjectArray<Face> m_faces = new ObjectArray<Face>();
+        public ObjectArray<Vector3> m_uniqueEdges = new ObjectArray<Vector3>();
+        public Vector3 m_localCenter;
+        public Vector3 m_extents;
+        public float m_radius;
+        public Vector3 mC;
+        public Vector3 mE;
     }
 
-    public void Project(ref Matrix trans, ref Vector3 dir, out float min, out float max)
+    public class InternalVertexPair
     {
-	    min = float.MaxValue;
-	    max = float.MinValue;
-	    int numVerts = m_vertices.Count;
-	    for(int i=0;i<numVerts;i++)
-	    {
-            Vector3 pt = Vector3.Transform(m_vertices[i], trans);
-            float dp = Vector3.Dot(pt, dir);
-		    if(dp < min)	min = dp;
-		    if(dp > max)	max = dp;
-	    }
-	    if(min>max)
-	    {
-		    float tmp = min;
-		    min = max;
-		    max = tmp;
-	    }
+        public InternalVertexPair(int v0, int v1)
+        {
+            m_v0 = v1 > v0 ? v1 : v0;
+            m_v1 = v1 > v0 ? v0 : v1;
+
+        }
+        public int GetHash()
+        {
+            return m_v0 + (m_v1 << 16);
+        }
+        public bool Equals(ref InternalVertexPair other)
+        {
+            return m_v0 == other.m_v0 && m_v1 == other.m_v1;
+        }
+        public int m_v0;
+        public int m_v1;
     }
-
-    public ObjectArray<Vector3> m_vertices = new ObjectArray<Vector3>();
-	public ObjectArray<Face>	m_faces = new ObjectArray<Face>();
-	public ObjectArray<Vector3>	 m_uniqueEdges= new ObjectArray<Vector3>();
-	public Vector3 m_localCenter;
-}
-
-public class InternalVertexPair
-{
-	public InternalVertexPair(int v0,int v1)
-	{
-        m_v0 = v1>v0?v1:v0;
-        m_v1 = v1>v0?v0:v1;
-
-	}
-	public int GetHash()
-	{
-		return m_v0+(m_v1<<16);
-	}
-	public bool Equals(ref InternalVertexPair other)
-	{
-		return m_v0==other.m_v0 && m_v1==other.m_v1;
-	}
-	public int m_v0;
-	public int m_v1;
-}
 
     public class InternalEdge
-{
-	public InternalEdge()
-	{
-        m_face0 = -1;
-        m_face1 = -1;
-	}
-	public int m_face0;
-	public int m_face1;
-}
-	
+    {
+        public InternalEdge()
+        {
+            m_face0 = -1;
+            m_face1 = -1;
+        }
+        public int m_face0;
+        public int m_face1;
+    }
+
 
 }

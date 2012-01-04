@@ -28,8 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using BulletXNA;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -912,10 +911,10 @@ namespace BulletXNA.BulletCollision
 #if OLD_CLAMPING_METHOD
 	    ///problem with this clamping method is that the floating point during quantization might still go outside the range [(0|isMax) .. (m_handleSentinel&m_bpHandleMask]|isMax]
 	    ///see http://code.google.com/p/bullet/issues/detail?id=87
-	    Vector3 clampedPoint = point;
+	    IndexedVector3 clampedPoint = point;
 	    clampedPoint.setMax(m_worldAabbMin);
 	    clampedPoint.setMin(m_worldAabbMax);
-	    Vector3 v = (clampedPoint - m_worldAabbMin) * m_quantize;
+	    IndexedVector3 v = (clampedPoint - m_worldAabbMin) * m_quantize;
 	    output[0] = (int)(((int)v.X & m_bpHandleMask) | isMax);
 	    output[1] = (int)(((int)v.Y & m_bpHandleMask) | isMax);
 	    output[2] = (int)(((int)v.Z & m_bpHandleMask) | isMax);

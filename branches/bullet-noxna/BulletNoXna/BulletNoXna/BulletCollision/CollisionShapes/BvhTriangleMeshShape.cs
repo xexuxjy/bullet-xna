@@ -25,7 +25,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -36,7 +35,7 @@ namespace BulletXNA.BulletCollision
         {
             m_bvh = null;
             m_ownsBvh = false;
-            m_shapeType = BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.TriangleMeshShape;
             m_triangleInfoMap = null;
         }
 
@@ -46,7 +45,7 @@ namespace BulletXNA.BulletCollision
             m_bvh = null;
             m_ownsBvh = false;
             m_useQuantizedAabbCompression = useQuantizedAabbCompression;
-            m_shapeType = BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.TriangleMeshShape;
             //construct bvh from meshInterface
 #if !DISABLE_BVH
 
@@ -90,7 +89,7 @@ namespace BulletXNA.BulletCollision
             m_bvh = null;
             m_ownsBvh = false;
             m_useQuantizedAabbCompression = useQuantizedAabbCompression;
-            m_shapeType = BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.TriangleMeshShape;
 #if !DISABLE_BVH
 
             if (buildBvh)
@@ -145,6 +144,12 @@ namespace BulletXNA.BulletCollision
             }
 #endif
         }
+
+        public void RefitTree(Vector3 aabbMin, Vector3 aabbMax)
+        {
+            RefitTree(ref aabbMin, ref aabbMax);
+        }
+
 
         public void RefitTree(ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
@@ -278,9 +283,21 @@ namespace BulletXNA.BulletCollision
                     for (int j = 2; j >= 0; j--)
                     {
                         m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
-                        Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        //Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        m_triangle[j] *= meshScaling;
                     }
                 }
+                else if (vertexBase is ObjectArray<Vector3>)
+                {
+                    Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
+                    for (int j = 2; j >= 0; j--)
+                    {
+                        m_triangle[j] = new Vector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
+                        //Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                        m_triangle[j] *= meshScaling;
+                    }
+                }
+
                 else if (vertexBase is ObjectArray<float>)
                 {
                     float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();

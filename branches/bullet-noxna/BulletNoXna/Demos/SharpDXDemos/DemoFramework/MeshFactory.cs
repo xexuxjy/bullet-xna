@@ -14,16 +14,15 @@ using Buffer = SharpDX.Direct3D10.Buffer;
 using Device = SharpDX.Direct3D10.Device;
 //using Face = BulletXNA.SoftBody.Face;
 using Mesh = SharpDX.Direct3D10.Mesh;
-using Matrix = Microsoft.Xna.Framework.Matrix;
-using Vector2 = Microsoft.Xna.Framework.Vector2;
-using Vector3 = Microsoft.Xna.Framework.Vector3;
+using Matrix = BulletXNA.LinearMath.Matrix;
+using Vector3 = BulletXNA.LinearMath.Vector3;
 
 namespace DemoFramework
 {
     public struct InstanceData
     {
-        public Matrix WorldTransform { get; set; }
-        public uint Color { get; set; }
+        public SharpDX.Matrix WorldTransform;
+        public uint Color;
     }
 
     // Contains the geometry buffers and information of all instances of a particular shape.
@@ -315,7 +314,7 @@ namespace DemoFramework
         {
             int up = shape.UpAxis;
             float radius = shape.Radius;
-            float halfHeight = new IndexedVector3(shape.GetHalfExtentsWithoutMargin())[up] + shape.Margin;
+            float halfHeight = new Vector3(shape.GetHalfExtentsWithoutMargin())[up] + shape.Margin;
 
             int numSteps = 10;
             float angleStep = (2 * (float)Math.PI) / numSteps;
@@ -724,14 +723,14 @@ namespace DemoFramework
             return shapeData;
         }
 
-        void InitInstanceData(CollisionObject colObj, CollisionShape shape, ShapeData shapeData, Matrix transform)
+        void InitInstanceData(CollisionObject colObj, CollisionShape shape, ShapeData shapeData, SharpDX.Matrix transform)
         {
             if (shape.ShapeType == BroadphaseNativeType.CompoundShape)
             {
                 CompoundShape compoundShape = shape as CompoundShape;
                 foreach (CompoundShapeChild child in compoundShape.GetChildList())
                 {
-                    InitInstanceData(colObj, child.m_childShape, shapes[child.m_childShape], child.m_transform * transform);
+                    InitInstanceData(colObj, child.m_childShape, shapes[child.m_childShape], MathHelper.Matrix(child.m_transform) * transform);
                 }
             }
             else if (shape.ShapeType == BroadphaseNativeType.SoftBodyShape)
@@ -782,7 +781,7 @@ namespace DemoFramework
                 {
                     (colObj as RigidBody).MotionState.GetWorldTransform(out transform);
                 }
-                InitInstanceData(colObj, shape, shapeData, transform);
+                InitInstanceData(colObj, shape, shapeData, MathHelper.Matrix(transform));
             }
 
             foreach (KeyValuePair<CollisionShape, ShapeData> sh in shapes)

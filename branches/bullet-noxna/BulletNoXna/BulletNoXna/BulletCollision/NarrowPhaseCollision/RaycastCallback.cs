@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -53,14 +53,11 @@ namespace BulletXNA.BulletCollision
 
         public virtual void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
-            Vector3 v10;
-            Vector3 v20;
+            Vector3 v10 = triangle[1] - triangle[0];
+            Vector3 v20 = triangle[2] - triangle[0];
 
-            Vector3.Subtract(ref triangle[1], ref triangle[0], out v10);
-            Vector3.Subtract(ref triangle[2], ref triangle[0], out v20);
 
-            Vector3 triangleNormal;
-            Vector3.Cross(ref v10, ref v20, out triangleNormal);
+            Vector3 triangleNormal = v10.Cross(ref v20);
 
             float dist;
             Vector3.Dot(ref triangle[0], ref triangleNormal, out dist);
@@ -96,30 +93,24 @@ namespace BulletXNA.BulletCollision
                 Vector3 point;
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
-                    Vector3 v0p;
-                    Vector3.Subtract(ref triangle[0], ref point, out v0p);
-                    Vector3 v1p;
-                    Vector3.Subtract(ref triangle[1], ref point, out v1p);
+                    Vector3 v0p = triangle[0] - point;
+                    Vector3 v1p = triangle[1] - point; ;
 
-                    Vector3 cp0;
-                    Vector3.Cross(ref v0p, ref v1p, out cp0);
+                    Vector3 cp0 = v0p.Cross(ref v1p);
 
                     float dot;
                     Vector3.Dot(ref cp0, ref triangleNormal, out dot);
                     if (dot >= edge_tolerance)
                     {
-                        Vector3 v2p;
-                        Vector3.Subtract(ref triangle[2], ref point, out v2p);
-                        Vector3 cp1; //= Vector3.Cross(v1p,v2p);
-                        Vector3.Cross(ref v1p, ref v2p, out cp1);
+                        Vector3 v2p = triangle[2] - point;
+                        Vector3 cp1 = v1p.Cross(ref v2p);//= Vector3.Cross(v1p,v2p);
 
                         float dot2;
                         Vector3.Dot(ref cp1, ref triangleNormal, out dot2);
 
                         if (dot2 >= edge_tolerance)
                         {
-                            Vector3 cp2;
-                            Vector3.Cross(ref v2p, ref v0p, out cp2);
+                            Vector3 cp2 = v2p.Cross(ref v0p);
                             float dot3;
                             Vector3.Dot(ref cp2, ref triangleNormal, out dot3);
 

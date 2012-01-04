@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
         {
             m_inConstructor = true;
             m_meshInterface = meshInterface;
-            m_shapeType = BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.TriangleMeshShape;
             if (meshInterface.HasPremadeAabb())
             {
                 meshInterface.GetPremadeAabb(out m_localAabbMin, out m_localAabbMax);
@@ -109,14 +109,14 @@ namespace BulletXNA.BulletCollision
             localHalfExtents += new Vector3(Margin);
             Vector3 localCenter = 0.5f * (m_localAabbMax + m_localAabbMin);
 
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
-            //Vector3 center = trans.Translation;
-            Vector3 center;
-            Vector3.Transform(ref localCenter,ref trans,out center);
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
-                                            Vector3.Dot(abs_b.Up, localHalfExtents),
-                                            Vector3.Dot(abs_b.Backward, localHalfExtents));
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+
+            Vector3 center = trans * localCenter;
+
+            Vector3 extent = new Vector3(abs_b[0].Dot(ref localHalfExtents),
+                   abs_b[1].Dot(ref localHalfExtents),
+                  abs_b[2].Dot(ref localHalfExtents));
+
             aabbMin = center - extent;
             aabbMax = center + extent;
 
@@ -202,7 +202,7 @@ namespace BulletXNA.BulletCollision
             m_supportVertexLocal = Vector3.Zero;
             m_worldTrans = trans;
             m_maxDot = -MathUtil.BT_LARGE_FLOAT;
-            m_supportVecLocal = MathUtil.TransposeTransformNormal(supportVecWorld, m_worldTrans);
+            m_supportVecLocal = supportVecWorld * m_worldTrans._basis;
             //m_supportVecLocal = Vector3.TransformNormal(supportVecWorld, m_worldTrans);
 	    }
 
@@ -222,8 +222,7 @@ namespace BulletXNA.BulletCollision
 
 	    public Vector3 GetSupportVertexWorldSpace()
 	    {
-            return Vector3.Transform(m_supportVertexLocal, m_worldTrans);
-            //return MathUtil.transposeTransformNormal(m_supportVertexLocal, m_worldTrans);
+            return m_worldTrans * m_supportVertexLocal;
 	    }
 
 	    public Vector3 GetSupportVertexLocal()
@@ -264,7 +263,6 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                int ibreak = 0;
                 AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax);
             }
 			

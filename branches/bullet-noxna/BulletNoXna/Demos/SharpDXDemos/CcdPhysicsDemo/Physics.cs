@@ -1,8 +1,7 @@
 ﻿using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
+using BulletXNA.LinearMath;
 using DemoFramework;
-using Matrix = Microsoft.Xna.Framework.Matrix;
-using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace CcdPhysicsDemo
 {

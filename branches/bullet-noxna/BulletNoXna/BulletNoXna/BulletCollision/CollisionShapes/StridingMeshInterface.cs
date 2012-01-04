@@ -24,7 +24,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -91,6 +90,31 @@ namespace BulletXNA.BulletCollision
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
 						}
+                        else if (vertexbase is ObjectArray<Vector3>)
+                        {
+                            Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
+                            for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
+                            {
+                                int triIndex = (gfxindex * indexstride);
+
+                                int index1 = indexList[triIndex];
+                                int index2 = indexList[triIndex + 1];
+                                int index3 = indexList[triIndex + 2];
+
+                                triangle[0] = new Vector3(vertexList[index1]) * meshScaling;
+                                triangle[1] = new Vector3(vertexList[index2]) * meshScaling;
+                                triangle[2] = new Vector3(vertexList[index3]) * meshScaling;
+
+                                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
+                                {
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T0", triangle[0]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+                                }
+
+                                callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
+                            }
+                        }
                         else if (vertexbase is ObjectArray<float>)
 						{
 							float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();

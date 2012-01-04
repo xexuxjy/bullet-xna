@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -249,16 +249,16 @@ namespace BulletXNA.BulletCollision
         ConeShape,
         ConvexShape,
         CylinderShape,
-        UNIFORM_SCALING_SHAPE_PROXYTYPE,
+        UniformScalingShape,
         MINKOWSKI_SUM_SHAPE_PROXYTYPE,
-        MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE,
+        MinkowskiDifferenceShape,
         Box2DShape,
         Convex2DShape,
         CUSTOM_CONVEX_SHAPE_TYPE,
         //concave shapes
         CONCAVE_SHAPES_START_HERE,
         //keep all the convex shapetype below here, for the check IsConvexShape in broadphase proxy!
-        TRIANGLE_MESH_SHAPE_PROXYTYPE,
+        TriangleMeshShape,
         SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE,
         ///used for demo integration FAST/Swift collision library and Bullet
         FAST_CONCAVE_MESH_PROXYTYPE,

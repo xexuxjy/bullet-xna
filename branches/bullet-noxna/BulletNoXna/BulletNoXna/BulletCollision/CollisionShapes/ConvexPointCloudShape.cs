@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -111,7 +111,7 @@ namespace BulletXNA.BulletCollision
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+                vec = new Vector3(1, 0, 0);
 	        } else
 	        {
                 vec.Normalize();

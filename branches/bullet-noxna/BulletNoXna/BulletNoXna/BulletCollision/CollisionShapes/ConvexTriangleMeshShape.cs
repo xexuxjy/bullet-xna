@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -76,7 +76,7 @@ namespace BulletXNA.BulletCollision
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+                vec = new Vector3(1, 0, 0);
 	        } 
             else
 	        {
@@ -181,10 +181,10 @@ namespace BulletXNA.BulletCollision
             InertiaCallback inertiaCallback = new InertiaCallback(ref center);
             m_stridingMesh.InternalProcessAllTriangles(inertiaCallback, ref aabbMax, ref aabbMax);
 
-            Matrix i = inertiaCallback.GetInertia();
-            MathUtil.Diagonalize(ref i, ref principal, 0.00001f, 20);
+            IndexedBasisMatrix i = inertiaCallback.GetInertia();
+            i.Diagonalize(out principal, 0.00001f, 20);
             //i.diagonalize(principal.getBasis(), 0.00001f, 20);
-            inertia = new Vector3(i.M11,i.M22,i.M33);
+            inertia = new Vector3(i[0,0],i[1,1],i[2,2]);
             inertia /= volume;
         }
 
@@ -212,8 +212,7 @@ namespace BulletXNA.BulletCollision
 	    {
 		    for (int i=0;i<3;i++)
 		    {
-			    float dot;
-                Vector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
+			    float dot = m_supportVecLocal.Dot(ref triangle[i]);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;
@@ -264,7 +263,7 @@ namespace BulletXNA.BulletCollision
                 Vector3 a = triangle[0] - reference;
                 Vector3 b = triangle[1] - reference;
                 Vector3 c = triangle[2] - reference;
-                float vol = Math.Abs(MathUtil.Vector3Triple(ref a,ref b,ref c));
+                float vol = Math.Abs(a.Triple(ref b,ref c));
                 sum += (.25f * vol) * ((triangle[0] + triangle[1] + triangle[2] + reference));
                 volume += vol;
             }
@@ -303,47 +302,37 @@ namespace BulletXNA.BulletCollision
 
         public InertiaCallback(ref Vector3 center)
         {
-            m_sum = new Matrix();
+            m_sum = new IndexedBasisMatrix();
             m_center = center;
         }
 
         public virtual void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex)
         {
-            Matrix i = new Matrix();
+            IndexedBasisMatrix i = new IndexedBasisMatrix();
             Vector3 a = triangle[0] - m_center;
             Vector3 b = triangle[1] - m_center;
             Vector3 c = triangle[2] - m_center;
-            float volNeg = -Math.Abs(MathUtil.Vector3Triple(ref a,ref b,ref c) * (1f / 6f));
-            for (int j = 0; j < 3; j++)
-            {
+            float volNeg = -Math.Abs(a.Triple(ref b, ref c)) * (1.0f / 6.0f);
+             for (int j = 0; j < 3; j++)
+             {
                 for (int k = 0; k <= j; k++)
                 {
-                    float aj = MathUtil.VectorComponent(ref a,j);
-                    float ak = MathUtil.VectorComponent(ref a,k);
-                    float bj = MathUtil.VectorComponent(ref b,j);
-                    float bk = MathUtil.VectorComponent(ref b,k);
-                    float cj = MathUtil.VectorComponent(ref c,j);
-                    float ck = MathUtil.VectorComponent(ref c,k);
-
-                    float temp = volNeg * (.1f * (aj * ak + bj * bk + cj * ck)
-                    + .05f * (aj * bk + ak * bj + aj * ck + ak * cj + bj * ck + bk * cj));
-
-                    MathUtil.MatrixComponent(ref i,j,k,temp);
-                    MathUtil.MatrixComponent(ref i,k,j,temp);
+                   i[j,k] = i[k,j] = volNeg * (0.1f * (a[j] * a[k] + b[j] * b[k] + c[j] * c[k])
+                      + 0.05f * (a[j] * b[k] + a[k] * b[j] + a[j] * c[k] + a[k] * c[j] + b[j] * c[k] + b[k] * c[j]));
                 }
-            }
-            float i00 = -i.M11;
-            float i11 = -i.M22;
-            float i22 = -i.M33;
-            i.M11 = i11 + i22; 
-            i.M22 = i22 + i00; 
-            i.M33 = i00 + i11;
-            m_sum.Right += i.Right;
-            m_sum.Up += i.Up;
-            m_sum.Backward += i.Backward;
+             }
+         float i00 = -i[0][0];
+         float i11 = -i[1][1];
+         float i22 = -i[2][2];
+         i[0,0] = i11 + i22; 
+         i[1,1] = i22 + i00; 
+         i[2,2] = i00 + i11;
+         m_sum[0] += i[0];
+         m_sum[1] += i[1];
+         m_sum[2] += i[2];
         }
 
-        public Matrix GetInertia()
+        public IndexedBasisMatrix GetInertia()
         {
             return m_sum;
         }
@@ -353,7 +342,7 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        Matrix m_sum;
+        IndexedBasisMatrix m_sum;
         Vector3 m_center;
     }
 

@@ -41,12 +41,9 @@
     <Compile Include="Physics.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="BulletNoXna">
-      <HintPath>..\..\..\BulletNoXna\bin\Release\BulletNoXna.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+    <Reference Include="BulletNoXna, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Microsoft.Xna.Framework.dll</HintPath>
+      <HintPath>..\..\..\BulletNoXna\bin\Debug\BulletNoXna.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>..\SharpDX.dll</HintPath>

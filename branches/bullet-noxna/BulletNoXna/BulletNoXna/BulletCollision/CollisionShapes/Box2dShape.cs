@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -55,7 +55,7 @@ namespace BulletXNA.BulletCollision
 		public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
 		{
 			Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-            Vector3 margin = new Vector3(Margin);
+			Vector3 margin= new Vector3(Margin);
 			halfExtents += margin;
 
 			return new Vector3(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
@@ -100,8 +100,16 @@ namespace BulletXNA.BulletCollision
 			m_normals[2] = new Vector3(0,1,0);
 			m_normals[3] = new Vector3(-1,0,0);
 
+
+            float minDimension = boxHalfExtents.X;
+            if (minDimension > boxHalfExtents.Y)
+            {
+                minDimension = boxHalfExtents.Y;
+            }
+            SetSafeMargin(minDimension);
+
 			m_shapeType = BroadphaseNativeType.Box2DShape;
-            Vector3 margin = new Vector3(Margin);
+			Vector3 margin = new Vector3(Margin);
 			m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
 		}
 

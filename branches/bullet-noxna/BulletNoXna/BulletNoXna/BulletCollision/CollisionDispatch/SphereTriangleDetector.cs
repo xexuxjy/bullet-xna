@@ -22,9 +22,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -119,7 +117,7 @@ namespace BulletXNA.BulletCollision
                     return true;
                 }
             }
-            resultNormal = Vector3.Up;
+            resultNormal = new Vector3(0, 1, 0);
             point = Vector3.Zero;
             return false;
         }
@@ -171,22 +169,22 @@ namespace BulletXNA.BulletCollision
             float depth = 0f;
             //	output.m_distance = float(1e30);
             //move sphere into triangle space
-            Matrix sphereInTr = MathUtil.InverseTimes(transformB, transformA);
+            Matrix sphereInTr = transformB.InverseTimes(ref transformA);
 
             Vector3 temp = sphereInTr.Translation;
             if (Collide(ref temp, out point, out normal, ref depth, ref timeOfImpact, m_contactBreakingThreshold))
             {
                 if (swapResults)
                 {
-                    Vector3 normalOnB = Vector3.TransformNormal(normal, transformB);
+                    Vector3 normalOnB = transformB._basis * normal;
                     Vector3 normalOnA = -normalOnB;
-                    Vector3 pointOnA = Vector3.Transform(point, transformB) + normalOnB * depth;
+                    Vector3 pointOnA = transformB * point + normalOnB * depth;
                     output.AddContactPoint(ref normalOnA, ref pointOnA, depth);
                 }
                 else
                 {
-                    Vector3 p = Vector3.TransformNormal(normal, transformB);
-                    Vector3 p2 = Vector3.Transform(point, transformB);
+                    Vector3 p = transformB._basis * normal;
+                    Vector3 p2 = transformB * point;
                     output.AddContactPoint(ref p, ref p2, depth);
                 }
             }

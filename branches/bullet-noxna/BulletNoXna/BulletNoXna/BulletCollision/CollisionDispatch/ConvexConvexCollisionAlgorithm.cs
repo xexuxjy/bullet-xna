@@ -25,8 +25,6 @@
 
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
-
 
 namespace BulletXNA.BulletCollision
 {
@@ -97,7 +95,7 @@ namespace BulletXNA.BulletCollision
 
             ConvexShape min0 = body0.CollisionShape as ConvexShape;
             ConvexShape min1 = body1.CollisionShape as ConvexShape;
-            Vector3 normalOnB = Vector3.Up;
+            Vector3 normalOnB = new Vector3(0,1,0);
             Vector3 pointOnBWorld = Vector3.Zero;
 #if !BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
             if ((min0.ShapeType == BroadphaseNativeType.CapsuleShape) && (min1.ShapeType == BroadphaseNativeType.CapsuleShape))
@@ -109,8 +107,8 @@ namespace BulletXNA.BulletCollision
 
                 float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.getHalfHeight(), capsuleA.Radius,
-                    capsuleB.getHalfHeight(), capsuleB.Radius, capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
+                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.GetHalfHeight(), capsuleA.Radius,
+                    capsuleB.GetHalfHeight(), capsuleB.Radius, capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
                     body0.GetWorldTransform(), body1.GetWorldTransform(), threshold);
 
                 if (dist < threshold)
@@ -172,13 +170,10 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 		PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
 		if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
 		{
-			gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-			
-
 			float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-			float minDist = 0.0f;
-			Vector3 sepNormalWorldSpace;
+            float minDist = float.MinValue;
+			Vector3 sepNormalWorldSpace = new Vector3(0,1,0);
 			bool foundSepAxis  = true;
 
 			if (dispatchInfo.m_enableSatConvex)
@@ -190,8 +185,28 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 					out sepNormalWorldSpace);
 			} else
 			{
-				sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
-				minDist = gjkPairDetector.GetCachedSeparatingDistance();
+
+#if ZERO_MARGIN
+                gjkPairDetector.SetIgnoreMargin(true);
+                gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+
+                gjkPairDetector.GetClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
+#endif
+
+				float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+				if (l2>MathUtil.SIMD_EPSILON)
+				{
+					sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+					//minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();
+					minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.Margin-min1.Margin;
+	
+#if ZERO_MARGIN
+					foundSepAxis = true;//gjkPairDetector.getCachedSeparatingDistance()<0.f;
+#else
+					foundSepAxis = gjkPairDetector.GetCachedSeparatingDistance()<(min0.Margin+min1.Margin);
+#endif
+                }
 			}
 			if (foundSepAxis)
 			{
@@ -208,27 +223,62 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 			}
 			return;
 
-		} else
+		} 
+        else
 		{
+
 			//we can also deal with convex versus triangle (without connectivity data)
 			if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.ShapeType==BroadphaseNativeType.TriangleShape)
 			{
-				gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-		
-				Vector3 sepNormalWorldSpace = Vector3.Normalize(gjkPairDetector.GetCachedSeparatingAxis());
+                ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
+                TriangleShape tri = polyhedronB as TriangleShape;
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
+                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
+                
+                float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+                Vector3 sepNormalWorldSpace = new Vector3(0, 1, 0); ;
+				float minDist = float.MinValue;
+				float maxDist = threshold;
+				
+				bool foundSepAxis = false;
+				if (false)
+				{
+					polyhedronB.InitializePolyhedralFeatures();
+                    foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+					body0.GetWorldTransform(), 
+					body1.GetWorldTransform(),
+					out sepNormalWorldSpace);
+				//	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
 
-				ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
-				TriangleShape tri = polyhedronB as TriangleShape;
-				vertices.Add(Vector3.Transform(tri.m_vertices1[0],body1.GetWorldTransform()));
-				vertices.Add(Vector3.Transform(tri.m_vertices1[1],body1.GetWorldTransform()));
-				vertices.Add(Vector3.Transform(tri.m_vertices1[2],body1.GetWorldTransform()));
+				} else
+				{
+#if ZERO_MARGIN
+					gjkPairDetector.SetIgnoreMargin(true);
+					gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
+#else
+					gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+#endif//ZERO_MARGIN
+					
+					float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+					if (l2>MathUtil.SIMD_EPSILON)
+					{
+						sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
+						//minDist = gjkPairDetector.getCachedSeparatingDistance();
+						//maxDist = threshold;
+						minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.Margin-min1.Margin;
+						foundSepAxis = true;
+					}
+				}
 
-				float threshold = m_manifoldPtr.GetContactBreakingThreshold();
-				float minDist = gjkPairDetector.GetCachedSeparatingDistance();
+				
+			if (foundSepAxis)
+			{
 				PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), 
-					body0.GetWorldTransform(), vertices, minDist-threshold, threshold, resultOut);
-				
-				
+					body0.GetWorldTransform(), vertices, minDist-threshold, maxDist, resultOut);
+			}
+								
 				if (m_ownManifold)
 				{
 					resultOut.RefreshContactPoints();
@@ -309,9 +359,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 
                             if (perturbeA)
                             {
-                                //input.m_transformA.setBasis(  btMatrix3x3(rotq.inverse()*perturbeRot*rotq)*body0.getWorldTransform().getBasis());
-                                Quaternion temp = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(ref rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
-                                input.m_transformA = MathUtil.BulletMatrixMultiplyBasis(Matrix.CreateFromQuaternion(temp), body0.GetWorldTransform());
+                                input.m_transformA._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body0.GetWorldTransform()._basis);
+                                input.m_transformB = body1.GetWorldTransform();
+                              
                                 input.m_transformB = body1.GetWorldTransform();
 #if DEBUG_CONTACTS
                                 dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformA, 10.0f);
@@ -320,9 +370,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                             else
                             {
                                 input.m_transformA = body0.GetWorldTransform();
-                                //input.m_transformB.setBasis( btMatrix3x3(rotq.inverse()*perturbeRot*rotq)*body1.getWorldTransform().getBasis());
-                                Quaternion temp = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(ref rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
-                                input.m_transformB = MathUtil.BulletMatrixMultiplyBasis(Matrix.CreateFromQuaternion(temp), body1.GetWorldTransform());
+                                input.m_transformB._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body1.GetWorldTransform()._basis);
 #if DEBUG_CONTACTS
                                 dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformB, 10.0f);
 #endif
@@ -577,9 +625,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             ref Matrix transformB,
             float distanceThreshold)
         {
-            Vector3 directionA = MathUtil.MatrixColumn(ref transformA, capsuleAxisA);
+            Vector3 directionA = transformA._basis.GetColumn(capsuleAxisA);
             Vector3 translationA = transformA.Translation;
-            Vector3 directionB = MathUtil.MatrixColumn(ref transformB, capsuleAxisB);
+            Vector3 directionB = transformB._basis.GetColumn(capsuleAxisB);
             Vector3 translationB = transformB.Translation;
 
             // translation between centers
@@ -670,19 +718,19 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
         {
             Vector3 endPt, startPt;
             float newDepth;
-            Vector3 newNormal = Vector3.Up;
+            Vector3 newNormal = new Vector3(0, 1, 0);
 
             if (m_perturbA)
             {
                 Vector3 endPtOrg = pointInWorld + normalOnBInWorld * orgDepth;
-                endPt = Vector3.Transform(endPtOrg, (MathUtil.BulletMatrixMultiply(m_unPerturbedTransform, Matrix.Invert(m_transformA))));
+                endPt = (m_unPerturbedTransform * m_transformA.Inverse()) * (endPtOrg);
                 newDepth = Vector3.Dot((endPt - pointInWorld), normalOnBInWorld);
                 startPt = endPt + normalOnBInWorld * newDepth;
             }
             else
             {
                 endPt = pointInWorld + normalOnBInWorld * orgDepth;
-                startPt = Vector3.Transform(pointInWorld, (MathUtil.BulletMatrixMultiply(m_unPerturbedTransform, Matrix.Invert(m_transformB))));
+                startPt = (m_unPerturbedTransform * m_transformB.Inverse()) * (pointInWorld);
                 newDepth = Vector3.Dot((endPt - startPt), normalOnBInWorld);
             }
 

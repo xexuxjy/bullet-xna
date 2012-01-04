@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -80,7 +80,7 @@ namespace BulletXNA.BulletCollision
 	            //just transform the vertices in worldspace, and take their AABB
 	            for (int i=0;i<m_numVertices;i++)
 	            {
-		            Vector3 worldVertex = Vector3.Transformt(m_vertices[i],t);
+		            IndexedVector3 worldVertex = IndexedVector3.Transformt(m_vertices[i],t);
                     MathUtil.vectorMin(ref worldVertex, ref aabbMin);
                     MathUtil.vectorMin(ref worldVertex,ref aabbMax);
 	            }
@@ -207,7 +207,7 @@ namespace BulletXNA.BulletCollision
 
 	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport,int i)
         {
-            planeNormal = Vector3.Up;
+            planeNormal = new Vector3(0, 1, 0); ;
             planeSupport = Vector3.Zero;
         }
 

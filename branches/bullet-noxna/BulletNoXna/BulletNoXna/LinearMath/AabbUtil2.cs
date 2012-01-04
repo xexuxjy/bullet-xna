@@ -24,7 +24,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
@@ -180,22 +179,18 @@ namespace BulletXNA
                     {
                         if ((sourceOutcode & bit) != 0)
                         {
-                            float lambda = (-MathUtil.VectorComponent(ref source, i) -
-                                MathUtil.VectorComponent(ref aabbHalfExtent, i) * normSign) /
-                                MathUtil.VectorComponent(ref r, i);
+                            float lambda = (-source[i] - aabbHalfExtent[i] * normSign) / r[i];
 
                             if (lambda_enter <= lambda)
                             {
                                 lambda_enter = lambda;
                                 hitNormal = Vector3.Zero;
-                                MathUtil.VectorComponent(ref hitNormal, i, normSign);
+                                hitNormal[i] = normSign;
                             }
                         }
                         else if ((targetOutcode & bit) != 0)
                         {
-                            float lambda = (-MathUtil.VectorComponent(ref source, i) -
-                                MathUtil.VectorComponent(ref aabbHalfExtent, i) * normSign) /
-                                MathUtil.VectorComponent(ref r, i);
+                            float lambda = (-source[i] - aabbHalfExtent[i] * normSign) / r[i];
                             lambda_exit = Math.Min(lambda_exit, lambda);
                         }
                         bit <<= 1;
@@ -238,19 +233,18 @@ namespace BulletXNA
         public static void TransformAabb(ref Vector3 halfExtents, float margin, ref Matrix t, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Vector3 halfExtentsWithMargin = halfExtents + new Vector3(margin);
-            Matrix abs_b = MathUtil.AbsoluteBasisMatrix(ref t);
+            IndexedBasisMatrix  abs_b = t._basis.Absolute();
             Vector3 center = t.Translation;
 
-            Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), halfExtentsWithMargin),
-                                        Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), halfExtentsWithMargin),
-                                        Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), halfExtentsWithMargin));
+            Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtentsWithMargin),
+                                                        abs_b[1].Dot(ref halfExtentsWithMargin),
+                                                        abs_b[2].Dot(ref halfExtentsWithMargin));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
         }
 
-
-        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        public static void TransformAabb(Vector3 localAabbMin, Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
         {
             Debug.Assert(localAabbMin.X <= localAabbMax.X);
             Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
@@ -259,12 +253,32 @@ namespace BulletXNA
             localHalfExtents += new Vector3(margin);
 
             Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
-            Matrix abs_b = MathUtil.AbsoluteMatrix(ref trans);
-            Vector3 center = Vector3.Transform(localCenter, trans);
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+            Vector3 center = trans * localCenter;
 
-            Vector3 extent = new Vector3(Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 0), localHalfExtents),
-                            Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 1), localHalfExtents),
-                            Vector3.Dot(MathUtil.MatrixRow(ref abs_b, 2), localHalfExtents));
+            Vector3 extent = new Vector3(abs_b[0].Dot(ref localHalfExtents),
+                                                        abs_b[1].Dot(ref localHalfExtents),
+                                                        abs_b[2].Dot(ref localHalfExtents));
+
+            aabbMinOut = center - extent;
+            aabbMaxOut = center + extent;
+        }
+
+        public static void TransformAabb(ref Vector3 localAabbMin, ref Vector3 localAabbMax, float margin, ref Matrix trans, out Vector3 aabbMinOut, out Vector3 aabbMaxOut)
+        {
+            Debug.Assert(localAabbMin.X <= localAabbMax.X);
+            Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
+            Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
+            Vector3 localHalfExtents = 0.5f * (localAabbMax - localAabbMin);
+            localHalfExtents += new Vector3(margin);
+
+            Vector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
+            Vector3 center = trans * localCenter;
+
+            Vector3 extent = new Vector3(abs_b[0].Dot(ref localHalfExtents),
+                                                        abs_b[1].Dot(ref localHalfExtents),
+                                                        abs_b[2].Dot(ref localHalfExtents));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;

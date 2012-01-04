@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
@@ -107,9 +107,9 @@ namespace BulletXNA
             predictedTransform = Matrix.CreateTranslation(curTrans.Translation + linvel * timeStep);
     //	#define QUATERNION_DERIVATIVE
 	    #if QUATERNION_DERIVATIVE
-            Vector3 pos;
+            IndexedVector3 pos;
             Quaternion predictedOrn;
-            Vector3 scale;
+            IndexedVector3 scale;
 
             curTrans.Decompose(ref scale, ref predictedOrn, ref pos);
 
@@ -140,15 +140,14 @@ namespace BulletXNA
 		    }
 		    Quaternion dorn = new Quaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
 
-            Quaternion orn0;
-            TransformUtil.GetRotation(ref curTrans, out orn0);
+            Quaternion orn0 = curTrans.GetRotation();
 
 		    Quaternion predictedOrn = dorn * orn0;
 		    predictedOrn.Normalize();
 	    #endif
 
             Matrix newMatrix = Matrix.CreateFromQuaternion(predictedOrn);
-            CopyMatrixRotation(ref newMatrix, ref predictedTransform);
+            predictedTransform._basis = newMatrix._basis;
 	    }
 
         public static void CalculateVelocityQuaternion(ref Vector3 pos0, ref Vector3 pos1, ref Quaternion orn0, ref Quaternion orn1, float timeStep, out Vector3 linVel, out Vector3 angVel)
@@ -203,7 +202,7 @@ namespace BulletXNA
         public static void CalculateDiffAxisAngle(ref Matrix transform0, ref Matrix transform1, out Vector3 axis, out float angle)
         {
             //Matrix dmat = GetRotateMatrix(ref transform1) * Matrix.Invert(GetRotateMatrix(ref transform0));
-            Matrix dmat = MathUtil.BulletMatrixMultiplyBasis(transform1, Matrix.Invert(transform0));
+            IndexedBasisMatrix dmat = transform1._basis * transform0._basis.Inverse();
             Quaternion dorn = Quaternion.Identity;
             GetRotation(ref dmat, out dorn);
 
@@ -218,7 +217,7 @@ namespace BulletXNA
             float len = axis.LengthSquared();
             if (len < MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON)
             {
-                axis = Vector3.Right;
+                axis = new Vector3(1,0,0);
             }
             else
             {
@@ -226,74 +225,16 @@ namespace BulletXNA
             }
         }
 
-        public static void CopyMatrixRotation(ref Matrix from, ref Matrix to)
+
+
+        public static void GetRotation(ref IndexedBasisMatrix a, out Quaternion rot)
         {
-            to.Right = from.Right;
-            to.Up = from.Up;
-            to.Backward = from.Backward;
+            rot = a.GetRotation();
         }
 
-        //public static void GetRotateMatrix(ref Matrix a  , ref Matrix b)
-        //{
-        //    b = Matrix.Identity;
-        //    b.Right = a.Right;
-        //    b.Up = a.Up;
-        //    b.Backward = a.Backward;
-        //}
-
-        //public static Matrix GetRotateMatrix(ref Matrix a)
-        //{
-        //    Matrix b = Matrix.Identity;
-        //    b.Right = a.Right;
-        //    b.Up = a.Up;
-        //    b.Backward = a.Backward;
-        //    return b;
-        //}
-
-        public static void GetRotation(ref Matrix a, out Quaternion rot)
+        public static Quaternion GetRotation(ref IndexedBasisMatrix a)
         {
-            float xs, ys, zs;
-
-            if (Math.Sign(a.M11 * a.M12 * a.M13 * a.M14) < 0)
-                xs = -1f;
-            else
-                xs = 1f;
-
-            if (Math.Sign(a.M21 * a.M22 * a.M23 * a.M24) < 0)
-                ys = -1f;
-            else
-                ys = 1f;
-
-            if (Math.Sign(a.M31 * a.M32 * a.M33 * a.M34) < 0)
-                zs = -1f;
-            else
-                zs = 1f;
-
-            Vector3 scale = new Vector3(
-                xs * (float)Math.Sqrt(a.M11 * a.M11 + a.M12 * a.M12 + a.M13 * a.M13),
-                ys * (float)Math.Sqrt(a.M21 * a.M21 + a.M22 * a.M22 + a.M23 * a.M23),
-                zs * (float)Math.Sqrt(a.M31 * a.M31 + a.M32 * a.M32 + a.M33 * a.M33)
-                );
-
-            if (scale.X == 0.0 || scale.Y == 0.0 || scale.Z == 0.0)
-            {
-                rot = Quaternion.Identity;
-                return;
-            }
-
-            Matrix m1 = new Matrix(a.M11 / scale.X, a.M12 / scale.X, a.M13 / scale.X, 0,
-                    a.M21 / scale.Y, a.M22 / scale.Y, a.M23 / scale.Y, 0,
-                    a.M31 / scale.Z, a.M32 / scale.Z, a.M33 / scale.Z, 0,
-                    0, 0, 0, 1);
-
-            rot = Quaternion.CreateFromRotationMatrix(m1);
-        }
-
-        public static Quaternion GetRotation(ref Matrix a)
-        {
-            Quaternion rot;
-            GetRotation(ref a, out rot);
-            return rot;
+            return a.GetRotation();
         }
 
         public static float ANGULAR_MOTION_THRESHOLD = .5f * MathUtil.SIMD_HALF_PI;
@@ -332,8 +273,8 @@ namespace BulletXNA
         {
             Vector3 toPosA = transA.Translation;
             Vector3 toPosB = transB.Translation;
-            Quaternion toOrnA = TransformUtil.GetRotation(ref transA);
-            Quaternion toOrnB = TransformUtil.GetRotation(ref transB);
+            Quaternion toOrnA = transA.GetRotation();
+            Quaternion toOrnB = transB.GetRotation();
 
             if (m_separatingDistance > 0.0f)
             {
@@ -369,8 +310,8 @@ namespace BulletXNA
     		
 		    Vector3 toPosA = transA.Translation;
 		    Vector3 toPosB = transB.Translation;
-            Quaternion toOrnA = TransformUtil.GetRotation(ref transA);
-            Quaternion toOrnB = TransformUtil.GetRotation(ref transB);
+            Quaternion toOrnA = transA.GetRotation();
+            Quaternion toOrnB = transB.GetRotation();
 		    m_posA = toPosA;
 		    m_posB = toPosB;
 		    m_ornA = toOrnA;

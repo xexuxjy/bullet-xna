@@ -24,14 +24,13 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
     public class IndexedMesh
     {
         public int m_numTriangles;
-        public ObjectArray<int> m_triangleIndexBase = new ObjectArray<int>();
+        public Object m_triangleIndexBase;
         public int m_triangleIndexStride;
         public int m_numVertices;
         public Object m_vertexBase = null;
@@ -62,7 +61,7 @@ namespace BulletXNA.BulletCollision
 	        indexedMesh.m_numVertices = numVertices;
 	        indexedMesh.m_vertexBase = vertexBase;
 
-            if (vertexBase is ObjectArray<Vector3>)
+            if (vertexBase is ObjectArray<Vector3> || vertexBase is ObjectArray<Vector3>)
             {
                 indexedMesh.m_vertexStride = 1;
             }

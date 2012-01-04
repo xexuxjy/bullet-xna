@@ -27,7 +27,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -166,14 +165,16 @@ namespace BulletXNA.BulletCollision
                     {
                         int ibreak = 0;
                     }
-                    Vector3 seperatingAxisInA = MathUtil.TransposeTransformNormal(-m_cachedSeparatingAxis, input.m_transformA);
-                    Vector3 seperatingAxisInB = MathUtil.TransposeTransformNormal(ref m_cachedSeparatingAxis, ref input.m_transformB);
+
+                    Vector3 seperatingAxisInA = (-m_cachedSeparatingAxis) * input.m_transformA._basis;
+                    Vector3 seperatingAxisInB = m_cachedSeparatingAxis * input.m_transformB._basis;
+
 
                     Vector3 pInA = m_minkowskiA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
                     Vector3 qInB = m_minkowskiB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
 
-                    Vector3 pWorld = Vector3.Transform(pInA, localTransA);
-                    Vector3 qWorld = Vector3.Transform(qInB, localTransB);
+                    Vector3 pWorld = localTransA * pInA;
+                    Vector3 qWorld = localTransB * qInB;
 
                     if (check2d)
                     {
@@ -312,8 +313,8 @@ namespace BulletXNA.BulletCollision
                         //        m_cachedSeparatingAxis.getY(),   
                         //        m_cachedSeparatingAxis.getZ(),   
                         //        squaredDistance,   
-                        //        m_minkowskiA->ShapeType,   
-                        //        m_minkowskiB->ShapeType);   
+                        //        m_minkowskiA->getShapeType(),   
+                        //        m_minkowskiB->getShapeType());   
 
                         //#endif   
                         break;
@@ -473,6 +474,13 @@ namespace BulletXNA.BulletCollision
                     }
                 }
             }
+
+
+	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
+	        {
+                BulletGlobals.g_streamWriter.WriteLine("valid [{0}] distance[{1:0000.00000000}][{2:0000.00000000}] maxDistSq[{3:0000.00000000}]", isValid, distance, distance * distance, input.m_maximumDistanceSquared);
+	        }
+
 
             if (isValid && ((distance < 0) || (distance * distance < input.m_maximumDistanceSquared)))
             {

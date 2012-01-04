@@ -27,15 +27,13 @@ SOFTWARE.
 
 using System;
 using System.ComponentModel;
-using Microsoft.Xna.Framework.Design;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
-namespace Microsoft.Xna.Framework
+namespace BulletXNA.LinearMath
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    [TypeConverter(typeof(Vector4Converter))]
     public struct Vector4 : IEquatable<Vector4>
     {
         #region Private Fields
@@ -101,14 +99,6 @@ namespace Microsoft.Xna.Framework
         {
             this.X = x;
             this.Y = y;
-            this.Z = z;
-            this.W = w;
-        }
-
-        public Vector4(Vector2 value, float z, float w)
-        {
-            this.X = value.X;
-            this.Y = value.Y;
             this.Z = z;
             this.W = w;
         }
@@ -480,29 +470,12 @@ namespace Microsoft.Xna.Framework
             result.Z = value1.Z - value2.Z;
         }
 
-        public static Vector4 Transform(Vector2 position, Matrix matrix)
-        {
-            Vector4 result;
-            Transform(ref position, ref matrix, out result);
-            return result;
-        }
-
-        public static Vector4 Transform(Vector2 value, Quaternion rotation)
-        {
-            throw new NotImplementedException();
-        }
-
         public static Vector4 Transform(Vector3 value, Quaternion rotation)
         {
             throw new NotImplementedException();
         }
 
         public static Vector4 Transform(Vector4 value, Quaternion rotation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Transform(ref Vector2 value, ref Quaternion rotation, out Vector4 result)
         {
             throw new NotImplementedException();
         }
@@ -550,28 +523,20 @@ namespace Microsoft.Xna.Framework
             return vector;
         }
 
-        public static void Transform(ref Vector2 position, ref Matrix matrix, out Vector4 result)
-        {
-            result = new Vector4((position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41,
-                                 (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42,
-                                 (position.X * matrix.M13) + (position.Y * matrix.M23) + matrix.M43,
-                                 (position.X * matrix.M14) + (position.Y * matrix.M24) + matrix.M44);
-        }
-
         public static void Transform(ref Vector3 position, ref Matrix matrix, out Vector4 result)
         {
-            result = new Vector4((position.X * matrix.M11) + (position.Y * matrix.M21) + (position.Z * matrix.M31) + matrix.M41,
-                                 (position.X * matrix.M12) + (position.Y * matrix.M22) + (position.Z * matrix.M32) + matrix.M42,
-                                 (position.X * matrix.M13) + (position.Y * matrix.M23) + (position.Z * matrix.M33) + matrix.M43,
-                                 (position.X * matrix.M14) + (position.Y * matrix.M24) + (position.Z * matrix.M34) + matrix.M44);
+            result = new Vector4((position.X * matrix._basis[0, 0]) + (position.Y * matrix._basis[1, 0]) + (position.Z * matrix._basis[2, 0]) + matrix.Translation.X,
+                                 (position.X * matrix._basis[0, 1]) + (position.Y * matrix._basis[1, 1]) + (position.Z * matrix._basis[2, 1]) + matrix.Translation.Y,
+                                 (position.X * matrix._basis[0, 2]) + (position.Y * matrix._basis[1, 2]) + (position.Z * matrix._basis[2, 2]) + matrix.Translation.Z,
+                                 1);
         }
 
         public static void Transform(ref Vector4 vector, ref Matrix matrix, out Vector4 result)
         {
-            result = new Vector4((vector.X * matrix.M11) + (vector.Y * matrix.M21) + (vector.Z * matrix.M31) + (vector.W * matrix.M41),
-                                 (vector.X * matrix.M12) + (vector.Y * matrix.M22) + (vector.Z * matrix.M32) + (vector.W * matrix.M42),
-                                 (vector.X * matrix.M13) + (vector.Y * matrix.M23) + (vector.Z * matrix.M33) + (vector.W * matrix.M43),
-                                 (vector.X * matrix.M14) + (vector.Y * matrix.M24) + (vector.Z * matrix.M34) + (vector.W * matrix.M44));
+            result = new Vector4((vector.X * matrix._basis[0, 0]) + (vector.Y * matrix._basis[1, 0]) + (vector.Z * matrix._basis[2, 0]) + (vector.W * matrix.Translation.X),
+                                 (vector.X * matrix._basis[0, 1]) + (vector.Y * matrix._basis[1, 1]) + (vector.Z * matrix._basis[2, 1]) + (vector.W * matrix.Translation.Y),
+                                 (vector.X * matrix._basis[0, 2]) + (vector.Y * matrix._basis[1, 2]) + (vector.Z * matrix._basis[2, 2]) + (vector.W * matrix.Translation.Z),
+                                 vector.W);
         }
 
         public override string ToString()

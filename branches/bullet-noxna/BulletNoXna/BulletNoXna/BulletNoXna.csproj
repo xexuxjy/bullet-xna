@@ -139,7 +139,6 @@
     <Compile Include="BulletDynamics\ConstraintSolver\SolverConstraint.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\TypedConstraint.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\UniversalConstraint.cs" />
-    <Compile Include="BulletDynamics\Dynamics\ContinuousDynamicsWorld.cs" />
     <Compile Include="BulletDynamics\Dynamics\DiscreteDynamicsWorld.cs" />
     <Compile Include="BulletDynamics\Dynamics\DynamicsWorld.cs" />
     <Compile Include="BulletDynamics\Dynamics\IActionInterface.cs" />
@@ -150,13 +149,17 @@
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
+    <Compile Include="LinearMath\IndexedBasisMatrix.cs" />
+    <Compile Include="LinearMath\Matrix.cs" />
     <Compile Include="LinearMath\MathHelper.cs" />
+    <Compile Include="LinearMath\Quaternion.cs" />
+    <Compile Include="LinearMath\Vector3.cs" />
+    <Compile Include="LinearMath\Vector4.cs" />
     <Compile Include="TypedObject.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\VoronoiSimplexSolver.cs" />
     <Compile Include="LinearMath\AabbUtil2.cs" />
     <Compile Include="LinearMath\ConvexHull.cs" />
     <Compile Include="LinearMath\IDebugDraw.cs" />
-    <Compile Include="LinearMath\IndexedVector3.cs" />
     <Compile Include="LinearMath\MathUtil.cs" />
     <Compile Include="LinearMath\ObjectArray.cs" />
     <Compile Include="LinearMath\TransformUtil.cs" />
@@ -165,10 +168,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Microsoft.Xna.Framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

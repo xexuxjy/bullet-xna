@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -63,9 +63,9 @@ namespace BulletXNA.BulletCollision
 	        int axis = m_coneIndices[1];
 	        int r1 = m_coneIndices[0];
 	        int r2 = m_coneIndices[2];
-	        m_height *= MathUtil.VectorComponent(ref scaling,axis) / MathUtil.VectorComponent(ref m_localScaling,axis);
-	        m_radius *= (MathUtil.VectorComponent(ref scaling,r1) / MathUtil.VectorComponent(ref m_localScaling,r1) + MathUtil.VectorComponent(ref scaling,r2) / MathUtil.VectorComponent(ref m_localScaling,r2)) / 2;
-	        m_sinAngle = (m_radius / (float)Math.Sqrt(m_radius * m_radius + m_height * m_height));
+            m_height *= scaling[axis] / m_localScaling[axis];
+            m_radius *= (scaling[r1] / m_localScaling[r1] + scaling[r2] / m_localScaling[r2]) / 2;
+            m_sinAngle = (m_radius / (float)Math.Sqrt(m_radius * m_radius + m_height * m_height));
 	        base.SetLocalScaling(ref scaling);
         }
 
@@ -149,37 +149,36 @@ namespace BulletXNA.BulletCollision
         {
 	        float halfHeight = m_height * 0.5f;
 
-            if (MathUtil.VectorComponent(ref v,m_coneIndices[1]) > v.Length() * m_sinAngle)
+         if (v[m_coneIndices[1]] > v.Length() * m_sinAngle)
+         {
+	        Vector3 tmp = new Vector3();
+
+	        tmp[m_coneIndices[0]] = 0.0f;
+	        tmp[m_coneIndices[1]] = halfHeight;
+	        tmp[m_coneIndices[2]] = 0.0f;
+	        return tmp;
+         }
+          else 
+         {
+            float s = (float)Math.Sqrt(v[m_coneIndices[0]] * v[m_coneIndices[0]] + v[m_coneIndices[2]] * v[m_coneIndices[2]]);
+            if (s > MathUtil.SIMD_EPSILON) 
             {
-                Vector3 tmp = Vector3.Zero;
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[0],0f);
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[1],halfHeight);
-                MathUtil.VectorComponent(ref tmp,m_coneIndices[2],0f);
-                return tmp;
+              float d = m_radius / s;
+	        Vector3 tmp = new Vector3();
+	          tmp[m_coneIndices[0]] = v[m_coneIndices[0]] * d;
+	          tmp[m_coneIndices[1]] = -halfHeight;
+	          tmp[m_coneIndices[2]] = v[m_coneIndices[2]] * d;
+	          return tmp;
             }
-            else 
+            else  
             {
-                float v0 = MathUtil.VectorComponent(ref v,m_coneIndices[0]);
-                float v2 = MathUtil.VectorComponent(ref v,m_coneIndices[2]);
-                float s = (float)Math.Sqrt(v0 * v0 + v2 * v2);
-                if (s > MathUtil.SIMD_EPSILON) 
-                {
-                    Vector3 tmp = Vector3.Zero;
-                    float d = m_radius / s;
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[0],v0*d);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[1],-halfHeight);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[2],v2*d);
-                    return tmp;
-                }
-                else  
-                {
-                    Vector3 tmp = Vector3.Zero;
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[0],0f);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[1],-halfHeight);
-                    MathUtil.VectorComponent(ref tmp,m_coneIndices[2],0f);
-                    return tmp;
-                }
-            }
+	        Vector3 tmp = new Vector3();
+		        tmp[m_coneIndices[0]] = 0.0f;
+		        tmp[m_coneIndices[1]] = -halfHeight;
+		        tmp[m_coneIndices[2]] = 0.0f;
+		        return tmp;
+	        }
+          }
 
         }
     }

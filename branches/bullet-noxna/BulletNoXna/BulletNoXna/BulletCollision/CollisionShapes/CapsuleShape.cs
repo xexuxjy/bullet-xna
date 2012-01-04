@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -46,8 +46,8 @@ namespace BulletXNA.BulletCollision
 	        float radius = Radius;
 
 	        Vector3 halfExtents = new Vector3(radius);
-            float val = MathUtil.VectorComponent(ref halfExtents,GetUpAxis());
-	        MathUtil.VectorComponent(ref halfExtents,GetUpAxis(),val +getHalfHeight());
+            float val = halfExtents[GetUpAxis()];
+	        halfExtents[GetUpAxis()] = val +GetHalfHeight();
 
 	        float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
 
@@ -99,7 +99,7 @@ namespace BulletXNA.BulletCollision
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < 0.0001f)
 	        {
-		        vec = Vector3.Right;
+		        vec = new Vector3(1,0,0);
 	        } 
             else
 	        {
@@ -115,10 +115,10 @@ namespace BulletXNA.BulletCollision
 
 	        {
 		        Vector3 pos = Vector3.Zero;
-		        MathUtil.VectorComponent(ref pos,GetUpAxis(),getHalfHeight());
+		        pos[GetUpAxis()] = GetHalfHeight();
 
 		        vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
-		        newDot = Vector3.Dot(vec,vtx);
+		        newDot = vec.Dot(ref vtx);
 		        if (newDot > maxDot)
 		        {
 			        maxDot = newDot;
@@ -127,10 +127,10 @@ namespace BulletXNA.BulletCollision
 	        }
 	        {
                 Vector3 pos = Vector3.Zero;
-                MathUtil.VectorComponent(ref pos, GetUpAxis(), -getHalfHeight());
+                pos[GetUpAxis()] = -GetHalfHeight();
 
                 vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
-                newDot = Vector3.Dot(vec, vtx);
+                newDot = vec.Dot(ref vtx);
                 if (newDot > maxDot)
                 {
                     maxDot = newDot;
@@ -154,10 +154,10 @@ namespace BulletXNA.BulletCollision
 		        float newDot = 0f;
 	            {
 		            Vector3 pos = Vector3.Zero;
-		            MathUtil.VectorComponent(ref pos,GetUpAxis(),getHalfHeight());
+                    pos[GetUpAxis()] = GetHalfHeight();
 
 		            vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
-		            newDot = Vector3.Dot(vec,vtx);
+                    newDot = vec.Dot(ref vtx);
 		            if (newDot > maxDot)
 		            {
 			            maxDot = newDot;
@@ -166,10 +166,10 @@ namespace BulletXNA.BulletCollision
 	            }
 	            {
                     Vector3 pos = Vector3.Zero;
-                    MathUtil.VectorComponent(ref pos, GetUpAxis(), -getHalfHeight());
+                    pos[GetUpAxis()] = -GetHalfHeight();
 
                     vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
-                    newDot = Vector3.Dot(vec, vtx);
+                    newDot = vec.Dot(ref vtx);
                     if (newDot > maxDot)
                     {
                         maxDot = newDot;
@@ -182,14 +182,14 @@ namespace BulletXNA.BulletCollision
 	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
 	        Vector3 halfExtents = new Vector3(Radius);
-	        MathUtil.VectorComponent(ref halfExtents,m_upAxis, Radius + getHalfHeight());
+            halfExtents[m_upAxis] = Radius + GetHalfHeight();
+
 	        halfExtents += new Vector3(Margin);
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
             Vector3 center = trans.Translation;
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents),
-                                            Vector3.Dot(abs_b.Up, halfExtents),
-                                            Vector3.Dot(abs_b.Backward, halfExtents));
+            Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents),
+                                           abs_b[1].Dot(ref halfExtents),
+                                           abs_b[2].Dot(ref halfExtents));
     		
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;
@@ -211,13 +211,13 @@ namespace BulletXNA.BulletCollision
             get
             {
                 int radiusAxis = (m_upAxis + 2) % 3;
-                return MathUtil.VectorComponent(ref m_implicitShapeDimensions, radiusAxis);
+                return m_implicitShapeDimensions[radiusAxis];
             }
 	    }
 
-	    public float getHalfHeight()
+	    public float GetHalfHeight()
 	    {
-            return MathUtil.VectorComponent(ref m_implicitShapeDimensions,m_upAxis);
+            return m_implicitShapeDimensions[m_upAxis];
 	    }
         protected int m_upAxis;
 

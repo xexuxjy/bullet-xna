@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
+using BulletXNA.LinearMath;
 using DemoFramework;
-using SharpDX;
 
 namespace CcdPhysicsDemo
 {

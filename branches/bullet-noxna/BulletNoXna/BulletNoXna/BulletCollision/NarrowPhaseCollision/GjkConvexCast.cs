@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -61,7 +61,7 @@ namespace BulletXNA.BulletCollision
             Vector3 r = (linVelA - linVelB);
 
             float lastLambda = lambda;
-            //btScalar epsilon = btScalar(0.001);
+            //float epsilon = float(0.001);
 
             int numIter = 0;
             //first solution, using GJK

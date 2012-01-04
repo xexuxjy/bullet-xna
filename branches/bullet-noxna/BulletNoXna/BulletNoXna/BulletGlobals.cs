@@ -22,10 +22,10 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
@@ -76,27 +76,54 @@ namespace BulletXNA
         }
 
 
+        public static ManifoldPoint GetManifoldPoint()
+        {
+            if (m_pointStack.Count == 0)
+            {
+                m_pointStack.Push(new ManifoldPoint());
+            }
+            ++m_assignedPointCount;
+            return m_pointStack.Pop();
+        }
 
-		public const bool debugRigidBody = false;
-		public const bool debugCollisionWorld = false;
+        public static void ReleaseManifoldPoint(ManifoldPoint mp)
+        {
+            --m_assignedPointCount;
+            m_pointStack.Push(mp);
+        }
+
+        private static Stack<ManifoldPoint> m_pointStack = new Stack<ManifoldPoint>(20);
+        private static int m_assignedPointCount = 0;
+
+
+        public const bool debugRigidBody = false;
+        public const bool debugCollisionWorld = false;
 		public const bool debugConstraints = false;
-		public const bool debugDiscreteDynamicsWorld = false;
+		public const bool debugDiscreteDynamicsWorld = true;
 		public const bool debugBoxBoxDetector = false;
-		public const bool debugIslands = false;
+		public const bool debugIslands = true;
 		public const bool debugBVHTriangleMesh = false;
 		public const bool debugConvexHull = false;
 		public const bool debugConvexShape = false;
 		public const bool debugShapeHull = false;
 		public const bool debugStridingMesh = false;
-		public const bool debugGJK = true;
+		public const bool debugGJK = false;
 		public const bool debugGJKDetector = false;
 		public const bool debugPersistentManifold = false;
 		public const bool debugVoronoiSimplex = false;
-		public const bool debugSolver = false;
+        public const bool debugSolver = true;
         public const bool debugBroadphase = false;
         public const bool debugBoxShape = false;
+        public const bool debugGimpactShape= false;
+        public const bool debugGimpactAlgo = false;
+        public const bool debugGimpactBVH = false;
+        public const bool debugPairCache = false;
+        public const bool debugDispatcher = false;
+        public const bool debugManifoldResult = false;
 
 
+        // tracking
+        public static int s_collisionAlgorithmInstanceCount = 0;
 
 
 

@@ -27,9 +27,9 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
-namespace BulletXNA.BulletCollision
+namespace BulletXNA.BulletCollision 
 {
     ///btPersistentManifold is a contact point cache, it stays persistent as long as objects are overlapping in the broadphase.
     ///Those contact points are created by the collision narrow phase.
@@ -187,13 +187,15 @@ namespace BulletXNA.BulletCollision
 
 		        DebugPersistency();
             }
+            BulletGlobals.ReleaseManifoldPoint(pt);
+            pt = null;
         }
 
 	    public void	DebugPersistency()
         {
                 if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
                 {
-				BulletGlobals.g_streamWriter.WriteLine("DebugPersistency : numPoints {0}\n", m_cachedPoints);
+				BulletGlobals.g_streamWriter.WriteLine("DebugPersistency : numPoints {0}", m_cachedPoints);
 				for (int i = 0; i < m_cachedPoints; i++)
 				{
 					BulletGlobals.g_streamWriter.WriteLine(String.Format("m_pointCache[{0}]", i));
@@ -256,12 +258,6 @@ namespace BulletXNA.BulletCollision
         {
             Debug.Assert(ValidContactDistance(ref newPoint));
 
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("addManifoldPoint");
-                MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, newPoint);
-            }
-
             int insertIndex = GetNumContacts();
             if (insertIndex == MANIFOLD_CACHE_SIZE)
             {
@@ -288,6 +284,15 @@ namespace BulletXNA.BulletCollision
 
             //Debug.Assert(m_pointCache[insertIndex].GetUserPersistentData() == null);
             m_pointCache[insertIndex] = newPoint;
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("addManifoldPoint[{0}][{1}]",insertIndex,m_cachedPoints);
+                MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, newPoint);
+            }
+
+
             return insertIndex;
         }
 
@@ -299,13 +304,13 @@ namespace BulletXNA.BulletCollision
             //		m_pointCache[index] = m_pointCache[lastUsedIndex];
             if (index != lastUsedIndex)
             {
-                //m_pointCache[index].Copy(m_pointCache[lastUsedIndex]);
+                //m_pointCache[index].Copy(m_pointCache[lastUsedIndex])
                 m_pointCache[index] = m_pointCache[lastUsedIndex];
                 //get rid of duplicated userPersistentData pointer
-                m_pointCache[lastUsedIndex].Reset();
+                //m_pointCache[lastUsedIndex].Reset();
             }
 
-            Debug.Assert(m_pointCache[lastUsedIndex].GetUserPersistentData() == null);
+            //Debug.Assert(m_pointCache[lastUsedIndex].GetUserPersistentData() == null);
             m_cachedPoints--;
         }
 
@@ -322,6 +327,8 @@ namespace BulletXNA.BulletCollision
 
             Debug.Assert(lifeTime >= 0);
             Object cache = m_pointCache[insertIndex].GetUserPersistentData();
+
+            BulletGlobals.ReleaseManifoldPoint(m_pointCache[insertIndex]);
 
             m_pointCache[insertIndex] = newPoint;
 
@@ -343,13 +350,9 @@ namespace BulletXNA.BulletCollision
 
         public bool ValidContactDistance(ref ManifoldPoint pt)
         {
-            if (pt.m_lifeTime > 1)
-            {
-                return pt.GetDistance() <= GetContactBreakingThreshold();
-            }
-            return pt.m_distance1 <= GetContactProcessingThreshold();
-
+            return pt.m_distance1 <= GetContactBreakingThreshold();
         }
+
         /// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
         public void RefreshContactPoints(ref Matrix trA, ref Matrix trB)
         {
@@ -360,25 +363,21 @@ namespace BulletXNA.BulletCollision
             }
 
 
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("refreshContactPoints");
-		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posA",trA.Translation);
-		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"posB",trB.Translation);
-	}
             /// first refresh worldspace positions and distance
             int numContacts = GetNumContacts() - 1;
             for (int i = numContacts; i >= 0; i--)
             {
                 ManifoldPoint manifoldPoint = m_pointCache[i];
-                Vector3 pointA = Vector3.Transform(manifoldPoint.GetLocalPointA(), trA);
-                Vector3 pointB = Vector3.Transform(manifoldPoint.GetLocalPointB(), trB);
+                Vector3 pointA = trA * manifoldPoint.GetLocalPointA();
+                Vector3 pointB = trB * manifoldPoint.GetLocalPointB();
 
                 manifoldPoint.SetPositionWorldOnA(ref pointA);
                 manifoldPoint.SetPositionWorldOnB(ref pointB);
 
                 manifoldPoint.SetDistance(Vector3.Dot((manifoldPoint.GetPositionWorldOnA() - manifoldPoint.GetPositionWorldOnB()), manifoldPoint.GetNormalWorldOnB()));
                 manifoldPoint.SetLifeTime(manifoldPoint.GetLifeTime() + 1);
+                m_pointCache[i] = manifoldPoint;
+
             }
 
             /// then 

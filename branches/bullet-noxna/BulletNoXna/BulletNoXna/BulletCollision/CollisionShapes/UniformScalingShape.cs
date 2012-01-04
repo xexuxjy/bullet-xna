@@ -23,7 +23,6 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -33,7 +32,7 @@ namespace BulletXNA.BulletCollision
         {
             m_childConvexShape = childConvexShape;
             m_uniformScalingFactor = uniformScalingFactor;
-            m_shapeType = BroadphaseNativeType.UNIFORM_SCALING_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.UniformScalingShape;
         }
 
         public override void Cleanup()
@@ -98,9 +97,13 @@ namespace BulletXNA.BulletCollision
 		Vector4.Zero,
 		Vector4.Zero
 	};
+
+    for (int i = 0; i < 6; i++)
+    {
+        _directions[i] = _directions[i] * t._basis;
+    }
     
-    Vector3.TransformNormal(_directions,ref t,_directions);
-	ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
+    ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
 
 	
 	BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
@@ -110,9 +113,9 @@ namespace BulletXNA.BulletCollision
 	for ( int i = 0; i < 3; ++i )
 	{
 		Vector3 temp = new Vector3(_supporting[i].X, _supporting[i].Y, _supporting[i].Z);
-		MathUtil.VectorComponent(ref aabbMax1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
+		aabbMax1[i] = (t *temp)[i];
 		temp = new Vector3(_supporting[i+3].X, _supporting[i+3].Y, _supporting[i+3].Z);
-		MathUtil.VectorComponent(ref aabbMin1,i,MathUtil.VectorComponent(Vector3.Transform(temp,t),i));
+        aabbMin1[i] = (t * temp)[i];
 	}
 
 	Vector3 marginVec = new Vector3(Margin);
@@ -121,15 +124,15 @@ namespace BulletXNA.BulletCollision
 	
 #else
 
-	btScalar margin = getMargin();
+	float margin = getMargin();
 	for (int i=0;i<3;i++)
 	{
-		Vector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
-		vec[i] = btScalar(1.);
-		Vector3 sv = localGetSupportingVertex(vec*t.getBasis());
-		Vector3 tmp = t(sv);
+		IndexedVector3 vec(float(0.),float(0.),float(0.));
+		vec[i] = float(1.);
+		IndexedVector3 sv = localGetSupportingVertex(vec*t.getBasis());
+		IndexedVector3 tmp = t(sv);
 		aabbMax[i] = tmp[i]+margin;
-		vec[i] = btScalar(-1.);
+		vec[i] = float(-1.);
 		sv = localGetSupportingVertex(vec*t.getBasis());
 		tmp = t(sv);
 		aabbMin[i] = tmp[i]-margin;

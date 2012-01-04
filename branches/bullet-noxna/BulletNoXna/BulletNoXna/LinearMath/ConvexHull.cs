@@ -19,7 +19,7 @@ subject to the following restrictions:
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+//using Microsoft.Xna.Framework;
 
 namespace BulletXNA.LinearMath
 {
@@ -158,6 +158,28 @@ public enum HullError
 	QE_OK,            // success!
 	QE_FAIL           // failed.
 }
+
+public class Plane
+{
+	public Vector3 Normal;
+	public float Distance;   // distance below origin - the D from plane equasion Ax+By+Cz+D=0
+	
+    public Plane(ref Vector3 n, float d)
+    {
+        Normal = n;
+        Distance = d;
+    }
+
+    public Plane(Vector3 n, float d)
+    {
+        Normal = n;
+        Distance = d;
+    }
+
+    public Plane()
+    {
+    }
+};
 
 //typedef ConvexH::HalfEdge HalfEdge;
 
@@ -1185,8 +1207,7 @@ public class HullTriangle : int3
 
                         Vector3 temp = v - p;
 
-                        Vector3 absTemp;
-                        MathUtil.AbsoluteVector(ref temp, out absTemp);
+                        Vector3 absTemp = temp.Absolute();
 
                         if (absTemp.X < normalepsilon && absTemp.Y < normalepsilon && absTemp.Z < normalepsilon)
 				        {
@@ -1339,9 +1360,9 @@ public class HullTriangle : int3
         }
         public static Vector3 ThreePlaneIntersection(Plane p0, Plane p1, Plane p2)
         {
-            Vector3 N1 = p0.Normal;
-            Vector3 N2 = p1.Normal;
-            Vector3 N3 = p2.Normal;
+            Vector3 N1 = new Vector3(p0.Normal);
+            Vector3 N2 = new Vector3(p1.Normal);
+            Vector3 N3 = new Vector3(p2.Normal);
 
             Vector3 n2n3 = Vector3.Cross(N2, N3);
             Vector3 n3n1 = Vector3.Cross(N3, N1);
@@ -1352,9 +1373,9 @@ public class HullTriangle : int3
             Debug.Assert(Math.Abs(quotient) > 0.000001f);
 
             quotient = -1.0f / quotient;
-            n2n3 *= p0.D;
-            n3n1 *= p1.D;
-            n1n2 *= p2.D;
+            n2n3 *= p0.Distance;
+            n3n1 *= p1.Distance;
+            n1n2 *= p2.Distance;
 
             Vector3 potentialVertex = n2n3;
             potentialVertex += n3n1;
@@ -1371,13 +1392,13 @@ public class HullTriangle : int3
             // returns the point where the line p0-p1 intersects the plane n&
             Vector3 dif = p1 - p0;
             float dn = Vector3.Dot(plane.Normal, dif);
-            float t = -(plane.D + Vector3.Dot(plane.Normal, p0)) / dn;
+            float t = -(plane.Distance + Vector3.Dot(plane.Normal, p0)) / dn;
             return p0 + (dif * t);
         }
 
         public static Vector3 PlaneProject(ref Plane plane, ref Vector3 point)
         {
-            return point - plane.Normal * (Vector3.Dot(point, plane.Normal) + plane.D);
+            return point - new Vector3(plane.Normal) * (Vector3.Dot(point, plane.Normal) + plane.Distance);
         }
 
         public static Vector3 TriNormal(Vector3 v0, Vector3 v1, Vector3 v2)
@@ -1412,7 +1433,7 @@ public class HullTriangle : int3
                 Plane plane = new Plane();
                 plane.Normal = Vector3.Cross(vdir, cp);
                 plane.Normal.Normalize();
-                plane.D = -Vector3.Dot(plane.Normal, vstart);
+                plane.Distance = -Vector3.Dot(plane.Normal, vstart);
                 Vector3 a = ustart + udir;
                 upoint = PlaneLineIntersection(ref plane, ref ustart, ref a);
             }
@@ -1421,7 +1442,7 @@ public class HullTriangle : int3
                 Plane plane = new Plane();
                 plane.Normal = Vector3.Cross(udir, cp);
                 plane.Normal.Normalize();
-                plane.D = -Vector3.Dot(plane.Normal, ustart);
+                plane.Distance = -Vector3.Dot(plane.Normal, ustart);
                 Vector3 a = vstart + vdir;
                 vpoint = PlaneLineIntersection(ref plane, ref vstart, ref a);
             }
@@ -1431,7 +1452,7 @@ public class HullTriangle : int3
         public static PlaneIntersectType PlaneTest(ref Plane p, ref Vector3 v)
         {
             float planetestepsilon = 0.0001f;
-            float a = Vector3.Dot(v, p.Normal) + p.D;
+            float a = Vector3.Dot(v, p.Normal) + p.Distance;
             PlaneIntersectType flag = (a > planetestepsilon) ? PlaneIntersectType.OVER : ((a < -planetestepsilon) ? PlaneIntersectType.UNDER : PlaneIntersectType.COPLANAR);
             return flag;
         }
@@ -1455,7 +1476,7 @@ public class HullTriangle : int3
 
         public IList<HullTriangle> m_tris = new List<HullTriangle>();
         public IList<int> m_vertexIndexMapping = new List<int>();
-        public const float EPSILON = 0.000001f; /* close enough to consider two btScalaring point numbers to be 'the same'. */
+        public const float EPSILON = 0.000001f; /* close enough to consider two floating point numbers to be 'the same'. */
 
     }
 }

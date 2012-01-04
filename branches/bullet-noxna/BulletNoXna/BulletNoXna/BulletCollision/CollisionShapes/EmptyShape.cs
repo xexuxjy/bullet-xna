@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -41,9 +41,10 @@ namespace BulletXNA.BulletCollision
 
         public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
         {
-            Vector3 margin = new Vector3(Margin);
-            aabbMin = t.Translation - margin;
-            aabbMax = t.Translation + margin;
+            float fmargin = Margin;
+            Vector3 margin = new Vector3(fmargin);
+	        aabbMin = t.Translation - margin;
+	        aabbMax = t.Translation + margin;
         }
 
         public override void SetLocalScaling(ref Vector3 scaling)

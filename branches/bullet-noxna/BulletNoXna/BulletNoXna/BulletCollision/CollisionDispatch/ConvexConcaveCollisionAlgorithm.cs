@@ -21,9 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Collections.Generic;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -199,7 +197,7 @@ namespace BulletXNA.BulletCollision
             }
 
             //Matrix triInv = MathHelper.InvertMatrix(triBody.getWorldTransform());
-            Matrix triInv = Matrix.Invert(triBody.GetWorldTransform());
+            Matrix triInv = triBody.GetWorldTransform().Inverse();
 
             Matrix convexFromLocal = triInv * convexbody.GetWorldTransform();
             Matrix convexToLocal = triInv * convexbody.GetInterpolationWorldTransform();
@@ -359,7 +357,7 @@ namespace BulletXNA.BulletCollision
 
             //recalc aabbs
             //Matrix convexInTriangleSpace = MathUtil.bulletMatrixMultiply(Matrix.Invert(m_triBody.getWorldTransform()) , m_convexBody.getWorldTransform());
-            Matrix convexInTriangleSpace = MathUtil.InverseTimes(m_triBody.GetWorldTransform(), m_convexBody.GetWorldTransform());
+            Matrix convexInTriangleSpace = m_triBody.GetWorldTransform().Inverse() * m_convexBody.GetWorldTransform();
             CollisionShape convexShape = m_convexBody.CollisionShape;
             convexShape.GetAabb(ref convexInTriangleSpace, out m_aabbMin, out m_aabbMax);
             float extraMargin = collisionMarginTriangle;

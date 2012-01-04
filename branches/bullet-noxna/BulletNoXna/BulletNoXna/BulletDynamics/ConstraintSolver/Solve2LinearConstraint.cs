@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -41,8 +41,8 @@ namespace BulletXNA.BulletDynamics
 	    //
 	    // solve unilateral raint (equality, direct method)
 	    //
-        public void ResolveUnilateralPairConstraint(RigidBody body0, RigidBody body1, ref Matrix world2A,
-                            ref Matrix world2B,
+        public void ResolveUnilateralPairConstraint(RigidBody body0, RigidBody body1, ref IndexedBasisMatrix world2A,
+                            ref IndexedBasisMatrix world2B,
                             ref Vector3 invInertiaADiag,
                             float invMassA,
                             ref Vector3 linvelA, ref Vector3 angvelA,
@@ -122,8 +122,8 @@ namespace BulletXNA.BulletDynamics
 	    //
 	    // solving 2x2 lcp problem (inequality, direct solution )
 	    //
-        void ResolveBilateralPairraint(RigidBody body0, RigidBody body1, ref Matrix world2A,
-                            ref Matrix world2B,
+        void ResolveBilateralPairraint(RigidBody body0, RigidBody body1, ref IndexedBasisMatrix world2A,
+                            ref IndexedBasisMatrix world2B,
                             ref Vector3 invInertiaADiag,
                             float invMassA,
                             ref Vector3 linvelA, ref Vector3 angvelA,

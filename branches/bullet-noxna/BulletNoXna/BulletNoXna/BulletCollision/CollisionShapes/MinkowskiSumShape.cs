@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -36,16 +36,15 @@ namespace BulletXNA.BulletCollision
             m_shapeB = shapeB;
             m_transA = Matrix.Identity;
             m_transB = Matrix.Identity;
-            m_shapeType = BroadphaseNativeType.MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.MinkowskiDifferenceShape;
         }
 
         public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
         {
-			Vector3 ta = MathUtil.TransposeTransformNormal(vec, m_transA);
-			Vector3 tb = MathUtil.TransposeTransformNormal(vec, m_transB);
-
-            Vector3 supVertexA = Vector3.Transform((m_shapeA.LocalGetSupportingVertexWithoutMargin(ref ta)),m_transA);
-            Vector3 supVertexB = Vector3.Transform((m_shapeB.LocalGetSupportingVertexWithoutMargin(ref tb)), m_transB);
+            Vector3 temp = vec * m_transA._basis;
+            Vector3 supVertexA = m_transA * (m_shapeA.LocalGetSupportingVertexWithoutMargin(ref temp));
+            temp = -vec * m_transB._basis;
+            Vector3 supVertexB = m_transB * (m_shapeB.LocalGetSupportingVertexWithoutMargin(ref temp));
             return supVertexA - supVertexB;
         }
 

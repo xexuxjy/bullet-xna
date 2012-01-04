@@ -23,7 +23,6 @@
 
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -169,16 +168,16 @@ namespace BulletXNA.BulletCollision
 			Vector3 v12 = edge1 + 1 < count1 ? vertices1[edge1+1] : vertices1[0];
 
 			Vector3 dv = v12 - v11;
-			Vector3 sideNormal = Vector3.TransformNormal( v12 - v11,xf1);
+			Vector3 sideNormal = xf1._basis * (v12 - v11);
 			sideNormal.Normalize();
 			Vector3 frontNormal = CrossS(ref sideNormal, 1.0f);
-			
-			v11 = Vector3.Transform(v11,xf1);
-			v12 = Vector3.Transform(v12,xf1);
 
-			float frontOffset = Vector3.Dot(frontNormal, v11);
-			float sideOffset1 = -Vector3.Dot(sideNormal, v11);
-			float sideOffset2 = Vector3.Dot(sideNormal, v12);
+            v11 = xf1 * v11;
+            v12 = xf1 * v12;
+
+			float frontOffset = frontNormal.Dot(ref v11);
+			float sideOffset1 = -(sideNormal.Dot(ref v11));
+			float sideOffset2 = sideNormal.Dot(ref v12);
 
 			// Clip incident edge against extruded edge1 side edges.
 			ClipVertex[] clipPoints1 = new ClipVertex[2];
@@ -214,7 +213,7 @@ namespace BulletXNA.BulletCollision
 			int pointCount = 0;
 			for (int i = 0; i < b2_maxManifoldPoints; ++i)
 			{
-				float separation = Vector3.Dot(frontNormal, clipPoints2[i].v) - frontOffset;
+				float separation = frontNormal.Dot(clipPoints2[i].v) - frontOffset;
 
 				if (separation <= 0.0f)
 				{
@@ -242,8 +241,8 @@ namespace BulletXNA.BulletCollision
 			int numOut = 0;
 
 			// Calculate the distance of end points to the line
-			float distance0 = Vector3.Dot(normal, vIn[0].v) - offset;
-			float distance1 = Vector3.Dot(normal, vIn[1].v) - offset;
+			float distance0 = normal.Dot(vIn[0].v) - offset;
+			float distance1 = normal.Dot(vIn[1].v) - offset;
 
 			// If the points are behind the plane
 			if (distance0 <= 0.0f) vOut[numOut++] = vIn[0];
@@ -282,8 +281,8 @@ namespace BulletXNA.BulletCollision
 			Debug.Assert(0 <= edge1 && edge1 < poly1.GetVertexCount());
 
 			// Convert normal from poly1's frame into poly2's frame.
-			Vector3 normal1World = Vector3.TransformNormal(normals1[edge1],xf1);
-			Vector3 normal1 = Vector3.TransformNormal(normal1World,MathUtil.TransposeBasis(xf2));
+			Vector3 normal1World = xf1._basis * normals1[edge1];
+            Vector3 normal1 = xf1._basis.Transpose() * normal1World;
 
 			// Find support vertex on poly2 for -normal.
 			int index = 0;
@@ -291,7 +290,7 @@ namespace BulletXNA.BulletCollision
 
 			for (int i = 0; i < count2; ++i)
 			{
-				float dot = Vector3.Dot(vertices2[i], normal1);
+				float dot = vertices2[i].Dot(normal1);
 				if (dot < minDot)
 				{
 					minDot = dot;
@@ -299,9 +298,9 @@ namespace BulletXNA.BulletCollision
 				}
 			}
 
-			Vector3 v1 = Vector3.Transform(vertices1[edge1],xf1);
-			Vector3 v2 = Vector3.Transform(vertices2[index],xf2);
-			float separation = Vector3.Dot(v2 - v1, normal1World);
+            Vector3 v1 = xf1 * vertices1[edge1];
+			Vector3 v2 = xf2 * vertices2[index];
+			float separation = (v2 - v1).Dot(normal1World);
 			return separation;
 		}
 
@@ -314,8 +313,8 @@ namespace BulletXNA.BulletCollision
 			Vector3[] normals1 = poly1.GetNormals();
 
 			// Vector pointing from the centroid of poly1 to the centroid of poly2.
-			Vector3 d = Vector3.Transform(poly2.GetCentroid(),xf2) - Vector3.Transform(poly1.GetCentroid(),xf1);
-			Vector3 dLocal1 = Vector3.TransformNormal(d, MathUtil.TransposeBasis(xf1));
+			Vector3 d = xf2 * poly2.GetCentroid() - xf1 * poly1.GetCentroid();
+            Vector3 dLocal1 = xf1._basis.Transpose() * d;
 
 
 			// Find edge normal on poly1 that has the largest projection onto d.
@@ -323,7 +322,7 @@ namespace BulletXNA.BulletCollision
 			float maxDot = -MathUtil.BT_LARGE_FLOAT;
 			for (int i = 0; i < count1; ++i)
 			{
-				float dot = Vector3.Dot(normals1[i], dLocal1);
+				float dot = normals1[i].Dot(ref dLocal1);
 				if (dot > maxDot)
 				{
 					maxDot = dot;
@@ -418,14 +417,14 @@ namespace BulletXNA.BulletCollision
 			Debug.Assert(0 <= edge1 && edge1 < poly1.GetVertexCount());
 
 			// Get the normal of the reference edge in poly2's frame.
-			Vector3 normal1 = Vector3.TransformNormal(Vector3.TransformNormal(normals1[edge1],xf1),MathUtil.TransposeBasis(xf2));
-			
+            Vector3 normal1 = xf2._basis.Transpose() * (xf1._basis * normals1[edge1]);
+
 			// Find the incident edge on poly2.
 			int index = 0;
 			float minDot = MathUtil.BT_LARGE_FLOAT;
 			for (int i = 0; i < count2; ++i)
 			{
-				float dot = Vector3.Dot(normal1, normals2[i]);
+				float dot = normal1.Dot(normals2[i]);
 				if (dot < minDot)
 				{
 					minDot = dot;
@@ -437,12 +436,12 @@ namespace BulletXNA.BulletCollision
 			int i1 = index;
 			int i2 = i1 + 1 < count2 ? i1 + 1 : 0;
 
-			c[0].v = Vector3.Transform(vertices2[i1],xf2);
+			c[0].v = xf2 * vertices2[i1];
 		//	c[0].id.features.referenceEdge = (unsigned char)edge1;
 		//	c[0].id.features.incidentEdge = (unsigned char)i1;
 		//	c[0].id.features.incidentVertex = 0;
 
-			c[1].v = Vector3.Transform(vertices2[i2],xf2);
+			c[1].v = xf2 * vertices2[i2];
 		//	c[1].id.features.referenceEdge = (unsigned char)edge1;
 		//	c[1].id.features.incidentEdge = (unsigned char)i2;
 		//	c[1].id.features.incidentVertex = 1;

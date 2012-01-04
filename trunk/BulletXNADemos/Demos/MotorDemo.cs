@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-using System.IO;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNADemos.Demos
 {

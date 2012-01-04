@@ -1,11 +1,9 @@
 ﻿#define BT_INTERNAL_EDGE_DEBUG_DRAW
 #define DEBUG_INTERNAL_EDGE
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 using System.Diagnostics;
+using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 
 

@@ -22,11 +22,10 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace BulletXNA
 {

@@ -24,7 +24,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -202,6 +201,12 @@ namespace BulletXNA.BulletCollision
 
             m_overlappingPairArray.RemoveAt(lastPairIndex);
 
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("HPC:RemoveOverlappingPair endSize[{0}].", m_overlappingPairArray.Count);
+            }
+
             return userData;
         }
 
@@ -214,6 +219,12 @@ namespace BulletXNA.BulletCollision
 
             bool collides = (proxy0.m_collisionFilterGroup & proxy1.m_collisionFilterMask) != 0;
             collides = collides && ((proxy1.m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("HPC:NeedsBroadphaseCollision collides[{0}].", collides);
+            }
+
 
             return collides;
         }
@@ -228,6 +239,9 @@ namespace BulletXNA.BulletCollision
             {
                 return null;
             }
+
+
+
             return InternalAddPair(proxy0, proxy1);
         }
 
@@ -240,6 +254,11 @@ namespace BulletXNA.BulletCollision
 
         public virtual void ProcessAllOverlappingPairs(IOverlapCallback callback, IDispatcher dispatcher)
         {
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("HPC:ProcessAllOverlappingPairs overlap[{0}].", m_overlappingPairArray.Count);
+            }
+
             for (int i = 0; i < m_overlappingPairArray.Count; )
             {
                 BroadphasePair pair = m_overlappingPairArray[i];

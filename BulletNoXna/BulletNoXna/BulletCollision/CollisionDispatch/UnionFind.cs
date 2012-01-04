@@ -26,12 +26,11 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
     // first pass I'm not going to worry too much about performance so this has become a class.
-    public class Element : IComparable<Element>
+    public struct Element : IComparable<Element>
     {
         public int m_id;
         public int m_sz;
@@ -67,10 +66,11 @@ namespace BulletXNA.BulletCollision
         {
             //first store the original body index, and islandId
             int numElements = m_elements.Count;
+            Element[] raw = m_elements.GetRawArray();
 
             for (int i = 0; i < numElements; i++)
             {
-                m_elements[i].m_id = Find(i);
+                raw[i].m_id = Find(i);
 #if !STATIC_SIMULATION_ISLAND_OPTIMIZATION
                 m_elements[i].m_sz = i;
 #endif
@@ -104,6 +104,11 @@ namespace BulletXNA.BulletCollision
         public Element GetElement(int index)
         {
             return m_elements[index];
+        }
+
+        public void SetElementSize(int index, int size)
+        {
+            m_elements.GetRawArray()[index].m_sz = size;
         }
 
 
@@ -144,7 +149,9 @@ namespace BulletXNA.BulletCollision
                 m_elements[i].m_sz += m_elements[j].m_sz; 
 			}
 #else
-            m_elements[i].m_id = j; m_elements[j].m_sz += m_elements[i].m_sz;
+            m_elements.GetRawArray()[i].m_id = j;
+            m_elements.GetRawArray()[j].m_sz += m_elements[i].m_sz;
+
 #endif //USE_PATH_COMPRESSION
         }
 
@@ -165,7 +172,6 @@ namespace BulletXNA.BulletCollision
 #else
             x = rawElements[x].m_id;
 #endif
-                x = rawElements[x].m_id;
                 //btAssert(x < m_N);
                 //btAssert(x >= 0);
 

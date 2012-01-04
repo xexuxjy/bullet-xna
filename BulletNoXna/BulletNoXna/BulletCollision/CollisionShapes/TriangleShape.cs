@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -98,8 +98,7 @@ namespace BulletXNA.BulletCollision
 				    Vector3 pa, pb;
                     GetEdge(i, out pa, out pb);
 				    Vector3 edge = pb-pa;
-                    Vector3 edgeNormal;
-                    Vector3.Cross(ref edge,ref normal,out edgeNormal);
+                    Vector3 edgeNormal = edge.Cross(ref normal);
 				    edgeNormal.Normalize();
                     float dist2;
                     Vector3.Dot(ref pt, ref edgeNormal,out dist2);

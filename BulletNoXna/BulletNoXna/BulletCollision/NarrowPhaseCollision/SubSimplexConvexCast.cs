@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -53,11 +53,8 @@ namespace BulletXNA.BulletCollision
             Vector3 r = (linVelA - linVelB);
             Vector3 v;
 
-            Vector3 supportTemp = MathUtil.TransposeTransformNormal(-r, fromA);
-            Vector3 supVertexA = Vector3.Transform(m_convexA.LocalGetSupportingVertex(ref supportTemp), fromA);
-            supportTemp = MathUtil.TransposeTransformNormal(r, fromB);
-            Vector3 foo = m_convexB.LocalGetSupportingVertex(ref supportTemp);
-            Vector3 supVertexB = Vector3.Transform(foo, fromB);
+            Vector3 supVertexA = fromA * m_convexA.LocalGetSupportingVertex(-r * fromA._basis);
+            Vector3 supVertexB = fromB * m_convexB.LocalGetSupportingVertex(r * fromB._basis);
             v = supVertexA - supVertexB;
             int maxIter = MAX_ITERATIONS;
 
@@ -76,10 +73,8 @@ namespace BulletXNA.BulletCollision
 
             while ((dist2 > epsilon) && (maxIter-- > 0))
             {
-                supportTemp = MathUtil.TransposeTransformNormal(-v, interpolatedTransA);
-                supVertexA = Vector3.Transform(m_convexA.LocalGetSupportingVertex(ref supportTemp), interpolatedTransA);
-                supportTemp = MathUtil.TransposeTransformNormal(v, interpolatedTransB);
-                supVertexB = Vector3.Transform(m_convexB.LocalGetSupportingVertex(ref supportTemp), interpolatedTransB);
+                supVertexA = interpolatedTransA * (m_convexA.LocalGetSupportingVertex(-v * interpolatedTransA._basis));
+                supVertexB = interpolatedTransB * (m_convexB.LocalGetSupportingVertex(v * interpolatedTransB._basis));
 
                 w = supVertexA - supVertexB;
 
@@ -162,86 +157,6 @@ namespace BulletXNA.BulletCollision
             result.m_hitPoint = hitB;
             return true;
 
-        }
-
-
-
-        public virtual bool russianCalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
-        {
-            MinkowskiSumShape convex = new MinkowskiSumShape(m_convexA, m_convexB);
-
-            Matrix rayFromLocalA;
-            Matrix rayToLocalA;
-
-            rayFromLocalA = Matrix.Invert(fromA) * fromB;
-            rayToLocalA = Matrix.Invert(toA) * toB;
-
-            m_simplexSolver.Reset();
-
-            //convex.TransformB = rayFromLocalA;
-            Matrix temp = Matrix.CreateFromQuaternion(Quaternion.CreateFromRotationMatrix(rayFromLocalA));
-            convex.SetTransformB(ref temp);
-
-            float lambda = 0;
-            //todo: need to verify this:
-            //because of minkowski difference, we need the inverse direction
-
-            Vector3 s = -rayFromLocalA.Translation;
-            Vector3 r = -(rayToLocalA.Translation - rayFromLocalA.Translation);
-            Vector3 x = s;
-            Vector3 v;
-            Vector3 arbitraryPoint = convex.LocalGetSupportingVertex(ref r);
-
-            v = x - arbitraryPoint;
-
-            int maxIter = MAX_ITERATIONS;
-
-            Vector3 n = new Vector3();
-            float lastLambda = lambda;
-
-            float dist2 = v.LengthSquared();
-            float epsilon = 0.0001f;
-
-            Vector3 w, p;
-            float VdotR;
-
-            while ((dist2 > epsilon) && (maxIter-- != 0))
-            {
-                p = convex.LocalGetSupportingVertex(ref v);
-                w = x - p;
-
-                float VdotW = Vector3.Dot(v, w);
-
-                if (VdotW > 0)
-                {
-                    VdotR = Vector3.Dot(v, r);
-
-                    if (VdotR >= -(MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
-                        return false;
-                    else
-                    {
-                        lambda = lambda - VdotW / VdotR;
-                        x = s + lambda * r;
-                        m_simplexSolver.Reset();
-                        //check next line
-                        w = x - p;
-                        lastLambda = lambda;
-                        n = v;
-                    }
-                }
-                m_simplexSolver.AddVertex(ref w, ref x, ref p);
-                if (m_simplexSolver.Closest(out v))
-                {
-                    dist2 = v.LengthSquared();
-                }
-                else
-                {
-                    dist2 = 0f;
-                }
-            }
-            result.m_fraction = lambda;
-            result.m_normal = n;
-            return true;
         }
 
 

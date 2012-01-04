@@ -21,9 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -44,12 +42,14 @@ namespace BulletXNA.BulletCollision
 
             if (m_use32bitIndices)
             {
+                m_32bitIndices = new ObjectArray<int>();
                 m_indexedMeshes[0].m_numTriangles = m_32bitIndices.Count / 3;
                 m_indexedMeshes[0].m_indexType = PHY_ScalarType.PHY_INTEGER;
                 m_indexedMeshes[0].m_triangleIndexStride = 3;
             }
             else
             {
+                m_16bitIndices = new ObjectArray<short>();
                 m_indexedMeshes[0].m_numTriangles = m_16bitIndices.Count / 3;
                 m_indexedMeshes[0].m_triangleIndexBase = null;
                 m_indexedMeshes[0].m_indexType = PHY_ScalarType.PHY_SHORT;
@@ -58,16 +58,21 @@ namespace BulletXNA.BulletCollision
 
             if (m_use4componentVertices)
             {
+                m_4componentVertices = new ObjectArray<Vector3>();
                 m_indexedMeshes[0].m_numVertices = m_4componentVertices.Count;
                 m_indexedMeshes[0].m_vertexStride = 1;
+                m_indexedMeshes[0].m_vertexBase = m_4componentVertices;
             }
             else
             {
+                m_3componentVertices = new ObjectArray<float>();
                 m_indexedMeshes[0].m_numVertices = m_3componentVertices.Count / 3;
                 m_indexedMeshes[0].m_vertexStride = 3;
+                m_indexedMeshes[0].m_vertexBase = m_3componentVertices;
             }
 
         }
+
         ///findOrAddVertex is an internal method, use addTriangle instead
         public int FindOrAddVertex(ref Vector3 vertex, bool removeDuplicateVertices)
         {
@@ -127,10 +132,9 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                m_16bitIndices.Add((uint)index);
+                m_16bitIndices.Add((short)index);
                 // not really supported yet.
-                Debug.Assert(false);
-                //m_indexedMeshes[0].m_triangleIndexBase = (unsigned char*) &m_16bitIndices[0];
+                m_indexedMeshes[0].m_triangleIndexBase = m_16bitIndices;
             }
         }
 
@@ -182,10 +186,10 @@ namespace BulletXNA.BulletCollision
             //(void) numindices;
         }
 
-        private ObjectArray<Vector3> m_4componentVertices = new ObjectArray<Vector3>();
-        private ObjectArray<float> m_3componentVertices = new ObjectArray<float>();
-        private ObjectArray<int> m_32bitIndices = new ObjectArray<int>();
-        private ObjectArray<uint> m_16bitIndices = new ObjectArray<uint>();
+        private ObjectArray<Vector3> m_4componentVertices;
+        private ObjectArray<float> m_3componentVertices;
+        private ObjectArray<int> m_32bitIndices;
+        private ObjectArray<short> m_16bitIndices;
         private bool m_use32bitIndices;
         private bool m_use4componentVertices;
 

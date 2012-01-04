@@ -192,12 +192,12 @@ namespace BulletXNA.BulletCollision
 		    return	m_sphereSphereCF;
 	    }
 #if USE_BUGGY_SPHERE_BOX_ALGORITHM
-	    if ((proxyType0 == BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE) && (proxyType1==BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE))
+	    if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1==BroadphaseNativeType.BoxShape))
 	    {
 		    return	m_sphereBoxCF;
 	    }
 
-	    if ((proxyType0 == BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE ) && (proxyType1==BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE))
+	    if ((proxyType0 == BroadphaseNativeType.BoxShape) && (proxyType1==BroadphaseNativeType.SphereShape))
 	    {
 		    return	m_boxSphereCF;
 	    }
@@ -275,6 +275,17 @@ namespace BulletXNA.BulletCollision
             ConvexConvexCreateFunc convexConvex = (ConvexConvexCreateFunc)m_convexConvexCreateFunc;
             convexConvex.m_numPerturbationIterations = numPerturbationIterations;
             convexConvex.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+        }
+
+        public void SetPlaneConvexMultipointIterations()
+        {
+            SetPlaneConvexMultipointIterations(3, 3);
+        }
+        public void SetPlaneConvexMultipointIterations(int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            ConvexPlaneCreateFunc planeCreateFunc = (ConvexPlaneCreateFunc)m_planeConvexCF;
+	        planeCreateFunc.m_numPerturbationIterations = numPerturbationIterations;
+	        planeCreateFunc.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
         }
     }
 }

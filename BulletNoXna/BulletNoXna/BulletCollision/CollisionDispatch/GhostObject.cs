@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -51,7 +51,8 @@ namespace BulletXNA.BulletCollision
             /* Compute AABB that encompasses angular movement */
             Vector3 linVel, angVel;
             TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
-            Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
+            Matrix R = Matrix.Identity;
+            R._basis = convexFromTrans._basis;
             castShape.CalculateTemporalAabb(ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 
             /// go over all objects, and if the ray intersects their aabb + cast shape aabb,

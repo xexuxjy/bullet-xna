@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -45,7 +45,7 @@ namespace BulletXNA.BulletDynamics
 	    public Point2PointConstraint(RigidBody rbA,ref Vector3 pivotInA) : base(TypedConstraintType.Point2Point,rbA)
         {
             m_pivotInA = pivotInA;
-            m_pivotInB = Vector3.Transform(pivotInA, rbA.GetCenterOfMassTransform());
+            m_pivotInB = rbA.GetCenterOfMassTransform() * pivotInA;
         }
 
         public override void GetInfo1(ConstraintInfo1 info)
@@ -72,7 +72,7 @@ namespace BulletXNA.BulletDynamics
             info.m_solverConstraints[1].m_contactNormal.Y = 1;
             info.m_solverConstraints[2].m_contactNormal.Z = 1;
 
-            Vector3 a1 = Vector3.TransformNormal(GetPivotInA(),body0_trans);
+            Vector3 a1 = body0_trans._basis * GetPivotInA();
             {
                 Vector3 a1neg = -a1;
 
@@ -87,7 +87,7 @@ namespace BulletXNA.BulletDynamics
             info->m_J2linearAxis[2*s+2] = -1;
             */
 
-            Vector3 a2 = Vector3.TransformNormal(GetPivotInB(),body1_trans);
+            Vector3 a2 = body1_trans._basis * GetPivotInB();
 
             {
                 Vector3 a2n = -a2;
@@ -107,7 +107,7 @@ namespace BulletXNA.BulletDynamics
 
             for (j = 0; j < 3; j++)
             {
-                info.m_solverConstraints[j].m_rhs = k * (MathUtil.VectorComponent(ref a2,j) + MathUtil.VectorComponent(ref body1Origin,j) - MathUtil.VectorComponent(ref a1,j) - MathUtil.VectorComponent(ref body0Origin,j));
+                info.m_solverConstraints[j].m_rhs = k * (a2[j] + body1Origin[j] - a1[j] - body0Origin[j]);
                 //printf("info->m_constraintError[%d]=%f\n",j,info->m_constraintError[j]);
             }
 

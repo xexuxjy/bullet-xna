@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -45,8 +45,8 @@ namespace BulletXNA.BulletCollision
             shapeR.m_shapes[0] =	shape0;
             shapeR.m_shapes[1] =	shape1;
 
-            shapeR.m_toshape1 = MathUtil.TransposeTimesBasis(ref wtrs1, ref wtrs0);
-            shapeR.m_toshape0 = MathUtil.InverseTimes(ref wtrs0, ref wtrs1);
+            shapeR.m_toshape1 = wtrs1._basis.TransposeTimes(ref wtrs0._basis);
+            shapeR.m_toshape0 = wtrs0.InverseTimes(ref wtrs1);
 
 
 
@@ -83,9 +83,9 @@ namespace BulletXNA.BulletCollision
                     Vector3 temp = -gjk.m_simplex.c[i].d;
                     w1+=shape.Support(ref temp,1)*p;
                 }
-                results.witnesses0	= Vector3.Transform(w0,wtrs0);
-                results.witnesses1	= Vector3.Transform(w1,wtrs0);
-                results.normal = w0-w1;
+                results.witnesses0 = wtrs0 * w0;
+                results.witnesses1 = wtrs0 * w1;
+                results.normal = w0 - w1;
                 results.distance =	results.normal.Length();
                 results.normal	/=	results.distance>GJK_MIN_DISTANCE?results.distance:1;
                 return(true);
@@ -125,8 +125,8 @@ namespace BulletXNA.BulletCollision
                             w0+=shape.Support(ref epa.m_result.c[i].d,0)*epa.m_result.p[i];
                         }
                         results.status			=	GjkEpaSolver2Status.Penetrating;
-                        results.witnesses0	=	Vector3.Transform(w0,wtrs0);
-                        results.witnesses1	=	Vector3.Transform((w0-epa.m_normal*epa.m_depth),wtrs0);
+                        results.witnesses0 = wtrs0 * w0;
+                        results.witnesses1 = wtrs0 * (w0 - epa.m_normal * epa.m_depth);
                         results.normal			=	-epa.m_normal;
                         results.distance		=	-epa.m_depth;
                         return(true);
@@ -163,8 +163,8 @@ namespace BulletXNA.BulletCollision
                     Vector3 temp = -gjk.m_simplex.c[i].d;
                     w1+=shape.Support(ref temp,1)*p;
                 }
-                results.witnesses0 = Vector3.Transform(w0,wtrs0);
-                results.witnesses1 = Vector3.Transform(w1,wtrs0);
+                results.witnesses0 = wtrs0 * w0;
+                results.witnesses1 = wtrs0 * w1;
                 Vector3	delta=	results.witnesses1-results.witnesses0;
                 float margin2 = shape0.GetMarginNonVirtual()+shape1.GetMarginNonVirtual();
                 float length = delta.Length();	
@@ -259,11 +259,11 @@ namespace BulletXNA.BulletCollision
 
         public Vector3 Support1(ref Vector3 d)
         {
-            Vector3 dcopy = Vector3.TransformNormal(d, m_toshape1);
+            Vector3 dcopy = m_toshape1 * d;
             Vector3 temp = m_enableMargin?m_shapes[1].LocalGetSupportVertexNonVirtual(ref dcopy) :
                                             m_shapes[1].LocalGetSupportVertexWithoutMarginNonVirtual(ref dcopy);
 
-            return Vector3.Transform(temp,m_toshape0);
+            return m_toshape0 * temp;
         }
 
         public Vector3 Support(ref Vector3 d)
@@ -283,7 +283,7 @@ namespace BulletXNA.BulletCollision
 
         public bool m_enableMargin;
         public ConvexShape[] m_shapes = new ConvexShape[2];
-        public Matrix m_toshape1 = Matrix.Identity;
+        public IndexedBasisMatrix m_toshape1 = IndexedBasisMatrix.Identity;
         public Matrix m_toshape0 = Matrix.Identity;
 
     }
@@ -505,7 +505,7 @@ namespace BulletXNA.BulletCollision
                     for(int i=0;i<3;++i)
                     {
                         Vector3 axis= Vector3.Zero;
-                        MathUtil.VectorComponent(ref axis,i,1f);
+                        axis[i] = 1f;
                         AppendVertice(m_simplex, ref axis);
                         if(EncloseOrigin())
                         {
@@ -528,7 +528,7 @@ namespace BulletXNA.BulletCollision
                     for(int i=0;i<3;++i)
                     {
                         Vector3 axis= Vector3.Zero;
-                        MathUtil.VectorComponent(ref axis,i,1f);
+                        axis[i] =1f;
                         Vector3	p= Vector3.Cross(d,axis);
                         if(p.LengthSquared()>0)
                         {

@@ -27,13 +27,11 @@ SOFTWARE.
 
 using System;
 using System.ComponentModel;
-using Microsoft.Xna.Framework.Design;
 using System.Text;
 
-namespace Microsoft.Xna.Framework
+namespace BulletXNA.LinearMath
 {
     [Serializable]
-    [TypeConverter(typeof(QuaternionConverter))]
     public struct Quaternion : IEquatable<Quaternion>
     {
         public float X;
@@ -161,84 +159,84 @@ namespace Microsoft.Xna.Framework
         public static Quaternion CreateFromRotationMatrix(Matrix matrix)
         {
             Quaternion result;
-            if ((matrix.M11 + matrix.M22 + matrix.M33) > 0.0F)
+            if ((matrix._basis[0, 0] + matrix._basis[1, 1] + matrix._basis[2, 2]) > 0.0F)
             {
-                float M1 = (float)System.Math.Sqrt((double)(matrix.M11 + matrix.M22 + matrix.M33 + 1.0F));
+                float M1 = (float)System.Math.Sqrt((double)(matrix._basis[0, 0] + matrix._basis[1, 1] + matrix._basis[2, 2] + 1.0F));
                 result.W = M1 * 0.5F;
                 M1 = 0.5F / M1;
-                result.X = (matrix.M23 - matrix.M32) * M1;
-                result.Y = (matrix.M31 - matrix.M13) * M1;
-                result.Z = (matrix.M12 - matrix.M21) * M1;
+                result.X = (matrix._basis[1, 2] - matrix._basis[2, 1]) * M1;
+                result.Y = (matrix._basis[2, 0] - matrix._basis[0, 2]) * M1;
+                result.Z = (matrix._basis[0, 1] - matrix._basis[1, 0]) * M1;
                 return result;
             }
-            if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
+            if ((matrix._basis[0, 0] >= matrix._basis[1, 1]) && (matrix._basis[0, 0] >= matrix._basis[2, 2]))
             {
-                float M2 = (float)System.Math.Sqrt((double)(1.0F + matrix.M11 - matrix.M22 - matrix.M33));
+                float M2 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[0, 0] - matrix._basis[1, 1] - matrix._basis[2, 2]));
                 float M3 = 0.5F / M2;
                 result.X = 0.5F * M2;
-                result.Y = (matrix.M12 + matrix.M21) * M3;
-                result.Z = (matrix.M13 + matrix.M31) * M3;
-                result.W = (matrix.M23 - matrix.M32) * M3;
+                result.Y = (matrix._basis[0, 1] + matrix._basis[1, 0]) * M3;
+                result.Z = (matrix._basis[0, 2] + matrix._basis[2, 0]) * M3;
+                result.W = (matrix._basis[1, 2] - matrix._basis[2, 1]) * M3;
                 return result;
             }
-            if (matrix.M22 > matrix.M33)
+            if (matrix._basis[1, 1] > matrix._basis[2, 2])
             {
-                float M4 = (float)System.Math.Sqrt((double)(1.0F + matrix.M22 - matrix.M11 - matrix.M33));
+                float M4 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[1, 1] - matrix._basis[0, 0] - matrix._basis[2, 2]));
                 float M5 = 0.5F / M4;
-                result.X = (matrix.M21 + matrix.M12) * M5;
+                result.X = (matrix._basis[1, 0] + matrix._basis[0, 1]) * M5;
                 result.Y = 0.5F * M4;
-                result.Z = (matrix.M32 + matrix.M23) * M5;
-                result.W = (matrix.M31 - matrix.M13) * M5;
+                result.Z = (matrix._basis[2, 1] + matrix._basis[1, 2]) * M5;
+                result.W = (matrix._basis[2, 0] - matrix._basis[0, 2]) * M5;
                 return result;
             }
-            float M6 = (float)System.Math.Sqrt((double)(1.0F + matrix.M33 - matrix.M11 - matrix.M22));
+            float M6 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[2, 2] - matrix._basis[0, 0] - matrix._basis[1, 1]));
             float M7 = 0.5F / M6;
-            result.X = (matrix.M31 + matrix.M13) * M7;
-            result.Y = (matrix.M32 + matrix.M23) * M7;
+            result.X = (matrix._basis[2, 0] + matrix._basis[0, 2]) * M7;
+            result.Y = (matrix._basis[2, 1] + matrix._basis[1, 2]) * M7;
             result.Z = 0.5F * M6;
-            result.W = (matrix.M12 - matrix.M21) * M7;
+            result.W = (matrix._basis[0, 1] - matrix._basis[1, 0]) * M7;
             return result;
         }
 
 
         public static void CreateFromRotationMatrix(ref Matrix matrix, out Quaternion result)
         {
-            if ((matrix.M11 + matrix.M22 + matrix.M33) > 0.0F)
+            if ((matrix._basis[0, 0] + matrix._basis[1, 1] + matrix._basis[2, 2]) > 0.0F)
             {
-                float M1 = (float)System.Math.Sqrt((double)(matrix.M11 + matrix.M22 + matrix.M33 + 1.0F));
+                float M1 = (float)System.Math.Sqrt((double)(matrix._basis[0, 0] + matrix._basis[1, 1] + matrix._basis[2, 2] + 1.0F));
                 result.W = M1 * 0.5F;
                 M1 = 0.5F / M1;
-                result.X = (matrix.M23 - matrix.M32) * M1;
-                result.Y = (matrix.M31 - matrix.M13) * M1;
-                result.Z = (matrix.M12 - matrix.M21) * M1;
+                result.X = (matrix._basis[1, 2] - matrix._basis[2, 1]) * M1;
+                result.Y = (matrix._basis[2, 0] - matrix._basis[0, 2]) * M1;
+                result.Z = (matrix._basis[0, 1] - matrix._basis[1, 0]) * M1;
                 return;
             }
-            if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
+            if ((matrix._basis[0, 0] >= matrix._basis[1, 1]) && (matrix._basis[0, 0] >= matrix._basis[2, 2]))
             {
-                float M2 = (float)System.Math.Sqrt((double)(1.0F + matrix.M11 - matrix.M22 - matrix.M33));
+                float M2 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[0, 0] - matrix._basis[1, 1] - matrix._basis[2, 2]));
                 float M3 = 0.5F / M2;
                 result.X = 0.5F * M2;
-                result.Y = (matrix.M12 + matrix.M21) * M3;
-                result.Z = (matrix.M13 + matrix.M31) * M3;
-                result.W = (matrix.M23 - matrix.M32) * M3;
+                result.Y = (matrix._basis[0, 1] + matrix._basis[1, 0]) * M3;
+                result.Z = (matrix._basis[0, 2] + matrix._basis[2, 0]) * M3;
+                result.W = (matrix._basis[1, 2] - matrix._basis[2, 1]) * M3;
                 return;
             }
-            if (matrix.M22 > matrix.M33)
+            if (matrix._basis[1, 1] > matrix._basis[2, 2])
             {
-                float M4 = (float)System.Math.Sqrt((double)(1.0F + matrix.M22 - matrix.M11 - matrix.M33));
+                float M4 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[1, 1] - matrix._basis[0, 0] - matrix._basis[2, 2]));
                 float M5 = 0.5F / M4;
-                result.X = (matrix.M21 + matrix.M12) * M5;
+                result.X = (matrix._basis[1, 0] + matrix._basis[0, 1]) * M5;
                 result.Y = 0.5F * M4;
-                result.Z = (matrix.M32 + matrix.M23) * M5;
-                result.W = (matrix.M31 - matrix.M13) * M5;
+                result.Z = (matrix._basis[2, 1] + matrix._basis[1, 2]) * M5;
+                result.W = (matrix._basis[2, 0] - matrix._basis[0, 2]) * M5;
                 return;
             }
-            float M6 = (float)System.Math.Sqrt((double)(1.0F + matrix.M33 - matrix.M11 - matrix.M22));
+            float M6 = (float)System.Math.Sqrt((double)(1.0F + matrix._basis[2, 2] - matrix._basis[0, 0] - matrix._basis[1, 1]));
             float M7 = 0.5F / M6;
-            result.X = (matrix.M31 + matrix.M13) * M7;
-            result.Y = (matrix.M32 + matrix.M23) * M7;
+            result.X = (matrix._basis[2, 0] + matrix._basis[0, 2]) * M7;
+            result.Y = (matrix._basis[2, 1] + matrix._basis[1, 2]) * M7;
             result.Z = 0.5F * M6;
-            result.W = (matrix.M12 - matrix.M21) * M7;
+            result.W = (matrix._basis[0, 1] - matrix._basis[1, 0]) * M7;
         }
 
 

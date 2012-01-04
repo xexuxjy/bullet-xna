@@ -29,7 +29,6 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -446,13 +445,13 @@ namespace BulletXNA.BulletCollision
             }
             means *= (1f / (float)numIndices);
 
-            splitValue = MathUtil.VectorComponent(ref means, splitAxis);
+            splitValue = means[splitAxis];
 
             //sort leafNodes so all values larger then splitValue comes first, and smaller values start from 'splitIndex'.
             for (int i = startIndex; i < endIndex; i++)
             {
                 Vector3 center = 0.5f * (GetAabbMax(i) + GetAabbMin(i));
-                if (MathUtil.VectorComponent(ref center, splitAxis) > splitValue)
+                if (center[splitAxis] > splitValue)
                 {
                     //swap
                     SwapLeafNodes(i, splitIndex);
@@ -798,7 +797,7 @@ namespace BulletXNA.BulletCollision
                 rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2(ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
 
 #else
-                Vector3 normal = Vector3.Zero;
+                IndexedVector3 normal = IndexedVector3.Zero;
                 rayBoxOverlap = AabbUtil2.RayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
 #endif
 

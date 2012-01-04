@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -53,12 +53,14 @@ namespace BulletXNA.BulletDynamics
             Vector3 yAxis = Vector3.Cross(zAxis,xAxis); // we want right coordinate system
 
             Matrix frameInW = Matrix.Identity;
-            MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                   xAxis[2], yAxis[2], zAxis[2]);
             frameInW.Translation = anchor;
 
             // now get constraint frame in local coordinate systems
-            m_frameInA = MathUtil.InverseTimes(rbA.GetCenterOfMassTransform(),frameInW);
-            m_frameInB = MathUtil.InverseTimes(rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = rbB.GetCenterOfMassTransform().Inverse() * frameInW;
             // sei limits
             SetLinearLowerLimit(new Vector3(0.0f, 0.0f, -1.0f));
             SetLinearUpperLimit(new Vector3(0.0f, 0.0f, 1.0f));

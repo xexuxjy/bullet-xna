@@ -24,7 +24,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -148,7 +147,7 @@ namespace BulletXNA.BulletCollision
                 Vector3 localAabbMax;
                 Matrix otherInCompoundSpace;
                 //otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
-                otherInCompoundSpace = MathUtil.InverseTimes(colObj.GetWorldTransform(), otherObj.GetWorldTransform());
+                otherInCompoundSpace = colObj.GetWorldTransform().Inverse() * otherObj.GetWorldTransform();
 
                 otherObj.CollisionShape.GetAabb(ref otherInCompoundSpace, out localAabbMin, out localAabbMax);
 
@@ -188,7 +187,7 @@ namespace BulletXNA.BulletCollision
                         orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
                         Matrix childTrans = compoundShape.GetChildTransform(i);
 
-                        newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+                        newChildWorldTrans = orgTrans * childTrans;
 
                         //perform an AABB check first
                         Vector3 aabbMin0;
@@ -252,7 +251,7 @@ namespace BulletXNA.BulletCollision
                 orgTrans = colObj.GetWorldTransform();
 
                 Matrix childTrans = compoundShape.GetChildTransform(i);
-                Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+                Matrix newChildWorldTrans = orgTrans * childTrans;
 
                 colObj.SetWorldTransform(ref newChildWorldTrans);
 
@@ -315,7 +314,7 @@ namespace BulletXNA.BulletCollision
             Matrix orgTrans = m_compoundColObj.GetWorldTransform();
             Matrix orgInterpolationTrans = m_compoundColObj.GetInterpolationWorldTransform();
             Matrix childTrans = compoundShape.GetChildTransform(index);
-            Matrix newChildWorldTrans = MathUtil.BulletMatrixMultiply(ref orgTrans, ref childTrans);
+            Matrix newChildWorldTrans = orgTrans * childTrans;
 
             //perform an AABB check first
             Vector3 aabbMin0;
@@ -377,7 +376,8 @@ namespace BulletXNA.BulletCollision
                 Vector3 worldAabbMin;
                 Vector3 worldAabbMax;
                 Matrix orgTrans = m_compoundColObj.GetWorldTransform();
-                MathUtil.TransformAabb(leaf.volume.Mins(), leaf.volume.Maxs(), 0f, orgTrans, out worldAabbMin, out worldAabbMax);
+
+                AabbUtil2.TransformAabb(leaf.volume.Mins(), leaf.volume.Maxs(), 0f, ref orgTrans, out worldAabbMin, out worldAabbMax);
                 m_dispatchInfo.getDebugDraw().DrawAabb(worldAabbMin, worldAabbMax, new Vector3(1, 0, 0));
             }
             ProcessChildShape(childShape, index);

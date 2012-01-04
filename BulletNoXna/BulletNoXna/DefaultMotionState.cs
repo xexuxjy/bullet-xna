@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA
 {
@@ -44,7 +44,7 @@ namespace BulletXNA
         ///synchronizes world transform from user to physics
         public virtual void GetWorldTransform(out Matrix centerOfMassWorldTrans)
         {
-            centerOfMassWorldTrans = MathUtil.BulletMatrixMultiply(Matrix.Invert(m_centerOfMassOffset), m_graphicsWorldTrans);
+            centerOfMassWorldTrans = m_centerOfMassOffset.Inverse() *  m_graphicsWorldTrans;
         }
 
         ///synchronizes world transform from physics to user
@@ -56,7 +56,7 @@ namespace BulletXNA
 
         public virtual void SetWorldTransform(ref Matrix centerOfMassWorldTrans)
         {
-            m_graphicsWorldTrans = MathUtil.BulletMatrixMultiply(ref centerOfMassWorldTrans, ref m_centerOfMassOffset);
+            m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
         }
         public Matrix m_graphicsWorldTrans;
         public Matrix m_centerOfMassOffset;

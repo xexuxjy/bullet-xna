@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -66,13 +66,15 @@ namespace BulletXNA.BulletDynamics
 	        Vector3 yAxis = Vector3.Normalize(axis2);
 	        Vector3 xAxis = Vector3.Cross(yAxis,zAxis); // we want right coordinate system
 	        Matrix frameInW = Matrix.Identity;
-            MathUtil.SetBasis(ref frameInW,ref xAxis,ref yAxis,ref zAxis);
-	        frameInW.Translation = anchor;
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                    xAxis[1], yAxis[1], zAxis[1],
+                                    xAxis[2], yAxis[2], zAxis[2]);
+            frameInW.Translation = anchor;
 	        // now get constraint frame in local coordinate systems
 			//m_frameInA = MathUtil.inverseTimes(rbA.getCenterOfMassTransform(),frameInW);
 			//m_frameInB = MathUtil.inverseTimes(rbB.getCenterOfMassTransform(),frameInW);
-			m_frameInA = MathUtil.BulletMatrixMultiply(Matrix.Invert(rbA.GetCenterOfMassTransform()), frameInW);
-			m_frameInB = MathUtil.BulletMatrixMultiply(Matrix.Invert(rbB.GetCenterOfMassTransform()), frameInW);
+			m_frameInA = rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+			m_frameInB = rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 	        // sei limits
 	        SetLinearLowerLimit(Vector3.Zero);
@@ -99,11 +101,13 @@ namespace BulletXNA.BulletDynamics
 			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
 
 			Matrix frameInW = Matrix.Identity;
-			MathUtil.SetBasis(ref frameInW, ref xAxis, ref yAxis, ref zAxis);
+            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
+                                xAxis[1], yAxis[1], zAxis[1],
+                                xAxis[2], yAxis[2], zAxis[2]);
 
 			// now get constraint frame in local coordinate systems
-			m_frameInA = MathUtil.InverseTimes(m_rbA.GetCenterOfMassTransform(), frameInW);
-			m_frameInB = MathUtil.InverseTimes(m_rbB.GetCenterOfMassTransform(), frameInW);
+            m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;
+            m_frameInB = m_rbB.GetCenterOfMassTransform().Inverse() * frameInW;
 
 			CalculateTransforms();
 		}

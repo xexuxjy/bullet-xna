@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -37,6 +37,7 @@ namespace BulletXNA.BulletCollision
 		public CylinderShape (ref Vector3 halfExtents)
         {
             m_upAxis = 1;
+            SetSafeMargin(ref halfExtents);
             m_shapeType = BroadphaseNativeType.CylinderShape;
 	        Vector3 margin = new Vector3(Margin);
 	        m_implicitShapeDimensions = (halfExtents * m_localScaling) - margin;
@@ -92,11 +93,9 @@ namespace BulletXNA.BulletCollision
 	}
 
 	// calculate squares
-    float radiusExtent = MathUtil.VectorComponent(ref halfExtents,idxRadius);
-    float heightExtent = MathUtil.VectorComponent(ref halfExtents,idxHeight);
+	radius2 = halfExtents[idxRadius] * halfExtents[idxRadius];
+	height2 = 4.0f * halfExtents[idxHeight] * halfExtents[idxHeight];
 
-	radius2 = radiusExtent * radiusExtent;
-	height2 = 4.0f * heightExtent * heightExtent;
 
 	// calculate tensor terms
 	float t1 = div12 * height2 + div4 * radius2;
@@ -116,13 +115,13 @@ namespace BulletXNA.BulletCollision
 	}
 #else
 	        //approximation of box shape, todo: implement cylinder shape inertia before people notice ;-)
-	        Vector3 halfExtents = GetHalfExtentsWithMargin();
+	        IndexedVector3 halfExtents = GetHalfExtentsWithMargin();
 
 	        float lx=2.0f*(halfExtents.X);
 	        float ly=2.0f*(halfExtents.Y);
 	        float lz=2.0f*(halfExtents.Z);
 
-	        inertia = new Vector3(mass/12.0f * (ly*ly + lz*lz),
+	        inertia = new IndexedVector3(mass/12.0f * (ly*ly + lz*lz),
 					        mass/12.0f * (lx*lx + lz*lz),
 					        mass/12.0f * (lx*lx + ly*ly));
 #endif //USE_BOX_INERTIA_APPROXIMATION
@@ -155,7 +154,7 @@ namespace BulletXNA.BulletCollision
             // FIXME - Don't think we can call on it directly as below
             //PolyhedralConvexShape.getAabb(ref trans,ref aabbMin,ref aabbMax);
             //base.getAabb(ref trans,ref aabbMin,ref aabbMax);
-            MathUtil.TransformAabb(GetHalfExtentsWithoutMargin(), Margin, trans, out aabbMin, out aabbMax);
+            AabbUtil2.TransformAabb(GetHalfExtentsWithoutMargin(), Margin, ref trans, out aabbMin, out aabbMax);
         }
 
         public override Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
@@ -248,32 +247,32 @@ namespace BulletXNA.BulletCollision
             //mapping depends on how cylinder local orientation is
             // extents of the cylinder is: X,Y is for radius, and Z for height
 
-            float radius = MathUtil.VectorComponent(ref halfExtents, XX);
-            float halfHeight = MathUtil.VectorComponent(ref halfExtents,cylinderUpAxis);
+            float radius = halfExtents[XX];
+            float halfHeight = halfExtents[cylinderUpAxis];
 
             Vector3 tmp = new Vector3();
             float d =1f;
 
-            float vx = MathUtil.VectorComponent(ref v, XX);
-            float vy = MathUtil.VectorComponent(ref v, YY);
-            float vz = MathUtil.VectorComponent(ref v, ZZ);
+            float vx = v[XX];
+            float vy = v[YY];
+            float vz = v[ZZ];
 
 
             float s = (float)Math.Sqrt(vx * vx + vz * vz);
             if (s != 0.0)
             {
-                d = radius / s;  
-	            MathUtil.VectorComponent(ref tmp,XX,(vx * d));
-	            MathUtil.VectorComponent(ref tmp,YY, (vy < 0.0f ? -halfHeight : halfHeight));
-	            MathUtil.VectorComponent(ref tmp,ZZ, (vz  * d));
-	            return tmp;
+                d = radius / s;
+                tmp[XX] = v[XX] * d;
+                tmp[YY] = v[YY] < 0.0f ? -halfHeight : halfHeight;
+                tmp[ZZ] = v[ZZ] * d;
+                return tmp;
             }
             else
             {
-                MathUtil.VectorComponent(ref tmp,XX,radius);
-	            MathUtil.VectorComponent(ref tmp,YY, (vy < 0.0f ? -halfHeight : halfHeight));
-	            MathUtil.VectorComponent(ref tmp,ZZ, 0f);
-	            return tmp;
+                tmp[XX] = radius;
+                tmp[YY] = v[YY] < 0.0f ? -halfHeight : halfHeight;
+                tmp[ZZ] = 0.0f;
+                return tmp;
             }
         }
 

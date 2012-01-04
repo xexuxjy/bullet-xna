@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -53,6 +53,11 @@ namespace BulletXNA.BulletCollision
         public virtual Vector3 LocalGetSupportingVertexWithoutMargin(ref Vector3 vec)
         {
             return Vector3.Zero;
+        }
+
+        public Vector3 LocalGetSupportVertexWithoutMarginNonVirtual(Vector3 localDir)
+        {
+            return LocalGetSupportVertexWithoutMarginNonVirtual(ref localDir);
         }
 
         public Vector3 LocalGetSupportVertexWithoutMarginNonVirtual(ref Vector3 localDir)
@@ -92,8 +97,8 @@ namespace BulletXNA.BulletCollision
                     {
                         TriangleShape triangleShape = (TriangleShape)this;
                         Vector3 dir = localDir;
-                        IList<Vector3> vertices = triangleShape.m_vertices1;
-                        Vector3 dots = new Vector3(Vector3.Dot(dir, vertices[0]), Vector3.Dot(dir, vertices[1]), Vector3.Dot(dir, vertices[2]));
+                        Vector3[] vertices = triangleShape.m_vertices1;
+                        Vector3 dots = new Vector3(Vector3.Dot(ref dir, ref vertices[0]), Vector3.Dot(ref dir, ref vertices[1]), Vector3.Dot(ref dir, ref vertices[2]));
                         int maxAxis = MathUtil.MaxAxis(ref dots);
                         Vector3 sup = vertices[maxAxis];
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
@@ -155,27 +160,27 @@ namespace BulletXNA.BulletCollision
                                 break;
                         };
 
-                        float radius = MathUtil.VectorComponent(ref halfExtents, XX);
-                        float halfHeight = MathUtil.VectorComponent(ref halfExtents, cylinderUpAxis);
+                        float radius = halfExtents[XX];
+                        float halfHeight = halfExtents[cylinderUpAxis];
 
                         Vector3 tmp = new Vector3();
                         float d;
-                        float vx = MathUtil.VectorComponent(ref v, XX);
-                        float vz = MathUtil.VectorComponent(ref v, ZZ);
+                        float vx = v[XX];
+                        float vz = v[ZZ];
                         float s = (float)Math.Sqrt(vx * vx + vz * vz);
                         if (s != 0f)
                         {
                             d = radius / s;
-                            MathUtil.VectorComponent(ref tmp, XX, (MathUtil.VectorComponent(ref v, XX) * d));
-                            MathUtil.VectorComponent(ref tmp, YY, (MathUtil.VectorComponent(ref v, YY) < 0.0 ? -halfHeight : halfHeight));
-                            MathUtil.VectorComponent(ref tmp, ZZ, (MathUtil.VectorComponent(ref v, ZZ) * d));
+                            tmp[XX] = v[XX] * d;
+                            tmp[YY] = v[YY] < 0.0f ? -halfHeight : halfHeight;
+                            tmp[ZZ] = v[ZZ] * d;
                             result = tmp;
                         }
                         else
                         {
-                            MathUtil.VectorComponent(ref tmp, XX, radius);
-                            MathUtil.VectorComponent(ref tmp, YY, (MathUtil.VectorComponent(ref v, YY) < 0.0 ? -halfHeight : halfHeight));
-                            MathUtil.VectorComponent(ref tmp, XX, 0.0f);
+                            tmp[XX] = radius;
+                            tmp[YY] = v[YY] < 0.0f ? -halfHeight : halfHeight;
+                            tmp[ZZ] = 0.0f;
                             result = tmp;
                         }
                         break;
@@ -185,7 +190,7 @@ namespace BulletXNA.BulletCollision
                         Vector3 vec0 = localDir;
 
                         CapsuleShape capsuleShape = this as CapsuleShape;
-                        float halfHeight = capsuleShape.getHalfHeight();
+                        float halfHeight = capsuleShape.GetHalfHeight();
                         int capsuleUpAxis = capsuleShape.GetUpAxis();
 
                         float radius = capsuleShape.Radius;
@@ -210,11 +215,11 @@ namespace BulletXNA.BulletCollision
                         float newDot;
                         {
                             Vector3 pos = new Vector3();
-                            MathUtil.VectorComponent(ref pos, capsuleUpAxis, halfHeight);
+                            pos[capsuleUpAxis] = halfHeight;
 
                             //vtx = pos +vec*(radius);
                             vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
-                            newDot = Vector3.Dot(vec, vtx);
+                            newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
                             {
@@ -224,11 +229,11 @@ namespace BulletXNA.BulletCollision
                         }
                         {
                             Vector3 pos = new Vector3();
-                            MathUtil.VectorComponent(ref pos, capsuleUpAxis, -halfHeight);
+                            pos[capsuleUpAxis] =  -halfHeight;
 
                             //vtx = pos +vec*(radius);
                             vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
-                            newDot = Vector3.Dot(vec, vtx);
+                            newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
                             {
@@ -281,7 +286,7 @@ namespace BulletXNA.BulletCollision
             {
                 localDirNorm = new Vector3(-1f);
             }
-            localDirNorm = Vector3.Normalize(localDirNorm);
+            localDirNorm = Vector3.Normalize(ref localDirNorm);
 
             return LocalGetSupportVertexWithoutMarginNonVirtual(ref localDirNorm) + GetMarginNonVirtual() * localDirNorm;
         }
@@ -354,10 +359,10 @@ namespace BulletXNA.BulletCollision
                         float margin = convexShape.GetMarginNonVirtual();
                         Vector3 halfExtents = convexShape.GetImplicitShapeDimensions();
                         halfExtents += new Vector3(margin);
-                        Matrix abs_b;
-                        MathUtil.AbsoluteMatrix(ref t, out abs_b);
+
+                        IndexedBasisMatrix abs_b = t._basis.Absolute();
                         Vector3 center = t.Translation;
-                        Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents), Vector3.Dot(abs_b.Up, halfExtents), Vector3.Dot(abs_b.Backward, halfExtents));
+                        Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;
@@ -370,16 +375,14 @@ namespace BulletXNA.BulletCollision
                         for (int i = 0; i < 3; i++)
                         {
                             Vector3 vec = new Vector3();
-                            MathUtil.VectorComponent(ref vec, i, 1f);
+                            vec[i] = 1f;
+                            Vector3 sv = LocalGetSupportVertexWithoutMarginNonVirtual(vec * t._basis);
+                            Vector3 tmp = t * sv;
+			                aabbMax[i] = tmp[i]+margin;
+			                vec[i] = -1.0f;
 
-							Vector3 temp = MathUtil.TransposeTransformNormal(vec, t); 
-                            Vector3 sv = LocalGetSupportVertexWithoutMarginNonVirtual(ref temp);
-                            Vector3 tmp = Vector3.Transform(sv,t);
-                            MathUtil.VectorComponent(ref aabbMax, i, (MathUtil.VectorComponent(ref tmp, i) + margin));
-                            MathUtil.VectorComponent(ref vec, i, -1f);
-							temp = MathUtil.TransposeTransformNormal(vec, t);
-                            tmp = Vector3.Transform(LocalGetSupportVertexWithoutMarginNonVirtual(ref temp),t);
-                            MathUtil.VectorComponent(ref aabbMin, i, (MathUtil.VectorComponent(ref tmp, i) - margin));
+                            tmp = t * (LocalGetSupportVertexWithoutMarginNonVirtual(vec * t._basis));
+                            aabbMin[i] = tmp[i] - margin;
                         }
                     }
                     break;
@@ -389,14 +392,13 @@ namespace BulletXNA.BulletCollision
                         float r = capsuleShape.Radius;
                         Vector3 halfExtents = new Vector3(r);
                         int m_upAxis = capsuleShape.GetUpAxis();
-                        MathUtil.VectorComponent(ref halfExtents, m_upAxis, r + capsuleShape.getHalfHeight());
+                        halfExtents[m_upAxis] =  r + capsuleShape.GetHalfHeight();
                         float nvMargin = capsuleShape.GetMarginNonVirtual();
                         halfExtents += new Vector3(nvMargin);
 
-                        Matrix abs_b;
-                        MathUtil.AbsoluteMatrix(ref t, out abs_b);
+                        IndexedBasisMatrix abs_b  = t._basis.Absolute();
                         Vector3 center = t.Translation;
-                        Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, halfExtents), Vector3.Dot(abs_b.Up, halfExtents), Vector3.Dot(abs_b.Backward, halfExtents));
+                        Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));		
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;
@@ -418,6 +420,23 @@ namespace BulletXNA.BulletCollision
             // should never reach here
             Debug.Assert(false);
 
+        }
+
+        public virtual void Project(ref Matrix trans, ref Vector3 dir, ref float min, ref float max)
+        {
+            Vector3 localAxis = dir * trans._basis;
+            Vector3 vtx1 = trans * LocalGetSupportingVertex(localAxis);
+            Vector3 vtx2 = trans * LocalGetSupportingVertex(-localAxis);
+
+            min = vtx1.Dot(dir);
+            max = vtx2.Dot(dir);
+
+            if (min > max)
+            {
+                float tmp = min;
+                min = max;
+                max = tmp;
+            }
         }
 
 

@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -81,7 +81,7 @@ namespace BulletXNA.BulletCollision
             Vector3 c;
 
             float lastLambda = lambda;
-            //btScalar epsilon = btScalar(0.001);
+            //float epsilon = float(0.001);
 
             int numIter = 0;
             //first solution, using GJK
@@ -154,7 +154,7 @@ namespace BulletXNA.BulletCollision
                     TransformUtil.IntegrateTransform(ref fromA, ref linVelA, ref angVelA, lambda, out interpolatedTransA);
                     TransformUtil.IntegrateTransform(ref fromB, ref linVelB, ref angVelB, lambda, out interpolatedTransB);
                     //relativeTrans = interpolatedTransB.inverseTimes(interpolatedTransA);
-                    relativeTrans = MathUtil.InverseTimes(ref interpolatedTransB, ref interpolatedTransA);
+                    relativeTrans = interpolatedTransB.InverseTimes(ref interpolatedTransA);
                     if (result.m_debugDrawer != null)
                     {
                         result.m_debugDrawer.DrawSphere(interpolatedTransA.Translation, 0.2f, new Vector3(1, 0, 0));
@@ -218,17 +218,17 @@ namespace BulletXNA.BulletCollision
                 float planeConstant = planeShape.GetPlaneConstant();
 
                 Matrix convexWorldTransform = transA;
-                Matrix convexInPlaneTrans = MathUtil.InverseTimes(ref transB, ref convexWorldTransform);
-                Matrix planeInConvex = MathUtil.InverseTimes(ref convexWorldTransform, ref transB);
+                Matrix convexInPlaneTrans = transB.Inverse() * convexWorldTransform;
+                Matrix planeInConvex = convexWorldTransform.Inverse() *  transB;
 
-                Vector3 vtx = convexShape.LocalGetSupportingVertex(Vector3.TransformNormal(-planeNormal, planeInConvex));
+                Vector3 vtx = convexShape.LocalGetSupportingVertex(planeInConvex._basis * -planeNormal);
 
-                Vector3 vtxInPlane = Vector3.Transform(vtx,convexInPlaneTrans);
+                Vector3 vtxInPlane = convexInPlaneTrans * vtx;
                 float distance = Vector3.Dot(planeNormal, vtxInPlane) - planeConstant;
 
                 Vector3 vtxInPlaneProjected = vtxInPlane - distance * planeNormal;
-                Vector3 vtxInPlaneWorld = Vector3.Transform(vtxInPlaneProjected, transB);
-                Vector3 normalOnSurfaceB = Vector3.TransformNormal(planeNormal, transB);
+                Vector3 vtxInPlaneWorld = transB * vtxInPlaneProjected;
+                Vector3 normalOnSurfaceB = transB._basis * planeNormal;
 
                 pointCollector.AddContactPoint(
                     ref normalOnSurfaceB,

@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -55,6 +55,8 @@ namespace BulletXNA.BulletDynamics
 		private static RigidBody s_fixed;
 
 		public const float DEFAULT_DEBUGDRAW_SIZE = 0.3f;
+
+        public String m_debugName;
 
 		private int m_userConstraintType;
 
@@ -341,6 +343,17 @@ namespace BulletXNA.BulletDynamics
 			m_isEnabled = enabled;
 		}
 
+    	///internal method used by the constraint solver, don't use them directly
+	    public virtual	void SolveConstraintObsolete(RigidBody bodyA,RigidBody bodyB,float timeStep) 
+        {
+
+        }
+
+        public virtual void BuildJacobian()
+        {
+
+
+        }
 
 		public static void PrintInfo1(StreamWriter writer, TypedConstraint constraint, ConstraintInfo1 info)
 		{
@@ -365,7 +378,7 @@ namespace BulletXNA.BulletDynamics
 				writer.WriteLine(String.Format("numRows [{0}] fps[{1:0.00000000}] erp[{2:0.00000000}] findex[{3}] numIter[{4}]", info2.m_solverConstraints.Length, info2.fps, info2.erp, info2.findex, info2.m_numIterations));
 				for (int i = 0; i < info2.m_solverConstraints.Length; ++i)
 				{
-					writer.WriteLine(String.Format("SolverConstaint[{0}]", i));
+					writer.WriteLine(String.Format("TypedConstraint[{0}]", i));
 					writer.WriteLine("ContactNormal");
 					MathUtil.PrintVector3(writer, info2.m_solverConstraints[i].m_contactNormal);
 					writer.WriteLine("rel1pos1CrossNormal");
@@ -382,13 +395,13 @@ namespace BulletXNA.BulletDynamics
 		{
 			if (writer != null)
 			{
-				writer.WriteLine("solverConstraint[{0}]", index);
-				MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
-				MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
-				MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);
-				MathUtil.PrintVector3(writer, "m_angularComponentB", constraint.m_angularComponentB);
-				writer.WriteLine("Friction [{0:0.00000000}] jagDiag[{1:0.00000000}] rhs[{2:0.00000000}] cfm[{3:0.00000000}] lower[{4:0.00000000}] upper[{5:0.00000000}] rhsPen[{6:0.00000000}]", constraint.m_friction, constraint.m_jacDiagABInv,
-					constraint.m_rhs, constraint.m_cfm, constraint.m_lowerLimit, constraint.m_lowerLimit, constraint.m_rhsPenetration);
+                writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index, (String)constraint.m_solverBodyA.UserObject, (String)constraint.m_solverBodyB.UserObject);
+                MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
+                MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
+                MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);
+                MathUtil.PrintVector3(writer, "m_angularComponentB", constraint.m_angularComponentB);
+                writer.WriteLine("Friction [{0:0.00000000}] jagDiag[{1:0.00000000}] rhs[{2:0.00000000}] cfm[{3:0.00000000}] lower[{4:0.00000000}] upper[{5:0.00000000}] rhsPen[{6:0.00000000}]", constraint.m_friction, constraint.m_jacDiagABInv,
+                    constraint.m_rhs, constraint.m_cfm, constraint.m_lowerLimit, constraint.m_lowerLimit, constraint.m_rhsPenetration);
 			}
 		}
 

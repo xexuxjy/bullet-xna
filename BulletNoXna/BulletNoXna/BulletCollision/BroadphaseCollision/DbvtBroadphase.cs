@@ -25,7 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -829,8 +829,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         public static BroadphaseBenchmarkExperiment[] s_experiments =
 	        {
 		        new BroadphaseBenchmarkExperiment("1024o.10%",1024,10,0,8192,0.005f,100f),
-		        /*{"4096o.10%",4096,10,0,8192,(btScalar)0.005,(btScalar)100},
-		        {"8192o.10%",8192,10,0,8192,(btScalar)0.005,(btScalar)100},*/
+		        /*{"4096o.10%",4096,10,0,8192,(float)0.005,(float)100},
+		        {"8192o.10%",8192,10,0,8192,(float)0.005,(float)100},*/
 	        };
 
 

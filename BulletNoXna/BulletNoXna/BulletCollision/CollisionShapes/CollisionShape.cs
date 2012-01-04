@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -110,7 +110,7 @@ namespace BulletXNA.BulletCollision
 
 	        //add conservative angular motion
 	        float angularMotion = angvel.Length() * GetAngularMotionDisc() * timeStep;
-	        Vector3 angularMotion3d = new Vector3(angularMotion);
+            Vector3 angularMotion3d = new Vector3(angularMotion);
 	        temporalAabbMin = new Vector3(temporalAabbMinx,temporalAabbMiny,temporalAabbMinz);
 	        temporalAabbMax = new Vector3(temporalAabbMaxx,temporalAabbMaxy,temporalAabbMaxz);
 

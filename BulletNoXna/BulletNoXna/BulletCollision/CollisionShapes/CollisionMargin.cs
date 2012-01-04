@@ -21,10 +21,14 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+
 namespace BulletXNA.BulletCollision
 {
     public static class CollisionMargin
     {
+        ///The CONVEX_DISTANCE_MARGIN is a default collision margin for convex collision shapes derived from btConvexInternalShape.
+        ///This collision margin is used by Gjk and some other algorithms
+        ///Note that when creating small objects, you need to make sure to set a smaller collision margin, using the 'setMargin' API
         public const float CONVEX_DISTANCE_MARGIN = 0.04f;
     }
 }

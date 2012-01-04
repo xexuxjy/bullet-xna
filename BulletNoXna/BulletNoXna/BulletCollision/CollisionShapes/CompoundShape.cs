@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -220,17 +220,15 @@ namespace BulletXNA.BulletCollision
             float margin = Margin;
             localHalfExtents += new Vector3(margin);
 
-            Matrix abs_b;
-            MathUtil.AbsoluteMatrix(ref trans, out abs_b);
+         
+           	IndexedBasisMatrix abs_b = trans._basis.Absolute();  
 
+    	    Vector3 center = trans * localCenter;
 
-            //Vector3 center = trans.Translation;
-            Vector3 center = Vector3.Transform(localCenter, trans);
-
-
-            Vector3 extent = new Vector3(Vector3.Dot(abs_b.Right, localHalfExtents),
-                                            Vector3.Dot(abs_b.Up, localHalfExtents),
-                                            Vector3.Dot(abs_b.Backward, localHalfExtents));
+	        Vector3 extent = new Vector3(abs_b[0].Dot(ref localHalfExtents),
+		                            abs_b[1].Dot(ref localHalfExtents),
+		                            abs_b[2].Dot(ref localHalfExtents));
+ 
             aabbMin = center - extent;
             aabbMax = center + extent;
         }
@@ -327,7 +325,7 @@ namespace BulletXNA.BulletCollision
             center /= totalMass;
             principal.Translation = center;
 
-            Matrix tensor = new Matrix();
+            IndexedBasisMatrix tensor = new IndexedBasisMatrix();
             for (int k = 0; k < n; k++)
             {
                 Vector3 i;
@@ -337,46 +335,35 @@ namespace BulletXNA.BulletCollision
                 Vector3 o = t.Translation - center;
 
                 //compute inertia tensor in coordinate system of compound shape
-                Matrix j = Matrix.Transpose(t);
-                j.Right = j.Right * i.X;
-                j.Up = j.Up * i.Y;
-                j.Backward = j.Backward * i.Z;
-
-                Matrix basis = MathUtil.BasisMatrix(ref t);
-                j = basis * j;
+                IndexedBasisMatrix j = t._basis.Transpose();
+                j[0] *= i[0];
+                j[1] *= i[1];
+                j[2] *= i[2];
+                j = t._basis * j;
 
                 //add inertia tensor
-                //tensor[0] += j[0];
-                //tensor[1] += j[1];
-                //tensor[2] += j[2];
-                tensor += j;
+                tensor[0] += j[0];
+                tensor[1] += j[1];
+                tensor[2] += j[2];
+                //tensor += j;
 
                 //compute inertia tensor of pointmass at o
                 float o2 = o.LengthSquared();
-                Vector3 a = new Vector3(o2, 0, 0);
-                MathUtil.SetMatrixVector(ref j, 0, ref a);
-                a = new Vector3(0, o2, 0);
-                MathUtil.SetMatrixVector(ref j, 1, ref a);
-                a = new Vector3(0, 0, o2);
-                MathUtil.SetMatrixVector(ref j, 2, ref a);
+                j._Row0 = new Vector3(o2, 0, 0);
+                j._Row1 = new Vector3(0, o2, 0);
+                j._Row2 = new Vector3(0, 0, o2);
 
-                a = o * -o.X;
-                MathUtil.SetMatrixVector(ref j, 0, ref a);
-                a = o * -o.Y;
-                MathUtil.SetMatrixVector(ref j, 1, ref a);
-                a = o * -o.Z;
-                MathUtil.SetMatrixVector(ref j, 2, ref a);
+                j._Row0 = o * -o.X;
+                j._Row1 = o * -o.Y;
+                j._Row2 = o * -o.Z;
 
                 //add inertia tensor of pointmass
-                //tensor[0] += masses[k] * j[0];
-                //tensor[1] += masses[k] * j[1];
-                //tensor[2] += masses[k] * j[2];
-                tensor.Right += masses[k] * j.Right;
-                tensor.Up += masses[k] * j.Up;
-                tensor.Backward += masses[k] * j.Backward;
+                tensor[0] += masses[k] * j[0];
+                tensor[1] += masses[k] * j[1];
+                tensor[2] += masses[k] * j[2];
             }
-            MathUtil.Diagonalize(ref tensor, ref principal, 0.00001f, 20);
-            inertia = new Vector3(tensor.M11, tensor.M22, tensor.M33);
+            tensor.Diagonalize(out principal, 0.00001f, 20);
+            inertia = new Vector3(tensor._Row0.X, tensor._Row1.Y, tensor._Row2.Z);
         }
 
         public int GetUpdateRevision()

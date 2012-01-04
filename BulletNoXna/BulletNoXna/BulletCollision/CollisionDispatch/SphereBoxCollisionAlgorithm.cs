@@ -23,7 +23,6 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -187,9 +186,9 @@ namespace BulletXNA.BulletCollision
                 }
 
                 // transform back in world space
-                tmp = Vector3.Transform(v3PointOnBox, m44T);
+                tmp = m44T * v3PointOnBox;
                 v3PointOnBox = tmp;
-                tmp = Vector3.Transform(v3PointOnSphere, m44T);
+                tmp = m44T * v3PointOnSphere;
                 v3PointOnSphere = tmp;
                 float fSeps2 = (v3PointOnBox - v3PointOnSphere).LengthSquared();
 
@@ -272,9 +271,9 @@ namespace BulletXNA.BulletCollision
             v3PointOnSphere = v3PointOnBox + normal * fSep;
 
             // transform back in world space
-            tmp = Vector3.Transform(v3PointOnBox, m44T);
+            tmp = m44T * v3PointOnBox;
             v3PointOnBox = tmp;
-            tmp = Vector3.Transform(v3PointOnSphere, m44T);
+            tmp = m44T * v3PointOnSphere;
             v3PointOnSphere = tmp;
             normal = (v3PointOnBox - v3PointOnSphere);
             normal.Normalize();

@@ -25,7 +25,6 @@
 
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -239,7 +238,7 @@ namespace BulletXNA.BulletCollision
                                     }
                             };
                             Matrix transform = colObj.GetWorldTransform();
-                            //DrawHelper.debugDrawObject(ref transform, colObj.getCollisionShape(), ref color, getDebugDrawer());
+                            DebugDrawObject(ref transform, colObj.CollisionShape, ref color);
                         }
                         if (aabb)
                         {
@@ -274,6 +273,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DebugDrawObject(ref Matrix worldTransform, CollisionShape shape, ref Vector3 color)
         {
+            //DrawHelper.DebugDrawObject(ref worldTransform, shape, ref color, GetDebugDrawer());
         }
 
 
@@ -351,7 +351,7 @@ namespace BulletXNA.BulletCollision
                 Vector3 angVel;
                 TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
                 Vector3 zeroLinVel = new Vector3();
-                Matrix R = MathUtil.BasisMatrix(ref convexFromTrans);
+                Matrix R = new Matrix(convexFromTrans._basis,Vector3.Zero);
                 castShape.CalculateTemporalAabb(ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
             }
 
@@ -372,17 +372,17 @@ namespace BulletXNA.BulletCollision
 		        if(resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
                 {
 			        //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
-			        Vector3 collisionObjectAabbMin = new Vector3();
-                    Vector3 collisionObjectAabbMax = new Vector3();
-			        collisionObject.CollisionShape.GetAabb(collisionObject.GetWorldTransform(),ref collisionObjectAabbMin,ref collisionObjectAabbMax);
+			        IndexedVector3 collisionObjectAabbMin = new IndexedVector3();
+                    IndexedVector3 collisionObjectAabbMax = new IndexedVector3();
+			        collisionObject.GetCollisionShape().GetAabb(collisionObject.GetWorldTransform(),ref collisionObjectAabbMin,ref collisionObjectAabbMax);
 			        AabbUtil2.AabbExpand(ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref castShapeAabbMin, ref castShapeAabbMax);
 			        float hitLambda = 1f; //could use resultCallback.m_closestHitFraction, but needs testing
-			        Vector3 hitNormal = new Vector3();
-                    Vector3 fromOrigin = convexFromWorld.Translation;
-                    Vector3 toOrigin = convexToWorld.Translation;
+			        IndexedVector3 hitNormal = new IndexedVector3();
+                    IndexedVector3 fromOrigin = convexFromWorld._origin;
+                    IndexedVector3 toOrigin = convexToWorld._origin;
                     if (AabbUtil2.RayAabb(ref fromOrigin, ref toOrigin, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, ref hitNormal))
 			        {
-                        Matrix trans = collisionObject.GetWorldTransform();
+                        IndexedMatrix trans = collisionObject.GetWorldTransform();
 				        ObjectQuerySingle(castShape, ref convexFromTrans,ref convexToTrans,
 					        collisionObject,
 						        collisionObject.CollisionShape,
@@ -544,7 +544,7 @@ namespace BulletXNA.BulletCollision
 
                             //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
                             //rotate normal into worldspace
-                            castResult.m_normal = Vector3.TransformNormal(castResult.m_normal, rayFromTrans);
+                            castResult.m_normal = rayFromTrans._basis * castResult.m_normal;
                             //#endif //USE_SUBSIMPLEX_CONVEX_CAST
 
                             castResult.m_normal.Normalize();
@@ -569,13 +569,13 @@ namespace BulletXNA.BulletCollision
                 if (collisionShape.IsConcave())
                 {
                     BulletGlobals.StartProfile("rayTestConcave");
-                    if (collisionShape.ShapeType == BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE && collisionShape is BvhTriangleMeshShape)
+                    if (collisionShape.ShapeType == BroadphaseNativeType.TriangleMeshShape && collisionShape is BvhTriangleMeshShape)
                     {
                         ///optimized version for btBvhTriangleMeshShape
                         BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
-                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-                        Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation, worldTocollisionObject);
-                        Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation, worldTocollisionObject);
+                        Matrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                        Vector3 rayFromLocal = worldTocollisionObject * rayFromTrans.Translation;
+                        Vector3 rayToLocal = worldTocollisionObject * rayToTrans.Translation;
 
                         Matrix transform = Matrix.Identity;
                         BridgeTriangleRaycastCallback rcb = new BridgeTriangleRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, triangleMesh, ref transform);
@@ -588,10 +588,10 @@ namespace BulletXNA.BulletCollision
                         //generic (slower) case
                         ConcaveShape concaveShape = (ConcaveShape)collisionShape;
 
-                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
+                        Matrix worldTocollisionObject = colObjWorldTransform.Inverse();
 
-                        Vector3 rayFromLocal = Vector3.Transform(rayFromTrans.Translation, worldTocollisionObject);
-                        Vector3 rayToLocal = Vector3.Transform(rayToTrans.Translation, worldTocollisionObject);
+                        Vector3 rayFromLocal = worldTocollisionObject * rayFromTrans.Translation;
+                        Vector3 rayToLocal = worldTocollisionObject * rayToTrans.Translation;
 
                         //ConvexCast::CastResult
                         Matrix transform = Matrix.Identity;
@@ -629,8 +629,9 @@ namespace BulletXNA.BulletCollision
 #if !DISABLE_DBVT_COMPOUNDSHAPE_RAYCAST_ACCELERATION
                         if (dbvt != null)
                         {
-                            Vector3 localRayFrom = MathUtil.InverseTimes(ref colObjWorldTransform, ref rayFromTrans).Translation;
-                            Vector3 localRayTo = MathUtil.InverseTimes(ref colObjWorldTransform, ref rayToTrans).Translation;
+                            Vector3 localRayFrom = colObjWorldTransform.InverseTimes(ref rayFromTrans).Translation;
+                            Vector3 localRayTo = colObjWorldTransform.InverseTimes(ref rayToTrans).Translation;
+
                             Dbvt.RayTest(dbvt.m_root, ref localRayFrom, ref localRayTo, rayCB);
                         }
                         else
@@ -699,21 +700,21 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                if (collisionShape.IsConcave())
-                {
-                    if (collisionShape.ShapeType == BroadphaseNativeType.TRIANGLE_MESH_SHAPE_PROXYTYPE)
-                    {
-                        BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
-                        BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
-                        Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-                        Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation, worldTocollisionObject);
-                        Vector3 convexToLocal = Vector3.Transform(convexToTrans.Translation, worldTocollisionObject);
-                        // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
+				if (collisionShape.IsConcave())
+				{
+                    if (collisionShape.ShapeType == BroadphaseNativeType.TriangleMeshShape)
+					{
+						BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
+						BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
+						Matrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                        Vector3 convexFromLocal = worldTocollisionObject * convexFromTrans.Translation;
+                        Vector3 convexToLocal = worldTocollisionObject * convexToTrans.Translation;
+						// rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
 
-                        Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) * MathUtil.BasisMatrix(ref convexToTrans);
+						Matrix rotationXform = new Matrix(worldTocollisionObject._basis * convexToTrans._basis,new Vector3(0));
 
-                        BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, triangleMesh, ref colObjWorldTransform);
-                        tccb.m_hitFraction = resultCallback.m_closestHitFraction;
+						BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, triangleMesh, ref colObjWorldTransform);
+						tccb.m_hitFraction = resultCallback.m_closestHitFraction;
 						tccb.m_allowedPenetration = allowedPenetration;
 
 						Vector3 boxMinLocal;
@@ -760,11 +761,11 @@ namespace BulletXNA.BulletCollision
 						{
 							BulletGlobals.StartProfile("convexSweepConcave");
 							ConcaveShape concaveShape = (ConcaveShape)collisionShape;
-							Matrix worldTocollisionObject = Matrix.Invert(colObjWorldTransform);
-							Vector3 convexFromLocal = Vector3.Transform(convexFromTrans.Translation, worldTocollisionObject);
-							Vector3 convexToLocal = Vector3.Transform(convexToTrans.Translation, worldTocollisionObject);
-							// rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
-							Matrix rotationXform = MathUtil.BasisMatrix(ref worldTocollisionObject) * MathUtil.BasisMatrix(ref convexToTrans);
+                            Matrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                            Vector3 convexFromLocal = worldTocollisionObject * convexFromTrans.Translation;
+                            Vector3 convexToLocal = worldTocollisionObject * convexToTrans.Translation;
+                            // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
+                            Matrix rotationXform = new Matrix(worldTocollisionObject._basis * convexToTrans._basis, new Vector3(0));
 
 							BridgeTriangleConvexcastCallback2 tccb = new BridgeTriangleConvexcastCallback2(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
 							tccb.m_hitFraction = resultCallback.m_closestHitFraction;
@@ -798,7 +799,7 @@ namespace BulletXNA.BulletCollision
 						{
 							Matrix childTrans = compoundShape.GetChildTransform(i);
 							CollisionShape childCollisionShape = compoundShape.GetChildShape(i);
-							Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(colObjWorldTransform, childTrans);
+							Matrix childWorldTrans = colObjWorldTransform * childTrans;
 							// replace collision shape so that callback can determine the triangle
 							CollisionShape saveCollisionShape = collisionObject.CollisionShape;
 							collisionObject.InternalSetTemporaryCollisionShape(childCollisionShape);
@@ -929,6 +930,13 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
         }
 
+        public void Initialize(ref Vector3 rayFromWorld, ref Vector3 rayToWorld)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+        }
+
+
         public Vector3 m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
         public Vector3 m_rayToWorld;
 
@@ -949,7 +957,7 @@ namespace BulletXNA.BulletCollision
             else
             {
                 ///need to transform normal into worldspace
-                m_hitNormalWorld = Vector3.TransformNormal(rayResult.m_hitNormalLocal, m_collisionObject.GetWorldTransform());
+                m_hitNormalWorld = m_collisionObject.GetWorldTransform()._basis * rayResult.m_hitNormalLocal;
             }
             m_hitPointWorld = MathUtil.Interpolate3(ref m_rayFromWorld, ref m_rayToWorld, rayResult.m_hitFraction);
             return rayResult.m_hitFraction;
@@ -1010,7 +1018,7 @@ namespace BulletXNA.BulletCollision
 			} else
 			{
 				///need to transform normal into worldspace
-				hitNormalWorld = Vector3.TransformNormal(rayResult.m_hitNormalLocal,m_collisionObject.GetWorldTransform());
+                hitNormalWorld = m_collisionObject.GetWorldTransform()._basis * rayResult.m_hitNormalLocal;
 			}
 			m_hitNormalWorld.Add(hitNormalWorld);
 			Vector3 hitPointWorld = MathUtil.Interpolate3(ref m_rayFromWorld,ref m_rayToWorld,rayResult.m_hitFraction);
@@ -1086,7 +1094,7 @@ namespace BulletXNA.BulletCollision
             else
             {
                 ///need to transform normal into worldspace
-                m_hitNormalWorld = Vector3.TransformNormal(convexResult.m_hitNormalLocal, m_hitCollisionObject.GetWorldTransform());
+                m_hitNormalWorld = m_hitCollisionObject.GetWorldTransform()._basis * convexResult.m_hitNormalLocal;
             }
             m_hitPointWorld = convexResult.m_hitPointLocal;
             return convexResult.m_hitFraction;
@@ -1125,7 +1133,7 @@ namespace BulletXNA.BulletCollision
             shapeInfo.m_shapePart = partId;
             shapeInfo.m_triangleIndex = triangleIndex;
 
-            Vector3 hitNormalWorld = Vector3.TransformNormal(hitNormalLocal, m_colObjWorldTransform);
+            Vector3 hitNormalWorld = m_colObjWorldTransform._basis * hitNormalLocal;
 
             LocalRayResult rayResult = new LocalRayResult
             (m_collisionObject,
@@ -1165,7 +1173,7 @@ namespace BulletXNA.BulletCollision
             shapeInfo.m_shapePart = partId;
             shapeInfo.m_triangleIndex = triangleIndex;
 
-            Vector3 hitNormalWorld = Vector3.TransformNormal(hitNormalLocal, m_colObjWorldTransform);
+            Vector3 hitNormalWorld = m_colObjWorldTransform._basis * hitNormalLocal;
 
             LocalRayResult rayResult = new LocalRayResult
             (m_collisionObject,
@@ -1287,7 +1295,7 @@ namespace BulletXNA.BulletCollision
             m_signs[1] = m_rayDirectionInverse.Y < 0.0f;
             m_signs[2] = m_rayDirectionInverse.Z < 0.0f;
 
-            m_lambda_max = Vector3.Dot(rayDir, (m_rayToWorld - m_rayFromWorld));
+            m_lambda_max = rayDir.Dot(m_rayToWorld - m_rayFromWorld);
         }
 
         public override bool Process(BroadphaseProxy proxy)
@@ -1307,7 +1315,7 @@ namespace BulletXNA.BulletCollision
                 //#if 0
                 //#ifdef RECALCULATE_AABB
                 //            Vector3 collisionObjectAabbMin,collisionObjectAabbMax;
-                //            collisionObject.CollisionShape.getAabb(collisionObject.getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
+                //            collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
                 //#else
                 //getBroadphase().getAabb(collisionObject.getBroadphaseHandle(),collisionObjectAabbMin,collisionObjectAabbMax);
                 Vector3 collisionObjectAabbMin = collisionObject.GetBroadphaseHandle().m_aabbMin;
@@ -1373,7 +1381,7 @@ namespace BulletXNA.BulletCollision
             m_signs[1] = m_rayDirectionInverse.Y < 0.0;
             m_signs[2] = m_rayDirectionInverse.Z < 0.0;
 
-            m_lambda_max = Vector3.Dot(rayDir, unnormalizedRayDir);
+            m_lambda_max = rayDir.Dot(ref unnormalizedRayDir);
 
         }
 
@@ -1526,7 +1534,8 @@ namespace BulletXNA.BulletCollision
                 MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
-            ManifoldPoint newPt = new ManifoldPoint(ref localA, ref localB, ref normalOnBInWorld, depth);
+            ManifoldPoint newPt = BulletGlobals.GetManifoldPoint();
+            newPt.Initialise(ref localA, ref localB, ref normalOnBInWorld, depth);
             newPt.m_positionWorldOnA = pointA;
             newPt.m_positionWorldOnB = pointInWorld;
 
@@ -1629,12 +1638,13 @@ namespace BulletXNA.BulletCollision
             //(void)triangleIndex;
 
             Vector3 wv0, wv1, wv2;
-            Vector3.Transform(ref triangle[0], ref m_worldTrans, out wv0);
-            Vector3.Transform(ref triangle[1], ref m_worldTrans, out wv1);
-            Vector3.Transform(ref triangle[2], ref m_worldTrans, out wv2);
+            wv0 = m_worldTrans * triangle[0];
+            wv1 = m_worldTrans * triangle[1];
+            wv2 = m_worldTrans * triangle[2];
+
             Vector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
 
-            Vector3 normal = Vector3.Cross((wv1 - wv0), (wv2 - wv0));
+            Vector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
             normal.Normalize();
             Vector3 normalColor = new Vector3(1, 1, 0);
             m_debugDrawer.DrawLine(center, center + normal, normalColor);
@@ -1677,7 +1687,7 @@ namespace BulletXNA.BulletCollision
         {
             CollisionShape childCollisionShape = m_compoundShape.GetChildShape(i);
             Matrix childTrans = m_compoundShape.GetChildTransform(i);
-            Matrix childWorldTrans = MathUtil.BulletMatrixMultiply(ref m_colObjWorldTransform, ref childTrans);
+            Matrix childWorldTrans = m_colObjWorldTransform * childTrans;
 
             // replace collision shape so that callback can determine the triangle
             CollisionShape saveCollisionShape = m_collisionObject.CollisionShape;

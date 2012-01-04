@@ -22,9 +22,7 @@
  */
 
 #define USE_BATCHED_SUPPORT
-using System.Collections.Generic;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -56,8 +54,8 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < numSampleDirections; i++)
             {
                 Vector3 norm = sPenetrationDirections[i];
-                seperatingAxisInABatch[i] = MathUtil.TransposeTransformNormal(-norm, transA);
-                seperatingAxisInBBatch[i] = MathUtil.TransposeTransformNormal(norm, transB);
+                seperatingAxisInABatch[i] = (-norm) * transA._basis;
+                seperatingAxisInBBatch[i] = norm * transB._basis;
             }
 
             {
@@ -68,10 +66,10 @@ namespace BulletXNA.BulletCollision
                     {
                         Vector3 norm;
                         convexA.GetPreferredPenetrationDirection(i, out norm);
-                        norm = Vector3.TransformNormal(norm, transA);
+                        norm = transA._basis * norm;
                         sPenetrationDirections[numSampleDirections] = norm;
-                        seperatingAxisInABatch[numSampleDirections] = Vector3.TransformNormal(-norm, transA);
-                        seperatingAxisInBBatch[numSampleDirections] = Vector3.TransformNormal(norm, transB);
+                        seperatingAxisInABatch[numSampleDirections] = (-norm) * transA._basis;
+                        seperatingAxisInBBatch[numSampleDirections] = norm * transB._basis;
                         numSampleDirections++;
                     }
                 }
@@ -85,10 +83,10 @@ namespace BulletXNA.BulletCollision
                     {
                         Vector3 norm;
                         convexB.GetPreferredPenetrationDirection(i, out norm);
-                        norm = Vector3.TransformNormal(norm, transB);
+                        norm = transB._basis * norm;
                         sPenetrationDirections[numSampleDirections] = norm;
-                        seperatingAxisInABatch[numSampleDirections] = Vector3.TransformNormal(-norm, transA);
-                        seperatingAxisInBBatch[numSampleDirections] = Vector3.TransformNormal(norm, transB);
+                        seperatingAxisInABatch[numSampleDirections] = (-norm) * transA._basis;
+                        seperatingAxisInBBatch[numSampleDirections] = norm * transB._basis;
                         numSampleDirections++;
                     }
                 }
@@ -111,8 +109,8 @@ namespace BulletXNA.BulletCollision
                 pInA = new Vector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
                 qInB = new Vector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
 
-                pWorld = Vector3.Transform(pInA, transA);
-                qWorld = Vector3.Transform(qInB, transB);
+			    pWorld = transA * pInA;	
+			    qWorld = transB * qInB;
                 if (check2d)
                 {
                     // shouldn't this be Y ?
@@ -141,9 +139,9 @@ namespace BulletXNA.BulletCollision
 		        {
 			        for (int i=0;i<numPDA;i++)
 			        {
-				        Vector3 norm;
+				        IndexedVector3 norm;
 				        convexA.GetPreferredPenetrationDirection(i, out norm);
-				        norm  = Vector3.TransformNormal(norm,transA);
+				        norm  = IndexedVector3.TransformNormal(norm,transA);
 				        sPenetrationDirections[numSampleDirections] = norm;
 				        numSampleDirections++;
 			        }
@@ -156,9 +154,9 @@ namespace BulletXNA.BulletCollision
 		        {
 			        for (int i=0;i<numPDB;i++)
 			        {
-                        Vector3 norm = Vector3.Zero;
+                        IndexedVector3 norm = IndexedVector3.Zero;
 				        convexB.GetPreferredPenetrationDirection(i, out norm);
-				        norm  = Vector3.TransformNormal(norm,transB);
+				        norm  = IndexedVector3.TransformNormal(norm,transB);
 				        sPenetrationDirections[numSampleDirections] = norm;
 				        numSampleDirections++;
 			        }
@@ -167,19 +165,19 @@ namespace BulletXNA.BulletCollision
 
 	        for (int i=0;i<numSampleDirections;i++)
 	        {
-		        Vector3 norm = sPenetrationDirections[i];
+		        IndexedVector3 norm = sPenetrationDirections[i];
 		        if (check2d)
 		        {
 			        norm.Z = 0f;
 		        }
                 if (norm.LengthSquared() > 0.01f)
                 {
-                    seperatingAxisInA = Vector3.TransformNormal(-norm, transA);
-                    seperatingAxisInB = Vector3.TransformNormal(norm, transB);
+                    seperatingAxisInA = IndexedVector3.TransformNormal(-norm, transA);
+                    seperatingAxisInB = IndexedVector3.TransformNormal(norm, transB);
                     pInA = convexA.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInA);
                     qInB = convexB.LocalGetSupportVertexWithoutMarginNonVirtual(ref seperatingAxisInB);
-                    pWorld = Vector3.Transform(pInA, transA);
-                    qWorld = Vector3.Transform(qInB, transB);
+                    pWorld = IndexedVector3.Transform(pInA, transA);
+                    qWorld = IndexedVector3.Transform(qInB, transB);
                     if (check2d)
                     {
                         pWorld.Z = 0.0f;
@@ -187,7 +185,7 @@ namespace BulletXNA.BulletCollision
                     }
 
                     w = qWorld - pWorld;
-                    float delta = Vector3.Dot(norm, w);
+                    float delta = IndexedVector3.Dot(norm, w);
                     //find smallest delta
                     if (delta < minProj)
                     {
@@ -216,11 +214,11 @@ namespace BulletXNA.BulletCollision
 #if DEBUG_DRAW
 	        if (debugDraw)
 	        {
-		        Vector3 color = new Vector3(0,1,0);
+		        IndexedVector3 color = new IndexedVector3(0,1,0);
 		        debugDraw.drawLine(minA,minB,color);
-		        color = new Vector3(1,1,1);
-		        Vector3 vec = minB-minA;
-		        float prj2 = Vector3.Dot(minNorm,vec);
+		        color = new IndexedVector3(1,1,1);
+		        IndexedVector3 vec = minB-minA;
+		        float prj2 = IndexedVector3.Dot(minNorm,vec);
 		        debugDraw.drawLine(minA,minA+(minNorm*minProj),color);
 
 	        }
@@ -265,7 +263,7 @@ namespace BulletXNA.BulletCollision
 #if DEBUG_DRAW
 		        if (debugDraw != null)
 		        {
-			        Vector3 color = new Vector3(1,0,0);
+			        IndexedVector3 color = new IndexedVector3(1,0,0);
 			        debugDraw.drawLine(pa,pb,color);
 		        }
 #endif//DEBUG_DRAW

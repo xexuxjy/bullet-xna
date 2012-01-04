@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -84,9 +84,9 @@ namespace BulletXNA.BulletCollision
 		    : base()
 	    {
 		    m_shapeType = BroadphaseNativeType.BoxShape;
-		    Vector3 margin = new Vector3(Margin);
+            SetSafeMargin(ref boxHalfExtents);
+            Vector3 margin = new Vector3(Margin);
 		    m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
-            int ibreak = 0;
 	    }
 
 	    public override float Margin
@@ -105,7 +105,7 @@ namespace BulletXNA.BulletCollision
 
 	    public override void SetLocalScaling(ref Vector3 scaling)
 	    {
-            Vector3 oldMargin = new Vector3(Margin);
+		    Vector3 oldMargin = new Vector3(Margin);
 		    Vector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		    Vector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -132,7 +132,7 @@ namespace BulletXNA.BulletCollision
 
         public override void CalculateLocalInertia(float mass, out Vector3 inertia)
         {
-	        //btScalar margin = btScalar(0.);
+	        //float margin = float(0.);
 	        Vector3 halfExtents = GetHalfExtentsWithMargin();
 
 	        float lx=2f*(halfExtents.X);
@@ -147,9 +147,9 @@ namespace BulletXNA.BulletCollision
 	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
 	    {
 		    //this plane might not be aligned...
-            Plane plane;
+            Vector4 plane;
 		    GetPlaneEquation(out plane, i);
-            planeNormal = plane.Normal;
+            planeNormal = new Vector3(plane);
             Vector3 negNormal = -planeNormal;
 		    planeSupport = LocalGetSupportingVertex(ref negNormal);
 	    }
@@ -179,45 +179,39 @@ namespace BulletXNA.BulletCollision
                 halfExtents.Y * (1 - ((i & 2) >> 1)) - halfExtents.Y * ((i & 2) >> 1),
                 halfExtents.Z * (1 - ((i & 4) >> 2)) - halfExtents.Z * ((i & 4) >> 2));
 	    }
-	
-
-	    public virtual void	GetPlaneEquation(out Plane plane, int i)
-	    {
-		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
 
-		    switch (i)
-		    {
-		    case 0:
-                plane.Normal = Vector3.Right;
-                plane.D = -halfExtents.X;
-			    break;
-		    case 1:
-                plane.Normal = Vector3.Left;
-                plane.D = -halfExtents.X;
-			    break;
-		    case 2:
-                plane.Normal = Vector3.Up;
-                plane.D = -halfExtents.Y;
-			    break;
-		    case 3:
-                plane.Normal = Vector3.Down;
-                plane.D = -halfExtents.Y;
-			    break;
-		    case 4:
-                plane.Normal = Vector3.Backward;
-                plane.D = -halfExtents.Z;
-			    break;
-		    case 5:
-                plane.Normal = Vector3.Forward;
-                plane.D = -halfExtents.Z;
-			    break;
-		    default:
-			    Debug.Assert(false);
-                plane = new Plane();
-                break;
-		    }
-	    }
+        public virtual void GetPlaneEquation(out Vector4 plane, int i)
+        {
+            Vector3 halfExtents = GetHalfExtentsWithoutMargin();
+
+
+            switch (i)
+            {
+                case 0:
+                    plane = new Vector4(1, 0, 0, -halfExtents.X);
+                    break;
+                case 1:
+                    plane = new Vector4(-1, 0, 0, -halfExtents.X);
+                    break;
+                case 2:
+                    plane = new Vector4(0, 1, 0, -halfExtents.Y);
+                    break;
+                case 3:
+                    plane = new Vector4(0, -1, 0, -halfExtents.Y);
+                    break;
+                case 4:
+                    plane = new Vector4(0, 0, 1, -halfExtents.Z);
+                    break;
+                case 5:
+                    plane = new Vector4(0, 0, -1, -halfExtents.Z);
+                    break;
+                default:
+                    Debug.Assert(false);
+                    plane = new Vector4();
+                    break;
+            }
+        }
 
 
         public override void GetEdge(int i, out Vector3 pa, out Vector3 pb)
@@ -291,7 +285,7 @@ namespace BulletXNA.BulletCollision
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
 
-		    //btScalar minDist = 2*tolerance;
+		    //float minDist = 2*tolerance;
     		
 		    bool result =	(pt.X <= (halfExtents.X+tolerance)) &&
 						    (pt.X >= (-halfExtents.X-tolerance)) &&
@@ -320,22 +314,22 @@ namespace BulletXNA.BulletCollision
 		    switch (index)
 		    {
 		    case 0:
-			    penetrationVector = Vector3.Right;
+			    penetrationVector = new Vector3(1, 0, 0);
 			    break;
 		    case 1:
-			    penetrationVector = Vector3.Left;
+			    penetrationVector = new Vector3(-1, 0, 0);
 			    break;
 		    case 2:
-			    penetrationVector = Vector3.Up;
+			    penetrationVector = new Vector3(0, 1, 0);
 			    break;
 		    case 3:
-			    penetrationVector = Vector3.Down;
+			    penetrationVector = new Vector3(0, -1, 0);
 			    break;
 		    case 4:
-			    penetrationVector = Vector3.Backward;
+			    penetrationVector = new Vector3(0, 0, 1);
 			    break;
 		    case 5:
-                penetrationVector = Vector3.Forward;
+                penetrationVector = new Vector3(0, 0, -1);
 			    break;
 		    default:
                 Debug.Assert(false);

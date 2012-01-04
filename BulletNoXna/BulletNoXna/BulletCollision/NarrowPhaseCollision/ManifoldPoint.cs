@@ -23,7 +23,6 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -32,16 +31,14 @@ namespace BulletXNA.BulletCollision
     public class ManifoldPoint
     {
 
-        //public ManifoldPoint()
-        //{
-        //}
-        public ManifoldPoint(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
+        public ManifoldPoint()
         {
-            m_localPointA = pointA;
-            m_localPointB = pointB;
-            m_normalWorldOnB = normal;
-            m_distance1 = distance;
+            m_constraintRow = new ConstraintRow[3];
+        }
 
+
+        public void Initialise(ref Vector3 pointA, ref Vector3 pointB, ref Vector3 normal, float distance)
+        {
             /* Don't initialize default values twice in C# */
             m_lateralFrictionDir1 = Vector3.Zero;
             m_lateralFrictionDir2 = Vector3.Zero;
@@ -65,7 +62,10 @@ namespace BulletXNA.BulletCollision
             m_positionWorldOnA = Vector3.Zero;
             m_positionWorldOnB = Vector3.Zero;
 
-            m_constraintRow = new ConstraintRow[3];
+            m_localPointA = pointA;
+            m_localPointB = pointB;
+            m_normalWorldOnB = normal;
+            m_distance1 = distance;
 
         }
 
@@ -354,13 +354,13 @@ namespace BulletXNA.BulletCollision
         public Vector3 m_lateralFrictionDir1;
         public Vector3 m_lateralFrictionDir2;
 
-        public ConstraintRow[] m_constraintRow;
+        public ConstraintRow[] m_constraintRow = new ConstraintRow[3];
 
     }
 
     public struct ConstraintRow
     {
-        public IndexedVector3 m_normal;
+        public Vector3 m_normal;
         public float m_rhs;
         public float m_jacDiagInv;
         public float m_lowerLimit;

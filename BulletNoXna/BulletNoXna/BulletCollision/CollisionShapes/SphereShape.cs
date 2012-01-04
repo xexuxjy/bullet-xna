@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -74,7 +74,7 @@ namespace BulletXNA.BulletCollision
         public override void GetAabb(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax)
         {
 	        Vector3 center = t.Translation;
-	        Vector3 extent = new Vector3(Margin);
+            Vector3 extent = new Vector3(Margin);
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;
         }

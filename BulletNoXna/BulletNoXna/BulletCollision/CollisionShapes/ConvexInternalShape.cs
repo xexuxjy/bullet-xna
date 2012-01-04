@@ -22,10 +22,16 @@
  */
 
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
+    ///The btConvexInternalShape uses a default collision margin set to CONVEX_DISTANCE_MARGIN.
+    ///This collision margin used by Gjk and some other algorithms, see also btCollisionMargin.h
+    ///Note that when creating small shapes (derived from btConvexInternalShape), 
+    ///you need to make sure to set a smaller collision margin, using the 'setMargin' API
+    ///There is a automatic mechanism 'setSafeMargin' used by btBoxShape and btCylinderShape
+
     public abstract class ConvexInternalShape : ConvexShape
     {
         public ConvexInternalShape()
@@ -61,6 +67,35 @@ namespace BulletXNA.BulletCollision
             return m_implicitShapeDimensions;
         }
 
+        public void SetSafeMargin(float minDimension)
+        {
+            SetSafeMargin(minDimension, 0.1f);
+        }
+
+	    public void	SetSafeMargin(float minDimension, float defaultMarginMultiplier)
+	    {
+		    float safeMargin = defaultMarginMultiplier*minDimension;
+		    if (safeMargin < Margin)
+		    {
+			    Margin = safeMargin;
+		    }
+	    }
+
+	    public void SetSafeMargin(ref Vector3 halfExtents)
+        {
+            SetSafeMargin(ref halfExtents,0.1f);
+        }
+	    
+        public void SetSafeMargin(ref Vector3 halfExtents, float defaultMarginMultiplier)
+	    {
+		    //see http://code.google.com/p/bullet/issues/detail?id=349
+		    //this margin check could could be added to other collision shapes too,
+		    //or add some assert/warning somewhere
+		    float minDimension=halfExtents[halfExtents.MinAxis()]; 		
+		    SetSafeMargin(minDimension, defaultMarginMultiplier);
+	    }
+
+
 	    ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
 	    public override void GetAabb(ref Matrix t,out Vector3 aabbMin,out Vector3 aabbMax)
 	    {
@@ -77,24 +112,24 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < 3; i++)
 	        {
 		        Vector3 vec = new Vector3();
-		        MathUtil.VectorComponent(ref vec,i,1f);
+		        vec[i] = 1f;
 
-
-				Vector3 temp = MathUtil.TransposeTransformNormal(vec, trans);
+                Vector3 temp = vec * trans._basis;
 				Vector3 sv = LocalGetSupportingVertex(ref temp);
-				Vector3 tmp = Vector3.Transform(sv, trans);
-				MathUtil.VectorComponent(ref aabbMax, i, MathUtil.VectorComponent(ref tmp, i) + margin);
-				MathUtil.VectorComponent(ref vec, i, -1f);
-				temp = MathUtil.TransposeTransformNormal(vec, trans);
+                Vector3 tmp = trans * sv;
+				aabbMax[i] = tmp[i] + margin;
+				vec[i] = -1f;
+
+                temp = vec * trans._basis;
 				sv = LocalGetSupportingVertex(ref temp);
-				tmp = Vector3.Transform(sv, trans);
-				MathUtil.VectorComponent(ref aabbMin, i, MathUtil.VectorComponent(ref tmp, i) - margin);
+                tmp = trans * sv;
+				aabbMin[i] = tmp[i] - margin;
 	        }
         }
 
         public override void SetLocalScaling(ref Vector3 scaling)
         {
-            MathUtil.AbsoluteVector(ref scaling, out m_localScaling);
+            m_localScaling = scaling.Absolute();
         }
 
         public override Vector3 GetLocalScaling()
@@ -214,20 +249,22 @@ namespace BulletXNA.BulletCollision
         	
 	        for ( int i = 0; i < 3; ++i )
 	        {
-                Vector4 temp = _supporting[i];
-		        MathUtil.VectorComponent(ref m_localAabbMax, i, (MathUtil.VectorComponent(ref temp,i) + m_collisionMargin));
-                MathUtil.VectorComponent(ref m_localAabbMin, i, (MathUtil.VectorComponent(ref temp, i) - m_collisionMargin));
-	        }
+                Vector3 s0 = new Vector3(_supporting[i]);
+                Vector3 s1 = new Vector3(_supporting[i+3]);
+
+                m_localAabbMax[i] = s0[i] + m_collisionMargin;
+                m_localAabbMin[i] = s1[i] - m_collisionMargin;
+            }
         	
 	        #else
 
 	        for (int i=0;i<3;i++)
 	        {
-		        btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
-		        vec[i] = btScalar(1.);
+		        btVector3 vec(float(0.),float(0.),float(0.));
+		        vec[i] = float(1.);
 		        btVector3 tmp = localGetSupportingVertex(vec);
 		        m_localAabbMax[i] = tmp[i]+m_collisionMargin;
-		        vec[i] = btScalar(-1.);
+		        vec[i] = float(-1.);
 		        tmp = localGetSupportingVertex(vec);
 		        m_localAabbMin[i] = tmp[i]-m_collisionMargin;
 	        }

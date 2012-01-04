@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -98,6 +97,12 @@ namespace BulletXNA.BulletCollision
             manifold.m_index1a = m_manifoldsPtr.Count;
             m_manifoldsPtr.Add(manifold);
 
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("GetNewManifold[{0}][{1}]", manifold.m_index1a,m_manifoldsPtr.Count);
+            }
+
+
             return manifold;
         }
 
@@ -114,6 +119,12 @@ namespace BulletXNA.BulletCollision
             m_manifoldsPtr[m_manifoldsPtr.Count - 1] = swapTemp;
             m_manifoldsPtr[findIndex].m_index1a = findIndex;
             m_manifoldsPtr.RemoveAt(m_manifoldsPtr.Count - 1);
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("ReleaseManifold[{0}][{1}]", manifold.m_index1a, m_manifoldsPtr.Count);
+            }
 
             // and return it to free list.
             m_persistentManifoldsPool.Push(manifold);
@@ -363,6 +374,11 @@ namespace BulletXNA.BulletCollision
                         {
                             dispatchInfo.SetTimeOfImpact(toi);
                         }
+                    }
+
+                    if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
+                    {
+                        BulletGlobals.g_streamWriter.WriteLine("NearCallback[{0}][{1}][{2}]", contactPointResult.GetBody0Internal().UserObject, contactPointResult.GetBody1Internal().UserObject,contactPointResult.GetPersistentManifold().GetNumContacts());
                     }
 
                     dispatcher.FreeManifoldResult(contactPointResult);

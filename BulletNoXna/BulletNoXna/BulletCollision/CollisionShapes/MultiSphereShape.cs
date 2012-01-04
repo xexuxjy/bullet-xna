@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
@@ -71,7 +71,7 @@ namespace BulletXNA.BulletCollision
 	        float lenSqr = vec.LengthSquared();
 	        if (lenSqr < (MathUtil.SIMD_EPSILON*MathUtil.SIMD_EPSILON))
 	        {
-		        vec = Vector3.Right;
+		        vec = new Vector3(1,0,0);
 	        } 
             else
 	        {

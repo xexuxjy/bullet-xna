@@ -24,9 +24,8 @@
 #define _BT_USE_CENTER_LIMIT_
 
 using System;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -470,7 +469,7 @@ namespace BulletXNA.BulletDynamics
 						info.m_solverConstraints[nrow].m_cfm = m_normalCFM;
 					}
 
-					float mot_fact = GetMotorFactor(m_hingeAngle, lostop, histop, m_motorTargetVelocity, info.fps * info.erp);
+					float mot_fact = GetMotorFactor(m_hingeAngle, lostop, histop, m_motorTargetVelocity, info.fps * currERP);
 					info.m_solverConstraints[nrow].m_rhs += mot_fact * m_motorTargetVelocity * m_referenceSign;
 					info.m_solverConstraints[nrow].m_lowerLimit = -m_maxMotorImpulse;
 					info.m_solverConstraints[nrow].m_upperLimit = m_maxMotorImpulse;

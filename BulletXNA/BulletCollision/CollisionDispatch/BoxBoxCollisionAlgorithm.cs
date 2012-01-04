@@ -23,7 +23,6 @@
 
 #define USE_PERSISTENT_CONTACTS
 
-using System.Collections.Generic;
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision

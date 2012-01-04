@@ -763,8 +763,7 @@ namespace BulletXNA
 
         public static bool CompareFloat(float val1, float val2)
         {
-            float holder = Math.Abs(val1 - val2);
-            return holder <= SIMD_EPSILON;
+            return Math.Abs(val1 - val2) <= SIMD_EPSILON;
         }
 
         public static bool FuzzyZero(float val)

@@ -22,13 +22,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using System;
 using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
-using System.IO;
 
 namespace BulletXNADemos.Demos
 {

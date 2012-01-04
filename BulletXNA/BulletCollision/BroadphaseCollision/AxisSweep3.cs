@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision

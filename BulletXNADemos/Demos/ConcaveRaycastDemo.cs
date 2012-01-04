@@ -27,7 +27,6 @@ using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System.IO;
 
 namespace BulletXNADemos.Demos
 {

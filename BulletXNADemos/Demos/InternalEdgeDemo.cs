@@ -1,13 +1,11 @@
 ﻿#define SWAP_WINDING
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BulletXNA.BulletCollision;
-using BulletXNA.LinearMath;
-using BulletXNA.BulletDynamics;
-using BulletXNA.BulletCollision.CollisionDispatch;
 using BulletXNA;
+using BulletXNA.BulletCollision;
+using BulletXNA.BulletCollision.CollisionDispatch;
+using BulletXNA.BulletDynamics;
+using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {

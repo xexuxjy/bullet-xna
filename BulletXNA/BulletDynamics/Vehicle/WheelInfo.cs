@@ -22,7 +22,6 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics

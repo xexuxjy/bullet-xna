@@ -21,10 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision;
-using Microsoft.Xna.Framework;
-using BulletXNA.LinearMath;
 using System.IO;
+using BulletXNA.BulletCollision;
+using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {

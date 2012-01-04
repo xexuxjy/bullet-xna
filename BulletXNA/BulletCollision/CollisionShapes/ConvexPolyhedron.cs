@@ -21,11 +21,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 #define TEST_INTERNAL_OBJECTS
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
-using System;
 
 namespace BulletXNA.BulletCollision
 {

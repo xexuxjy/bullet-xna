@@ -1,9 +1,9 @@
 ﻿
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+
 namespace BulletXNADemos.Demos
 {
     public class FrameRateCounter : DrawableGameComponent

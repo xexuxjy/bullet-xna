@@ -1,12 +1,10 @@
 ﻿#define TEST_GIMPACT_TORUS
 
-using System.IO;
-using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
+using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using BulletXNA.LinearMath;
 
 namespace BulletXNADemos.Demos
 {

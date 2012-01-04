@@ -189,7 +189,7 @@
       <Project>{4E1937EE-3139-44CB-989D-F050BC099CE6}</Project>
       <Name>BulletXNA-Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="Content\BulletXNADemoContent.contentproj">
+    <ProjectReference Include="Content\Content.contentproj">
       <Project>{19F18FB0-6BA5-4076-9E7E-934437CAC410}</Project>
       <Name>BulletXNADemoContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>

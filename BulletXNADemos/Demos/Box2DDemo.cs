@@ -39,7 +39,7 @@ namespace BulletXNADemos.Demos
             SetCameraDistance(SCALING*50.0f);
             m_cameraTargetPosition = IndexedVector3.Zero;
 
-            //string filename = @"C:\users\man\bullet\xna-box2d-output.txt";
+            //string filename = @"E:\users\man\bullet\xna-box2d-output.txt";
             //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
             //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
@@ -124,9 +124,9 @@ namespace BulletXNADemos.Demos
 		//		float start_y = START_POS_Y;
 		//		float start_z = START_POS_Z - ARRAY_SIZE_Z/2;
 
-				IndexedVector3 x = new IndexedVector3(-ARRAY_SIZE_X, 20.0f,-20f);
+				IndexedVector3 x = new IndexedVector3(-ARRAY_SIZE_X, 8f,-20f);
 				//IndexedVector3 y = IndexedVector3.Zero;
-				IndexedVector3 y = new IndexedVector3(0,20,0);
+				IndexedVector3 y = new IndexedVector3(0,0,0);
 				IndexedVector3 deltaX = new IndexedVector3(SCALING*1, SCALING*2,0f);
 				IndexedVector3 deltaY = new IndexedVector3(SCALING*2, 0.0f,0f);
 

@@ -101,7 +101,7 @@ namespace BulletXNA
 		public const bool debugConstraints = false;
 		public const bool debugDiscreteDynamicsWorld = true;
 		public const bool debugBoxBoxDetector = false;
-		public const bool debugIslands = true;
+		public const bool debugIslands = false;
 		public const bool debugBVHTriangleMesh = false;
 		public const bool debugConvexHull = false;
 		public const bool debugConvexShape = false;
@@ -111,7 +111,7 @@ namespace BulletXNA
 		public const bool debugGJKDetector = false;
 		public const bool debugPersistentManifold = false;
 		public const bool debugVoronoiSimplex = false;
-        public const bool debugSolver = true;
+        public const bool debugSolver = false;
         public const bool debugBroadphase = false;
         public const bool debugBoxShape = false;
         public const bool debugGimpactShape= false;

@@ -119,6 +119,7 @@
     <Compile Include="Demos\DemoMeshes.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />
     <Compile Include="Demos\FrameRateCounter.cs" />
+    <Compile Include="Demos\GhostObjectDemo.cs" />
     <Compile Include="Demos\GImpactTestDemo.cs" />
     <Compile Include="Demos\InternalEdgeDemo.cs" />
     <Compile Include="Demos\IslandStressDemo.cs" />

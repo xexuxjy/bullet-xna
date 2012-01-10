@@ -109,9 +109,8 @@ namespace BulletXNA.BulletCollision
             CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
             Debug.Assert(otherObject != null);
             ///if this linearSearch becomes too slow (too many overlapping objects) we should add a more appropriate data structure
-            if (!m_overlappingObjects.Contains(otherObject))
             {
-                m_overlappingObjects.Remove(otherObject);
+                m_overlappingObjects.RemoveQuick(otherObject);
             }
         }
 
@@ -125,7 +124,7 @@ namespace BulletXNA.BulletCollision
             return m_overlappingObjects[index];
         }
 
-        public IList<CollisionObject> GetOverlappingPairs()
+        public ObjectArray<CollisionObject> GetOverlappingPairs()
         {
             return m_overlappingObjects;
         }
@@ -143,7 +142,7 @@ namespace BulletXNA.BulletCollision
             return null;
         }
 
-        protected IList<CollisionObject> m_overlappingObjects;
+        protected ObjectArray<CollisionObject> m_overlappingObjects = new ObjectArray<CollisionObject>();
 
     }
 
@@ -182,9 +181,8 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(actualThisProxy != null);
 
             Debug.Assert(otherObject != null);
-            if (m_overlappingObjects.Contains(otherObject))
+            if (m_overlappingObjects.Remove(otherObject))
             {
-                m_overlappingObjects.Remove(otherObject);
                 m_hashPairCache.RemoveOverlappingPair(actualThisProxy, otherProxy, dispatcher);
             }
         }

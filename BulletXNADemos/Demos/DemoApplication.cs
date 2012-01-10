@@ -37,7 +37,7 @@ namespace BulletXNADemos.Demos
     public class DemoApplication : Microsoft.Xna.Framework.Game
     {
         protected int numiterations = 0;
-        protected int maxiterations = 500;
+        protected int maxiterations = 0;
         protected IProfileManager m_profileManager;
         protected IProfileIterator m_profileIterator;
         protected IDebugDraw m_debugDraw;
@@ -193,6 +193,7 @@ namespace BulletXNADemos.Demos
 		        else
 		        {
                     //colObj.getWorldTransform().getOpenGLMatrix(m);
+                    m = colObj.GetWorldTransform();
 			        rot=colObj.GetWorldTransform()._basis;
 		        }
 		        wireColor = new IndexedVector3(1.0f,1.0f,0.5f); //wants deactivation
@@ -1611,6 +1612,7 @@ namespace BulletXNADemos.Demos
             //m_debugDraw = new DefaultDebugDraw(vertexDeclaration,basicEffect);
 
             //debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            //DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits | DebugDrawModes.DBG_DrawWireframe;
             DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;

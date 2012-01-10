@@ -589,7 +589,7 @@ namespace BulletXNA.BulletCollision
                     CleanOverlappingPair(pair, dispatcher);
                     pair.m_pProxy0 = null;
                     pair.m_pProxy1 = null;
-                    m_overlappingPairArray.RemoveAt(m_overlappingPairArray.Count - 1);
+                    m_overlappingPairArray.RemoveAtQuick(i);
                     OverlappingPairCacheGlobals.gOverlappingPairs--;
                 }
                 else
@@ -619,7 +619,7 @@ namespace BulletXNA.BulletCollision
                     //BroadphasePair temp = m_overlappingPairArray[findIndex];
                     //m_overlappingPairArray[findIndex] = m_overlappingPairArray[m_overlappingPairArray.Count-1];
                     //m_overlappingPairArray[m_overlappingPairArray.Count-1] = temp;
-                    m_overlappingPairArray.RemoveAt(m_overlappingPairArray.Count - 1);
+                    m_overlappingPairArray.RemoveAtQuick(findIndex);
                     return userData;
                 }
             }

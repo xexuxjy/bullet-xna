@@ -59,6 +59,7 @@
       <Name>DebugFont</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
+      <SubType>Designer</SubType>
     </Compile>
     <Compile Include="DebugFont8.spritefont">
       <Name>DebugFont8</Name>

@@ -75,10 +75,6 @@ namespace BulletXNA.BulletDynamics
 		private float m_normalCFM;
 		private float m_stopCFM;
 		private float m_stopERP;
-
-        private bool m_useSolveConstraintObsolete = false;
-        private JacobianEntry[] m_jac = new JacobianEntry[3]; //3 orthogonal linear constraints
-        private JacobianEntry[] m_jacAng = new JacobianEntry[3]; //2 orthogonal angular constraints+ 1 for limit/motor
         
         public HingeConstraint(RigidBody rbA, RigidBody rbB, ref IndexedVector3 pivotInA, ref IndexedVector3 pivotInB, ref IndexedVector3 axisInA, ref IndexedVector3 axisInB)
 			: this(rbA, rbB, ref pivotInA, ref pivotInB, ref axisInA, ref axisInB, false)
@@ -287,47 +283,29 @@ namespace BulletXNA.BulletDynamics
 
 		public override void GetInfo1(ConstraintInfo1 info)
 		{
-            if (m_useSolveConstraintObsolete)
+            info.m_numConstraintRows = 5; // Fixed 3 linear + 2 angular
+            info.nub = 1;
+            //prepare constraint
+            TestLimit(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
+            if (GetSolveLimit() || GetEnableAngularMotor())
             {
-                info.m_numConstraintRows = 0;
-                info.nub = 0;
+                info.m_numConstraintRows++; // limit 3rd anguar as well
+                info.nub--;
             }
-            else
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
-
-                info.m_numConstraintRows = 5; // Fixed 3 linear + 2 angular
-                info.nub = 1;
-                //prepare constraint
-                TestLimit(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
-                if (GetSolveLimit() || GetEnableAngularMotor())
-                {
-                    info.m_numConstraintRows++; // limit 3rd anguar as well
-                    info.nub--;
-                }
-                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
-                {
-                    PrintInfo1(BulletGlobals.g_streamWriter, this, info);
-                }
+                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
             }
 		}
 
 		public void GetInfo1NonVirtual(ConstraintInfo1 info)
 		{
-            if (m_useSolveConstraintObsolete)
+            //always add the 'limit' row, to avoid computation (data is not available yet)
+            info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
+            info.nub = 0;
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
-                info.m_numConstraintRows = 0;
-                info.nub = 0;
-            }
-            else
-            {
-
-                //always add the 'limit' row, to avoid computation (data is not available yet)
-                info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
-                info.nub = 0;
-                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
-                {
-                    PrintInfo1(BulletGlobals.g_streamWriter, this, info);
-                }
+                PrintInfo1(BulletGlobals.g_streamWriter, this, info);
             }
 		}
 
@@ -353,8 +331,6 @@ namespace BulletXNA.BulletDynamics
 		public void GetInfo2Internal(ConstraintInfo2 info, IndexedMatrix transA, IndexedMatrix transB, IndexedVector3 angVelA, IndexedVector3 angVelB)
 		{
 			// transforms in world space
-            Debug.Assert(!m_useSolveConstraintObsolete);
-
             IndexedMatrix trA = transA * m_rbAFrame;
             IndexedMatrix trB = transB * m_rbBFrame;
 			// pivot point
@@ -593,8 +569,6 @@ namespace BulletXNA.BulletDynamics
 
 		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref IndexedMatrix transA, ref IndexedMatrix transB, ref IndexedVector3 angVelA, ref IndexedVector3 angVelB)
 		{
-            Debug.Assert(!m_useSolveConstraintObsolete);
-
 			// transforms in world space
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
@@ -1057,7 +1031,7 @@ namespace BulletXNA.BulletDynamics
             float angle = (float)Math.Atan2(a,b );
 
             float result = m_referenceSign * angle;
-            if (BulletGlobals.g_streamWriter != null)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GetHingeAngle [{0:0.00000000}][{1:0.00000000}][{2:0.00000000}][{3:0.00000000}]", a,b,m_referenceSign,result);
             }
@@ -1152,93 +1126,6 @@ namespace BulletXNA.BulletDynamics
 		{
 			m_useOffsetForConstraintFrame = frameOffsetOnOff;
 		}
-
-
-        public override void BuildJacobian()
-        {
-            if (m_useSolveConstraintObsolete)
-            {
-                m_appliedImpulse = 0.0f;
-                m_accMotorImpulse = 0.0f;
-
-                if (!m_angularOnly)
-                {
-                    IndexedVector3 pivotAInW = m_rbA.GetCenterOfMassTransform() * m_rbAFrame._origin;
-                    IndexedVector3 pivotBInW = m_rbB.GetCenterOfMassTransform() * m_rbBFrame._origin;
-                    IndexedVector3 relPos = pivotBInW - pivotAInW;
-
-                    IndexedVector3[] normal = new IndexedVector3[3];
-                    if (relPos.LengthSquared() > MathUtil.SIMD_EPSILON)
-                    {
-                        normal[0] = IndexedVector3.Normalize(ref relPos);
-                    }
-                    else
-                    {
-                        normal[0] = new IndexedVector3(1.0f, 0, 0);
-                    }
-
-                    TransformUtil.PlaneSpace1(ref normal[0], out normal[1], out normal[2]);
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        m_jac[i] = new JacobianEntry(m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
-                        m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
-                        pivotAInW - m_rbA.GetCenterOfMassPosition(),
-                        pivotBInW - m_rbB.GetCenterOfMassPosition(),
-                        normal[i],
-                        m_rbA.GetInvInertiaDiagLocal(),
-                        m_rbA.GetInvMass(),
-                        m_rbB.GetInvInertiaDiagLocal(),
-                        m_rbB.GetInvMass());
-                    }
-                }
-
-                //calculate two perpendicular jointAxis, orthogonal to hingeAxis
-                //these two jointAxis require equal angular velocities for both bodies
-
-                //this is unused for now, it's a todo
-                IndexedVector3 jointAxis0local;
-                IndexedVector3 jointAxis1local;
-
-                IndexedVector3 temp = m_rbAFrame._basis.GetColumn(2);
-                TransformUtil.PlaneSpace1(ref temp, out jointAxis0local, out jointAxis1local);
-
-                IndexedVector3 jointAxis0 = GetRigidBodyA().GetCenterOfMassTransform()._basis * jointAxis0local;
-                IndexedVector3 jointAxis1 = GetRigidBodyA().GetCenterOfMassTransform()._basis * jointAxis1local;
-                IndexedVector3 hingeAxisWorld = GetRigidBodyA().GetCenterOfMassTransform()._basis * m_rbAFrame._basis.GetColumn(2);
-
-                m_jacAng[0] = new JacobianEntry(jointAxis0,
-                    m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbA.GetInvInertiaDiagLocal(),
-                    m_rbB.GetInvInertiaDiagLocal());
-
-                m_jacAng[1] = new JacobianEntry(jointAxis1,
-                    m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbA.GetInvInertiaDiagLocal(),
-                    m_rbB.GetInvInertiaDiagLocal());
-
-                m_jacAng[2] = new JacobianEntry(hingeAxisWorld,
-                    m_rbA.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbB.GetCenterOfMassTransform()._basis.Transpose(),
-                    m_rbA.GetInvInertiaDiagLocal(),
-                    m_rbB.GetInvInertiaDiagLocal());
-
-                // clear accumulator
-                m_accLimitImpulse = 0.0f;
-
-                // test angular limit
-                TestLimit(m_rbA.GetCenterOfMassTransform(), m_rbB.GetCenterOfMassTransform());
-
-                //Compute K = J*W*J' for hinge axis
-                IndexedVector3 axisA = GetRigidBodyA().GetCenterOfMassTransform()._basis * m_rbAFrame._basis.GetColumn(2);
-                m_kHinge = 1.0f / (GetRigidBodyA().ComputeAngularImpulseDenominator(ref axisA) +
-                                     GetRigidBodyB().ComputeAngularImpulseDenominator(ref axisA));
-
-            }
-
-        }
 
 
 	}

@@ -24,21 +24,25 @@
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace BulletXNA.BulletCollision
 {
 	public class Box2dBox2dCollisionAlgorithm : ActivatingCollisionAlgorithm
 	{
-		public Box2dBox2dCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci)
-		: base(createFunc,ci) 
+		public Box2dBox2dCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
+		: base(ci) 
         {
             
         }
 
-		public Box2dBox2dCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1) :
-			base(createFunc,ci,body0,body1)
+		public Box2dBox2dCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1) :
+			base(ci,body0,body1)
 		{
+			if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
+			{
+				m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+				m_ownManifold = true;
+			}
 		}
 
 		public override void Cleanup()
@@ -52,16 +56,6 @@ namespace BulletXNA.BulletCollision
 			}
 			base.Cleanup();
 		}
-
-        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-        {
-            base.Initialize(createFunc, ci, body0, body1);
-            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
-            {
-                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
-                m_ownManifold = true;
-            }
-        }
 
 		public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
 		{
@@ -495,20 +489,7 @@ namespace BulletXNA.BulletCollision
 	{
 		public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
 		{
-            Box2dBox2dCollisionAlgorithm alg = Aquire() as Box2dBox2dCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new Box2dBox2dCollisionAlgorithm(this, null, ci, body0, body1);
-                Release(alg);
-            }
-            else
-            {
-                alg = Aquire() as Box2dBox2dCollisionAlgorithm;
-                alg.Initialize(this, null, ci, body0, body1);
-            }
-            return alg;
+			return new Box2dBox2dCollisionAlgorithm(null, ci, body0, body1);
 		}
-
-
 	}
 }

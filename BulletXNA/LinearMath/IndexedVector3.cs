@@ -91,7 +91,7 @@ namespace BulletXNA.LinearMath
 
         public IndexedVector3 Abs()
         {
-            return new IndexedVector3(Math.Abs(X),Math.Abs(Y),Math.Abs(Z));
+            return new IndexedVector3(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
         }
 
         public IndexedVector3 Absolute()
@@ -115,9 +115,9 @@ namespace BulletXNA.LinearMath
 
         }
 
-        public static void Transform(IndexedVector3[] source ,ref IndexedMatrix t, IndexedVector3[] dest)
+        public static void Transform(IndexedVector3[] source, ref IndexedMatrix t, IndexedVector3[] dest)
         {
-            for(int i=0;i<source.Length;++i)
+            for (int i = 0; i < source.Length; ++i)
             {
                 dest[i] = t * source[i];
             }
@@ -127,7 +127,7 @@ namespace BulletXNA.LinearMath
         public static IndexedVector3 Normalize(IndexedVector3 v)
         {
             float num = 1f / (float)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
-            return new IndexedVector3(v.X * num,v.Y * num,v.Z*num);
+            return new IndexedVector3(v.X * num, v.Y * num, v.Z * num);
         }
 
         public static IndexedVector3 Normalize(ref IndexedVector3 v)
@@ -153,7 +153,7 @@ namespace BulletXNA.LinearMath
                 X * v.Y - Y * v.X);
         }
 
-        public static IndexedVector3 Cross(IndexedVector3 v,IndexedVector3 v2)
+        public static IndexedVector3 Cross(IndexedVector3 v, IndexedVector3 v2)
         {
             return new IndexedVector3(
                 v.Y * v2.Z - v.Z * v2.Y,
@@ -170,8 +170,8 @@ namespace BulletXNA.LinearMath
         }
 
 
-        
-        
+
+
         public static float Dot(IndexedVector3 a, IndexedVector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
@@ -211,6 +211,44 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
+        public static IndexedVector3 operator +(Vector3 value1, IndexedVector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X + value2.X;
+            vector.Y = value1.Y + value2.Y;
+            vector.Z = value1.Z + value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator +(IndexedVector3 value1, Vector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X + value2.X;
+            vector.Y = value1.Y + value2.Y;
+            vector.Z = value1.Z + value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator -(Vector3 value1, IndexedVector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X - value2.X;
+            vector.Y = value1.Y - value2.Y;
+            vector.Z = value1.Z - value2.Z;
+            return vector;
+        }
+
+        public static IndexedVector3 operator -(IndexedVector3 value1, Vector3 value2)
+        {
+            IndexedVector3 vector;
+            vector.X = value1.X - value2.X;
+            vector.Y = value1.Y - value2.Y;
+            vector.Z = value1.Z - value2.Z;
+            return vector;
+        }
+
+
+
         public static IndexedVector3 operator -(IndexedVector3 value1, IndexedVector3 value2)
         {
             IndexedVector3 vector;
@@ -229,7 +267,7 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
-        public static IndexedVector3 operator / (IndexedVector3 value, float scaleFactor)
+        public static IndexedVector3 operator /(IndexedVector3 value, float scaleFactor)
         {
 
             float num = 1f / scaleFactor;
@@ -241,7 +279,7 @@ namespace BulletXNA.LinearMath
         }
 
 
-        public static IndexedVector3 operator *(float scaleFactor,IndexedVector3 value)
+        public static IndexedVector3 operator *(float scaleFactor, IndexedVector3 value)
         {
             IndexedVector3 vector;
             vector.X = value.X * scaleFactor;
@@ -355,7 +393,7 @@ namespace BulletXNA.LinearMath
             return new float[] { X, Y, Z };
         }
 
-        public static void Lerp(ref IndexedVector3 a, ref IndexedVector3 b, float t,out IndexedVector3 c)
+        public static void Lerp(ref IndexedVector3 a, ref IndexedVector3 b, float t, out IndexedVector3 c)
         {
             c = new IndexedVector3(
                 a.X + (b.X - a.X) * t,
@@ -365,30 +403,43 @@ namespace BulletXNA.LinearMath
 
         public static IndexedVector3 Lerp(ref IndexedVector3 a, ref IndexedVector3 b, float t)
         {
-            return  new IndexedVector3(
+            return new IndexedVector3(
                 a.X + (b.X - a.X) * t,
                 a.Y + (b.Y - a.Y) * t,
                 a.Z + (b.Z - a.Z) * t);
         }
 
 
-
+        // FIXME - try this as a switch??
         public float this[int i]
         {
             get
             {
-                if (i == 0) return X;
-                if (i == 1) return Y;
-                if (i == 2) return Z;
-                Debug.Assert(false);
-                return 0.0f;
+                switch (i)
+                {
+                    case (0): return X;
+                    case (1): return Y;
+                    case (2): return Z;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            return 0.0f;
+                        }
+                }
             }
             set
             {
-                if (i == 0) { X = value; return; }
-                if (i == 1) {Y = value; return;}
-                if (i == 2) { Z = value; return; }
-                Debug.Assert(false);
+                switch (i)
+                {
+                    case (0): X = value; break;
+                    case (1): Y = value; break;
+                    case (2): Z = value; break;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            break;
+                        }
+                }
             }
         }
 
@@ -441,11 +492,30 @@ namespace BulletXNA.LinearMath
             }
         }
 
+        public static IndexedVector3 Up
+        {
+            get
+            {
+                return IndexedVector3._up;
+            }
+        }
+
+        public static IndexedVector3 Down
+        {
+            get
+            {
+                return -IndexedVector3._up;
+            }
+        }
+
+
+
+
 
 
         public float Dot(ref IndexedVector3 v)
         {
-            return X * v.X+ Y * v.Y + Z * v.Z;
+            return X * v.X + Y * v.Y + Z * v.Z;
         }
 
         public float Dot(IndexedVector3 v)
@@ -503,10 +573,24 @@ namespace BulletXNA.LinearMath
         {
             return X < Y ? (Y < Z ? 0 : 2) : (X < Z ? 1 : 2);
         }
- 
-        
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator Vector3(IndexedVector3 v)
+        {
+            return new Vector3(v.X, v.Y, v.Z);
+        }
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator IndexedVector3(Vector3 v)
+        {
+            return new IndexedVector3(v.X, v.Y, v.Z);
+        }
+
+
+
         private static IndexedVector3 _zero = new IndexedVector3();
         private static IndexedVector3 _one = new IndexedVector3(1);
+        private static IndexedVector3 _up = new IndexedVector3(0,1,0);
 
 
         public float X;

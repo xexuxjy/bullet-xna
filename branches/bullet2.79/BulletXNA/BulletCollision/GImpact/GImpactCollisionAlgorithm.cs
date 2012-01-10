@@ -514,8 +514,8 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public GImpactCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-            : base(createFunc,ci, body0, body1)
+        public GImpactCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+            : base(ci, body0, body1)
         {
         }
 
@@ -1088,16 +1088,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            GImpactCollisionAlgorithm alg = Aquire() as GImpactCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new GImpactCollisionAlgorithm(this,ci, body0, body1);
-            }
-            else
-            {
-                alg.Initialize(this, ci, body0, body1);
-            }
-            return alg;
+            return new GImpactCollisionAlgorithm(ci, body0, body1);
         }
     }
 

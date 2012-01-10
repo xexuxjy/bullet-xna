@@ -31,14 +31,14 @@ namespace BulletXNA.BulletCollision
     public class BoxBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
 
-        public BoxBoxCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci)
-            : base(createFunc,ci)
+        public BoxBoxCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
+            : base(ci)
         {
 
         }
 
-        public BoxBoxCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-            : base(createFunc,ci)
+        public BoxBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+            : base(ci)
         {
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
             {
@@ -46,17 +46,6 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = true;
             }
         }
-
-        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-        {
-            base.Initialize(createFunc, ci);
-            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
-            {
-                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
-                m_ownManifold = true;
-            }
-        }
-
 
         public override void Cleanup()
         {
@@ -134,16 +123,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            BoxBoxCollisionAlgorithm alg = Aquire() as BoxBoxCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new BoxBoxCollisionAlgorithm(this, null, ci, body0, body1);
-            }
-            else
-            {
-                alg.Initialize(this, null, ci, body0, body1);
-            }
-            return alg;
+            return new BoxBoxCollisionAlgorithm(null, ci, body0, body1);
         }
     }
 }

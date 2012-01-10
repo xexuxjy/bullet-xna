@@ -50,16 +50,9 @@ namespace BulletXNA.BulletCollision
 
         bool disableCcd = false;
 
-        public ConvexConvexAlgorithm(CollisionAlgorithmCreateFunc createFunc,PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
-            : base(createFunc,ci, body0, body1)
+        public ConvexConvexAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+            : base(ci, body0, body1)
         {
-            Initialize(createFunc, mf, ci, body0, body1, simplexSolver, pdSolver, numPerturbationIterations, minimumPointsPerturbationThreshold);
-        }
-
-
-        public void Initialize(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
-        {
-            base.Initialize(createFunc, ci, body0, body1);
             m_simplexSolver = simplexSolver;
             m_pdSolver = pdSolver;
             m_ownManifold = false;
@@ -691,16 +684,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            ConvexConvexAlgorithm alg = Aquire() as ConvexConvexAlgorithm;
-            if (alg == null)
-            {
-                alg = new ConvexConvexAlgorithm(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
-            }
-            else
-            {
-                alg.Initialize(this, ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
-            }
-            return alg;
+            return new ConvexConvexAlgorithm(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
         }
 
         public IConvexPenetrationDepthSolver m_pdSolver;

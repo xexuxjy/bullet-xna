@@ -30,20 +30,12 @@ namespace BulletXNA.BulletCollision
 
     public class ConvexConcaveCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-            : base(createFunc,ci, body0, body1)
+        public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+            : base(ci, body0, body1)
         {
             m_isSwapped = isSwapped;
             m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
         }
-
-        public void Initialize(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-        {
-            base.Initialize(createFunc, ci, body0, body1);
-            m_isSwapped = isSwapped;
-            m_convexTriangleCallback.Initialize(m_dispatcher, body0, body1, isSwapped);
-        }
-
 
         public override void Cleanup()
         {
@@ -344,11 +336,6 @@ namespace BulletXNA.BulletCollision
 
         public ConvexTriangleCallback(IDispatcher dispatcher, CollisionObject body0, CollisionObject body1, bool isSwapped)
         {
-            Initialize(dispatcher, body0, body1, isSwapped);
-        }
-
-        public void Initialize(IDispatcher dispatcher, CollisionObject body0, CollisionObject body1, bool isSwapped)
-        {
             m_dispatcher = dispatcher;
             m_convexBody = isSwapped ? body1 : body0;
             m_triBody = isSwapped ? body0 : body1;
@@ -457,16 +444,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            ConvexConcaveCollisionAlgorithm alg = Aquire() as ConvexConcaveCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new ConvexConcaveCollisionAlgorithm(this, ci, body0, body1, false);
-            }
-            else
-            {
-                alg.Initialize(this, ci, body0, body1, false);
-            }
-            return alg;
+            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, false);
         }
     }
 
@@ -474,16 +452,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            ConvexConcaveCollisionAlgorithm alg = Aquire() as ConvexConcaveCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new ConvexConcaveCollisionAlgorithm(this, ci, body0, body1, true);
-            }
-            else
-            {
-                alg.Initialize(this, ci, body0, body1, true);
-            }
-            return alg;
+            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, true);
         }
     }
 

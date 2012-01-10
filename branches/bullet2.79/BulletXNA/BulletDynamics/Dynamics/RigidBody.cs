@@ -437,7 +437,7 @@ namespace BulletXNA.BulletDynamics
 			}
 
 
-            if (IsStaticOrKinematicObject())
+            if (IsKinematicObject())
             {
                 SetInterpolationWorldTransform(ref m_worldTransform);
             }
@@ -557,6 +557,11 @@ namespace BulletXNA.BulletDynamics
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugRigidBody)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("[{0}] RigidBody updateInertiaTensor",(String)m_userObjectPointer));
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "invInertiaLocal", m_invInertiaLocal);
+                MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, m_worldTransform);
+                MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, m_worldTransform._basis.Scaled(ref m_invInertiaLocal));
+                MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, m_worldTransform._basis.Transpose());
+
             }
             m_invInertiaTensorWorld = m_worldTransform._basis.Scaled(ref m_invInertiaLocal) * m_worldTransform._basis.Transpose();
 

@@ -1357,6 +1357,7 @@ namespace BulletXNA
                 PrintVector3(writer, "Right       ", m.GetColumn(0));
                 PrintVector3(writer, "Up          ", m.GetColumn(1));
                 PrintVector3(writer, "Backward    ", m.GetColumn(2));
+                PrintVector3(writer, "Translation ", IndexedVector3.Zero);
             }
         }
 
@@ -1411,6 +1412,13 @@ namespace BulletXNA
                 a.Z + (b.Z - a.Z) * t);
         }
 
+
+        public static float Vector3Distance2XZ(IndexedVector3 x, IndexedVector3 y)
+        {
+            IndexedVector3 xa = new IndexedVector3(x.X, 0, x.Z);
+            IndexedVector3 ya = new IndexedVector3(y.X, 0, y.Z);
+            return (xa - ya).LengthSquared();
+        }
 
         public static void PrintMatrix(TextWriter writer, Matrix m)
         {

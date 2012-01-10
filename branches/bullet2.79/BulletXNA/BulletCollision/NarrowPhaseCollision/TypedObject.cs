@@ -21,18 +21,20 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-namespace BulletXNA.BulletCollision
+///rudimentary class to provide type info
+namespace BulletXNA
 {
-    public abstract class ActivatingCollisionAlgorithm : CollisionAlgorithm
+    public class TypedObject
     {
-        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
-            : base(ci)
+        public TypedObject(int objectType)
         {
+            m_objectType = objectType;
         }
 
-        public ActivatingCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
-            : base(ci)
+        public int GetObjectType()
         {
+            return m_objectType;
         }
+        private int m_objectType;
     }
 }

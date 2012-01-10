@@ -29,8 +29,8 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public SphereBoxCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc, PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
-            : base(createFunc,ci, col0, col1)
+        public SphereBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
+            : base(ci, col0, col1)
         {
             m_isSwapped = isSwapped;
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;

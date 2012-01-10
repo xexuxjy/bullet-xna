@@ -30,8 +30,8 @@ namespace BulletXNA.BulletCollision
 {
     public class CompoundCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-        public CompoundCollisionAlgorithm(CollisionAlgorithmCreateFunc createFunc,CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-            : base(createFunc,ci, body0, body1)
+        public CompoundCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+            : base(ci, body0, body1)
         {
             m_isSwapped = isSwapped;
             m_sharedManifold = ci.GetManifold();
@@ -42,25 +42,10 @@ namespace BulletXNA.BulletCollision
             m_compoundShapeRevision = compoundShape.GetUpdateRevision();
             PreallocateChildAlgorithms(body0, body1);
         }
-
-        public void Initialize(CollisionAlgorithmCreateFunc createFunc, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
-        {
-            base.Initialize(createFunc, ci, body0, body1);
-            m_isSwapped = isSwapped;
-            m_sharedManifold = ci.GetManifold();
-            m_ownsManifold = false;
-            CollisionObject colObj = m_isSwapped ? body1 : body0;
-            Debug.Assert(colObj.GetCollisionShape().IsCompound());
-            CompoundShape compoundShape = (CompoundShape)(colObj.GetCollisionShape());
-            m_compoundShapeRevision = compoundShape.GetUpdateRevision();
-            PreallocateChildAlgorithms(body0, body1);
-        }
-
 
         public override void Cleanup()
         {
             RemoveChildAlgorithms();
-            base.Cleanup();
         }
 
         private void RemoveChildAlgorithms()
@@ -404,16 +389,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            CompoundCollisionAlgorithm alg = Aquire() as CompoundCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new CompoundCollisionAlgorithm(this, ci, body0, body1, false);
-            }
-            else
-            {
-                alg.Initialize(this,ci,body0,body1,false);
-            }
-            return alg;
+            return new CompoundCollisionAlgorithm(ci, body0, body1, false);
         }
     }
 
@@ -421,16 +397,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            CompoundCollisionAlgorithm alg = Aquire() as CompoundCollisionAlgorithm;
-            if (alg == null)
-            {
-                alg = new CompoundCollisionAlgorithm(this, ci, body0, body1, true);
-            }
-            else
-            {
-                alg.Initialize(this,ci,body0,body1,true);
-            }
-            return alg;
+            return new CompoundCollisionAlgorithm(ci, body0, body1, true);
         }
     }
 

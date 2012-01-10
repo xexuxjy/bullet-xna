@@ -28,6 +28,7 @@ namespace BulletXNA.LinearMath
 {
     public interface IDebugDraw
     {
+        void DrawText(String text, IndexedVector3 location, IndexedVector3 color);
         void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 fromColor);
         void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor);
         void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor);
@@ -70,6 +71,9 @@ namespace BulletXNA.LinearMath
 
         void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
             float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees);
+
+        void LoadContent();
+    
     }
 
     /*-------------------------------------------------------------------------------------*/

@@ -112,13 +112,14 @@ namespace BulletXNA.BulletCollision
             ClearManifold(manifold);
             int findIndex = manifold.m_index1a;
             //m_manifoldsPtr.Remove(manifold);
-
-
-            PersistentManifold swapTemp = m_manifoldsPtr[findIndex];
-            m_manifoldsPtr[findIndex] = m_manifoldsPtr[m_manifoldsPtr.Count - 1];
-            m_manifoldsPtr[m_manifoldsPtr.Count - 1] = swapTemp;
+            m_manifoldsPtr.RemoveAtQuick(findIndex);
             m_manifoldsPtr[findIndex].m_index1a = findIndex;
-            m_manifoldsPtr.RemoveAt(m_manifoldsPtr.Count - 1);
+
+            //PersistentManifold swapTemp = m_manifoldsPtr[findIndex];
+            //m_manifoldsPtr[findIndex] = m_manifoldsPtr[m_manifoldsPtr.Count - 1];
+            //m_manifoldsPtr[m_manifoldsPtr.Count - 1] = swapTemp;
+            //m_manifoldsPtr[findIndex].m_index1a = findIndex;
+            //m_manifoldsPtr.RemoveAt(m_manifoldsPtr.Count - 1);
 
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)

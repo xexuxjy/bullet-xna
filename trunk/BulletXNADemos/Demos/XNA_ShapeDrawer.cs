@@ -65,7 +65,7 @@ namespace BulletXNADemos.Demos
 			m_debugEffect = new BasicEffect(m_game.GraphicsDevice);
 			m_debugEffect.VertexColorEnabled = true;
 
-            m_game.Content.RootDirectory = "./content";
+            //m_game.Content.RootDirectory = "./content";
 			//m_effect = m_game.Content.Load<Effect>("Standard");
 			m_modelEffect = new BasicEffect(m_game.GraphicsDevice);
             m_vertexEffect = new BasicEffect(m_game.GraphicsDevice);
@@ -80,9 +80,9 @@ namespace BulletXNADemos.Demos
 			m_cubeModel = m_game.Content.Load<Model>("unitcube");
 			m_sphereModel = m_game.Content.Load<Model>("unitsphere");
 			m_cylinderModel = m_game.Content.Load<Model>("unitcylinder");
-			//m_coneModel = m_game.Content.Load<Model>("unitcone");
+			m_coneModel = m_game.Content.Load<Model>("unitcone");
 
-			m_coneModel = m_game.Content.Load<Model>("unitcube");
+            //m_coneModel = m_game.Content.Load<Model>("unitcube");
 
 			m_modelEffect.TextureEnabled = true;
 			m_modelEffect.EnableDefaultLighting();
@@ -479,12 +479,12 @@ namespace BulletXNADemos.Demos
                                 switch (upIndex)
                                 {
                                     case 0:
-                                        rotateMatrix = IndexedMatrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
-                                        break;
-                                    case 1:
                                         rotateMatrix = IndexedMatrix.CreateRotationX(-MathUtil.SIMD_HALF_PI);
                                         break;
+                                    case 1:
+                                        break;
                                     case 2:
+                                        rotateMatrix = IndexedMatrix.CreateRotationX(MathUtil.SIMD_HALF_PI);
                                         break;
                                     default:
                                         {
@@ -494,8 +494,9 @@ namespace BulletXNADemos.Demos
 
                                 IndexedMatrix translationMatrix = IndexedMatrix.CreateTranslation(0f, 0f, -0.5f * height);
 
-                                IndexedMatrix resultant = translationMatrix * rotateMatrix * m;
-								DrawSolidCone(radius, height, ref resultant, ref view, ref projection, ref color);
+                                IndexedMatrix resultant = m * rotateMatrix * translationMatrix;
+
+                                DrawSolidCone(height, radius, ref resultant, ref view, ref projection, ref color);
                                 useWireframeFallback = false;
                                 break;
 

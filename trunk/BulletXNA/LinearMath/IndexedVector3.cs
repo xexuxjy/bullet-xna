@@ -307,6 +307,20 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
+        public static void Multiply(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
+        {
+            output.X = value1.X * value2.X;
+            output.Y = value1.Y * value2.Y;
+            output.Z = value1.Z * value2.Z;
+        }
+
+        public static void Subtract(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
+        {
+            output.X = value1.X - value2.X;
+            output.Y = value1.Y - value2.Y;
+            output.Z = value1.Z - value2.Z;
+        }
+
 
         public static IndexedVector3 operator /(IndexedVector3 value1, IndexedVector3 value2)
         {

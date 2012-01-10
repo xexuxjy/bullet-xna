@@ -571,6 +571,38 @@ namespace BulletXNA.LinearMath
 			return Array.LastIndexOf<T>(this._items, item, index, count);
 		}
 
+        // Remove the item if it exits, order of the data isn't preserved and last item is copied into it's place.
+        public bool RemoveQuick(T item)
+        {
+			int index = this.IndexOf(item);
+			if (index >= 0)
+			{
+                if (_size > 0)
+                {
+                    // copy the last item to this position
+                    this._items[index] = this._items[_size - 1];
+                }
+                --_size;
+                return true;
+            }
+			return false;
+		}
+
+        public bool RemoveAtQuick(int  index)
+        {
+            if (index >= 0)
+            {
+                if (_size > 0)
+                {
+                    // copy the last item to this position
+                    this._items[index] = this._items[_size - 1];
+                }
+                --_size;
+                return true;
+            }
+            return false;
+        }
+
 		public bool Remove(T item)
 		{
 			int index = this.IndexOf(item);

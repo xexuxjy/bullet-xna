@@ -46,7 +46,7 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 normal = IndexedVector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
             normal.Normalize();
             IndexedVector3 p1ToCentre = sphereCenter - vertices[0];
-            float distanceFromPlane = IndexedVector3.Dot(p1ToCentre, normal);
+            float distanceFromPlane = IndexedVector3.Dot(ref p1ToCentre, ref normal);
 
             if (distanceFromPlane < 0f)
             {
@@ -136,14 +136,14 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 p2_to_p = p - p2;
             IndexedVector3 p3_to_p = p - p3;
 
-            IndexedVector3 edge1_normal = IndexedVector3.Cross(edge1, normal);
-            IndexedVector3 edge2_normal = IndexedVector3.Cross(edge2, normal);
-            IndexedVector3 edge3_normal = IndexedVector3.Cross(edge3, normal);
+            IndexedVector3 edge1_normal = IndexedVector3.Cross(ref edge1, ref normal);
+            IndexedVector3 edge2_normal = IndexedVector3.Cross(ref edge2, ref normal);
+            IndexedVector3 edge3_normal = IndexedVector3.Cross(ref edge3, ref normal);
 
             float r1, r2, r3;
-            r1 = IndexedVector3.Dot(edge1_normal, p1_to_p);
-            r2 = IndexedVector3.Dot(edge2_normal, p2_to_p);
-            r3 = IndexedVector3.Dot(edge3_normal, p3_to_p);
+            r1 = IndexedVector3.Dot(ref edge1_normal, ref p1_to_p);
+            r2 = IndexedVector3.Dot(ref edge2_normal, ref p2_to_p);
+            r3 = IndexedVector3.Dot(ref edge3_normal, ref p3_to_p);
             if ((r1 > 0 && r2 > 0 && r3 > 0) ||
                  (r1 <= 0 && r2 <= 0 && r3 <= 0))
                 return true;
@@ -198,11 +198,11 @@ namespace BulletXNA.BulletCollision
         {
             IndexedVector3 diff = p - from;
             IndexedVector3 v = to - from;
-            float t = IndexedVector3.Dot(v, diff);
+            float t = IndexedVector3.Dot(ref v, ref diff);
 
             if (t > 0)
             {
-                float dotVV = IndexedVector3.Dot(v, v);
+                float dotVV = IndexedVector3.Dot(ref v, ref v);
                 if (t < dotVV)
                 {
                     t /= dotVV;
@@ -220,7 +220,7 @@ namespace BulletXNA.BulletCollision
             }
 
             nearest = from + t * v;
-            return IndexedVector3.Dot(diff, diff);
+            return IndexedVector3.Dot(ref diff, ref diff);
         }
 
         private SphereShape m_sphere;

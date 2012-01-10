@@ -510,6 +510,12 @@ namespace BulletXNA.BulletDynamics
 	    public void ApplyCentralImpulse(ref IndexedVector3 impulse)
 	    {
             m_linearVelocity += impulse * m_linearFactor * m_inverseMass;
+
+            if (m_inverseMass > 0f)
+            {
+                int ibreak = 0;
+            }
+
             MathUtil.SanityCheckVector(ref m_linearVelocity);
 	    }
 

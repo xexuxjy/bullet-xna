@@ -1449,6 +1449,16 @@ namespace BulletXNA
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
         }
 
+        public static T Clamp<T>(T value, T max, T min)
+                 where T : System.IComparable<T>
+        {
+            T result = value;
+            if (value.CompareTo(max) > 0)
+                result = max;
+            if (value.CompareTo(min) < 0)
+                result = min;
+            return result;
+        } 
 
         //public const float SIMD_EPSILON = 0.0000001f;
         public const float SIMD_EPSILON = 1.192092896e-07f;

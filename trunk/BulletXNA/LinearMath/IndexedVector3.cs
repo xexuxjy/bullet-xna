@@ -518,11 +518,41 @@ namespace BulletXNA.LinearMath
         {
             get
             {
-                return -IndexedVector3._up;
+                return IndexedVector3._down;
             }
         }
 
+        public static IndexedVector3 Right
+        {
+            get
+            {
+                return IndexedVector3._right;
+            }
+        }
 
+        public static IndexedVector3 Left
+        {
+            get
+            {
+                return IndexedVector3._left;
+            }
+        }
+
+        public static IndexedVector3 Forward
+        {
+            get
+            {
+                return IndexedVector3._forward;
+            }
+        }
+
+        public static IndexedVector3 Backward
+        {
+            get
+            {
+                return IndexedVector3._backward;
+            }
+        }
 
 
 
@@ -600,11 +630,23 @@ namespace BulletXNA.LinearMath
             return new IndexedVector3(v.X, v.Y, v.Z);
         }
 
+        public override string ToString()
+        {
+            return "X : " + X + " Y " + Y + " Z " + Z;
+        }
 
 
         private static IndexedVector3 _zero = new IndexedVector3();
-        private static IndexedVector3 _one = new IndexedVector3(1);
-        private static IndexedVector3 _up = new IndexedVector3(0,1,0);
+        private static IndexedVector3 _one = new IndexedVector3(1f, 1f, 1f);
+        private static IndexedVector3 _unitX = new IndexedVector3(1f, 0.0f, 0.0f);
+        private static IndexedVector3 _unitY = new IndexedVector3(0.0f, 1f, 0.0f);
+        private static IndexedVector3 _unitZ = new IndexedVector3(0.0f, 0.0f, 1f);
+        private static IndexedVector3 _up = new IndexedVector3(0.0f, 1f, 0.0f);
+        private static IndexedVector3 _down = new IndexedVector3(0.0f, -1f, 0.0f);
+        private static IndexedVector3 _right = new IndexedVector3(1f, 0.0f, 0.0f);
+        private static IndexedVector3 _left = new IndexedVector3(-1f, 0.0f, 0.0f);
+        private static IndexedVector3 _forward = new IndexedVector3(0.0f, 0.0f, -1f);
+        private static IndexedVector3 _backward = new IndexedVector3(0.0f, 0.0f, 1f);
 
 
         public float X;

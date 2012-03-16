@@ -579,6 +579,90 @@ namespace BulletXNA.LinearMath
         }
 
 
+        public void SetNewForward(IndexedVector3 forward)
+        {
+            forward.Normalize();
+            // Re-calculate Right
+            IndexedVector3 right = Vector3.Cross(forward, this[0]);
+
+            // The same instability may cause the 3 orientation vectors may
+            // also diverge. Either the Up or Direction vector needs to be
+            // re-computed with a cross product to ensure orthagonality
+            IndexedVector3 up = Vector3.Cross(right, forward);
+            this[0] = right;
+            this[1] = up;
+            this[2] = forward;
+           }
+
+        public static IndexedBasisMatrix CreateRotationY(float radians)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            IndexedBasisMatrix ibm = new IndexedBasisMatrix(num1,0.0f, -num2,0.0f,1f,0.0f,num2,0.0f,num1);
+            return ibm;
+        }
+
+        public static IndexedBasisMatrix CreateFromAxisAngle(IndexedVector3 axis, float angle)
+        {
+            float num1 = axis.X;
+            float num2 = axis.Y;
+            float num3 = axis.Z;
+            float num4 = (float)Math.Sin((double)angle);
+            float num5 = (float)Math.Cos((double)angle);
+            float num6 = num1 * num1;
+            float num7 = num2 * num2;
+            float num8 = num3 * num3;
+            float num9 = num1 * num2;
+            float num10 = num1 * num3;
+            float num11 = num2 * num3;
+            IndexedBasisMatrix ibm = new IndexedBasisMatrix(num6 + num5 * (1f - num6),
+                (float)((double)num9 - (double)num5 * (double)num9 + (double)num4 * (double)num3),
+                (float)((double)num10 - (double)num5 * (double)num10 - (double)num4 * (double)num2),
+                (float)((double)num9 - (double)num5 * (double)num9 - (double)num4 * (double)num3),
+                num7 + num5 * (1f - num7),
+                (float)((double)num11 - (double)num5 * (double)num11 + (double)num4 * (double)num1),
+                (float)((double)num10 - (double)num5 * (double)num10 + (double)num4 * (double)num2),
+                (float)((double)num11 - (double)num5 * (double)num11 - (double)num4 * (double)num1),
+                num8 + num5 * (1f - num8));
+            return ibm;
+        }
+
+        public IndexedVector3 Right
+        {
+            get { return this[0]; }
+            set{this[0] = value;}
+        }
+
+        public IndexedVector3 Left
+        {
+            get { return -this[0]; }
+            set {this[0] = -value;}
+        }
+
+        public IndexedVector3 Up
+        {
+            get { return this[1]; }
+            set { this[1] = value;}
+        }
+
+        public IndexedVector3 Down
+        {
+            get { return -this[1]; }
+            set { this[1] = -value; }
+        }
+
+        public IndexedVector3 Forward
+        {
+            get { return -this[2]; }
+            set { this[2] = -value; }
+        }
+
+        public IndexedVector3 Backward
+        {
+            get { return this[2]; }
+            set { this[2] = value; }
+        }
+
 
         public IndexedVector3 _Row0;
         public IndexedVector3 _Row1;

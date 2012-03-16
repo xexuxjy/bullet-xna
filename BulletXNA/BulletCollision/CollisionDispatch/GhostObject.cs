@@ -205,7 +205,7 @@ namespace BulletXNA.BulletCollision
         {
         }
 
-        public virtual void cleanup()
+        public virtual void Cleanup()
         {
         }
 

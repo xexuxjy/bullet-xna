@@ -699,9 +699,19 @@ namespace BulletXNADemos.Demos
 	        return(sc);
         }
 
+        public void RenderStandard(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection)
+        {
+            RenderStandard(gameTime, ref view, ref projection, true);
+        }
+
         public void RenderStandard(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             RenderStandard(gameTime, ref view, ref projection, true);
+        }
+
+        public void RenderStandard(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection, bool clear)
+        {
+            RenderStandard(gameTime, ref view, ref projection, clear);
         }
 
         public void RenderStandard(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection, bool clear)
@@ -719,11 +729,34 @@ namespace BulletXNADemos.Demos
         }
 
 
+        public void RenderStandard(GameTime gameTime, Matrix view, Matrix projection, bool clear)
+        {
+            // Always clear?
+            if (clear)
+            {
+                m_game.GraphicsDevice.Clear(Color.CornflowerBlue);
+            }
+
+            {
+                DrawPrimitives(gameTime, view, projection);
+                m_texturedVertexCount = 0;
+            }
+        }
+
+
+
         public void RenderOthers(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection)
         {
             RenderOthers(gameTime, ref view, ref projection);
         }
 
+        public void RenderOthers(GameTime gameTime, Matrix view, Matrix projection)
+        {
+            IndexedMatrix im = IndexedMatrix.Identity;
+            RenderOthers(gameTime, ref im, ref im);
+        }
+
+        
         public void RenderOthers(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
             m_spriteBatch.Begin();
@@ -746,12 +779,23 @@ namespace BulletXNADemos.Demos
         }
 
 
+
+
+
         private void DrawPrimitives(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
+        {
+            Matrix mView = view.ToMatrix();
+            Matrix mProj = projection.ToMatrixProjection();
+            DrawPrimitives(gameTime, mView, mProj);
+
+        }
+
+        private void DrawPrimitives(GameTime gameTime, Matrix view, Matrix projection)
         {
 			if(m_texturedVertexCount > 0)
 			{
-                m_vertexEffect.View = view.ToMatrix();
-                m_vertexEffect.Projection = projection.ToMatrixProjection();
+                m_vertexEffect.View = view;
+                m_vertexEffect.Projection = projection;
 
                 foreach (EffectPass pass in m_vertexEffect.CurrentTechnique.Passes)
 				{
@@ -771,26 +815,21 @@ namespace BulletXNADemos.Demos
                     foreach (BasicEffect effect in mesh.Effects)
                     {
 						effect.Texture = GetTexture(ref modelScalingData.color);
-                        effect.View = view.ToMatrix();
-                        effect.Projection = projection.ToMatrixProjection();
-
+                        effect.View = view;
+                        effect.Projection = projection;
 
                         effect.World = transforms[mesh.ParentBone.Index] * modelScalingData.transform.ToMatrix();
-                        //effect.World = modelScalingData.transform.ToMatrix() * transforms[mesh.ParentBone.Index];
-
-                        //if (BulletGlobals.g_streamWriter != null)
-                        //{
-                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-bone", transforms[mesh.ParentBone.Index]);
-                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-model", modelScalingData.transform.ToMatrix());
-                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-view", effect.View);
-                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-proj", effect.Projection);
-                        //    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "draw-world", effect.World);
-                        //}
                     }
                     mesh.Draw();
                 }
             }
 			m_modelScalingData.Clear();
+        }
+
+
+        public void RenderDebugLines(GameTime gameTime, IndexedMatrix view, IndexedMatrix projection)
+        {
+            RenderDebugLines(gameTime, ref view, ref projection);
         }
 
         public void RenderDebugLines(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
@@ -801,19 +840,33 @@ namespace BulletXNADemos.Demos
 
             if (m_lineIndex > 0)
             {
-                //m_game.GraphicsDevice.VertexDeclaration = m_lineVertexDeclaration;
-                //m_debugEffect.Begin();
                 foreach (EffectPass pass in m_debugEffect.CurrentTechnique.Passes)
                 {
-                    //pass.Begin();
                     pass.Apply();
                     m_game.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineList, m_lineVertices, 0, m_lineIndex / 2);
-                    //pass.End();
                 }
-                //m_debugEffect.End();
             }
             m_lineIndex = 0;
         }
+
+        public void RenderDebugLines(GameTime gameTime, Matrix view, Matrix projection)
+        {
+            m_debugEffect.World = Matrix.Identity;
+            m_debugEffect.View = view;
+            m_debugEffect.Projection = projection;
+
+            if (m_lineIndex > 0)
+            {
+                foreach (EffectPass pass in m_debugEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    m_game.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineList, m_lineVertices, 0, m_lineIndex / 2);
+                }
+            }
+            m_lineIndex = 0;
+        }
+
+
 
 
         private void RemapModel(Model model, Effect effect)

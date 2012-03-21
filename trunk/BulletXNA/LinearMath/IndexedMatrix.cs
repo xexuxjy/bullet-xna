@@ -57,9 +57,6 @@ namespace BulletXNA.LinearMath
             matrix.Right = _basis.GetColumn(0).ToVector3();
             matrix.Up = _basis.GetColumn(1).ToVector3();
             matrix.Backward = _basis.GetColumn(2).ToVector3();
-            //matrix.Right = _basis.GetRow(0).ToVector3();
-            //matrix.Up = _basis.GetRow(1).ToVector3();
-            //matrix.Backward = _basis.GetRow(2).ToVector3();
 
             matrix.Translation = _origin.ToVector3();
             matrix.M34 = -1;

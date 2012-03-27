@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -124,6 +124,59 @@ namespace BulletXNA.BulletCollision
                 return false;
             }
 
+            public void AdjustHeightValues(int yAxis,ref int min,ref int max)
+            {
+                if (children == null)
+                {
+                    min = quantizedAabbMin[yAxis];
+                    max = quantizedAabbMax[yAxis];
+                }
+                else
+                {
+                    int newMin = min;
+                    int newMax = max;
+
+                    children[0].AdjustHeightValues(yAxis, ref newMin, ref newMax);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[1].AdjustHeightValues(yAxis, ref newMin, ref newMax);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[2].AdjustHeightValues(yAxis, ref newMin, ref newMax);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[3].AdjustHeightValues(yAxis, ref newMin, ref newMax);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+
+                    quantizedAabbMin[yAxis] = min;
+                    quantizedAabbMax[yAxis] = max;
+                }
+            }
         }
 
 
@@ -133,14 +186,98 @@ namespace BulletXNA.BulletCollision
 
         public void RebuildQuadTree(int maxDepth=5)
         {
+            m_rootQuadTreeNode = new QuadTreeNode();
+
+            int xAxis = 0;
+            int yAxis = 1;
+            int zAxis = 2;
+
+            // need these as quantized vals?
+            int min = -100;
+            int max = 100;
+
+            if (m_upAxis == 0)
+            {
+                xAxis = 1;
+                yAxis = 0;
+                zAxis = 2;
+            }
+            else if(m_upAxis == 2)
+            {
+                xAxis = 0;
+                yAxis = 2;
+                zAxis = 1;
+            }
+            
+            BuildNodes(m_rootQuadTreeNode,0,maxDepth,xAxis,yAxis,zAxis);
+            // cheat second pass to rebuild heights.
+            // adjust heights.
+            m_rootQuadTreeNode.AdjustHeightValues(yAxis, ref min, ref max);
+
+        }
 
 
+        private void BuildNodes(QuadTreeNode parent,int depth,int maxDepth,int xAxis,int yAxis,int zAzis)
+        {
+            if (depth < maxDepth)
+            {
+                if (parent.children == null)
+                {
+                    parent.children = new QuadTreeNode[4];
+                    //split nodes
+
+
+                    // do something funky to build the heights.
+                    // adjust for up axis.
+                    int diff1 = (parent.quantizedAabbMax[xAxis] - parent.quantizedAabbMin[xAxis]) / 2;
+                    int diff2 = (parent.quantizedAabbMax[yAxis] - parent.quantizedAabbMin[yAxis]) / 2;
+                    int diff3 = (parent.quantizedAabbMax[zAzis] - parent.quantizedAabbMin[zAzis]) / 2;
+
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        parent.children[i].quantizedAabbMin[xAxis] = parent.quantizedAabbMin[xAxis] + diff1;
+                        parent.children[i].quantizedAabbMin[zAzis] = parent.quantizedAabbMin[zAzis] + diff3;
+                        parent.children[i].quantizedAabbMax[xAxis] = parent.quantizedAabbMax[xAxis] - diff1;
+                        parent.children[i].quantizedAabbMax[zAzis] = parent.quantizedAabbMax[zAzis] - diff3;
+                    }
+                }
+            }
+            else
+            {
+                // at lowest depth, we should now go through and find min/max height values for each vertex.
+                InspectVertexHeights();
+
+            }
         }
 
         public bool HasAccelerator()
         {
             return m_rootQuadTreeNode != null;
         }
+
+
+        private void InspectVertexHeights(int startX,int endX,int startJ,int endJ,int upAxis,ref int min,ref int max)
+        {
+                IndexedVector3 vertex = new IndexedVector3();
+                for (int j = startJ; j < endJ; j++)
+                {
+                    for (int x = startX; x < endX; x++)
+                    {
+                        GetVertex(x, j, out vertex);
+                        int quantizedHeight = MathUtil.GetQuantized(vertex[upAxis]);
+                        if (quantizedHeight < min)
+                        {
+                            min = quantizedHeight;
+                        }
+                        if (quantizedHeight > max)
+                        {
+                            max = quantizedHeight;
+                        }
+                    }
+                }
+            }
+
+
 
 
         public void PerformRaycast(ITriangleCallback callback, ref IndexedVector3 raySource, ref IndexedVector3 rayTarget)

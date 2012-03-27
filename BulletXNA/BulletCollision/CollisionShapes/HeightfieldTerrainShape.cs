@@ -113,6 +113,164 @@ namespace BulletXNA.BulletCollision
         protected IndexedVector3 m_localScaling;
 
 
+        class QuadTreeNode
+        {
+            public int[] quantizedAabbMin = new int[3];
+            public int[] quantizedAabbMax = new int[3];
+            public QuadTreeNode[] children;
+
+            public Boolean Intersects(int[] raySource, int[] rayTarget)
+            {
+                return false;
+            }
+
+        }
+
+
+        public QuadTreeNode m_rootQuadTreeNode;
+
+
+
+        public void RebuildQuadTree(int maxDepth=5)
+        {
+
+
+        }
+
+        public bool HasAccelerator()
+        {
+            return m_rootQuadTreeNode != null;
+        }
+
+
+        public void PerformRaycast(ITriangleCallback callback, ref IndexedVector3 raySource, ref IndexedVector3 rayTarget)
+        {
+            ObjectArray<QuadTreeNode> results = new ObjectArray<QuadTreeNode>();
+            // quantize source and target.
+            int[] quantizedSource = new int[3];
+            int[] quantizedTarget = new int[3];
+
+            QuantizeWithClamp(quantizedSource, ref raySource, 0);
+            QuantizeWithClamp(quantizedTarget, ref rayTarget, 1);
+
+            // build list of squares
+            QueryNode(m_rootQuadTreeNode, results, quantizedSource, quantizedTarget);
+
+            // go through each of the results.
+            foreach (QuadTreeNode quadTreeNode in results)
+            {
+                int startX = 0;
+                int endX = m_heightStickWidth - 1;
+                int startJ = 0;
+                int endJ = m_heightStickLength - 1;
+
+                switch (m_upAxis)
+                {
+                    case 0:
+                        {
+                            if (quadTreeNode.quantizedAabbMin[1] > startX)
+                                startX = quadTreeNode.quantizedAabbMin[1];
+                            if (quadTreeNode.quantizedAabbMax[1] < endX)
+                                endX = quadTreeNode.quantizedAabbMax[1];
+                            if (quadTreeNode.quantizedAabbMin[2] > startJ)
+                                startJ = quadTreeNode.quantizedAabbMin[2];
+                            if (quadTreeNode.quantizedAabbMax[2] < endJ)
+                                endJ = quadTreeNode.quantizedAabbMax[2];
+                            break;
+                        }
+                    case 1:
+                        {
+                            if (quadTreeNode.quantizedAabbMin[0] > startX)
+                                startX = quadTreeNode.quantizedAabbMin[0];
+                            if (quadTreeNode.quantizedAabbMax[0] < endX)
+                                endX = quadTreeNode.quantizedAabbMax[0];
+                            if (quadTreeNode.quantizedAabbMin[2] > startJ)
+                                startJ = quadTreeNode.quantizedAabbMin[2];
+                            if (quadTreeNode.quantizedAabbMax[2] < endJ)
+                                endJ = quadTreeNode.quantizedAabbMax[2];
+                            break;
+                        };
+                    case 2:
+                        {
+                            if (quadTreeNode.quantizedAabbMin[0] > startX)
+                                startX = quadTreeNode.quantizedAabbMin[0];
+                            if (quadTreeNode.quantizedAabbMax[0] < endX)
+                                endX = quadTreeNode.quantizedAabbMax[0];
+                            if (quadTreeNode.quantizedAabbMin[1] > startJ)
+                                startJ = quadTreeNode.quantizedAabbMin[1];
+                            if (quadTreeNode.quantizedAabbMax[1] < endJ)
+                                endJ = quadTreeNode.quantizedAabbMax[1];
+                            break;
+                        }
+                    default:
+                        {
+                            //need to get valid m_upAxis
+                            Debug.Assert(false);
+                            break;
+                        }
+                }
+
+                IndexedVector3[] vertices = new IndexedVector3[3];
+                for (int j = startJ; j < endJ; j++)
+                {
+                    for (int x = startX; x < endX; x++)
+                    {
+                        if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0)))
+                        {
+                            //first triangle
+                            GetVertex(x, j, out vertices[0]);
+                            GetVertex(x + 1, j, out vertices[1]);
+                            GetVertex(x + 1, j + 1, out vertices[2]);
+                            callback.ProcessTriangle(vertices, x, j);
+                            //second triangle
+                            GetVertex(x, j, out vertices[0]);
+                            GetVertex(x + 1, j + 1, out vertices[1]);
+                            GetVertex(x, j + 1, out vertices[2]);
+
+                            callback.ProcessTriangle(vertices, x, j);
+                        }
+                        else
+                        {
+                            //first triangle
+                            GetVertex(x, j, out vertices[0]);
+                            GetVertex(x, j + 1, out vertices[1]);
+                            GetVertex(x + 1, j, out vertices[2]);
+                            callback.ProcessTriangle(vertices, x, j);
+
+                            //second triangle
+                            GetVertex(x + 1, j, out vertices[0]);
+                            GetVertex(x, j + 1, out vertices[1]);
+                            GetVertex(x + 1, j + 1, out vertices[2]);
+                            callback.ProcessTriangle(vertices, x, j);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, int[] raySource, int[] rayTarget)
+        {
+            //if(node.children == null && node.Intersects(raySource,rayTarget))
+            // add the lowest level.
+            if (node.children == null)
+            {
+                results.Add(node);
+            }
+            else
+            {
+                // simple rescursive for now.
+                for (int i = 0; i < 4; ++i)
+                {
+                    if (node.children[i].Intersects(raySource, rayTarget))
+                    {
+                        QueryNode(node.children[i], results, raySource, rayTarget);
+                    }
+                }
+            }
+        }
+
+
         /// preferred constructor
         /**
           This constructor supports a range of heightfield

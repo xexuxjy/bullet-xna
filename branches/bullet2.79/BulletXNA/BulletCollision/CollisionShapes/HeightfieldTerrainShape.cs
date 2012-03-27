@@ -113,11 +113,28 @@ namespace BulletXNA.BulletCollision
         protected IndexedVector3 m_localScaling;
 
 
-        class QuadTreeNode
+        public class QuadTreeNode
         {
             public int[] quantizedAabbMin = new int[3];
             public int[] quantizedAabbMax = new int[3];
             public QuadTreeNode[] children;
+            public int depth;
+            //only needed for collection class
+            public QuadTreeNode()
+            { }
+
+            public QuadTreeNode(int[] min, int[] max, int xAxis, int yAxis, int zAxis, int xDiff, int zDiff,bool x,bool z,int d)
+            {
+                quantizedAabbMin[xAxis] = min[xAxis] + (x?xDiff:0);
+                quantizedAabbMin[zAxis] = min[zAxis] + (z?zDiff:0);
+                quantizedAabbMax[xAxis] = quantizedAabbMin[xAxis] + xDiff;
+                quantizedAabbMax[zAxis] = quantizedAabbMin[zAxis] + zDiff;
+                depth = d;
+                System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
+
+
+
+            }
 
             public Boolean Intersects(int[] raySource, int[] rayTarget)
             {
@@ -183,18 +200,27 @@ namespace BulletXNA.BulletCollision
         public QuadTreeNode m_rootQuadTreeNode;
 
 
+        public void RebuildQuadTree()
+        {
+            RebuildQuadTree(5);
+        }
 
-        public void RebuildQuadTree(int maxDepth=5)
+        public void RebuildQuadTree(int maxDepth)
         {
             m_rootQuadTreeNode = new QuadTreeNode();
+
+            QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMin,ref m_localAabbMin,0);
+            QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMax,ref m_localAabbMax,1);
+
+
 
             int xAxis = 0;
             int yAxis = 1;
             int zAxis = 2;
 
             // need these as quantized vals?
-            int min = -100;
-            int max = 100;
+            int min = 0;
+            int max = 0;
 
             if (m_upAxis == 0)
             {
@@ -202,14 +228,14 @@ namespace BulletXNA.BulletCollision
                 yAxis = 0;
                 zAxis = 2;
             }
-            else if(m_upAxis == 2)
+            else if (m_upAxis == 2)
             {
                 xAxis = 0;
                 yAxis = 2;
                 zAxis = 1;
             }
-            
-            BuildNodes(m_rootQuadTreeNode,0,maxDepth,xAxis,yAxis,zAxis);
+
+            BuildNodes(m_rootQuadTreeNode, 0, maxDepth, xAxis, yAxis, zAxis);
             // cheat second pass to rebuild heights.
             // adjust heights.
             m_rootQuadTreeNode.AdjustHeightValues(yAxis, ref min, ref max);
@@ -217,36 +243,36 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        private void BuildNodes(QuadTreeNode parent,int depth,int maxDepth,int xAxis,int yAxis,int zAzis)
+
+        private void BuildNodes(QuadTreeNode parent,int depth,int maxDepth,int xAxis,int yAxis,int zAxis)
         {
             if (depth < maxDepth)
             {
                 if (parent.children == null)
                 {
-                    parent.children = new QuadTreeNode[4];
-                    //split nodes
-
-
                     // do something funky to build the heights.
                     // adjust for up axis.
-                    int diff1 = (parent.quantizedAabbMax[xAxis] - parent.quantizedAabbMin[xAxis]) / 2;
-                    int diff2 = (parent.quantizedAabbMax[yAxis] - parent.quantizedAabbMin[yAxis]) / 2;
-                    int diff3 = (parent.quantizedAabbMax[zAzis] - parent.quantizedAabbMin[zAzis]) / 2;
+                    int xDiff = (parent.quantizedAabbMax[xAxis] - parent.quantizedAabbMin[xAxis]) / 2;
+                    int yDiff = (parent.quantizedAabbMax[yAxis] - parent.quantizedAabbMin[yAxis]) / 2;
+                    int zDiff = (parent.quantizedAabbMax[zAxis] - parent.quantizedAabbMin[zAxis]) / 2;
 
-                    for (int i = 0; i < 4; ++i)
+                    // don;t split too low.
+                    if(xDiff > 2 || yDiff > 2 || zDiff > 2)
                     {
-                        parent.children[i].quantizedAabbMin[xAxis] = parent.quantizedAabbMin[xAxis] + diff1;
-                        parent.children[i].quantizedAabbMin[zAzis] = parent.quantizedAabbMin[zAzis] + diff3;
-                        parent.children[i].quantizedAabbMax[xAxis] = parent.quantizedAabbMax[xAxis] - diff1;
-                        parent.children[i].quantizedAabbMax[zAzis] = parent.quantizedAabbMax[zAzis] - diff3;
+                                        
+                        parent.children = new QuadTreeNode[4];
+                        //split nodes
+
+                        parent.children[0] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax,xAxis,yAxis,zAxis,xDiff,zDiff,false,false,depth);
+                        BuildNodes(parent.children[0], depth + 1, maxDepth, xAxis, yAxis, zAxis);
+                        parent.children[1] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, true, false,depth);
+                        BuildNodes(parent.children[1], depth + 1, maxDepth, xAxis, yAxis, zAxis);
+                        parent.children[2] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, false, true,depth);
+                        BuildNodes(parent.children[2], depth + 1, maxDepth, xAxis, yAxis, zAxis);
+                        parent.children[3] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, true, true,depth);
+                        BuildNodes(parent.children[3], depth + 1, maxDepth, xAxis, yAxis, zAxis);
                     }
                 }
-            }
-            else
-            {
-                // at lowest depth, we should now go through and find min/max height values for each vertex.
-                InspectVertexHeights();
-
             }
         }
 
@@ -256,26 +282,26 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        private void InspectVertexHeights(int startX,int endX,int startJ,int endJ,int upAxis,ref int min,ref int max)
+        private void InspectVertexHeights(int startX,int endX,int startZ,int endZ,int upAxis,ref int min,ref int max)
         {
-                IndexedVector3 vertex = new IndexedVector3();
-                for (int j = startJ; j < endJ; j++)
+            IndexedVector3 vertex = new IndexedVector3();
+            for (int z = startZ; z < endZ; z++)
+            {
+                for (int x = startX; x < endX; x++)
                 {
-                    for (int x = startX; x < endX; x++)
+                    GetVertex(x, z, out vertex);
+                    int quantizedHeight = MathUtil.GetQuantized(vertex[upAxis]);
+                    if (quantizedHeight < min)
                     {
-                        GetVertex(x, j, out vertex);
-                        int quantizedHeight = MathUtil.GetQuantized(vertex[upAxis]);
-                        if (quantizedHeight < min)
-                        {
-                            min = quantizedHeight;
-                        }
-                        if (quantizedHeight > max)
-                        {
-                            max = quantizedHeight;
-                        }
+                        min = quantizedHeight;
+                    }
+                    if (quantizedHeight > max)
+                    {
+                        max = quantizedHeight;
                     }
                 }
             }
+        }
 
 
 

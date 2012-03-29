@@ -115,38 +115,43 @@ namespace BulletXNA.BulletCollision
 
         public class QuadTreeNode
         {
-            public int[] quantizedAabbMin = new int[3];
-            public int[] quantizedAabbMax = new int[3];
+            public BoundingBox boundingBox;// int[] quantizedAabbMin = new int[3];
+            //public int[] quantizedAabbMax = new int[3];
             public QuadTreeNode[] children;
             public int depth;
             //only needed for collection class
             public QuadTreeNode()
             { }
 
-            public QuadTreeNode(int[] min, int[] max, int xAxis, int yAxis, int zAxis, int xDiff, int zDiff,bool x,bool z,int d)
+            public QuadTreeNode(ref BoundingBox parentBB,int xAxis, int yAxis, int zAxis, float xDiff, float zDiff,bool x,bool z,int d)
             {
-                quantizedAabbMin[xAxis] = min[xAxis] + (x?xDiff:0);
-                quantizedAabbMin[zAxis] = min[zAxis] + (z?zDiff:0);
-                quantizedAabbMax[xAxis] = quantizedAabbMin[xAxis] + xDiff;
-                quantizedAabbMax[zAxis] = quantizedAabbMin[zAxis] + zDiff;
+                IndexedVector3 iv3Min = parentBB.Min;
+                IndexedVector3 iv3Max = new IndexedVector3();
+                iv3Min[xAxis] += (x ? xDiff : 0);
+                iv3Min[zAxis] += (z ? zDiff : 0);
+                iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
+                iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
                 depth = d;
-                System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
+                boundingBox = new BoundingBox(iv3Min, iv3Max);
+
+                //System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
 
 
 
             }
 
-            public Boolean Intersects(int[] raySource, int[] rayTarget)
+            //public Boolean Intersects(int[] raySource, int[] rayTarget)
+            public bool Intersects(Ray ray)
             {
-                return false;
+                return boundingBox.Intersects(ray).HasValue;
             }
 
             public void AdjustHeightValues(int yAxis,ref int min,ref int max)
             {
                 if (children == null)
                 {
-                    min = quantizedAabbMin[yAxis];
-                    max = quantizedAabbMax[yAxis];
+                    min = (int)new IndexedVector3(boundingBox.Min)[yAxis];
+                    max = (int)new IndexedVector3(boundingBox.Max)[yAxis];
                 }
                 else
                 {
@@ -190,8 +195,14 @@ namespace BulletXNA.BulletCollision
                         max = newMax;
                     }
 
-                    quantizedAabbMin[yAxis] = min;
-                    quantizedAabbMax[yAxis] = max;
+                    IndexedVector3 iv3Min = new IndexedVector3(boundingBox.Min);
+                    IndexedVector3 iv3Max = new IndexedVector3(boundingBox.Max);
+
+                    iv3Min[yAxis] = min;
+                    iv3Max[yAxis] = max;
+
+                    boundingBox = new BoundingBox(iv3Min, iv3Max);
+
                 }
             }
         }
@@ -209,8 +220,8 @@ namespace BulletXNA.BulletCollision
         {
             m_rootQuadTreeNode = new QuadTreeNode();
 
-            QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMin,ref m_localAabbMin,0);
-            QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMax,ref m_localAabbMax,1);
+            //QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMin,ref m_localAabbMin,0);
+            //QuantizeWithClamp(m_rootQuadTreeNode.quantizedAabbMax,ref m_localAabbMax,1);
 
 
 
@@ -252,24 +263,27 @@ namespace BulletXNA.BulletCollision
                 {
                     // do something funky to build the heights.
                     // adjust for up axis.
-                    int xDiff = (parent.quantizedAabbMax[xAxis] - parent.quantizedAabbMin[xAxis]) / 2;
-                    int yDiff = (parent.quantizedAabbMax[yAxis] - parent.quantizedAabbMin[yAxis]) / 2;
-                    int zDiff = (parent.quantizedAabbMax[zAxis] - parent.quantizedAabbMin[zAxis]) / 2;
+                    //int xDiff = (parent.quantizedAabbMax[xAxis] - parent.quantizedAabbMin[xAxis]) / 2;
+                    //int yDiff = (parent.quantizedAabbMax[yAxis] - parent.quantizedAabbMin[yAxis]) / 2;
+                    //int zDiff = (parent.quantizedAabbMax[zAxis] - parent.quantizedAabbMin[zAxis]) / 2;
+
+                    IndexedVector3 diff = (parent.boundingBox.Max - parent.boundingBox.Min) / 2;
+
 
                     // don;t split too low.
-                    if(xDiff > 2 || yDiff > 2 || zDiff > 2)
+                    if (diff.X > 2 || diff.Y > 2 || diff.Z > 2)
                     {
                                         
                         parent.children = new QuadTreeNode[4];
                         //split nodes
 
-                        parent.children[0] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax,xAxis,yAxis,zAxis,xDiff,zDiff,false,false,depth);
+                        parent.children[0] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
                         BuildNodes(parent.children[0], depth + 1, maxDepth, xAxis, yAxis, zAxis);
-                        parent.children[1] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, true, false,depth);
+                        parent.children[1] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
                         BuildNodes(parent.children[1], depth + 1, maxDepth, xAxis, yAxis, zAxis);
-                        parent.children[2] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, false, true,depth);
+                        parent.children[2] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
                         BuildNodes(parent.children[2], depth + 1, maxDepth, xAxis, yAxis, zAxis);
-                        parent.children[3] = new QuadTreeNode(parent.quantizedAabbMin, parent.quantizedAabbMax, xAxis, yAxis, zAxis, xDiff, zDiff, true, true,depth);
+                        parent.children[3] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
                         BuildNodes(parent.children[3], depth + 1, maxDepth, xAxis, yAxis, zAxis);
                     }
                 }
@@ -316,8 +330,12 @@ namespace BulletXNA.BulletCollision
             QuantizeWithClamp(quantizedSource, ref raySource, 0);
             QuantizeWithClamp(quantizedTarget, ref rayTarget, 1);
 
+
+            Ray ray = new Ray(raySource, rayTarget);
+
             // build list of squares
-            QueryNode(m_rootQuadTreeNode, results, quantizedSource, quantizedTarget);
+            QueryNode(m_rootQuadTreeNode, results, ray);
+
 
             // go through each of the results.
             foreach (QuadTreeNode quadTreeNode in results)
@@ -327,42 +345,45 @@ namespace BulletXNA.BulletCollision
                 int startJ = 0;
                 int endJ = m_heightStickLength - 1;
 
+                IndexedVector3 iv3Min = quadTreeNode.boundingBox.Min;
+                IndexedVector3 iv3Max = quadTreeNode.boundingBox.Max;
+
                 switch (m_upAxis)
                 {
                     case 0:
                         {
-                            if (quadTreeNode.quantizedAabbMin[1] > startX)
-                                startX = quadTreeNode.quantizedAabbMin[1];
-                            if (quadTreeNode.quantizedAabbMax[1] < endX)
-                                endX = quadTreeNode.quantizedAabbMax[1];
-                            if (quadTreeNode.quantizedAabbMin[2] > startJ)
-                                startJ = quadTreeNode.quantizedAabbMin[2];
-                            if (quadTreeNode.quantizedAabbMax[2] < endJ)
-                                endJ = quadTreeNode.quantizedAabbMax[2];
+                            if (iv3Min[1] > startX)
+                                startX = (int)iv3Min[1];
+                            if (iv3Max[1] < endX)
+                                endX = (int)iv3Max[1];
+                            if (iv3Min[2] > startJ)
+                                startJ = (int)iv3Min[2];
+                            if (iv3Max[2] < endJ)
+                                endJ = (int)iv3Max[2];
                             break;
                         }
                     case 1:
                         {
-                            if (quadTreeNode.quantizedAabbMin[0] > startX)
-                                startX = quadTreeNode.quantizedAabbMin[0];
-                            if (quadTreeNode.quantizedAabbMax[0] < endX)
-                                endX = quadTreeNode.quantizedAabbMax[0];
-                            if (quadTreeNode.quantizedAabbMin[2] > startJ)
-                                startJ = quadTreeNode.quantizedAabbMin[2];
-                            if (quadTreeNode.quantizedAabbMax[2] < endJ)
-                                endJ = quadTreeNode.quantizedAabbMax[2];
+                            if (iv3Min[0] > startX)
+                                startX = (int)iv3Min[0];
+                            if (iv3Max[0] < endX)
+                                endX = (int)iv3Max[0];
+                            if (iv3Min[2] > startJ)
+                                startJ = (int)iv3Min[2];
+                            if (iv3Max[2] < endJ)
+                                endJ = (int)iv3Max[2];
                             break;
                         };
                     case 2:
                         {
-                            if (quadTreeNode.quantizedAabbMin[0] > startX)
-                                startX = quadTreeNode.quantizedAabbMin[0];
-                            if (quadTreeNode.quantizedAabbMax[0] < endX)
-                                endX = quadTreeNode.quantizedAabbMax[0];
-                            if (quadTreeNode.quantizedAabbMin[1] > startJ)
-                                startJ = quadTreeNode.quantizedAabbMin[1];
-                            if (quadTreeNode.quantizedAabbMax[1] < endJ)
-                                endJ = quadTreeNode.quantizedAabbMax[1];
+                            if (iv3Min[0] > startX)
+                                startX = (int)iv3Min[0];
+                            if (iv3Max[0] < endX)
+                                endX = (int)iv3Max[0];
+                            if (iv3Min[1] > startJ)
+                                startJ = (int)iv3Min[1];
+                            if (iv3Max[1] < endJ)
+                                endJ = (int)iv3Max[1];
                             break;
                         }
                     default:
@@ -412,7 +433,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, int[] raySource, int[] rayTarget)
+        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, Ray ray)
         {
             //if(node.children == null && node.Intersects(raySource,rayTarget))
             // add the lowest level.
@@ -422,12 +443,14 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
+
+
                 // simple rescursive for now.
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (node.children[i].Intersects(raySource, rayTarget))
+                    if (node.children[i].Intersects(ray))
                     {
-                        QueryNode(node.children[i], results, raySource, rayTarget);
+                        QueryNode(node.children[i], results, ray);
                     }
                 }
             }

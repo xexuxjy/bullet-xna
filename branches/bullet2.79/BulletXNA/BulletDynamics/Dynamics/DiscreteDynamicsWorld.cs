@@ -704,8 +704,14 @@ namespace BulletXNA.BulletDynamics
 
 
             //	btAssert(0);
-
-            m_solverIslandCallback.Setup(solverInfo, m_sortedConstraints, numConstraints, m_debugDrawer);
+            if (m_solverIslandCallback == null)
+            {
+                m_solverIslandCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, m_sortedConstraints, GetNumConstraints(), m_debugDrawer, m_dispatcher1);
+            }
+            else
+            {
+                m_solverIslandCallback.Setup(solverInfo, m_sortedConstraints, numConstraints, m_debugDrawer);
+            }
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
@@ -720,7 +726,7 @@ namespace BulletXNA.BulletDynamics
             }
 
             /// solve all the constraints for this island
-            m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), solverCallback);
+            m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), m_solverIslandCallback);
 
             m_solverIslandCallback.ProcessConstraints();
 

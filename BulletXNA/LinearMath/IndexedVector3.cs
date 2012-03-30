@@ -586,6 +586,10 @@ namespace BulletXNA.LinearMath
             return new IndexedVector3(v.X, v.Y, v.Z);
         }
 
+        public override string ToString()
+        {
+            return "X : " + X + " Y " + Y + " Z " + Z;
+        }
 
 
         private static IndexedVector3 _zero = new IndexedVector3();

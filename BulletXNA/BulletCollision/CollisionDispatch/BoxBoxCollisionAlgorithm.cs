@@ -58,6 +58,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+            base.Cleanup();
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)

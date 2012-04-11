@@ -129,8 +129,11 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 iv3Max = new IndexedVector3();
                 iv3Min[xAxis] += (x ? xDiff : 0);
                 iv3Min[zAxis] += (z ? zDiff : 0);
-                iv3Min[yAxis] = float.MaxValue;
-                iv3Max[yAxis] = float.MinValue;
+                // large numbers here , but not max as float/int conversion gets broken
+                iv3Min[yAxis] = 100000;
+                iv3Max[yAxis] = -100000;
+
+
                 iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
                 iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
                 depth = d;
@@ -242,8 +245,8 @@ namespace BulletXNA.BulletCollision
             int zAxis = 2;
 
             // need these as quantized vals?
-            int min = 0;
-            int max = 0;
+            int min = int.MaxValue;
+            int max = int.MinValue;
 
             if (m_upAxis == 0)
             {

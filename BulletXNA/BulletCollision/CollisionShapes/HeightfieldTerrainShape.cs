@@ -149,6 +149,8 @@ namespace BulletXNA.BulletCollision
             public bool Intersects(Ray ray)
             {
                 return boundingBox.Intersects(ray).HasValue;
+                //return children == null;
+                //return true;
             }
 
             public void AdjustHeightValues(int xAxis,int yAxis,int zAxis,ref int min,ref int max,HeightfieldTerrainShape shape)
@@ -423,13 +425,27 @@ namespace BulletXNA.BulletCollision
                     IndexedVector3 drawMin = iv3Min;
                     IndexedVector3 drawMax = iv3Max;
 
-                    drawMin *= m_localScaling;
-                    drawMax *= m_localScaling;
+                    IndexedVector3 a;
+                    IndexedVector3 b;
+                    GetVertex((int)iv3Min[0], (int)iv3Min[2], out a);
+                    GetVertex((int)iv3Max[0], (int)iv3Max[2], out b);
 
-                    drawMin -= (m_localOrigin * m_localScaling);
-                    drawMax -= (m_localOrigin * m_localScaling);
+                    a[1] = iv3Min[1];
+                    b[1] = iv3Max[1];
 
-                    BulletGlobals.gDebugDraw.DrawAabb(drawMin,drawMax, new IndexedVector3(1,1,0));
+                    //vertex = new IndexedVector3(height - m_localOrigin.X,
+                    //                           (-m_width / 2f) + x,
+                    //                           (-m_length / 2f) + y
+                    //                           );
+
+
+                    //drawMin *= m_localScaling;
+                    //drawMax *= m_localScaling;
+
+                    //drawMin -= (m_localOrigin * m_localScaling);
+                    //drawMax -= (m_localOrigin * m_localScaling);
+
+                    BulletGlobals.gDebugDraw.DrawAabb(a, b, new IndexedVector3(1, 1, 0));
                 }
                   
 
@@ -490,7 +506,7 @@ namespace BulletXNA.BulletCollision
                 drawMax -= (m_localOrigin * m_localScaling);
 
 
-                BulletGlobals.gDebugDraw.DrawAabb(drawMin, drawMax, new IndexedVector3(1, 0, 1));
+                //BulletGlobals.gDebugDraw.DrawAabb(drawMin, drawMax, new IndexedVector3(1, 0, 1));
             }
                   
 
@@ -870,6 +886,33 @@ namespace BulletXNA.BulletCollision
                         break;
                     }
             }
+
+
+            // debug draw the boxes?
+
+            if (BulletGlobals.gDebugDraw != null)
+            {
+                IndexedVector3 drawMin = aabbMin;
+                IndexedVector3 drawMax = aabbMax;
+
+                //vertex = new IndexedVector3(height - m_localOrigin.X,
+                //                           (-m_width / 2f) + x,
+                //                           (-m_length / 2f) + y
+                //                           );
+
+                //drawMin.Y = -10;
+                //drawMax.Y = 10;
+
+                //drawMin *= m_localScaling;
+                //drawMax *= m_localScaling;
+
+                //drawMin -= (m_localOrigin * m_localScaling);
+                //drawMax -= (m_localOrigin * m_localScaling);
+
+                BulletGlobals.gDebugDraw.DrawAabb(drawMin, drawMax, new IndexedVector3(0, 1, 0));
+            }
+
+
 
             IndexedVector3[] vertices = new IndexedVector3[3];
             for (int j = startJ; j < endJ; j++)

@@ -124,7 +124,7 @@ namespace BulletXNADemos.Demos
 					          m_minHeight, m_maxHeight,
 					          m_upAxis, m_type, flipQuadEdges);
 
-            m_terrainShape.RebuildQuadTree(5,2);
+            m_terrainShape.RebuildQuadTree(5, 2);
 
 	        Debug.Assert(m_terrainShape != null, "null heightfield");
 

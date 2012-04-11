@@ -1091,7 +1091,7 @@ namespace BulletXNADemos.Demos
 
 	    private IList<ShapeCache> m_shapecaches = new List<ShapeCache>();
 
-        private const int m_textureVertexMaxSize = 10000;
+        private const int m_textureVertexMaxSize = 100000;
         private const int m_lineVertexMaxSize = 500000;
 
         private int m_texturedVertexCount;

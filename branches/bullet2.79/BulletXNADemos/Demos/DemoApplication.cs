@@ -329,7 +329,7 @@ namespace BulletXNADemos.Demos
             //#ifndef BT_NO_PROFILE
             //    CProfileManager::Release_Iterator(m_profileIterator);
             //#endif //BT_NO_PROFILE
-
+            int i = BulletGlobals.s_collisionAlgorithmInstanceCount;
             m_shootBoxShape = null;
             m_shapeDrawer = null;
         }

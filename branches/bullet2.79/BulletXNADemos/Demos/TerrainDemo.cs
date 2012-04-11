@@ -68,8 +68,8 @@ namespace BulletXNADemos.Demos
 	        // set up basic state
 	        m_upAxis = 1;		// start with Y-axis as "up"
 	        m_type = PHY_ScalarType.PHY_FLOAT;
-	        m_model = eTerrainModel.eRadial;//eFractal;
-	        m_isDynamic = true;
+            //m_model = eTerrainModel.eRadial;//eFractal;
+	        m_isDynamic = false;
 
 	        // set up the physics world
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
@@ -123,6 +123,9 @@ namespace BulletXNADemos.Demos
 					          s_gridHeightScale,
 					          m_minHeight, m_maxHeight,
 					          m_upAxis, m_type, flipQuadEdges);
+
+            m_terrainShape.RebuildQuadTree(5,2);
+
 	        Debug.Assert(m_terrainShape != null, "null heightfield");
 
 	        // scale the shape
@@ -636,6 +639,7 @@ namespace BulletXNADemos.Demos
 			    Debug.Assert(bpe > 0 ,"Bad bytes per element");
 			    SetRadial(m_rawHeightfieldData, bpe, m_type, m_phase);
 		    }
+            TestRay();
 
             base.ClientMoveAndDisplay(gameTime);
         }
@@ -678,7 +682,7 @@ namespace BulletXNADemos.Demos
 
         private Random m_random = new Random();
         const int m_randomMax = 0x7fff;
-        const int s_gridSize = 32 + 1;  // must be (2^N) + 1
+        const int s_gridSize = 64 + 1;  // must be (2^N) + 1
         const float s_gridSpacing = 5.0f;
 
         const float s_gridHeightScale = 0.2f;
@@ -698,6 +702,58 @@ namespace BulletXNADemos.Demos
             eRadial = 1,	// deterministic
             eFractal = 2	// random
         };
+
+        public void TestRay()
+        {
+            // add something to draw and test collision?
+            if (true)
+            {
+                    int rayLength = 1000;
+                    int normalLength = 10;
+                    IndexedVector3 startPos = m_cameraPosition;
+                    IndexedVector3 direction = -m_lookAt._basis[2];
+                    IndexedVector3 right = m_lookAt._basis[0];
+                    IndexedVector3 endPos = startPos + (direction * rayLength);
+
+                    Vector3 collisionPoint = Vector3.Zero;
+                    Vector3 collisionNormal = Vector3.Zero;
+
+                    if (BulletGlobals.gDebugDraw != null)
+                    {
+                        IndexedVector3 rayColor = new IndexedVector3(1, 1, 1);
+                        IndexedVector3 normalColor = new IndexedVector3(1, 0, 0);
+                        
+                        
+                        // offset the pos by the camera right a b it
+                        BulletGlobals.gDebugDraw.DrawLine(startPos+(right * 10), endPos, rayColor);
+                        BulletGlobals.gDebugDraw.DrawLine(startPos - (right * 10), endPos, rayColor);
+
+
+                        IndexedVector3 location = new IndexedVector3(20, 0, 20);
+                        IndexedVector3 colour = new IndexedVector3(1, 1, 1);
+
+                        ClosestRayResultCallback cb = new ClosestRayResultCallback(ref startPos, ref endPos);
+                        m_dynamicsWorld.RayTest(ref startPos, ref endPos, cb);
+
+                        if (cb.HasHit())
+                        {
+                            collisionPoint = cb.m_hitPointWorld;
+                            collisionNormal = cb.m_hitNormalWorld;
+
+                            
+                            Vector3 normalStart = collisionPoint;
+                            Vector3 normalEnd = normalStart + (collisionNormal * normalLength);
+                            BulletGlobals.gDebugDraw.DrawLine(normalStart, normalEnd, normalColor);
+                            BulletGlobals.gDebugDraw.DrawText(String.Format("Camera Pos[{0} Forward[{1}] Collide[{2}] Normal[{3}].", startPos, direction, collisionPoint, collisionNormal), location, colour);
+
+                        }
+
+                    }
+                }
+
+
+
+        }
 
     }
 }

@@ -129,6 +129,8 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 iv3Max = new IndexedVector3();
                 iv3Min[xAxis] += (x ? xDiff : 0);
                 iv3Min[zAxis] += (z ? zDiff : 0);
+                iv3Min[yAxis] = float.MaxValue;
+                iv3Max[yAxis] = float.MinValue;
                 iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
                 iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
                 depth = d;

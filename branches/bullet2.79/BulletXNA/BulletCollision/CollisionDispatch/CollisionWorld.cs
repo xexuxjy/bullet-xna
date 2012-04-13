@@ -581,7 +581,7 @@ namespace BulletXNA.BulletCollision
                         triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
                         rcb.Cleanup();
                     }
-                    else if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape && ((HeightfieldTerrainShape)collisionShape).HasAccelerator())
+                    else if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape)
                     {
                         ///optimized version for btBvhTriangleMeshShape
                         HeightfieldTerrainShape heightField = (HeightfieldTerrainShape)collisionShape;

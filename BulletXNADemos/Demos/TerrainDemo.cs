@@ -124,13 +124,15 @@ namespace BulletXNADemos.Demos
 					          m_minHeight, m_maxHeight,
 					          m_upAxis, m_type, flipQuadEdges);
 
-            m_terrainShape.RebuildQuadTree(5, 2);
 
 	        Debug.Assert(m_terrainShape != null, "null heightfield");
 
 	        // scale the shape
 	        IndexedVector3 localScaling = GetUpVector(m_upAxis, s_gridSpacing, 1.0f);
             m_terrainShape.SetLocalScaling(ref localScaling);
+
+            m_terrainShape.RebuildQuadTree(3, 4);
+
 
 	        // stash this shape away
 	        m_collisionShapes.Add(m_terrainShape);
@@ -166,6 +168,9 @@ namespace BulletXNADemos.Demos
 
             case eTerrainModel.eFractal:
 		        return "Fractal";
+
+            case eTerrainModel.eTest:
+                return "Test";
 
 	        default:
 		        Debug.Assert(false,"bad terrain model type");
@@ -517,6 +522,25 @@ namespace BulletXNADemos.Demos
 		        SetFractal(raw,0, bytesPerElement, type, s_gridSize - 1);
 		        break;
 
+            case eTerrainModel.eTest:
+
+                
+
+                    int half = (int)nBytes / 2;
+                    int j = 0;
+                    for (j = 0; j < half; j += bytesPerElement)
+                    {
+                        ConvertFromFloat(raw, j, 0f, type);
+                    }
+                    for (; j < nBytes; j += bytesPerElement)
+                    {
+                        ConvertFromFloat(raw, j, 15f, type);
+                    }
+
+                
+                break;
+
+
 	        default:
 		        Debug.Assert(false,"bad model type");
                 break;
@@ -700,7 +724,8 @@ namespace BulletXNADemos.Demos
         public enum eTerrainModel
         {
             eRadial = 1,	// deterministic
-            eFractal = 2	// random
+            eFractal = 2,	// random
+            eTest = 3
         };
 
         public void TestRay()

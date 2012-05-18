@@ -34,7 +34,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BulletXNADemos.Demos
 {
-    public class DemoApplication : Microsoft.Xna.Framework.Game
+    public abstract class DemoApplication : Microsoft.Xna.Framework.Game
     {
         protected int numiterations = 0;
         protected int maxiterations = 0;
@@ -127,6 +127,7 @@ namespace BulletXNADemos.Demos
 
 
         protected bool use6Dof = false;
+
 
         //----------------------------------------------------------------------------------------------
 

@@ -67,13 +67,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Standard.fx">
-      <Name>Standard</Name>
-      <Importer>EffectImporter</Importer>
-      <Processor>EffectProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="SphereHighPoly.fbx">
       <Name>SphereHighPoly</Name>
       <Importer>FbxImporter</Importer>

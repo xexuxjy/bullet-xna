@@ -759,6 +759,7 @@ namespace BulletXNADemos.Demos
         
         public void RenderOthers(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
+
             m_spriteBatch.Begin();
             for (int i = 0; i < m_textPositionColours.Count; ++i)
             {

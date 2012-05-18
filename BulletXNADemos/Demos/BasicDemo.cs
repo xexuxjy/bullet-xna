@@ -54,7 +54,7 @@ namespace BulletXNADemos.Demos
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
-            m_broadphase = new SimpleBroadphase(1000, pairCache);
+            //m_broadphase = new SimpleBroadphase(1000, pairCache);
 
 	        ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
 	        SequentialImpulseConstraintSolver sol = new SequentialImpulseConstraintSolver();

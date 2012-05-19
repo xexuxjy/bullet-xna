@@ -57,6 +57,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+            base.Cleanup();
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -89,8 +90,7 @@ namespace BulletXNA.BulletCollision
             input.m_transformA = body0.GetWorldTransform();
             input.m_transformB = body1.GetWorldTransform();
 
-            BoxBoxDetector detector = new BoxBoxDetector(box0, box1);
-            detector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
+            BoxBoxDetector.GetClosestPoints(box0,box1,input, resultOut, dispatchInfo.getDebugDraw(), false);
 
 #if USE_PERSISTENT_CONTACTS
             //  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
@@ -106,7 +106,7 @@ namespace BulletXNA.BulletCollision
             return 1f;
         }
 
-        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(PersistentManifoldArray manifoldArray)
         {
             if (m_manifoldPtr != null && m_ownManifold)
             {

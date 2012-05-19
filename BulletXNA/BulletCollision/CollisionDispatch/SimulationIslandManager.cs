@@ -31,7 +31,9 @@ namespace BulletXNA.BulletCollision
     public class SimulationIslandManager
     {
         private UnionFind m_unionFind;
-        private ObjectArray<PersistentManifold> m_islandmanifold;
+        private PersistentManifoldArray m_islandmanifold;
+        private PersistentManifoldArray m_subList;
+
         private ObjectArray<CollisionObject> m_islandBodies;
 
         private bool m_splitIslands;
@@ -40,7 +42,8 @@ namespace BulletXNA.BulletCollision
         {
             m_splitIslands = true;
             m_unionFind = new UnionFind();
-            m_islandmanifold = new ObjectArray<PersistentManifold>();
+            m_islandmanifold = new PersistentManifoldArray();
+            m_subList = new PersistentManifoldArray();
             m_islandBodies = new ObjectArray<CollisionObject>();
         }
 
@@ -208,7 +211,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
             if (!m_splitIslands)
             {
-                ObjectArray<PersistentManifold> manifolds = dispatcher.GetInternalManifoldPointer();
+                PersistentManifoldArray manifolds = dispatcher.GetInternalManifoldPointer();
                 int maxNumManifolds = dispatcher.GetNumManifolds();
                 callback.ProcessIsland(collisionObjects, collisionObjects.Count, manifolds, maxNumManifolds, -1);
             }
@@ -222,9 +225,9 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
                 //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
                 //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
-                //((ObjectArray<PersistentManifold>)m_islandmanifold).Sort();
+                //((PersistentManifoldArray)m_islandmanifold).Sort();
 
-                //ObjectArray<PersistentManifold> copy = new ObjectArray<PersistentManifold>(m_islandmanifold);
+                //PersistentManifoldArray copy = new PersistentManifoldArray(m_islandmanifold);
                 m_islandmanifold.Sort(sortPredicate);
 
                 //for (int i = 0; i < m_islandmanifold.Count; ++i)
@@ -306,15 +309,15 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     if (!islandSleeping)
                     {
                         // pass shortedned list to callback.
-                        ObjectArray<PersistentManifold> subList = new ObjectArray<PersistentManifold>();
+                        m_subList.Clear();
                         for (int i = 0; i < numIslandManifolds; ++i)
                         {
-                            subList.Add(m_islandmanifold[startManifoldIndex + i]);
+                            m_subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
 
 
 
-                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, subList, numIslandManifolds, islandId);
+                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_subList, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
                     }
                     else
@@ -526,7 +529,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
     public interface IIslandCallback
     {
-        void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifolds, int numManifolds, int islandId);
+        void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, PersistentManifoldArray manifolds, int numManifolds, int islandId);
     }
 
 

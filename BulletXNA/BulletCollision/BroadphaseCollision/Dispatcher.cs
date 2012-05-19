@@ -48,7 +48,7 @@ namespace BulletXNA.BulletCollision
 
         PersistentManifold GetManifoldByIndexInternal(int index);
 
-        ObjectArray<PersistentManifold> GetInternalManifoldPointer();
+        PersistentManifoldArray GetInternalManifoldPointer();
 
         Object AllocateCollisionAlgorithm(int size);
 

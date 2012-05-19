@@ -37,6 +37,8 @@ namespace BulletXNA.BulletDynamics
         {
             m_ownsIslandManager = true;
             m_constraints = new ObjectArray<TypedConstraint>();
+            m_sortedConstraints = new ObjectArray<TypedConstraint>();
+            m_islandSortPredicate = new SortConstraintOnIslandPredicate();
             m_actions = new List<IActionInterface>();
             m_nonStaticRigidBodies = new ObjectArray<RigidBody>();
             m_islandManager = new SimulationIslandManager();
@@ -679,18 +681,18 @@ namespace BulletXNA.BulletDynamics
         protected virtual void SolveConstraints(ContactSolverInfo solverInfo)
         {
             //sorted version of all btTypedConstraint, based on islandId
-            ObjectArray<TypedConstraint> sortedConstraints;
-            if (GetNumConstraints() > 0)
+            m_sortedConstraints.Resize(m_constraints.Count);
+            int numConstraints = GetNumConstraints();
+            for (int i = 0; i < numConstraints; i++)
             {
-                sortedConstraints = new ObjectArray<TypedConstraint>(m_constraints);
-
+                m_sortedConstraints[i] = m_constraints[i];
+            }
+            
+            if(numConstraints > 1)
+            {
                 //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
                 // If this sort is removed then the constraint gets twitchy...
-                sortedConstraints.Sort(new SortConstraintOnIslandPredicate());
-            }
-            else
-            {
-                sortedConstraints = null;
+                m_sortedConstraints.Sort(m_islandSortPredicate);
             }
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
@@ -700,8 +702,14 @@ namespace BulletXNA.BulletDynamics
 
 
             //	btAssert(0);
-
-            InplaceSolverIslandCallback solverCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, sortedConstraints, GetNumConstraints(), m_debugDrawer, m_dispatcher1);
+            if (m_solverIslandCallback == null)
+            {
+                m_solverIslandCallback = new InplaceSolverIslandCallback(solverInfo, m_constraintSolver, m_sortedConstraints, GetNumConstraints(), m_debugDrawer, m_dispatcher1);
+            }
+            else
+            {
+                m_solverIslandCallback.Setup(solverInfo, m_sortedConstraints, numConstraints, m_debugDrawer);
+            }
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
@@ -716,9 +724,9 @@ namespace BulletXNA.BulletDynamics
             }
 
             /// solve all the constraints for this island
-            m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), solverCallback);
+            m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), m_solverIslandCallback);
 
-            solverCallback.ProcessConstraints();
+            m_solverIslandCallback.ProcessConstraints();
 
             m_constraintSolver.AllSolved(solverInfo, m_debugDrawer);
         }
@@ -865,11 +873,12 @@ namespace BulletXNA.BulletDynamics
         }
 
         protected IConstraintSolver m_constraintSolver;
-
+        protected InplaceSolverIslandCallback m_solverIslandCallback;
         protected SimulationIslandManager m_islandManager;
 
         protected ObjectArray<TypedConstraint> m_constraints;
-
+        protected ObjectArray<TypedConstraint> m_sortedConstraints;
+        protected SortConstraintOnIslandPredicate m_islandSortPredicate;
         protected ObjectArray<RigidBody> m_nonStaticRigidBodies;
 
 
@@ -905,7 +914,7 @@ namespace BulletXNA.BulletDynamics
         public IDebugDraw m_debugDrawer;
         public IDispatcher m_dispatcher;
         public ObjectArray<CollisionObject> m_bodies;
-        public ObjectArray<PersistentManifold> m_manifolds;
+        public PersistentManifoldArray m_manifolds;
         public ObjectArray<TypedConstraint> m_constraints;
 
         public InplaceSolverIslandCallback(
@@ -923,7 +932,7 @@ namespace BulletXNA.BulletDynamics
             m_debugDrawer = debugDrawer;
             m_dispatcher = dispatcher;
             m_bodies = new ObjectArray<CollisionObject>();
-            m_manifolds = new ObjectArray<PersistentManifold>();
+            m_manifolds = new PersistentManifoldArray();
             m_constraints = new ObjectArray<TypedConstraint>();
         }
 
@@ -935,7 +944,18 @@ namespace BulletXNA.BulletDynamics
         //}
 
 
-        public virtual void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifolds, int numManifolds, int islandId)
+        public void Setup(ContactSolverInfo solverInfo,ObjectArray<TypedConstraint> sortedConstraints,int numConstraints,IDebugDraw debugDrawer)
+        {
+            Debug.Assert(solverInfo != null);
+            m_solverInfo = solverInfo;
+            m_sortedConstraints = sortedConstraints;
+            m_numConstraints = numConstraints;
+            m_debugDrawer = debugDrawer;
+            m_bodies.Resize(0);
+            m_manifolds.Resize(0);
+            m_constraints.Resize(0);
+        }
+        public virtual void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, PersistentManifoldArray manifolds, int numManifolds, int islandId)
         {
             if (islandId < 0)
             {
@@ -1007,7 +1027,7 @@ namespace BulletXNA.BulletDynamics
                 //                ///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
                 //                if (numManifolds + numCurConstraints > 0)
                 //                {
-                ////solveGroup(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifold,int numManifolds,ObjectArray<TypedConstraint> constraints,int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
+                ////solveGroup(ObjectArray<CollisionObject> bodies,int numBodies,PersistentManifoldArray manifold,int numManifolds,ObjectArray<TypedConstraint> constraints,int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
                 //                    m_solver.solveGroup(bodies,numBodies,manifolds, numManifolds,startConstraint,numCurConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
                 //                }
 
@@ -1088,7 +1108,7 @@ namespace BulletXNA.BulletDynamics
             {
 #if false
 			    ///don't do CCD when there are already contact points (touching contact/penetration)
-                ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
+                PersistentManifoldArray manifoldArray = new PersistentManifoldArray();
 			    BroadphasePair collisionPair = m_pairCache.FindPair(m_me.GetBroadphaseHandle(),proxy0);
 			    if (collisionPair != null)
 			    {

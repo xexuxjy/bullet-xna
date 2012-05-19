@@ -120,7 +120,7 @@ namespace BulletXNA.BulletCollision
             ///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep
             ///so we should add a 'refreshManifolds' in the btCollisionAlgorithm
             {
-                ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
+                PersistentManifoldArray manifoldArray = new PersistentManifoldArray();
                 for (int i = 0; i < m_childCollisionAlgorithms.Count; i++)
                 {
                     if (m_childCollisionAlgorithms[i] != null)
@@ -170,7 +170,7 @@ namespace BulletXNA.BulletCollision
                 //iterate over all children, perform an AABB check inside ProcessChildShape
                 int numChildren = m_childCollisionAlgorithms.Count;
 
-                ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
+                PersistentManifoldArray manifoldArray = new PersistentManifoldArray();
                 CollisionShape childShape = null;
                 IndexedMatrix orgTrans;
                 IndexedMatrix orgInterpolationTrans;
@@ -208,7 +208,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(PersistentManifoldArray manifoldArray)
         {
             for (int i = 0; i < m_childCollisionAlgorithms.Count; i++)
             {

@@ -239,7 +239,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(PersistentManifoldArray manifoldArray)
         {
             if (m_convexTriangleCallback.m_manifoldPtr != null)
             {

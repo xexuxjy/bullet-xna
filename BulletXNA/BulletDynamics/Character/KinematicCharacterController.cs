@@ -590,7 +590,7 @@ namespace BulletXNA.BulletDynamics
 		protected IndexedVector3 m_targetPosition;
 
 		///keep track of the contact manifolds
-		protected ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
+		protected PersistentManifoldArray m_manifoldArray = new PersistentManifoldArray();
 
 		protected bool m_touchingContact;
 		protected IndexedVector3 m_touchingNormal;

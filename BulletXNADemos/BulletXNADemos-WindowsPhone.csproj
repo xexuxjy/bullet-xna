@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProjectGuid>{82349D6A-E863-4F5C-90A7-34087F0A69E1}</ProjectGuid>
@@ -76,6 +76,9 @@
     <None Include="Background.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </None>
+    <None Include="BulletXNADemos-WindowsPhone_2012_05_18_16_58_16.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_05_18_17_04_18.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_05_18_17_05_46.sap" />
     <None Include="PhoneGameThumb.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </None>

@@ -261,7 +261,7 @@ namespace BulletXNADemos.Demos
 
             ObjectArray<BroadphasePair> collisionPairs = m_pairCachingGhostObject.GetOverlappingPairCache().GetOverlappingPairArray();
             int numObjects = collisionPairs.Count;
-            ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
+            PersistentManifoldArray m_manifoldArray = new PersistentManifoldArray();
             bool added;
             for (int i = 0; i < numObjects; i++)
             {

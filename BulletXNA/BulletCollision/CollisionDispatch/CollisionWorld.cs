@@ -581,6 +581,20 @@ namespace BulletXNA.BulletCollision
                         triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
                         rcb.Cleanup();
                     }
+                    else if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape)
+                    {
+                        ///optimized version for btBvhTriangleMeshShape
+                        HeightfieldTerrainShape heightField = (HeightfieldTerrainShape)collisionShape;
+                        IndexedMatrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                        IndexedVector3 rayFromLocal = worldTocollisionObject * rayFromTrans._origin;
+                        IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
+
+                        IndexedMatrix transform = IndexedMatrix.Identity;
+                        BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, heightField, ref transform);
+                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        heightField.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
+                        rcb.Cleanup();
+                    }
                     else
                     {
                         //generic (slower) case

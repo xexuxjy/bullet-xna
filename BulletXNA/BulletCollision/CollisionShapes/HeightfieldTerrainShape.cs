@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA.BulletCollision
 {
@@ -110,6 +111,518 @@ namespace BulletXNA.BulletCollision
         protected int m_upAxis;
 
         protected IndexedVector3 m_localScaling;
+
+        protected QuadTreeNode m_rootQuadTreeNode;
+        protected int m_minNodeSize;
+        protected int m_maxDepth;
+
+
+
+        public class QuadTreeNode
+        {
+            public BoundingBox boundingBox;// int[] quantizedAabbMin = new int[3];
+            //public int[] quantizedAabbMax = new int[3];
+            public QuadTreeNode[] children;
+            public int depth;
+            //only needed for collection class
+            public QuadTreeNode()
+            { }
+
+            public QuadTreeNode(ref BoundingBox parentBB,int xAxis, int yAxis, int zAxis, float xDiff, float zDiff,bool x,bool z,int d)
+            {
+                IndexedVector3 iv3Min = parentBB.Min;
+                IndexedVector3 iv3Max = new IndexedVector3();
+                iv3Min[xAxis] += (x ? xDiff : 0);
+                iv3Min[zAxis] += (z ? zDiff : 0);
+                // large numbers here , but not max as float/int conversion gets broken
+                iv3Min[yAxis] = 100000;
+                iv3Max[yAxis] = -100000;
+
+
+                iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
+                iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
+                depth = d;
+                boundingBox = new BoundingBox(iv3Min, iv3Max);
+
+                //System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
+
+
+
+            }
+
+            public bool Intersects(Ray ray)
+            {
+                return boundingBox.Intersects(ray).HasValue;
+                //return children == null;
+                //return true;
+            }
+
+            public void AdjustHeightValues(int xAxis,int yAxis,int zAxis,ref float min,ref float max,HeightfieldTerrainShape shape)
+            {
+                if (children == null)
+                {
+                    IndexedVector3 iv3Min = new IndexedVector3(boundingBox.Min);
+                    IndexedVector3 iv3Max = new IndexedVector3(boundingBox.Max);
+
+                    min = iv3Min[yAxis];
+                    max = iv3Max[yAxis];
+                    
+                    int[] clampedMin = new int[3];
+                    int[] clampedMax = new int[3];
+
+                    shape.QuantizeWithClamp(clampedMin, ref iv3Min, 0);
+                    shape.QuantizeWithClamp(clampedMax, ref iv3Max, 1);
+                    
+                    shape.InspectVertexHeights(clampedMin[xAxis], clampedMax[xAxis], clampedMin[zAxis], clampedMax[zAxis], yAxis, ref min, ref max);
+
+                    iv3Min[yAxis] = min;
+                    iv3Max[yAxis] = max;
+
+                    boundingBox = new BoundingBox(iv3Min, iv3Max);
+                    
+                }
+                else
+                {
+                    float newMin = min;
+                    float newMax = max;
+
+
+
+                    children[0].AdjustHeightValues(xAxis,yAxis, zAxis,ref newMin, ref newMax,shape);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[1].AdjustHeightValues(xAxis, yAxis, zAxis, ref newMin, ref newMax, shape);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[2].AdjustHeightValues(xAxis, yAxis, zAxis, ref newMin, ref newMax, shape);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+                    children[3].AdjustHeightValues(xAxis, yAxis, zAxis, ref newMin, ref newMax, shape);
+                    if (newMin < min)
+                    {
+                        min = newMin;
+                    }
+                    if (newMax > max)
+                    {
+                        max = newMax;
+                    }
+
+                    IndexedVector3 iv3Min = new IndexedVector3(boundingBox.Min);
+                    IndexedVector3 iv3Max = new IndexedVector3(boundingBox.Max);
+
+                    iv3Min[yAxis] = min;
+                    iv3Max[yAxis] = max;
+
+                    boundingBox = new BoundingBox(iv3Min, iv3Max);
+
+                }
+            }
+        }
+
+        public void RebuildQuadTree()
+        {
+            RebuildQuadTree(5,4);
+        }
+
+        public void RebuildQuadTree(int maxDepth,int minNodeSize)
+        {
+            m_minNodeSize = minNodeSize;
+            m_maxDepth = maxDepth;
+
+            m_rootQuadTreeNode = new QuadTreeNode();
+
+            int xAxis = 0;
+            int yAxis = 1;
+            int zAxis = 2;
+
+            float min = 100000f;
+            float max = -100000f;
+
+            if (m_upAxis == 0)
+            {
+                xAxis = 1;
+                yAxis = 0;
+                zAxis = 2;
+            }
+            else if (m_upAxis == 2)
+            {
+                xAxis = 0;
+                yAxis = 2;
+                zAxis = 1;
+            }
+
+            m_rootQuadTreeNode.boundingBox = new BoundingBox(m_localAabbMin, m_localAabbMax);
+
+            BuildNodes(m_rootQuadTreeNode, 0, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
+            // cheat second pass to rebuild heights.
+            // adjust heights.
+            m_rootQuadTreeNode.AdjustHeightValues(xAxis,yAxis, zAxis,ref min, ref max,this);
+
+        }
+
+
+
+        private void BuildNodes(QuadTreeNode parent,int depth,int maxDepth,int minNodeSize,int xAxis,int yAxis,int zAxis)
+        {
+            if (depth < maxDepth)
+            {
+                if (parent.children == null)
+                {
+
+                    IndexedVector3 diff = (parent.boundingBox.Max - parent.boundingBox.Min) / 2;
+
+
+                    // don;t split too low.
+                    if (diff[xAxis] >= minNodeSize || diff[zAxis] >= minNodeSize)
+                    {
+                        parent.children = new QuadTreeNode[4];
+                        //split nodes
+
+                        parent.children[0] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
+                        BuildNodes(parent.children[0], depth + 1, maxDepth, minNodeSize,xAxis, yAxis, zAxis);
+                        parent.children[1] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
+                        BuildNodes(parent.children[1], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
+                        parent.children[2] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
+                        BuildNodes(parent.children[2], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
+                        parent.children[3] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
+                        BuildNodes(parent.children[3], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
+                    }
+                }
+            }
+        }
+
+        public bool HasAccelerator()
+        {
+            return m_rootQuadTreeNode != null;
+        }
+
+
+        private void InspectVertexHeights(int startX,int endX,int startZ,int endZ,int upAxis,ref float min,ref float max)
+        {
+            IndexedVector3 vertex = new IndexedVector3();
+            IndexedVector3 invScale = new IndexedVector3(1f) / m_localScaling;
+            // adjust for +1 bounds in the same way triangle drawing does?
+
+            for (int z = startZ; z < endZ; z++)
+            {
+                for (int x = startX; x < endX; x++)
+                {
+                    float height = GetRawHeightFieldValue(x, z);
+
+                    if (height < min)
+                    {
+                        min = height;
+                    }
+                    if (height> max)
+                    {
+                        max = height;
+                    }
+                }
+            }
+        }
+
+
+        public float TestAndClampHeight(float newHeight, float comparison, bool min)
+        {
+            if (min)
+            {
+                return newHeight < comparison ? newHeight : comparison;
+            }
+            else
+            {
+                return newHeight > comparison ? newHeight : comparison;
+            }
+        }
+
+
+        public void PerformRaycast(ITriangleCallback callback, ref IndexedVector3 raySource, ref IndexedVector3 rayTarget)
+        {
+            if (!HasAccelerator())
+            {
+                // if no accelerator then do the normal process triangles call.
+                ProcessAllTriangles(callback, ref raySource, ref rayTarget);
+            }
+            else
+            {
+                // if the rays short then don't go through the acclerator either as the node set 
+                // to check will be small
+                float rayLength2 = (rayTarget - raySource).LengthSquared();
+                int checkNode = 0;
+                if (m_upAxis == 0)
+                {
+                    checkNode = 1;
+                }
+
+                if (rayLength2 < m_minNodeSize * m_localScaling[checkNode])
+                {
+                    ProcessAllTriangles(callback, ref raySource, ref rayTarget);
+                }
+                else
+                {
+
+                    ObjectArray<QuadTreeNode> results = new ObjectArray<QuadTreeNode>();
+
+                    // scale down the input ray so it is in local (non-scaled) coordinates
+                    IndexedVector3 invScale = new IndexedVector3(1f) / m_localScaling;
+
+                    IndexedVector3 localRaySource = raySource * invScale;
+                    IndexedVector3 localRayTarget = rayTarget * invScale;
+
+                    // account for local origin
+                    localRaySource += m_localOrigin;
+                    localRayTarget += m_localOrigin;
+
+                    //Ray ray = new Ray(raySource, rayTarget);
+                    Ray ray = new Ray(localRaySource, (localRayTarget - localRaySource).Normalized());
+
+                    // build list of squares
+                    QueryNode(m_rootQuadTreeNode, results, ray);
+
+
+                    // go through each of the results.
+                    foreach (QuadTreeNode quadTreeNode in results)
+                    {
+                        int startX = 0;
+                        int endX = m_heightStickWidth - 1;
+                        int startJ = 0;
+                        int endJ = m_heightStickLength - 1;
+
+                        IndexedVector3 iv3Min = quadTreeNode.boundingBox.Min;
+                        IndexedVector3 iv3Max = quadTreeNode.boundingBox.Max;
+
+                        switch (m_upAxis)
+                        {
+                            case 0:
+                                {
+                                    if (iv3Min[1] > startX)
+                                        startX = (int)iv3Min[1];
+                                    if (iv3Max[1] < endX)
+                                        endX = (int)iv3Max[1];
+                                    if (iv3Min[2] > startJ)
+                                        startJ = (int)iv3Min[2];
+                                    if (iv3Max[2] < endJ)
+                                        endJ = (int)iv3Max[2];
+                                    break;
+                                }
+                            case 1:
+                                {
+                                    if (iv3Min[0] > startX)
+                                        startX = (int)iv3Min[0];
+                                    if (iv3Max[0] < endX)
+                                        endX = (int)iv3Max[0];
+                                    if (iv3Min[2] > startJ)
+                                        startJ = (int)iv3Min[2];
+                                    if (iv3Max[2] < endJ)
+                                        endJ = (int)iv3Max[2];
+                                    break;
+                                };
+                            case 2:
+                                {
+                                    if (iv3Min[0] > startX)
+                                        startX = (int)iv3Min[0];
+                                    if (iv3Max[0] < endX)
+                                        endX = (int)iv3Max[0];
+                                    if (iv3Min[1] > startJ)
+                                        startJ = (int)iv3Min[1];
+                                    if (iv3Max[1] < endJ)
+                                        endJ = (int)iv3Max[1];
+                                    break;
+                                }
+                            default:
+                                {
+                                    //need to get valid m_upAxis
+                                    Debug.Assert(false);
+                                    break;
+                                }
+                        }
+
+                        // debug draw the boxes?
+#if DEBUG_ACCELERATOR
+                        if (BulletGlobals.gDebugDraw != null)
+                        {
+                            IndexedVector3 drawMin = iv3Min;
+                            IndexedVector3 drawMax = iv3Max;
+
+                            IndexedVector3 worldMin = LocalToWorld2(drawMin);
+                            IndexedVector3 worldMax = LocalToWorld2(drawMax);
+
+                            BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new IndexedVector3(1, 1, 0));
+                        }
+#endif
+
+                        IndexedVector3[] vertices = new IndexedVector3[3];
+                        for (int j = startJ; j < endJ; j++)
+                        {
+                            for (int x = startX; x < endX; x++)
+                            {
+                                if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0)))
+                                {
+                                    //first triangle
+                                    GetVertex(x, j, out vertices[0]);
+                                    GetVertex(x + 1, j, out vertices[1]);
+                                    GetVertex(x + 1, j + 1, out vertices[2]);
+                                    callback.ProcessTriangle(vertices, x, j);
+
+                                    //second triangle
+                                    GetVertex(x, j, out vertices[0]);
+                                    GetVertex(x + 1, j + 1, out vertices[1]);
+                                    GetVertex(x, j + 1, out vertices[2]);
+                                    callback.ProcessTriangle(vertices, x, j);
+                                }
+                                else
+                                {
+                                    //first triangle
+                                    GetVertex(x, j, out vertices[0]);
+                                    GetVertex(x, j + 1, out vertices[1]);
+                                    GetVertex(x + 1, j, out vertices[2]);
+                                    callback.ProcessTriangle(vertices, x, j);
+
+                                    //second triangle
+                                    GetVertex(x + 1, j, out vertices[0]);
+                                    GetVertex(x, j + 1, out vertices[1]);
+                                    GetVertex(x + 1, j + 1, out vertices[2]);
+                                    callback.ProcessTriangle(vertices, x, j);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        private IndexedVector3 LocalToWorld2(IndexedVector3 local)
+        {
+            int xAxis = 0;
+            int yAxis = 1;
+            int zAxis = 2;
+
+            // need these as quantized vals?
+
+            float localHeight = local[m_upAxis];
+
+            if (m_upAxis == 0)
+            {
+                xAxis = 1;
+                yAxis = 0;
+                zAxis = 2;
+            }
+            else if (m_upAxis == 2)
+            {
+                xAxis = 0;
+                yAxis = 2;
+                zAxis = 1;
+            }
+
+            switch (m_upAxis)
+            {
+                case 0:
+                    {
+                        local = new IndexedVector3(localHeight - m_localOrigin.X,
+                            (-m_width / 2f) + local.X,
+                            (-m_length / 2f) + local.Y
+                            );
+                        break;
+                    }
+                case 1:
+                    {
+                        local = new IndexedVector3(
+                        (-m_width / 2f) + local.X,
+                        localHeight - m_localOrigin.Y,
+                        (-m_length / 2f) + local.Z
+                        );
+                        break;
+                    };
+                case 2:
+                    {
+                        local = new IndexedVector3(
+                        (-m_width / 2f) + local.X,
+                        (-m_length / 2f) + local.Y,
+                        localHeight - m_localOrigin.Z
+                        );
+                        break;
+                    }
+                default:
+                    {
+                        //need to get valid m_upAxis
+                        Debug.Assert(false);
+                        local = IndexedVector3.Zero;
+                        break;
+                    }
+                }   
+            local *= m_localScaling;
+
+            // dodgy hack as we don't have access to the rigidbody for the world transform
+            local.Y -= 20;
+
+            return local;
+
+        }
+
+        private IndexedVector3 LocalToWorld(IndexedVector3 local)
+        {
+            IndexedVector3 world = local *m_localScaling;
+
+            // account for local origin
+            world -= m_localOrigin;
+            return world;
+        }
+
+
+        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, Ray ray)
+        {
+            //if(node.children == null && node.Intersects(raySource,rayTarget))
+            // add the lowest level.
+
+            if (node.children == null)
+            {
+                results.Add(node);
+#if DEBUG_ACCELERATOR
+                if (BulletGlobals.gDebugDraw != null)
+                {
+
+                    IndexedVector3 drawMin = new IndexedVector3(node.boundingBox.Min);
+                    IndexedVector3 drawMax = new IndexedVector3(node.boundingBox.Max);
+
+                    IndexedVector3 worldMin = LocalToWorld2(drawMin);
+                    IndexedVector3 worldMax = LocalToWorld2(drawMax);
+
+                    BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new IndexedVector3(1, 1, 1));
+                }
+#endif
+            }
+            else
+            {
+
+
+                // simple rescursive for now.
+                for (int i = 0; i < 4; ++i)
+                {
+                    if (node.children[i].Intersects(ray))
+                    {
+                        QueryNode(node.children[i], results, ray);
+                    }
+                }
+            }
+        }
 
 
         /// preferred constructor
@@ -274,8 +787,8 @@ namespace BulletXNA.BulletCollision
                         break;
                     }
             }
-            IndexedVector3.Multiply(ref vertex, ref vertex, ref m_localScaling);
-            //vertex *= m_localScaling;
+
+            vertex *= m_localScaling;
         }
 
 
@@ -466,6 +979,19 @@ namespace BulletXNA.BulletCollision
                         break;
                     }
             }
+
+
+            // debug draw the boxes?
+#if DEBUG_ACCELERATOR
+            if (BulletGlobals.gDebugDraw != null)
+            {
+                IndexedVector3 drawMin = aabbMin;
+                IndexedVector3 drawMax = aabbMax;
+
+                BulletGlobals.gDebugDraw.DrawAabb(drawMin, drawMax, new IndexedVector3(0, 1, 0));
+            }
+#endif
+
 
             IndexedVector3[] vertices = new IndexedVector3[3];
             for (int j = startJ; j < endJ; j++)

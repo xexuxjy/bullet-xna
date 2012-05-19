@@ -249,7 +249,7 @@ namespace BulletXNA.BulletCollision
             m_collisionConfiguration = config;
         }
 
-        public virtual ObjectArray<PersistentManifold> GetInternalManifoldPointer()
+        public virtual PersistentManifoldArray GetInternalManifoldPointer()
         {
             return m_manifoldsPtr;
         }
@@ -280,7 +280,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        private ObjectArray<PersistentManifold> m_manifoldsPtr = new ObjectArray<PersistentManifold>();
+        private PersistentManifoldArray m_manifoldsPtr = new PersistentManifoldArray();
         private Stack<PersistentManifold> m_persistentManifoldsPool = new Stack<PersistentManifold>();
         private Stack<ManifoldResult> m_manifoldResultsPool = new Stack<ManifoldResult>();
 

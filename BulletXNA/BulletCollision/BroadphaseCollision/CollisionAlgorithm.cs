@@ -91,7 +91,7 @@ namespace BulletXNA.BulletCollision
 
         public abstract float CalculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
-        public abstract void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray);
+        public abstract void GetAllContactManifolds(PersistentManifoldArray manifoldArray);
 
         public virtual void Cleanup()
         {

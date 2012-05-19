@@ -501,7 +501,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             return resultFraction;
         }
 
-        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(PersistentManifoldArray manifoldArray)
         {
             ///should we use m_ownManifold to avoid adding duplicates?
             if (m_manifoldPtr != null && m_ownManifold)

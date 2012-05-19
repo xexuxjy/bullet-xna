@@ -569,7 +569,7 @@ namespace BulletXNA.BulletCollision
             return 1.0f;
         }
 
-        public override void GetAllContactManifolds(ObjectArray<PersistentManifold> manifoldArray)
+        public override void GetAllContactManifolds(PersistentManifoldArray manifoldArray)
         {
             if (m_manifoldPtr != null)
             {

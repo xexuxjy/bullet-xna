@@ -127,10 +127,10 @@ namespace BulletXNA.BulletCollision
 	float margin = getMargin();
 	for (int i=0;i<3;i++)
 	{
-		IndexedVector3 vec(float(0.),float(0.),float(0.));
+		Vector3 vec(float(0.),float(0.),float(0.));
 		vec[i] = float(1.);
-		IndexedVector3 sv = localGetSupportingVertex(vec*t.getBasis());
-		IndexedVector3 tmp = t(sv);
+		Vector3 sv = localGetSupportingVertex(vec*t.getBasis());
+		Vector3 tmp = t(sv);
 		aabbMax[i] = tmp[i]+margin;
 		vec[i] = float(-1.);
 		sv = localGetSupportingVertex(vec*t.getBasis());

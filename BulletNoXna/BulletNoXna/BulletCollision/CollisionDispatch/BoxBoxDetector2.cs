@@ -89,30 +89,30 @@
 //            float[] temp1 = new float[12];
 //            float[] temp2 = new float[12];
 
-//            temp1[0] = rotateA._basis[0, 0];
-//            temp1[1] = rotateA._basis[0, 1];
-//            temp1[2] = rotateA._basis[0, 2];
+//            temp1[0] = rotateA.M11;
+//            temp1[1] = rotateA.M12;
+//            temp1[2] = rotateA.M13;
 
-//            temp1[4] = rotateA._basis[1, 0];
-//            temp1[5] = rotateA._basis[1, 1];
-//            temp1[6] = rotateA._basis[1, 2];
+//            temp1[4] = rotateA.M21;
+//            temp1[5] = rotateA.M22;
+//            temp1[6] = rotateA.M23;
 
-//            temp1[8] = rotateA._basis[2, 0];
-//            temp1[9] = rotateA._basis[2, 1];
-//            temp1[10] = rotateA._basis[2, 2];
+//            temp1[8] = rotateA.M31;
+//            temp1[9] = rotateA.M32;
+//            temp1[10] = rotateA.M33;
 
 
-//            temp2[0] = rotateB._basis[0, 0];
-//            temp2[1] = rotateB._basis[0, 1];
-//            temp2[2] = rotateB._basis[0, 2];
+//            temp2[0] = rotateB.M11;
+//            temp2[1] = rotateB.M12;
+//            temp2[2] = rotateB.M13;
 
-//            temp2[4] = rotateB._basis[1, 0];
-//            temp2[5] = rotateB._basis[1, 1];
-//            temp2[6] = rotateB._basis[1, 2];
+//            temp2[4] = rotateB.M21;
+//            temp2[5] = rotateB.M22;
+//            temp2[6] = rotateB.M23;
 
-//            temp2[8] = rotateB._basis[2, 0];
-//            temp2[9] = rotateB._basis[2, 1];
-//            temp2[10] = rotateB._basis[2, 2];
+//            temp2[8] = rotateB.M31;
+//            temp2[9] = rotateB.M32;
+//            temp2[10] = rotateB.M33;
 
 //            DBoxBox2(MathUtil.FloatFromVector3(ref translationA),
 //            temp1,
@@ -465,19 +465,19 @@
 
 //            // find the four corners of the incident face, in reference-face coordinates
 //            float[] quad = new float[8];	// 2D coordinate of incident face (x,y pairs)
-//            float c1, c2, _basis[0, 0], m12, m21, m22;
+//            float c1, c2, m11, m12, m21, m22;
 //            c1 = DDOT14(center, 0, Ra, code1);
 //            c2 = DDOT14(center, 0, Ra, code2);
 
 //            // optimize this? - we have already computed this data above, but it is not
 //            // stored in an easy-to-index format. for now it's quicker just to recompute
 //            // the four dot products.
-//            _basis[0, 0] = DDOT44(Ra, code1, Rb, a1);
+//            m11 = DDOT44(Ra, code1, Rb, a1);
 //            m12 = DDOT44(Ra, code1, Rb, a2);
 //            m21 = DDOT44(Ra, code2, Rb, a1);
 //            m22 = DDOT44(Ra, code2, Rb, a2);
 //            {
-//                float k1 = _basis[0, 0] * Sb[a1];
+//                float k1 = m11 * Sb[a1];
 //                float k2 = m21 * Sb[a1];
 //                float k3 = m12 * Sb[a2];
 //                float k4 = m22 * Sb[a2];
@@ -510,8 +510,8 @@
 //            // the 'ret' array as necessary so that 'point' and 'ret' correspond.
 //            float[] point = new float[3 * 8];		// penetrating contact points
 //            float[] dep = new float[8];			// depths for those points
-//            float det1 = 1f / (_basis[0, 0] * m22 - m12 * m21);
-//            _basis[0, 0] *= det1;
+//            float det1 = 1f / (m11 * m22 - m12 * m21);
+//            m11 *= det1;
 //            m12 *= det1;
 //            m21 *= det1;
 //            m22 *= det1;
@@ -519,7 +519,7 @@
 //            for (int j = 0; j < n; j++)
 //            {
 //                float k1 = m22 * (ret[j * 2] - c1) - m12 * (ret[j * 2 + 1] - c2);
-//                float k2 = -m21 * (ret[j * 2] - c1) + _basis[0, 0] * (ret[j * 2 + 1] - c2);
+//                float k2 = -m21 * (ret[j * 2] - c1) + m11 * (ret[j * 2 + 1] - c2);
 //                for (int i = 0; i < 3; i++)
 //                {
 //                    point[cnum * 3 + i] = center[i] + k1 * Rb[i * 4 + a1] + k2 * Rb[i * 4 + a2];

@@ -120,10 +120,7 @@ namespace BulletXNA.BulletCollision
                     BroadphaseProxy childProxy = bridgeProxy.m_childProxy;
                     bridgeProxy.m_childBroadphase.DestroyProxy(childProxy, dispatcher);
 
-                    //multiProxy.m_bridgeProxies.swap(i, multiProxy.m_bridgeProxies.Count - 1);
-                    //multiProxy.m_bridgeProxies.pop_back();
-                    multiProxy.m_bridgeProxies.RemoveAt(i);
-
+                    multiProxy.m_bridgeProxies.RemoveAtQuick(i);
                 }
             }
 
@@ -454,7 +451,7 @@ namespace BulletXNA.BulletCollision
     public class MultiSapProxy : BroadphaseProxy
     {
         ///array with all the entries that this proxy belongs to
-        public IList<BridgeProxy> m_bridgeProxies;
+        public ObjectArray<BridgeProxy> m_bridgeProxies;
         //public Vector3	m_aabbMin;
         //public Vector3	m_aabbMax;
 

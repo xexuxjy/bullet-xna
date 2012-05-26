@@ -26,22 +26,19 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class BoxBoxDetector
+    public static class BoxBoxDetector
     {
 
-        public BoxBoxDetector(BoxShape box1, BoxShape box2)
-        {
-            m_box1 = box1;
-            m_box2 = box2;
-        }
+        //public BoxBoxDetector(BoxShape box1, BoxShape box2)
+        //{
+        //    m_box1 = box1;
+        //    m_box2 = box2;
+        //}
 
-        public virtual void Cleanup()
-        {
-        }
 
         // Work in progress to copy redo the box detector to remove un-necessary allocations
 
-        public virtual void GetClosestPoints(ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
+        public static void GetClosestPoints(BoxShape box1,BoxShape box2, ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
         {
             Matrix transformA = input.m_transformA;
             Matrix transformB = input.m_transformB;
@@ -67,8 +64,8 @@ namespace BulletXNA.BulletCollision
 
             //Vector3 debugExtents = new Vector3(2f, 2f, 2f);
 
-            Vector3 box1Margin = new Vector3(2f * m_box1.GetHalfExtentsWithMargin());
-            Vector3 box2Margin = new Vector3(2f * m_box2.GetHalfExtentsWithMargin());
+            Vector3 box1Margin = new Vector3(2f * box1.GetHalfExtentsWithMargin());
+            Vector3 box2Margin = new Vector3(2f * box2.GetHalfExtentsWithMargin());
 
             //Vector3 box1Margin = 2f * debugExtents;
             //Vector3 box2Margin = 2f * debugExtents;
@@ -482,13 +479,13 @@ namespace BulletXNA.BulletCollision
             }
 
             // find the size of the reference face
-            float[] rect = new float[2];
-            rect[0] = Sa[code1];
-            rect[1] = Sa[code2];
+            //float[] s_rectReferenceFace = new float[2];
+            s_rectReferenceFace[0] = Sa[code1];
+            s_rectReferenceFace[1] = Sa[code2];
 
             // intersect the incident and reference faces
             float[] ret = s_ret;
-            int n = IntersectRectQuad2(rect, quad, ret);
+            int n = IntersectRectQuad2(s_rectReferenceFace, quad, ret);
             if (n < 1)
             {
                 return 0;		// this should never happen
@@ -792,12 +789,11 @@ namespace BulletXNA.BulletCollision
             }
 
             // search for points that have angles closest to A[i0] + i*(2*pi/m).
-            int[] avail = new int[8];
             for (i = 0; i < n; i++)
             {
-                avail[i] = 1;
+                s_availablePoints[i] = 1;
             }
-            avail[i0] = 0;
+            s_availablePoints[i0] = 0;
             iret[0] = i0;
             iretIndex++;
             for (j = 1; j < m; j++)
@@ -813,7 +809,7 @@ namespace BulletXNA.BulletCollision
 
                 for (i = 0; i < n; i++)
                 {
-                    if (avail[i] != 0)
+                    if (s_availablePoints[i] != 0)
                     {
                         diff = Math.Abs(A[i] - a);
                         if (diff > MathUtil.SIMD_PI)
@@ -830,7 +826,7 @@ namespace BulletXNA.BulletCollision
                 //#if defined(DEBUG) || defined (_DEBUG)
                 //    btAssert (*iret != i0);	// ensure iret got set
                 //#endif
-                avail[iret[iretIndex]] = 0;
+                s_availablePoints[iret[iretIndex]] = 0;
                 iretIndex++;
             }
         }
@@ -955,8 +951,8 @@ namespace BulletXNA.BulletCollision
         //    A[2] = DDOT(B, 8, C, 0);
         //}
 
-        private BoxShape m_box1;
-        private BoxShape m_box2;
+        //private BoxShape m_box1;
+        //private BoxShape m_box2;
         private static float fudge_factor = 1.05f;
 
         private static float[] s_buffer = new float[12];
@@ -969,6 +965,9 @@ namespace BulletXNA.BulletCollision
         private static float[] s_point = new float[3 * 8];		// penetrating contact points
         private static float[] s_dep = new float[8];			// depths for those points
         private static float[] s_A = new float[8];
+        private static float[] s_rectReferenceFace = new float[2];
+        private static int[] s_availablePoints = new int[8];
+
     }
 
 }

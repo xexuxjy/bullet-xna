@@ -408,6 +408,48 @@ namespace BulletXNA.LinearMath
             return i;
         }
 
+        public Vector3 Left
+        {
+            get { return _basis.Left; }
+        }
+
+        public Vector3 Right
+        {
+            get { return _basis.Right; }
+        }
+
+        public Vector3 Up
+        {
+            get
+            {
+                return _basis.Up;
+            }
+        }
+
+        public Vector3 Down
+        {
+            get
+            {
+                return _basis.Down;
+            }
+        }
+
+        public Vector3 Forward
+        {
+            get
+            {
+                return _basis.Forward;
+            }
+        }
+
+        public Vector3 Backward
+        {
+            get
+            {
+                return _basis.Backward;
+            }
+        }
+
 
 
         public IndexedBasisMatrix _basis;

@@ -32,6 +32,8 @@ namespace BulletXNA.BulletCollision
     {
         private UnionFind m_unionFind;
         private ObjectArray<PersistentManifold> m_islandmanifold;
+        private ObjectArray<PersistentManifold> m_subList;
+
         private ObjectArray<CollisionObject> m_islandBodies;
 
         private bool m_splitIslands;
@@ -41,6 +43,7 @@ namespace BulletXNA.BulletCollision
             m_splitIslands = true;
             m_unionFind = new UnionFind();
             m_islandmanifold = new ObjectArray<PersistentManifold>();
+            m_subList = new ObjectArray<PersistentManifold>();
             m_islandBodies = new ObjectArray<CollisionObject>();
         }
 
@@ -306,15 +309,15 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     if (!islandSleeping)
                     {
                         // pass shortedned list to callback.
-                        ObjectArray<PersistentManifold> subList = new ObjectArray<PersistentManifold>();
+                        m_subList.Clear();
                         for (int i = 0; i < numIslandManifolds; ++i)
                         {
-                            subList.Add(m_islandmanifold[startManifoldIndex + i]);
+                            m_subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
 
 
 
-                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, subList, numIslandManifolds, islandId);
+                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_subList, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
                     }
                     else

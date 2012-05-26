@@ -115,13 +115,13 @@ namespace BulletXNA.BulletCollision
 	}
 #else
 	        //approximation of box shape, todo: implement cylinder shape inertia before people notice ;-)
-	        IndexedVector3 halfExtents = GetHalfExtentsWithMargin();
+	        Vector3 halfExtents = GetHalfExtentsWithMargin();
 
 	        float lx=2.0f*(halfExtents.X);
 	        float ly=2.0f*(halfExtents.Y);
 	        float lz=2.0f*(halfExtents.Z);
 
-	        inertia = new IndexedVector3(mass/12.0f * (ly*ly + lz*lz),
+	        inertia = new Vector3(mass/12.0f * (ly*ly + lz*lz),
 					        mass/12.0f * (lx*lx + lz*lz),
 					        mass/12.0f * (lx*lx + ly*ly));
 #endif //USE_BOX_INERTIA_APPROXIMATION

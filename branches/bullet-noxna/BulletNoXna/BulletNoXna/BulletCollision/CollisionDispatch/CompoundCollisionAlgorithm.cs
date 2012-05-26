@@ -351,7 +351,7 @@ namespace BulletXNA.BulletCollision
 
 
                 m_childCollisionAlgorithms[index].ProcessCollision(m_compoundColObj, m_otherObj, m_dispatchInfo, m_resultOut);
-                if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawAabb)) != 0))
+                if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DrawAabb)) != 0))
                 {
                     Vector3 worldAabbMin = Vector3.Zero, worldAabbMax = Vector3.Zero;
                     m_dispatchInfo.getDebugDraw().DrawAabb(aabbMin0, aabbMax0, new Vector3(1, 1, 1));
@@ -371,7 +371,7 @@ namespace BulletXNA.BulletCollision
 
             CompoundShape compoundShape = (CompoundShape)(m_compoundColObj.CollisionShape);
             CollisionShape childShape = compoundShape.GetChildShape(index);
-            if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawAabb)) != 0))
+            if (m_dispatchInfo.getDebugDraw() != null && (((m_dispatchInfo.getDebugDraw().GetDebugMode() & DebugDrawModes.DrawAabb)) != 0))
             {
                 Vector3 worldAabbMin;
                 Vector3 worldAabbMax;

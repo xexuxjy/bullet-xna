@@ -506,18 +506,21 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 #if DBVT_BP_PROFILE
             if (0 == (m_pid % DbvtBroadphase.DBVT_BP_PROFILING_RATE))
             {
-                System.Console.WriteLine("fixed({0}) dynamics({1}) pairs({2})\r\n", m_sets[1].m_leaves, m_sets[0].m_leaves, m_paircache.GetNumOverlappingPairs());
-                uint total = (uint)m_profiling.m_total;
-                if (total <= 0) total = 1;
-                System.Console.WriteLine("ddcollide: {0} ({1})\r\n", (50 + m_profiling.m_ddcollide * 100) / total, m_profiling.m_ddcollide / DBVT_BP_PROFILING_RATE);
-                System.Console.WriteLine("fdcollide: {0} ({1})\r\n", (50 + m_profiling.m_fdcollide * 100) / total, m_profiling.m_fdcollide / DBVT_BP_PROFILING_RATE);
-                System.Console.WriteLine("cleanup:   {0} ({1})\r\n", (50 + m_profiling.m_cleanup * 100) / total, m_profiling.m_cleanup / DBVT_BP_PROFILING_RATE);
-                System.Console.WriteLine("total:     {0}\r\n", total / DBVT_BP_PROFILING_RATE);
-                ulong sum = m_profiling.m_ddcollide +
-                    m_profiling.m_fdcollide +
-                    m_profiling.m_cleanup;
-                System.Console.WriteLine("leaked: %u%% (%uus)\r\n", 100 - ((50 + sum * 100) / total), (total - sum) / DBVT_BP_PROFILING_RATE);
-                System.Console.WriteLine("job counts: %u%%\r\n", (m_profiling.m_jobcount * 100) / (ulong)((m_sets[0].m_leaves + m_sets[1].m_leaves) * DbvtBroadphase.DBVT_BP_PROFILING_RATE));
+                if (BulletGlobals.g_streamWriter != null)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("fixed({0}) dynamics({1}) pairs({2})", m_sets[1].m_leaves, m_sets[0].m_leaves, m_paircache.GetNumOverlappingPairs());
+                    uint total = (uint)m_profiling.m_total;
+                    if (total <= 0) total = 1;
+                    BulletGlobals.g_streamWriter.WriteLine("ddcollide: {0} ({1})", (50 + m_profiling.m_ddcollide * 100) / total, m_profiling.m_ddcollide / DBVT_BP_PROFILING_RATE);
+                    BulletGlobals.g_streamWriter.WriteLine("fdcollide: {0} ({1})", (50 + m_profiling.m_fdcollide * 100) / total, m_profiling.m_fdcollide / DBVT_BP_PROFILING_RATE);
+                    BulletGlobals.g_streamWriter.WriteLine("cleanup:   {0} ({1})", (50 + m_profiling.m_cleanup * 100) / total, m_profiling.m_cleanup / DBVT_BP_PROFILING_RATE);
+                    BulletGlobals.g_streamWriter.WriteLine("total:     {0}", total / DBVT_BP_PROFILING_RATE);
+                    ulong sum = m_profiling.m_ddcollide +
+                        m_profiling.m_fdcollide +
+                        m_profiling.m_cleanup;
+                    BulletGlobals.g_streamWriter.WriteLine("leaked: {0} {1}", 100 - ((50 + sum * 100) / total), (total - sum) / DBVT_BP_PROFILING_RATE);
+                    BulletGlobals.g_streamWriter.WriteLine("job counts: {0}", (m_profiling.m_jobcount * 100) / (ulong)((m_sets[0].m_leaves + m_sets[1].m_leaves) * DbvtBroadphase.DBVT_BP_PROFILING_RATE));
+                }
                 m_profiling.clear();
             }
 #endif
@@ -586,12 +589,15 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 int spawn_count = (object_count * experiment.spawn_count) / 100;
                 float speed = experiment.speed;
                 float amplitude = experiment.amplitude;
-                System.Console.WriteLine("Experiment #{0} '{1}':\r\n", iexp, experiment.name);
-                System.Console.WriteLine("\tObjects: {0}\r\n", object_count);
-                System.Console.WriteLine("\tUpdate: {0}\r\n", update_count);
-                System.Console.WriteLine("\tSpawn: {0}\r\n", spawn_count);
-                System.Console.WriteLine("\tSpeed: {0}\r\n", speed);
-                System.Console.WriteLine("\tAmplitude: {0}\r\n", amplitude);
+                if (BulletGlobals.g_streamWriter != null)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("Experiment #{0} '{1}':", iexp, experiment.name);
+                    BulletGlobals.g_streamWriter.WriteLine("\tObjects: {0}", object_count);
+                    BulletGlobals.g_streamWriter.WriteLine("\tUpdate: {0}", update_count);
+                    BulletGlobals.g_streamWriter.WriteLine("\tSpawn: {0}", spawn_count);
+                    BulletGlobals.g_streamWriter.WriteLine("\tSpeed: {0}", speed);
+                    BulletGlobals.g_streamWriter.WriteLine("\tAmplitude: {0}", amplitude);
+                }
                 //srand(180673);
                 /* Create objects	*/
                 wallclock.Reset();
@@ -914,13 +920,16 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             ulong us = (ulong)sw.ElapsedMilliseconds;
             ulong ms = (us + 500) / 1000;
             float sec = us / (1000f * 1000f);
-            if (count > 0)
+            if(BulletGlobals.g_streamWriter != null)
             {
-                System.Console.WriteLine("{0} : {1} us ({2} ms), {3}/s\r\n", name, us, ms, count / sec);
-            }
-            else
-            {
-                System.Console.WriteLine("{0} : {1} us ({2} ms)\r\n", name, us, ms);
+                if (count > 0)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("{0} : {1} us ({2} ms), {3}/s\r\n", name, us, ms, count / sec);
+                }
+                else
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("{0} : {1} us ({2} ms)\r\n", name, us, ms);
+                }
             }
         }
     }

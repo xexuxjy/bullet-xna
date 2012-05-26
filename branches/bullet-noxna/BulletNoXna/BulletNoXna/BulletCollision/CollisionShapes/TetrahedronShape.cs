@@ -80,7 +80,7 @@ namespace BulletXNA.BulletCollision
 	            //just transform the vertices in worldspace, and take their AABB
 	            for (int i=0;i<m_numVertices;i++)
 	            {
-		            IndexedVector3 worldVertex = IndexedVector3.Transformt(m_vertices[i],t);
+		            Vector3 worldVertex = Vector3.Transformt(m_vertices[i],t);
                     MathUtil.vectorMin(ref worldVertex, ref aabbMin);
                     MathUtil.vectorMin(ref worldVertex,ref aabbMax);
 	            }

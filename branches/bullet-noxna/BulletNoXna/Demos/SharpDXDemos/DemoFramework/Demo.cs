@@ -33,8 +33,8 @@ namespace DemoFramework
         {
             get { return _device; }
         }
-        Device.OutputMergerStage outputMerger;
-        Device.InputAssemblerStage inputAssembler;
+        OutputMergerStage outputMerger;
+        InputAssemblerStage inputAssembler;
 
         SwapChain _swapChain;
         public SwapChain SwapChain
@@ -175,46 +175,46 @@ namespace DemoFramework
         void DisposeBuffers()
         {
             if (RenderView != null)
-                RenderView.Release();
+                RenderView.Dispose();
 
             if (GBufferLightView != null)
-                GBufferLightView.Release();
+                GBufferLightView.Dispose();
 
             if (GBufferNormalView != null)
-                GBufferNormalView.Release();
+                GBufferNormalView.Dispose();
 
             if (GBufferDiffuseView != null)
-                GBufferDiffuseView.Release();
+                GBufferDiffuseView.Dispose();
 
             if (gBufferLight != null)
-                gBufferLight.Release();
+                gBufferLight.Dispose();
             
             if (gBufferNormal != null)
-                gBufferNormal.Release();
+                gBufferNormal.Dispose();
             
             if (gBufferDiffuse != null)
-                gBufferDiffuse.Release();
+                gBufferDiffuse.Dispose();
 
             if (depthTexture != null)
-                depthTexture.Release();
+                depthTexture.Dispose();
 
             if (lightDepthTexture != null)
-                lightDepthTexture.Release();
+                lightDepthTexture.Dispose();
 
             if (lightBufferRes != null)
-                lightBufferRes.Release();
+                lightBufferRes.Dispose();
 
             if (normalBufferRes != null)
-                normalBufferRes.Release();
+                normalBufferRes.Dispose();
 
             if (diffuseBufferRes != null)
-                diffuseBufferRes.Release();
+                diffuseBufferRes.Dispose();
 
             if (depthRes != null)
-                depthRes.Release();
+                depthRes.Dispose();
 
             if (lightDepthRes != null)
-                lightDepthRes.Release();
+                lightDepthRes.Dispose();
         }
 
         void CreateBuffers()
@@ -453,7 +453,7 @@ namespace DemoFramework
             {
                 Device.ClearDepthStencilView(LightDepthView, DepthStencilClearFlags.Depth, 1.0f, 0);
                 outputMerger.SetDepthStencilState(lightDepthStencilState, 0);
-                outputMerger.SetRenderTargets(0, null, LightDepthView);
+                outputMerger.SetRenderTargets(0, new RenderTargetView[0], LightDepthView);
                 ShadowGenPass.Apply();
                 OnRender();
                 Effect.GetVariableByName("lightDepthMap").AsShaderResource().SetResource(lightDepthRes);
@@ -472,8 +472,8 @@ namespace DemoFramework
             GBufferRenderPass.Apply();
 
             inputAssembler.SetVertexBuffers(0, quadBinding);
-            inputAssembler.SetPrimitiveTopology(PrimitiveTopology.TriangleStrip);
-            inputAssembler.SetInputLayout(quadBufferLayout);
+            inputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
+            inputAssembler.InputLayout = quadBufferLayout;
             Device.Draw(4, 0);
 
             Info.OnRender(FramesPerSecond);
@@ -520,7 +520,7 @@ namespace DemoFramework
 
                 RenderView.Dispose();
                 DepthView.Dispose();
-                _swapChain.ResizeBuffers(_swapChain.Description.BufferCount, Width, Height, _swapChain.Description.ModeDescription.Format, (int)_swapChain.Description.Flags);
+                _swapChain.ResizeBuffers(_swapChain.Description.BufferCount, 0, 0, Format.Unknown, 0);
 
                 CreateBuffers();
 

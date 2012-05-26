@@ -193,6 +193,20 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
+        public static void Multiply(ref Vector3 output, ref Vector3 value1, ref Vector3 value2)
+        {
+            output.X = value1.X * value2.X;
+            output.Y = value1.Y * value2.Y;
+            output.Z = value1.Z * value2.Z;
+        }
+
+        public static void Subtract(ref Vector3 output, ref Vector3 value1, ref Vector3 value2)
+        {
+            output.X = value1.X - value2.X;
+            output.Y = value1.Y - value2.Y;
+            output.Z = value1.Z - value2.Z;
+        }
+
         public static Vector3 operator /(Vector3 value, float scaleFactor)
         {
 
@@ -430,9 +444,43 @@ namespace BulletXNA.LinearMath
         {
             get
             {
-                return -Vector3._up;
+                return Vector3._down;
             }
         }
+
+        public static Vector3 Right
+        {
+            get
+            {
+                return Vector3._right;
+            }
+        }
+
+        public static Vector3 Left
+        {
+            get
+            {
+                return Vector3._left;
+            }
+        }
+
+        public static Vector3 Forward
+        {
+            get
+            {
+                return Vector3._forward;
+            }
+        }
+
+        public static Vector3 Backward
+        {
+            get
+            {
+                return Vector3._backward;
+            }
+        }
+
+
 
         public static Vector3 UnitX
         {
@@ -520,10 +568,6 @@ namespace BulletXNA.LinearMath
             return X < Y ? (Y < Z ? 0 : 2) : (X < Z ? 1 : 2);
         }
 
-        private static Vector3 _zero = new Vector3();
-        private static Vector3 _one = new Vector3(1);
-        private static Vector3 _up = new Vector3(0,1,0);
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(32);
@@ -565,6 +609,18 @@ namespace BulletXNA.LinearMath
             return string.Format(formatProvider, "X:{0} Y:{1} Z:{2}", X.ToString(format, formatProvider),
                 Y.ToString(format, formatProvider), Z.ToString(format, formatProvider));
         }
+
+        private static Vector3 _zero = new Vector3();
+        private static Vector3 _one = new Vector3(1f, 1f, 1f);
+        private static Vector3 _unitX = new Vector3(1f, 0.0f, 0.0f);
+        private static Vector3 _unitY = new Vector3(0.0f, 1f, 0.0f);
+        private static Vector3 _unitZ = new Vector3(0.0f, 0.0f, 1f);
+        private static Vector3 _up = new Vector3(0.0f, 1f, 0.0f);
+        private static Vector3 _down = new Vector3(0.0f, -1f, 0.0f);
+        private static Vector3 _right = new Vector3(1f, 0.0f, 0.0f);
+        private static Vector3 _left = new Vector3(-1f, 0.0f, 0.0f);
+        private static Vector3 _forward = new Vector3(0.0f, 0.0f, -1f);
+        private static Vector3 _backward = new Vector3(0.0f, 0.0f, 1f);
 
         public float X;
         public float Y;

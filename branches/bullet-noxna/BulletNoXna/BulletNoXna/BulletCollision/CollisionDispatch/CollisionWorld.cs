@@ -168,7 +168,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DebugDrawWorld()
         {
-            if (GetDebugDrawer() != null && ((GetDebugDrawer().GetDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
+            if (GetDebugDrawer() != null && ((GetDebugDrawer().GetDebugMode() & DebugDrawModes.DrawContactPoints) != 0))
             {
                 int numManifolds = GetDispatcher().GetNumManifolds();
                 Vector3 color = Vector3.Zero;
@@ -190,8 +190,8 @@ namespace BulletXNA.BulletCollision
             if (GetDebugDrawer() != null)
             {
                 DebugDrawModes debugMode = GetDebugDrawer().GetDebugMode();
-                bool wireFrame = (debugMode & DebugDrawModes.DBG_DrawWireframe) != 0;
-                bool aabb = (debugMode & DebugDrawModes.DBG_DrawAabb) != 0;
+                bool wireFrame = (debugMode & DebugDrawModes.DrawWireframe) != 0;
+                bool aabb = (debugMode & DebugDrawModes.DrawAabb) != 0;
 
                 if(wireFrame || aabb)
                 {
@@ -372,14 +372,14 @@ namespace BulletXNA.BulletCollision
 		        if(resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle())) 
                 {
 			        //RigidcollisionObject* collisionObject = ctrl.GetRigidcollisionObject();
-			        IndexedVector3 collisionObjectAabbMin = new IndexedVector3();
-                    IndexedVector3 collisionObjectAabbMax = new IndexedVector3();
+			        Vector3 collisionObjectAabbMin = new Vector3();
+                    Vector3 collisionObjectAabbMax = new Vector3();
 			        collisionObject.GetCollisionShape().GetAabb(collisionObject.GetWorldTransform(),ref collisionObjectAabbMin,ref collisionObjectAabbMax);
 			        AabbUtil2.AabbExpand(ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref castShapeAabbMin, ref castShapeAabbMax);
 			        float hitLambda = 1f; //could use resultCallback.m_closestHitFraction, but needs testing
-			        IndexedVector3 hitNormal = new IndexedVector3();
-                    IndexedVector3 fromOrigin = convexFromWorld._origin;
-                    IndexedVector3 toOrigin = convexToWorld._origin;
+			        Vector3 hitNormal = new Vector3();
+                    Vector3 fromOrigin = convexFromWorld._origin;
+                    Vector3 toOrigin = convexToWorld._origin;
                     if (AabbUtil2.RayAabb(ref fromOrigin, ref toOrigin, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, ref hitNormal))
 			        {
                         IndexedMatrix trans = collisionObject.GetWorldTransform();
@@ -581,6 +581,20 @@ namespace BulletXNA.BulletCollision
                         BridgeTriangleRaycastCallback rcb = new BridgeTriangleRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, triangleMesh, ref transform);
                         rcb.m_hitFraction = resultCallback.m_closestHitFraction;
                         triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
+                        rcb.Cleanup();
+                    }
+                    else if (collisionShape.ShapeType == BroadphaseNativeType.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape)
+                    {
+                        ///optimized version for btBvhTriangleMeshShape
+                        HeightfieldTerrainShape heightField = (HeightfieldTerrainShape)collisionShape;
+                        Matrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                        Vector3 rayFromLocal = worldTocollisionObject * rayFromTrans.Translation;
+                        Vector3 rayToLocal = worldTocollisionObject * rayToTrans.Translation;
+
+                        Matrix transform = Matrix.Identity;
+                        BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, heightField, ref transform);
+                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        heightField.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
                         rcb.Cleanup();
                     }
                     else
@@ -936,6 +950,12 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
         }
 
+
+        public void Initialize(Vector3 rayFromWorld, Vector3 rayToWorld)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+        }
 
         public Vector3 m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
         public Vector3 m_rayToWorld;

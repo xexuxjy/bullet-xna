@@ -122,6 +122,8 @@
     <Compile Include="BulletCollision\NarrowPhaseCollision\RaycastCallback.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\SimplexSolverInterface.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\SubSimplexConvexCast.cs" />
+    <Compile Include="BulletDynamics\Character\ICharacterControllerInterface.cs" />
+    <Compile Include="BulletDynamics\Character\KinematicCharacterController.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\ConeTwistConstraint.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\ContactConstraint.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\ContactSolverInfo.cs" />
@@ -148,11 +150,13 @@
     <Compile Include="DefaultMotionState.cs" />
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
+    <Compile Include="LinearMath\BoundingBox.cs" />
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
     <Compile Include="LinearMath\IndexedBasisMatrix.cs" />
     <Compile Include="LinearMath\Matrix.cs" />
     <Compile Include="LinearMath\MathHelper.cs" />
     <Compile Include="LinearMath\Quaternion.cs" />
+    <Compile Include="LinearMath\Ray.cs" />
     <Compile Include="LinearMath\Vector3.cs" />
     <Compile Include="LinearMath\Vector4.cs" />
     <Compile Include="TypedObject.cs" />

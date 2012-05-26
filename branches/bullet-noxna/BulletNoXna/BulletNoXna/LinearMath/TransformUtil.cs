@@ -107,9 +107,9 @@ namespace BulletXNA
             predictedTransform = Matrix.CreateTranslation(curTrans.Translation + linvel * timeStep);
     //	#define QUATERNION_DERIVATIVE
 	    #if QUATERNION_DERIVATIVE
-            IndexedVector3 pos;
+            Vector3 pos;
             Quaternion predictedOrn;
-            IndexedVector3 scale;
+            Vector3 scale;
 
             curTrans.Decompose(ref scale, ref predictedOrn, ref pos);
 

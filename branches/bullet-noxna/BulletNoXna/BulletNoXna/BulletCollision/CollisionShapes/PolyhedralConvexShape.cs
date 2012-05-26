@@ -53,21 +53,21 @@ namespace BulletXNA.BulletCollision
 
             m_polyhedron = new ConvexPolyhedron();
 
-            ObjectArray<IndexedVector3> tmpVertices = new ObjectArray<IndexedVector3>();
+            ObjectArray<Vector3> tmpVertices = new ObjectArray<Vector3>();
             for (int i = 0; i < GetNumVertices(); i++)
             {
-                IndexedVector3 newVertex;
+                Vector3 newVertex;
                 GetVertex(i, out newVertex);
                 tmpVertices.Add(newVertex);
             }
 
             ConvexHullComputer conv = new ConvexHullComputer();
-            //conv.compute(&tmpVertices[0].getX(), sizeof(IndexedVector3),tmpVertices.Count,0.0f,0.0f);
+            //conv.compute(&tmpVertices[0].getX(), sizeof(Vector3),tmpVertices.Count,0.0f,0.0f);
             conv.Compute(tmpVertices, 0, tmpVertices.Count, 0.0f, 0.0f);
 
 
 
-            ObjectArray<IndexedVector3> faceNormals = new ObjectArray<IndexedVector3>();
+            ObjectArray<Vector3> faceNormals = new ObjectArray<Vector3>();
             int numFaces = conv.faces.size();
             faceNormals.Resize(numFaces);
             ConvexHullComputer convexUtil = conv;
@@ -89,7 +89,7 @@ namespace BulletXNA.BulletCollision
                 Edge firstEdge = convexUtil.edges[face];
                 Edge edge = firstEdge;
 
-                IndexedVector3[] edges = new IndexedVector3[3];
+                Vector3[] edges = new Vector3[3];
                 int numEdges = 0;
                 //compute face normals
 
@@ -101,10 +101,10 @@ namespace BulletXNA.BulletCollision
                     int src = edge.GetSourceVertex();
                     m_polyhedron.m_faces[i].m_indices.Add(src);
                     int targ = edge.GetTargetVertex();
-                    IndexedVector3 wa = convexUtil.vertices[src];
+                    Vector3 wa = convexUtil.vertices[src];
 
-                    IndexedVector3 wb = convexUtil.vertices[targ];
-                    IndexedVector3 newEdge = wb - wa;
+                    Vector3 wb = convexUtil.vertices[targ];
+                    Vector3 newEdge = wb - wa;
                     newEdge.Normalize();
                     if (numEdges < 2)
                     {
@@ -119,7 +119,7 @@ namespace BulletXNA.BulletCollision
 
                 if (numEdges == 2)
                 {
-                    faceNormals[i] = IndexedVector3.Cross(edges[0], edges[1]);
+                    faceNormals[i] = Vector3.Cross(edges[0], edges[1]);
                     faceNormals[i].Normalize();
                     m_polyhedron.m_faces[i].m_plane[0] = -faceNormals[i].X;
                     m_polyhedron.m_faces[i].m_plane[1] = -faceNormals[i].Y;
@@ -130,12 +130,12 @@ namespace BulletXNA.BulletCollision
                 else
                 {
                     Debug.Assert(false);//degenerate?
-                    faceNormals[i] = IndexedVector3.Zero;
+                    faceNormals[i] = Vector3.Zero;
                 }
 
                 for (int v = 0; v < m_polyhedron.m_faces[i].m_indices.Count; v++)
                 {
-                    float eq = IndexedVector3.Dot(m_polyhedron.m_vertices[m_polyhedron.m_faces[i].m_indices[v]], faceNormals[i]);
+                    float eq = Vector3.Dot(m_polyhedron.m_vertices[m_polyhedron.m_faces[i].m_indices[v]], faceNormals[i]);
                     if (planeEq > eq)
                     {
                         planeEq = eq;
@@ -151,12 +151,12 @@ namespace BulletXNA.BulletCollision
                 for (int f = 0; f < m_polyhedron.m_faces.Count; f++)
                 {
 
-                    IndexedVector3 planeNormal = new IndexedVector3(m_polyhedron.m_faces[f].m_plane[0], m_polyhedron.m_faces[f].m_plane[1], m_polyhedron.m_faces[f].m_plane[2]);
+                    Vector3 planeNormal = new Vector3(m_polyhedron.m_faces[f].m_plane[0], m_polyhedron.m_faces[f].m_plane[1], m_polyhedron.m_faces[f].m_plane[2]);
                     float planeEq = m_polyhedron.m_faces[f].m_plane[3];
 
-                    IndexedVector3 supVec = LocalGetSupportingVertex(-planeNormal);
+                    Vector3 supVec = LocalGetSupportingVertex(-planeNormal);
 
-                    if (IndexedVector3.Dot(supVec, planeNormal) < planeEq)
+                    if (Vector3.Dot(supVec, planeNormal) < planeEq)
                     {
                         m_polyhedron.m_faces[f].m_plane[0] *= -1;
                         m_polyhedron.m_faces[f].m_plane[1] *= -1;
@@ -334,13 +334,13 @@ namespace BulletXNA.BulletCollision
 
             for (int i=0;i<3;i++)
             {
-                IndexedVector3 vec = new IndexedVector3();
+                Vector3 vec = new Vector3();
                 MathUtil.vectorComponent(ref vec,i,1f);
-                IndexedVector3 tmp = localGetSupportingVertex(ref vec);
+                Vector3 tmp = localGetSupportingVertex(ref vec);
                 MathUtil.vectorComponent(ref m_localAabbMax,i,(MathUtil.vectorComponent(ref tmp,i) + m_collisionMargin));
 
                 MathUtil.vectorComponent(ref vec,i,-1f);
-                IndexedVector3 tmp = localGetSupportingVertex(ref vec);
+                Vector3 tmp = localGetSupportingVertex(ref vec);
                 MathUtil.vectorComponent(ref m_localAabbMin,i,(MathUtil.vectorComponent(ref tmp,i) - m_collisionMargin));
 
             }

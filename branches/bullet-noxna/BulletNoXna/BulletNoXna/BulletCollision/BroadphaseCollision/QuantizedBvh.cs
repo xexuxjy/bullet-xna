@@ -797,7 +797,7 @@ namespace BulletXNA.BulletCollision
                 rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2(ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
 
 #else
-                IndexedVector3 normal = IndexedVector3.Zero;
+                Vector3 normal = Vector3.Zero;
                 rayBoxOverlap = AabbUtil2.RayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
 #endif
 

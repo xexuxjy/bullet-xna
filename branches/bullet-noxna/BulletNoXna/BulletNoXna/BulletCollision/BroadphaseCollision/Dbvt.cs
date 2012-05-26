@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 namespace BulletXNA.BulletCollision
 {
@@ -384,22 +385,31 @@ namespace BulletXNA.BulletCollision
             CollideTT(m_root0, m_root1, collider);
         }
 
+        private static Stack<sStkNN> CollideTTStack = new Stack<sStkNN>(DOUBLE_STACKSIZE);
+        private static int CollideTTCount = 0;
+
+
         public static void CollideTT(DbvtNode root0, DbvtNode root1, Collide collideable)
         {
+            CollideTTCount++;
+            Debug.Assert(CollideTTCount < 2);
+            CollideTTStack.Clear();
+
+            
             if (root0 != null && root1 != null)
             {
-                Stack<sStkNN> stack = new Stack<sStkNN>(DOUBLE_STACKSIZE);
-                stack.Push(new sStkNN(root0, root1));
+
+                CollideTTStack.Push(new sStkNN(root0, root1));
                 do
                 {
-                    sStkNN p = stack.Pop();
+                    sStkNN p = CollideTTStack.Pop();
                     if (p.a == p.b)
                     {
                         if (p.a.IsInternal())
                         {
-                            stack.Push(new sStkNN(p.a._children[0], p.a._children[0]));
-                            stack.Push(new sStkNN(p.a._children[1], p.a._children[1]));
-                            stack.Push(new sStkNN(p.a._children[0], p.a._children[1]));
+                            CollideTTStack.Push(new sStkNN(p.a._children[0], p.a._children[0]));
+                            CollideTTStack.Push(new sStkNN(p.a._children[1], p.a._children[1]));
+                            CollideTTStack.Push(new sStkNN(p.a._children[0], p.a._children[1]));
                         }
                     }
                     else if (DbvtAabbMm.Intersect(ref p.a.volume, ref p.b.volume))
@@ -408,23 +418,23 @@ namespace BulletXNA.BulletCollision
                         {
                             if (p.b.IsInternal())
                             {
-                                stack.Push(new sStkNN(p.a._children[0], p.b._children[0]));
-                                stack.Push(new sStkNN(p.a._children[1], p.b._children[0]));
-                                stack.Push(new sStkNN(p.a._children[0], p.b._children[1]));
-                                stack.Push(new sStkNN(p.a._children[1], p.b._children[1]));
+                                CollideTTStack.Push(new sStkNN(p.a._children[0], p.b._children[0]));
+                                CollideTTStack.Push(new sStkNN(p.a._children[1], p.b._children[0]));
+                                CollideTTStack.Push(new sStkNN(p.a._children[0], p.b._children[1]));
+                                CollideTTStack.Push(new sStkNN(p.a._children[1], p.b._children[1]));
                             }
                             else
                             {
-                                stack.Push(new sStkNN(p.a._children[0], p.b));
-                                stack.Push(new sStkNN(p.a._children[1], p.b));
+                                CollideTTStack.Push(new sStkNN(p.a._children[0], p.b));
+                                CollideTTStack.Push(new sStkNN(p.a._children[1], p.b));
                             }
                         }
                         else
                         {
                             if (p.b.IsInternal())
                             {
-                                stack.Push(new sStkNN(p.a, p.b._children[0]));
-                                stack.Push(new sStkNN(p.a, p.b._children[1]));
+                                CollideTTStack.Push(new sStkNN(p.a, p.b._children[0]));
+                                CollideTTStack.Push(new sStkNN(p.a, p.b._children[1]));
                             }
                             else
                             {
@@ -432,8 +442,9 @@ namespace BulletXNA.BulletCollision
                             }
                         }
                     }
-                } while (stack.Count > 0);
+                } while (CollideTTStack.Count > 0);
             }
+            CollideTTCount--;
         }
 
 
@@ -554,30 +565,35 @@ namespace BulletXNA.BulletCollision
         }
 
 
+        private static Stack<DbvtNode> CollideTVStack = new Stack<DbvtNode>(SIMPLE_STACKSIZE);
+        private static int CollideTVCount = 0;
 
         public static void CollideTV(DbvtNode root, ref DbvtAabbMm volume, Collide collideable)
         {
+            CollideTVCount++;
+            Debug.Assert(CollideTVCount < 2);
+            CollideTVStack.Clear();
             if (root != null)
             {
-                Stack<DbvtNode> stack = new Stack<DbvtNode>(SIMPLE_STACKSIZE);
-                stack.Push(root);
+                CollideTVStack.Push(root);
                 do
                 {
-                    DbvtNode n = stack.Pop();
+                    DbvtNode n = CollideTVStack.Pop();
                     if (DbvtAabbMm.Intersect(ref n.volume, ref volume))
                     {
                         if (n.IsInternal())
                         {
-                            stack.Push(n._children[0]);
-                            stack.Push(n._children[1]);
+                            CollideTVStack.Push(n._children[0]);
+                            CollideTVStack.Push(n._children[1]);
                         }
                         else
                         {
                             collideable.Process(n);
                         }
                     }
-                } while (stack.Count > 0);
+                } while (CollideTVStack.Count > 0);
             }
+            CollideTVCount--;
         }
 
 
@@ -612,13 +628,17 @@ namespace BulletXNA.BulletCollision
         }
 
 
+        private static Stack<sStkNP> CollideKDOPStack = new Stack<sStkNP>(SIMPLE_STACKSIZE);
+        private static int CollideKDOPCount = 0;
 
         public static void CollideKDOP(DbvtNode root, Vector3[] normals, float[] offsets, int count, Collide collideable)
         {
+            CollideKDOPCount++;
+            Debug.Assert(CollideKDOPCount < 2);
+            CollideKDOPStack.Clear();
             if (root != null)
             {
                 int inside = (1 << count) - 1;
-                Stack<sStkNP> stack = new Stack<sStkNP>(SIMPLE_STACKSIZE);
                 int[] signs = new int[count];
 
                 for (int i = 0; i < count; ++i)
@@ -627,10 +647,10 @@ namespace BulletXNA.BulletCollision
                                 ((normals[i].Y >= 0) ? 2 : 0) +
                                 ((normals[i].Z >= 0) ? 4 : 0);
                 }
-                stack.Push(new sStkNP(root, 0));
+                CollideKDOPStack.Push(new sStkNP(root, 0));
                 do
                 {
-                    sStkNP se = stack.Pop();
+                    sStkNP se = CollideKDOPStack.Pop();
                     bool outp = false;
                     for (int i = 0, j = 1; (!outp) && (i < count); ++i, j <<= 1)
                     {
@@ -648,8 +668,8 @@ namespace BulletXNA.BulletCollision
                     {
                         if ((se.mask != inside) && (se.node.IsInternal()))
                         {
-                            stack.Push(new sStkNP(se.node._children[0], se.mask));
-                            stack.Push(new sStkNP(se.node._children[1], se.mask));
+                            CollideKDOPStack.Push(new sStkNP(se.node._children[0], se.mask));
+                            CollideKDOPStack.Push(new sStkNP(se.node._children[1], se.mask));
                         }
                         else
                         {
@@ -659,20 +679,26 @@ namespace BulletXNA.BulletCollision
                             }
                         }
                     }
-                } while (stack.Count > 0);
+                } while (CollideKDOPStack.Count > 0);
             }
+            CollideKDOPCount--;
         }
 
 
+        private static List<sStkNPS> CollideOCLStack = new List<sStkNPS>(SIMPLE_STACKSIZE);
+        private static int CollideOCLCount = 0;
 
         public static void CollideOCL(DbvtNode root, Vector3[] normals, float[] offsets, ref Vector3 sortaxis, int count, Collide collideable)
         {
+            CollideOCLCount++;
+            Debug.Assert(CollideOCLCount < 2);
+
+            CollideOCLStack.Clear();
             if (root != null)
             {
                 uint srtsgns = (uint)((sortaxis.X >= 0 ? 1 : 0) + (sortaxis.Y >= 0 ? 2 : 0) + (sortaxis.Z >= 0 ? 4 : 0));
                 int inside = (1 << count) - 1;
                 //Stack<sStkNPS>	stack = new Stack<sStkNPS>(SIMPLE_STACKSIZE);
-                List<sStkNPS> stack = new List<sStkNPS>(SIMPLE_STACKSIZE);
                 int[] signs = new int[count];
 
                 for (int i = 0; i < count; ++i)
@@ -681,11 +707,11 @@ namespace BulletXNA.BulletCollision
                              ((normals[i].Y >= 0) ? 2 : 0) +
                              ((normals[i].Z >= 0) ? 4 : 0);
                 }
-                stack.Insert(0, new sStkNPS(root, 0, root.volume.ProjectMinimum(ref sortaxis, srtsgns)));
+                CollideOCLStack.Insert(0, new sStkNPS(root, 0, root.volume.ProjectMinimum(ref sortaxis, srtsgns)));
                 do
                 {
-                    sStkNPS se = stack[0];
-                    stack.RemoveAt(0);
+                    sStkNPS se = CollideOCLStack[0];
+                    CollideOCLStack.RemoveAt(0);
                     if (se.mask != inside)
                     {
                         bool outp = false;
@@ -713,15 +739,15 @@ namespace BulletXNA.BulletCollision
                             for (int i = 0; i < 2; ++i)
                             {
                                 DbvtNode n = se.node._children[i];
-                                int j = stack.Count;
+                                int j = CollideOCLStack.Count;
                                 sStkNPS ne = new sStkNPS(n, se.mask, n.volume.ProjectMinimum(ref sortaxis, srtsgns));
-                                stack.Insert(0, ne);
-                                while ((j > 0) && (ne.value > stack[j - 1].value))
+                                CollideOCLStack.Insert(0, ne);
+                                while ((j > 0) && (ne.value > CollideOCLStack[j - 1].value))
                                 {
-                                    sStkNPS left = stack[j];
-                                    sStkNPS right = stack[j - 1];
-                                    stack[j] = right;
-                                    stack[j - 1] = left;
+                                    sStkNPS left = CollideOCLStack[j];
+                                    sStkNPS right = CollideOCLStack[j - 1];
+                                    CollideOCLStack[j] = right;
+                                    CollideOCLStack[j - 1] = left;
                                     --j;
                                     //btSwap(stack[j],stack[j-1]);--j;
                                 }
@@ -732,8 +758,9 @@ namespace BulletXNA.BulletCollision
                             collideable.Process(se.node);
                         }
                     }
-                } while (stack.Count > 0);
+                } while (CollideOCLStack.Count > 0);
             }
+            CollideOCLCount--;
         }
 
 

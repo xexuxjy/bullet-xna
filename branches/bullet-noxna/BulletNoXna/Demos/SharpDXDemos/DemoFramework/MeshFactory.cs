@@ -57,10 +57,10 @@ namespace DemoFramework
                 BindFlags = BindFlags.VertexBuffer
             };
 
-            using (var data = new SharpDX.DataStream(vectors, false, false))
+            using (var data = new SharpDX.DataStream(vertexBufferDesc.SizeInBytes, false, true))
             {
+                data.WriteRange(vectors);
                 VertexBuffer = new Buffer(device, data, vertexBufferDesc);
-                VertexBuffer.Unmap();
             }
 
             BufferBindings[0] = new VertexBufferBinding(VertexBuffer, 24, 0);
@@ -92,8 +92,9 @@ namespace DemoFramework
                     CpuAccessFlags = CpuAccessFlags.Write
                 };
 
-                using (var data = new SharpDX.DataStream(vectors, false, false))
+                using (var data = new SharpDX.DataStream(vertexBufferDesc.SizeInBytes, false, false))
                 {
+                    data.WriteRange(vectors);
                     VertexBuffer = new Buffer(device, data, vertexBufferDesc);
                 }
 
@@ -101,20 +102,39 @@ namespace DemoFramework
             }
         }
 
-        public void SetIndexBuffer(Device device, byte[] indices)
+        public void SetIndexBuffer(Device device, ushort[] indices)
         {
-            IndexFormat = Format.R8_UInt;
+            IndexFormat = Format.R16_UInt;
 
-            BufferDescription boxIndexBufferDesc = new BufferDescription()
+            BufferDescription indexBufferDesc = new BufferDescription()
             {
-                SizeInBytes = sizeof(byte) * indices.Length,
+                SizeInBytes = sizeof(ushort) * indices.Length,
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.IndexBuffer
             };
 
-            using (var data = new SharpDX.DataStream(indices, false, false))
+            using (var data = new DataStream(indexBufferDesc.SizeInBytes, false, true))
             {
-                IndexBuffer = new Buffer(device, data, boxIndexBufferDesc);
+                data.WriteRange(indices);
+                IndexBuffer = new Buffer(device, data, indexBufferDesc);
+            }
+        }
+
+        public void SetIndexBuffer(Device device, uint[] indices)
+        {
+            IndexFormat = Format.R32_UInt;
+
+            BufferDescription indexBufferDesc = new BufferDescription()
+            {
+                SizeInBytes = sizeof(uint) * indices.Length,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.IndexBuffer
+            };
+
+            using (var data = new DataStream(indexBufferDesc.SizeInBytes, false, true))
+            {
+                data.WriteRange(indices);
+                IndexBuffer = new Buffer(device, data, indexBufferDesc);
             }
         }
 
@@ -196,7 +216,7 @@ namespace DemoFramework
             Clear();
 
             if (planeShader != null)
-                planeShader.Release();
+                planeShader.Dispose();
         }
 
         ShapeData CreateBoxShape(BoxShape shape)
@@ -324,11 +344,11 @@ namespace DemoFramework
             shapeData.IndexCount = (4 * numSteps + 2) * 3;
 
             Vector3[] vertices = new Vector3[shapeData.VertexCount * 2];
-            byte[] indices = new byte[shapeData.IndexCount];
+            ushort[] indices = new ushort[shapeData.IndexCount];
 
             int i = 0, v = 0;
-            byte index = 0;
-            byte baseIndex;
+            ushort index = 0;
+            ushort baseIndex;
             Vector3 normal;
 
             // Draw two sides
@@ -353,12 +373,12 @@ namespace DemoFramework
                     vertices[v++] = normal;
 
                     indices[i++] = baseIndex;
-                    indices[i++] = (byte)(index - 1);
+                    indices[i++] = (ushort)(index - 1);
                     indices[i++] = index++;
                 }
                 indices[i++] = baseIndex;
-                indices[i++] = (byte)(index - 1);
-                indices[i++] = (byte)(baseIndex + 1);
+                indices[i++] = (ushort)(index - 1);
+                indices[i++] = (ushort)(baseIndex + 1);
             }
 
 
@@ -387,20 +407,20 @@ namespace DemoFramework
                 vertices[v++] = GetVectorByAxis(new Vector3(x, -halfHeight, z), up);
                 vertices[v++] = normal;
 
-                indices[i++] = (byte)(index - 2);
-                indices[i++] = (byte)(index - 1);
-                indices[i++] = (byte)index;
-                indices[i++] = (byte)index;
-                indices[i++] = (byte)(index - 1);
-                indices[i++] = (byte)(index + 1);
+                indices[i++] = (ushort)(index - 2);
+                indices[i++] = (ushort)(index - 1);
+                indices[i++] = index;
+                indices[i++] = index;
+                indices[i++] = (ushort)(index - 1);
+                indices[i++] = (ushort)(index + 1);
                 index += 2;
             }
-            indices[i++] = (byte)(index - 2);
-            indices[i++] = (byte)(index - 1);
-            indices[i++] = (byte)(baseIndex);
-            indices[i++] = (byte)(baseIndex);
-            indices[i++] = (byte)(index - 1);
-            indices[i++] = (byte)(baseIndex + 1);
+            indices[i++] = (ushort)(index - 2);
+            indices[i++] = (ushort)(index - 1);
+            indices[i++] = baseIndex;
+            indices[i++] = baseIndex;
+            indices[i++] = (ushort)(index - 1);
+            indices[i++] = (ushort)(baseIndex + 1);
 
             shapeData.SetVertexBuffer(device, vertices);
             shapeData.SetIndexBuffer(device, indices);
@@ -541,7 +561,7 @@ namespace DemoFramework
             shapeData.IndexCount = 6 * slices * (stacks - 1);
 
             Vector3[] vertices = new Vector3[shapeData.VertexCount * 2];
-            byte[] indices = new byte[shapeData.IndexCount];
+            ushort[] indices = new ushort[shapeData.IndexCount];
 
             int i = 0, v = 0;
 
@@ -575,7 +595,7 @@ namespace DemoFramework
 
             // Indices
             // Top cap
-            byte index = 2;
+            ushort index = 2;
             for (k = 0; k < slices; k++)
             {
                 indices[i++] = 0;
@@ -833,13 +853,13 @@ namespace DemoFramework
 
         public void RenderInstanced()
         {
-            Device.InputAssemblerStage ia = device.InputAssembler;
-            ia.SetInputLayout(inputLayout);
+            InputAssemblerStage ia = device.InputAssembler;
+            ia.InputLayout = inputLayout;
 
             foreach (ShapeData s in shapes.Values)
             {
                 ia.SetVertexBuffers(0, s.BufferBindings);
-                ia.SetPrimitiveTopology(s.PrimitiveTopology);
+                ia.PrimitiveTopology = s.PrimitiveTopology;
                 if (s.IndexBuffer != null)
                 {
                     ia.SetIndexBuffer(s.IndexBuffer, s.IndexFormat, 0);

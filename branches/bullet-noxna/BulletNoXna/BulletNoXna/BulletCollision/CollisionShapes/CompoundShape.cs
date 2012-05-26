@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
         public CompoundShape() : this(true) { }
         public CompoundShape(bool enableDynamicAabbTree)
         {
-            m_children = new List<CompoundShapeChild>();
+            m_children = new ObjectArray<CompoundShapeChild>();
             m_localAabbMax = new Vector3(float.MinValue);
             m_localAabbMin = new Vector3(float.MaxValue);
             m_collisionMargin = 0f;
@@ -109,7 +109,7 @@ namespace BulletXNA.BulletCollision
             {
                 m_dynamicAabbTree.Remove(m_children[childShapeIndex].m_treeNode);
             }
-            m_children.RemoveAt(childShapeIndex);
+            m_children.RemoveAtQuick(childShapeIndex);
             if (m_dynamicAabbTree != null)
             {
                 m_children[childShapeIndex].m_treeNode.dataAsInt = childShapeIndex;
@@ -371,7 +371,7 @@ namespace BulletXNA.BulletCollision
             return m_updateRevision;
         }
 
-        private IList<CompoundShapeChild> m_children;
+        private ObjectArray<CompoundShapeChild> m_children;
         private Vector3 m_localAabbMin;
         private Vector3 m_localAabbMax;
 

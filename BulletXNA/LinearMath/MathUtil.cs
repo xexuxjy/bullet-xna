@@ -701,6 +701,11 @@ namespace BulletXNA
             return (int)(x + 0.5);
         }
 
+        public static int Clamp(int value, int min, int max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
+
         public static void VectorClampMax(ref IndexedVector3 input, ref IndexedVector3 bounds)
         {
             input.X = Math.Min(input.X, bounds.X);

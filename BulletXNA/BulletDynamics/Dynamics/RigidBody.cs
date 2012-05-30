@@ -70,10 +70,10 @@ namespace BulletXNA.BulletDynamics
 
         public int m_debugBodyId;
 
-        protected IndexedVector3 m_deltaLinearVelocity;
-        protected IndexedVector3 m_deltaAngularVelocity;
+        public IndexedVector3 m_deltaLinearVelocity;
+        public IndexedVector3 m_deltaAngularVelocity;
         protected IndexedVector3 m_angularFactor;
-        protected IndexedVector3 m_invMass;
+        public IndexedVector3 m_invMass;
         protected IndexedVector3 m_pushVelocity;
         protected IndexedVector3 m_turnVelocity;
 
@@ -627,7 +627,14 @@ namespace BulletXNA.BulletDynamics
 	    public IndexedVector3 GetVelocityInLocalPoint(ref IndexedVector3 rel_pos)
 	    {
 		    //we also calculate lin/ang velocity for kinematic objects
-		    return m_linearVelocity + IndexedVector3.Cross(m_angularVelocity,rel_pos);
+
+            IndexedVector3 temp = new IndexedVector3(m_angularVelocity.Y * rel_pos.Z - m_angularVelocity.Z * rel_pos.Y,
+                m_angularVelocity.Z * rel_pos.X - m_angularVelocity.X * rel_pos.Z,
+                m_angularVelocity.X * rel_pos.Y - m_angularVelocity.Y * rel_pos.X);
+
+            return new IndexedVector3(m_linearVelocity.X + temp.X, m_linearVelocity.Y + temp.Y, m_linearVelocity.Z + temp.Z);
+
+            //return m_linearVelocity + IndexedVector3.Cross(m_angularVelocity,rel_pos);
 
 		    //for kinematic objects, we could also use use:
 		    //		return 	(m_worldTransform(rel_pos) - m_interpolationWorldTransform(rel_pos)) / m_kinematicTimeStep;
@@ -917,9 +924,18 @@ namespace BulletXNA.BulletDynamics
 			}
 
 		    if (m_inverseMass != 0f)
-		    {
-			    m_deltaLinearVelocity += linearComponent*impulseMagnitude;
-			    m_deltaAngularVelocity += angularComponent*(impulseMagnitude*m_angularFactor);
+            {   
+                m_deltaLinearVelocity.X += impulseMagnitude * linearComponent.X;
+                m_deltaLinearVelocity.Y += impulseMagnitude * linearComponent.Y;
+                m_deltaLinearVelocity.Z += impulseMagnitude * linearComponent.Z;
+                //m_deltaLinearVelocity += linearComponent*impulseMagnitude;
+                
+                m_deltaAngularVelocity.X += angularComponent.X * (impulseMagnitude * m_angularFactor.X);
+                m_deltaAngularVelocity.Y += angularComponent.Y  * (impulseMagnitude * m_angularFactor.Y);
+                m_deltaAngularVelocity.Z += angularComponent.Z *(impulseMagnitude * m_angularFactor.Z);
+
+                //m_deltaAngularVelocity += angularComponent*(impulseMagnitude*m_angularFactor);
+                
                 MathUtil.SanityCheckVector(ref m_deltaLinearVelocity);
                 MathUtil.SanityCheckVector(ref m_deltaAngularVelocity);
             }

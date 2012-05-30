@@ -314,6 +314,21 @@ namespace BulletXNA.LinearMath
             output.Z = value1.Z * value2.Z;
         }
 
+        public static void Multiply(ref IndexedVector3 output, ref IndexedVector3 value1, float value2)
+        {
+            output.X = value1.X * value2;
+            output.Y = value1.Y * value2;
+            output.Z = value1.Z * value2;
+        }
+
+
+        public static void Multiply(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2, float value3)
+        {
+            output.X = value1.X * value2.X * value3;
+            output.Y = value1.Y * value2.Y * value3;
+            output.Z = value1.Z * value2.Z * value3;
+        }
+
         public static void Subtract(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
         {
             output.X = value1.X - value2.X;
@@ -321,6 +336,12 @@ namespace BulletXNA.LinearMath
             output.Z = value1.Z - value2.Z;
         }
 
+        public static void Add(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
+        {
+            output.X = value1.X + value2.X;
+            output.Y = value1.Y + value2.Y;
+            output.Z = value1.Z + value2.Z;
+        }
 
         public static IndexedVector3 operator /(IndexedVector3 value1, IndexedVector3 value2)
         {

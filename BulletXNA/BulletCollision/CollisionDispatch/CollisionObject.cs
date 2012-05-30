@@ -521,7 +521,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        protected IndexedMatrix m_worldTransform;
+        public IndexedMatrix m_worldTransform;
         protected IndexedMatrix m_interpolationWorldTransform = IndexedMatrix.Identity;
         protected IndexedVector3 m_interpolationAngularVelocity;
         protected IndexedVector3 m_interpolationLinearVelocity;

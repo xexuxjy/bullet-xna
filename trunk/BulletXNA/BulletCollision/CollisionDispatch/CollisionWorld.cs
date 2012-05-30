@@ -25,7 +25,7 @@
 
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+using BulletXNA.BulletDynamics;
 
 namespace BulletXNA.BulletCollision
 {
@@ -255,7 +255,10 @@ namespace BulletXNA.BulletCollision
 
 					        if(colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
 					        {
-						        colObj.GetCollisionShape().GetAabb(colObj.GetInterpolationWorldTransform(),out minAabb2,out maxAabb2);
+                                IndexedMatrix m = colObj.GetInterpolationWorldTransform();
+                                (colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
+
+						        colObj.GetCollisionShape().GetAabb(m,out minAabb2,out maxAabb2);
 						        minAabb2 -= contactThreshold;
 						        maxAabb2 += contactThreshold;
 						        MathUtil.VectorMin(ref minAabb2,ref minAabb);
@@ -939,18 +942,29 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
         }
 
+        public void Initialize(IndexedVector3 rayFromWorld, IndexedVector3 rayToWorld)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+            m_closestHitFraction = 1f;
+            m_collisionObject = null;
+        }
+
         public void Initialize(ref IndexedVector3 rayFromWorld, ref IndexedVector3 rayToWorld)
         {
             m_rayFromWorld = rayFromWorld;
             m_rayToWorld = rayToWorld;
+            m_closestHitFraction = 1f;
+            m_collisionObject = null;
+
         }
 
 
-        public void Initialize(Vector3 rayFromWorld, Vector3 rayToWorld)
-        {
-            m_rayFromWorld = rayFromWorld;
-            m_rayToWorld = rayToWorld;
-        }
+        //public void Initialize(Vector3 rayFromWorld, Vector3 rayToWorld)
+        //{
+        //    m_rayFromWorld = rayFromWorld;
+        //    m_rayToWorld = rayToWorld;
+        //}
 
         public IndexedVector3 m_rayFromWorld;//used to calculate hitPointWorld from hitFraction
         public IndexedVector3 m_rayToWorld;

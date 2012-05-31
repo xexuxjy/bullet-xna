@@ -260,7 +260,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     }
 
 
-                    bool islandSleeping = false;
+                    bool islandSleeping = true;
 
                     for (endIslandIndex = startIslandIndex; (endIslandIndex < numElem) && (GetUnionFind().GetElement(endIslandIndex).m_id == islandId); endIslandIndex++)
                     {

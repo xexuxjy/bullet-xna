@@ -42,9 +42,8 @@ namespace BulletXNA.BulletDynamics
 		}
 		protected IndexedVector3 PerpindicularComponent(ref IndexedVector3 direction, ref IndexedVector3 normal)
 		{
-			float magnitude = 1f - IndexedVector3.Dot(direction, normal);
-			return normal * magnitude;
-		}
+            return direction - ParallelComponent(ref direction, ref normal);
+        }
 
 		protected bool RecoverFromPenetration(CollisionWorld collisionWorld)
 		{
@@ -107,12 +106,12 @@ namespace BulletXNA.BulletDynamics
 		{
 			// phase 1: up
 			IndexedMatrix start = IndexedMatrix.Identity, end = IndexedMatrix.Identity;
-			m_targetPosition = m_currentPosition + upAxisDirection[m_upAxis] * (m_stepHeight + (m_verticalOffset > 0.9f ? m_verticalOffset : 0.0f));
+			m_targetPosition = m_currentPosition + upAxisDirection[m_upAxis] * (m_stepHeight + (m_verticalOffset > 0.0f ? m_verticalOffset : 0.0f));
 
 
 			/* FIXME: Handle penetration properly */
-			start._origin = (m_currentPosition + upAxisDirection[m_upAxis] * 0.1f);
-			end._origin = m_targetPosition;
+            start._origin = (m_currentPosition + upAxisDirection[m_upAxis] * (m_convexShape.GetMargin() + m_addedMargin));
+            end._origin = (m_targetPosition);
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, -upAxisDirection[m_upAxis], 0.7071f);
 			callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
@@ -310,6 +309,10 @@ namespace BulletXNA.BulletDynamics
 			{
 				// we dropped a fraction of the height -> hit floor
 				m_currentPosition = MathUtil.Interpolate3(ref m_currentPosition, ref m_targetPosition, callback.m_closestHitFraction);
+                m_verticalVelocity = 0.0f;
+                m_verticalOffset = 0.0f;
+                m_wasJumping = false;
+
 			}
 			else
 			{

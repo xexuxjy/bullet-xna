@@ -329,6 +329,11 @@ namespace BulletXNADemos.Demos
             //#ifndef BT_NO_PROFILE
             //    CProfileManager::Release_Iterator(m_profileIterator);
             //#endif //BT_NO_PROFILE
+            if (BulletGlobals.g_streamWriter != null)
+            {
+                BulletGlobals.g_streamWriter.Close();
+            }
+
             int i = BulletGlobals.s_collisionAlgorithmInstanceCount;
             m_shootBoxShape = null;
             m_shapeDrawer = null;
@@ -1614,7 +1619,7 @@ namespace BulletXNADemos.Demos
 
             //debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             //DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits | DebugDrawModes.DBG_DrawWireframe;
-            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;
             m_debugDraw.SetDebugMode(debugMode);

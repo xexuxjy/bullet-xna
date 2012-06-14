@@ -26,6 +26,7 @@ using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
+using System.IO;
 
 namespace BulletXNADemos.Demos
 {
@@ -46,6 +47,10 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
+            string filename = @"E:\users\man\bullet\xna-constraint-output.txt";
+            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 	        IndexedVector3 worldMin = new IndexedVector3(-1000,-1000,-1000);
@@ -394,6 +399,12 @@ namespace BulletXNADemos.Demos
 		spHingeDynAB.SetDbgDrawSize(5.0f);
 	}
 #endif
+        }
+
+        public override void Cleanup()
+        {
+
+            base.Cleanup();
         }
 
         static void Main(string[] args)

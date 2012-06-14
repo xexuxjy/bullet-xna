@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA
@@ -110,7 +110,7 @@ namespace BulletXNA
     //	#define QUATERNION_DERIVATIVE
 	    #if QUATERNION_DERIVATIVE
             IndexedVector3 pos;
-            Quaternion predictedOrn;
+            IndexedQuaternion predictedOrn;
             IndexedVector3 scale;
 
             curTrans.Decompose(ref scale, ref predictedOrn, ref pos);
@@ -140,11 +140,11 @@ namespace BulletXNA
 			    // sync(fAngle) = sin(c*fAngle)/t
 			    axis   = angvel*( (float)Math.Sin(0.5f*fAngle*timeStep)/fAngle );
 		    }
-		    Quaternion dorn = new Quaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
+		    IndexedQuaternion dorn = new IndexedQuaternion(axis.X,axis.Y,axis.Z,(float)Math.Cos( fAngle*timeStep*.5f) );
 
-            Quaternion orn0 = curTrans.GetRotation();
+            IndexedQuaternion orn0 = curTrans.GetRotation();
 
-		    Quaternion predictedOrn = dorn * orn0;
+		    IndexedQuaternion predictedOrn = dorn * orn0;
 		    predictedOrn.Normalize();
 	    #endif
 
@@ -152,7 +152,7 @@ namespace BulletXNA
             predictedTransform._basis = newMatrix._basis;
 	    }
 
-        public static void CalculateVelocityQuaternion(ref IndexedVector3 pos0, ref IndexedVector3 pos1, ref Quaternion orn0, ref Quaternion orn1, float timeStep, out IndexedVector3 linVel, out IndexedVector3 angVel)
+        public static void CalculateVelocityQuaternion(ref IndexedVector3 pos0, ref IndexedVector3 pos1, ref IndexedQuaternion orn0, ref IndexedQuaternion orn1, float timeStep, out IndexedVector3 linVel, out IndexedVector3 angVel)
         {
             linVel = (pos1 - pos0) / timeStep;
             if (orn0 != orn1)
@@ -168,10 +168,10 @@ namespace BulletXNA
             }
         }
 
-        public static void CalculateDiffAxisAngleQuaternion(ref Quaternion orn0, ref Quaternion orn1a, out IndexedVector3 axis, out float angle)
+        public static void CalculateDiffAxisAngleQuaternion(ref IndexedQuaternion orn0, ref IndexedQuaternion orn1a, out IndexedVector3 axis, out float angle)
         {
-            Quaternion orn1 = MathUtil.QuatFurthest(ref orn0, ref orn1a);
-            Quaternion dorn = orn1 * MathUtil.QuaternionInverse(ref orn0);
+            IndexedQuaternion orn1 = MathUtil.QuatFurthest(ref orn0, ref orn1a);
+            IndexedQuaternion dorn = orn1 * MathUtil.QuaternionInverse(ref orn0);
 
             ///floating point inaccuracy can lead to w component > 1..., which breaks 
             dorn.Normalize();
@@ -205,7 +205,7 @@ namespace BulletXNA
         {
             //IndexedMatrix dmat = GetRotateMatrix(ref transform1) * IndexedMatrix.Invert(GetRotateMatrix(ref transform0));
             IndexedBasisMatrix dmat = transform1._basis * transform0._basis.Inverse();
-            Quaternion dorn = Quaternion.Identity;
+            IndexedQuaternion dorn = IndexedQuaternion.Identity;
             GetRotation(ref dmat, out dorn);
 
             ///floating point inaccuracy can lead to w component > 1..., which breaks 
@@ -229,12 +229,12 @@ namespace BulletXNA
 
 
 
-        public static void GetRotation(ref IndexedBasisMatrix a, out Quaternion rot)
+        public static void GetRotation(ref IndexedBasisMatrix a, out IndexedQuaternion rot)
         {
             rot = a.GetRotation();
         }
 
-        public static Quaternion GetRotation(ref IndexedBasisMatrix a)
+        public static IndexedQuaternion GetRotation(ref IndexedBasisMatrix a)
         {
             return a.GetRotation();
         }
@@ -248,8 +248,8 @@ namespace BulletXNA
     ///by conservatively updating a cached separating distance/vector instead of re-calculating the closest distance
     public class ConvexSeparatingDistanceUtil
     {
-        private Quaternion m_ornA;
-        private Quaternion m_ornB;
+        private IndexedQuaternion m_ornA;
+        private IndexedQuaternion m_ornB;
         private IndexedVector3 m_posA;
         private IndexedVector3 m_posB;
 
@@ -275,8 +275,8 @@ namespace BulletXNA
         {
             IndexedVector3 toPosA = transA._origin;
             IndexedVector3 toPosB = transB._origin;
-            Quaternion toOrnA = transA.GetRotation();
-            Quaternion toOrnB = transB.GetRotation();
+            IndexedQuaternion toOrnA = transA.GetRotation();
+            IndexedQuaternion toOrnB = transB.GetRotation();
 
             if (m_separatingDistance > 0.0f)
             {
@@ -312,8 +312,8 @@ namespace BulletXNA
     		
 		    IndexedVector3 toPosA = transA._origin;
 		    IndexedVector3 toPosB = transB._origin;
-            Quaternion toOrnA = transA.GetRotation();
-            Quaternion toOrnB = transB.GetRotation();
+            IndexedQuaternion toOrnA = transA.GetRotation();
+            IndexedQuaternion toOrnB = transB.GetRotation();
 		    m_posA = toPosA;
 		    m_posB = toPosB;
 		    m_ornA = toOrnA;

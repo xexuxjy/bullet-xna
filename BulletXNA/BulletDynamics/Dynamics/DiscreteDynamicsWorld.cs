@@ -1022,15 +1022,6 @@ namespace BulletXNA.BulletDynamics
                         //printf("deferred\n");
                     }
                 }
-
-
-                //                ///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
-                //                if (numManifolds + numCurConstraints > 0)
-                //                {
-                ////solveGroup(ObjectArray<CollisionObject> bodies,int numBodies,PersistentManifoldArray manifold,int numManifolds,ObjectArray<TypedConstraint> constraints,int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
-                //                    m_solver.solveGroup(bodies,numBodies,manifolds, numManifolds,startConstraint,numCurConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
-                //                }
-
             }
         }
 

@@ -51,8 +51,12 @@ namespace BulletXNA.BulletCollision
             /* Compute AABB that encompasses angular movement */
             IndexedVector3 linVel, angVel;
             TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
+
+            // FIXME MAN check this - should be a get/set rotation call, basis copy like this may break with scale?
             IndexedMatrix R = IndexedMatrix.Identity;
-            R._basis = convexFromTrans._basis;
+            R.SetRotation(convexFromTrans.GetRotation());
+
+
             castShape.CalculateTemporalAabb(ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 
             /// go over all objects, and if the ray intersects their aabb + cast shape aabb,

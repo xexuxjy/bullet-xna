@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletDynamics
 {
@@ -377,10 +377,10 @@ namespace BulletXNA.BulletDynamics
 	        //rotate around steering over de wheelAxleWS
 	        float steering = wheel.m_steering;
         	
-	        Quaternion steeringOrn = Quaternion.CreateFromAxisAngle(up.ToVector3(),steering);//wheel.m_steering);
+	        IndexedQuaternion steeringOrn = IndexedQuaternion.CreateFromAxisAngle(up.ToVector3(),steering);//wheel.m_steering);
             IndexedBasisMatrix steeringMat = new IndexedBasisMatrix(ref steeringOrn);
 
-            Quaternion rotatingOrn = Quaternion.CreateFromAxisAngle(right.ToVector3(), -wheel.m_rotation);
+            IndexedQuaternion rotatingOrn = IndexedQuaternion.CreateFromAxisAngle(right.ToVector3(), -wheel.m_rotation);
             IndexedBasisMatrix rotatingMat = new IndexedBasisMatrix(ref rotatingOrn);
 
 

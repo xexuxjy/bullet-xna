@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -160,12 +160,12 @@ namespace BulletXNA.BulletCollision
             return CylinderLocalSupportX(GetHalfExtentsWithoutMargin(), vec);
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new Vector4(CylinderLocalSupportY(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportY(halfExtents, vectors[i]).ToVector3(),0);
             }
         }
 
@@ -288,12 +288,12 @@ namespace BulletXNA.BulletCollision
             return CylinderLocalSupportX(GetHalfExtentsWithoutMargin(), vec);
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new Vector4(CylinderLocalSupportX(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportX(halfExtents, vectors[i]).ToVector3(),0);
             }
         }
     	
@@ -326,12 +326,12 @@ namespace BulletXNA.BulletCollision
         {
             return CylinderLocalSupportZ(GetHalfExtentsWithoutMargin(), vec);
         }
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new Vector4(CylinderLocalSupportZ(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportZ(halfExtents, vectors[i]).ToVector3(),0);
             }
         }
 

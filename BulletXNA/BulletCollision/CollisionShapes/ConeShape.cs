@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -50,12 +50,12 @@ namespace BulletXNA.BulletCollision
         {
             return ConeLocalSupport(ref vec);
         }
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
 	        for (int i=0;i<numVectors;i++)
 	        {
 		        IndexedVector3 vec = vectors[i];
-		        supportVerticesOut[i] = new Vector4(ConeLocalSupport(ref vec).ToVector3(),0);
+		        supportVerticesOut[i] = new IndexedVector4(ConeLocalSupport(ref vec).ToVector3(),0);
 	        }
         }
 

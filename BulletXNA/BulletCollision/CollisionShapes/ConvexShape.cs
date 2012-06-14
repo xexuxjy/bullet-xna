@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -442,7 +442,7 @@ namespace BulletXNA.BulletCollision
 
 
         //notice that the vectors should be unit length
-		public abstract void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors);
+		public abstract void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors);
 
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version

@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 
 
@@ -231,7 +231,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 isConvex = (dotA < 0f);
 
                                 correctedAngle = isConvex ? ang4 : -ang4;
-                                Quaternion orn2 = Quaternion.CreateFromAxisAngle(calculatedEdge.ToVector3(), -correctedAngle);
+                                IndexedQuaternion orn2 = IndexedQuaternion.CreateFromAxisAngle(calculatedEdge.ToVector3(), -correctedAngle);
                                 IndexedMatrix rotateMatrix = IndexedMatrix.CreateFromQuaternion(orn2);
                                 calculatedNormalB = new IndexedBasisMatrix(orn2) * normalA;
                             }
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 1:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[0] - m_triangleVerticesA[1];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         float bla = IndexedVector3.Dot(computedNormalB, normalB);
                                         if (bla < 0)
@@ -272,7 +272,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 2:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[2] - m_triangleVerticesA[0];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (IndexedVector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -294,7 +294,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 3:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[1] - m_triangleVerticesA[2];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (IndexedVector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -504,7 +504,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle < correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
+                    IndexedQuaternion rotation = IndexedQuaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }
@@ -515,7 +515,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle > correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
+                    IndexedQuaternion rotation = IndexedQuaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }
@@ -668,7 +668,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                             IndexedVector3 nA = swapFactor * tri_normal;
 
-                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV0V1Angle);
+                            IndexedQuaternion orn = new IndexedQuaternion(edge.ToVector3(), info.m_edgeV0V1Angle);
                             IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
                             if ((info.m_flags & TriangleInfoMap.TRI_INFO_V0V1_SWAP_NORMALB) != 0)
                             {
@@ -759,7 +759,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
                             IndexedVector3 nA = swapFactor * tri_normal;
 
-                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV1V2Angle);
+                            IndexedQuaternion orn = new IndexedQuaternion(edge.ToVector3(), info.m_edgeV1V2Angle);
                             IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
                             if ((info.m_flags & TriangleInfoMap.TRI_INFO_V1V2_SWAP_NORMALB) != 0)
                             {
@@ -845,7 +845,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 #endif //BT_INTERNAL_EDGE_DEBUG_DRAW
 
                             IndexedVector3 nA = swapFactor * tri_normal;
-                            Quaternion orn = new Quaternion(edge.ToVector3(), info.m_edgeV2V0Angle);
+                            IndexedQuaternion orn = new IndexedQuaternion(edge.ToVector3(), info.m_edgeV2V0Angle);
                             IndexedVector3 computedNormalB = MathUtil.QuatRotate(ref orn, ref tri_normal);
                             if ((info.m_flags & TriangleInfoMap.TRI_INFO_V2V0_SWAP_NORMALB) != 0)
                             {

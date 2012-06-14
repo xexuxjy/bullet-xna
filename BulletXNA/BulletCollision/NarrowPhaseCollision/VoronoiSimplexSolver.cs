@@ -27,7 +27,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -666,7 +666,7 @@ namespace BulletXNA.BulletCollision
         // if m_usedVertices & MASK then the related vertex is used
         public BitArray m_usedVertices = new BitArray(4);
         //public float[] m_barycentricCoords = new float[4];
-        public Vector4 m_barycentricCoords = new Vector4();
+        public IndexedVector4 m_barycentricCoords = new IndexedVector4();
         public bool m_degenerate;
 
         public void Reset()

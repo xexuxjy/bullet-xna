@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
@@ -77,7 +77,7 @@ namespace BulletXNA.BulletDynamics
 		// motor
 		public bool m_bMotorEnabled;
 		public bool m_bNormalizedMotorStrength;
-		public Quaternion m_qTarget = Quaternion.Identity;
+		public IndexedQuaternion m_qTarget = IndexedQuaternion.Identity;
 		public float m_maxMotorImpulse;
 		public IndexedVector3 m_accMotorImpulse;
 
@@ -448,7 +448,7 @@ namespace BulletXNA.BulletDynamics
 			if (m_twistSpan >= 0f)
 			{
                 IndexedVector3 b2Axis2a = GetRigidBodyB().GetCenterOfMassTransform()._basis * m_rbBFrame._basis.GetColumn(1); 
-				Quaternion rotationArc = MathUtil.ShortestArcQuat(ref b2Axis1, ref b1Axis1);
+				IndexedQuaternion rotationArc = MathUtil.ShortestArcQuat(ref b2Axis1, ref b1Axis1);
 				IndexedVector3 TwistRef = MathUtil.QuatRotate(ref rotationArc, ref b2Axis2a);
 				float twist = (float)Math.Atan2(TwistRef.Dot(ref b1Axis3), TwistRef.Dot(ref b1Axis2));
 				m_twistAngle = twist;
@@ -496,7 +496,7 @@ namespace BulletXNA.BulletDynamics
 				IndexedMatrix trA = transA * m_rbAFrame;
 				IndexedMatrix trB = transB * m_rbBFrame;
                 IndexedMatrix trDeltaAB = trB * trPose * trA.Inverse();
-				Quaternion qDeltaAB = trDeltaAB.GetRotation();
+				IndexedQuaternion qDeltaAB = trDeltaAB.GetRotation();
 				IndexedVector3 swingAxis = new IndexedVector3(qDeltaAB.X, qDeltaAB.Y, qDeltaAB.Z);
 				m_swingAxis = swingAxis;
 				m_swingAxis.Normalize();
@@ -513,18 +513,18 @@ namespace BulletXNA.BulletDynamics
 
 				// compute rotation of A wrt B (in constraint space)
 				// Not sure if these need order swapping as well?
-                Quaternion qA = transA.GetRotation() * m_rbAFrame.GetRotation();
-                Quaternion qB = transB.GetRotation() * m_rbBFrame.GetRotation();
+                IndexedQuaternion qA = transA.GetRotation() * m_rbAFrame.GetRotation();
+                IndexedQuaternion qB = transB.GetRotation() * m_rbBFrame.GetRotation();
                 
-                Quaternion qAB = MathUtil.QuaternionInverse(qB) * qA;
+                IndexedQuaternion qAB = MathUtil.QuaternionInverse(qB) * qA;
 
 				// split rotation into cone and twist
 				// (all this is done from B's perspective. Maybe I should be averaging axes...)
 				IndexedVector3 vConeNoTwist = MathUtil.QuatRotate(ref qAB, ref vTwist);
 				vConeNoTwist.Normalize();
-				Quaternion qABCone = MathUtil.ShortestArcQuat(ref vTwist, ref vConeNoTwist);
+				IndexedQuaternion qABCone = MathUtil.ShortestArcQuat(ref vTwist, ref vConeNoTwist);
 				qABCone.Normalize();
-				Quaternion qABTwist = MathUtil.QuaternionInverse(qABCone) * qAB;
+				IndexedQuaternion qABTwist = MathUtil.QuaternionInverse(qABCone) * qAB;
 				qABTwist.Normalize();
 
 				if (m_swingSpan1 >= m_fixThresh && m_swingSpan2 >= m_fixThresh)
@@ -735,22 +735,22 @@ namespace BulletXNA.BulletDynamics
 		// q: the desired rotation of bodyA wrt bodyB.
 		// note: if q violates the joint limits, the internal target is clamped to avoid conflicting impulses (very bad for stability)
 		// note: don't forget to enableMotor()
-		public void SetMotorTarget(ref Quaternion q)
+		public void SetMotorTarget(ref IndexedQuaternion q)
 		{
 			IndexedMatrix trACur = m_rbA.GetCenterOfMassTransform();
 			IndexedMatrix trBCur = m_rbB.GetCenterOfMassTransform();
 			IndexedMatrix trABCur = trBCur.Inverse() * trACur;
-			Quaternion qABCur = trABCur.GetRotation();
+			IndexedQuaternion qABCur = trABCur.GetRotation();
             IndexedMatrix trConstraintCur = (trBCur * m_rbBFrame).Inverse() * (trACur * m_rbAFrame);
                 
-			Quaternion qConstraintCur = trConstraintCur.GetRotation();
+			IndexedQuaternion qConstraintCur = trConstraintCur.GetRotation();
 
-            Quaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation()) * q * m_rbAFrame.GetRotation();
+            IndexedQuaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation()) * q * m_rbAFrame.GetRotation();
 			SetMotorTargetInConstraintSpace(ref qConstraint);
 		}
 
 		// same as above, but q is the desired rotation of frameA wrt frameB in constraint space
-		public void SetMotorTargetInConstraintSpace(ref Quaternion q)
+		public void SetMotorTargetInConstraintSpace(ref IndexedQuaternion q)
 		{
 			m_qTarget = q;
 
@@ -760,9 +760,9 @@ namespace BulletXNA.BulletDynamics
 
 				// split into twist and cone
 				IndexedVector3 vTwisted = MathUtil.QuatRotate(ref m_qTarget, ref vTwist);
-				Quaternion qTargetCone = MathUtil.ShortestArcQuat(ref vTwist, ref vTwisted);
+				IndexedQuaternion qTargetCone = MathUtil.ShortestArcQuat(ref vTwist, ref vTwisted);
 				qTargetCone.Normalize();
-				Quaternion qTargetTwist = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(qTargetCone), m_qTarget);
+				IndexedQuaternion qTargetTwist = MathUtil.QuaternionMultiply(MathUtil.QuaternionInverse(qTargetCone), m_qTarget);
 				qTargetTwist.Normalize();
 
 				// clamp cone
@@ -781,7 +781,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							swingAngle = -swingLimit * softness;
 						}
-						qTargetCone = Quaternion.CreateFromAxisAngle(swingAxis.ToVector3(), swingAngle);
+						qTargetCone = new IndexedQuaternion(swingAxis, swingAngle);
 					}
 				}
 
@@ -802,7 +802,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							twistAngle = -m_twistSpan * softness;
 						}
-						qTargetTwist = Quaternion.CreateFromAxisAngle(twistAxis.ToVector3(), twistAngle);
+						qTargetTwist = new IndexedQuaternion(twistAxis, twistAngle);
 					}
 				}
 
@@ -838,12 +838,12 @@ namespace BulletXNA.BulletDynamics
 			// convert into point in constraint space:
 			// note: twist is x-axis, swing 1 and 2 are along the z and y axes respectively
 			IndexedVector3 vSwingAxis = new IndexedVector3(0, xEllipse, -yEllipse);
-			Quaternion qSwing = Quaternion.CreateFromAxisAngle(vSwingAxis.ToVector3(), swingLimit);
+			IndexedQuaternion qSwing = new IndexedQuaternion(vSwingAxis, swingLimit);
 			IndexedVector3 vPointInConstraintSpace = new IndexedVector3(fLength, 0, 0);
 			return MathUtil.QuatRotate(ref qSwing, ref vPointInConstraintSpace);
 		}
 
-		protected void ComputeConeLimitInfo(ref Quaternion qCone, // in
+		protected void ComputeConeLimitInfo(ref IndexedQuaternion qCone, // in
 			ref float swingAngle, ref IndexedVector3 vSwingAxis, ref float swingLimit) // all outs
 		{
 			swingAngle = MathUtil.QuatAngle(ref qCone);
@@ -904,15 +904,15 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
-		protected void ComputeTwistLimitInfo(ref Quaternion qTwist, // in
+		protected void ComputeTwistLimitInfo(ref IndexedQuaternion qTwist, // in
 			out float twistAngle, out IndexedVector3 vTwistAxis) // all outs
 		{
-			Quaternion qMinTwist = qTwist;
+			IndexedQuaternion qMinTwist = qTwist;
 			twistAngle = MathUtil.QuatAngle(ref qTwist);
 
 			if (twistAngle > MathUtil.SIMD_PI) // long way around. flip quat and recalculate.
 			{
-				qMinTwist = Quaternion.Negate(qTwist);
+				qMinTwist = -(qTwist);
 				twistAngle = MathUtil.QuatAngle(ref qTwist);
 			}
 			if (twistAngle < 0f)

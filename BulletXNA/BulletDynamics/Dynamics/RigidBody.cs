@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.BulletCollision;
-using Microsoft.Xna.Framework;
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
@@ -254,8 +253,8 @@ namespace BulletXNA.BulletDynamics
 
         public void SetDamping(float lin_damping, float ang_damping)
         {
-            m_linearDamping = MathHelper.Clamp(lin_damping, 0f, 1f);
-            m_angularDamping = MathHelper.Clamp(ang_damping, 0f, 1f);
+            m_linearDamping = MathUtil.Clamp(lin_damping, 0f, 1f);
+            m_angularDamping = MathUtil.Clamp(ang_damping, 0f, 1f);
 
         }
 
@@ -437,7 +436,7 @@ namespace BulletXNA.BulletDynamics
 			}
 
 
-            if (IsStaticOrKinematicObject())
+            if (IsKinematicObject())
             {
                 SetInterpolationWorldTransform(ref m_worldTransform);
             }
@@ -583,7 +582,7 @@ namespace BulletXNA.BulletDynamics
 		    return m_worldTransform._origin; 
 	    }
 	    
-        public Quaternion GetOrientation()
+        public IndexedQuaternion GetOrientation()
         {
             return m_worldTransform._basis.GetRotation();
         }

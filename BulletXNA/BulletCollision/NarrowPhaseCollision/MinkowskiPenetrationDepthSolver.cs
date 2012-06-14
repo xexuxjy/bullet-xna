@@ -23,7 +23,7 @@
 
 #define USE_BATCHED_SUPPORT
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -44,8 +44,8 @@ namespace BulletXNA.BulletCollision
 #if USE_BATCHED_SUPPORT
 
 
-            Vector4[] supportVerticesABatch = new Vector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
-            Vector4[] supportVerticesBBatch = new Vector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+            IndexedVector4[] supportVerticesABatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+            IndexedVector4[] supportVerticesBBatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
             IndexedVector3[] seperatingAxisInABatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
             IndexedVector3[] seperatingAxisInBBatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
 

@@ -27,7 +27,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision 
@@ -92,7 +92,7 @@ namespace BulletXNA.BulletCollision
                 res3 = cross.LengthSquared();
             }
 
-            Vector4 maxvec = new Vector4(res0, res1, res2, res3);
+            IndexedVector4 maxvec = new IndexedVector4(res0, res1, res2, res3);
             int biggestarea = MathUtil.ClosestAxis(ref maxvec);
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)

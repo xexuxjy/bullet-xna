@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -49,13 +49,13 @@ namespace BulletXNA.BulletCollision
             return supVertexA - supVertexB;
         }
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             ///@todo: could make recursive use of batching. probably this shape is not used frequently.
             for (int i = 0; i < numVectors; i++)
             {
                 IndexedVector3 temp = vectors[i];
-                supportVerticesOut[i] = new Vector4(LocalGetSupportingVertexWithoutMargin(ref temp).ToVector3(),0f);
+                supportVerticesOut[i] = new IndexedVector4(LocalGetSupportingVertexWithoutMargin(ref temp).ToVector3(),0f);
             }
         }
         public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)

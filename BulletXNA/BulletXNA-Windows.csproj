@@ -244,7 +244,9 @@
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
     <Compile Include="LinearMath\IndexedBasisMatrix.cs" />
     <Compile Include="LinearMath\IndexedMatrix.cs" />
+    <Compile Include="LinearMath\IndexedQuaternion.cs" />
     <Compile Include="LinearMath\IndexedVector3.cs" />
+    <Compile Include="LinearMath\IndexedVector4.cs" />
     <Compile Include="LinearMath\ObjectArray.cs" />
     <Compile Include="LinearMath\ConvexHull.cs" />
     <Compile Include="LinearMath\MathUtil.cs" />

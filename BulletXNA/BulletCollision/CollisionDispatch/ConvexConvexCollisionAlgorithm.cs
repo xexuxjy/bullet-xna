@@ -25,7 +25,7 @@
 
 using System.Diagnostics;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -354,9 +354,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                         if (v0.LengthSquared() > MathUtil.SIMD_EPSILON)
                         {
 
-                            Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
+                            IndexedQuaternion perturbeRot = IndexedQuaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
                             float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                            Quaternion rotq = Quaternion.CreateFromAxisAngle(sepNormalWorldSpace.ToVector3(), iterationAngle);
+                            IndexedQuaternion rotq = IndexedQuaternion.CreateFromAxisAngle(sepNormalWorldSpace.ToVector3(), iterationAngle);
 
                             if (perturbeA)
                             {

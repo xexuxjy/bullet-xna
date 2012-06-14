@@ -22,7 +22,7 @@
  */
 
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -100,7 +100,7 @@ namespace BulletXNA.BulletCollision
 	        }
             //first perform a collision query with the non-perturbated collision objects
             {
-                Quaternion rotq = Quaternion.Identity;
+                IndexedQuaternion rotq = IndexedQuaternion.Identity;
                 CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
             }
 
@@ -119,12 +119,12 @@ namespace BulletXNA.BulletCollision
                 {
                     perturbeAngle = angleLimit;
                 }
-                Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
+                IndexedQuaternion perturbeRot = IndexedQuaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
                 for (int i = 0; i < m_numPerturbationIterations; i++)
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                    Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal.ToVector3(), iterationAngle);
-                    rotq = MathUtil.QuaternionMultiply(Quaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
+                    IndexedQuaternion rotq = IndexedQuaternion.CreateFromAxisAngle(planeNormal.ToVector3(), iterationAngle);
+                    rotq = MathUtil.QuaternionMultiply(IndexedQuaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
                     CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
                 }
             }
@@ -138,7 +138,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public virtual void CollideSingleContact(ref Quaternion perturbeRot, CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public virtual void CollideSingleContact(ref IndexedQuaternion perturbeRot, CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             CollisionObject convexObj = m_isSwapped ? body1 : body0;
             CollisionObject planeObj = m_isSwapped ? body0 : body1;

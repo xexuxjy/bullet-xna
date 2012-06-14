@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -66,14 +66,14 @@ namespace BulletXNA.BulletCollision
         }
 
 
-	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors,Vector4[] supportVerticesOut,int numVectors)
+	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors,IndexedVector4[] supportVerticesOut,int numVectors)
 	    {
 		    IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
     	
 		    for (int i=0;i<numVectors;i++)
 		    {
 			    IndexedVector3 vec = vectors[i];
-                supportVerticesOut[i] = new Vector4(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
+                supportVerticesOut[i] = new IndexedVector4(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
                                 MathUtil.FSel(vec.Y, halfExtents.Y, -halfExtents.Y),
                                 MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z),0f);
 		    }
@@ -180,7 +180,7 @@ namespace BulletXNA.BulletCollision
 	    }
 	
 
-	    public virtual void	GetPlaneEquation(out Plane plane, int i)
+	    public virtual void	GetPlaneEquation(out IndexedVector4 plane, int i)
 	    {
 		    IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
@@ -188,32 +188,26 @@ namespace BulletXNA.BulletCollision
 		    switch (i)
 		    {
 		    case 0:
-                    plane.Normal = new Vector3(1, 0, 0);
-                plane.D = -halfExtents.X;
-			    break;
+                plane = new IndexedVector4(IndexedVector3.Right,-halfExtents.X);
+    		    break;
 		    case 1:
-                plane.Normal = new Vector3(-1, 0, 0);
-                plane.D = -halfExtents.X;
+                plane = new IndexedVector4(IndexedVector3.Left, -halfExtents.X);
 			    break;
 		    case 2:
-                plane.Normal = new Vector3(0, 1, 0);
-                plane.D = -halfExtents.Y;
+                plane = new IndexedVector4(IndexedVector3.Up, -halfExtents.Y);
 			    break;
 		    case 3:
-                plane.Normal = new Vector3(0, -1, 0);
-                plane.D = -halfExtents.Y;
+                plane = new IndexedVector4(IndexedVector3.Down, -halfExtents.Y);
 			    break;
 		    case 4:
-                plane.Normal = new Vector3(0, 0, 1);
-                plane.D = -halfExtents.Z;
+                plane = new IndexedVector4(IndexedVector3.Backward, -halfExtents.Z);
 			    break;
 		    case 5:
-                plane.Normal = new Vector3(0, 0, -1);
-                plane.D = -halfExtents.Z;
+                plane = new IndexedVector4(IndexedVector3.Forward, -halfExtents.Z);
 			    break;
 		    default:
 			    Debug.Assert(false);
-                plane = new Plane();
+                plane = new IndexedVector4();
                 break;
 		    }
 	    }
@@ -319,22 +313,22 @@ namespace BulletXNA.BulletCollision
 		    switch (index)
 		    {
 		    case 0:
-			    penetrationVector = new IndexedVector3(Vector3.Right);
+			    penetrationVector = IndexedVector3.Right;
 			    break;
 		    case 1:
-			    penetrationVector = new IndexedVector3(Vector3.Left);
+                penetrationVector = IndexedVector3.Left;
 			    break;
 		    case 2:
-			    penetrationVector = new IndexedVector3(Vector3.Up);
+			    penetrationVector = IndexedVector3.Up;
 			    break;
 		    case 3:
-			    penetrationVector = new IndexedVector3(Vector3.Down);
+			    penetrationVector = IndexedVector3.Down;
 			    break;
 		    case 4:
-			    penetrationVector = new IndexedVector3(Vector3.Backward);
+			    penetrationVector = IndexedVector3.Backward;
 			    break;
 		    case 5:
-                penetrationVector = new IndexedVector3(Vector3.Forward);
+                penetrationVector = IndexedVector3.Forward;
 			    break;
 		    default:
                 Debug.Assert(false);

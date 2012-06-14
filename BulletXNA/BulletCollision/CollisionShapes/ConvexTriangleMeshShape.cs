@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -95,7 +95,7 @@ namespace BulletXNA.BulletCollision
 	        return supVec;
 
         }
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
 	        for (int j=0;j<numVectors;j++)
 	        {
@@ -105,7 +105,7 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 		        m_stridingMesh.InternalProcessAllTriangles(supportCallback,ref aabbMin,ref aabbMax);
-		        supportVerticesOut[j] = new Vector4(supportCallback.GetSupportVertexLocal().ToVector3(),0);
+		        supportVerticesOut[j] = new IndexedVector4(supportCallback.GetSupportVertexLocal().ToVector3(),0);
 	        }
         }
 	

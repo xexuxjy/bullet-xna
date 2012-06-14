@@ -22,7 +22,7 @@
  */
 
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -243,7 +243,7 @@ namespace BulletXNA.BulletCollision
         	
 	        #if true
             //fixme - make a static list.
-            Vector4[] _supporting = new Vector4[6];
+            IndexedVector4[] _supporting = new IndexedVector4[6];
 	        BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
         	
 	        for ( int i = 0; i < 3; ++i )
@@ -270,7 +270,7 @@ namespace BulletXNA.BulletCollision
 	        #endif
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
         }
 

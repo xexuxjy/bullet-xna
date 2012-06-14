@@ -26,7 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA
 {
@@ -134,12 +134,12 @@ namespace BulletXNA
             return a.X < a.Y ? (a.Y < a.Z ? 2 : 1) : (a.X < a.Z ? 2 : 0);
         }
 
-        public static int MaxAxis(Vector4 a)
+        public static int MaxAxis(IndexedVector4 a)
         {
             return MaxAxis(ref a);
         }
 
-        public static int MaxAxis(ref Vector4 a)
+        public static int MaxAxis(ref IndexedVector4 a)
         {
             int maxIndex = -1;
             float maxVal = -BT_LARGE_FLOAT;
@@ -166,15 +166,15 @@ namespace BulletXNA
             return maxIndex;
         }
 
-        public static int ClosestAxis(ref Vector4 a)
+        public static int ClosestAxis(ref IndexedVector4 a)
         {
             return MaxAxis(AbsoluteVector4(ref a));
         }
 
 
-        public static Vector4 AbsoluteVector4(ref Vector4 vec)
+        public static IndexedVector4 AbsoluteVector4(ref IndexedVector4 vec)
         {
-            return new Vector4(Math.Abs(vec.X), Math.Abs(vec.Y), Math.Abs(vec.Z), Math.Abs(vec.W));
+            return new IndexedVector4(Math.Abs(vec.X), Math.Abs(vec.Y), Math.Abs(vec.Z), Math.Abs(vec.W));
         }
 
 //        public static float VectorComponent(IndexedVector3 v, int i)
@@ -284,12 +284,12 @@ namespace BulletXNA
 //        }
 
 
-        public static float VectorComponent(Vector4 v, int i)
+        public static float VectorComponent(IndexedVector4 v, int i)
         {
             return VectorComponent(ref v, i);
         }
 
-        public static float VectorComponent(ref Vector4 v, int i)
+        public static float VectorComponent(ref IndexedVector4 v, int i)
         {
             switch (i)
             {
@@ -309,7 +309,7 @@ namespace BulletXNA
 
 
 
-        public static void VectorComponent(ref Vector4 v, int i, float f)
+        public static void VectorComponent(ref IndexedVector4 v, int i, float f)
         {
             switch (i)
             {
@@ -388,7 +388,7 @@ namespace BulletXNA
 
 //        public static void RotateVector(ref IndexedVector3 vec, ref IndexedMatrix m, out IndexedVector3 output)
 //        {
-//            Quaternion rotation;
+//            IndexedQuaternion rotation;
 //            IndexedVector3 component;
 //            m.Decompose(out component, out rotation, out component);
 //            output = IndexedVector3.Transform(vec, rotation);
@@ -814,60 +814,60 @@ namespace BulletXNA
 //            return matrixOut;
 //        }
 
-        public static Quaternion ShortestArcQuat(IndexedVector3 axisInA, IndexedVector3 axisInB)
+        public static IndexedQuaternion ShortestArcQuat(IndexedVector3 axisInA, IndexedVector3 axisInB)
         {
             return ShortestArcQuat(ref axisInA, ref axisInB);
         }
-        public static Quaternion ShortestArcQuat(ref IndexedVector3 axisInA, ref IndexedVector3 axisInB)
+        public static IndexedQuaternion ShortestArcQuat(ref IndexedVector3 axisInA, ref IndexedVector3 axisInB)
         {
             IndexedVector3 c = IndexedVector3.Cross(axisInA, axisInB);
             float d = IndexedVector3.Dot(axisInA, axisInB);
 
             if (d < -1.0 + SIMD_EPSILON)
             {
-                return new Quaternion(0.0f, 1.0f, 0.0f, 0.0f); // just pick any vector
+                return new IndexedQuaternion(0.0f, 1.0f, 0.0f, 0.0f); // just pick any vector
             }
 
             float s = (float)Math.Sqrt((1.0f + d) * 2.0f);
             float rs = 1.0f / s;
 
-            return new Quaternion(c.X * rs, c.Y * rs, c.Z * rs, s * 0.5f);
+            return new IndexedQuaternion(c.X * rs, c.Y * rs, c.Z * rs, s * 0.5f);
 
         }
 
-        public static float QuatAngle(ref Quaternion quat)
+        public static float QuatAngle(ref IndexedQuaternion quat)
         {
             return 2f * (float)Math.Acos(quat.W);
         }
 
-        public static Quaternion QuatFurthest(ref Quaternion input1, ref Quaternion input2)
+        public static IndexedQuaternion QuatFurthest(ref IndexedQuaternion input1, ref IndexedQuaternion input2)
         {
-            Quaternion diff, sum;
+            IndexedQuaternion diff, sum;
             diff = input1 - input2;
             sum = input1 + input2;
-            if (Quaternion.Dot(diff, diff) > Quaternion.Dot(sum, sum))
+            if (IndexedQuaternion.Dot(diff, diff) > IndexedQuaternion.Dot(sum, sum))
             {
                 return input2;
             }
             return (-input2);
         }
 
-        public static IndexedVector3 QuatRotate(Quaternion rotation, IndexedVector3 v)
+        public static IndexedVector3 QuatRotate(IndexedQuaternion rotation, IndexedVector3 v)
         {
             return QuatRotate(ref rotation, ref v);
         }
 
-        public static IndexedVector3 QuatRotate(ref Quaternion rotation, ref IndexedVector3 v)
+        public static IndexedVector3 QuatRotate(ref IndexedQuaternion rotation, ref IndexedVector3 v)
         {
-            Quaternion q = QuatVectorMultiply(ref rotation, ref v);
+            IndexedQuaternion q = QuatVectorMultiply(ref rotation, ref v);
             q *= QuaternionInverse(ref rotation);
             return new IndexedVector3(q.X, q.Y, q.Z);
         }
 
 
-        public static Quaternion QuatVectorMultiply(ref Quaternion q, ref IndexedVector3 w)
+        public static IndexedQuaternion QuatVectorMultiply(ref IndexedQuaternion q, ref IndexedVector3 w)
         {
-            return new Quaternion(q.W * w.X + q.Y * w.Z - q.Z * w.Y,
+            return new IndexedQuaternion(q.W * w.X + q.Y * w.Z - q.Z * w.Y,
                                     q.W * w.Y + q.Z * w.X - q.X * w.Z,
                                     q.W * w.Z + q.X * w.Y - q.Y * w.X,
                                     -q.X * w.X - q.Y * w.Y - q.Z * w.Z);
@@ -1116,13 +1116,13 @@ namespace BulletXNA
 //        {
 //            IndexedVector3 translate;
 //            IndexedVector3 scale;
-//            Quaternion rotate;
+//            IndexedQuaternion rotate;
 //            m.Decompose(out scale, out rotate, out translate);
 //            return quaternionToEuler(ref rotate);
 //        }
 
 //        // Taken from Fabian Vikings post at : http://forums.xna.com/forums/p/4574/23763.aspx  
-//        public static IndexedVector3 quaternionToEuler(ref Quaternion q)
+//        public static IndexedVector3 quaternionToEuler(ref IndexedQuaternion q)
 //        {
 //            IndexedVector3 v = IndexedVector3.Zero;
 
@@ -1158,22 +1158,22 @@ namespace BulletXNA
 //            return v;
 //        }
 
-        public static Quaternion QuaternionInverse(Quaternion q)
+        public static IndexedQuaternion QuaternionInverse(IndexedQuaternion q)
         {
             return QuaternionInverse(ref q);
         }
 
-        public static Quaternion QuaternionInverse(ref Quaternion q)
+        public static IndexedQuaternion QuaternionInverse(ref IndexedQuaternion q)
         {
-            return new Quaternion(-q.X, -q.Y, -q.Z, q.W);
+            return new IndexedQuaternion(-q.X, -q.Y, -q.Z, q.W);
         }
 
-        public static Quaternion QuaternionMultiply(Quaternion a, Quaternion b)
+        public static IndexedQuaternion QuaternionMultiply(IndexedQuaternion a, IndexedQuaternion b)
         {
             return QuaternionMultiply(ref a, ref b);
         }
 
-        public static Quaternion QuaternionMultiply(ref Quaternion a, ref Quaternion b)
+        public static IndexedQuaternion QuaternionMultiply(ref IndexedQuaternion a, ref IndexedQuaternion b)
         {
             return a * b;
             //return b * a;
@@ -1269,12 +1269,12 @@ namespace BulletXNA
 //        }
 
 
-        public static IndexedVector3 Vector4ToVector3(Vector4 v4)
+        public static IndexedVector3 Vector4ToVector3(IndexedVector4 v4)
         {
             return new IndexedVector3(v4.X, v4.Y, v4.Z);
         }
 
-        public static IndexedVector3 Vector4ToVector3(ref Vector4 v4)
+        public static IndexedVector3 Vector4ToVector3(ref IndexedVector4 v4)
         {
             return new IndexedVector3(v4.X, v4.Y, v4.Z);
         }
@@ -1299,7 +1299,7 @@ namespace BulletXNA
 
 
 
-        public static void PrintQuaternion(TextWriter writer, Quaternion q)
+        public static void PrintQuaternion(TextWriter writer, IndexedQuaternion q)
         {
             writer.Write(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000} W:{3:0.00000000}}}", q.X, q.Y, q.Z, q.W));
         }
@@ -1314,12 +1314,12 @@ namespace BulletXNA
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
         }
 
-        public static void PrintVector4(TextWriter writer, Vector4 v)
+        public static void PrintVector4(TextWriter writer, IndexedVector4 v)
         {
             writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000} W:{3:0.00000000}}}", v.X, v.Y, v.Z, v.W));
         }
 
-        public static void PrintVector4(TextWriter writer, String name, Vector4 v)
+        public static void PrintVector4(TextWriter writer, String name, IndexedVector4 v)
         {
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000} W:{4:0.00000000}}}", name, v.X, v.Y, v.Z, v.W));
         }
@@ -1380,6 +1380,7 @@ namespace BulletXNA
                 PrintVector3(streamWriter, "normalWorldB", mp.m_normalWorldOnB);
             }
         }
+#if XNA
 
         public static bool IsAlmostZero(Vector3 v)
         {
@@ -1393,7 +1394,7 @@ namespace BulletXNA
             if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
             return true;
         }
-
+#endif
         public static bool IsAlmostZero(IndexedVector3 v)
         {
             if (Math.Abs(v.X) > 1e-6 || Math.Abs(v.Y) > 1e-6 || Math.Abs(v.Z) > 1e-6) return false;
@@ -1424,6 +1425,8 @@ namespace BulletXNA
             return (xa - ya).LengthSquared();
         }
 
+#if XNA
+        
         public static void PrintMatrix(TextWriter writer, Matrix m)
         {
             PrintMatrix(writer, null, m);
@@ -1444,6 +1447,7 @@ namespace BulletXNA
             }
         }
 
+
         public static void PrintVector3(TextWriter writer, Vector3 v)
         {
             writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000}}}", v.X, v.Y, v.Z));
@@ -1453,7 +1457,7 @@ namespace BulletXNA
         {
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
         }
-
+#endif
         public static T Clamp<T>(T value, T max, T min)
                  where T : System.IComparable<T>
         {

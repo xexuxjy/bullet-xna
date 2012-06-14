@@ -23,7 +23,7 @@ subject to the following restrictions:
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -114,7 +114,7 @@ namespace BulletXNA.BulletCollision
             Add(new GIM_CONTACT(ref point, ref normal, depth, feature1, feature2));
         }
 
-        void PushContact(ref IndexedVector3 point, ref Vector4 normal,
+        void PushContact(ref IndexedVector3 point, ref IndexedVector4 normal,
             float depth, int feature1, int feature2)
         {
             IndexedVector3 temp = new IndexedVector3(normal.X, normal.Y, normal.Z);

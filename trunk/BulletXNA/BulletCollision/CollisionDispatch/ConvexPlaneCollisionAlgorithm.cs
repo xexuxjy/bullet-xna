@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -119,11 +119,11 @@ namespace BulletXNA.BulletCollision
                 {
                     perturbeAngle = angleLimit;
                 }
-                IndexedQuaternion perturbeRot = IndexedQuaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
+                IndexedQuaternion perturbeRot = new IndexedQuaternion(v0, perturbeAngle);
                 for (int i = 0; i < m_numPerturbationIterations; i++)
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                    IndexedQuaternion rotq = IndexedQuaternion.CreateFromAxisAngle(planeNormal.ToVector3(), iterationAngle);
+                    IndexedQuaternion rotq = new IndexedQuaternion(planeNormal, iterationAngle);
                     rotq = MathUtil.QuaternionMultiply(IndexedQuaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
                     CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
                 }

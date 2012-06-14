@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -377,10 +377,10 @@ namespace BulletXNA.BulletDynamics
 	        //rotate around steering over de wheelAxleWS
 	        float steering = wheel.m_steering;
         	
-	        IndexedQuaternion steeringOrn = IndexedQuaternion.CreateFromAxisAngle(up.ToVector3(),steering);//wheel.m_steering);
+	        IndexedQuaternion steeringOrn = new IndexedQuaternion(up.,steering);//wheel.m_steering);
             IndexedBasisMatrix steeringMat = new IndexedBasisMatrix(ref steeringOrn);
 
-            IndexedQuaternion rotatingOrn = IndexedQuaternion.CreateFromAxisAngle(right.ToVector3(), -wheel.m_rotation);
+            IndexedQuaternion rotatingOrn = new IndexedQuaternion(right, -wheel.m_rotation);
             IndexedBasisMatrix rotatingMat = new IndexedBasisMatrix(ref rotatingOrn);
 
 

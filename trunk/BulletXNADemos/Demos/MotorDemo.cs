@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using BulletXNA;
 using BulletXNA.BulletCollision;
@@ -74,7 +74,7 @@ namespace BulletXNADemos.Demos
 				vToBone.Normalize();
 
 				IndexedVector3 vAxis = IndexedVector3.Cross(vToBone,vUp);	
-				transform._basis = new IndexedBasisMatrix(Quaternion.CreateFromAxisAngle(vAxis.ToVector3(), MathUtil.SIMD_HALF_PI));
+				transform._basis = new IndexedBasisMatrix(new IndexedQuaternion(vAxis, MathUtil.SIMD_HALF_PI));
 				transform._origin = vBoneOrigin;
 				m_bodies[1+2*i] = demoApplication.LocalCreateRigidBody(1.0f, offset * transform, m_shapes[1+2*i]);
 

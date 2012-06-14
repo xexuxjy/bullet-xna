@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -355,7 +355,7 @@ namespace BulletXNADemos.Demos
         // "Portable" method; prerequisite call: m_dynamicsWorld.getBroadphase().getOverlappingPairCache().setInternalGhostPairCallback(m_ghostPairCallback); 
         //static void GetCollidingObjectsInsidePairCachingGhostObject(btDiscreteDynamicsWorld* m_dynamicsWorld,btPairCachingGhostObject* m_pairCachingGhostObject,btAlignedObjectArray < btCollisionObject* >& collisionArrayOut);
 
-        private Quaternion quatDeg45Y = Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), MathUtil.SIMD_HALF_PI * 0.5f);
+        private IndexedQuaternion quatDeg45Y = new IndexedQuaternion(new IndexedVector3(0, 1, 0), MathUtil.SIMD_HALF_PI * 0.5f);
 
         float rad = 0;
 

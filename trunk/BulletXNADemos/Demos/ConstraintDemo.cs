@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -108,7 +108,7 @@ namespace BulletXNADemos.Demos
 		        IndexedVector3 sliderWorldPos = new IndexedVector3(0,10,0);
 		        IndexedVector3 sliderAxis = new IndexedVector3(1,0,0);
 		        float angle=0f;//SIMD_RADS_PER_DEG * 10.f;
-		        IndexedBasisMatrix sliderOrientation = new IndexedBasisMatrix(Quaternion.CreateFromAxisAngle(sliderAxis.ToVector3() ,angle));
+		        IndexedBasisMatrix sliderOrientation = new IndexedBasisMatrix(new IndexedQuaternion(sliderAxis,angle));
 		        trans = IndexedMatrix.Identity;
 		        trans._origin = sliderWorldPos;
 		        //trans.setBasis(sliderOrientation);

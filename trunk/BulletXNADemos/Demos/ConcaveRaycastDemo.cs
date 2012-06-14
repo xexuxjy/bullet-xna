@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -346,7 +346,7 @@ public class btRaycastBar
 		{
 			float alpha = dalpha * i;
 			// rotate around by alpha degrees y 
-            IndexedMatrix tr = IndexedMatrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.Up,alpha));
+            IndexedMatrix tr = IndexedMatrix.CreateFromQuaternion(new IndexedQuaternion(Vector3.Up,alpha));
 			direction[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
 			direction[i] = tr * direction[i];
 			direction[i] = direction[i] * ray_length;

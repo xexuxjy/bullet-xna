@@ -28,6 +28,7 @@ using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace BulletXNA
 {
@@ -215,9 +216,9 @@ namespace BulletXNA
 								IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
 								IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
-								DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
-								concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
-								drawCallback.Cleanup();
+                                //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
+                                //concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                                //drawCallback.Cleanup();
 							}
 							else if (shape.GetShapeType() == BroadphaseNativeTypes.CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE)
 							{
@@ -227,9 +228,9 @@ namespace BulletXNA
 								IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 								//DebugDrawcallback drawCallback;
-								DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
-								convexMesh.GetMeshInterface().InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
-								drawCallback.Cleanup();
+                                //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
+                                //convexMesh.GetMeshInterface().InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                                //drawCallback.Cleanup();
 							}
 							else if (shape.IsPolyhedral())/// for polyhedral shapes
 							{

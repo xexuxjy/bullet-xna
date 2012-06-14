@@ -134,6 +134,11 @@ namespace BulletXNA.BulletCollision
             return m_allowedCcdPenetration;
         }
 
+        public void SetAllowedCcdPenetration(float ccd)
+        {
+            m_allowedCcdPenetration = ccd;
+        }
+
         public float GetConvexConservativeDistanceThreshold()
         {
             return m_convexConservativeDistanceThreshold;

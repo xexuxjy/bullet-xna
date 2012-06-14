@@ -451,11 +451,17 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     //kinematic objects don't merge islands, but wake up all connected objects
                     if (colObj0.IsKinematicObject() && colObj0.GetActivationState() != ActivationState.ISLAND_SLEEPING)
                     {
-                        colObj1.Activate();
+                        if (colObj0.HasContactResponse())
+                        {
+                            colObj1.Activate();
+                        }
                     }
                     if (colObj1.IsKinematicObject() && colObj1.GetActivationState() != ActivationState.ISLAND_SLEEPING)
                     {
-                        colObj0.Activate();
+                        if (colObj1.HasContactResponse())
+                        {
+                            colObj0.Activate();
+                        }
                     }
                     if (m_splitIslands)
                     {

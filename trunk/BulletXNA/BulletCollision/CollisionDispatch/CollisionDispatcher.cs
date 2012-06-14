@@ -95,6 +95,12 @@ namespace BulletXNA.BulletCollision
             manifold.Initialise(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
 
             manifold.m_index1a = m_manifoldsPtr.Count;
+
+            if (manifold.m_index1a == 23)
+            {
+                int ibreak = 0;
+            }
+
             m_manifoldsPtr.Add(manifold);
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)

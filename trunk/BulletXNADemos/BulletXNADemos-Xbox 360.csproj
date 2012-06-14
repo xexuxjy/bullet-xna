@@ -66,9 +66,11 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Demos\AndrewDemo.cs" />
     <Compile Include="Demos\BasicDemo.cs" />
     <Compile Include="Demos\Box2DDemo.cs" />
     <Compile Include="Demos\CapsuleHeightfieldDemo.cs" />
+    <Compile Include="Demos\CharacterDemo.cs" />
     <Compile Include="Demos\ConcaveDemo.cs" />
     <Compile Include="Demos\ConcaveRaycastDemo.cs" />
     <Compile Include="Demos\ConstraintDemo.cs" />
@@ -81,6 +83,7 @@
     <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
+    <Compile Include="Demos\PyramidDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
     <Compile Include="Demos\SimpleCompoundDemo.cs" />
     <Compile Include="Demos\TerrainDemo.cs" />
@@ -191,6 +194,9 @@
     <Reference Include="System.Core">
       <Private>False</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BulletXNADemos-WindowsPhone_2012_05_30_22_39_55.sap" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

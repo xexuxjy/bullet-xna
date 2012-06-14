@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -354,9 +354,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
                         if (v0.LengthSquared() > MathUtil.SIMD_EPSILON)
                         {
 
-                            IndexedQuaternion perturbeRot = IndexedQuaternion.CreateFromAxisAngle(v0.ToVector3(), perturbeAngle);
+                            IndexedQuaternion perturbeRot = new IndexedQuaternion(v0, perturbeAngle);
                             float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                            IndexedQuaternion rotq = IndexedQuaternion.CreateFromAxisAngle(sepNormalWorldSpace.ToVector3(), iterationAngle);
+                            IndexedQuaternion rotq = new IndexedQuaternion(sepNormalWorldSpace, iterationAngle);
 
                             if (perturbeA)
                             {

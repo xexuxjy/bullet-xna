@@ -1,4 +1,4 @@
-﻿#define BT_INTERNAL_EDGE_DEBUG_DRAW
+#define BT_INTERNAL_EDGE_DEBUG_DRAW
 #define DEBUG_INTERNAL_EDGE
 using System;
 using System.Diagnostics;
@@ -231,7 +231,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 isConvex = (dotA < 0f);
 
                                 correctedAngle = isConvex ? ang4 : -ang4;
-                                IndexedQuaternion orn2 = IndexedQuaternion.CreateFromAxisAngle(calculatedEdge.ToVector3(), -correctedAngle);
+                                IndexedQuaternion orn2 = new IndexedQuaternion(calculatedEdge, -correctedAngle);
                                 IndexedMatrix rotateMatrix = IndexedMatrix.CreateFromQuaternion(orn2);
                                 calculatedNormalB = new IndexedBasisMatrix(orn2) * normalA;
                             }
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 1:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[0] - m_triangleVerticesA[1];
-                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = new IndexedQuaternion(edge1, -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         float bla = IndexedVector3.Dot(computedNormalB, normalB);
                                         if (bla < 0)
@@ -272,7 +272,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 2:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[2] - m_triangleVerticesA[0];
-                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = new IndexedQuaternion(edge1, -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (IndexedVector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -294,7 +294,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 3:
                                     {
                                         IndexedVector3 edge1 = m_triangleVerticesA[1] - m_triangleVerticesA[2];
-                                        IndexedQuaternion orn = IndexedQuaternion.CreateFromAxisAngle(edge1.ToVector3(), -correctedAngle);
+                                        IndexedQuaternion orn = new IndexedQuaternion(edge1, -correctedAngle);
                                         IndexedVector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (IndexedVector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -504,7 +504,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle < correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    IndexedQuaternion rotation = IndexedQuaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
+                    IndexedQuaternion rotation = new IndexedQuaternion(edge, diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }
@@ -515,7 +515,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle > correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    IndexedQuaternion rotation = IndexedQuaternion.CreateFromAxisAngle(edge.ToVector3(), diffAngle);
+                    IndexedQuaternion rotation = new IndexedQuaternion(edge, diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }

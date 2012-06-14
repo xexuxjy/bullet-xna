@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -512,7 +512,7 @@ namespace BulletXNADemos.Demos
             float rele = m_pitch;
             float razi = m_yaw;
 
-            Quaternion rot = Quaternion.CreateFromAxisAngle(m_cameraUp.ToVector3(), razi);
+            IndexedQuaternion rot = new IndexedQuaternion(m_cameraUp, razi);
             
             IndexedVector3 eyePos = new IndexedVector3();
             eyePos[m_forwardAxis] = -m_cameraDistance;
@@ -523,7 +523,7 @@ namespace BulletXNADemos.Demos
                 forward = new IndexedVector3(0,0,-1);
             }
             IndexedVector3 right = IndexedVector3.Cross(m_cameraUp, IndexedVector3.Normalize(forward));
-            Quaternion roll = Quaternion.CreateFromAxisAngle(right.ToVector3(), -rele);
+            IndexedQuaternion roll = new Quaternion(right, -rele);
             rot.Normalize();
             roll.Normalize();
 

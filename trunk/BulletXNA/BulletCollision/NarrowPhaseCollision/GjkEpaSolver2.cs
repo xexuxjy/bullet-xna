@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -146,7 +146,7 @@ namespace BulletXNA.BulletCollision
         {
             GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
             SphereShape	shape1 = new SphereShape(margin);
-            IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(Quaternion.Identity);
+            IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
             wtrs0._origin = position;
 	        
             Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
@@ -418,7 +418,7 @@ namespace BulletXNA.BulletCollision
                 }		
 
                 /* Reduce simplex						*/ 
-                Vector4 weights = new Vector4();
+                IndexedVector4 weights = new IndexedVector4();
                 uint mask=0;
                 switch(cs.rank)
                 {
@@ -618,7 +618,7 @@ namespace BulletXNA.BulletCollision
                 a.X*b.Y*c.Z-a.Z*b.Y*c.X);
         }
 
-        public static float ProjectOrigin(ref IndexedVector3 a,ref IndexedVector3 b,ref Vector4 w,ref uint m)
+        public static float ProjectOrigin(ref IndexedVector3 a,ref IndexedVector3 b,ref IndexedVector4 w,ref uint m)
         {
             IndexedVector3	d=b-a;
             float l=d.LengthSquared();
@@ -653,7 +653,7 @@ namespace BulletXNA.BulletCollision
         public static float ProjectOrigin(ref IndexedVector3 a,
             ref IndexedVector3 b,
             ref IndexedVector3 c,
-            ref Vector4 w,ref uint m)
+            ref IndexedVector4 w,ref uint m)
         {
             uint[] imd3 = {1,2,0};
             IndexedVector3[] vt  = {a,b,c};
@@ -663,7 +663,7 @@ namespace BulletXNA.BulletCollision
             if (l > GjkEpaSolver2.GJK_SIMPLEX3_EPS)
             {
                 float mindist=-1f;
-                Vector4 subw = new Vector4();
+                IndexedVector4 subw = new IndexedVector4();
                 uint subm = 0;
                 for(int i=0;i<3;++i)
                 {
@@ -702,7 +702,7 @@ namespace BulletXNA.BulletCollision
             ref IndexedVector3 b,
             ref IndexedVector3 c,
             ref IndexedVector3 d,
-            ref Vector4 w,ref uint m)
+            ref IndexedVector4 w,ref uint m)
         {
             uint[] imd3 ={1,2,0};
             IndexedVector3[]	vt = {a,b,c,d};
@@ -713,7 +713,7 @@ namespace BulletXNA.BulletCollision
             if (ng && (Math.Abs(vl) > GjkEpaSolver2.GJK_SIMPLEX4_EPS))
             {
                 float mindist=-1;
-                Vector4 subw = new Vector4();
+                IndexedVector4 subw = new IndexedVector4();
                 uint subm = 0;
                 for(int i=0;i<3;++i)
                 {

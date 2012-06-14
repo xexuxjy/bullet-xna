@@ -21,18 +21,18 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
     public class GeometeryOperations
     {
-        public static void bt_edge_plane(ref IndexedVector3 e1, ref IndexedVector3 e2, ref IndexedVector3 normal, out Vector4 plane)
+        public static void bt_edge_plane(ref IndexedVector3 e1, ref IndexedVector3 e2, ref IndexedVector3 normal, out IndexedVector4 plane)
         {
             IndexedVector3 planenormal = (e2-e1).Cross(ref normal);
             planenormal.Normalize();
-            plane = new Vector4(planenormal.ToVector3(), e2.Dot(ref planenormal));
+            plane = new IndexedVector4(planenormal.ToVector3(), e2.Dot(ref planenormal));
         }
 
     }

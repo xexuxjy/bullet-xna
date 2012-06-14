@@ -352,7 +352,8 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 angVel;
                 TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
                 IndexedVector3 zeroLinVel = new IndexedVector3();
-                IndexedMatrix R = new IndexedMatrix(convexFromTrans._basis,IndexedVector3.Zero);
+                IndexedMatrix R = IndexedMatrix.Identity;
+                R.SetRotation(convexFromTrans.GetRotation());
                 castShape.CalculateTemporalAabb(ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
             }
 

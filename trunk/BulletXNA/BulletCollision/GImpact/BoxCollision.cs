@@ -23,7 +23,7 @@ subject to the following restrictions:
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -471,7 +471,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void ProjectionInterval(ref Vector4 direction, out float vmin, out float vmax)
+        public void ProjectionInterval(ref IndexedVector4 direction, out float vmin, out float vmax)
         {
             IndexedVector3 temp = new IndexedVector3(direction.X, direction.Y, direction.Z);
             ProjectionInterval(ref temp, out vmin, out vmax);
@@ -490,7 +490,7 @@ namespace BulletXNA.BulletCollision
 
         // seems silly to duplicate this stuff when it's in xna plane, but a cleanup will wait
         // till it's 'working'
-        public BT_PLANE_INTERSECTION_TYPE PlaneClassify(ref Vector4 plane)
+        public BT_PLANE_INTERSECTION_TYPE PlaneClassify(ref IndexedVector4 plane)
         {
             float _fmin, _fmax;
             ProjectionInterval(ref plane, out _fmin, out _fmax);
@@ -600,14 +600,14 @@ namespace BulletXNA.BulletCollision
         }
 
         //! Simple test for planes.
-        public bool CollidePlane(ref Vector4 plane)
+        public bool CollidePlane(ref IndexedVector4 plane)
         {
             BT_PLANE_INTERSECTION_TYPE classify = PlaneClassify(ref plane);
             return (classify == BT_PLANE_INTERSECTION_TYPE.BT_CONST_COLLIDE_PLANE);
         }
 
         //! test for a triangle, with edges
-        public bool CollideTriangleExact(ref IndexedVector3 p1, ref IndexedVector3 p2, ref IndexedVector3 p3, ref Vector4 triangle_plane)
+        public bool CollideTriangleExact(ref IndexedVector3 p1, ref IndexedVector3 p2, ref IndexedVector3 p3, ref IndexedVector4 triangle_plane)
         {
             if (!CollidePlane(ref triangle_plane))
             {

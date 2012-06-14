@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -140,7 +140,7 @@ namespace BulletXNA.BulletCollision
 	        return supVec;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
 	        float radius = GetRadius();
 
@@ -160,7 +160,7 @@ namespace BulletXNA.BulletCollision
 		            if (newDot > maxDot)
 		            {
 			            maxDot = newDot;
-			            supportVerticesOut[j] = new Vector4(vtx.ToVector3(),0);
+			            supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(),0);
 		            }
 	            }
 	            {
@@ -172,7 +172,7 @@ namespace BulletXNA.BulletCollision
                     if (newDot > maxDot)
                     {
                         maxDot = newDot;
-			            supportVerticesOut[j] = new Vector4(vtx.ToVector3(),0);
+			            supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(),0);
                     }
                 }
 	        }

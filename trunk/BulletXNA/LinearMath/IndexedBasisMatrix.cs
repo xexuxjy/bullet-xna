@@ -1,7 +1,7 @@
 ﻿
 using System.Diagnostics;
 using System;
-using Microsoft.Xna.Framework;
+
 namespace BulletXNA.LinearMath
 {
     public struct IndexedBasisMatrix
@@ -55,7 +55,7 @@ namespace BulletXNA.LinearMath
             _Row2 = row2;
         }
 
-        public IndexedBasisMatrix(Quaternion q)
+        public IndexedBasisMatrix(IndexedQuaternion q)
         {
             float d = q.LengthSquared();
             Debug.Assert(d != 0.0f);
@@ -70,7 +70,7 @@ namespace BulletXNA.LinearMath
         }
 
 
-        public IndexedBasisMatrix(ref Quaternion q)
+        public IndexedBasisMatrix(ref IndexedQuaternion q)
         {
             float d = q.LengthSquared();
             Debug.Assert(d != 0.0f);
@@ -423,7 +423,7 @@ namespace BulletXNA.LinearMath
             return new IndexedBasisMatrix(_Row0.Abs(), _Row1.Abs(), _Row2.Abs());
         }
 
-        public Quaternion GetRotation()
+        public IndexedQuaternion GetRotation()
         {
             float trace = _Row0.X + _Row1.Y + _Row2.Z;
             IndexedVector3 temp = new IndexedVector3();
@@ -454,13 +454,13 @@ namespace BulletXNA.LinearMath
                 temp[j] = (this[j][i] + this[i][j]) * s;
                 temp[k] = (this[k][i] + this[i][k]) * s;
             }
-            return new Quaternion(temp[0], temp[1], temp[2], temp2);
+            return new IndexedQuaternion(temp[0], temp[1], temp[2], temp2);
 
         }
 
 
 
-        public void SetRotation(Quaternion q)
+        public void SetRotation(IndexedQuaternion q)
         {
             float d = q.LengthSquared();
             Debug.Assert(d != 0.0f);
@@ -474,7 +474,7 @@ namespace BulletXNA.LinearMath
                 xz - wy, yz + wx, 1.0f - (xx + yy));
         }
 
-        public void SetRotation(ref Quaternion q)
+        public void SetRotation(ref IndexedQuaternion q)
         {
             float d = q.LengthSquared();
             Debug.Assert(d != 0.0f);
@@ -579,20 +579,20 @@ namespace BulletXNA.LinearMath
         }
 
 
-        public void SetNewForward(IndexedVector3 forward)
-        {
-            forward.Normalize();
-            // Re-calculate Right
-            IndexedVector3 right = Vector3.Cross(forward, this[0]);
+        //public void SetNewForward(IndexedVector3 forward)
+        //{
+        //    forward.Normalize();
+        //    // Re-calculate Right
+        //    IndexedVector3 right = Vector3.Cross(forward, this[0]);
 
-            // The same instability may cause the 3 orientation vectors may
-            // also diverge. Either the Up or Direction vector needs to be
-            // re-computed with a cross product to ensure orthagonality
-            IndexedVector3 up = Vector3.Cross(right, forward);
-            this[0] = right;
-            this[1] = up;
-            this[2] = forward;
-           }
+        //    // The same instability may cause the 3 orientation vectors may
+        //    // also diverge. Either the Up or Direction vector needs to be
+        //    // re-computed with a cross product to ensure orthagonality
+        //    IndexedVector3 up = Vector3.Cross(right, forward);
+        //    this[0] = right;
+        //    this[1] = up;
+        //    this[2] = forward;
+        //   }
 
         public static IndexedBasisMatrix CreateRotationY(float radians)
         {

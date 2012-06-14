@@ -22,7 +22,7 @@
  */
 
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -73,13 +73,16 @@ namespace BulletXNA.BulletCollision
             }
 
         }
+
+#if XNA
+
         ///findOrAddVertex is an internal method, use addTriangle instead
         public int FindOrAddVertex(ref Vector3 vertex, bool removeDuplicateVertices)
         {
             IndexedVector3 iv3 = new IndexedVector3(vertex);
             return FindOrAddVertex(ref iv3,removeDuplicateVertices);
         }
-
+#endif
         public int FindOrAddVertex(ref IndexedVector3 vertex, bool removeDuplicateVertices)
         {
             //return index of new/existing vertex
@@ -156,6 +159,7 @@ namespace BulletXNA.BulletCollision
 
         ///By default addTriangle won't search for duplicate vertices, because the search is very slow for large triangle meshes.
         ///In general it is better to directly use btTriangleIndexVertexArray instead.
+#if XNA
 
         public void AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
         {
@@ -173,7 +177,7 @@ namespace BulletXNA.BulletCollision
             AddIndex(FindOrAddVertex(ref vertex1, removeDuplicateVertices));
             AddIndex(FindOrAddVertex(ref vertex2, removeDuplicateVertices));
         }
-
+#endif
         public int GetNumTriangles()
         {
             if (m_use32bitIndices)

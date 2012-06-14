@@ -23,7 +23,7 @@ subject to the following restrictions:
 #define GIMPACT_VS_PLANE_COLLISION
 
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 
 namespace BulletXNA.BulletCollision
@@ -32,16 +32,16 @@ namespace BulletXNA.BulletCollision
     //! Class for accessing the plane equation
     public static class PlaneShape
     {
-        public static void GetPlaneEquation(StaticPlaneShape plane,out Vector4 equation)
+        public static void GetPlaneEquation(StaticPlaneShape plane,out IndexedVector4 equation)
         {
-            equation = new Vector4(plane.GetPlaneNormal().ToVector3(),plane.GetPlaneConstant());
+            equation = new IndexedVector4(plane.GetPlaneNormal().ToVector3(),plane.GetPlaneConstant());
 
         }
 
 
-        public static void GetPlaneEquationTransformed(StaticPlaneShape plane,ref IndexedMatrix trans, out Vector4 equation)
+        public static void GetPlaneEquationTransformed(StaticPlaneShape plane,ref IndexedMatrix trans, out IndexedVector4 equation)
         {
-            equation = new Vector4();
+            equation = new IndexedVector4();
             IndexedVector3 planeNormal = plane.GetPlaneNormal();
 
             equation.X = trans._basis.GetRow(0).Dot(ref planeNormal);
@@ -465,7 +465,7 @@ namespace BulletXNA.BulletCollision
             IndexedMatrix orgtrans0 = body0.GetWorldTransform();
             IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
-            Vector4 plane;
+            IndexedVector4 plane;
             PlaneShape.GetPlaneEquationTransformed(shape1,ref orgtrans1, out plane);
 
             //test box against plane

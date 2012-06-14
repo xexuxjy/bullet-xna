@@ -22,7 +22,7 @@
  */
 
 using System;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -57,11 +57,11 @@ namespace BulletXNA.BulletCollision
         }
 
         //notice that the vectors should be unit length
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors) 
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors) 
         {
 	        for (int i=0;i<numVectors;i++)
 	        {
-		        supportVerticesOut[i] = Vector4.Zero;
+		        supportVerticesOut[i] = IndexedVector4.Zero;
 	        }
         }
 

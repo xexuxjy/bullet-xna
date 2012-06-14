@@ -36,6 +36,7 @@ namespace BulletXNA.BulletDynamics
 		protected ObjectArray<SolverConstraint> m_tmpSolverNonContactConstraintPool;
 		protected ObjectArray<SolverConstraint> m_tmpSolverContactFrictionConstraintPool;
 		protected ObjectArray<int> m_orderTmpConstraintPool;
+        protected ObjectArray<int> m_orderNonContactConstraintPool;
 		protected ObjectArray<int> m_orderFrictionConstraintPool;
 		protected ObjectArray<ConstraintInfo1> m_tmpConstraintSizesPool;
 
@@ -61,6 +62,7 @@ namespace BulletXNA.BulletDynamics
 			m_tmpConstraintSizesPool = new ObjectArray<ConstraintInfo1>();
 			m_orderTmpConstraintPool = new ObjectArray<int>();
 			m_orderFrictionConstraintPool = new ObjectArray<int>();
+            m_orderNonContactConstraintPool = new ObjectArray<int>();
 		}
 
 		public virtual void Cleanup()
@@ -1062,24 +1064,30 @@ namespace BulletXNA.BulletDynamics
 
 			ContactSolverInfo info = infoGlobal;
 
-			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
+            int numNonContactPool = m_tmpSolverNonContactConstraintPool.Count;
+            int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
 
 			///@todo: use stack allocator for such temporarily memory, same for solver bodies/constraints
 			//m_orderTmpConstraintPool.Capacity = numConstraintPool;
 			//m_orderFrictionConstraintPool.Capacity = numFrictionPool;
-			m_orderTmpConstraintPool.Clear();
-			m_orderFrictionConstraintPool.Clear();
-			{
-				for (int i = 0; i < numConstraintPool; i++)
-				{
-					m_orderTmpConstraintPool.Add(i);
-				}
-				for (int i = 0; i < numFrictionPool; i++)
-				{
-					m_orderFrictionConstraintPool.Add(i);
-				}
-			}
+            m_orderNonContactConstraintPool.Resize(numNonContactPool);
+            m_orderTmpConstraintPool.Resize(numConstraintPool);
+            m_orderFrictionConstraintPool.Resize(numFrictionPool);
+            {
+                for (int i = 0; i < numNonContactPool; i++)
+                {
+                    m_orderNonContactConstraintPool[i] = i;
+                }
+                for (int i = 0; i < numConstraintPool; i++)
+                {
+                    m_orderTmpConstraintPool[i] = i;
+                }
+                for (int i = 0; i < numFrictionPool; i++)
+                {
+                    m_orderFrictionConstraintPool[i] = i;
+                }
+            }
 
             BulletGlobals.StopProfile();
 
@@ -1132,6 +1140,7 @@ namespace BulletXNA.BulletDynamics
 
         protected float SolveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, PersistentManifoldArray manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
+            int numNonContactPool = m_tmpSolverNonContactConstraintPool.Count;
 			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
 
@@ -1140,6 +1149,14 @@ namespace BulletXNA.BulletDynamics
 			{
 				if ((iteration & 7) == 0)
 				{
+                    for (int j = 0; j < numNonContactPool; ++j)
+                    {
+                        int tmp = m_orderNonContactConstraintPool[j];
+                        int swapi = RandInt2(j + 1);
+                        m_orderNonContactConstraintPool[j] = m_orderNonContactConstraintPool[swapi];
+                        m_orderNonContactConstraintPool[swapi] = tmp;
+                    }
+
 					for (int j = 0; j < numConstraintPool; ++j)
 					{
 						int tmp = m_orderTmpConstraintPool[j];
@@ -1164,7 +1181,7 @@ namespace BulletXNA.BulletDynamics
 			int poolSize = m_tmpSolverNonContactConstraintPool.Count;
 			for (int j = 0; j < poolSize; j++)
 			{
-				SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[j];
+				SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[m_orderNonContactConstraintPool[j]];
 
 				ResolveSingleConstraintRowGeneric(constraint.m_solverBodyA, constraint.m_solverBodyB, ref constraint);
 				rawTmpSolverNonContactConstraintPool[j] = constraint;

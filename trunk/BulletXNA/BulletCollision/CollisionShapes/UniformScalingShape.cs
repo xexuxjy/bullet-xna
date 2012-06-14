@@ -23,7 +23,7 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -47,7 +47,7 @@ namespace BulletXNA.BulletCollision
 	        return tmpVertex*m_uniformScalingFactor;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
 	        m_childConvexShape.BatchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
 	        for (int i=0;i<numVectors;i++)
@@ -89,14 +89,14 @@ namespace BulletXNA.BulletCollision
 		new IndexedVector3( 0.0f,  0.0f, -1.0f)
 	};
 	
-	Vector4[] _supporting = new Vector4[]
+	IndexedVector4[] _supporting = new IndexedVector4[]
 	{
-		Vector4.Zero,
-		Vector4.Zero,
-		Vector4.Zero,
-		Vector4.Zero,
-		Vector4.Zero,
-		Vector4.Zero
+		IndexedVector4.Zero,
+		IndexedVector4.Zero,
+		IndexedVector4.Zero,
+		IndexedVector4.Zero,
+		IndexedVector4.Zero,
+		IndexedVector4.Zero
 	};
 
     for (int i = 0; i < 6; i++)
@@ -104,7 +104,7 @@ namespace BulletXNA.BulletCollision
         _directions[i] = _directions[i] * t._basis;
     }
     
-    ObjectArray<Vector4> tempSupporting = new ObjectArray<Vector4>(6);
+    ObjectArray<IndexedVector4> tempSupporting = new ObjectArray<IndexedVector4>(6);
 
 	
 	BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);

@@ -25,7 +25,7 @@
 #define TRUE
 
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -188,7 +188,7 @@ namespace BulletXNA.BulletCollision
             return m_polyhedron;
         }
 
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             int i;
 
@@ -197,7 +197,7 @@ namespace BulletXNA.BulletCollision
 
             for (i = 0; i < numVectors; i++)
             {
-                Vector4 temp = supportVerticesOut[i];
+                IndexedVector4 temp = supportVerticesOut[i];
                 temp.W = -MathUtil.BT_LARGE_FLOAT;
                 supportVerticesOut[i] = temp;
             }
@@ -214,7 +214,7 @@ namespace BulletXNA.BulletCollision
                     newDot = IndexedVector3.Dot(vec, vtx);
                     if (newDot > supportVerticesOut[j].W)
                     {
-                        supportVerticesOut[j] = new Vector4(vtx.ToVector3(), newDot);
+                        supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(), newDot);
                     }
                 }
             }
@@ -319,7 +319,7 @@ namespace BulletXNA.BulletCollision
             _directions[4] = new IndexedVector3(0, -1, 0);
             _directions[5] = new IndexedVector3(0, 0, -1);
 
-            Vector4[] _supporting = new Vector4[6];
+            IndexedVector4[] _supporting = new IndexedVector4[6];
 
             BatchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
 

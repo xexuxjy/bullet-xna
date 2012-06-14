@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.LinearMath
 {
@@ -13,58 +13,6 @@ namespace BulletXNA.LinearMath
                 return IndexedMatrix._identity;
             }
         }
-
-        public Matrix ToMatrix()
-        {
-            Matrix matrix = Matrix.Identity;
-            matrix.Right = _basis.GetColumn(0).ToVector3();
-            matrix.Up = _basis.GetColumn(1).ToVector3();
-            matrix.Backward = _basis.GetColumn(2).ToVector3();
-            //matrix.Right = _basis.GetRow(0).ToVector3();
-            //matrix.Up = _basis.GetRow(1).ToVector3();
-            //matrix.Backward = _basis.GetRow(2).ToVector3();
-
-            matrix.Translation = _origin.ToVector3();
-            return matrix;
-        }
-
-        // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator Matrix(IndexedMatrix im)
-        {
-            Matrix matrix = Matrix.Identity;
-            matrix.Right = im._basis.GetColumn(0).ToVector3();
-            matrix.Up = im._basis.GetColumn(1).ToVector3();
-            matrix.Backward = im._basis.GetColumn(2).ToVector3();
-            matrix.Translation = im._origin.ToVector3();
-            return matrix;
-        }
-
-        // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator IndexedMatrix(Matrix m)
-        {
-            IndexedMatrix im = new IndexedMatrix();
-            im._origin = new IndexedVector3(m.Translation);
-            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
-            im._basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
-            return im;
-        }
-
-
-
-        public Matrix ToMatrixProjection()
-        {
-            Matrix matrix = Matrix.Identity;
-            matrix.Right = _basis.GetColumn(0).ToVector3();
-            matrix.Up = _basis.GetColumn(1).ToVector3();
-            matrix.Backward = _basis.GetColumn(2).ToVector3();
-
-            matrix.Translation = _origin.ToVector3();
-            matrix.M34 = -1;
-            matrix.M44 = 0;
-            return matrix;
-        }
-
-
         static IndexedMatrix()
         {
         }
@@ -82,12 +30,6 @@ namespace BulletXNA.LinearMath
             _origin = origin;
         }
 
-        public IndexedMatrix(Matrix m)
-        {
-            _origin = new IndexedVector3(m.Translation);
-            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
-            _basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
-        }
 
         public static IndexedMatrix CreateLookAt(IndexedVector3 cameraPosition, IndexedVector3 cameraTarget, IndexedVector3 cameraUpVector)
         {
@@ -419,19 +361,30 @@ namespace BulletXNA.LinearMath
 			        v * _basis);
         }
 
-	    public Quaternion GetRotation() 
+        public void SetRotation(IndexedQuaternion q)
+        {
+            _basis.SetRotation(ref q);
+        }
+
+        public void SetRotation(ref IndexedQuaternion q)
+        {
+            _basis.SetRotation(ref q);
+        }
+
+
+	    public IndexedQuaternion GetRotation() 
         { 
 		    return _basis.GetRotation();
 	    }
 
-        public static IndexedMatrix CreateFromQuaternion(Quaternion q)
+        public static IndexedMatrix CreateFromQuaternion(IndexedQuaternion q)
         {
             IndexedMatrix i = new IndexedMatrix();
             i._basis.SetRotation(ref q);
             return i;
         }
 
-        public static IndexedMatrix CreateFromQuaternion(ref Quaternion q)
+        public static IndexedMatrix CreateFromQuaternion(ref IndexedQuaternion q)
         {
             IndexedMatrix i = new IndexedMatrix();
             i._basis.SetRotation(ref q);
@@ -479,6 +432,65 @@ namespace BulletXNA.LinearMath
                 return _basis.Backward;
             }
         }
+
+#if XNA
+        public IndexedMatrix(Matrix m)
+        {
+            _origin = new IndexedVector3(m.Translation);
+            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
+            _basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
+        }
+
+        public Matrix ToMatrix()
+        {
+            Matrix matrix = Matrix.Identity;
+            matrix.Right = _basis.GetColumn(0).ToVector3();
+            matrix.Up = _basis.GetColumn(1).ToVector3();
+            matrix.Backward = _basis.GetColumn(2).ToVector3();
+            //matrix.Right = _basis.GetRow(0).ToVector3();
+            //matrix.Up = _basis.GetRow(1).ToVector3();
+            //matrix.Backward = _basis.GetRow(2).ToVector3();
+
+            matrix.Translation = _origin.ToVector3();
+            return matrix;
+        }
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator Matrix(IndexedMatrix im)
+        {
+            Matrix matrix = Matrix.Identity;
+            matrix.Right = im._basis.GetColumn(0).ToVector3();
+            matrix.Up = im._basis.GetColumn(1).ToVector3();
+            matrix.Backward = im._basis.GetColumn(2).ToVector3();
+            matrix.Translation = im._origin.ToVector3();
+            return matrix;
+        }
+
+        // User-defined conversion from IndexedVector3 to Vector3
+        public static implicit operator IndexedMatrix(Matrix m)
+        {
+            IndexedMatrix im = new IndexedMatrix();
+            im._origin = new IndexedVector3(m.Translation);
+            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
+            im._basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
+            return im;
+        }
+
+
+
+        public Matrix ToMatrixProjection()
+        {
+            Matrix matrix = Matrix.Identity;
+            matrix.Right = _basis.GetColumn(0).ToVector3();
+            matrix.Up = _basis.GetColumn(1).ToVector3();
+            matrix.Backward = _basis.GetColumn(2).ToVector3();
+
+            matrix.Translation = _origin.ToVector3();
+            matrix.M34 = -1;
+            matrix.M44 = 0;
+            return matrix;
+        }
+#endif
 
 
 

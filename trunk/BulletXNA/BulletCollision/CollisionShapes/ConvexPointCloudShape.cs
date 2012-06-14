@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -134,14 +134,14 @@ namespace BulletXNA.BulletCollision
 
         }
         
-        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
         {
             float newDot;
             //use 'w' component of supportVerticesOut?
             {
                 for (int i = 0; i < numVectors; i++)
                 {
-                    Vector4 temp = supportVerticesOut[i];
+                    IndexedVector4 temp = supportVerticesOut[i];
                     temp.W = float.MinValue;
                     supportVerticesOut[i] = temp;
                 }
@@ -158,7 +158,7 @@ namespace BulletXNA.BulletCollision
                     if (newDot > supportVerticesOut[j].W)
                     {
                         //WARNING: don't swap next lines, the w component would get overwritten!
-                        supportVerticesOut[j] = new Vector4(vtx.ToVector3(), newDot);
+                        supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(), newDot);
                     }
                 }
             }

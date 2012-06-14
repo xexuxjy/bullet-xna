@@ -62,8 +62,8 @@ namespace BulletXNA.BulletDynamics
 	        // new position of X, allowed limits are (-PI,PI);
 	        // So to simulate ODE Universal joint we should use parent axis as Z, child axis as Y and limit all other DOFs
 	        // Build the frame in world coordinate system first
-	        IndexedVector3 zAxis = IndexedVector3.Normalize(axis1);
-	        IndexedVector3 yAxis = IndexedVector3.Normalize(axis2);
+	        IndexedVector3 zAxis = IndexedVector3.Normalize(m_axis1);
+	        IndexedVector3 yAxis = IndexedVector3.Normalize(m_axis2);
 	        IndexedVector3 xAxis = IndexedVector3.Cross(yAxis,zAxis); // we want right coordinate system
 	        IndexedMatrix frameInW = IndexedMatrix.Identity;
             frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],

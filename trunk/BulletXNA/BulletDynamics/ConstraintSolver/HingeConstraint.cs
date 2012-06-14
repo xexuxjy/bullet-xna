@@ -25,7 +25,7 @@
 
 using System;
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletDynamics
 {
@@ -125,7 +125,7 @@ namespace BulletXNA.BulletDynamics
                                     rbAxisA1.Y, rbAxisA2.Y, axisInA.Y,
                                     rbAxisA1.Z, rbAxisA2.Z, axisInA.Z);
 
-			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
+			IndexedQuaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
 			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
 			IndexedVector3 rbAxisB2 = IndexedVector3.Cross(axisInB, rbAxisB1);
 
@@ -173,7 +173,7 @@ namespace BulletXNA.BulletDynamics
 
             IndexedVector3 axisInB = rbA.GetCenterOfMassTransform()._basis * axisInA;
 
-			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
+			IndexedQuaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
 			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
 			IndexedVector3 rbAxisB2 = IndexedVector3.Cross(axisInB, rbAxisB1);
 
@@ -884,18 +884,18 @@ namespace BulletXNA.BulletDynamics
 			m_maxMotorImpulse = maxMotorImpulse;
 		}
 
-		public void SetMotorTarget(ref Quaternion qAinB, float dt) // qAinB is rotation of body A wrt body B.
+		public void SetMotorTarget(ref IndexedQuaternion qAinB, float dt) // qAinB is rotation of body A wrt body B.
 		{
 			// convert target from body to constraint space
-            Quaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation())* qAinB * m_rbAFrame.GetRotation();
+            IndexedQuaternion qConstraint = MathUtil.QuaternionInverse(m_rbBFrame.GetRotation())* qAinB * m_rbAFrame.GetRotation();
 
             qConstraint.Normalize();
 
 			// extract "pure" hinge component
 			IndexedVector3 vNoHinge = MathUtil.QuatRotate(ref qConstraint, ref vHinge);
 			vNoHinge.Normalize();
-			Quaternion qNoHinge = MathUtil.ShortestArcQuat(ref vHinge, ref vNoHinge);
-			Quaternion qHinge = MathUtil.QuaternionInverse(ref qNoHinge) * qConstraint;
+			IndexedQuaternion qNoHinge = MathUtil.ShortestArcQuat(ref vHinge, ref vNoHinge);
+			IndexedQuaternion qHinge = MathUtil.QuaternionInverse(ref qNoHinge) * qConstraint;
 			qHinge.Normalize();
 
 			// compute angular target, clamped to limits
@@ -974,7 +974,7 @@ namespace BulletXNA.BulletDynamics
 
             IndexedVector3 axisInB = m_rbA.GetCenterOfMassTransform()._basis * axisInA;
 
-			Quaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
+			IndexedQuaternion rotationArc = MathUtil.ShortestArcQuat(ref axisInA, ref axisInB);
 			IndexedVector3 rbAxisB1 = MathUtil.QuatRotate(ref rotationArc, ref rbAxisA1);
             IndexedVector3 rbAxisB2 = IndexedVector3.Cross(ref axisInB, ref rbAxisB1);
 

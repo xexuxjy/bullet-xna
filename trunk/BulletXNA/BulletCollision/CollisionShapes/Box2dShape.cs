@@ -23,7 +23,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -73,14 +73,14 @@ namespace BulletXNA.BulletCollision
 				MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z));
 		}
 
-		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, Vector4[] supportVerticesOut, int numVectors)
+		public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
 		{
 			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 		
 			for (int i=0;i<numVectors;i++)
 			{
 				IndexedVector3 vec = vectors[i];
-				supportVerticesOut[i] = new Vector4(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
+				supportVerticesOut[i] = new IndexedVector4(MathUtil.FSel(vec.X, halfExtents.X, -halfExtents.X),
 					MathUtil.FSel(vec.Y, halfExtents.Y, -halfExtents.Y),
 					MathUtil.FSel(vec.Z, halfExtents.Z, -halfExtents.Z),0); 
 			}
@@ -185,7 +185,7 @@ namespace BulletXNA.BulletCollision
         public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
 		{
 			//this plane might not be aligned...
-			Vector4 plane;
+			IndexedVector4 plane;
 			GetPlaneEquation(out plane,i);
 			planeNormal = new IndexedVector3(plane.X,plane.Y,plane.Z);
 			planeSupport = LocalGetSupportingVertex(-planeNormal);
@@ -219,33 +219,33 @@ namespace BulletXNA.BulletCollision
 		}
 		
 
-		public void GetPlaneEquation(out Vector4 plane,int i)
+		public void GetPlaneEquation(out IndexedVector4 plane,int i)
 		{
 			IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
 
 			switch (i)
 			{
 			case 0:
-				plane = new Vector4(1,0,0,-halfExtents.X);
+				plane = new IndexedVector4(1,0,0,-halfExtents.X);
 				break;
 			case 1:
-				plane = new Vector4(-1,0,0,-halfExtents.X);
+				plane = new IndexedVector4(-1,0,0,-halfExtents.X);
 				break;
 			case 2:
-				plane = new Vector4(0,1,0,-halfExtents.Y);
+				plane = new IndexedVector4(0,1,0,-halfExtents.Y);
 				break;
 			case 3:
-				plane = new Vector4(0,-1,0,-halfExtents.Y);
+				plane = new IndexedVector4(0,-1,0,-halfExtents.Y);
 				break;
 			case 4:
-				plane = new Vector4(0,0,1,-halfExtents.Z);
+				plane = new IndexedVector4(0,0,1,-halfExtents.Z);
 				break;
 			case 5:
-				plane = new Vector4(0,0,-1,-halfExtents.Z);
+				plane = new IndexedVector4(0,0,-1,-halfExtents.Z);
 				break;
 			default:
 				Debug.Assert(false);
-                plane = Vector4.Zero;
+                plane = IndexedVector4.Zero;
 				break;
 			}
 		}

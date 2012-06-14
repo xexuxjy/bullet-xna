@@ -22,14 +22,14 @@ subject to the following restrictions:
 */
 
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
     public class ClipPolygon
     {
 
-        public static float DistancePointPlane(ref Vector4 plane, ref IndexedVector3 point)
+        public static float DistancePointPlane(ref IndexedVector4 plane, ref IndexedVector3 point)
         {
             return point.Dot(new IndexedVector3(plane.X, plane.Y, plane.Z)) - plane.W;
         }
@@ -71,7 +71,7 @@ namespace BulletXNA.BulletCollision
         *\return The count of the clipped counts
         */
         public static int PlaneClipPolygon(
-                               ref Vector4 plane,
+                               ref IndexedVector4 plane,
                                ObjectArray<IndexedVector3> polygon_points,
                                int polygon_point_count,
                                ObjectArray<IndexedVector3> clipped)
@@ -122,7 +122,7 @@ namespace BulletXNA.BulletCollision
         *\return The count of the clipped counts
         */
         public static int PlaneClipTriangle(
-                               ref Vector4 plane,
+                               ref IndexedVector4 plane,
                                ref IndexedVector3 point0,
                                ref IndexedVector3 point1,
                                ref IndexedVector3 point2,

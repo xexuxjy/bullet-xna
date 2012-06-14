@@ -230,21 +230,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 //PersistentManifoldArray copy = new PersistentManifoldArray(m_islandmanifold);
                 m_islandmanifold.Sort(sortPredicate);
 
-                //for (int i = 0; i < m_islandmanifold.Count; ++i)
-                //{
-                //    if (copy[i] != m_islandmanifold[i])
-                //    {
-
-                //        int island0 = ((CollisionObject)m_islandmanifold[i].GetBody0()).GetIslandTag();
-                //        int island1 = ((CollisionObject)m_islandmanifold[i].GetBody1()).GetIslandTag();
-
-                //        int islandc0 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
-                //        int islandc1 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
-
-                //        int ibreak = 0;
-                //    }
-                //}
-
                 //now process all active islands (sets of manifolds for now)
 
                 int startManifoldIndex = 0;
@@ -315,8 +300,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                             m_subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
 
-
-
                         callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_subList, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
                     }
@@ -326,7 +309,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("islandSleeping.");
                         }
-
                     }
 
                     if (numIslandManifolds != 0)

@@ -22,7 +22,7 @@ subject to the following restrictions:
 */
 
 using BulletXNA.LinearMath;
-using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.BulletCollision
 {
@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
 
         public float m_penetration_depth;
         public int m_point_count;
-        public Vector4 m_separating_normal;
+        public IndexedVector4 m_separating_normal;
         public IndexedVector3[] m_points = new IndexedVector3[MAX_TRI_CLIPPING];
 
         public void CopyFrom(GIM_TRIANGLE_CONTACT other)
@@ -58,7 +58,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //! classify points that are closer
-        public void MergePoints(ref Vector4 plane, float margin, ObjectArray<IndexedVector3> points, int point_count)
+        public void MergePoints(ref IndexedVector4 plane, float margin, ObjectArray<IndexedVector3> points, int point_count)
         {
             m_point_count = 0;
             m_penetration_depth = -1000.0f;
@@ -98,7 +98,7 @@ namespace BulletXNA.BulletCollision
     public class PrimitiveTriangle
     {
         public IndexedVector3[] m_vertices = new IndexedVector3[3];
-        public Vector4 m_plane;
+        public IndexedVector4 m_plane;
         public float m_margin;
         //float m_dummy;
         public PrimitiveTriangle()
@@ -111,7 +111,7 @@ namespace BulletXNA.BulletCollision
         {
             IndexedVector3 normal = IndexedVector3.Cross(m_vertices[1] - m_vertices[0], m_vertices[2] - m_vertices[0]);
             normal.Normalize();
-            m_plane = new Vector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices[0], normal));
+            m_plane = new IndexedVector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices[0], normal));
         }
 
         //! Test if triangles could collide
@@ -144,7 +144,7 @@ namespace BulletXNA.BulletCollision
         /*!
         \pre this triangle must have its plane calculated.
         */
-        public void GetEdgePlane(int edge_index, out Vector4 plane)
+        public void GetEdgePlane(int edge_index, out IndexedVector4 plane)
         {
             IndexedVector3 e0 = m_vertices[edge_index];
             IndexedVector3 e1 = m_vertices[(edge_index + 1) % 3];
@@ -168,7 +168,7 @@ namespace BulletXNA.BulletCollision
 
             ObjectArray<IndexedVector3> temp_points = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
 
-            Vector4 edgeplane;
+            IndexedVector4 edgeplane;
 
             GetEdgePlane(0, out edgeplane);
 
@@ -309,20 +309,20 @@ namespace BulletXNA.BulletCollision
             IndexedVector3.Transform(m_vertices1, ref t, m_vertices1);
         }
 
-        public void BuildTriPlane(out Vector4 plane)
+        public void BuildTriPlane(out IndexedVector4 plane)
         {
             IndexedVector3 normal = IndexedVector3.Cross(m_vertices1[1] - m_vertices1[0], m_vertices1[2] - m_vertices1[0]);
             normal.Normalize();
-            plane = new Vector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices1[0], normal));
+            plane = new IndexedVector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices1[0], normal));
         }
 
         public bool OverlapTestConservative(TriangleShapeEx other)
         {
             float total_margin = GetMargin() + other.GetMargin();
 
-            Vector4 plane0;
+            IndexedVector4 plane0;
             BuildTriPlane(out plane0);
-            Vector4 plane1;
+            IndexedVector4 plane1;
             other.BuildTriPlane(out plane1);
 
             // classify points on other triangle

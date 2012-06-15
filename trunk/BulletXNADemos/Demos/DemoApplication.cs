@@ -332,6 +332,7 @@ namespace BulletXNADemos.Demos
             if (BulletGlobals.g_streamWriter != null)
             {
                 BulletGlobals.g_streamWriter.Close();
+                BulletGlobals.g_streamWriter = null;
             }
 
             int i = BulletGlobals.s_collisionAlgorithmInstanceCount;
@@ -528,7 +529,7 @@ namespace BulletXNADemos.Demos
                 forward = new IndexedVector3(0,0,-1);
             }
             IndexedVector3 right = IndexedVector3.Cross(m_cameraUp, IndexedVector3.Normalize(forward));
-            IndexedQuaternion roll = new Quaternion(right, -rele);
+            IndexedQuaternion roll = new IndexedQuaternion(right, -rele);
             rot.Normalize();
             roll.Normalize();
 
@@ -537,7 +538,9 @@ namespace BulletXNADemos.Demos
             IndexedMatrix m3 = m1 * m2;
 
 
-            eyePos = new IndexedVector3(Vector3.Transform(eyePos.ToVector3(),(rot * roll)));
+            //eyePos = new IndexedVector3(Vector3.Transform(eyePos.ToVector3(),(rot * roll)));
+            //eyePos = new IndexedVector3(eyePos, (rot * roll));
+            eyePos = m3 * eyePos;
 
             //m_cameraTargetPosition = m_cameraPosition + eyePos;
             m_cameraPosition = eyePos;
@@ -736,7 +739,7 @@ namespace BulletXNADemos.Demos
                 linVel.Normalize();
                 linVel *= m_ShootBoxInitialSpeed;
 
-                IndexedMatrix newMatrix = IndexedMatrix.CreateFromQuaternion(new Quaternion(0,0,0,1));
+                IndexedMatrix newMatrix = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
                 newMatrix._origin = camPos;
                 body.SetWorldTransform(ref newMatrix);
                 body.SetLinearVelocity(ref linVel);
@@ -1622,7 +1625,7 @@ namespace BulletXNADemos.Demos
 
             //debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             //DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits | DebugDrawModes.DBG_DrawWireframe;
-            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;
             m_debugDraw.SetDebugMode(debugMode);

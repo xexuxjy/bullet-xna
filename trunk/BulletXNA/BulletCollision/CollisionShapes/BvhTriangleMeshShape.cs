@@ -288,9 +288,10 @@ namespace BulletXNA.BulletCollision
                         m_triangle[j] *= meshScaling;
                     }
                 }
-                else if (vertexBase is ObjectArray<Vector3>)
+#if XNA
+                else if (vertexBase is ObjectArray<Microsoft.Xna.Framework.Vector3>)
                 {
-                    Vector3[] vertexBaseRaw = ((ObjectArray<Vector3>)vertexBase).GetRawArray();
+                    Microsoft.Xna.Framework.Vector3[] vertexBaseRaw = ((ObjectArray<Microsoft.Xna.Framework.Vector3>)vertexBase).GetRawArray();
                     for (int j = 2; j >= 0; j--)
                     {
                         m_triangle[j] = new IndexedVector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
@@ -298,7 +299,7 @@ namespace BulletXNA.BulletCollision
                         m_triangle[j] *= meshScaling;
                     }
                 }
-
+#endif
                 else if (vertexBase is ObjectArray<float>)
                 {
                     float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();

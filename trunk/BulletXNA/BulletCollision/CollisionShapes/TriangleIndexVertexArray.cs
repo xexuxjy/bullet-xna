@@ -62,10 +62,16 @@ namespace BulletXNA.BulletCollision
 	        indexedMesh.m_numVertices = numVertices;
 	        indexedMesh.m_vertexBase = vertexBase;
 
-            if (vertexBase is ObjectArray<IndexedVector3> || vertexBase is ObjectArray<Vector3>)
+            if (vertexBase is ObjectArray<IndexedVector3>)
             {
                 indexedMesh.m_vertexStride = 1;
             }
+#if XNA
+            else if (vertexBase is ObjectArray<IndexedVector3>)
+            {
+                indexedMesh.m_vertexStride = 1;
+            }
+#endif
             else if (vertexBase is ObjectArray<float>)
             {
                 indexedMesh.m_vertexStride = 3;

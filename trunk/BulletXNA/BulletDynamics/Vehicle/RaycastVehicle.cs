@@ -377,7 +377,7 @@ namespace BulletXNA.BulletDynamics
 	        //rotate around steering over de wheelAxleWS
 	        float steering = wheel.m_steering;
         	
-	        IndexedQuaternion steeringOrn = new IndexedQuaternion(up.,steering);//wheel.m_steering);
+	        IndexedQuaternion steeringOrn = new IndexedQuaternion(up,steering);//wheel.m_steering);
             IndexedBasisMatrix steeringMat = new IndexedBasisMatrix(ref steeringOrn);
 
             IndexedQuaternion rotatingOrn = new IndexedQuaternion(right, -wheel.m_rotation);

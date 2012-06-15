@@ -55,7 +55,7 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < numVectors; i++)
             {
                 IndexedVector3 temp = vectors[i];
-                supportVerticesOut[i] = new IndexedVector4(LocalGetSupportingVertexWithoutMargin(ref temp).ToVector3(),0f);
+                supportVerticesOut[i] = new IndexedVector4(LocalGetSupportingVertexWithoutMargin(ref temp),0f);
             }
         }
         public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)

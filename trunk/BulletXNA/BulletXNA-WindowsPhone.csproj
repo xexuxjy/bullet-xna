@@ -55,7 +55,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;WINDOWS_PHONE;XNA</DefineConstants>
     <XnaCompressContent>false</XnaCompressContent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows Phone' ">
@@ -67,7 +67,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;WINDOWS_PHONE;XNA</DefineConstants>
     <XnaCompressContent>false</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>

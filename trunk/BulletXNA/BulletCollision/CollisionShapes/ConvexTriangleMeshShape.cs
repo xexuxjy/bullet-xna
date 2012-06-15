@@ -105,7 +105,7 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
 
 		        m_stridingMesh.InternalProcessAllTriangles(supportCallback,ref aabbMin,ref aabbMax);
-		        supportVerticesOut[j] = new IndexedVector4(supportCallback.GetSupportVertexLocal().ToVector3(),0);
+		        supportVerticesOut[j] = new IndexedVector4(supportCallback.GetSupportVertexLocal(),0);
 	        }
         }
 	

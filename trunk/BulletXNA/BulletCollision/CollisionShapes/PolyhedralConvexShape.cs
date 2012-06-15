@@ -214,7 +214,7 @@ namespace BulletXNA.BulletCollision
                     newDot = IndexedVector3.Dot(vec, vtx);
                     if (newDot > supportVerticesOut[j].W)
                     {
-                        supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(), newDot);
+                        supportVerticesOut[j] = new IndexedVector4(vtx, newDot);
                     }
                 }
             }

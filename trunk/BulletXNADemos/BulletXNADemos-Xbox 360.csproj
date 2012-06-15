@@ -51,7 +51,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;XBOX;XBOX360</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XBOX;XBOX360;XNA</DefineConstants>
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Xbox 360' ">
@@ -62,7 +62,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE;XBOX;XBOX360</DefineConstants>
+    <DefineConstants>TRACE;XBOX;XBOX360;XNA</DefineConstants>
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>

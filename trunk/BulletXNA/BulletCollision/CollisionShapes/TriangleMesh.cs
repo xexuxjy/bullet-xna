@@ -77,7 +77,7 @@ namespace BulletXNA.BulletCollision
 #if XNA
 
         ///findOrAddVertex is an internal method, use addTriangle instead
-        public int FindOrAddVertex(ref Vector3 vertex, bool removeDuplicateVertices)
+        public int FindOrAddVertex(ref Microsoft.Xna.Framework.Vector3 vertex, bool removeDuplicateVertices)
         {
             IndexedVector3 iv3 = new IndexedVector3(vertex);
             return FindOrAddVertex(ref iv3,removeDuplicateVertices);
@@ -161,16 +161,16 @@ namespace BulletXNA.BulletCollision
         ///In general it is better to directly use btTriangleIndexVertexArray instead.
 #if XNA
 
-        public void AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
+        public void AddTriangle(Microsoft.Xna.Framework.Vector3 vertex0, Microsoft.Xna.Framework.Vector3 vertex1, Microsoft.Xna.Framework.Vector3 vertex2)
         {
             AddTriangle(ref vertex0, ref vertex1, ref vertex2);
         }
 
-        public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2)
+        public void AddTriangle(ref Microsoft.Xna.Framework.Vector3 vertex0, ref Microsoft.Xna.Framework.Vector3 vertex1, ref Microsoft.Xna.Framework.Vector3 vertex2)
         {
             AddTriangle(ref vertex0, ref vertex1, ref vertex2, false);
         }
-        public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2, bool removeDuplicateVertices)
+        public void AddTriangle(ref Microsoft.Xna.Framework.Vector3 vertex0, ref Microsoft.Xna.Framework.Vector3 vertex1, ref Microsoft.Xna.Framework.Vector3 vertex2, bool removeDuplicateVertices)
         {
             m_indexedMeshes[0].m_numTriangles++;
             AddIndex(FindOrAddVertex(ref vertex0, removeDuplicateVertices));

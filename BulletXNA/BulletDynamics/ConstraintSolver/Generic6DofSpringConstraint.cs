@@ -42,19 +42,26 @@ namespace BulletXNA.BulletDynamics
         public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, IndexedMatrix frameInA, IndexedMatrix frameInB, bool useLinearReferenceFrameA)
             : this(rbA, rbB, ref frameInA, ref frameInB, useLinearReferenceFrameA)
         {
+            Init();
         }
 
         
         public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, ref IndexedMatrix frameInA, ref IndexedMatrix frameInB ,bool useLinearReferenceFrameA) : base(rbA,rbB,ref frameInA,ref frameInB,useLinearReferenceFrameA)
         {
+            Init();
+        }
+
+        protected void Init()
+        {
             m_constraintType = TypedConstraintType.D6_SPRING_CONSTRAINT_TYPE;
-			for (int i = 0; i < s_degreesOfFreedom; ++i)
+            for (int i = 0; i < s_degreesOfFreedom; ++i)
             {
                 m_springEnabled[i] = false;
                 m_equilibriumPoint[i] = 0.0f;
                 m_springStiffness[i] = 0.0f;
                 m_springDamping[i] = 1.0f;
             }
+
         }
 
 

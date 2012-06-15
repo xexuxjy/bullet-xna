@@ -30,6 +30,17 @@ using BulletXNA.LinearMath;
 namespace BulletXNA.BulletCollision
 {
     // first pass I'm not going to worry too much about performance so this has become a class.
+
+    public class UnionFindElementSortPredicate : IQSComparer<Element>
+    {
+
+		    public bool Compare( Element lhs, Element rhs )
+		    {
+			    return lhs.m_id < rhs.m_id;
+		    }
+    }
+
+
     public struct Element : IComparable<Element>
     {
         public int m_id;
@@ -76,7 +87,8 @@ namespace BulletXNA.BulletCollision
 #endif
             }
 
-            m_elements.Sort();
+            //m_elements.Sort();
+            m_elements.QuickSort(m_sortPredicate);
         }
 
         public void Reset(int N)
@@ -179,5 +191,6 @@ namespace BulletXNA.BulletCollision
             return x;
         }
         private ObjectArray<Element> m_elements;
+        private UnionFindElementSortPredicate m_sortPredicate = new UnionFindElementSortPredicate();
     }
 }

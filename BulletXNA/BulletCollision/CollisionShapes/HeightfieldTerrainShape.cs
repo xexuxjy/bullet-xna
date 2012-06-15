@@ -120,7 +120,8 @@ namespace BulletXNA.BulletCollision
 
         public class QuadTreeNode
         {
-            public BoundingBox boundingBox;// int[] quantizedAabbMin = new int[3];
+            IndexedVector3 vmin;
+            IndexedVector3 vmax;
             //public int[] quantizedAabbMax = new int[3];
             public QuadTreeNode[] children;
             public int depth;
@@ -128,10 +129,10 @@ namespace BulletXNA.BulletCollision
             public QuadTreeNode()
             { }
 
-            public QuadTreeNode(ref BoundingBox parentBB,int xAxis, int yAxis, int zAxis, float xDiff, float zDiff,bool x,bool z,int d)
+            public QuadTreeNode(ref IndexedVector3 minv, ref IndexedVector3 maxv,int xAxis, int yAxis, int zAxis, float xDiff, float zDiff, bool x, bool z, int d)
             {
-                IndexedVector3 iv3Min = parentBB.Min;
-                IndexedVector3 iv3Max = new IndexedVector3();
+                IndexedVector3 iv3Min = minv;
+                IndexedVector3 iv3Max = maxv;
                 iv3Min[xAxis] += (x ? xDiff : 0);
                 iv3Min[zAxis] += (z ? zDiff : 0);
                 // large numbers here , but not max as float/int conversion gets broken
@@ -142,7 +143,6 @@ namespace BulletXNA.BulletCollision
                 iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
                 iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
                 depth = d;
-                boundingBox = new BoundingBox(iv3Min, iv3Max);
 
                 //System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
 
@@ -150,11 +150,87 @@ namespace BulletXNA.BulletCollision
 
             }
 
-            public bool Intersects(Ray ray)
+            public bool Intersects(IndexedVector3 source,IndexedVector3 direction)
             {
-                return boundingBox.Intersects(ray).HasValue;
-                //return children == null;
-                //return true;
+                float num1 = 0.0f;
+                float num2 = MathUtil.SIMD_INFINITY;
+                if (Math.Abs(direction.X) < 9.99999997475243E-07)
+                {
+                    if (direction.X < vmin.X || direction.X > vmax.X)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    float num3 = 1f / direction.X;
+                    float num4 = (vmin.X - direction.X) * num3;
+                    float num5 = (vmax.X - direction.X) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+                    num1 = (num4 > num1) ? num4 : num1;
+                    num2 = (num5 < num2) ? num5 : num2;
+
+
+                    if (num1 > num2)
+                    {
+                        return false;
+                    }
+                }
+                if (Math.Abs(direction.Y) < 9.99999997475243E-07)
+                {
+                    if (source.Y < vmin.Y || source.Y > vmax.Y)
+                        return false;
+                }
+                else
+                {
+                    float num3 = float(1) / direction.Y;
+                    float num4 = (vmin.Y - source.Y) * num3;
+                    float num5 = (vmax.Y - source.Y) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+                    num1 = (num4 > num1) ? num4 : num1;
+                    num2 = (num5 < num2) ? num5 : num2;
+                    if (num1 > num2)
+                    {
+                        return false;
+                    }
+                }
+                if (btFabs(direction.Z) < 9.99999997475243E-07)
+                {
+                    if (source.Z < vmin.Z || source.Z > vmax.Z)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    float num3 = float(1) / direction.Z;
+                    float num4 = (vmin.Z - source.Z) * num3;
+                    float num5 = (vmax.Z - source.Z) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+
+                    num1 = (num4 > num1) ? num4 : num1;
+                    float num7 = (num5 < num2) ? num5 : num2;
+                    if (num1 > num7)
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
 
             public void AdjustHeightValues(int xAxis,int yAxis,int zAxis,ref float min,ref float max,HeightfieldTerrainShape shape)
@@ -390,11 +466,11 @@ namespace BulletXNA.BulletCollision
                     localRaySource += m_localOrigin;
                     localRayTarget += m_localOrigin;
 
-                    //Ray ray = new Ray(raySource, rayTarget);
-                    Ray ray = new Ray(localRaySource, (localRayTarget - localRaySource).Normalized());
+                    IndexedVector3 direction = (localRayTarget - localRaySource);
+                    direction.Normalize();
 
                     // build list of squares
-                    QueryNode(m_rootQuadTreeNode, results, ray);
+                    QueryNode(m_rootQuadTreeNode, results, localRaySource, direction);
 
 
                     // go through each of the results.
@@ -587,7 +663,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, Ray ray)
+        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, IndexedVector3 source,IndexedVector3 direction)
         {
             //if(node.children == null && node.Intersects(raySource,rayTarget))
             // add the lowest level.

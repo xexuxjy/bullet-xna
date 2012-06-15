@@ -809,9 +809,12 @@ namespace BulletXNA.BulletDynamics
 	        for (int i = 0; i < m_constraintRefs.Count; ++i)
 	        {
 		        TypedConstraint c = m_constraintRefs[i];
-                if (c.GetRigidBodyA() == otherRb || c.GetRigidBodyB() == otherRb)
+                if (c.IsEnabled())
                 {
-                    return false;
+                    if (c.GetRigidBodyA() == otherRb || c.GetRigidBodyB() == otherRb)
+                    {
+                        return false;
+                    }
                 }
 	        }
 

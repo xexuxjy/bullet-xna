@@ -284,9 +284,13 @@ namespace BulletXNA.BulletCollision
         }
         public void SetPlaneConvexMultipointIterations(int numPerturbationIterations, int minimumPointsPerturbationThreshold)
         {
-            ConvexPlaneCreateFunc planeCreateFunc = (ConvexPlaneCreateFunc)m_planeConvexCF;
-	        planeCreateFunc.m_numPerturbationIterations = numPerturbationIterations;
-	        planeCreateFunc.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+            ConvexPlaneCreateFunc cpCF = (ConvexPlaneCreateFunc)m_convexPlaneCF;
+            cpCF.m_numPerturbationIterations = numPerturbationIterations;
+            cpCF.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+            ConvexPlaneCreateFunc pcCF = (ConvexPlaneCreateFunc)m_planeConvexCF;
+	        pcCF.m_numPerturbationIterations = numPerturbationIterations;
+	        pcCF.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
         }
     }
 }

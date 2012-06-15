@@ -120,8 +120,8 @@ namespace BulletXNA.BulletCollision
 
         public class QuadTreeNode
         {
-            IndexedVector3 vmin;
-            IndexedVector3 vmax;
+            public IndexedVector3 vmin;
+            public IndexedVector3 vmax;
             //public int[] quantizedAabbMax = new int[3];
             public QuadTreeNode[] children;
             public int depth;
@@ -204,7 +204,7 @@ namespace BulletXNA.BulletCollision
                         return false;
                     }
                 }
-                if (btFabs(direction.Z) < 9.99999997475243E-07)
+                if (Math.Abs(direction.Z) < 9.99999997475243E-07)
                 {
                     if (source.Z < vmin.Z || source.Z > vmax.Z)
                     {
@@ -237,24 +237,20 @@ namespace BulletXNA.BulletCollision
             {
                 if (children == null)
                 {
-                    IndexedVector3 iv3Min = new IndexedVector3(boundingBox.Min);
-                    IndexedVector3 iv3Max = new IndexedVector3(boundingBox.Max);
 
-                    min = iv3Min[yAxis];
-                    max = iv3Max[yAxis];
+                    min = vmin[yAxis];
+                    max = vmax[yAxis];
                     
                     int[] clampedMin = new int[3];
                     int[] clampedMax = new int[3];
 
-                    shape.QuantizeWithClamp(clampedMin, ref iv3Min, 0);
-                    shape.QuantizeWithClamp(clampedMax, ref iv3Max, 1);
+                    shape.QuantizeWithClamp(clampedMin, ref vmin, 0);
+                    shape.QuantizeWithClamp(clampedMax, ref vmax, 1);
                     
                     shape.InspectVertexHeights(clampedMin[xAxis], clampedMax[xAxis], clampedMin[zAxis], clampedMax[zAxis], yAxis, ref min, ref max);
 
-                    iv3Min[yAxis] = min;
-                    iv3Max[yAxis] = max;
-
-                    boundingBox = new BoundingBox(iv3Min, iv3Max);
+                    vmin[yAxis] = min;
+                    vmax[yAxis] = max;
                     
                 }
                 else
@@ -301,14 +297,8 @@ namespace BulletXNA.BulletCollision
                         max = newMax;
                     }
 
-                    IndexedVector3 iv3Min = new IndexedVector3(boundingBox.Min);
-                    IndexedVector3 iv3Max = new IndexedVector3(boundingBox.Max);
-
-                    iv3Min[yAxis] = min;
-                    iv3Max[yAxis] = max;
-
-                    boundingBox = new BoundingBox(iv3Min, iv3Max);
-
+                    vmin[yAxis] = min;
+                    vmax[yAxis] = max;
                 }
             }
         }
@@ -345,7 +335,8 @@ namespace BulletXNA.BulletCollision
                 zAxis = 1;
             }
 
-            m_rootQuadTreeNode.boundingBox = new BoundingBox(m_localAabbMin, m_localAabbMax);
+            m_rootQuadTreeNode.vmin = m_localAabbMin;
+            m_rootQuadTreeNode.vmax = m_localAabbMax;
 
             BuildNodes(m_rootQuadTreeNode, 0, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
             // cheat second pass to rebuild heights.
@@ -363,7 +354,7 @@ namespace BulletXNA.BulletCollision
                 if (parent.children == null)
                 {
 
-                    IndexedVector3 diff = (parent.boundingBox.Max - parent.boundingBox.Min) / 2;
+                    IndexedVector3 diff = (parent.vmax - parent.vmin) / 2;
 
 
                     // don;t split too low.
@@ -372,13 +363,13 @@ namespace BulletXNA.BulletCollision
                         parent.children = new QuadTreeNode[4];
                         //split nodes
 
-                        parent.children[0] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
+                        parent.children[0] = new QuadTreeNode(ref parent.vmin, ref parent.vmax,xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
                         BuildNodes(parent.children[0], depth + 1, maxDepth, minNodeSize,xAxis, yAxis, zAxis);
-                        parent.children[1] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
+                        parent.children[1] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
                         BuildNodes(parent.children[1], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
-                        parent.children[2] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
+                        parent.children[2] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
                         BuildNodes(parent.children[2], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
-                        parent.children[3] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
+                        parent.children[3] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
                         BuildNodes(parent.children[3], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
                     }
                 }
@@ -481,8 +472,8 @@ namespace BulletXNA.BulletCollision
                         int startJ = 0;
                         int endJ = m_heightStickLength - 1;
 
-                        IndexedVector3 iv3Min = quadTreeNode.boundingBox.Min;
-                        IndexedVector3 iv3Max = quadTreeNode.boundingBox.Max;
+                        IndexedVector3 iv3Min = quadTreeNode.vmin;
+                        IndexedVector3 iv3Max = quadTreeNode.vmax;
 
                         switch (m_upAxis)
                         {
@@ -692,9 +683,9 @@ namespace BulletXNA.BulletCollision
                 // simple rescursive for now.
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (node.children[i].Intersects(ray))
+                    if (node.children[i].Intersects(source,direction))
                     {
-                        QueryNode(node.children[i], results, ray);
+                        QueryNode(node.children[i], results, source,direction);
                     }
                 }
             }

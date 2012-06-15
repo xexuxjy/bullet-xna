@@ -165,7 +165,7 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportY(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportY(halfExtents, vectors[i]),0);
             }
         }
 
@@ -293,7 +293,7 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportX(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportX(halfExtents, vectors[i]),0);
             }
         }
     	
@@ -331,7 +331,7 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 halfExtents = GetHalfExtentsWithoutMargin();
             for (int i = 0; i < numVectors; i++)
             {
-                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportZ(halfExtents, vectors[i]).ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(CylinderLocalSupportZ(halfExtents, vectors[i]),0);
             }
         }
 

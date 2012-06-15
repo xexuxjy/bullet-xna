@@ -111,7 +111,7 @@ namespace BulletXNA.BulletCollision
         {
             IndexedVector3 normal = IndexedVector3.Cross(m_vertices[1] - m_vertices[0], m_vertices[2] - m_vertices[0]);
             normal.Normalize();
-            m_plane = new IndexedVector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices[0], normal));
+            m_plane = new IndexedVector4(normal, IndexedVector3.Dot(m_vertices[0], normal));
         }
 
         //! Test if triangles could collide
@@ -313,7 +313,7 @@ namespace BulletXNA.BulletCollision
         {
             IndexedVector3 normal = IndexedVector3.Cross(m_vertices1[1] - m_vertices1[0], m_vertices1[2] - m_vertices1[0]);
             normal.Normalize();
-            plane = new IndexedVector4(normal.ToVector3(), IndexedVector3.Dot(m_vertices1[0], normal));
+            plane = new IndexedVector4(normal, IndexedVector3.Dot(m_vertices1[0], normal));
         }
 
         public bool OverlapTestConservative(TriangleShapeEx other)

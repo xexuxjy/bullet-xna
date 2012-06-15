@@ -434,16 +434,16 @@ namespace BulletXNA.LinearMath
         }
 
 #if XNA
-        public IndexedMatrix(Matrix m)
+        public IndexedMatrix(Microsoft.Xna.Framework.Matrix m)
         {
             _origin = new IndexedVector3(m.Translation);
             //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
             _basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
         }
 
-        public Matrix ToMatrix()
+        public Microsoft.Xna.Framework.Matrix ToMatrix()
         {
-            Matrix matrix = Matrix.Identity;
+            Microsoft.Xna.Framework.Matrix matrix = Microsoft.Xna.Framework.Matrix.Identity;
             matrix.Right = _basis.GetColumn(0).ToVector3();
             matrix.Up = _basis.GetColumn(1).ToVector3();
             matrix.Backward = _basis.GetColumn(2).ToVector3();
@@ -456,9 +456,9 @@ namespace BulletXNA.LinearMath
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator Matrix(IndexedMatrix im)
+        public static implicit operator Microsoft.Xna.Framework.Matrix(IndexedMatrix im)
         {
-            Matrix matrix = Matrix.Identity;
+            Microsoft.Xna.Framework.Matrix matrix = Microsoft.Xna.Framework.Matrix.Identity;
             matrix.Right = im._basis.GetColumn(0).ToVector3();
             matrix.Up = im._basis.GetColumn(1).ToVector3();
             matrix.Backward = im._basis.GetColumn(2).ToVector3();
@@ -467,7 +467,7 @@ namespace BulletXNA.LinearMath
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator IndexedMatrix(Matrix m)
+        public static implicit operator IndexedMatrix(Microsoft.Xna.Framework.Matrix m)
         {
             IndexedMatrix im = new IndexedMatrix();
             im._origin = new IndexedVector3(m.Translation);
@@ -478,9 +478,9 @@ namespace BulletXNA.LinearMath
 
 
 
-        public Matrix ToMatrixProjection()
+        public Microsoft.Xna.Framework.Matrix ToMatrixProjection()
         {
-            Matrix matrix = Matrix.Identity;
+            Microsoft.Xna.Framework.Matrix matrix = Microsoft.Xna.Framework.Matrix.Identity;
             matrix.Right = _basis.GetColumn(0).ToVector3();
             matrix.Up = _basis.GetColumn(1).ToVector3();
             matrix.Backward = _basis.GetColumn(2).ToVector3();

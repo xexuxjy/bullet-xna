@@ -158,7 +158,7 @@ namespace BulletXNA.BulletCollision
                     if (newDot > supportVerticesOut[j].W)
                     {
                         //WARNING: don't swap next lines, the w component would get overwritten!
-                        supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(), newDot);
+                        supportVerticesOut[j] = new IndexedVector4(vtx, newDot);
                     }
                 }
             }

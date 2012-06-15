@@ -189,7 +189,7 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3.Dot(ref dir, ref m_vertices1[2],out c);
 
                 IndexedVector3 dots = new IndexedVector3(a, b, c);
-                supportVerticesOut[i] = new IndexedVector4(m_vertices1[MathUtil.MaxAxis(ref dots)].ToVector3(),0);
+                supportVerticesOut[i] = new IndexedVector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
 		    }
 	    }
 

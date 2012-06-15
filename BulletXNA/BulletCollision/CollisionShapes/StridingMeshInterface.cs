@@ -25,9 +25,9 @@ using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
-#if XNA
-using Microsoft.XNA;
-#endif
+//#if XNA
+//using Microsoft.XNA;
+//#endif
 
 namespace BulletXNA.BulletCollision
 {
@@ -95,9 +95,9 @@ namespace BulletXNA.BulletCollision
 							}
 						}
 #if XNA
-                        else if (vertexbase is ObjectArray<Vector3>)
+                        else if (vertexbase is ObjectArray<Microsoft.Xna.Framework.Vector3>)
                         {
-                            Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
+                            Microsoft.Xna.Framework.Vector3[] vertexList = (vertexbase as ObjectArray<Microsoft.Xna.Framework.Vector3>).GetRawArray();
                             for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
                             {
                                 int triIndex = (gfxindex * indexstride);

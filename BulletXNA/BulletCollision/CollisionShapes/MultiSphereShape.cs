@@ -120,7 +120,7 @@ namespace BulletXNA.BulletCollision
 	                if (newDot > maxDot)
 	                {
 		                maxDot = newDot;
-		                supportVerticesOut[j] = new IndexedVector4(vtx.ToVector3(),0);
+		                supportVerticesOut[j] = new IndexedVector4(vtx,0);
 	                }
                 }
             }

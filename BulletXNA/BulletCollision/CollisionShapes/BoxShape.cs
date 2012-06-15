@@ -146,9 +146,9 @@ namespace BulletXNA.BulletCollision
 	    public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
 	    {
 		    //this plane might not be aligned...
-            Plane plane;
+            IndexedVector4 plane;
 		    GetPlaneEquation(out plane, i);
-            planeNormal = new IndexedVector3(plane.Normal);
+            planeNormal = plane.ToVector3();
             IndexedVector3 negNormal = -planeNormal;
 		    planeSupport = LocalGetSupportingVertex(ref negNormal);
 	    }

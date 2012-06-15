@@ -60,6 +60,26 @@ namespace BulletXNA.LinearMath
             }
         }
 
+        public static IndexedVector4 operator -(IndexedVector4 value)
+        {
+            IndexedVector4 vector;
+            vector.X = -value.X;
+            vector.Y = -value.Y;
+            vector.Z = -value.Z;
+            vector.W = -value.W;
+            return vector;
+        }
+
+        public static IndexedVector4 operator *(IndexedVector4 value, float scaleFactor)
+        {
+            IndexedVector4 vector;
+            vector.X = value.X * scaleFactor;
+            vector.Y = value.Y * scaleFactor;
+            vector.Z = value.Z * scaleFactor;
+            vector.W = value.W * scaleFactor;
+
+            return vector;
+        }
 
 
         private static IndexedVector4 _zero = new IndexedVector4(0f);

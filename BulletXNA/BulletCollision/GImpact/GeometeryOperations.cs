@@ -32,7 +32,7 @@ namespace BulletXNA.BulletCollision
         {
             IndexedVector3 planenormal = (e2-e1).Cross(ref normal);
             planenormal.Normalize();
-            plane = new IndexedVector4(planenormal.ToVector3(), e2.Dot(ref planenormal));
+            plane = new IndexedVector4(planenormal, e2.Dot(ref planenormal));
         }
 
     }

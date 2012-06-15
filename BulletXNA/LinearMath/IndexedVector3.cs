@@ -35,31 +35,31 @@ namespace BulletXNA.LinearMath
         }
 
 #if XNA
-        public IndexedVector3(ref Vector3 v)
+        public IndexedVector3(ref Microsoft.Xna.Framework.Vector3 v)
         {
             X = v.X;
             Y = v.Y;
             Z = v.Z;
         }
 
-        public IndexedVector3(Vector3 v)
+        public IndexedVector3(Microsoft.Xna.Framework.Vector3 v)
         {
             X = v.X;
             Y = v.Y;
             Z = v.Z;
         }
 
-        public Vector3 ToVector3()
+        public Microsoft.Xna.Framework.Vector3 ToVector3()
         {
-            return new Vector3(X, Y, Z);
+            return new Microsoft.Xna.Framework.Vector3(X, Y, Z);
         }
 
-        public void ToVector3(out Vector3 result)
+        public void ToVector3(out Microsoft.Xna.Framework.Vector3 result)
         {
-            result = new Vector3(X, Y, Z);
+            result = new Microsoft.Xna.Framework.Vector3(X, Y, Z);
         }
 
-                public static IndexedVector3 operator +(Vector3 value1, IndexedVector3 value2)
+        public static IndexedVector3 operator +(Microsoft.Xna.Framework.Vector3 value1, IndexedVector3 value2)
         {
             IndexedVector3 vector;
             vector.X = value1.X + value2.X;
@@ -68,7 +68,7 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
-        public static IndexedVector3 operator +(IndexedVector3 value1, Vector3 value2)
+        public static IndexedVector3 operator +(IndexedVector3 value1, Microsoft.Xna.Framework.Vector3 value2)
         {
             IndexedVector3 vector;
             vector.X = value1.X + value2.X;
@@ -77,7 +77,7 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
-        public static IndexedVector3 operator -(Vector3 value1, IndexedVector3 value2)
+        public static IndexedVector3 operator -(Microsoft.Xna.Framework.Vector3 value1, IndexedVector3 value2)
         {
             IndexedVector3 vector;
             vector.X = value1.X - value2.X;
@@ -86,7 +86,7 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
-        public static IndexedVector3 operator -(IndexedVector3 value1, Vector3 value2)
+        public static IndexedVector3 operator -(IndexedVector3 value1, Microsoft.Xna.Framework.Vector3 value2)
         {
             IndexedVector3 vector;
             vector.X = value1.X - value2.X;
@@ -96,28 +96,28 @@ namespace BulletXNA.LinearMath
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator Vector3(IndexedVector3 v)
+        public static implicit operator Microsoft.Xna.Framework.Vector3(IndexedVector3 v)
         {
-            return new Vector3(v.X, v.Y, v.Z);
+            return new Microsoft.Xna.Framework.Vector3(v.X, v.Y, v.Z);
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
-        public static implicit operator IndexedVector3(Vector3 v)
+        public static implicit operator IndexedVector3(Microsoft.Xna.Framework.Vector3 v)
         {
             return new IndexedVector3(v.X, v.Y, v.Z);
         }
 
-        public static float Dot(ref IndexedVector3 a, ref Vector3 b)
+        public static float Dot(ref IndexedVector3 a, ref Microsoft.Xna.Framework.Vector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
         }
 
-        public static float Dot(IndexedVector3 a, Vector3 b)
+        public static float Dot(IndexedVector3 a, Microsoft.Xna.Framework.Vector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
         }
 
-        public static float Dot(Vector3 a, IndexedVector3 b)
+        public static float Dot(Microsoft.Xna.Framework.Vector3 a, IndexedVector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
         }

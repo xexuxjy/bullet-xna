@@ -1351,9 +1351,9 @@ public class HullTriangle : int3
             Debug.Assert(Math.Abs(quotient) > 0.000001f);
 
             quotient = -1.0f / quotient;
-            n2n3 *= p0.D;
-            n3n1 *= p1.D;
-            n1n2 *= p2.D;
+            n2n3 *= p0.W;
+            n3n1 *= p1.W;
+            n1n2 *= p2.W;
 
             IndexedVector3 potentialVertex = n2n3;
             potentialVertex += n3n1;
@@ -1370,13 +1370,13 @@ public class HullTriangle : int3
             // returns the point where the line p0-p1 intersects the IndexedVector4 n&
             IndexedVector3 dif = p1 - p0;
             float dn = IndexedVector3.Dot(plane.ToVector3(), dif);
-            float t = -(IndexedVector4.D + IndexedVector3.Dot(plane.ToVector3(), p0)) / dn;
+            float t = -(plane.W + IndexedVector3.Dot(plane.ToVector3(), p0)) / dn;
             return p0 + (dif * t);
         }
 
         public static IndexedVector3 PlaneProject(ref IndexedVector4 plane, ref IndexedVector3 point)
         {
-            return point - plane.ToVector3() * (IndexedVector3.Dot(point, plane.ToVector3()) + IndexedVector4.D);
+            return point - plane.ToVector3() * (IndexedVector3.Dot(point, plane.ToVector3()) + plane.W);
         }
 
         public static IndexedVector3 TriNormal(IndexedVector3 v0, IndexedVector3 v1, IndexedVector3 v2)
@@ -1408,21 +1408,17 @@ public class HullTriangle : int3
             float dist = (float)Math.Abs(distu - distv);
             if (upoint.HasValue)
             {
-                IndexedVector4 IndexedVector4 = new IndexedVector4();
-                IndexedVector4.Normal = IndexedVector3.Cross(vdir, cp).ToVector3();
-                IndexedVector4.Normal.Normalize();
-                IndexedVector4.D = -IndexedVector3.Dot(IndexedVector4.Normal, vstart);
+                IndexedVector4 plane = new IndexedVector4(IndexedVector3.Cross(vdir, cp).Normalized(),0);
+                plane.W = -IndexedVector3.Dot(plane.ToVector3(), vstart);
                 IndexedVector3 a = ustart + udir;
-                upoint = PlaneLineIntersection(ref IndexedVector4, ref ustart, ref a);
+                upoint = PlaneLineIntersection(ref plane, ref ustart, ref a);
             }
             if (vpoint.HasValue)
             {
-                IndexedVector4 IndexedVector4 = new IndexedVector4();
-                IndexedVector4.Normal = IndexedVector3.Cross(udir, cp).ToVector3();
-                IndexedVector4.Normal.Normalize();
-                IndexedVector4.D = -IndexedVector3.Dot(IndexedVector4.Normal, ustart);
+                IndexedVector4 plane = new IndexedVector4(IndexedVector3.Cross(udir, cp).Normalized(), 0);
+                plane.W = -IndexedVector3.Dot(plane.ToVector3(), ustart);
                 IndexedVector3 a = vstart + vdir;
-                vpoint = PlaneLineIntersection(ref IndexedVector4, ref vstart, ref a);
+                vpoint = PlaneLineIntersection(ref plane, ref vstart, ref a);
             }
             return dist;
         }
@@ -1430,7 +1426,7 @@ public class HullTriangle : int3
         public static PlaneIntersectType PlaneTest(ref IndexedVector4 p, ref IndexedVector3 v)
         {
             float planetestepsilon = 0.0001f;
-            float a = IndexedVector3.Dot(v, p.Normal) + p.D;
+            float a = IndexedVector3.Dot(v, p.ToVector3()) + p.W;
             PlaneIntersectType flag = (a > planetestepsilon) ? PlaneIntersectType.OVER : ((a < -planetestepsilon) ? PlaneIntersectType.UNDER : PlaneIntersectType.COPLANAR);
             return flag;
         }

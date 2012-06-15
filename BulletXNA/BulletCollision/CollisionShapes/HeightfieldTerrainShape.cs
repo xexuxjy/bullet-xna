@@ -188,7 +188,7 @@ namespace BulletXNA.BulletCollision
                 }
                 else
                 {
-                    float num3 = float(1) / direction.Y;
+                    float num3 = 1f / direction.Y;
                     float num4 = (vmin.Y - source.Y) * num3;
                     float num5 = (vmax.Y - source.Y) * num3;
                     if (num4 > num5)
@@ -213,7 +213,7 @@ namespace BulletXNA.BulletCollision
                 }
                 else
                 {
-                    float num3 = float(1) / direction.Z;
+                    float num3 = 1f / direction.Z;
                     float num4 = (vmin.Z - source.Z) * num3;
                     float num5 = (vmax.Z - source.Z) * num3;
                     if (num4 > num5)

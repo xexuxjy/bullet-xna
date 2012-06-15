@@ -75,6 +75,24 @@ namespace BulletXNA.LinearMath
         }
 
 
+        public static IndexedQuaternion operator *(IndexedQuaternion q1, IndexedVector3 v1)
+        {
+            return new IndexedQuaternion(q1.W * v1.X + q1.Y * v1.Z - q1.Z * v1.Y,
+                q1.W * v1.Y + q1.Z * v1.X - q1.X * v1.Z,
+                q1.W * v1.Z + q1.X * v1.Y - q1.Y * v1.X,
+                -q1.X * v1.X - q1.Y * v1.Y - q1.Z * v1.Z);
+        }
+
+
+        public static IndexedQuaternion operator *(IndexedVector3 v1, IndexedQuaternion q1)
+        {
+	        return new IndexedQuaternion( v1.X * q1.W + v1.Y * q1.Z - v1.Z * q1.Y,
+		        v1.Y * q1.W + v1.Z * q1.X - v1.X * q1.Z,
+		        v1.Z * q1.W + v1.X * q1.Y - v1.Y * q1.X,
+		        -v1.X * q1.X - v1.Y * q1.Y - v1.Z * q1.Z); 
+        }
+
+
         public static IndexedQuaternion operator -(IndexedQuaternion value)
         {
             IndexedQuaternion q;
@@ -114,6 +132,51 @@ namespace BulletXNA.LinearMath
             this.Z *= num;
             this.W *= num;
         }
+
+        public static IndexedQuaternion Inverse(IndexedQuaternion q)
+        {
+            return new IndexedQuaternion(-q.X, -q.Y, -q.Z, q.W);
+        }
+
+        public IndexedQuaternion Inverse()
+        {
+            return new IndexedQuaternion(-X, -Y, -Z, W);
+        }
+
+
+        public float Dot(IndexedQuaternion q)
+	    {
+		    return X * q.X + Y * q.Y + Z * q.Z + W * q.W;
+	    }
+
+        public static float Dot(IndexedQuaternion q, IndexedQuaternion q2)
+        {
+            return q.X * q2.X + q.Y * q2.Y + q.Z * q2.Z + q.W * q2.W;
+        }
+
+        public static bool operator ==(IndexedQuaternion value1, IndexedQuaternion value2)
+        {
+            if (value1.X == value2.X && value1.Y == value2.Y && value1.Z == value2.Z)
+                return value1.W == value2.W;
+            else
+                return false;
+        }
+
+        public static bool operator !=(IndexedQuaternion value1, IndexedQuaternion value2)
+        {
+            if (value1.X == value2.X && value1.Y == value2.Y && value1.Z == value2.Z)
+                return value1.W != value2.W;
+            else
+                return true;
+        }
+
+        public IndexedVector3 QuatRotate(IndexedQuaternion rotation, IndexedVector3 v) 
+        {
+	        IndexedQuaternion q = rotation * v;
+	        q *= rotation.Inverse();
+	        return new IndexedVector3(q.X,q.Y,q.Z);
+        }
+
 
         public float X;
         public float Y;

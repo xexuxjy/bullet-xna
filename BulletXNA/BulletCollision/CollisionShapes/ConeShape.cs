@@ -55,7 +55,7 @@ namespace BulletXNA.BulletCollision
 	        for (int i=0;i<numVectors;i++)
 	        {
 		        IndexedVector3 vec = vectors[i];
-		        supportVerticesOut[i] = new IndexedVector4(ConeLocalSupport(ref vec).ToVector3(),0);
+		        supportVerticesOut[i] = new IndexedVector4(ConeLocalSupport(ref vec),0);
 	        }
         }
 

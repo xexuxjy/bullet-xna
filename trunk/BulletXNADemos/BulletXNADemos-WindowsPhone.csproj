@@ -76,7 +76,6 @@
     <None Include="Background.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </None>
-    <None Include="BulletXNADemos-WindowsPhone_2012_05_30_22_39_55.sap" />
     <None Include="PhoneGameThumb.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </None>

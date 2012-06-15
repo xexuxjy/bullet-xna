@@ -498,6 +498,12 @@ namespace BulletXNA.BulletDynamics
                 IndexedMatrix trDeltaAB = trB * trPose * trA.Inverse();
 				IndexedQuaternion qDeltaAB = trDeltaAB.GetRotation();
 				IndexedVector3 swingAxis = new IndexedVector3(qDeltaAB.X, qDeltaAB.Y, qDeltaAB.Z);
+                float swingAxisLen2 = swingAxis.LengthSquared();
+                if (MathUtil.FuzzyZero(swingAxisLen2))
+                {
+                    return;
+                }
+
 				m_swingAxis = swingAxis;
 				m_swingAxis.Normalize();
 				m_swingCorrection = MathUtil.QuatAngle(ref qDeltaAB);

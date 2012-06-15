@@ -219,7 +219,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] = halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
                             newDot = IndexedVector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
@@ -233,7 +233,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] =  -halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
                             newDot = IndexedVector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)

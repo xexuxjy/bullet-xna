@@ -39,6 +39,7 @@ namespace BulletXNA.BulletDynamics
             m_constraints = new ObjectArray<TypedConstraint>();
             m_sortedConstraints = new ObjectArray<TypedConstraint>();
             m_islandSortPredicate = new SortConstraintOnIslandPredicate();
+            m_islandQuickSortPredicate = new QuickSortConstraintOnIslandPredicate();
             m_actions = new List<IActionInterface>();
             m_nonStaticRigidBodies = new ObjectArray<RigidBody>();
             m_islandManager = new SimulationIslandManager();
@@ -692,7 +693,8 @@ namespace BulletXNA.BulletDynamics
             {
                 //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
                 // If this sort is removed then the constraint gets twitchy...
-                m_sortedConstraints.Sort(m_islandSortPredicate);
+                //m_sortedConstraints.Sort(m_islandSortPredicate);
+                m_sortedConstraints.QuickSort(m_islandQuickSortPredicate);
             }
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
@@ -879,6 +881,7 @@ namespace BulletXNA.BulletDynamics
         protected ObjectArray<TypedConstraint> m_constraints;
         protected ObjectArray<TypedConstraint> m_sortedConstraints;
         protected SortConstraintOnIslandPredicate m_islandSortPredicate;
+        protected QuickSortConstraintOnIslandPredicate m_islandQuickSortPredicate;
         protected ObjectArray<RigidBody> m_nonStaticRigidBodies;
 
 
@@ -1137,5 +1140,18 @@ namespace BulletXNA.BulletDynamics
         #endregion
     }
 
+    public class QuickSortConstraintOnIslandPredicate : IQSComparer<TypedConstraint>
+    {
+        #region IComparer<TypedConstraint> Members
+
+        public bool Compare(TypedConstraint lhs, TypedConstraint rhs)
+        {
+            int rIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(rhs);
+            int lIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(lhs);
+            return lIslandId0 < rIslandId0;
+        }
+
+        #endregion
+    }
 
 }

@@ -21,6 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#define P2P
+
 using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
@@ -76,10 +78,35 @@ namespace BulletXNADemos.Demos
             trans._origin = new IndexedVector3(0, 20, 0);
 
 	        float mass = 1f;
-        #if true
-	        //point to point constraint (ball socket)
+
+#if true
+	    //point to point constraint with a breaking threshold
+	    {
+		    trans = IndexedMatrix.Identity;
+		    trans._origin = new IndexedVector3(1,30,-5);
+		    LocalCreateRigidBody( mass,trans,shape);
+		    trans._origin = new IndexedVector3(0,0,-5);
+
+		    RigidBody body0 = LocalCreateRigidBody( mass,trans,shape);
+		    
+            trans._origin = new IndexedVector3(2*CUBE_HALF_EXTENTS,20,0);
+		    mass = 1.0f;
+		    RigidBody body1 = null;//localCreateRigidBody( mass,trans,shape);
+		    IndexedVector3 pivotInA = new IndexedVector3(CUBE_HALF_EXTENTS,CUBE_HALF_EXTENTS,0);
+		    TypedConstraint p2p = new Point2PointConstraint(body0,ref pivotInA);
+		    m_dynamicsWorld.AddConstraint(p2p);
+		    p2p.SetBreakingImpulseThreshold(10.2f);
+		    p2p.SetDbgDrawSize(5.0f);
+	    }
+#endif
+
+
+
+#if true
+            //point to point constraint (ball socket)
 			//SEEMS OK
 	        {
+                trans = IndexedMatrix.Identity;
 		        RigidBody body0 = LocalCreateRigidBody( mass,ref trans,shape);
 		        trans._origin = new IndexedVector3(2*CUBE_HALF_EXTENTS,20,0);
 
@@ -92,6 +119,13 @@ namespace BulletXNADemos.Demos
                 IndexedVector3 pivotInB = body1 != null ? body1.GetCenterOfMassTransform().Inverse() * (body0.GetCenterOfMassTransform() * (pivotInA)) : pivotInA;
                 IndexedVector3 axisInB = body1 != null ? (body1.GetCenterOfMassTransform()._basis.Inverse() * (body1.GetCenterOfMassTransform()._basis * axisInA)) :
                 body0.GetCenterOfMassTransform()._basis * axisInA;
+#if P2P
+		TypedConstraint p2p = new Point2PointConstraint(body0,ref pivotInA);
+		//btTypedConstraint* p2p = new btPoint2PointConstraint(*body0,*body1,pivotInA,pivotInB);
+		//btTypedConstraint* hinge = new btHingeConstraint(*body0,*body1,pivotInA,pivotInB,axisInA,axisInB);
+		m_dynamicsWorld.AddConstraint(p2p);
+		p2p.SetDbgDrawSize(5.0f);
+#else
 
 		        HingeConstraint hinge = new HingeConstraint(body0,ref pivotInA,ref axisInA,false);
         		
@@ -101,9 +135,9 @@ namespace BulletXNADemos.Demos
 
 		        m_dynamicsWorld.AddConstraint(hinge);//p2p);
 		        hinge.SetDbgDrawSize(5f);
-
-	        }
         #endif
+	        }
+#endif
 
 #if true
 	        //create a slider, using the generic D6 constraint
@@ -397,6 +431,27 @@ namespace BulletXNADemos.Demos
 		m_dynamicsWorld.AddConstraint(spHingeDynAB, true);
 		// draw constraint frames and limits for debugging
 		spHingeDynAB.SetDbgDrawSize(5.0f);
+	}
+#endif
+
+#if true
+	{ // 6DOF connected to the world, with motor
+		IndexedMatrix tr = IndexedMatrix.CreateTranslation(10,-15,0);
+		RigidBody pBody = LocalCreateRigidBody( 1.0f, ref tr, shape);
+		pBody.SetActivationState(ActivationState.DISABLE_DEACTIVATION);
+		IndexedMatrix frameB = IndexedMatrix.Identity;
+		Generic6DofConstraint pGen6Dof = new Generic6DofConstraint(pBody, ref frameB, false );
+		m_dynamicsWorld.AddConstraint(pGen6Dof);
+		pGen6Dof.SetDbgDrawSize(5.0f);
+
+		pGen6Dof.SetAngularLowerLimit(new IndexedVector3(0,0,0));
+		pGen6Dof.SetAngularUpperLimit(new IndexedVector3(0,0,0));
+		pGen6Dof.SetLinearLowerLimit(new IndexedVector3(-10.0f, 0, 0));
+		pGen6Dof.SetLinearUpperLimit(new IndexedVector3(10.0f, 0, 0));
+
+		pGen6Dof.GetTranslationalLimitMotor().m_enableMotor[0] = true;
+		pGen6Dof.GetTranslationalLimitMotor().m_targetVelocity[0] = 5.0f;
+		pGen6Dof.GetTranslationalLimitMotor().m_maxMotorForce[0] = 0.1f;
 	}
 #endif
         }

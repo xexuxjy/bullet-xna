@@ -674,9 +674,12 @@ namespace BulletXNADemos.Demos
 				        myMotionState.m_graphicsWorldTrans = myMotionState.m_startWorldTrans;
 				        body.SetCenterOfMassTransform(ref myMotionState.m_graphicsWorldTrans );
 				        colObj.SetInterpolationWorldTransform(ref myMotionState.m_startWorldTrans );
-				        colObj.ForceActivationState(ActivationState.ACTIVE_TAG);
-				        colObj.Activate();
-				        colObj.SetDeactivationTime(0);
+                        if (colObj.GetActivationState() != ActivationState.DISABLE_DEACTIVATION)
+                        {
+                            colObj.ForceActivationState(ActivationState.ACTIVE_TAG);
+                            colObj.Activate();
+                            colObj.SetDeactivationTime(0);
+                        }
 				        //colObj.setActivationState(WANTS_DEACTIVATION);
 			        }
 			        //removed cached contact points (this is not necessary if all objects have been removed from the dynamics world)

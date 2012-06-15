@@ -116,7 +116,7 @@ namespace BulletXNA.BulletCollision
 		        IndexedVector3 pos = IndexedVector3.Zero;
 		        pos[GetUpAxis()] = GetHalfHeight();
 
-		        vtx = pos +vec*m_localScaling*(radius) - vec * GetMargin();
+		        vtx = pos +vec*(radius) - vec * GetMargin();
 		        newDot = vec.Dot(ref vtx);
 		        if (newDot > maxDot)
 		        {
@@ -128,7 +128,7 @@ namespace BulletXNA.BulletCollision
                 IndexedVector3 pos = IndexedVector3.Zero;
                 pos[GetUpAxis()] = -GetHalfHeight();
 
-                vtx = pos + vec * m_localScaling * (radius) - vec * GetMargin();
+                vtx = pos + vec * (radius) - vec * GetMargin();
                 newDot = vec.Dot(ref vtx);
                 if (newDot > maxDot)
                 {
@@ -155,7 +155,7 @@ namespace BulletXNA.BulletCollision
 		            IndexedVector3 pos = IndexedVector3.Zero;
                     pos[GetUpAxis()] = GetHalfHeight();
 
-		            vtx = pos +vec*m_localScaling*(radius) - vec * GetMargin();
+		            vtx = pos +vec*(radius) - vec * GetMargin();
                     newDot = vec.Dot(ref vtx);
 		            if (newDot > maxDot)
 		            {
@@ -167,7 +167,7 @@ namespace BulletXNA.BulletCollision
                     IndexedVector3 pos = IndexedVector3.Zero;
                     pos[GetUpAxis()] = -GetHalfHeight();
 
-                    vtx = pos + vec * m_localScaling * (radius) - vec * GetMargin();
+                    vtx = pos + vec * (radius) - vec * GetMargin();
                     newDot = vec.Dot(ref vtx);
                     if (newDot > maxDot)
                     {

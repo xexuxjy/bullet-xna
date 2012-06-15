@@ -25,6 +25,9 @@ using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
+#if XNA
+using Microsoft.XNA;
+#endif
 
 namespace BulletXNA.BulletCollision
 {
@@ -91,6 +94,7 @@ namespace BulletXNA.BulletCollision
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
 						}
+#if XNA
                         else if (vertexbase is ObjectArray<Vector3>)
                         {
                             Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
@@ -116,6 +120,7 @@ namespace BulletXNA.BulletCollision
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
                             }
                         }
+#endif
                         else if (vertexbase is ObjectArray<float>)
 						{
 							float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();

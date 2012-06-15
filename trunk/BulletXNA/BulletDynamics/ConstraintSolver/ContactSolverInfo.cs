@@ -67,7 +67,7 @@ namespace BulletXNA.BulletDynamics
 		    m_splitImpulsePenetrationThreshold = -0.02f;
             m_linearSlop = 0f;
 		    m_warmstartingFactor=0.85f;
-            m_solverMode = SolverMode.SOLVER_USE_WARMSTARTING | SolverMode.SOLVER_SIMD;//SOLVER_RANDMIZE_ORDER
+            m_solverMode = SolverMode.SOLVER_USE_WARMSTARTING | SolverMode.SOLVER_SIMD;// | SolverMode.SOLVER_RANDMIZE_ORDER;
 		    m_restingContactRestitutionThreshold = 2;//resting contact lifetime threshold to disable restitution
             m_minimumSolverBatchSize = 128; //try to combine islands until the amount of constraints reaches this limit
             //m_minimumSolverBatchSize = 1;

@@ -93,7 +93,7 @@ namespace BulletXNA.BulletCollision
             minAabb -= contactThreshold;
             maxAabb += contactThreshold;
 
-            if(GetDispatchInfo().m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
+            if (GetDispatchInfo().m_useContinuous && colObj.GetInternalType() == CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject())
 	        {
 		        IndexedVector3 minAabb2,maxAabb2;
 		        colObj.GetCollisionShape().GetAabb(colObj.GetInterpolationWorldTransform(),out minAabb2 ,out maxAabb2);
@@ -1671,14 +1671,18 @@ namespace BulletXNA.BulletCollision
 
             IndexedVector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
 
-            IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
-            normal.Normalize();
-            IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
-            m_debugDrawer.DrawLine(center, center + normal, normalColor);
+            if ((int)(m_debugDrawer.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
+            {
 
-            m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
-            m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);
-            m_debugDrawer.DrawLine(ref wv2, ref wv0, ref m_color);
+                IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
+                normal.Normalize();
+                IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
+                m_debugDrawer.DrawLine(center, center + normal, normalColor);
+
+                m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
+                m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);
+                m_debugDrawer.DrawLine(ref wv2, ref wv0, ref m_color);
+            }
         }
         public void Cleanup()
         {

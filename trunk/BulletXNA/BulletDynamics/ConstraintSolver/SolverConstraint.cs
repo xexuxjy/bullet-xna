@@ -56,6 +56,12 @@ namespace BulletXNA.BulletDynamics
         public float m_lowerLimit;
         public float m_upperLimit;
         public float m_rhsPenetration;
+        public int m_overrideNumSolverIterations = -1;
+
+        public SolverConstraint()
+        {
+            int i = 0;
+        }
 
         public void PrintSolverConstraint(TextWriter tw)
         {

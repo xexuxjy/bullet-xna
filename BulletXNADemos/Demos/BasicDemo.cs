@@ -27,6 +27,7 @@ using BulletXNA;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
+using System.IO;
 
 namespace BulletXNADemos.Demos
 {
@@ -38,12 +39,12 @@ namespace BulletXNADemos.Demos
         
         public override void InitializeDemo()
         {
-            maxiterations = 500;
+            //maxiterations = 10;
             SetCameraDistance(SCALING * 50f);
 
-            //string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
-            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
+            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
 
 	        ///collision configuration contains default setup for memory, collision setup
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
@@ -115,23 +116,23 @@ namespace BulletXNADemos.Demos
                             RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
                             RigidBody body = new RigidBody(rbInfo);
                             //body->setContactProcessingThreshold(colShape->getContactBreakingThreshold());
-                            body.SetActivationState(ActivationState.ISLAND_SLEEPING);
+                            //body.SetActivationState(ActivationState.ISLAND_SLEEPING);
 
                             m_dynamicsWorld.AddRigidBody(body);
-                            body.SetActivationState(ActivationState.ISLAND_SLEEPING);
+                            //body.SetActivationState(ActivationState.ISLAND_SLEEPING);
                             body.SetUserPointer(String.Format("Box X{0} Y{1} Z{2}", k, i, j));
 				        }
 			        }
 		        }
 	        }
 
-	        ClientResetScene();
+            //ClientResetScene();
         }
 
         // test - just 8 objects.
-        public const int ARRAY_SIZE_X = 2;
-        public const int ARRAY_SIZE_Y = 2;
-        public const int ARRAY_SIZE_Z = 2;
+        public const int ARRAY_SIZE_X = 1;
+        public const int ARRAY_SIZE_Y = 1;
+        public const int ARRAY_SIZE_Z = 1;
 
         //maximum number of objects (and allow user to shoot additional boxes)
         public const int MAX_PROXIES = (ARRAY_SIZE_X*ARRAY_SIZE_Y*ARRAY_SIZE_Z + 1024);

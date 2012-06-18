@@ -513,7 +513,8 @@ namespace BulletXNA.BulletDynamics
                 BulletGlobals.g_streamWriter.WriteLine("PredictUnconstraintMotion [{0}][{1}]", length, timeStep);
             }
 
-            for (int i = 0; i < length; ++i)
+            //for (int i = 0; i < length;i++)
+            for (int i = 0; i < m_nonStaticRigidBodies.Count;i++ )
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
                 if (!body.IsStaticOrKinematicObject())

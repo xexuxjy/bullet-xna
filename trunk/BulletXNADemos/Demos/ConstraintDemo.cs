@@ -49,9 +49,11 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
-            string filename = @"E:\users\man\bullet\xna-constraint-output.txt";
-            FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
-            BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+            //string filename = @"E:\users\man\bullet\xna-constraint-output.txt";
+            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+            //BulletGlobals.g_streamWriter = new StreamWriter(filestream);
+
+            //maxiterations = 100;
 
 	        m_collisionConfiguration = new DefaultCollisionConfiguration();
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
@@ -103,10 +105,10 @@ namespace BulletXNADemos.Demos
 
 
 #if true
-            //point to point constraint (ball socket)
+        //point to point constraint (ball socket)
 			//SEEMS OK
 	        {
-                trans = IndexedMatrix.Identity;
+                //trans = IndexedMatrix.Identity;
 		        RigidBody body0 = LocalCreateRigidBody( mass,ref trans,shape);
 		        trans._origin = new IndexedVector3(2*CUBE_HALF_EXTENTS,20,0);
 
@@ -140,7 +142,7 @@ namespace BulletXNADemos.Demos
 #endif
 
 #if true
-	        //create a slider, using the generic D6 constraint
+            //create a slider, using the generic D6 constraint
 			// SEEMS OK
 	        {
 		        mass = 1f;
@@ -177,6 +179,8 @@ namespace BulletXNADemos.Demos
                 spSlider6Dof.SetAngularUpperLimit(ref angularUpper);
         //		slider.setAngularLowerLimit(IndexedVector3(0,0,0));
         //		slider.setAngularUpperLimit(IndexedVector3(0,0,0));
+                spSlider6Dof.SetAngularLowerLimit(new IndexedVector3(-MathUtil.SIMD_PI, 0, 0));
+                spSlider6Dof.SetAngularUpperLimit(new IndexedVector3(1.5f, 0, 0));
 
                 spSlider6Dof.GetTranslationalLimitMotor().m_enableMotor[0] = true;
                 spSlider6Dof.GetTranslationalLimitMotor().m_targetVelocity.X = -5.0f;
@@ -380,7 +384,7 @@ namespace BulletXNADemos.Demos
 	}
 #endif
 #if true
-            {
+    {
 		// WORKS OK
 		// create a Hinge2 joint
 		// create two rigid bodies
@@ -407,7 +411,7 @@ namespace BulletXNADemos.Demos
 	}
 #endif
 #if true
-            { 
+    { 
 			// WORKS OK
 		// create a Hinge joint between two dynamic bodies
 		// create two rigid bodies
@@ -435,7 +439,7 @@ namespace BulletXNADemos.Demos
 #endif
 
 #if true
-	{ // 6DOF connected to the world, with motor
+    { // 6DOF connected to the world, with motor
 		IndexedMatrix tr = IndexedMatrix.CreateTranslation(10,-15,0);
 		RigidBody pBody = LocalCreateRigidBody( 1.0f, ref tr, shape);
 		pBody.SetActivationState(ActivationState.DISABLE_DEACTIVATION);

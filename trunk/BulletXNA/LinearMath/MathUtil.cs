@@ -1306,12 +1306,25 @@ namespace BulletXNA
 
         public static void PrintVector3(TextWriter writer, IndexedVector3 v)
         {
-            writer.WriteLine(String.Format("{{X:{0:0.00000000} Y:{1:0.00000000} Z:{2:0.00000000}}}", v.X, v.Y, v.Z));
+            writer.Write("{");
+	        PrintScalar(writer,"X:",v.X);
+            writer.Write(" ");
+	        PrintScalar(writer,"Y:",v.Y);
+            writer.Write(" ");
+	        PrintScalar(writer,"Z:",v.Z);
+	        writer.WriteLine("}");
         }
 
         public static void PrintVector3(TextWriter writer, String name, IndexedVector3 v)
         {
-            writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
+            writer.Write(String.Format("[{0}]",name));
+            writer.Write("{");
+            PrintScalar(writer, "X:", v.X);
+            writer.Write(" ");
+            PrintScalar(writer, "Y:", v.Y);
+            writer.Write(" ");
+            PrintScalar(writer, "Z:", v.Z);
+            writer.WriteLine("}");
         }
 
         public static void PrintVector4(TextWriter writer, IndexedVector4 v)
@@ -1361,11 +1374,20 @@ namespace BulletXNA
                 PrintVector3(writer, "Right       ", m.GetColumn(0));
                 PrintVector3(writer, "Up          ", m.GetColumn(1));
                 PrintVector3(writer, "Backward    ", m.GetColumn(2));
-                PrintVector3(writer, "Translation ", IndexedVector3.Zero);
             }
         }
 
 
+        public static void PrintScalar(TextWriter writer, String name,float s)
+        {
+	        float s2 = s;
+	        if(s2 < 0f && MathUtil.FuzzyZero(s2))
+	        {
+                s2 = 0f;
+	        }
+	        writer.Write("{0} {1:0.000}",name,s2);
+
+        }
 
 
         public static void PrintContactPoint(StreamWriter streamWriter, ManifoldPoint mp)
@@ -1458,7 +1480,7 @@ namespace BulletXNA
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
         }
 #endif
-        public static T Clamp<T>(T value, T max, T min)
+        public static T Clamp<T>(T value, T min,T max)
                  where T : System.IComparable<T>
         {
             T result = value;

@@ -621,7 +621,9 @@ namespace BulletXNADemos.Demos
         public virtual void ClientMoveAndDisplay(GameTime gameTime)
         {
             //simple dynamics world doesn't handle fixed-time-stepping
-            float ms = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //float ms = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //float ms = 16666f / 1000000.0f;
+            float ms = 1f / 60f;
             //ms *= 0.1f;
             ///step the simulation
             if (m_dynamicsWorld != null)
@@ -837,7 +839,7 @@ namespace BulletXNADemos.Demos
 
             RigidBody body = new RigidBody(cInfo);
 
-            if (BulletGlobals.g_streamWriter != null && false)
+            if (BulletGlobals.g_streamWriter != null && true)
             {
                 BulletGlobals.g_streamWriter.WriteLine("localCreateRigidBody [{0}] startTransform",body.m_debugBodyId);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, startTransform);

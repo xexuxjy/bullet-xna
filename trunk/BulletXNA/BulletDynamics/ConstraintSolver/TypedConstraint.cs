@@ -423,6 +423,12 @@ namespace BulletXNA.BulletDynamics
 	{
 		public int m_numConstraintRows;
 		public int nub;
+
+        ~ConstraintInfo1()
+        {
+            int ibreak = 0;
+        }
+
 	}
 
 	public class ConstraintInfo2
@@ -447,6 +453,25 @@ namespace BulletXNA.BulletDynamics
 		//damping of the velocity
 		public float m_damping;
 
+        public void Reset()
+        {
+
+            for (int i = 0; i < maxConstraints; ++i)
+            {
+                m_solverConstraints[i] = null;
+            }
+            m_numRows = 0;
+            fps = 0f;
+            erp = 0;
+            findex = 0;
+            m_numIterations = 0;
+            m_damping = 0f;
+        }
+
+        ~ConstraintInfo2()
+        {
+            int ibreak = 0;
+        }
 	}
 
 

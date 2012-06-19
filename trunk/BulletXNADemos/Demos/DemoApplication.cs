@@ -1129,7 +1129,7 @@ namespace BulletXNADemos.Demos
                     }
                 }
             }
-            else if (newMouseState.LeftButton == ButtonState.Pressed)
+            else if (WasPressed(ref oldMouseState,ref newMouseState,0))
             {
                 //add a point to point constraint for picking
                 if (m_dynamicsWorld != null)
@@ -1196,6 +1196,7 @@ namespace BulletXNADemos.Demos
                                 }
                                 else
                                 {
+                                    Debug.Assert(m_pickConstraint == null);
                                     Point2PointConstraint p2p = new Point2PointConstraint(body, ref localPivot);
                                     m_dynamicsWorld.AddConstraint(p2p, false);
 
@@ -1520,6 +1521,26 @@ namespace BulletXNADemos.Demos
             }
             return false;
         }
+
+        //----------------------------------------------------------------------------------------------
+
+        private bool WasPressed(ref MouseState old, ref MouseState current, int buttonIndex)
+        {
+            if (buttonIndex == 0)
+            {
+                return old.LeftButton == ButtonState.Released && current.LeftButton == ButtonState.Pressed;
+            }
+            if (buttonIndex == 1)
+            {
+                return old.MiddleButton == ButtonState.Released && current.MiddleButton == ButtonState.Pressed;
+            }
+            if (buttonIndex == 2)
+            {
+                return old.RightButton == ButtonState.Released && current.RightButton == ButtonState.Pressed;
+            }
+            return false;
+        }
+
 
        //----------------------------------------------------------------------------------------------
 

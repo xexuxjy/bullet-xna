@@ -113,6 +113,9 @@ namespace BulletXNA.BulletDynamics
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
 
+
+
+
 			{
 				IndexedVector3 ftorqueAxis1 = IndexedVector3.Cross(rel_pos1, solverConstraint.m_contactNormal);
 				solverConstraint.m_relpos1CrossNormal = ftorqueAxis1;
@@ -1210,11 +1213,12 @@ namespace BulletXNA.BulletDynamics
 			}
 
 			SolverConstraint[] rawTmpSolverNonContactConstraintPool = m_tmpSolverNonContactConstraintPool.GetRawArray();
+            int[] rawOrderNonContactConstraintPool = m_orderNonContactConstraintPool.GetRawArray();
 			///solve all joint constraints
 		    for (int j=0;j<m_tmpSolverNonContactConstraintPool.Count;j++)
 		    {
-			    SolverConstraint constraint = m_tmpSolverNonContactConstraintPool[m_orderNonContactConstraintPool[j]];
-                //if (iteration < constraint.m_overrideNumSolverIterations)
+                SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[rawOrderNonContactConstraintPool[j]];
+                if (iteration < constraint.m_overrideNumSolverIterations)
                 {
 				    ResolveSingleConstraintRowGeneric(constraint.m_solverBodyA,constraint.m_solverBodyB,ref constraint);
                 }
@@ -1222,19 +1226,23 @@ namespace BulletXNA.BulletDynamics
 
 		    if (iteration< infoGlobal.m_numIterations)
 		    {
+                SolverConstraint[] rawTmpSolverContactConstraintPool = m_tmpSolverContactConstraintPool.GetRawArray();
+                int[] rawOrderTmpConstraintPool = m_orderTmpConstraintPool.GetRawArray();
 
 			    ///solve all contact constraints
 			    int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
 			    for (int j=0;j<numPoolConstraints;j++)
 			    {
-				    SolverConstraint solveManifold = m_tmpSolverContactConstraintPool[m_orderTmpConstraintPool[j]];
+                    SolverConstraint solveManifold = rawTmpSolverContactConstraintPool[rawOrderTmpConstraintPool[j]];
 				    ResolveSingleConstraintRowLowerLimit(solveManifold.m_solverBodyA,solveManifold.m_solverBodyB,ref solveManifold);
 			    }
 			    ///solve all friction constraints
 			    int numFrictionPoolConstraints = m_tmpSolverContactFrictionConstraintPool.Count;
-			    for (int j=0;j<numFrictionPoolConstraints;j++)
+                SolverConstraint[] rawTmpSolverContactFrictionConstraintPool = m_tmpSolverContactFrictionConstraintPool.GetRawArray();
+                int[] rawOrderFrictionConstraintPool = m_orderFrictionConstraintPool.GetRawArray();
+                for (int j = 0; j < numFrictionPoolConstraints; j++)
 			    {
-				    SolverConstraint solveManifold = m_tmpSolverContactFrictionConstraintPool[m_orderFrictionConstraintPool[j]];
+				    SolverConstraint solveManifold = rawTmpSolverContactFrictionConstraintPool[rawOrderFrictionConstraintPool[j]];
 				    float totalImpulse = m_tmpSolverContactConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse;
 
 				    if (totalImpulse>0f)

@@ -63,6 +63,36 @@ namespace BulletXNA.BulletDynamics
             int i = 0;
         }
 
+
+        public void Reset()
+        {
+            m_relpos1CrossNormal = IndexedVector3.Zero;
+            m_contactNormal = IndexedVector3.Zero;
+            m_relpos2CrossNormal = IndexedVector3.Zero;
+            m_angularComponentA = IndexedVector3.Zero;
+            m_angularComponentB = IndexedVector3.Zero;
+            m_appliedPushImpulse = 0f;
+            m_appliedImpulse = 0f;
+            m_friction = 0f;
+            m_jacDiagABInv = 0f;
+            m_numConsecutiveRowsPerKernel = 0;
+            m_frictionIndex = 0;
+            m_solverBodyA = null;
+            m_companionIdA = 0;
+            m_solverBodyB = null;
+            m_companionIdB = 0;
+            m_originalContactPointConstraint = null;
+            m_originalContactPointConstraint = null;
+            m_rhs = 0f;
+            m_cfm = 0;
+            m_lowerLimit = 0f;
+            m_upperLimit = 0f;
+            m_rhsPenetration = 0f;
+            m_overrideNumSolverIterations = -1;
+
+        }
+
+
         public void PrintSolverConstraint(TextWriter tw)
         {
             if (tw != null)

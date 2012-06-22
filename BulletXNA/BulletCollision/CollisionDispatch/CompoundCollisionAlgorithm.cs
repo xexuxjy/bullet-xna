@@ -283,7 +283,7 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public class CompoundLeafCallback : Collide
+    public class CompoundLeafCallback : DefaultCollide
     {
         public CollisionObject m_compoundColObj;
         public CollisionObject m_otherObj;

@@ -560,10 +560,10 @@ namespace BulletXNA.BulletCollision
             if (m_pairCache.HasDeferredRemoval())
             {
 
-                IList<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
+                ObjectArray<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
 
                 //perform a sort, to find duplicates and to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
                 //overlappingPairArray.resize(overlappingPairArray.size() - m_invalidPair);
                 m_invalidPair = 0;
 
@@ -620,10 +620,9 @@ namespace BulletXNA.BulletCollision
                 ///if you don't like to skip the invalid pairs in the array, execute following code:
 #if CLEAN_INVALID_PAIRS
 
-                //perform a sort, to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
 
-                //overlappingPairArray.Capacity = (overlappingPairArray.Count - m_invalidPair);
+                overlappingPairArray.Resize(overlappingPairArray.Count - m_invalidPair);
                 m_invalidPair = 0;
 #endif//CLEAN_INVALID_PAIRS
 

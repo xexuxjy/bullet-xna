@@ -55,6 +55,12 @@ namespace BulletXNA.BulletCollision
             //}
             return m_id - obj.m_id;
         }
+
+        public override string ToString()
+        {
+            return "id = " + m_id + " , sz = " + m_sz;
+        }
+    
     }
 
     public class UnionFind

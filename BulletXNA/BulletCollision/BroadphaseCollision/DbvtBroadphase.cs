@@ -76,15 +76,16 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public class DbvtTreeCollider : Collide
+    public struct DbvtTreeCollider : ICollide
     {
         public DbvtBroadphase pbp;
         public DbvtProxy proxy;
         public DbvtTreeCollider(DbvtBroadphase p)
         {
             pbp = p;
+            proxy = null;
         }
-        public override void Process(DbvtNode na, DbvtNode nb)
+        public void Process(DbvtNode na, DbvtNode nb)
         {
             if (na != nb)
             {
@@ -98,23 +99,55 @@ namespace BulletXNA.BulletCollision
                 ++pbp.m_newpairs;
             }
         }
-        public override void Process(DbvtNode n)
+        public void Process(DbvtNode n)
         {
             Process(n, proxy.leaf);
         }
+        public void Process(DbvtNode n, float f)
+        {
+            Process(n);
+        }
+        public bool Descent(DbvtNode n)
+        {
+            return true;
+        }
+        public bool AllLeaves(DbvtNode n)
+        {
+            return true;
+        }
+
+
     }
 
-    public class BroadphaseRayTester : Collide
+    public struct BroadphaseRayTester : ICollide
     {
         public BroadphaseRayTester(BroadphaseRayCallback orgCallback)
         {
             m_rayCallback = orgCallback;
         }
-        public override void Process(DbvtNode leaf)
+        public void Process(DbvtNode leaf)
         {
             DbvtProxy proxy = leaf.data as DbvtProxy;
             m_rayCallback.Process(proxy);
         }
+
+        public void Process(DbvtNode n, DbvtNode n2)
+        { }
+
+        public void Process(DbvtNode n, float f)
+        {
+            Process(n);
+        }
+        public bool Descent(DbvtNode n)
+        {
+            return true;
+        }
+        public bool AllLeaves(DbvtNode n)
+        {
+            return true;
+        }
+
+
         BroadphaseRayCallback m_rayCallback;
     }
 
@@ -653,10 +686,10 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             if (m_paircache.HasDeferredRemoval())
             {
 
-                IList<BroadphasePair> overlappingPairArray = m_paircache.GetOverlappingPairArray();
+                ObjectArray<BroadphasePair> overlappingPairArray = m_paircache.GetOverlappingPairArray();
 
                 //perform a sort, to find duplicates and to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
 
 
                 int invalidPair = 0;
@@ -710,7 +743,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 }
 
                 //perform a sort, to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
+
                 //overlappingPairArray.resize(overlappingPairArray.size() - invalidPair);
                 //overlappingPairArray.Capacity = overlappingPairArray.Count - invalidPair;
             }
@@ -842,18 +876,36 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 
     }
 
-    public class BroadphaseAabbTester : Collide
+    public struct BroadphaseAabbTester : ICollide
     {
         IBroadphaseAabbCallback m_aabbCallback;
         public BroadphaseAabbTester(IBroadphaseAabbCallback orgCallback)
         {
             m_aabbCallback = orgCallback;
         }
-        public override void Process(DbvtNode leaf)
+
+        public void Process(DbvtNode leaf)
         {
             DbvtProxy proxy = leaf.data as DbvtProxy;
             m_aabbCallback.Process(proxy);
         }
+
+        public void Process(DbvtNode n, DbvtNode n2)
+        { }
+
+        public void Process(DbvtNode n, float f)
+        {
+            Process(n);
+        }
+        public bool Descent(DbvtNode n)
+        {
+            return true;
+        }
+        public bool AllLeaves(DbvtNode n)
+        {
+            return true;
+        }
+
     }
 
 

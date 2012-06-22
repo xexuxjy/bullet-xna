@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
@@ -172,6 +173,8 @@ namespace BulletXNA.LinearMath
 			}
 
             this._size = newsize;
+            this._version++;
+
 		}
 	
 
@@ -691,6 +694,14 @@ namespace BulletXNA.LinearMath
 				this._version++;
 			}
 		}
+
+
+        public void	PopBack()
+		{
+			Debug.Assert(Count>0);
+            RemoveAtQuick(Count - 1);
+		}
+
 
 		public void Reverse()
 		{

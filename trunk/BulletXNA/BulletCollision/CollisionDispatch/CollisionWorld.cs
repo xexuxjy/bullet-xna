@@ -1690,7 +1690,7 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public class RayTester : Collide
+    public class RayTester : DefaultCollide
     {
         public CollisionObject m_collisionObject;
         public CompoundShape m_compoundShape;

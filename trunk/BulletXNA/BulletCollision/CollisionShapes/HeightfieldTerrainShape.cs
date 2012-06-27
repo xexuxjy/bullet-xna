@@ -970,6 +970,11 @@ namespace BulletXNA.BulletCollision
             - convert input aabb to a range of heightfield grid points (quantize)
             - iterate over all triangles in that subset of the grid
          */
+        //quantize the aabbMin and aabbMax, and adjust the start/end ranges
+        int[] quantizedAabbMin = new int[3];
+        int[] quantizedAabbMax = new int[3];
+        IndexedVector3[] vertices = new IndexedVector3[3];
+
         public override void ProcessAllTriangles(ITriangleCallback callback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
             // scale down the input aabb's so they are in local (non-scaled) coordinates
@@ -982,9 +987,6 @@ namespace BulletXNA.BulletCollision
             localAabbMin += m_localOrigin;
             localAabbMax += m_localOrigin;
 
-            //quantize the aabbMin and aabbMax, and adjust the start/end ranges
-            int[] quantizedAabbMin = new int[3];
-            int[] quantizedAabbMax = new int[3];
             QuantizeWithClamp(quantizedAabbMin, ref localAabbMin, 0);
             QuantizeWithClamp(quantizedAabbMax, ref localAabbMax, 1);
 
@@ -1060,7 +1062,6 @@ namespace BulletXNA.BulletCollision
 #endif
 
 
-            IndexedVector3[] vertices = new IndexedVector3[3];
             for (int j = startJ; j < endJ; j++)
             {
                 for (int x = startX; x < endX; x++)

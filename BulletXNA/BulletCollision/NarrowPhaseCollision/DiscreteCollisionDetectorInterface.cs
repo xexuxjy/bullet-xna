@@ -38,11 +38,13 @@ namespace BulletXNA.BulletCollision
         void AddContactPoint(ref IndexedVector3 normalOnBInWorld, ref IndexedVector3 pointInWorld, float depth);
     }
 
-    public struct ClosestPointInput
+    // Temp change to class while i test maxdist squared
+    public class ClosestPointInput
     {
         public IndexedMatrix m_transformA;
         public IndexedMatrix m_transformB;
-        public float m_maximumDistanceSquared;
+        public float m_maximumDistanceSquared = MathUtil.BT_LARGE_FLOAT;
+
     }
 
     public class StorageResult : IDiscreteCollisionDetectorInterfaceResult
@@ -77,7 +79,7 @@ namespace BulletXNA.BulletCollision
 
         IndexedVector3 m_normalOnSurfaceB;
         IndexedVector3 m_closestPointInB;
-        float m_distance; //negative means penetration !
+        float m_distance = MathUtil.BT_LARGE_FLOAT; //negative means penetration !
 
     }
 }

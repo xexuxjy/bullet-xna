@@ -35,23 +35,23 @@ namespace BulletXNA
         public static float[,] BasisMatrixToFloatArray(ref IndexedBasisMatrix m)
         {
             float[,] result = new float[3, 3];
-            result[0, 0] = m._Row0.X;
-            result[0, 1] = m._Row0.Y;
-            result[0, 2] = m._Row0.Z;
-            result[1, 0] = m._Row1.X;
-            result[1, 1] = m._Row1.Y;
-            result[1, 2] = m._Row1.Z;
-            result[2, 0] = m._Row2.X;
-            result[2, 1] = m._Row2.Y;
-            result[2, 2] = m._Row2.Z;
+            result[0, 0] = m._el0.X;
+            result[0, 1] = m._el0.Y;
+            result[0, 2] = m._el0.Z;
+            result[1, 0] = m._el1.X;
+            result[1, 1] = m._el1.Y;
+            result[1, 2] = m._el1.Z;
+            result[2, 0] = m._el2.X;
+            result[2, 1] = m._el2.Y;
+            result[2, 2] = m._el2.Z;
             return result;
         }
 
         public static void FloatArrayToBasisMatrix(float[,] f, ref IndexedBasisMatrix m)
         {
-            m._Row0 = new IndexedVector3(f[0, 0], f[0, 1], f[0, 2]);
-            m._Row1 = new IndexedVector3(f[1, 0], f[1, 1], f[1, 2]);
-            m._Row2 = new IndexedVector3(f[2, 0], f[2, 1], f[2, 2]);
+            m._el0 = new IndexedVector3(f[0, 0], f[0, 1], f[0, 2]);
+            m._el1 = new IndexedVector3(f[1, 0], f[1, 1], f[1, 2]);
+            m._el2 = new IndexedVector3(f[2, 0], f[2, 1], f[2, 2]);
         }
 
 

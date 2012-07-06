@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
+using BulletXNA.BulletDynamics;
 
 namespace BulletXNA
 {
@@ -76,25 +77,42 @@ namespace BulletXNA
         }
 
 
-        public static ManifoldPoint GetManifoldPoint()
-        {
-            if (m_pointStack.Count == 0)
-            {
-                m_pointStack.Push(new ManifoldPoint());
-            }
-            ++m_assignedPointCount;
-            return m_pointStack.Pop();
-        }
+        //public static ManifoldPoint GetManifoldPoint()
+        //{
+        //    if (m_pointStack.Count == 0)
+        //    {
+        //        m_pointStack.Push(new ManifoldPoint());
+        //    }
+        //    ++m_assignedPointCount;
+        //    return m_pointStack.Pop();
+        //}
 
-        public static void ReleaseManifoldPoint(ManifoldPoint mp)
-        {
-            --m_assignedPointCount;
-            m_pointStack.Push(mp);
-        }
+        //public static void ReleaseManifoldPoint(ManifoldPoint mp)
+        //{
+        //    --m_assignedPointCount;
+        //    m_pointStack.Push(mp);
+        //}
 
-        private static Stack<ManifoldPoint> m_pointStack = new Stack<ManifoldPoint>(20);
-        private static int m_assignedPointCount = 0;
+        //private static Stack<ManifoldPoint> m_pointStack = new Stack<ManifoldPoint>(20);
+        //private static int m_assignedPointCount = 0;
 
+
+        public static PooledType<VoronoiSimplexSolver> VoronoiSimplexSolverPool = new PooledType<VoronoiSimplexSolver>();
+        public static PooledType<SubSimplexConvexCast> SubSimplexConvexCastPool = new PooledType<SubSimplexConvexCast>();
+        public static PooledType<ManifoldPoint> ManifoldPointPool = new PooledType<ManifoldPoint>();
+        public static PooledType<CastResult> CastResultPool = new PooledType<CastResult>();
+        public static PooledType<SphereShape> SphereShapePool = new PooledType<SphereShape>();
+        public static PooledType<DbvtNode> DbvtNodePool = new PooledType<DbvtNode>();
+        public static PooledType<SingleRayCallback> SingleRayCallbackPool = new PooledType<SingleRayCallback>();
+        public static PooledType<SubSimplexClosestResult> SubSimplexClosestResultPool = new PooledType<SubSimplexClosestResult>();
+        public static PooledType<GjkPairDetector> GjkPairDetectorPool = new PooledType<GjkPairDetector>();
+        public static PooledType<DbvtTreeCollider> DbvtTreeColliderPool = new PooledType<DbvtTreeCollider>();
+        public static PooledType<SingleSweepCallback> SingleSweepCallbackPool = new PooledType<SingleSweepCallback>();
+        public static PooledType<BroadphaseRayTester> BroadphaseRayTesterPool = new PooledType<BroadphaseRayTester>();
+        public static PooledType<ClosestNotMeConvexResultCallback> ClosestNotMeConvexResultCallbackPool = new PooledType<ClosestNotMeConvexResultCallback>();
+        public static PooledType<GjkEpaPenetrationDepthSolver> GjkEpaPenetrationDepthSolverPool = new PooledType<GjkEpaPenetrationDepthSolver>();
+        public static PooledType<ContinuousConvexCollision> ContinuousConvexCollisionPool = new PooledType<ContinuousConvexCollision>();
+        public static PooledType<DbvtStackDataBlock> DbvtStackDataBlockPool = new PooledType<DbvtStackDataBlock>();
 
         public const bool debugRigidBody = true;
         public const bool debugCollisionWorld = false;

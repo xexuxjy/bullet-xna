@@ -49,6 +49,10 @@ namespace BulletXNA.BulletCollision
 
         public virtual void Cleanup()
         {
+            m_fraction = float.MaxValue;
+            m_debugDrawer = null;
+            m_allowedPenetration = 0f;
+            BulletGlobals.CastResultPool.Free(this);
         }
 
         public IndexedMatrix m_hitTransformA;

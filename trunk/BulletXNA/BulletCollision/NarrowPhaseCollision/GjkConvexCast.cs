@@ -74,92 +74,98 @@ namespace BulletXNA.BulletCollision
             PointCollector pointCollector = new PointCollector();
 
 
-            GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB, m_simplexSolver, null);//m_penetrationDepthSolver);		
-            ClosestPointInput input = new ClosestPointInput();
-
-            //we don't use margins during CCD
-            //	gjk.setIgnoreMargin(true);
-
-            input.m_transformA = fromA;
-            input.m_transformB = fromB;
-            gjk.GetClosestPoints(input, pointCollector, null, false);
-
-            hasResult = pointCollector.m_hasResult;
-            c = pointCollector.m_pointInWorld;
-
-            if (hasResult)
+            using (GjkPairDetector gjk = BulletGlobals.GjkPairDetectorPool.Get())
             {
-                float dist = pointCollector.m_distance;
-                n = pointCollector.m_normalOnBInWorld;
+                gjk.Initialize(m_convexA, m_convexB, m_simplexSolver, null);//m_penetrationDepthSolver);		
+                ClosestPointInput input = ClosestPointInput.Default();
 
-                //not close enough
-                while (dist > radius)
+                //we don't use margins during CCD
+                //	gjk.setIgnoreMargin(true);
+
+                input.m_transformA = fromA;
+                input.m_transformB = fromB;
+                gjk.GetClosestPoints(ref input, pointCollector, null, false);
+
+                hasResult = pointCollector.m_hasResult;
+                c = pointCollector.m_pointInWorld;
+
+                if (hasResult)
                 {
-                    numIter++;
-                    if (numIter > maxIter)
+                    float dist = pointCollector.m_distance;
+                    n = pointCollector.m_normalOnBInWorld;
+
+                    //not close enough
+                    while (dist > radius)
                     {
-                        return false; //todo: report a failure
-                    }
-                    float dLambda = 0f;
-
-                    float projectedLinearVelocity = IndexedVector3.Dot(r, n);
-
-                    dLambda = dist / (projectedLinearVelocity);
-
-                    lambda = lambda - dLambda;
-
-                    if (lambda > 1f || lambda < 0f)
-                        return false;
-
-                    //todo: next check with relative epsilon
-                    if (lambda <= lastLambda)
-                    {
-                        return false;
-                        //n.setValue(0,0,0);
-                        //break;
-                    }
-                    lastLambda = lambda;
-
-                    //interpolate to next lambda
-                    result.DebugDraw(lambda);
-                    input.m_transformA._origin = MathUtil.Interpolate3(fromA._origin, toA._origin, lambda);
-                    input.m_transformB._origin = MathUtil.Interpolate3(fromB._origin, toB._origin, lambda);
-
-                    gjk.GetClosestPoints(input, pointCollector, null, false);
-                    if (pointCollector.m_hasResult)
-                    {
-                        if (pointCollector.m_distance < 0f)
+                        numIter++;
+                        if (numIter > maxIter)
                         {
-                            result.m_fraction = lastLambda;
-                            n = pointCollector.m_normalOnBInWorld;
-                            result.m_normal = n;
-                            result.m_hitPoint = pointCollector.m_pointInWorld;
-                            return true;
+                            return false; //todo: report a failure
                         }
-                        c = pointCollector.m_pointInWorld;
-                        n = pointCollector.m_normalOnBInWorld;
-                        dist = pointCollector.m_distance;
+                        float dLambda = 0f;
+
+                        float projectedLinearVelocity = IndexedVector3.Dot(r, n);
+
+                        dLambda = dist / (projectedLinearVelocity);
+
+                        lambda = lambda - dLambda;
+
+                        if (lambda > 1f || lambda < 0f)
+                        {
+                            return false;
+                        }
+
+                        //todo: next check with relative epsilon
+                        if (lambda <= lastLambda)
+                        {
+                            return false;
+                            //n.setValue(0,0,0);
+                            //break;
+                        }
+                        lastLambda = lambda;
+
+                        //interpolate to next lambda
+                        result.DebugDraw(lambda);
+                        input.m_transformA._origin = MathUtil.Interpolate3(fromA._origin, toA._origin, lambda);
+                        input.m_transformB._origin = MathUtil.Interpolate3(fromB._origin, toB._origin, lambda);
+
+                        gjk.GetClosestPoints(ref input, pointCollector, null, false);
+                        if (pointCollector.m_hasResult)
+                        {
+                            if (pointCollector.m_distance < 0f)
+                            {
+                                result.m_fraction = lastLambda;
+                                n = pointCollector.m_normalOnBInWorld;
+                                result.m_normal = n;
+                                result.m_hitPoint = pointCollector.m_pointInWorld;
+
+                                return true;
+                            }
+                            c = pointCollector.m_pointInWorld;
+                            n = pointCollector.m_normalOnBInWorld;
+                            dist = pointCollector.m_distance;
+
+                        }
+                        else
+                        {
+                            //??
+                            return false;
+                        }
                     }
-                    else
+
+                    //is n normalized?
+                    //don't report time of impact for motion away from the contact normal (or causes minor penetration)
+                    if (IndexedVector3.Dot(n, r) >= -result.m_allowedPenetration)
                     {
-                        //??
                         return false;
                     }
-                }
 
-                //is n normalized?
-                //don't report time of impact for motion away from the contact normal (or causes minor penetration)
-                if (IndexedVector3.Dot(n, r) >= -result.m_allowedPenetration)
-                {
-                    return false;
+                    result.m_fraction = lambda;
+                    result.m_normal = n;
+                    result.m_hitPoint = c;
+                    return true;
                 }
-
-                result.m_fraction = lambda;
-                result.m_normal = n;
-                result.m_hitPoint = c;
-                return true;
             }
-
             return false;
         }
 

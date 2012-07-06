@@ -258,7 +258,6 @@ namespace BulletXNA.BulletCollision
 
         public bool ClosestPtPointTetrahedron(ref IndexedVector3 p, ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c, ref IndexedVector3 d, ref SubSimplexClosestResult finalResult)
         {
-            SubSimplexClosestResult tempResult = new SubSimplexClosestResult();
 
             // Start ref assuming point inside all halfspaces, so closest to itself
             finalResult.m_closestPointOnSimplex = p;
@@ -280,6 +279,8 @@ namespace BulletXNA.BulletCollision
                 return false;
             }
 
+            SubSimplexClosestResult tempResult = BulletGlobals.SubSimplexClosestResultPool.Get();
+            tempResult.Reset();
 
             float bestSqDist = float.MaxValue;
             // If point outside face abc then compute closest point on abc
@@ -387,6 +388,8 @@ namespace BulletXNA.BulletCollision
                 }
 
             }
+
+            BulletGlobals.SubSimplexClosestResultPool.Free(tempResult);
 
             //help! we ended up full !
 

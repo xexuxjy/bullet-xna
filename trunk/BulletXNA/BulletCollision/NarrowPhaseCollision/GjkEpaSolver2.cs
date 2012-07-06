@@ -145,7 +145,8 @@ namespace BulletXNA.BulletCollision
         public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, GjkEpaSolver2Results results)
         {
             GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
-            SphereShape	shape1 = new SphereShape(margin);
+            SphereShape shape1 = BulletGlobals.SphereShapePool.Get();
+            shape1.Initialize(margin);
             IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
             wtrs0._origin = position;
 	        
@@ -187,6 +188,8 @@ namespace BulletXNA.BulletCollision
                     }
                 }	
             }
+            BulletGlobals.SphereShapePool.Free(shape1);
+
             return(MathUtil.SIMD_INFINITY);
         }
 

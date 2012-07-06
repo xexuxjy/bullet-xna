@@ -198,9 +198,9 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DispatchAllCollisionPairs(IOverlappingPairCache pairCache, DispatcherInfo dispatchInfo, IDispatcher dispatcher)
         {
-            CollisionPairCallback collisionCallback = new CollisionPairCallback(dispatchInfo, this);
-            pairCache.ProcessAllOverlappingPairs(collisionCallback, dispatcher);
-            collisionCallback.cleanup();
+            m_collisionCallback.Initialize(dispatchInfo, this);
+            pairCache.ProcessAllOverlappingPairs(m_collisionCallback, dispatcher);
+            m_collisionCallback.cleanup();
         }
 
         public void SetNearCallback(INearCallback nearCallback)
@@ -298,6 +298,7 @@ namespace BulletXNA.BulletCollision
         private INearCallback m_nearCallback;
         private ICollisionConfiguration m_collisionConfiguration;
 
+        private CollisionPairCallback m_collisionCallback = new CollisionPairCallback(null, null);
 
         public static int gNumManifold = 0;
 
@@ -314,6 +315,12 @@ namespace BulletXNA.BulletCollision
     public class CollisionPairCallback : IOverlapCallback
     {
         public CollisionPairCallback(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
+        {
+            m_dispatchInfo = dispatchInfo;
+            m_dispatcher = dispatcher;
+        }
+
+        public void Initialize(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
         {
             m_dispatchInfo = dispatchInfo;
             m_dispatcher = dispatcher;

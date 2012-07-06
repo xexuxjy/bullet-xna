@@ -257,6 +257,11 @@ namespace BulletXNA.BulletDynamics
             return this;
         }
 
+        public override void SetGravity(IndexedVector3 gravity)
+        {
+            SetGravity(ref gravity);
+        }
+
         public override void SetGravity(ref IndexedVector3 gravity)
         {
             m_gravity = gravity;
@@ -563,49 +568,31 @@ namespace BulletXNA.BulletDynamics
                             if (body.GetCollisionShape().IsConvex())
                             {
                                 gNumClampedCcdMotions++;
-#if USE_STATIC_ONLY
-					class StaticOnlyCallback : public btClosestNotMeConvexResultCallback
-					{
-					public:
 
-						StaticOnlyCallback (btCollisionObject* me,const btVector3& fromA,const btVector3& toA,btOverlappingPairCache* pairCache,btDispatcher* dispatcher) : 
-						  btClosestNotMeConvexResultCallback(me,fromA,toA,pairCache,dispatcher)
-						{
-						}
-
-					  	virtual bool needsCollision(btBroadphaseProxy* proxy0) const
-						{
-							btCollisionObject* otherObj = (btCollisionObject*) proxy0.m_clientObject;
-							if (!otherObj.isStaticOrKinematicObject())
-								return false;
-							return btClosestNotMeConvexResultCallback::needsCollision(proxy0);
-						}
-					};
-
-					StaticOnlyCallback sweepResults(body,body.GetWorldTransform()._origin,predictedTrans._origin,getBroadphase().getOverlappingPairCache(),getDispatcher());
-#else
-                                ClosestNotMeConvexResultCallback sweepResults = new ClosestNotMeConvexResultCallback(body, body.GetWorldTransform()._origin, predictedTrans._origin, GetBroadphase().GetOverlappingPairCache(), GetDispatcher());
-#endif
-                                //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                SphereShape tmpSphere = new SphereShape(body.GetCcdSweptSphereRadius());//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
-
-                                sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
-                                sweepResults.m_collisionFilterMask = body.GetBroadphaseProxy().m_collisionFilterMask;
-                                IndexedMatrix modifiedPredictedTrans = predictedTrans;
-                                modifiedPredictedTrans._basis = body.GetWorldTransform()._basis;
-
-                                modifiedPredictedTrans._origin = predictedTrans._origin;
-
-                                ConvexSweepTest(tmpSphere, body.GetWorldTransform(), modifiedPredictedTrans, sweepResults, 0f);
-                                if (sweepResults.HasHit() && (sweepResults.m_closestHitFraction < 1.0f))
+                                using (ClosestNotMeConvexResultCallback sweepResults = BulletGlobals.ClosestNotMeConvexResultCallbackPool.Get())
                                 {
+                                    sweepResults.Initialize(body, body.GetWorldTransform()._origin, predictedTrans._origin, GetBroadphase().GetOverlappingPairCache(), GetDispatcher());
+                                    //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
+                                    SphereShape tmpSphere = BulletGlobals.SphereShapePool.Get();
+                                    tmpSphere.Initialize(body.GetCcdSweptSphereRadius());//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
+                                    sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
 
-                                    //printf("clamped integration to hit fraction = %f\n",fraction);
-                                    body.SetHitFraction(sweepResults.m_closestHitFraction);
-                                    body.PredictIntegratedTransform(timeStep * body.GetHitFraction(), out predictedTrans);
-                                    body.SetHitFraction(0.0f);
-                                    body.ProceedToTransform(ref predictedTrans);
+                                    sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
+                                    sweepResults.m_collisionFilterMask = body.GetBroadphaseProxy().m_collisionFilterMask;
+                                    IndexedMatrix modifiedPredictedTrans = predictedTrans;
+                                    modifiedPredictedTrans._basis = body.GetWorldTransform()._basis;
+
+                                    modifiedPredictedTrans._origin = predictedTrans._origin;
+
+                                    ConvexSweepTest(tmpSphere, body.GetWorldTransform(), modifiedPredictedTrans, sweepResults, 0f);
+                                    if (sweepResults.HasHit() && (sweepResults.m_closestHitFraction < 1.0f))
+                                    {
+
+                                        //printf("clamped integration to hit fraction = %f\n",fraction);
+                                        body.SetHitFraction(sweepResults.m_closestHitFraction);
+                                        body.PredictIntegratedTransform(timeStep * body.GetHitFraction(), out predictedTrans);
+                                        body.SetHitFraction(0.0f);
+                                        body.ProceedToTransform(ref predictedTrans);
 
 #if false
 						btVector3 linVel = body.getLinearVelocity();
@@ -625,19 +612,22 @@ namespace BulletXNA.BulletDynamics
 							printf("sm2=%f\n",sm2);
 						}
 #else
-                                    //response  between two dynamic objects without friction, assuming 0 penetration depth
-                                    float appliedImpulse = 0.0f;
-                                    float depth = 0.0f;
-                                    appliedImpulse = ContactConstraint.ResolveSingleCollision(body, sweepResults.m_hitCollisionObject, ref sweepResults.m_hitPointWorld, ref sweepResults.m_hitNormalWorld, GetSolverInfo(), depth);
+                                        //response  between two dynamic objects without friction, assuming 0 penetration depth
+                                        float appliedImpulse = 0.0f;
+                                        float depth = 0.0f;
+                                        appliedImpulse = ContactConstraint.ResolveSingleCollision(body, sweepResults.m_hitCollisionObject, ref sweepResults.m_hitPointWorld, ref sweepResults.m_hitNormalWorld, GetSolverInfo(), depth);
 
 
 #endif
 
-                                    continue;
+                                        continue;
+                                    }
+
+
+                                    BulletGlobals.SphereShapePool.Free(tmpSphere);
                                 }
                             }
                             BulletGlobals.StopProfile();
-
                         }
 
 
@@ -1045,17 +1035,38 @@ namespace BulletXNA.BulletDynamics
     }
 
 
-    public class ClosestNotMeConvexResultCallback : ClosestConvexResultCallback
+    public class ClosestNotMeConvexResultCallback : ClosestConvexResultCallback,IDisposable
     {
         public CollisionObject m_me;
         public float m_allowedPenetration;
         public IOverlappingPairCache m_pairCache;
         public IDispatcher m_dispatcher;
 
+
+        public ClosestNotMeConvexResultCallback() { }  // for pool
         public ClosestNotMeConvexResultCallback(CollisionObject me, IndexedVector3 fromA, IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
             : this(me, ref fromA, ref toA, pairCache, dispatcher)
         {
         }
+
+        public virtual void Initialize(CollisionObject me, ref IndexedVector3 fromA, ref IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
+        {
+            base.Initialize(ref fromA,ref toA);
+            m_allowedPenetration = 0.0f;
+            m_me = me;
+            m_pairCache = pairCache;
+            m_dispatcher = dispatcher;
+        }
+
+        public virtual void Initialize(CollisionObject me, IndexedVector3 fromA, IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
+        {
+            base.Initialize(ref fromA, ref toA);
+            m_allowedPenetration = 0.0f;
+            m_me = me;
+            m_pairCache = pairCache;
+            m_dispatcher = dispatcher;
+        }
+
         public ClosestNotMeConvexResultCallback(CollisionObject me, ref IndexedVector3 fromA, ref IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher) :
             base(ref fromA, ref toA)
         {
@@ -1125,6 +1136,13 @@ namespace BulletXNA.BulletDynamics
             }
             return false;
         }
+
+        public void Dispose()
+        {
+            BulletGlobals.ClosestNotMeConvexResultCallbackPool.Free(this);
+        }
+
+    
     }
 
     public class SortConstraintOnIslandPredicate : IComparer<TypedConstraint>

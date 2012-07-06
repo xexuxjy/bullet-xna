@@ -29,12 +29,25 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereShape : ConvexInternalShape
     {
+        public SphereShape()
+            : this(1f)
+        {
+        }
+
 	    public SphereShape (float radius)
 	    {
 		    m_shapeType = BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE;
 		    m_implicitShapeDimensions.X  = radius;
 		    m_collisionMargin = radius;
 	    }
+
+        public void Initialize(float radius)
+        {
+            m_shapeType = BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE;
+            m_implicitShapeDimensions.X = radius;
+            m_collisionMargin = radius;
+        }
+
 	
 	    public override IndexedVector3	LocalGetSupportingVertex(ref IndexedVector3 vec)
         {
@@ -106,6 +119,10 @@ namespace BulletXNA.BulletCollision
 		    return GetRadius();
 	    }
 
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
 
     }
 }

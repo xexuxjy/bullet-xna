@@ -73,14 +73,14 @@ namespace BulletXNA.BulletCollision
             /// report a contact. internally this will be kept persistent, and contact reduction is done
             resultOut.SetPersistentManifold(m_manifoldPtr);
             SphereTriangleDetector detector = new SphereTriangleDetector(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
-            ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input = ClosestPointInput.Default();
             input.m_maximumDistanceSquared = float.MaxValue;
             input.m_transformA = sphereObj.GetWorldTransform();
             input.m_transformB = triObj.GetWorldTransform();
 
             bool swapResults = m_swapped;
 
-            detector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
+            detector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
 
             if (m_ownManifold)
             {

@@ -126,6 +126,15 @@ namespace BulletXNA.BulletCollision
 
         public void Clear()
         {
+            if (m_root != null)
+            {
+                RecurseDeleteNode(this, m_root);
+            }
+            //btAlignedFree(m_free);
+            //m_free = 0;
+            m_lkhd = -1;
+            m_stkStack.Clear();
+            m_opath = 0;
         }
 
 
@@ -572,37 +581,42 @@ namespace BulletXNA.BulletCollision
                                 ref IndexedVector3 rayTo,
                                 ICollide policy)
         {
-            if (root != null)
+
+            using (DbvtStackDataBlock stackDataBlock = BulletGlobals.DbvtStackDataBlockPool.Get())
             {
-                IndexedVector3 rayDir = (rayTo - rayFrom);
-                rayDir.Normalize();
-
-                ///what about division by zero? -. just set rayDirection[i] to INF/BT_LARGE_FLOAT
-                IndexedVector3 rayDirectionInverse = new IndexedVector3(
-                    rayDir.X == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X,
-                    rayDir.Y == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y,
-                    rayDir.Z == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z);
-                bool[] signs = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
-
-                float lambda_max = IndexedVector3.Dot(rayDir, (rayTo - rayFrom));
-
-                ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
-
-                int depth = 1;
-                int treshold = DOUBLE_STACKSIZE - 2;
-
-                stack.Resize(DOUBLE_STACKSIZE);
-                stack[0] = root;
-                IndexedVector3[] bounds = new IndexedVector3[2];
-                do
+                if (root != null)
                 {
-                    DbvtNode node = stack[--depth];
+                    IndexedVector3 rayDir = (rayTo - rayFrom);
+                    rayDir.Normalize();
 
-                    bounds[0] = node.volume.Mins();
-                    bounds[1] = node.volume.Maxs();
+                    ///what about division by zero? -. just set rayDirection[i] to INF/BT_LARGE_FLOAT
+                    IndexedVector3 rayDirectionInverse = new IndexedVector3(
+                        rayDir.X == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X,
+                        rayDir.Y == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y,
+                        rayDir.Z == 0.0f ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z);
 
-                    float tmin = 1.0f, lambda_min = 0.0f;
-                    bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, signs, bounds, out tmin, lambda_min, lambda_max);
+                    stackDataBlock.signs[0] = rayDirectionInverse.X < 0.0f;
+                    stackDataBlock.signs[1] = rayDirectionInverse.Y < 0.0f;
+                    stackDataBlock.signs[2] = rayDirectionInverse.Z < 0.0f;
+
+
+                    float lambda_max = IndexedVector3.Dot(rayDir, (rayTo - rayFrom));
+
+
+                    int depth = 1;
+                    int treshold = DOUBLE_STACKSIZE - 2;
+
+                    stackDataBlock.stack.Resize(DOUBLE_STACKSIZE);
+                    stackDataBlock.stack[0] = root;
+                    do
+                    {
+                        DbvtNode node = stackDataBlock.stack[--depth];
+
+                        stackDataBlock.bounds[0] = node.volume.Mins();
+                        stackDataBlock.bounds[1] = node.volume.Maxs();
+
+                        float tmin = 1.0f, lambda_min = 0.0f;
+                        bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, stackDataBlock.signs, stackDataBlock.bounds, out tmin, lambda_min, lambda_max);
 
 #if COMPARE_BTRAY_AABB2
 				float param=1.0f;
@@ -610,28 +624,28 @@ namespace BulletXNA.BulletCollision
 				Debug.Assert(result1 == result2);
 #endif //TEST_BTRAY_AABB2
 
-                    if (result1)
-                    {
-                        if (node.IsInternal())
+                        if (result1)
                         {
-                            if (depth > treshold)
+                            if (node.IsInternal())
                             {
-                                stack.Resize(stack.Count * 2);
-                                treshold = stack.Count - 2;
+                                if (depth > treshold)
+                                {
+                                    stackDataBlock.stack.Resize(stackDataBlock.stack.Count * 2);
+                                    treshold = stackDataBlock.stack.Count - 2;
+                                }
+                                stackDataBlock.stack[depth++] = node._children[0];
+                                stackDataBlock.stack[depth++] = node._children[1];
                             }
-                            stack[depth++] = node._children[0];
-                            stack[depth++] = node._children[1];
+                            else
+                            {
+                                policy.Process(node);
+                            }
                         }
-                        else
-                        {
-                            policy.Process(node);
-                        }
-                    }
-                } while (depth != 0);
+                    } while (depth != 0);
 
+                }
             }
         }
-
 
 
         public void RayTestInternal(DbvtNode root,
@@ -644,44 +658,47 @@ namespace BulletXNA.BulletCollision
                                     ref IndexedVector3 aabbMax,
                                     ICollide policy)
         {
-            //    (void) rayTo;
-            //DBVT_CHECKTYPE
-            if (root != null)
+            using (DbvtStackDataBlock stackDataBlock = BulletGlobals.DbvtStackDataBlockPool.Get())
             {
-                IndexedVector3 resultNormal = new IndexedVector3(0, 1, 0);
-
-                int depth = 1;
-                int treshold = DOUBLE_STACKSIZE - 2;
-                ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>(DOUBLE_STACKSIZE);
-                stack[0] = root;
-                IndexedVector3[] bounds = new IndexedVector3[2];
-                do
+                //    (void) rayTo;
+                //DBVT_CHECKTYPE
+                if (root != null)
                 {
-                    DbvtNode node = stack[--depth];
-                    bounds[0] = node.volume.Mins() - aabbMax;
-                    bounds[1] = node.volume.Maxs() - aabbMin;
-                    float tmin = 1.0f, lambda_min = 0.0f;
-                    bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, signs, bounds, out tmin, lambda_min, lambda_max);
-                    if (result1)
+                    IndexedVector3 resultNormal = new IndexedVector3(0, 1, 0);
+
+                    int depth = 1;
+                    int treshold = DOUBLE_STACKSIZE - 2;
+                    stackDataBlock.stack[0] = root;
+                    do
                     {
-                        if (node.IsInternal())
+                        DbvtNode node = stackDataBlock.stack[--depth];
+                        stackDataBlock.bounds[0] = node.volume.Mins() - aabbMax;
+                        stackDataBlock.bounds[1] = node.volume.Maxs() - aabbMin;
+                        float tmin = 1.0f, lambda_min = 0.0f;
+                        bool result1 = AabbUtil2.RayAabb2(ref rayFrom, ref rayDirectionInverse, signs, stackDataBlock.bounds, out tmin, lambda_min, lambda_max);
+                        if (result1)
                         {
-                            if (depth > treshold)
+                            if (node.IsInternal())
                             {
-                                stack.Resize(stack.Count * 2);
-                                treshold = stack.Count - 2;
+                                if (depth > treshold)
+                                {
+                                    stackDataBlock.stack.Resize(stackDataBlock.stack.Count * 2);
+                                    treshold = stackDataBlock.stack.Count - 2;
+                                }
+                                stackDataBlock.stack[depth++] = node._children[0];
+                                stackDataBlock.stack[depth++] = node._children[1];
                             }
-                            stack[depth++] = node._children[0];
-                            stack[depth++] = node._children[1];
+                            else
+                            {
+                                policy.Process(node);
+                            }
                         }
-                        else
-                        {
-                            policy.Process(node);
-                        }
-                    }
-                } while (depth != 0);
+                    } while (depth != 0);
+                }
+
             }
         }
+
 
 
         private static Stack<DbvtNode> CollideTVStack = new Stack<DbvtNode>(SIMPLE_STACKSIZE);
@@ -829,27 +846,34 @@ namespace BulletXNA.BulletCollision
                     BottomUp(pdbvt, leaves);
                     return (leaves[0]);
                 }
-            }
+            }   
             return (leaves[0]);
         }
 
         public static DbvtNode CreateNode(Dbvt pdbvt, DbvtNode parent, Object data)
         {
-            DbvtNode node = null;
-            if (pdbvt.m_free != null)
-            {
-                node = pdbvt.m_free;
-                pdbvt.m_free = null;
-            }
-            else
-            {
-                node = new DbvtNode();
-            }
+            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
             node.parent = parent;
             node.data = data;
             node._children[1] = null;
             return (node);
         }
+
+
+        public static DbvtNode CreateNode2(Dbvt tree, DbvtNode aparent, ref DbvtAabbMm avolume, Object adata)
+        {
+            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
+            node.volume = avolume;
+            node.parent = aparent;
+            node.data = adata;
+            if (node.data is int)
+            {
+                node.dataAsInt = (int)node.data;
+            }
+
+            return node;
+        }
+
 
         //
         public static DbvtNode CreateNode(Dbvt pdbvt,
@@ -877,8 +901,9 @@ namespace BulletXNA.BulletCollision
         public static void DeleteNode(Dbvt pdbvt, DbvtNode node)
         {
             //btAlignedFree(pdbvt.m_free);
-            pdbvt.m_free = node;
-
+            //pdbvt.m_free = node;
+            node.Reset();
+            BulletGlobals.DbvtNodePool.Free(node);
         }
 
         public static void RecurseDeleteNode(Dbvt pdbvt, DbvtNode node)
@@ -918,7 +943,8 @@ namespace BulletXNA.BulletCollision
                 }
                 DbvtNode prev = root.parent;
                 DbvtAabbMm mergeResults = DbvtAabbMm.Merge(ref leaf.volume, ref root.volume);
-                DbvtNode node = new DbvtNode(pdbvt, prev, ref mergeResults, null);
+
+                DbvtNode node = CreateNode2(pdbvt, prev, ref mergeResults, null);
                 if (prev != null)
                 {
                     prev._children[IndexOf(root)] = node;
@@ -1021,7 +1047,7 @@ namespace BulletXNA.BulletCollision
         public static int DOUBLE_STACKSIZE = SIMPLE_STACKSIZE * 2;
 
         public DbvtNode m_root;
-        public DbvtNode m_free;
+        //public DbvtNode m_free;
 
         public int m_lkhd;
         public int m_leaves;
@@ -1047,6 +1073,29 @@ namespace BulletXNA.BulletCollision
                 dataAsInt = (int)data;
             }
         }
+
+        public void Reset()
+        {
+            parent = null;
+
+            //if (_children[0] != null)
+            //{
+            //    Dbvt.DeleteNode(null, _children[0]);
+            //    _children[0] = null;
+            //}
+
+            //if (_children[1] != null)
+            //{
+            //    Dbvt.DeleteNode(null, _children[1]);
+            //    _children[1] = null;
+            //}
+
+            data = null;
+            dataAsInt = 0;
+            // bump id as well? we're effectively a new node..
+            id = counter++;
+        }
+
         public DbvtAabbMm volume;
         public DbvtNode parent;
         public DbvtNode[] _children = new DbvtNode[2];
@@ -1344,6 +1393,19 @@ namespace BulletXNA.BulletCollision
         {
             return true;
         }
+    }
+
+    public class DbvtStackDataBlock : IDisposable
+    {
+        public ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
+        public bool[] signs = new bool[3];
+        public IndexedVector3[] bounds = new IndexedVector3[2];
+
+        public void Dispose()
+        {
+            BulletGlobals.DbvtStackDataBlockPool.Free(this);
+        }
+
     }
 
 

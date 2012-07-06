@@ -347,13 +347,13 @@ namespace BulletXNA.BulletCollision
 
                 //compute inertia tensor of pointmass at o
                 float o2 = o.LengthSquared();
-                j._Row0 = new IndexedVector3(o2, 0, 0);
-                j._Row1 = new IndexedVector3(0, o2, 0);
-                j._Row2 = new IndexedVector3(0, 0, o2);
+                j._el0 = new IndexedVector3(o2, 0, 0);
+                j._el1 = new IndexedVector3(0, o2, 0);
+                j._el2 = new IndexedVector3(0, 0, o2);
 
-                j._Row0 = o * -o.X;
-                j._Row1 = o * -o.Y;
-                j._Row2 = o * -o.Z;
+                j._el0 = o * -o.X;
+                j._el1 = o * -o.Y;
+                j._el2 = o * -o.Z;
 
                 //add inertia tensor of pointmass
                 tensor[0] += masses[k] * j[0];
@@ -361,7 +361,7 @@ namespace BulletXNA.BulletCollision
                 tensor[2] += masses[k] * j[2];
             }
             tensor.Diagonalize(out principal, 0.00001f, 20);
-            inertia = new IndexedVector3(tensor._Row0.X, tensor._Row1.Y, tensor._Row2.Z);
+            inertia = new IndexedVector3(tensor._el0.X, tensor._el1.Y, tensor._el2.Z);
         }
 
         public int GetUpdateRevision()

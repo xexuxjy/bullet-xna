@@ -287,12 +287,14 @@ namespace BulletXNA.BulletCollision
         {
             //do a swept sphere for now
             IndexedMatrix ident = IndexedMatrix.Identity;
-            CastResult castResult = new CastResult();
+            CastResult castResult = BulletGlobals.CastResultPool.Get();
             castResult.m_fraction = m_hitFraction;
-            SphereShape pointShape = new SphereShape(m_ccdSphereRadius);
+            SphereShape pointShape = BulletGlobals.SphereShapePool.Get();
+            pointShape.Initialize(m_ccdSphereRadius);
             TriangleShape triShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-            SubSimplexConvexCast convexCaster = new SubSimplexConvexCast(pointShape, triShape, simplexSolver);
+            VoronoiSimplexSolver simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+            SubSimplexConvexCast convexCaster = BulletGlobals.SubSimplexConvexCastPool.Get();
+            convexCaster.Initialize(pointShape, triShape, simplexSolver);
             //GjkConvexCast	convexCaster(&pointShape,convexShape,&simplexSolver);
             //ContinuousConvexCollision convexCaster(&pointShape,convexShape,&simplexSolver,0);
             //local space?
@@ -305,7 +307,10 @@ namespace BulletXNA.BulletCollision
                     m_hitFraction = castResult.m_fraction;
                 }
             }
-
+            BulletGlobals.SubSimplexConvexCastPool.Free(convexCaster);
+            BulletGlobals.VoronoiSimplexSolverPool.Free(simplexSolver);
+            BulletGlobals.SphereShapePool.Free(pointShape);
+            castResult.Cleanup();
         }
 
     };

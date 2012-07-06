@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision
 
         // Work in progress to copy redo the box detector to remove un-necessary allocations
 
-        public static void GetClosestPoints(BoxShape box1,BoxShape box2, ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
+        public static void GetClosestPoints(BoxShape box1,BoxShape box2, ref ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
         {
             IndexedMatrix transformA = input.m_transformA;
             IndexedMatrix transformB = input.m_transformB;

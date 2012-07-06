@@ -159,7 +159,7 @@ namespace BulletXNA.BulletCollision
 
         #region IDiscreteCollisionDetectorInterface Members
 
-        public void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
+        public void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
         {
             IndexedMatrix transformA = input.m_transformA;
             IndexedMatrix transformB = input.m_transformB;

@@ -227,12 +227,13 @@ namespace BulletXNA.BulletCollision
 
 
 
-            GjkPairDetector gjkdet = new GjkPairDetector(convexA, convexB, simplexSolver, null);
+            GjkPairDetector gjkdet = BulletGlobals.GjkPairDetectorPool.Get();
+            gjkdet.Initialize(convexA, convexB, simplexSolver, null);
 
             float offsetDist = minProj;
             IndexedVector3 offset = minNorm * offsetDist;
 
-            ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input = ClosestPointInput.Default();
 
             IndexedVector3 newOrg = transA._origin + offset;
 
@@ -246,7 +247,7 @@ namespace BulletXNA.BulletCollision
             MinkowskiIntermediateResult res = new MinkowskiIntermediateResult();
             gjkdet.SetCachedSeperatingAxis(-minNorm);
 
-            gjkdet.GetClosestPoints(input, res, debugDraw, false);
+            gjkdet.GetClosestPoints(ref input, res, debugDraw, false);
 
             float correctedMinNorm = minProj - res.m_depth;
 
@@ -271,6 +272,8 @@ namespace BulletXNA.BulletCollision
 
 
             }
+
+            BulletGlobals.GjkPairDetectorPool.Free(gjkdet);
             return res.m_hasResult;
         }
 

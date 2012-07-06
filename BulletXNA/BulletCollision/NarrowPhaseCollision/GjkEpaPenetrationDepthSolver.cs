@@ -27,6 +27,8 @@ namespace BulletXNA.BulletCollision
 {
     public class GjkEpaPenetrationDepthSolver : IConvexPenetrationDepthSolver
     {
+        public GjkEpaPenetrationDepthSolver() { } // for pool
+
         public virtual bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref IndexedMatrix transA, ref IndexedMatrix transB,
                 ref IndexedVector3 v, ref IndexedVector3 wWitnessOnA, ref IndexedVector3 wWitnessOnB, IDebugDraw debugDraw)
         {

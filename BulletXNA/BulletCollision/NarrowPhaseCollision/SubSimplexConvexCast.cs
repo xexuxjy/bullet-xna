@@ -27,6 +27,17 @@ namespace BulletXNA.BulletCollision
 {
     public class SubSimplexConvexCast : IConvexCast
     {
+        // to help with pool
+        public SubSimplexConvexCast()
+        { }
+
+        public void Initialize(ConvexShape shapeA, ConvexShape shapeB, ISimplexSolverInterface simplexSolver)
+        {
+            m_convexA = shapeA;
+            m_convexB = shapeB;
+            m_simplexSolver = simplexSolver;
+        }
+
         public SubSimplexConvexCast(ConvexShape shapeA, ConvexShape shapeB, ISimplexSolverInterface simplexSolver)
         {
             m_convexA = shapeA;

@@ -18,41 +18,41 @@ namespace BulletXNA.LinearMath
         public IndexedBasisMatrix Scaled(IndexedVector3 s)
         {
 
-            return new IndexedBasisMatrix(_Row0.X * s.X, _Row0.Y * s.Y, _Row0.Z * s.Z,
-                                        _Row1.X * s.X, _Row1.Y * s.Y, _Row1.Z * s.Z,
-                                        _Row2.X * s.X, _Row2.Y * s.Y, _Row2.Z * s.Z);
+            return new IndexedBasisMatrix(_el0.X * s.X, _el0.Y * s.Y, _el0.Z * s.Z,
+                                        _el1.X * s.X, _el1.Y * s.Y, _el1.Z * s.Z,
+                                        _el2.X * s.X, _el2.Y * s.Y, _el2.Z * s.Z);
 
         }
 
         public IndexedBasisMatrix Scaled(ref IndexedVector3 s)
         {
 
-            return new IndexedBasisMatrix(_Row0.X * s.X, _Row0.Y * s.Y, _Row0.Z * s.Z,
-                                        _Row1.X * s.X, _Row1.Y * s.Y, _Row1.Z * s.Z,
-                                        _Row2.X * s.X, _Row2.Y * s.Y, _Row2.Z * s.Z);
+            return new IndexedBasisMatrix(_el0.X * s.X, _el0.Y * s.Y, _el0.Z * s.Z,
+                                        _el1.X * s.X, _el1.Y * s.Y, _el1.Z * s.Z,
+                                        _el2.X * s.X, _el2.Y * s.Y, _el2.Z * s.Z);
 
         }
 
 
         public IndexedBasisMatrix(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
         {
-            _Row0 = new IndexedVector3(m11, m12, m13);
-            _Row1 = new IndexedVector3(m21, m22, m23);
-            _Row2 = new IndexedVector3(m31, m32, m33);
+            _el0 = new IndexedVector3(m11, m12, m13);
+            _el1 = new IndexedVector3(m21, m22, m23);
+            _el2 = new IndexedVector3(m31, m32, m33);
         }
 
         public IndexedBasisMatrix(IndexedVector3 row0, IndexedVector3 row1, IndexedVector3 row2)
         {
-            _Row0 = row0;
-            _Row1 = row1;
-            _Row2 = row2;
+            _el0 = row0;
+            _el1 = row1;
+            _el2 = row2;
         }
 
         public IndexedBasisMatrix(ref IndexedVector3 row0, ref IndexedVector3 row1, ref IndexedVector3 row2)
         {
-            _Row0 = row0;
-            _Row1 = row1;
-            _Row2 = row2;
+            _el0 = row0;
+            _el1 = row1;
+            _el2 = row2;
         }
 
         public IndexedBasisMatrix(IndexedQuaternion q)
@@ -64,9 +64,9 @@ namespace BulletXNA.LinearMath
             float wx = q.W * xs, wy = q.W * ys, wz = q.W * zs;
             float xx = q.X * xs, xy = q.X * ys, xz = q.X * zs;
             float yy = q.Y * ys, yz = q.Y * zs, zz = q.Z * zs;
-            _Row0 = new IndexedVector3(1.0f - (yy + zz), xy - wz, xz + wy);
-            _Row1 = new IndexedVector3(xy + wz, 1.0f - (xx + zz), yz - wx);
-            _Row2 = new IndexedVector3(xz - wy, yz + wx, 1.0f - (xx + yy));
+            _el0 = new IndexedVector3(1.0f - (yy + zz), xy - wz, xz + wy);
+            _el1 = new IndexedVector3(xy + wz, 1.0f - (xx + zz), yz - wx);
+            _el2 = new IndexedVector3(xz - wy, yz + wx, 1.0f - (xx + yy));
         }
 
 
@@ -79,9 +79,9 @@ namespace BulletXNA.LinearMath
             float wx = q.W * xs, wy = q.W * ys, wz = q.W * zs;
             float xx = q.X * xs, xy = q.X * ys, xz = q.X * zs;
             float yy = q.Y * ys, yz = q.Y * zs, zz = q.Z * zs;
-            _Row0 = new IndexedVector3(1.0f - (yy + zz), xy - wz, xz + wy);
-            _Row1 = new IndexedVector3(xy + wz, 1.0f - (xx + zz), yz - wx);
-            _Row2 = new IndexedVector3(xz - wy, yz + wx, 1.0f - (xx + yy));
+            _el0 = new IndexedVector3(1.0f - (yy + zz), xy - wz, xz + wy);
+            _el1 = new IndexedVector3(xy + wz, 1.0f - (xx + zz), yz - wx);
+            _el2 = new IndexedVector3(xz - wy, yz + wx, 1.0f - (xx + yy));
         }
 
 
@@ -97,7 +97,7 @@ namespace BulletXNA.LinearMath
         public IndexedVector3 GetColumn(int i)
         {
             Debug.Assert(i >= 0 && i < 3);
-            return new IndexedVector3(_Row0[i], _Row1[i], _Row2[i]);
+            return new IndexedVector3(_el0[i], _el1[i], _el2[i]);
         }
 
         public IndexedVector3 GetRow(int i)
@@ -106,11 +106,11 @@ namespace BulletXNA.LinearMath
             switch (i)
             {
                 case (0):
-                    return _Row0;
+                    return _el0;
                 case (1):
-                    return _Row1;
+                    return _el1;
                 case (2):
-                    return _Row2;
+                    return _el2;
             }
             Debug.Assert(false);
             return IndexedVector3.Zero;
@@ -128,11 +128,11 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    return _Row0.X;
+                                    return _el0.X;
                                 case (1):
-                                    return _Row0.Y;
+                                    return _el0.Y;
                                 case (2):
-                                    return _Row0.Z;
+                                    return _el0.Z;
                                 default:
                                     break;
                             }
@@ -143,11 +143,11 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    return _Row1.X;
+                                    return _el1.X;
                                 case (1):
-                                    return _Row1.Y;
+                                    return _el1.Y;
                                 case (2):
-                                    return _Row1.Z;
+                                    return _el1.Z;
                                 default:
                                     break;
                             }
@@ -158,11 +158,11 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    return _Row2.X;
+                                    return _el2.X;
                                 case (1):
-                                    return _Row2.Y;
+                                    return _el2.Y;
                                 case (2):
-                                    return _Row2.Z;
+                                    return _el2.Z;
                                 default:
                                     break;
                             }
@@ -181,13 +181,13 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    _Row0.X = value;
+                                    _el0.X = value;
                                     break;
                                 case (1):
-                                    _Row0.Y = value;
+                                    _el0.Y = value;
                                     break;
                                 case (2):
-                                    _Row0.Z = value;
+                                    _el0.Z = value;
                                     break;
                                 default:
                                     break;
@@ -199,13 +199,13 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    _Row1.X = value;
+                                    _el1.X = value;
                                     break;
                                 case (1):
-                                    _Row1.Y = value;
+                                    _el1.Y = value;
                                     break;
                                 case (2):
-                                    _Row1.Z = value;
+                                    _el1.Z = value;
                                     break;
                                 default:
                                     break;
@@ -217,13 +217,13 @@ namespace BulletXNA.LinearMath
                             switch (j)
                             {
                                 case (0):
-                                    _Row2.X = value;
+                                    _el2.X = value;
                                     break;
                                 case (1):
-                                    _Row2.Y = value;
+                                    _el2.Y = value;
                                     break;
                                 case (2):
-                                    _Row2.Z = value;
+                                    _el2.Z = value;
                                     break;
                                 default:
                                     break;
@@ -244,11 +244,11 @@ namespace BulletXNA.LinearMath
                 switch (i)
                 {
                     case (0):
-                        return _Row0;
+                        return _el0;
                     case (1):
-                        return _Row1;
+                        return _el1;
                     case (2):
-                        return _Row2;
+                        return _el2;
                 }
                 Debug.Assert(false);
                 return IndexedVector3.Zero;
@@ -260,13 +260,13 @@ namespace BulletXNA.LinearMath
                 switch (i)
                 {
                     case (0):
-                        _Row0 = value;
+                        _el0 = value;
                         break;
                     case (1):
-                        _Row1 = value;
+                        _el1 = value;
                         break;
                     case (2):
-                        _Row2 = value;
+                        _el2 = value;
                         break;
                 }
             }
@@ -276,36 +276,36 @@ namespace BulletXNA.LinearMath
 
         public static IndexedBasisMatrix Transpose(IndexedBasisMatrix IndexedMatrix)
         {
-            return new IndexedBasisMatrix(IndexedMatrix._Row0.X, IndexedMatrix._Row1.X, IndexedMatrix._Row2.X,
-                IndexedMatrix._Row0.Y, IndexedMatrix._Row1.Y, IndexedMatrix._Row2.Y,
-                IndexedMatrix._Row0.Z, IndexedMatrix._Row1.Z, IndexedMatrix._Row2.Z);
+            return new IndexedBasisMatrix(IndexedMatrix._el0.X, IndexedMatrix._el1.X, IndexedMatrix._el2.X,
+                IndexedMatrix._el0.Y, IndexedMatrix._el1.Y, IndexedMatrix._el2.Y,
+                IndexedMatrix._el0.Z, IndexedMatrix._el1.Z, IndexedMatrix._el2.Z);
 
         }
 
         public static void Transpose(ref IndexedBasisMatrix IndexedMatrix, out IndexedBasisMatrix result)
         {
-            result = new IndexedBasisMatrix(IndexedMatrix._Row0.X, IndexedMatrix._Row1.X, IndexedMatrix._Row2.X,
-                IndexedMatrix._Row0.Y, IndexedMatrix._Row1.Y, IndexedMatrix._Row2.Y,
-                IndexedMatrix._Row0.Z, IndexedMatrix._Row1.Z, IndexedMatrix._Row2.Z);
+            result = new IndexedBasisMatrix(IndexedMatrix._el0.X, IndexedMatrix._el1.X, IndexedMatrix._el2.X,
+                IndexedMatrix._el0.Y, IndexedMatrix._el1.Y, IndexedMatrix._el2.Y,
+                IndexedMatrix._el0.Z, IndexedMatrix._el1.Z, IndexedMatrix._el2.Z);
         }
 
         public static bool operator ==(IndexedBasisMatrix matrix1, IndexedBasisMatrix matrix2)
         {
-            return matrix1._Row0 == matrix2._Row0 &&
-                matrix1._Row1 == matrix2._Row1 &&
-                matrix1._Row2 == matrix2._Row2;
+            return matrix1._el0 == matrix2._el0 &&
+                matrix1._el1 == matrix2._el1 &&
+                matrix1._el2 == matrix2._el2;
         }
 
         public static bool operator !=(IndexedBasisMatrix matrix1, IndexedBasisMatrix matrix2)
         {
-            return matrix1._Row0 != matrix2._Row0 ||
-                matrix1._Row1 != matrix2._Row1 ||
-                matrix1._Row2 != matrix2._Row2;
+            return matrix1._el0 != matrix2._el0 ||
+                matrix1._el1 != matrix2._el1 ||
+                matrix1._el2 != matrix2._el2;
         }
 
         public static IndexedVector3 operator *(IndexedBasisMatrix m, IndexedVector3 v)
         {
-            return new IndexedVector3(m._Row0.Dot(ref v), m._Row1.Dot(ref v), m._Row2.Dot(ref v));
+            return new IndexedVector3(m._el0.Dot(ref v), m._el1.Dot(ref v), m._el2.Dot(ref v));
         }
 
         public static IndexedVector3 operator *(IndexedVector3 v, IndexedBasisMatrix m)
@@ -316,9 +316,23 @@ namespace BulletXNA.LinearMath
         public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, IndexedBasisMatrix m2)
         {
             return new IndexedBasisMatrix(
-                m2.TDotX(ref m1._Row0), m2.TDotY(ref m1._Row0), m2.TDotZ(ref m1._Row0),
-                m2.TDotX(ref m1._Row1), m2.TDotY(ref m1._Row1), m2.TDotZ(ref m1._Row1),
-                m2.TDotX(ref m1._Row2), m2.TDotY(ref m1._Row2), m2.TDotZ(ref m1._Row2));
+                m2.TDotX(ref m1._el0), m2.TDotY(ref m1._el0), m2.TDotZ(ref m1._el0),
+                m2.TDotX(ref m1._el1), m2.TDotY(ref m1._el1), m2.TDotZ(ref m1._el1),
+                m2.TDotX(ref m1._el2), m2.TDotY(ref m1._el2), m2.TDotZ(ref m1._el2));
+        }
+
+
+        public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, float s)
+        {
+            return new IndexedBasisMatrix(m1._el0 * s, m1._el1 * s, m1._el2 * s);
+        }
+
+        public static IndexedBasisMatrix CreateScale(IndexedVector3 scale)
+        {
+            return new IndexedBasisMatrix(new IndexedVector3(scale.X, 0, 0),
+            new IndexedVector3(0, scale.Y, 0),
+            new IndexedVector3(0, 0, scale.Z));
+
         }
 
 
@@ -341,15 +355,15 @@ namespace BulletXNA.LinearMath
 
         public float TDotX(ref IndexedVector3 v)
         {
-            return _Row0.X * v.X + _Row1.X * v.Y + _Row2.X * v.Z;
+            return _el0.X * v.X + _el1.X * v.Y + _el2.X * v.Z;
         }
         public float TDotY(ref IndexedVector3 v)
         {
-            return _Row0.Y * v.X + _Row1.Y * v.Y + _Row2.Y * v.Z;
+            return _el0.Y * v.X + _el1.Y * v.Y + _el2.Y * v.Z;
         }
         public float TDotZ(ref IndexedVector3 v)
         {
-            return _Row0.Z * v.X + _Row1.Z * v.Y + _Row2.Z * v.Z;
+            return _el0.Z * v.X + _el1.Z * v.Y + _el2.Z * v.Z;
         }
 
         public IndexedBasisMatrix Inverse()
@@ -373,59 +387,59 @@ namespace BulletXNA.LinearMath
         public IndexedBasisMatrix TransposeTimes(IndexedBasisMatrix m)
         {
             return new IndexedBasisMatrix(
-        _Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
-        _Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
-        _Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
-        _Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
-        _Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
-        _Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
-        _Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
-        _Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
-        _Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
+        _el0.X * m._el0.X + _el1.X * m._el1.X + _el2.X * m._el2.X,
+        _el0.X * m._el0.Y + _el1.X * m._el1.Y + _el2.X * m._el2.Y,
+        _el0.X * m._el0.Z + _el1.X * m._el1.Z + _el2.X * m._el2.Z,
+        _el0.Y * m._el0.X + _el1.Y * m._el1.X + _el2.Y * m._el2.X,
+        _el0.Y * m._el0.Y + _el1.Y * m._el1.Y + _el2.Y * m._el2.Y,
+        _el0.Y * m._el0.Z + _el1.Y * m._el1.Z + _el2.Y * m._el2.Z,
+        _el0.Z * m._el0.X + _el1.Z * m._el1.X + _el2.Z * m._el2.X,
+        _el0.Z * m._el0.Y + _el1.Z * m._el1.Y + _el2.Z * m._el2.Y,
+        _el0.Z * m._el0.Z + _el1.Z * m._el1.Z + _el2.Z * m._el2.Z);
 
         }
 
         public IndexedBasisMatrix TransposeTimes(ref IndexedBasisMatrix m)
         {
             return new IndexedBasisMatrix(
-        _Row0.X * m._Row0.X + _Row1.X * m._Row1.X + _Row2.X * m._Row2.X,
-        _Row0.X * m._Row0.Y + _Row1.X * m._Row1.Y + _Row2.X * m._Row2.Y,
-        _Row0.X * m._Row0.Z + _Row1.X * m._Row1.Z + _Row2.X * m._Row2.Z,
-        _Row0.Y * m._Row0.X + _Row1.Y * m._Row1.X + _Row2.Y * m._Row2.X,
-        _Row0.Y * m._Row0.Y + _Row1.Y * m._Row1.Y + _Row2.Y * m._Row2.Y,
-        _Row0.Y * m._Row0.Z + _Row1.Y * m._Row1.Z + _Row2.Y * m._Row2.Z,
-        _Row0.Z * m._Row0.X + _Row1.Z * m._Row1.X + _Row2.Z * m._Row2.X,
-        _Row0.Z * m._Row0.Y + _Row1.Z * m._Row1.Y + _Row2.Z * m._Row2.Y,
-        _Row0.Z * m._Row0.Z + _Row1.Z * m._Row1.Z + _Row2.Z * m._Row2.Z);
+        _el0.X * m._el0.X + _el1.X * m._el1.X + _el2.X * m._el2.X,
+        _el0.X * m._el0.Y + _el1.X * m._el1.Y + _el2.X * m._el2.Y,
+        _el0.X * m._el0.Z + _el1.X * m._el1.Z + _el2.X * m._el2.Z,
+        _el0.Y * m._el0.X + _el1.Y * m._el1.X + _el2.Y * m._el2.X,
+        _el0.Y * m._el0.Y + _el1.Y * m._el1.Y + _el2.Y * m._el2.Y,
+        _el0.Y * m._el0.Z + _el1.Y * m._el1.Z + _el2.Y * m._el2.Z,
+        _el0.Z * m._el0.X + _el1.Z * m._el1.X + _el2.Z * m._el2.X,
+        _el0.Z * m._el0.Y + _el1.Z * m._el1.Y + _el2.Z * m._el2.Y,
+        _el0.Z * m._el0.Z + _el1.Z * m._el1.Z + _el2.Z * m._el2.Z);
 
         }
 
         public IndexedBasisMatrix TimesTranspose(IndexedBasisMatrix m)
         {
             return new IndexedBasisMatrix(
-                _Row0.Dot(m._Row0), _Row0.Dot(m._Row1), _Row0.Dot(m._Row2),
-                _Row1.Dot(m._Row0), _Row1.Dot(m._Row1), _Row1.Dot(m._Row2),
-                _Row2.Dot(m._Row0), _Row2.Dot(m._Row1), _Row2.Dot(m._Row2));
+                _el0.Dot(m._el0), _el0.Dot(m._el1), _el0.Dot(m._el2),
+                _el1.Dot(m._el0), _el1.Dot(m._el1), _el1.Dot(m._el2),
+                _el2.Dot(m._el0), _el2.Dot(m._el1), _el2.Dot(m._el2));
         }
 
 
         public IndexedBasisMatrix Transpose()
         {
-            return new IndexedBasisMatrix(_Row0.X, _Row1.X, _Row2.X,
-                _Row0.Y, _Row1.Y, _Row2.Y,
-                _Row0.Z, _Row1.Z, _Row2.Z);
+            return new IndexedBasisMatrix(_el0.X, _el1.X, _el2.X,
+                _el0.Y, _el1.Y, _el2.Y,
+                _el0.Z, _el1.Z, _el2.Z);
         }
 
 
 
         public IndexedBasisMatrix Absolute()
         {
-            return new IndexedBasisMatrix(_Row0.Abs(), _Row1.Abs(), _Row2.Abs());
+            return new IndexedBasisMatrix(_el0.Abs(), _el1.Abs(), _el2.Abs());
         }
 
         public IndexedQuaternion GetRotation()
         {
-            float trace = _Row0.X + _Row1.Y + _Row2.Z;
+            float trace = _el0.X + _el1.Y + _el2.Z;
             IndexedVector3 temp = new IndexedVector3();
             float temp2 = 0f;
             if (trace > 0.0f)
@@ -434,15 +448,15 @@ namespace BulletXNA.LinearMath
                 temp2 = (s * 0.5f);
                 s = 0.5f / s;
 
-                temp[0] = ((_Row2.Y - _Row1.Z) * s);
-                temp[1] = ((_Row0.Z - _Row2.X) * s);
-                temp[2] = ((_Row1.X - _Row0.Y) * s);
+                temp[0] = ((_el2.Y - _el1.Z) * s);
+                temp[1] = ((_el0.Z - _el2.X) * s);
+                temp[2] = ((_el1.X - _el0.Y) * s);
             }
             else
             {
-                int i = _Row0.X < _Row1.Y ?
-                    (_Row1.Y < _Row2.Z ? 2 : 1) :
-                    (_Row0.X < _Row2.Z ? 2 : 0);
+                int i = _el0.X < _el1.Y ?
+                    (_el1.Y < _el2.Z ? 2 : 1) :
+                    (_el0.X < _el2.Z ? 2 : 0);
                 int j = (i + 1) % 3;
                 int k = (i + 2) % 3;
 
@@ -594,6 +608,49 @@ namespace BulletXNA.LinearMath
         //    this[2] = forward;
         //   }
 
+        public static IndexedBasisMatrix CreateRotationX(float radians)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            IndexedBasisMatrix _basis;
+            _basis._el0 = new IndexedVector3(1, 0, 0);
+            _basis._el1 = new IndexedVector3(0, num1, num2);
+            _basis._el2 = new IndexedVector3(0, -num2, num1);
+            return _basis;
+        }
+
+        public static void CreateRotationX(float radians, out IndexedBasisMatrix _basis)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            _basis._el0 = new IndexedVector3(1, 0, 0);
+            _basis._el1 = new IndexedVector3(0, num1, num2);
+            _basis._el2 = new IndexedVector3(0, -num2, num1);
+        }
+
+        public static IndexedBasisMatrix CreateRotationZ(float radians)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            IndexedBasisMatrix _basis;
+            _basis._el0 = new IndexedVector3(num1, num2, 0);
+            _basis._el1 = new IndexedVector3(-num2, num1, 0);
+            _basis._el2 = new IndexedVector3(0, 0, 1);
+            return _basis;
+        }
+
+        public static void CreateRotationZ(float radians, out IndexedBasisMatrix _basis)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            _basis._el0 = new IndexedVector3(num1, num2, 0);
+            _basis._el1 = new IndexedVector3(-num2, num1, 0);
+            _basis._el2 = new IndexedVector3(0, 0, 1);
+        }
+
+
+
+
         public static IndexedBasisMatrix CreateRotationY(float radians)
         {
             float num1 = (float)Math.Cos((double)radians);
@@ -663,10 +720,38 @@ namespace BulletXNA.LinearMath
             set { this[2] = value; }
         }
 
+        public void GetOpenGLMatrix(out IndexedVector3 v1,out IndexedVector3 v2,out IndexedVector3 v3)
+        {
+		    v1.X  = _el0.X; 
+		    v1.Y  = _el1.X;
+		    v1.Z  = _el2.X;
+		    //m[3]  = btScalar(0.0); 
+		    v2.X  = _el0.Y;
+		    v2.Y  = _el1.Y;
+		    v2.Z  = _el2.Y;
+		    //m[7]  = btScalar(0.0); 
+		    v3.X  = _el0.Z; 
+		    v3.Y  = _el1.Z;
+		    v3.Z = _el2.Z;
+		    //m[11] = btScalar(0.0); 
 
-        public IndexedVector3 _Row0;
-        public IndexedVector3 _Row1;
-        public IndexedVector3 _Row2;
+        }
+        public void SetOpenGLMatrix(IndexedVector3 v1, IndexedVector3 v2, IndexedVector3 v3)
+        {
+            SetOpenGLMatrix(ref v1, ref v2, ref v3);
+        }
+
+        public void SetOpenGLMatrix(ref IndexedVector3 v1,ref IndexedVector3 v2,ref IndexedVector3 v3)
+        {
+		    _el0 = new IndexedVector3(v1.X,v2.X,v3.X);
+            _el1 = new IndexedVector3(v1.Y, v2.Y, v3.Y);
+            _el2 = new IndexedVector3(v1.Z, v2.Z, v3.Z);
+        }
+
+
+        public IndexedVector3 _el0;
+        public IndexedVector3 _el1;
+        public IndexedVector3 _el2;
 
     }
 }

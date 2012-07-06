@@ -97,9 +97,9 @@ namespace BulletXNA.LinearMath
             //return new IndexedVector3(matrix1._basis[0].Dot(ref v) + matrix1._origin.X, 
             //                           matrix1._basis[1].Dot(ref v) + matrix1._origin.Y,
             //                            matrix1._basis[2].Dot(ref v) + matrix1._origin.Z);
-            return new IndexedVector3(matrix1._basis._Row0.Dot(ref v) + matrix1._origin.X,
-                                                   matrix1._basis._Row1.Dot(ref v) + matrix1._origin.Y,
-                                                    matrix1._basis._Row2.Dot(ref v) + matrix1._origin.Z);
+            return new IndexedVector3(matrix1._basis._el0.Dot(ref v) + matrix1._origin.X,
+                                                   matrix1._basis._el1.Dot(ref v) + matrix1._origin.Y,
+                                                    matrix1._basis._el2.Dot(ref v) + matrix1._origin.Z);
         }
 
         //public static IndexedVector3 operator *(IndexedVector3 v,IndexedMatrix matrix1)
@@ -135,27 +135,23 @@ namespace BulletXNA.LinearMath
         //    IndexedMatrix._basis._Row0 = matrix1._basis._Row0 * scaleFactor;
         //    IndexedMatrix._basis._Row1 = matrix1._basis._Row1 * scaleFactor;
         //    IndexedMatrix._basis._Row2 = matrix1._basis._Row2 * scaleFactor;
-        //    IndexedMatrix._origin = matrix1._origin* scaleFactor;
+        //    IndexedMatrix._origin = matrix1._origin * scaleFactor;
         //    return IndexedMatrix;
         //}
 
-        public static IndexedMatrix operator /(IndexedMatrix matrix1, IndexedMatrix matrix2)
-        {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = matrix1._basis._Row0 / matrix2._basis._Row0;
-            IndexedMatrix._basis._Row1 = matrix1._basis._Row1 / matrix2._basis._Row1;
-            IndexedMatrix._basis._Row2 = matrix1._basis._Row2 / matrix2._basis._Row2;
-            IndexedMatrix._origin = matrix1._origin / matrix2._origin;
-            return IndexedMatrix;
-        }
+        //public static IndexedMatrix operator /(IndexedMatrix matrix1, IndexedMatrix matrix2)
+        //{
+        //    IndexedMatrix IndexedMatrix = IndexedMatrix.Identity;
+        //    IndexedMatrix._basis = matrix1._basis / matrix2._basis;
+        //    IndexedMatrix._origin = matrix1._origin / matrix2._origin;
+        //    return IndexedMatrix;
+        //}
 
         public static IndexedMatrix operator /(IndexedMatrix matrix1, float divider)
         {
             float num = 1f / divider;
             IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = matrix1._basis._Row0 * num;
-            IndexedMatrix._basis._Row1 = matrix1._basis._Row1 * num;
-            IndexedMatrix._basis._Row2 = matrix1._basis._Row2 * num;
+            IndexedMatrix._basis = matrix1._basis * num;
             IndexedMatrix._origin = matrix1._origin * num;
             return IndexedMatrix;
         }
@@ -163,102 +159,73 @@ namespace BulletXNA.LinearMath
 
         public static IndexedMatrix CreateTranslation(IndexedVector3 position)
         {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(1, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, 1, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, 0, 1);
+            IndexedMatrix IndexedMatrix = IndexedMatrix.Identity;
             IndexedMatrix._origin = position;            
             return IndexedMatrix;
         }
 
         public static void CreateTranslation(ref IndexedVector3 position, out IndexedMatrix result)
         {
-            result._basis._Row0 = new IndexedVector3(1, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, 1, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, 1);
-            result._origin =  position;
+            result = IndexedMatrix.Identity;
+            result._origin = position;
         }
 
         public static IndexedMatrix CreateTranslation(float xPosition, float yPosition, float zPosition)
         {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(1, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, 1, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, 0, 1);
+            IndexedMatrix IndexedMatrix = IndexedMatrix.Identity;
             IndexedMatrix._origin = new IndexedVector3(xPosition, yPosition, zPosition);
             return IndexedMatrix;
         }
 
         public static void CreateTranslation(float xPosition, float yPosition, float zPosition, out IndexedMatrix result)
         {
-            result._basis._Row0 = new IndexedVector3(1, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, 1, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, 1);
+            result = IndexedMatrix.Identity;
             result._origin = new IndexedVector3(xPosition, yPosition, zPosition);
         }
 
-        public static IndexedMatrix CreateScale(float xScale, float yScale, float zScale)
+        public static IndexedMatrix CreateScale(float x, float y, float z)
         {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(xScale, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, yScale, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, 0, zScale);
-            IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
+            IndexedMatrix IndexedMatrix = IndexedMatrix.Identity;
+            IndexedMatrix._basis = IndexedBasisMatrix.CreateScale(new IndexedVector3(x,y,z));
             return IndexedMatrix;
         }
 
         public static void CreateScale(float xScale, float yScale, float zScale, out IndexedMatrix result)
         {
-            result._basis._Row0 = new IndexedVector3(xScale, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, yScale, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, zScale);
-            result._origin = new IndexedVector3(0,0,0);
+            result = IndexedMatrix.Identity;
+            result._basis = IndexedBasisMatrix.CreateScale(new IndexedVector3(xScale, yScale, zScale));
         }
 
         public static IndexedMatrix CreateScale(IndexedVector3 scales)
         {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(scales.X, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, scales.Y, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, 0, scales.Z);
-            IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
-            return IndexedMatrix;
+            IndexedMatrix result = IndexedMatrix.Identity;
+            result._basis = IndexedBasisMatrix.CreateScale(scales);
+            return result;
         }
 
         public static void CreateScale(ref IndexedVector3 scales, out IndexedMatrix result)
         {
-            result._basis._Row0 = new IndexedVector3(scales.X, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, scales.Y, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, scales.Z);
-            result._origin = new IndexedVector3(0, 0, 0);
+            result = IndexedMatrix.Identity;
+            result._basis = IndexedBasisMatrix.CreateScale(scales);
         }
 
         public static IndexedMatrix CreateScale(float scale)
         {
-            IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(scale, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, scale, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, 0, scale);
-            IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
-            return IndexedMatrix;
+            IndexedMatrix result = IndexedMatrix.Identity;
+            result._basis = IndexedBasisMatrix.CreateScale(new IndexedVector3(scale)); 
+            return result;
         }
 
         public static void CreateScale(float scale, out IndexedMatrix result)
         {
-            result._basis._Row0 = new IndexedVector3(scale, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, scale, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, scale);
-            result._origin = new IndexedVector3(0, 0, 0);
+            result = IndexedMatrix.Identity;
+            result._basis = IndexedBasisMatrix.CreateScale(new IndexedVector3(scale));
         }
 
         public static IndexedMatrix CreateRotationX(float radians)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
             IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(1, 0, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, num1, num2);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0, -num2, num1);
+            IndexedMatrix._basis = IndexedBasisMatrix.CreateRotationX(radians);
             IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
             
             return IndexedMatrix;
@@ -266,55 +233,37 @@ namespace BulletXNA.LinearMath
 
         public static void CreateRotationX(float radians, out IndexedMatrix result)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
-            result._basis._Row0 = new IndexedVector3(1, 0, 0);
-            result._basis._Row1 = new IndexedVector3(0, num1, num2);
-            result._basis._Row2 = new IndexedVector3(0, -num2, num1);
+            result._basis = IndexedBasisMatrix.CreateRotationX(radians);
             result._origin = new IndexedVector3(0, 0, 0);
         }
 
         public static IndexedMatrix CreateRotationY(float radians)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
             IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(num1, 0, -num2);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(0, 1, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(num2, -0, num1);
+            IndexedMatrix._basis = IndexedBasisMatrix.CreateRotationY(radians);
             IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
+
             return IndexedMatrix;
         }
 
         public static void CreateRotationY(float radians, out IndexedMatrix result)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
-            result._basis._Row0 = new IndexedVector3(num1, 0, -num2);
-            result._basis._Row1 = new IndexedVector3(0, 1, 0);
-            result._basis._Row2 = new IndexedVector3(num2, -0, num1);
+            result._basis = IndexedBasisMatrix.CreateRotationY(radians);
             result._origin = new IndexedVector3(0, 0, 0);
         }
 
         public static IndexedMatrix CreateRotationZ(float radians)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
             IndexedMatrix IndexedMatrix;
-            IndexedMatrix._basis._Row0 = new IndexedVector3(num1, num2, 0);
-            IndexedMatrix._basis._Row1 = new IndexedVector3(-num2, num1, 0);
-            IndexedMatrix._basis._Row2 = new IndexedVector3(0,0,1);
+            IndexedMatrix._basis = IndexedBasisMatrix.CreateRotationZ(radians);
             IndexedMatrix._origin = new IndexedVector3(0, 0, 0);
+
             return IndexedMatrix;
         }
 
         public static void CreateRotationZ(float radians, out IndexedMatrix result)
         {
-            float num1 = (float)Math.Cos((double)radians);
-            float num2 = (float)Math.Sin((double)radians);
-            result._basis._Row0 = new IndexedVector3(num1, num2, 0);
-            result._basis._Row1 = new IndexedVector3(-num2, num1, 0);
-            result._basis._Row2 = new IndexedVector3(0, 0, 1);
+            result._basis = IndexedBasisMatrix.CreateRotationZ(radians);
             result._origin = new IndexedVector3(0, 0, 0);
         }
 
@@ -443,39 +392,37 @@ namespace BulletXNA.LinearMath
 
         public Microsoft.Xna.Framework.Matrix ToMatrix()
         {
-            Microsoft.Xna.Framework.Matrix matrix = Microsoft.Xna.Framework.Matrix.Identity;
-            matrix.Right = _basis.GetColumn(0).ToVector3();
-            matrix.Up = _basis.GetColumn(1).ToVector3();
-            matrix.Backward = _basis.GetColumn(2).ToVector3();
-            //matrix.Right = _basis.GetRow(0).ToVector3();
-            //matrix.Up = _basis.GetRow(1).ToVector3();
-            //matrix.Backward = _basis.GetRow(2).ToVector3();
-
-            matrix.Translation = _origin.ToVector3();
-            return matrix;
+            Microsoft.Xna.Framework.Matrix m = Microsoft.Xna.Framework.Matrix.Identity;
+            IndexedVector3 right;
+            IndexedVector3 up;
+            IndexedVector3 backward;
+            _basis.GetOpenGLMatrix(out right, out up, out backward);
+            m.Right = right;
+            m.Up = up;
+            m.Backward = backward;
+            m.Translation = _origin.ToVector3();
+            return m;
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
         public static implicit operator Microsoft.Xna.Framework.Matrix(IndexedMatrix im)
         {
-            Microsoft.Xna.Framework.Matrix matrix = Microsoft.Xna.Framework.Matrix.Identity;
-            matrix.Right = im._basis.GetColumn(0).ToVector3();
-            matrix.Up = im._basis.GetColumn(1).ToVector3();
-            matrix.Backward = im._basis.GetColumn(2).ToVector3();
-            matrix.Translation = im._origin.ToVector3();
-            return matrix;
+            return im.ToMatrix();
         }
 
         // User-defined conversion from IndexedVector3 to Vector3
         public static implicit operator IndexedMatrix(Microsoft.Xna.Framework.Matrix m)
         {
             IndexedMatrix im = new IndexedMatrix();
-            im._origin = new IndexedVector3(m.Translation);
-            //_basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward)).Transpose();
-            im._basis = new IndexedBasisMatrix(new IndexedVector3(m.Right), new IndexedVector3(m.Up), new IndexedVector3(m.Backward));
+            im.SetOpenGLMatrix(m);
             return im;
         }
 
+        public void SetOpenGLMatrix(Microsoft.Xna.Framework.Matrix m)
+        {
+            _basis.SetOpenGLMatrix(m.Right, m.Up, m.Backward);
+            _origin = m.Translation;
+        }
 
 
         public Microsoft.Xna.Framework.Matrix ToMatrixProjection()

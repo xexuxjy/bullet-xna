@@ -27,6 +27,7 @@ namespace BulletXNA.BulletCollision
 {
     public class ContinuousConvexCollision : IConvexCast
     {
+        public ContinuousConvexCollision() { } // for pool
         public ContinuousConvexCollision(ConvexShape shapeA, ConvexShape shapeB)
         {
             m_convexA = shapeA;
@@ -47,6 +48,31 @@ namespace BulletXNA.BulletCollision
             m_convexA = shapeA;
             m_planeShape = plane;
         }
+
+        public virtual void Initialize(ConvexShape shapeA, ConvexShape shapeB)
+        {
+            m_convexA = shapeA;
+            m_convexB1 = shapeB;
+            m_simplexSolver = null;
+            m_penetrationDepthSolver = null;
+        }
+
+        public virtual void Initialize(ConvexShape shapeA, ConvexShape shapeB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
+        {
+            m_convexA = shapeA;
+            m_convexB1 = shapeB;
+            m_simplexSolver = simplexSolver;
+            m_penetrationDepthSolver = penetrationDepthSolver;
+        }
+
+        public void Initialize(ConvexShape shapeA, StaticPlaneShape plane)
+        {
+            m_convexA = shapeA;
+            m_planeShape = plane;
+            m_simplexSolver = null;
+            m_penetrationDepthSolver = null;
+        }
+
 
 
         public virtual bool CalcTimeOfImpact(ref IndexedMatrix fromA, ref IndexedMatrix toA, ref IndexedMatrix fromB, ref IndexedMatrix toB, CastResult result)
@@ -202,10 +228,10 @@ namespace BulletXNA.BulletCollision
             {
                 m_simplexSolver.Reset();
                 GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB1, m_convexA.GetShapeType(), m_convexB1.GetShapeType(), m_convexA.GetMargin(), m_convexB1.GetMargin(), m_simplexSolver, m_penetrationDepthSolver);
-                ClosestPointInput input = new ClosestPointInput();
+                ClosestPointInput input = ClosestPointInput.Default();
                 input.m_transformA = transA;
                 input.m_transformB = transB;
-                gjk.GetClosestPoints(input, pointCollector, null);
+                gjk.GetClosestPoints(ref input, pointCollector, null);
             }
             else
             {

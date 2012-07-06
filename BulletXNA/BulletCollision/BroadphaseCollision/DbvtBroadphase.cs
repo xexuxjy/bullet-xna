@@ -20,7 +20,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-#define DBVT_BP_PROFILE
+//#define DBVT_BP_PROFILE
 #define DBVT_BP_MARGIN
 using System;
 using System.Collections.Generic;
@@ -76,15 +76,25 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public struct DbvtTreeCollider : ICollide
+    public class DbvtTreeCollider : ICollide
     {
         public DbvtBroadphase pbp;
         public DbvtProxy proxy;
+
+        public DbvtTreeCollider() { } // for pool;
+
         public DbvtTreeCollider(DbvtBroadphase p)
         {
             pbp = p;
             proxy = null;
         }
+
+        public void Initialize(DbvtBroadphase p)
+        {
+            pbp = p;
+            proxy = null;
+        }
+
         public void Process(DbvtNode na, DbvtNode nb)
         {
             if (na != nb)
@@ -119,12 +129,20 @@ namespace BulletXNA.BulletCollision
 
     }
 
-    public struct BroadphaseRayTester : ICollide
+    public class BroadphaseRayTester : ICollide
     {
+        public BroadphaseRayTester() { } // for pool
+
         public BroadphaseRayTester(BroadphaseRayCallback orgCallback)
         {
             m_rayCallback = orgCallback;
         }
+
+        public void Initialize(BroadphaseRayCallback orgCallback)
+        {
+            m_rayCallback = orgCallback;
+        }
+
         public void Process(DbvtNode leaf)
         {
             DbvtProxy proxy = leaf.data as DbvtProxy;
@@ -200,8 +218,7 @@ namespace BulletXNA.BulletCollision
 
         public void Collide(IDispatcher dispatcher)
         {
-            Stopwatch totalStopwatch = new Stopwatch();
-            totalStopwatch.Start();
+            BulletGlobals.StartProfile("BroadphaseCollide");
             //SPC(m_profiling.m_total);
             /* optimize				*/
             m_sets[0].OptimizeIncremental(1 + (m_sets[0].m_leaves * m_dupdates) / 100);
@@ -218,7 +235,8 @@ namespace BulletXNA.BulletCollision
 
             if (current != null)
             {
-                DbvtTreeCollider collider = new DbvtTreeCollider(this);
+                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                collider.Initialize(this);
                 do
                 {
                     DbvtProxy next = current.links[1];
@@ -237,29 +255,32 @@ namespace BulletXNA.BulletCollision
                     current = next;
                 } while (current != null);
                 m_fixedleft = m_sets[1].m_leaves;
+                BulletGlobals.DbvtTreeColliderPool.Free(collider);
                 m_needcleanup = true;
             }
             /* collide dynamics		*/
             {
-                DbvtTreeCollider collider = new DbvtTreeCollider(this);
+                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                collider.Initialize(this);
                 if (m_deferedcollide)
                 {
-                    Stopwatch fdCollideStopwatch = new Stopwatch();
-                    fdCollideStopwatch.Start();
+                    //Stopwatch fdCollideStopwatch = new Stopwatch();
+                    //fdCollideStopwatch.Start();
                     //SPC(m_profiling.m_fdcollide);
                     Dbvt.CollideTTpersistentStack(m_sets[0].m_root, m_sets[1].m_root, collider);
-                    fdCollideStopwatch.Stop();
-                    m_profiling.m_fdcollide += (ulong)fdCollideStopwatch.ElapsedMilliseconds;
+                    //fdCollideStopwatch.Stop();
+                    //m_profiling.m_fdcollide += (ulong)fdCollideStopwatch.ElapsedMilliseconds;
                 }
                 if (m_deferedcollide)
                 {
-                    Stopwatch ddCollideStopwatch = new Stopwatch();
-                    ddCollideStopwatch.Start();
+                    //Stopwatch ddCollideStopwatch = new Stopwatch();
+                    //ddCollideStopwatch.Start();
                     //SPC(m_profiling.m_ddcollide);
                     Dbvt.CollideTTpersistentStack(m_sets[0].m_root, m_sets[0].m_root, collider);
-                    ddCollideStopwatch.Stop();
-                    m_profiling.m_ddcollide += (ulong)ddCollideStopwatch.ElapsedMilliseconds;
+                    //ddCollideStopwatch.Stop();
+                    //m_profiling.m_ddcollide += (ulong)ddCollideStopwatch.ElapsedMilliseconds;
                 }
+                BulletGlobals.DbvtTreeColliderPool.Free(collider);
             }
             /* clean up				*/
             if (m_needcleanup)
@@ -297,7 +318,7 @@ namespace BulletXNA.BulletCollision
                     }
                 }
                 cleanupStopwatch.Stop();
-                m_profiling.m_cleanup += (ulong)cleanupStopwatch.ElapsedMilliseconds;
+                //m_profiling.m_cleanup += (ulong)cleanupStopwatch.ElapsedMilliseconds;
             }
             ++m_pid;
             m_newpairs = 1;
@@ -313,8 +334,7 @@ namespace BulletXNA.BulletCollision
             m_updates_done /= 2;
             m_updates_call /= 2;
 
-            totalStopwatch.Stop();
-            m_profiling.m_total += (ulong)totalStopwatch.ElapsedMilliseconds;
+            BulletGlobals.StopProfile();
 
         }
 
@@ -344,10 +364,12 @@ namespace BulletXNA.BulletCollision
             ListAppend(proxy, ref m_stageRoots[m_stageCurrent]);
             if (!m_deferedcollide)
             {
-                DbvtTreeCollider collider = new DbvtTreeCollider(this);
+                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                collider.Initialize(this);
                 collider.proxy = proxy;
                 Dbvt.CollideTV(m_sets[0].m_root, ref aabb, collider);
                 Dbvt.CollideTV(m_sets[1].m_root, ref aabb, collider);
+                BulletGlobals.DbvtTreeColliderPool.Free(collider);
             }
             return (proxy);
 
@@ -432,9 +454,11 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     m_needcleanup = true;
                     if (!m_deferedcollide)
                     {
-                        DbvtTreeCollider collider = new DbvtTreeCollider(this);
+                        DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                        collider.Initialize(this);
                         Dbvt.CollideTTpersistentStack(m_sets[1].m_root, proxy.leaf, collider);
                         Dbvt.CollideTTpersistentStack(m_sets[0].m_root, proxy.leaf, collider);
+                        BulletGlobals.DbvtTreeColliderPool.Free(collider);
                     }
                 }
             }
@@ -460,7 +484,9 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 
         public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-            BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
+            BroadphaseRayTester callback = BulletGlobals.BroadphaseRayTesterPool.Get();
+            callback.Initialize(rayCallback);
+            
 
             m_sets[0].RayTestInternal(m_sets[0].m_root,
                 ref rayFrom,
@@ -481,6 +507,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 ref aabbMin,
                 ref aabbMax,
                 callback);
+            BulletGlobals.BroadphaseRayTesterPool.Free(callback);
         }
 
         public virtual void GetAabb(BroadphaseProxy absproxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
@@ -495,7 +522,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         ///it is not part of the btBroadphaseInterface but specific to btDbvtBroadphase.
         ///it bypasses certain optimizations that prevent aabb updates (when the aabb shrinks), see
         ///http://code.google.com/p/bullet/issues/detail?id=223
-        public void setAabbForceUpdate(BroadphaseProxy absproxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
+        public void SetAabbForceUpdate(BroadphaseProxy absproxy, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             DbvtProxy proxy = absproxy as DbvtProxy;
             DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref aabbMin, ref aabbMax);
@@ -524,9 +551,11 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 m_needcleanup = true;
                 if (!m_deferedcollide)
                 {
-                    DbvtTreeCollider collider = new DbvtTreeCollider(this);
+                    DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                    collider.Initialize(this);
                     Dbvt.CollideTTpersistentStack(m_sets[1].m_root, proxy.leaf, collider);
                     Dbvt.CollideTTpersistentStack(m_sets[0].m_root, proxy.leaf, collider);
+                    BulletGlobals.DbvtTreeColliderPool.Free(collider);
                 }
             }
         }
@@ -536,27 +565,27 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         public virtual void CalculateOverlappingPairs(IDispatcher dispatcher)
         {
             Collide(dispatcher);
-#if DBVT_BP_PROFILE
-            if (0 == (m_pid % DbvtBroadphase.DBVT_BP_PROFILING_RATE))
-            {
-                if (BulletGlobals.g_streamWriter != null)
-                {
-                    BulletGlobals.g_streamWriter.WriteLine("fixed({0}) dynamics({1}) pairs({2})", m_sets[1].m_leaves, m_sets[0].m_leaves, m_paircache.GetNumOverlappingPairs());
-                    uint total = (uint)m_profiling.m_total;
-                    if (total <= 0) total = 1;
-                    BulletGlobals.g_streamWriter.WriteLine("ddcollide: {0} ({1})", (50 + m_profiling.m_ddcollide * 100) / total, m_profiling.m_ddcollide / DBVT_BP_PROFILING_RATE);
-                    BulletGlobals.g_streamWriter.WriteLine("fdcollide: {0} ({1})", (50 + m_profiling.m_fdcollide * 100) / total, m_profiling.m_fdcollide / DBVT_BP_PROFILING_RATE);
-                    BulletGlobals.g_streamWriter.WriteLine("cleanup:   {0} ({1})", (50 + m_profiling.m_cleanup * 100) / total, m_profiling.m_cleanup / DBVT_BP_PROFILING_RATE);
-                    BulletGlobals.g_streamWriter.WriteLine("total:     {0}", total / DBVT_BP_PROFILING_RATE);
-                    ulong sum = m_profiling.m_ddcollide +
-                        m_profiling.m_fdcollide +
-                        m_profiling.m_cleanup;
-                    BulletGlobals.g_streamWriter.WriteLine("leaked: {0} {1}", 100 - ((50 + sum * 100) / total), (total - sum) / DBVT_BP_PROFILING_RATE);
-                    BulletGlobals.g_streamWriter.WriteLine("job counts: {0}", (m_profiling.m_jobcount * 100) / (ulong)((m_sets[0].m_leaves + m_sets[1].m_leaves) * DbvtBroadphase.DBVT_BP_PROFILING_RATE));
-                }
-                m_profiling.clear();
-            }
-#endif
+//#if DBVT_BP_PROFILE
+//            if (0 == (m_pid % DbvtBroadphase.DBVT_BP_PROFILING_RATE))
+//            {
+//                if (BulletGlobals.g_streamWriter != null)
+//                {
+//                    BulletGlobals.g_streamWriter.WriteLine("fixed({0}) dynamics({1}) pairs({2})", m_sets[1].m_leaves, m_sets[0].m_leaves, m_paircache.GetNumOverlappingPairs());
+//                    uint total = (uint)m_profiling.m_total;
+//                    if (total <= 0) total = 1;
+//                    BulletGlobals.g_streamWriter.WriteLine("ddcollide: {0} ({1})", (50 + m_profiling.m_ddcollide * 100) / total, m_profiling.m_ddcollide / DBVT_BP_PROFILING_RATE);
+//                    BulletGlobals.g_streamWriter.WriteLine("fdcollide: {0} ({1})", (50 + m_profiling.m_fdcollide * 100) / total, m_profiling.m_fdcollide / DBVT_BP_PROFILING_RATE);
+//                    BulletGlobals.g_streamWriter.WriteLine("cleanup:   {0} ({1})", (50 + m_profiling.m_cleanup * 100) / total, m_profiling.m_cleanup / DBVT_BP_PROFILING_RATE);
+//                    BulletGlobals.g_streamWriter.WriteLine("total:     {0}", total / DBVT_BP_PROFILING_RATE);
+//                    ulong sum = m_profiling.m_ddcollide +
+//                        m_profiling.m_fdcollide +
+//                        m_profiling.m_cleanup;
+//                    BulletGlobals.g_streamWriter.WriteLine("leaked: {0} {1}", 100 - ((50 + sum * 100) / total), (total - sum) / DBVT_BP_PROFILING_RATE);
+//                    BulletGlobals.g_streamWriter.WriteLine("job counts: {0}", (m_profiling.m_jobcount * 100) / (ulong)((m_sets[0].m_leaves + m_sets[1].m_leaves) * DbvtBroadphase.DBVT_BP_PROFILING_RATE));
+//                }
+//                m_profiling.clear();
+//            }
+//#endif
 
             PerformDeferredRemoval(dispatcher);
         }

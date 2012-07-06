@@ -629,12 +629,12 @@ namespace BulletXNA.BulletDynamics
 			m_me = me;
 		}
 
-		public override float AddSingleResult(LocalRayResult rayResult, bool normalInWorldSpace)
+		public override float AddSingleResult(ref LocalRayResult rayResult, bool normalInWorldSpace)
 		{
 			if (rayResult.m_collisionObject == m_me)
 				return 1.0f;
 
-			return base.AddSingleResult(rayResult, normalInWorldSpace);
+			return base.AddSingleResult(ref rayResult, normalInWorldSpace);
 		}
 
 		protected CollisionObject m_me;

@@ -188,7 +188,7 @@ namespace BulletXNA.BulletCollision
 
 		        DebugPersistency();
             }
-            BulletGlobals.ReleaseManifoldPoint(pt);
+            BulletGlobals.ManifoldPointPool.Free(pt);
             pt = null;
         }
 
@@ -329,7 +329,7 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(lifeTime >= 0);
             Object cache = m_pointCache[insertIndex].GetUserPersistentData();
 
-            BulletGlobals.ReleaseManifoldPoint(m_pointCache[insertIndex]);
+            BulletGlobals.ManifoldPointPool.Free(m_pointCache[insertIndex]);
 
             m_pointCache[insertIndex] = newPoint;
 

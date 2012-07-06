@@ -85,12 +85,12 @@ namespace BulletXNA.BulletCollision
 	            m_manifoldPtr.ClearManifold();
 #endif //USE_PERSISTENT_CONTACTS
 
-            ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input = ClosestPointInput.Default();
             input.m_maximumDistanceSquared = float.MaxValue;
             input.m_transformA = body0.GetWorldTransform();
             input.m_transformB = body1.GetWorldTransform();
 
-            BoxBoxDetector.GetClosestPoints(box0,box1,input, resultOut, dispatchInfo.getDebugDraw(), false);
+            BoxBoxDetector.GetClosestPoints(box0,box1,ref input, resultOut, dispatchInfo.getDebugDraw(), false);
 
 #if USE_PERSISTENT_CONTACTS
             //  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added

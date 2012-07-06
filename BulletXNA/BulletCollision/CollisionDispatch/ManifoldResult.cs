@@ -135,7 +135,7 @@ namespace BulletXNA.BulletCollision
                 MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
-            ManifoldPoint newPt = BulletGlobals.GetManifoldPoint();
+            ManifoldPoint newPt = BulletGlobals.ManifoldPointPool.Get();
             newPt.Initialise(ref localA, ref localB, ref normalOnBInWorld, depth);
             
 

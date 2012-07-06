@@ -27,7 +27,7 @@ namespace BulletXNA.BulletCollision
 {
     public interface IDiscreteCollisionDetectorInterface
     {
-        void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults);
+        void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults);
     }
 
     public interface IDiscreteCollisionDetectorInterfaceResult
@@ -39,12 +39,25 @@ namespace BulletXNA.BulletCollision
     }
 
     // Temp change to class while i test maxdist squared
-    public class ClosestPointInput
+    public struct ClosestPointInput
     {
         public IndexedMatrix m_transformA;
         public IndexedMatrix m_transformB;
-        public float m_maximumDistanceSquared = MathUtil.BT_LARGE_FLOAT;
+        public float m_maximumDistanceSquared;
 
+        public ClosestPointInput(IndexedMatrix ma, IndexedMatrix mb, float dist2)
+        {
+            m_transformA = ma;
+            m_transformB = mb;
+            m_maximumDistanceSquared = dist2;
+        }
+
+        public static ClosestPointInput Default()
+        {
+            return _default;
+        }
+
+        private static ClosestPointInput _default = new ClosestPointInput(IndexedMatrix.Identity, IndexedMatrix.Identity, MathUtil.BT_LARGE_FLOAT);
     }
 
     public class StorageResult : IDiscreteCollisionDetectorInterfaceResult

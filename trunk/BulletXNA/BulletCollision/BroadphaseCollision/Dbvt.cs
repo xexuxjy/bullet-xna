@@ -855,6 +855,11 @@ namespace BulletXNA.BulletCollision
             DbvtNode node = BulletGlobals.DbvtNodePool.Get();
             node.parent = parent;
             node.data = data;
+            if (node.data is int)
+            {
+                node.dataAsInt = (int)node.data;
+            }
+            node._children[0] = null;
             node._children[1] = null;
             return (node);
         }
@@ -866,6 +871,9 @@ namespace BulletXNA.BulletCollision
             node.volume = avolume;
             node.parent = aparent;
             node.data = adata;
+            node._children[0] = null;
+            node._children[1] = null;
+
             if (node.data is int)
             {
                 node.dataAsInt = (int)node.data;

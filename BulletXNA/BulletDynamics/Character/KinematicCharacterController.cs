@@ -298,10 +298,12 @@ namespace BulletXNA.BulletDynamics
 
 			if (m_useGhostObjectSweepTest)
 			{
+                // this doesn't work....
 				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
 			}
 			else
 			{
+                // this works....
 				collisionWorld.ConvexSweepTest(m_convexShape, start, end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
 			}
 
@@ -346,8 +348,8 @@ namespace BulletXNA.BulletDynamics
 		///btActionInterface interface
 		public virtual void UpdateAction(CollisionWorld collisionWorld, float deltaTime)
 		{
-			PreStep(collisionWorld);
-			PlayerStep(collisionWorld, deltaTime);
+            PreStep(collisionWorld);
+            PlayerStep(collisionWorld, deltaTime);
 		}
 
 		///btActionInterface interface

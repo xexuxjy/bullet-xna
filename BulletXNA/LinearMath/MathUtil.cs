@@ -68,58 +68,58 @@ namespace BulletXNA
             return m._basis.Transpose() * v1;
         }
 
-//        //public static IndexedMatrix TransposeTimesBasis(ref IndexedMatrix a, ref IndexedMatrix b)
-//        public static IndexedMatrix TransposeTimesBasis(ref IndexedMatrix mA, ref IndexedMatrix mB)
+        //        //public static IndexedMatrix TransposeTimesBasis(ref IndexedMatrix a, ref IndexedMatrix b)
+        //        public static IndexedMatrix TransposeTimesBasis(ref IndexedMatrix mA, ref IndexedMatrix mB)
 
-//        {
-//            IndexedMatrix ba = MathUtil.BasisMatrix(ref mA);
-//            ba = IndexedMatrix.Transpose(ba);
-//            IndexedMatrix bb = MathUtil.BasisMatrix(ref mB);
-//            return BulletMatrixMultiply(ref ba, ref bb);
-//        }
+        //        {
+        //            IndexedMatrix ba = MathUtil.BasisMatrix(ref mA);
+        //            ba = IndexedMatrix.Transpose(ba);
+        //            IndexedMatrix bb = MathUtil.BasisMatrix(ref mB);
+        //            return BulletMatrixMultiply(ref ba, ref bb);
+        //        }
 
-//        public static IndexedMatrix InverseTimes(IndexedMatrix a, IndexedMatrix b)
-//        {
-//            return InverseTimes(ref a, ref b);
-//        }
+        //        public static IndexedMatrix InverseTimes(IndexedMatrix a, IndexedMatrix b)
+        //        {
+        //            return InverseTimes(ref a, ref b);
+        //        }
 
-//        public static IndexedMatrix InverseTimes(ref IndexedMatrix a, ref IndexedMatrix b)
-//        {
-//            IndexedMatrix m = IndexedMatrix.Invert(a);
-//            return BulletMatrixMultiply(ref m, ref b);
-//        }
+        //        public static IndexedMatrix InverseTimes(ref IndexedMatrix a, ref IndexedMatrix b)
+        //        {
+        //            IndexedMatrix m = IndexedMatrix.Invert(a);
+        //            return BulletMatrixMultiply(ref m, ref b);
+        //        }
 
-//        public static IndexedMatrix TransposeBasis(IndexedMatrix m)
-//        {
-//            return TransposeBasis(ref m);
-//        }
+        //        public static IndexedMatrix TransposeBasis(IndexedMatrix m)
+        //        {
+        //            return TransposeBasis(ref m);
+        //        }
 
-//        public static IndexedMatrix TransposeBasis(ref IndexedMatrix m)
-//        {
-//            return IndexedMatrix.Transpose(BasisMatrix(ref m));
-//        }
+        //        public static IndexedMatrix TransposeBasis(ref IndexedMatrix m)
+        //        {
+        //            return IndexedMatrix.Transpose(BasisMatrix(ref m));
+        //        }
 
-//        public static IndexedMatrix InverseBasis(IndexedMatrix m)
-//        {
-//            return InverseBasis(ref m);
-//        }
+        //        public static IndexedMatrix InverseBasis(IndexedMatrix m)
+        //        {
+        //            return InverseBasis(ref m);
+        //        }
 
-//        public static IndexedMatrix InverseBasis(ref IndexedMatrix m)
-//        {
-//            IndexedMatrix b = BasisMatrix(ref m);
-//            b = IndexedMatrix.Invert(b);
-//            return b;
-//        }
+        //        public static IndexedMatrix InverseBasis(ref IndexedMatrix m)
+        //        {
+        //            IndexedMatrix b = BasisMatrix(ref m);
+        //            b = IndexedMatrix.Invert(b);
+        //            return b;
+        //        }
 
-//        public static float Cofac(ref IndexedMatrix m,int r1, int c1, int r2, int c2)
-//        {
-//            float a = MatrixComponent(ref m, r1, c1);
-//            float b = MatrixComponent(ref m, r2, c2);
-//            float c = MatrixComponent(ref m, r1, c2);
-//            float d = MatrixComponent(ref m, r2, c1);
+        //        public static float Cofac(ref IndexedMatrix m,int r1, int c1, int r2, int c2)
+        //        {
+        //            float a = MatrixComponent(ref m, r1, c1);
+        //            float b = MatrixComponent(ref m, r2, c2);
+        //            float c = MatrixComponent(ref m, r1, c2);
+        //            float d = MatrixComponent(ref m, r2, c1);
 
-//            return a * b - c * d;
-//        }
+        //            return a * b - c * d;
+        //        }
 
 
         public static float FSel(float a, float b, float c)
@@ -177,111 +177,111 @@ namespace BulletXNA
             return new IndexedVector4(Math.Abs(vec.X), Math.Abs(vec.Y), Math.Abs(vec.Z), Math.Abs(vec.W));
         }
 
-//        public static float VectorComponent(IndexedVector3 v, int i)
-//        {
-//            return VectorComponent(ref v, i);
-//        }
+        //        public static float VectorComponent(IndexedVector3 v, int i)
+        //        {
+        //            return VectorComponent(ref v, i);
+        //        }
 
-//        public static float VectorComponent(ref IndexedVector3 v, int i)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    return v.X;
-//                case 1:
-//                    return v.Y;
-//                case 2:
-//                    return v.Z;
-//                default:
-//                    Debug.Assert(false);
-//                    return 0.0f;
-//            }
-//        }
+        //        public static float VectorComponent(ref IndexedVector3 v, int i)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    return v.X;
+        //                case 1:
+        //                    return v.Y;
+        //                case 2:
+        //                    return v.Z;
+        //                default:
+        //                    Debug.Assert(false);
+        //                    return 0.0f;
+        //            }
+        //        }
 
-//        public static void VectorComponent(ref IndexedVector3 v, int i, float f)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    v.X = f;
-//                    return;
-//                case 1:
-//                    v.Y = f;
-//                    return;
-//                case 2:
-//                    v.Z = f;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void VectorComponent(ref IndexedVector3 v, int i, float f)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    v.X = f;
+        //                    return;
+        //                case 1:
+        //                    v.Y = f;
+        //                    return;
+        //                case 2:
+        //                    v.Z = f;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
-//        public static void VectorComponentAddAssign(ref IndexedVector3 v, int i, float f)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    v.X += f;
-//                    return;
-//                case 1:
-//                    v.Y += f;
-//                    return;
-//                case 2:
-//                    v.Z += f;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void VectorComponentAddAssign(ref IndexedVector3 v, int i, float f)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    v.X += f;
+        //                    return;
+        //                case 1:
+        //                    v.Y += f;
+        //                    return;
+        //                case 2:
+        //                    v.Z += f;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
-//        public static void VectorComponentMinusAssign(ref IndexedVector3 v, int i, float f)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    v.X -= f;
-//                    return;
-//                case 1:
-//                    v.Y -= f;
-//                    return;
-//                case 2:
-//                    v.Z -= f;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void VectorComponentMinusAssign(ref IndexedVector3 v, int i, float f)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    v.X -= f;
+        //                    return;
+        //                case 1:
+        //                    v.Y -= f;
+        //                    return;
+        //                case 2:
+        //                    v.Z -= f;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
-//        public static void VectorComponentMultiplyAssign(ref IndexedVector3 v, int i, float f)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    v.X *= f;
-//                    return;
-//                case 1:
-//                    v.Y *= f;
-//                    return;
-//                case 2:
-//                    v.Z *= f;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void VectorComponentMultiplyAssign(ref IndexedVector3 v, int i, float f)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    v.X *= f;
+        //                    return;
+        //                case 1:
+        //                    v.Y *= f;
+        //                    return;
+        //                case 2:
+        //                    v.Z *= f;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
-//        public static void VectorComponentDivideAssign(ref IndexedVector3 v, int i, float f)
-//        {
-//            switch (i)
-//            {
-//                case 0:
-//                    v.X /= f;
-//                    return;
-//                case 1:
-//                    v.Y /= f;
-//                    return;
-//                case 2:
-//                    v.Z /= f;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void VectorComponentDivideAssign(ref IndexedVector3 v, int i, float f)
+        //        {
+        //            switch (i)
+        //            {
+        //                case 0:
+        //                    v.X /= f;
+        //                    return;
+        //                case 1:
+        //                    v.Y /= f;
+        //                    return;
+        //                case 2:
+        //                    v.Z /= f;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
 
         public static float VectorComponent(IndexedVector4 v, int i)
@@ -329,187 +329,187 @@ namespace BulletXNA
             Debug.Assert(false);
         }
 
-//        public static IndexedMatrix AbsoluteMatrix(IndexedMatrix input)
-//        {
-//            return AbsoluteMatrix(ref input);
-//        }
+        //        public static IndexedMatrix AbsoluteMatrix(IndexedMatrix input)
+        //        {
+        //            return AbsoluteMatrix(ref input);
+        //        }
 
-//        public static IndexedMatrix AbsoluteMatrix(ref IndexedMatrix input)
-//        {
-//            IndexedMatrix output;
-//            AbsoluteMatrix(ref input, out output);
-//            return output;
-//        }
+        //        public static IndexedMatrix AbsoluteMatrix(ref IndexedMatrix input)
+        //        {
+        //            IndexedMatrix output;
+        //            AbsoluteMatrix(ref input, out output);
+        //            return output;
+        //        }
 
-//        public static void AbsoluteMatrix(ref IndexedMatrix input, out IndexedMatrix output)
-//        {
-//            output = new IndexedMatrix(
-//                Math.Abs(input.M11),
-//                Math.Abs(input.M12),
-//                Math.Abs(input.M13),
-//                Math.Abs(input.M14),
-//                Math.Abs(input.M21),
-//                Math.Abs(input.M22),
-//                Math.Abs(input.M23),
-//                Math.Abs(input.M24),
-//                Math.Abs(input.M31),
-//                Math.Abs(input.M32),
-//                Math.Abs(input.M33),
-//                Math.Abs(input.M34),
-//                Math.Abs(input.M41),
-//                Math.Abs(input.M42),
-//                Math.Abs(input.M43),
-//                Math.Abs(input.M44));
-//        }
+        //        public static void AbsoluteMatrix(ref IndexedMatrix input, out IndexedMatrix output)
+        //        {
+        //            output = new IndexedMatrix(
+        //                Math.Abs(input.M11),
+        //                Math.Abs(input.M12),
+        //                Math.Abs(input.M13),
+        //                Math.Abs(input.M14),
+        //                Math.Abs(input.M21),
+        //                Math.Abs(input.M22),
+        //                Math.Abs(input.M23),
+        //                Math.Abs(input.M24),
+        //                Math.Abs(input.M31),
+        //                Math.Abs(input.M32),
+        //                Math.Abs(input.M33),
+        //                Math.Abs(input.M34),
+        //                Math.Abs(input.M41),
+        //                Math.Abs(input.M42),
+        //                Math.Abs(input.M43),
+        //                Math.Abs(input.M44));
+        //        }
 
-//        public static IndexedMatrix AbsoluteBasisMatrix(ref IndexedMatrix input)
-//        {
-//            IndexedMatrix output;
-//            AbsoluteBasisMatrix(ref input, out output);
-//            return output;
-//        }
+        //        public static IndexedMatrix AbsoluteBasisMatrix(ref IndexedMatrix input)
+        //        {
+        //            IndexedMatrix output;
+        //            AbsoluteBasisMatrix(ref input, out output);
+        //            return output;
+        //        }
 
-//        public static void AbsoluteBasisMatrix(ref IndexedMatrix input, out IndexedMatrix output)
-//        {
-//            output = new IndexedMatrix(
-//                Math.Abs(input.M11), Math.Abs(input.M12), Math.Abs(input.M13), 0.0f,
-//                Math.Abs(input.M21), Math.Abs(input.M22), Math.Abs(input.M23), 0.0f,
-//                Math.Abs(input.M31), Math.Abs(input.M32), Math.Abs(input.M33), 0.0f,
-//                0.0f, 0.0f, 0.0f, 1.0f);
-//        }
+        //        public static void AbsoluteBasisMatrix(ref IndexedMatrix input, out IndexedMatrix output)
+        //        {
+        //            output = new IndexedMatrix(
+        //                Math.Abs(input.M11), Math.Abs(input.M12), Math.Abs(input.M13), 0.0f,
+        //                Math.Abs(input.M21), Math.Abs(input.M22), Math.Abs(input.M23), 0.0f,
+        //                Math.Abs(input.M31), Math.Abs(input.M32), Math.Abs(input.M33), 0.0f,
+        //                0.0f, 0.0f, 0.0f, 1.0f);
+        //        }
 
-//        public static void AbsoluteVector(ref IndexedVector3 input, out IndexedVector3 output)
-//        {
-//            output = new IndexedVector3(
-//                Math.Abs(input.X),
-//                Math.Abs(input.Y),
-//                Math.Abs(input.Z));
-//        }
+        //        public static void AbsoluteVector(ref IndexedVector3 input, out IndexedVector3 output)
+        //        {
+        //            output = new IndexedVector3(
+        //                Math.Abs(input.X),
+        //                Math.Abs(input.Y),
+        //                Math.Abs(input.Z));
+        //        }
 
-//        public static void RotateVector(ref IndexedVector3 vec, ref IndexedMatrix m, out IndexedVector3 output)
-//        {
-//            IndexedQuaternion rotation;
-//            IndexedVector3 component;
-//            m.Decompose(out component, out rotation, out component);
-//            output = IndexedVector3.Transform(vec, rotation);
-//        }
+        //        public static void RotateVector(ref IndexedVector3 vec, ref IndexedMatrix m, out IndexedVector3 output)
+        //        {
+        //            IndexedQuaternion rotation;
+        //            IndexedVector3 component;
+        //            m.Decompose(out component, out rotation, out component);
+        //            output = IndexedVector3.Transform(vec, rotation);
+        //        }
 
-//        public static void TransformAabb(IndexedVector3 halfExtents, float margin, IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
-//        {
-//            //TransformAabb(ref halfExtents,margin,ref trans,out aabbMinOut,out aabbMaxOut);
-//            IndexedVector3 halfExtentsWithMargin = halfExtents + new IndexedVector3(margin);
-//            IndexedVector3 center, extent;
-//            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
-//            aabbMinOut = center - extent;
-//            aabbMaxOut = center + extent;
-//        }
+        //        public static void TransformAabb(IndexedVector3 halfExtents, float margin, IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
+        //        {
+        //            //TransformAabb(ref halfExtents,margin,ref trans,out aabbMinOut,out aabbMaxOut);
+        //            IndexedVector3 halfExtentsWithMargin = halfExtents + new IndexedVector3(margin);
+        //            IndexedVector3 center, extent;
+        //            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
+        //            aabbMinOut = center - extent;
+        //            aabbMaxOut = center + extent;
+        //        }
 
-//        public static void TransformAabb(ref IndexedVector3 halfExtents, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
-//        {
-//            IndexedVector3 halfExtentsWithMargin = halfExtents + new IndexedVector3(margin);
-//            IndexedVector3 center, extent;
-//            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
-//            aabbMinOut = center - extent;
-//            aabbMaxOut = center + extent;
-//        }
+        //        public static void TransformAabb(ref IndexedVector3 halfExtents, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
+        //        {
+        //            IndexedVector3 halfExtentsWithMargin = halfExtents + new IndexedVector3(margin);
+        //            IndexedVector3 center, extent;
+        //            AbsoluteExtents(ref trans, ref halfExtentsWithMargin, out center, out extent);
+        //            aabbMinOut = center - extent;
+        //            aabbMaxOut = center + extent;
+        //        }
 
-//        public static void TransformAabb(IndexedVector3 localAabbMin, IndexedVector3 localAabbMax, float margin, IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
-//        {
-//            TransformAabb(ref localAabbMin, ref localAabbMax, margin, ref trans, out aabbMinOut, out aabbMaxOut);
-//        }
+        //        public static void TransformAabb(IndexedVector3 localAabbMin, IndexedVector3 localAabbMax, float margin, IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
+        //        {
+        //            TransformAabb(ref localAabbMin, ref localAabbMax, margin, ref trans, out aabbMinOut, out aabbMaxOut);
+        //        }
 
-//        public static void TransformAabb(ref IndexedVector3 localAabbMin, ref IndexedVector3 localAabbMax, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
-//        {
-//            Debug.Assert(localAabbMin.X <= localAabbMax.X);
-//            Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
-//            Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
-//            IndexedVector3 localHalfExtents = 0.5f * (localAabbMax - localAabbMin);
-//            localHalfExtents += new IndexedVector3(margin);
+        //        public static void TransformAabb(ref IndexedVector3 localAabbMin, ref IndexedVector3 localAabbMax, float margin, ref IndexedMatrix trans, out IndexedVector3 aabbMinOut, out IndexedVector3 aabbMaxOut)
+        //        {
+        //            Debug.Assert(localAabbMin.X <= localAabbMax.X);
+        //            Debug.Assert(localAabbMin.Y <= localAabbMax.Y);
+        //            Debug.Assert(localAabbMin.Z <= localAabbMax.Z);
+        //            IndexedVector3 localHalfExtents = 0.5f * (localAabbMax - localAabbMin);
+        //            localHalfExtents += new IndexedVector3(margin);
 
-//            IndexedVector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
-//            IndexedMatrix abs_b = MathUtil.AbsoluteBasisMatrix(ref trans);
+        //            IndexedVector3 localCenter = 0.5f * (localAabbMax + localAabbMin);
+        //            IndexedMatrix abs_b = MathUtil.AbsoluteBasisMatrix(ref trans);
 
-//            IndexedVector3 center = IndexedVector3.Transform(localCenter, trans);
+        //            IndexedVector3 center = IndexedVector3.Transform(localCenter, trans);
 
-//            IndexedVector3 extent = new IndexedVector3(IndexedVector3.Dot(abs_b.Right, localHalfExtents),
-//                                            IndexedVector3.Dot(abs_b.Up, localHalfExtents),
-//                                            IndexedVector3.Dot(abs_b.Backward, localHalfExtents));
+        //            IndexedVector3 extent = new IndexedVector3(IndexedVector3.Dot(abs_b.Right, localHalfExtents),
+        //                                            IndexedVector3.Dot(abs_b.Up, localHalfExtents),
+        //                                            IndexedVector3.Dot(abs_b.Backward, localHalfExtents));
 
-//            aabbMinOut = center - extent;
-//            aabbMaxOut = center + extent;
-//        }
+        //            aabbMinOut = center - extent;
+        //            aabbMaxOut = center + extent;
+        //        }
 
-//        public static void AbsoluteExtents(ref IndexedMatrix trans, ref IndexedVector3 vec, out IndexedVector3 center, out IndexedVector3 extent)
-//        {
-//            IndexedMatrix abs_b;
-//            AbsoluteMatrix(ref trans, out abs_b);
+        //        public static void AbsoluteExtents(ref IndexedMatrix trans, ref IndexedVector3 vec, out IndexedVector3 center, out IndexedVector3 extent)
+        //        {
+        //            IndexedMatrix abs_b;
+        //            AbsoluteMatrix(ref trans, out abs_b);
 
-//            center = trans._origin;
-//            extent = new IndexedVector3(IndexedVector3.Dot(abs_b.Right, vec),
-//                                            IndexedVector3.Dot(abs_b.Up, vec),
-//                                            IndexedVector3.Dot(abs_b.Backward, vec));
-//        }
+        //            center = trans._origin;
+        //            extent = new IndexedVector3(IndexedVector3.Dot(abs_b.Right, vec),
+        //                                            IndexedVector3.Dot(abs_b.Up, vec),
+        //                                            IndexedVector3.Dot(abs_b.Backward, vec));
+        //        }
 
-//        public static void SetMatrixVector(ref IndexedMatrix matrix, int row, IndexedVector3 vector)
-//        {
-//            SetMatrixVector(ref matrix, row, ref vector);
-//        }
+        //        public static void SetMatrixVector(ref IndexedMatrix matrix, int row, IndexedVector3 vector)
+        //        {
+        //            SetMatrixVector(ref matrix, row, ref vector);
+        //        }
 
-//        public static void SetMatrixVector(ref IndexedMatrix matrix, int row, ref IndexedVector3 vector)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    matrix.M11 = vector.X;
-//                    matrix.M12 = vector.Y;
-//                    matrix.M13 = vector.Z;
-//                    return;
-//                case 1:
-//                    matrix.M21 = vector.X;
-//                    matrix.M22 = vector.Y;
-//                    matrix.M23 = vector.Z;
-//                    return;
-//                case 2:
-//                    matrix.M31 = vector.X;
-//                    matrix.M32 = vector.Y;
-//                    matrix.M33 = vector.Z;
-//                    return;
-//                case 3:
-//                    matrix.M41 = vector.X;
-//                    matrix.M42 = vector.Y;
-//                    matrix.M43 = vector.Z;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void SetMatrixVector(ref IndexedMatrix matrix, int row, ref IndexedVector3 vector)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    matrix.M11 = vector.X;
+        //                    matrix.M12 = vector.Y;
+        //                    matrix.M13 = vector.Z;
+        //                    return;
+        //                case 1:
+        //                    matrix.M21 = vector.X;
+        //                    matrix.M22 = vector.Y;
+        //                    matrix.M23 = vector.Z;
+        //                    return;
+        //                case 2:
+        //                    matrix.M31 = vector.X;
+        //                    matrix.M32 = vector.Y;
+        //                    matrix.M33 = vector.Z;
+        //                    return;
+        //                case 3:
+        //                    matrix.M41 = vector.X;
+        //                    matrix.M42 = vector.Y;
+        //                    matrix.M43 = vector.Z;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
-//        public static void AddMatrixVector(ref IndexedMatrix matrix, int row, ref IndexedVector3 vector)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    matrix.M11 += vector.X;
-//                    matrix.M12 += vector.Y;
-//                    matrix.M13 += vector.Z;
-//                    return;
-//                case 1:
-//                    matrix.M21 += vector.X;
-//                    matrix.M22 += vector.Y;
-//                    matrix.M23 += vector.Z;
-//                    return;
-//                case 2:
-//                    matrix.M31 += vector.X;
-//                    matrix.M32 += vector.Y;
-//                    matrix.M33 += vector.Z;
-//                    return;
-//                case 3:
-//                    matrix.M41 += vector.X;
-//                    matrix.M42 += vector.Y;
-//                    matrix.M43 += vector.Z;
-//                    return;
-//            }
-//            Debug.Assert(false);
-//        }
+        //        public static void AddMatrixVector(ref IndexedMatrix matrix, int row, ref IndexedVector3 vector)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    matrix.M11 += vector.X;
+        //                    matrix.M12 += vector.Y;
+        //                    matrix.M13 += vector.Z;
+        //                    return;
+        //                case 1:
+        //                    matrix.M21 += vector.X;
+        //                    matrix.M22 += vector.Y;
+        //                    matrix.M23 += vector.Z;
+        //                    return;
+        //                case 2:
+        //                    matrix.M31 += vector.X;
+        //                    matrix.M32 += vector.Y;
+        //                    matrix.M33 += vector.Z;
+        //                    return;
+        //                case 3:
+        //                    matrix.M41 += vector.X;
+        //                    matrix.M42 += vector.Y;
+        //                    matrix.M43 += vector.Z;
+        //                    return;
+        //            }
+        //            Debug.Assert(false);
+        //        }
 
         public static float Vector3Triple(ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c)
         {
@@ -518,177 +518,177 @@ namespace BulletXNA
                 a.Z * (b.X * c.Y - b.Y * c.X);
         }
 
-//        // FIXME - MAN - make sure this is being called how we'd expect , may need to
-//        // swap i,j for row/column differences
-        
-//        public static float MatrixComponent(ref IndexedMatrix m, int index)
-//        {
-//            //int i = index % 4;
-//            //int j = index / 4;
+        //        // FIXME - MAN - make sure this is being called how we'd expect , may need to
+        //        // swap i,j for row/column differences
 
-//            int j = index % 4;
-//            int i = index / 4;
-            
-//            return MatrixComponent(ref m,i,j);
-//        }
-        
-//        public static float MatrixComponent(ref IndexedMatrix m, int row, int column)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    if (column == 0) return m.M11;
-//                    if (column == 1) return m.M12;
-//                    if (column == 2) return m.M13;
-//                    if (column == 3) return m.M14;
-//                    break;
-//                case 1:
-//                    if (column == 0) return m.M21;
-//                    if (column == 1) return m.M22;
-//                    if (column == 2) return m.M23;
-//                    if (column == 3) return m.M24;
-//                    break;
-//                case 2:
-//                    if (column == 0) return m.M31;
-//                    if (column == 1) return m.M32;
-//                    if (column == 2) return m.M33;
-//                    if (column == 3) return m.M34;
-//                    break;
-//                case 3:
-//                    if (column == 0) return m.M41;
-//                    if (column == 1) return m.M42;
-//                    if (column == 2) return m.M43;
-//                    if (column == 3) return m.M44;
-//                    break;
-//            }
-//            return 0;
-//        }
+        //        public static float MatrixComponent(ref IndexedMatrix m, int index)
+        //        {
+        //            //int i = index % 4;
+        //            //int j = index / 4;
 
-//        public static void MatrixComponent(ref IndexedMatrix m, int row, int column, float val)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    if (column == 0) m.M11 = val;
-//                    if (column == 1) m.M12 = val;
-//                    if (column == 2) m.M13 = val;
-//                    if (column == 3) m.M14 = val;
-//                    break;
-//                case 1:
-//                    if (column == 0) m.M21 = val;
-//                    if (column == 1) m.M22 = val;
-//                    if (column == 2) m.M23 = val;
-//                    if (column == 3) m.M24 = val;
-//                    break;
-//                case 2:
-//                    if (column == 0) m.M31 = val;
-//                    if (column == 1) m.M32 = val;
-//                    if (column == 2) m.M33 = val;
-//                    if (column == 3) m.M34 = val;
-//                    break;
-//                case 3:
-//                    if (column == 0) m.M41 = val;
-//                    if (column == 1) m.M42 = val;
-//                    if (column == 2) m.M43 = val;
-//                    if (column == 3) m.M44 = val;
-//                    break;
-//            }
-//        }
+        //            int j = index % 4;
+        //            int i = index / 4;
 
-//        public static IndexedVector3 MatrixColumn(IndexedMatrix matrix, int row)
-//        {
-//            return MatrixColumn(ref matrix, row);
-//        }
+        //            return MatrixComponent(ref m,i,j);
+        //        }
 
-//        public static IndexedVector3 MatrixColumn(ref IndexedMatrix matrix, int row)
-//        {
-//            IndexedVector3 vectorRow;
-//            MatrixColumn(ref matrix, row, out vectorRow);
-//            return vectorRow;
-//        }
+        //        public static float MatrixComponent(ref IndexedMatrix m, int row, int column)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    if (column == 0) return m.M11;
+        //                    if (column == 1) return m.M12;
+        //                    if (column == 2) return m.M13;
+        //                    if (column == 3) return m.M14;
+        //                    break;
+        //                case 1:
+        //                    if (column == 0) return m.M21;
+        //                    if (column == 1) return m.M22;
+        //                    if (column == 2) return m.M23;
+        //                    if (column == 3) return m.M24;
+        //                    break;
+        //                case 2:
+        //                    if (column == 0) return m.M31;
+        //                    if (column == 1) return m.M32;
+        //                    if (column == 2) return m.M33;
+        //                    if (column == 3) return m.M34;
+        //                    break;
+        //                case 3:
+        //                    if (column == 0) return m.M41;
+        //                    if (column == 1) return m.M42;
+        //                    if (column == 2) return m.M43;
+        //                    if (column == 3) return m.M44;
+        //                    break;
+        //            }
+        //            return 0;
+        //        }
 
-//        public static void MatrixColumn(IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
-//        {
-//            MatrixColumn(ref matrix,row, out vectorRow);
-//        }
+        //        public static void MatrixComponent(ref IndexedMatrix m, int row, int column, float val)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    if (column == 0) m.M11 = val;
+        //                    if (column == 1) m.M12 = val;
+        //                    if (column == 2) m.M13 = val;
+        //                    if (column == 3) m.M14 = val;
+        //                    break;
+        //                case 1:
+        //                    if (column == 0) m.M21 = val;
+        //                    if (column == 1) m.M22 = val;
+        //                    if (column == 2) m.M23 = val;
+        //                    if (column == 3) m.M24 = val;
+        //                    break;
+        //                case 2:
+        //                    if (column == 0) m.M31 = val;
+        //                    if (column == 1) m.M32 = val;
+        //                    if (column == 2) m.M33 = val;
+        //                    if (column == 3) m.M34 = val;
+        //                    break;
+        //                case 3:
+        //                    if (column == 0) m.M41 = val;
+        //                    if (column == 1) m.M42 = val;
+        //                    if (column == 2) m.M43 = val;
+        //                    if (column == 3) m.M44 = val;
+        //                    break;
+        //            }
+        //        }
 
-//        public static void MatrixColumn(ref IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    vectorRow = new IndexedVector3(matrix.M11, matrix.M12, matrix.M13);
-//                    break;
-//                case 1:
-//                    vectorRow = new IndexedVector3(matrix.M21, matrix.M22, matrix.M23);
-//                    break;
-//                case 2:
-//                    vectorRow = new IndexedVector3(matrix.M31, matrix.M32, matrix.M33);
-//                    break;
-//                case 3:
-//                    vectorRow = new IndexedVector3(matrix.M41, matrix.M42, matrix.M43);
-//                    break;
-//                default:
-//                    vectorRow = IndexedVector3.Zero;
-//                    break;
-//            }
-//        }
+        //        public static IndexedVector3 MatrixColumn(IndexedMatrix matrix, int row)
+        //        {
+        //            return MatrixColumn(ref matrix, row);
+        //        }
 
-//        public static IndexedVector3 MatrixRow(IndexedMatrix matrix, int row)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    return new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
-//                case 1:
-//                    return new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
-//                case 2:
-//                    return new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
-//                case 3:
-//                    return new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
-//                default:
-//                    return IndexedVector3.Zero;
-//            }
-//        }
+        //        public static IndexedVector3 MatrixColumn(ref IndexedMatrix matrix, int row)
+        //        {
+        //            IndexedVector3 vectorRow;
+        //            MatrixColumn(ref matrix, row, out vectorRow);
+        //            return vectorRow;
+        //        }
 
-//        public static IndexedVector3 MatrixRow(ref IndexedMatrix matrix, int row)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    return new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
-//                case 1:
-//                    return new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
-//                case 2:
-//                    return new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
-//                case 3:
-//                    return new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
-//                default:
-//                    return IndexedVector3.Zero;
-//            }
-//        }
+        //        public static void MatrixColumn(IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
+        //        {
+        //            MatrixColumn(ref matrix,row, out vectorRow);
+        //        }
 
-//        public static void MatrixRow(ref IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
-//        {
-//            switch (row)
-//            {
-//                case 0:
-//                    vectorRow = new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
-//                    break;
-//                case 1:
-//                    vectorRow = new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
-//                    break;
-//                case 2:
-//                    vectorRow = new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
-//                    break;
-//                case 3:
-//                    vectorRow = new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
-//                    break;
-//                default:
-//                    vectorRow = IndexedVector3.Zero;
-//                    break;
-//            }
-//        }
+        //        public static void MatrixColumn(ref IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    vectorRow = new IndexedVector3(matrix.M11, matrix.M12, matrix.M13);
+        //                    break;
+        //                case 1:
+        //                    vectorRow = new IndexedVector3(matrix.M21, matrix.M22, matrix.M23);
+        //                    break;
+        //                case 2:
+        //                    vectorRow = new IndexedVector3(matrix.M31, matrix.M32, matrix.M33);
+        //                    break;
+        //                case 3:
+        //                    vectorRow = new IndexedVector3(matrix.M41, matrix.M42, matrix.M43);
+        //                    break;
+        //                default:
+        //                    vectorRow = IndexedVector3.Zero;
+        //                    break;
+        //            }
+        //        }
+
+        //        public static IndexedVector3 MatrixRow(IndexedMatrix matrix, int row)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    return new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
+        //                case 1:
+        //                    return new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
+        //                case 2:
+        //                    return new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
+        //                case 3:
+        //                    return new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
+        //                default:
+        //                    return IndexedVector3.Zero;
+        //            }
+        //        }
+
+        //        public static IndexedVector3 MatrixRow(ref IndexedMatrix matrix, int row)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    return new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
+        //                case 1:
+        //                    return new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
+        //                case 2:
+        //                    return new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
+        //                case 3:
+        //                    return new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
+        //                default:
+        //                    return IndexedVector3.Zero;
+        //            }
+        //        }
+
+        //        public static void MatrixRow(ref IndexedMatrix matrix, int row, out IndexedVector3 vectorRow)
+        //        {
+        //            switch (row)
+        //            {
+        //                case 0:
+        //                    vectorRow = new IndexedVector3(matrix.M11, matrix.M21, matrix.M31);
+        //                    break;
+        //                case 1:
+        //                    vectorRow = new IndexedVector3(matrix.M12, matrix.M22, matrix.M32);
+        //                    break;
+        //                case 2:
+        //                    vectorRow = new IndexedVector3(matrix.M13, matrix.M23, matrix.M33);
+        //                    break;
+        //                case 3:
+        //                    vectorRow = new IndexedVector3(matrix.M14, matrix.M24, matrix.M34);
+        //                    break;
+        //                default:
+        //                    vectorRow = IndexedVector3.Zero;
+        //                    break;
+        //            }
+        //        }
 
 
 
@@ -787,32 +787,32 @@ namespace BulletXNA
             return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz));
         }
 
-//        public static void BasisMatrix(IndexedMatrix matrixIn, out IndexedMatrix matrixOut)
-//        {
-//            BasisMatrix(ref matrixIn, out matrixOut);
-//        }
-//        public static void BasisMatrix(ref IndexedMatrix matrixIn, out IndexedMatrix matrixOut)
-//        {
-//            matrixOut = matrixIn;
-//            matrixOut.M41 = 0.0f;
-//            matrixOut.M42 = 0.0f;
-//            matrixOut.M43 = 0.0f;
-//            matrixOut.M44 = 1.0f;
-//        }
+        //        public static void BasisMatrix(IndexedMatrix matrixIn, out IndexedMatrix matrixOut)
+        //        {
+        //            BasisMatrix(ref matrixIn, out matrixOut);
+        //        }
+        //        public static void BasisMatrix(ref IndexedMatrix matrixIn, out IndexedMatrix matrixOut)
+        //        {
+        //            matrixOut = matrixIn;
+        //            matrixOut.M41 = 0.0f;
+        //            matrixOut.M42 = 0.0f;
+        //            matrixOut.M43 = 0.0f;
+        //            matrixOut.M44 = 1.0f;
+        //        }
 
-//        public static IndexedMatrix BasisMatrix(IndexedMatrix matrixIn)
-//        {
-//            return BasisMatrix(ref matrixIn);
-//        }
-//        public static IndexedMatrix BasisMatrix(ref IndexedMatrix matrixIn)
-//        {
-//            IndexedMatrix matrixOut = matrixIn;
-//            matrixOut.M41 = 0.0f;
-//            matrixOut.M42 = 0.0f;
-//            matrixOut.M43 = 0.0f;
-//            matrixOut.M44 = 1.0f;
-//            return matrixOut;
-//        }
+        //        public static IndexedMatrix BasisMatrix(IndexedMatrix matrixIn)
+        //        {
+        //            return BasisMatrix(ref matrixIn);
+        //        }
+        //        public static IndexedMatrix BasisMatrix(ref IndexedMatrix matrixIn)
+        //        {
+        //            IndexedMatrix matrixOut = matrixIn;
+        //            matrixOut.M41 = 0.0f;
+        //            matrixOut.M42 = 0.0f;
+        //            matrixOut.M43 = 0.0f;
+        //            matrixOut.M44 = 1.0f;
+        //            return matrixOut;
+        //        }
 
         public static IndexedQuaternion ShortestArcQuat(IndexedVector3 axisInA, IndexedVector3 axisInB)
         {
@@ -873,98 +873,98 @@ namespace BulletXNA
                                     -q.X * w.X - q.Y * w.Y - q.Z * w.Z);
         }
 
-//      /**@brief diagonalizes this matrix by the Jacobi method.
-//       * @param rot stores the rotation from the coordinate system in which the matrix is diagonal to the original
-//       * coordinate system, i.e., old_this = rot * new_this * rot^T. 
-//       * @param threshold See iteration
-//       * @param iteration The iteration stops when all off-diagonal elements are less than the threshold multiplied 
-//       * by the sum of the absolute values of the diagonal, or when maxSteps have been executed. 
-//       * 
-//       * Note that this matrix is assumed to be symmetric. 
-//       */
-//        public static void Diagonalize(ref IndexedMatrix inMatrix,ref IndexedMatrix rot, float threshold, int maxSteps)
-//        {
-//            Debug.Assert(false);
-//            rot = IndexedMatrix.Identity;
-//            for (int step = maxSteps; step > 0; step--)
-//            {
-//                // find off-diagonal element [p][q] with largest magnitude
-//                int p = 0;
-//                int q = 1;
-//                int r = 2;
-//                float max = Math.Abs(inMatrix.M12);
-//                float v = Math.Abs(inMatrix.M13);
-//                if (v > max)
-//                {
-//                   q = 2;
-//                   r = 1;
-//                   max = v;
-//                }
-//                v = Math.Abs(inMatrix.M23);
-//                if (v > max)
-//                {
-//                   p = 1;
-//                   q = 2;
-//                   r = 0;
-//                   max = v;
-//                }
+        //      /**@brief diagonalizes this matrix by the Jacobi method.
+        //       * @param rot stores the rotation from the coordinate system in which the matrix is diagonal to the original
+        //       * coordinate system, i.e., old_this = rot * new_this * rot^T. 
+        //       * @param threshold See iteration
+        //       * @param iteration The iteration stops when all off-diagonal elements are less than the threshold multiplied 
+        //       * by the sum of the absolute values of the diagonal, or when maxSteps have been executed. 
+        //       * 
+        //       * Note that this matrix is assumed to be symmetric. 
+        //       */
+        //        public static void Diagonalize(ref IndexedMatrix inMatrix,ref IndexedMatrix rot, float threshold, int maxSteps)
+        //        {
+        //            Debug.Assert(false);
+        //            rot = IndexedMatrix.Identity;
+        //            for (int step = maxSteps; step > 0; step--)
+        //            {
+        //                // find off-diagonal element [p][q] with largest magnitude
+        //                int p = 0;
+        //                int q = 1;
+        //                int r = 2;
+        //                float max = Math.Abs(inMatrix.M12);
+        //                float v = Math.Abs(inMatrix.M13);
+        //                if (v > max)
+        //                {
+        //                   q = 2;
+        //                   r = 1;
+        //                   max = v;
+        //                }
+        //                v = Math.Abs(inMatrix.M23);
+        //                if (v > max)
+        //                {
+        //                   p = 1;
+        //                   q = 2;
+        //                   r = 0;
+        //                   max = v;
+        //                }
 
-//                float t = threshold * (Math.Abs(inMatrix.M11) + Math.Abs(inMatrix.M22) + Math.Abs(inMatrix.M33));
-//                if (max <= t)
-//                {
-//                   if (max <= SIMD_EPSILON * t)
-//                   {
-//                      return;
-//                   }
-//                   step = 1;
-//                }
+        //                float t = threshold * (Math.Abs(inMatrix.M11) + Math.Abs(inMatrix.M22) + Math.Abs(inMatrix.M33));
+        //                if (max <= t)
+        //                {
+        //                   if (max <= SIMD_EPSILON * t)
+        //                   {
+        //                      return;
+        //                   }
+        //                   step = 1;
+        //                }
 
-//                // compute Jacobi rotation J which leads to a zero for element [p][q] 
-//                float mpq = MathUtil.MatrixComponent(ref inMatrix,p,q);
-//                float theta = (MathUtil.MatrixComponent(ref inMatrix,q,q)-MathUtil.MatrixComponent(ref inMatrix,p,p)) / (2 * mpq);
-//                float theta2 = theta * theta;
-//                float cos;
-//                float sin;
-//                if (theta2 * theta2 < 10f / SIMD_EPSILON)
-//                {
-//                   t = (theta >= 0f) ? (float)(1f / (theta + Math.Sqrt(1 + theta2)))
-//                                            : (float)(1f / (theta - Math.Sqrt(1 + theta2)));
-//                   cos = (float)(1f / Math.Sqrt(1 + t * t));
-//                   sin = cos * t;
-//                }
-//                else
-//                {
-//                   // approximation for large theta-value, i.e., a nearly diagonal matrix
-//                   t = 1 / (theta * (2 + 0.5f / theta2));
-//                   cos = 1 - 0.5f * t * t;
-//                   sin = cos * t;
-//                }
+        //                // compute Jacobi rotation J which leads to a zero for element [p][q] 
+        //                float mpq = MathUtil.MatrixComponent(ref inMatrix,p,q);
+        //                float theta = (MathUtil.MatrixComponent(ref inMatrix,q,q)-MathUtil.MatrixComponent(ref inMatrix,p,p)) / (2 * mpq);
+        //                float theta2 = theta * theta;
+        //                float cos;
+        //                float sin;
+        //                if (theta2 * theta2 < 10f / SIMD_EPSILON)
+        //                {
+        //                   t = (theta >= 0f) ? (float)(1f / (theta + Math.Sqrt(1 + theta2)))
+        //                                            : (float)(1f / (theta - Math.Sqrt(1 + theta2)));
+        //                   cos = (float)(1f / Math.Sqrt(1 + t * t));
+        //                   sin = cos * t;
+        //                }
+        //                else
+        //                {
+        //                   // approximation for large theta-value, i.e., a nearly diagonal matrix
+        //                   t = 1 / (theta * (2 + 0.5f / theta2));
+        //                   cos = 1 - 0.5f * t * t;
+        //                   sin = cos * t;
+        //                }
 
-//                // apply rotation to matrix (this = J^T * this * J)
-//                MathUtil.MatrixComponent(ref inMatrix,p,q,0f);
-//                MathUtil.MatrixComponent(ref inMatrix,q,p,0f);
-//                MathUtil.MatrixComponent(ref inMatrix,p,p,MathUtil.MatrixComponent(ref inMatrix,p,p)-t*mpq);
-//                MathUtil.MatrixComponent(ref inMatrix,q,q,MathUtil.MatrixComponent(ref inMatrix,q,q)+t*mpq);
+        //                // apply rotation to matrix (this = J^T * this * J)
+        //                MathUtil.MatrixComponent(ref inMatrix,p,q,0f);
+        //                MathUtil.MatrixComponent(ref inMatrix,q,p,0f);
+        //                MathUtil.MatrixComponent(ref inMatrix,p,p,MathUtil.MatrixComponent(ref inMatrix,p,p)-t*mpq);
+        //                MathUtil.MatrixComponent(ref inMatrix,q,q,MathUtil.MatrixComponent(ref inMatrix,q,q)+t*mpq);
 
-//                float  mrp = MathUtil.MatrixComponent(ref inMatrix,r,p);
-//                float  mrq = MathUtil.MatrixComponent(ref inMatrix,r,q);
+        //                float  mrp = MathUtil.MatrixComponent(ref inMatrix,r,p);
+        //                float  mrq = MathUtil.MatrixComponent(ref inMatrix,r,q);
 
-//                MathUtil.MatrixComponent(ref inMatrix,r,p,cos * mrp - sin * mrq);
-//                MathUtil.MatrixComponent(ref inMatrix,p,r,cos * mrp - sin * mrq);
+        //                MathUtil.MatrixComponent(ref inMatrix,r,p,cos * mrp - sin * mrq);
+        //                MathUtil.MatrixComponent(ref inMatrix,p,r,cos * mrp - sin * mrq);
 
-//                MathUtil.MatrixComponent(ref inMatrix,r,q,cos * mrp + sin * mrq);
-//                MathUtil.MatrixComponent(ref inMatrix,q,r,cos * mrp + sin * mrq);
+        //                MathUtil.MatrixComponent(ref inMatrix,r,q,cos * mrp + sin * mrq);
+        //                MathUtil.MatrixComponent(ref inMatrix,q,r,cos * mrp + sin * mrq);
 
-//                // apply rotation to rot (rot = rot * J)
-//                for (int i = 0; i < 3; i++)
-//                {
-//                    float  mrp2 = MathUtil.MatrixComponent(ref rot,i,p);
-//                    float  mrq2 = MathUtil.MatrixComponent(ref rot,i,q);
-//                    MathUtil.MatrixComponent(ref rot, i, p, cos * mrp - sin * mrq);
-//                    MathUtil.MatrixComponent(ref rot, i, q, cos * mrp + sin * mrq);
-//                }
-//            }
-//        }
+        //                // apply rotation to rot (rot = rot * J)
+        //                for (int i = 0; i < 3; i++)
+        //                {
+        //                    float  mrp2 = MathUtil.MatrixComponent(ref rot,i,p);
+        //                    float  mrq2 = MathUtil.MatrixComponent(ref rot,i,q);
+        //                    MathUtil.MatrixComponent(ref rot, i, p, cos * mrp - sin * mrq);
+        //                    MathUtil.MatrixComponent(ref rot, i, q, cos * mrp + sin * mrq);
+        //                }
+        //            }
+        //        }
 
 
 
@@ -1020,38 +1020,38 @@ namespace BulletXNA
 
         }
 
-//        public static void Vector3FromFloat(out IndexedVector3 v, float[] fa)
-//        {
-//            v = new IndexedVector3(fa[0], fa[1], fa[2]);
-//        }
+        //        public static void Vector3FromFloat(out IndexedVector3 v, float[] fa)
+        //        {
+        //            v = new IndexedVector3(fa[0], fa[1], fa[2]);
+        //        }
 
-//        //public static void FloatFromVector3(IndexedVector3 v, float[] fa)
-//        //{
-//        //    FloatFromVector3(ref v, fa);
-//        //}
+        //        //public static void FloatFromVector3(IndexedVector3 v, float[] fa)
+        //        //{
+        //        //    FloatFromVector3(ref v, fa);
+        //        //}
 
-//        //public static void FloatFromVector3(ref IndexedVector3 v, float[] fa)
-//        //{
-//        //    fa[0] = v.X;
-//        //    fa[1] = v.Y;
-//        //    fa[2] = v.Z;
-//        //}
+        //        //public static void FloatFromVector3(ref IndexedVector3 v, float[] fa)
+        //        //{
+        //        //    fa[0] = v.X;
+        //        //    fa[1] = v.Y;
+        //        //    fa[2] = v.Z;
+        //        //}
 
-//        //public static float[] FloatFromVector3(IndexedVector3 v)
-//        //{
-//        //    return FloatFromVector3(ref v);
-//        //}
+        //        //public static float[] FloatFromVector3(IndexedVector3 v)
+        //        //{
+        //        //    return FloatFromVector3(ref v);
+        //        //}
 
-//        //public static float[] FloatFromVector3(ref IndexedVector3 v)
-//        //{
-//        //    return new float[] { v.X, v.Y, v.Z };
-//        //}
+        //        //public static float[] FloatFromVector3(ref IndexedVector3 v)
+        //        //{
+        //        //    return new float[] { v.X, v.Y, v.Z };
+        //        //}
 
         public static float GetMatrixElem(IndexedBasisMatrix mat, int index)
         {
-	        int i = index%3;
-	        int j = index/3;
-	        return mat[i,j];
+            int i = index % 3;
+            int j = index / 3;
+            return mat[i, j];
         }
 
         public static float GetMatrixElem(ref IndexedBasisMatrix mat, int index)
@@ -1112,51 +1112,51 @@ namespace BulletXNA
 
 
 
-//        public static IndexedVector3 MatrixToEuler(ref IndexedMatrix m)
-//        {
-//            IndexedVector3 translate;
-//            IndexedVector3 scale;
-//            IndexedQuaternion rotate;
-//            m.Decompose(out scale, out rotate, out translate);
-//            return quaternionToEuler(ref rotate);
-//        }
+        //        public static IndexedVector3 MatrixToEuler(ref IndexedMatrix m)
+        //        {
+        //            IndexedVector3 translate;
+        //            IndexedVector3 scale;
+        //            IndexedQuaternion rotate;
+        //            m.Decompose(out scale, out rotate, out translate);
+        //            return quaternionToEuler(ref rotate);
+        //        }
 
-//        // Taken from Fabian Vikings post at : http://forums.xna.com/forums/p/4574/23763.aspx  
-//        public static IndexedVector3 quaternionToEuler(ref IndexedQuaternion q)
-//        {
-//            IndexedVector3 v = IndexedVector3.Zero;
+        //        // Taken from Fabian Vikings post at : http://forums.xna.com/forums/p/4574/23763.aspx  
+        //        public static IndexedVector3 quaternionToEuler(ref IndexedQuaternion q)
+        //        {
+        //            IndexedVector3 v = IndexedVector3.Zero;
 
-//            v.X = (float)Math.Atan2
-//            (
-//                2 * q.Y * q.W - 2 * q.X * q.Z,
-//                   1 - 2 * Math.Pow(q.Y, 2) - 2 * Math.Pow(q.Z, 2)
-//            );
+        //            v.X = (float)Math.Atan2
+        //            (
+        //                2 * q.Y * q.W - 2 * q.X * q.Z,
+        //                   1 - 2 * Math.Pow(q.Y, 2) - 2 * Math.Pow(q.Z, 2)
+        //            );
 
-//            v.Z = (float)Math.Asin
-//            (
-//                2 * q.X * q.Y + 2 * q.Z * q.W
-//            );
+        //            v.Z = (float)Math.Asin
+        //            (
+        //                2 * q.X * q.Y + 2 * q.Z * q.W
+        //            );
 
-//            v.Y = (float)Math.Atan2
-//            (
-//                2 * q.X * q.W - 2 * q.Y * q.Z,
-//                1 - 2 * Math.Pow(q.X, 2) - 2 * Math.Pow(q.Z, 2)
-//            );
+        //            v.Y = (float)Math.Atan2
+        //            (
+        //                2 * q.X * q.W - 2 * q.Y * q.Z,
+        //                1 - 2 * Math.Pow(q.X, 2) - 2 * Math.Pow(q.Z, 2)
+        //            );
 
-//            if (q.X * q.Y + q.Z * q.W == 0.5)
-//            {
-//                v.X = (float)(2 * Math.Atan2(q.X, q.W));
-//                v.Y = 0;
-//            }
+        //            if (q.X * q.Y + q.Z * q.W == 0.5)
+        //            {
+        //                v.X = (float)(2 * Math.Atan2(q.X, q.W));
+        //                v.Y = 0;
+        //            }
 
-//            else if (q.X * q.Y + q.Z * q.W == -0.5)
-//            {
-//                v.X = (float)(-2 * Math.Atan2(q.X, q.W));
-//                v.Y = 0;
-//            }
+        //            else if (q.X * q.Y + q.Z * q.W == -0.5)
+        //            {
+        //                v.X = (float)(-2 * Math.Atan2(q.X, q.W));
+        //                v.Y = 0;
+        //            }
 
-//            return v;
-//        }
+        //            return v;
+        //        }
 
         public static IndexedQuaternion QuaternionInverse(IndexedQuaternion q)
         {
@@ -1189,19 +1189,19 @@ namespace BulletXNA
         //    return m1 * m2;
         //}
 
-//        public static IndexedMatrix BulletMatrixMultiplyBasis(IndexedMatrix m1, IndexedMatrix m2)
-//        {
-//            return BulletMatrixMultiplyBasis(ref m1, ref m2);
-//        }
+        //        public static IndexedMatrix BulletMatrixMultiplyBasis(IndexedMatrix m1, IndexedMatrix m2)
+        //        {
+        //            return BulletMatrixMultiplyBasis(ref m1, ref m2);
+        //        }
 
-//        public static IndexedMatrix BulletMatrixMultiplyBasis(ref IndexedMatrix m1, ref IndexedMatrix m2)
-//        {
-//            IndexedMatrix mb1;
-//            BasisMatrix(ref m1, out mb1);
-//            IndexedMatrix mb2;
-//            BasisMatrix(ref m2, out mb2);
-//            return BulletMatrixMultiply(ref mb1, ref mb2);
-//        }
+        //        public static IndexedMatrix BulletMatrixMultiplyBasis(ref IndexedMatrix m1, ref IndexedMatrix m2)
+        //        {
+        //            IndexedMatrix mb1;
+        //            BasisMatrix(ref m1, out mb1);
+        //            IndexedMatrix mb2;
+        //            BasisMatrix(ref m2, out mb2);
+        //            return BulletMatrixMultiply(ref mb1, ref mb2);
+        //        }
 
 
 
@@ -1259,14 +1259,14 @@ namespace BulletXNA
 
         }
 
-//        public static IndexedVector3 MatrixToVector(IndexedMatrix m, IndexedVector3 v)
-//        {
-//            return new IndexedVector3(
-//                IndexedVector3.Dot(new IndexedVector3(m.M11, m.M12, m.M13), v) + m._origin.X,
-//                IndexedVector3.Dot(new IndexedVector3(m.M21, m.M22, m.M23), v) + m._origin.Y,
-//                IndexedVector3.Dot(new IndexedVector3(m.M31, m.M32, m.M33), v) + m._origin.Z
-//                );
-//        }
+        //        public static IndexedVector3 MatrixToVector(IndexedMatrix m, IndexedVector3 v)
+        //        {
+        //            return new IndexedVector3(
+        //                IndexedVector3.Dot(new IndexedVector3(m.M11, m.M12, m.M13), v) + m._origin.X,
+        //                IndexedVector3.Dot(new IndexedVector3(m.M21, m.M22, m.M23), v) + m._origin.Y,
+        //                IndexedVector3.Dot(new IndexedVector3(m.M31, m.M32, m.M33), v) + m._origin.Z
+        //                );
+        //        }
 
 
         public static IndexedVector3 Vector4ToVector3(IndexedVector4 v4)
@@ -1280,22 +1280,22 @@ namespace BulletXNA
         }
 
 
-//        public static IndexedVector3 TransposeTransformNormal(IndexedVector3 v,IndexedMatrix m)
-//        {
-//            return TransposeTransformNormal(ref v, ref m);
-//        }
+        //        public static IndexedVector3 TransposeTransformNormal(IndexedVector3 v,IndexedMatrix m)
+        //        {
+        //            return TransposeTransformNormal(ref v, ref m);
+        //        }
 
-//        public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v,ref IndexedMatrix m)
-//        {
-//            IndexedMatrix mt = TransposeBasis(ref m);
-//            return IndexedVector3.TransformNormal(v, mt);
-//        }
+        //        public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v,ref IndexedMatrix m)
+        //        {
+        //            IndexedMatrix mt = TransposeBasis(ref m);
+        //            return IndexedVector3.TransformNormal(v, mt);
+        //        }
 
-//        //public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v, ref IndexedMatrix m)
-//        //{
-//        //    IndexedMatrix mt = TransposeBasis(ref m);
-//        //    return IndexedVector3.TransformNormal(ref v, ref mt);
-//        //}
+        //        //public static IndexedVector3 TransposeTransformNormal(ref IndexedVector3 v, ref IndexedMatrix m)
+        //        //{
+        //        //    IndexedMatrix mt = TransposeBasis(ref m);
+        //        //    return IndexedVector3.TransformNormal(ref v, ref mt);
+        //        //}
 
 
 
@@ -1307,17 +1307,17 @@ namespace BulletXNA
         public static void PrintVector3(TextWriter writer, IndexedVector3 v)
         {
             writer.Write("{");
-	        PrintScalar(writer,"X:",v.X);
+            PrintScalar(writer, "X:", v.X);
             writer.Write(" ");
-	        PrintScalar(writer,"Y:",v.Y);
+            PrintScalar(writer, "Y:", v.Y);
             writer.Write(" ");
-	        PrintScalar(writer,"Z:",v.Z);
-	        writer.WriteLine("}");
+            PrintScalar(writer, "Z:", v.Z);
+            writer.WriteLine("}");
         }
 
         public static void PrintVector3(TextWriter writer, String name, IndexedVector3 v)
         {
-            writer.Write(String.Format("[{0}]",name));
+            writer.Write(String.Format("[{0}]", name));
             writer.Write("{");
             PrintScalar(writer, "X:", v.X);
             writer.Write(" ");
@@ -1378,14 +1378,14 @@ namespace BulletXNA
         }
 
 
-        public static void PrintScalar(TextWriter writer, String name,float s)
+        public static void PrintScalar(TextWriter writer, String name, float s)
         {
-	        float s2 = s;
-	        if(s2 < 0f && MathUtil.FuzzyZero(s2))
-	        {
+            float s2 = s;
+            if (s2 < 0f && MathUtil.FuzzyZero(s2))
+            {
                 s2 = 0f;
-	        }
-	        writer.Write("{0} {1:0.000}",name,s2);
+            }
+            writer.Write("{0} {1:0.000}", name, s2);
 
         }
 
@@ -1480,7 +1480,7 @@ namespace BulletXNA
             writer.WriteLine(String.Format("[{0}] {{X:{1:0.00000000} Y:{2:0.00000000} Z:{3:0.00000000}}}", name, v.X, v.Y, v.Z));
         }
 #endif
-        public static T Clamp<T>(T value, T min,T max)
+        public static T Clamp<T>(T value, T min, T max)
                  where T : System.IComparable<T>
         {
             T result = value;
@@ -1489,7 +1489,7 @@ namespace BulletXNA
             if (value.CompareTo(min) < 0)
                 result = min;
             return result;
-        } 
+        }
 
         //public const float SIMD_EPSILON = 0.0000001f;
         public const float SIMD_EPSILON = 1.192092896e-07f;

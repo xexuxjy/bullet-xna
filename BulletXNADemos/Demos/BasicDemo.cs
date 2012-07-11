@@ -81,7 +81,8 @@ namespace BulletXNADemos.Demos
             LocalCreateRigidBody(mass, ref groundTransform, groundShape);
 	        {
 		        //create a few dynamic rigidbodies
-                CollisionShape colShape = new BoxShape(new IndexedVector3(SCALING, SCALING, SCALING));
+                //CollisionShape colShape = new BoxShape(new IndexedVector3(SCALING, SCALING, SCALING));
+                CollisionShape colShape = BuildCorner();
 		        //btCollisionShape* colShape = new btSphereShape(btScalar(1.));
                 //CollisionShape colShape = new CylinderShape(new IndexedVector3(1f, 1, 1f));
 		        m_collisionShapes.Add(colShape);
@@ -128,6 +129,52 @@ namespace BulletXNADemos.Demos
 
             //ClientResetScene();
         }
+
+
+        public CollisionShape BuildCorner()
+        {
+            // slope.
+            IndexedVector3[] vertices = new IndexedVector3[]{new IndexedVector3(0,0,0),new IndexedVector3(1,0,0),new IndexedVector3(0,0,1),new IndexedVector3(1,0,1),
+                            new IndexedVector3(0,1,0),new IndexedVector3(1,1,0),new IndexedVector3(0,1,1),new IndexedVector3(1,1,1)};
+
+
+
+            //int[] indices = new int[] { 0, 4, 5, 4, 6, 7, 7, 5, 4, 0, 4, 6, 6, 2, 0, 2, 6, 7, 4,5,0,2,2,7,5};
+            //int[] indices = new int[] { 0, 4, 5, 4, 6, 7, 7, 5, 4,  6, 4,0,0,2,6, 7, 6, 2, 4, 5, 0, 2, 2, 7, 5 };
+            int[] indices = new int[] { 1,4,5,
+                1,5,7,
+                7,3,1,
+                3,7,6,
+                7,5,4,
+                4,6,7,
+                4,1,3,
+                3,6,4
+            };
+
+            int vertStride = 1;
+            int indexStride = 3;
+
+            ObjectArray<IndexedVector3> vertexArray = new ObjectArray<IndexedVector3>();
+            for (int i = 0; i < vertices.Length; ++i)
+            {
+                vertexArray.Add(vertices[i]);
+            }
+
+            ObjectArray<int> intArray = new ObjectArray<int>();
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                intArray.Add(indices[i]);
+            }
+            TriangleIndexVertexArray indexVertexArray = new TriangleIndexVertexArray(indices.Length/3, intArray, indexStride, vertexArray.Count, vertexArray, vertStride);
+            TriangleMeshShape triangleMesh = new TriangleMeshShape(indexVertexArray);
+            //TriangleMeshShape triangleMesh = new BvhTriangleMeshShape(indexVertexArray,true,true);
+            return triangleMesh;
+
+
+
+
+        }
+
 
         // test - just 8 objects.
         public const int ARRAY_SIZE_X = 5;

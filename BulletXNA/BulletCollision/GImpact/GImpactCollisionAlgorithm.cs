@@ -23,6 +23,7 @@ subject to the following restrictions:
 #define GIMPACT_VS_PLANE_COLLISION
 
 using BulletXNA.LinearMath;
+using System;
 
 
 
@@ -61,7 +62,9 @@ namespace BulletXNA.BulletCollision
         protected int m_part0;
         protected int m_triface1;
         protected int m_part1;
+        GIM_TRIANGLE_CONTACT m_contact_data = new GIM_TRIANGLE_CONTACT();
 
+        public GImpactCollisionAlgorithm() { } // for pool
 
         //! Creates a new contact point
         protected PersistentManifold NewContactManifold(CollisionObject body0, CollisionObject body1)
@@ -74,7 +77,6 @@ namespace BulletXNA.BulletCollision
         {
             if (m_convex_algorithm != null)
             {
-                m_convex_algorithm.Cleanup();
                 m_dispatcher.FreeCollisionAlgorithm(m_convex_algorithm);
                 m_convex_algorithm = null;
             }
@@ -234,7 +236,6 @@ namespace BulletXNA.BulletCollision
 
             PrimitiveTriangle ptri0 = new PrimitiveTriangle();
             PrimitiveTriangle ptri1 = new PrimitiveTriangle();
-            GIM_TRIANGLE_CONTACT contact_data = new GIM_TRIANGLE_CONTACT();
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
@@ -273,17 +274,17 @@ namespace BulletXNA.BulletCollision
 
                 if (ptri0.OverlapTestConservative(ptri1))
                 {
-                    if (ptri0.FindTriangleCollisionClipMethod(ptri1, contact_data))
+                    if (ptri0.FindTriangleCollisionClipMethod(ptri1, m_contact_data))
                     {
 
-                        int j = contact_data.m_point_count;
+                        int j = m_contact_data.m_point_count;
                         while (j-- != 0)
                         {
 
                             AddContactPoint(body0, body1,
-                                        contact_data.m_points[j],
-                                        MathUtil.Vector4ToVector3(ref contact_data.m_separating_normal),
-                                        -contact_data.m_penetration_depth);
+                                        m_contact_data.m_points[j],
+                                        MathUtil.Vector4ToVector3(ref m_contact_data.m_separating_normal),
+                                        -m_contact_data.m_penetration_depth);
                         }
                     }
                 }
@@ -331,7 +332,6 @@ namespace BulletXNA.BulletCollision
 
                 algor.ProcessCollision(body0, body1, m_dispatchInfo, m_resultOut);
 
-                algor.Cleanup();
                 m_dispatcher.FreeCollisionAlgorithm(algor);
             }
 
@@ -519,9 +519,14 @@ namespace BulletXNA.BulletCollision
         {
         }
 
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            base.Initialize(ci, body0, body1);
+        }
+
         public override void Cleanup()
         {
-
+            BulletGlobals.GImpactCollisionAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -694,50 +699,53 @@ namespace BulletXNA.BulletCollision
             shape0.LockChildShapes();
             shape1.LockChildShapes();
 
-            GIM_ShapeRetriever retriever0 = new GIM_ShapeRetriever(shape0);
-            GIM_ShapeRetriever retriever1 = new GIM_ShapeRetriever(shape1);
-
-            bool child_has_transform0 = shape0.ChildrenHasTransform();
-            bool child_has_transform1 = shape1.ChildrenHasTransform();
-
-            int i = pairset.Count;
-            while (i-- != 0)
+            using(GIM_ShapeRetriever retriever0 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
+            using (GIM_ShapeRetriever retriever1 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
             {
-                GIM_PAIR pair = pairset[i];
-                m_triface0 = pair.m_index1;
-                m_triface1 = pair.m_index2;
-                CollisionShape colshape0 = retriever0.GetChildShape(m_triface0);
-                CollisionShape colshape1 = retriever1.GetChildShape(m_triface1);
+                retriever0.Initialize(shape0);
+                retriever1.Initialize(shape1);
 
-                if (child_has_transform0)
+                bool child_has_transform0 = shape0.ChildrenHasTransform();
+                bool child_has_transform1 = shape1.ChildrenHasTransform();
+
+                int i = pairset.Count;
+                while (i-- != 0)
                 {
-                    body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(m_triface0));
+                    GIM_PAIR pair = pairset[i];
+                    m_triface0 = pair.m_index1;
+                    m_triface1 = pair.m_index2;
+                    CollisionShape colshape0 = retriever0.GetChildShape(m_triface0);
+                    CollisionShape colshape1 = retriever1.GetChildShape(m_triface1);
+
+                    if (child_has_transform0)
+                    {
+                        body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(m_triface0));
+                    }
+
+                    if (child_has_transform1)
+                    {
+                        body1.SetWorldTransform(orgtrans1 * shape1.GetChildTransform(m_triface1));
+                    }
+
+                    //collide two convex shapes
+                    ConvexVsConvexCollision(body0, body1, colshape0, colshape1);
+
+
+                    if (child_has_transform0)
+                    {
+                        body0.SetWorldTransform(ref orgtrans0);
+                    }
+
+                    if (child_has_transform1)
+                    {
+                        body1.SetWorldTransform(ref orgtrans1);
+                    }
+
                 }
 
-                if (child_has_transform1)
-                {
-                    body1.SetWorldTransform(orgtrans1 * shape1.GetChildTransform(m_triface1));
-                }
-
-                //collide two convex shapes
-                ConvexVsConvexCollision(body0, body1, colshape0, colshape1);
-
-
-                if (child_has_transform0)
-                {
-                    body0.SetWorldTransform(ref orgtrans0);
-                }
-
-                if (child_has_transform1)
-                {
-                    body1.SetWorldTransform(ref orgtrans1);
-                }
-
+                shape0.UnlockChildShapes();
+                shape1.UnlockChildShapes();
             }
-
-            shape0.UnlockChildShapes();
-            shape1.UnlockChildShapes();
-
         }
 
         public void GImpactVsShape(CollisionObject body0,
@@ -812,7 +820,7 @@ namespace BulletXNA.BulletCollision
 
             IndexedMatrix orgtrans1 = body1.GetWorldTransform();
 
-            ObjectArray<int> collided_results = new ObjectArray<int>();
+            ObjectArray<int> collided_results = new ObjectArray<int>(64);
 
             GImpactVsShapeFindPairs(ref orgtrans0, ref orgtrans1, shape0, shape1, collided_results);
 
@@ -821,54 +829,55 @@ namespace BulletXNA.BulletCollision
 
             shape0.LockChildShapes();
 
-            GIM_ShapeRetriever retriever0 = new GIM_ShapeRetriever(shape0);
-
-
-            bool child_has_transform0 = shape0.ChildrenHasTransform();
-
-
-            int i = collided_results.Count;
-
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+            using (GIM_ShapeRetriever retriever0 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
             {
-                BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape [{0}]", collided_results.Count);
+                retriever0.Initialize(shape0);
+                bool child_has_transform0 = shape0.ChildrenHasTransform();
+
+
+                int i = collided_results.Count;
+
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape [{0}]", collided_results.Count);
+                }
+
+
+                while (i-- != 0)
+                {
+                    int child_index = collided_results[i];
+                    if (swapped)
+                        m_triface1 = child_index;
+                    else
+                        m_triface0 = child_index;
+
+                    CollisionShape colshape0 = retriever0.GetChildShape(child_index);
+
+                    if (child_has_transform0)
+                    {
+                        body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(child_index));
+                    }
+
+                    //collide two shapes
+                    if (swapped)
+                    {
+                        ShapeVsShapeCollision(body1, body0, shape1, colshape0);
+                    }
+                    else
+                    {
+                        ShapeVsShapeCollision(body0, body1, colshape0, shape1);
+                    }
+
+                    //restore transforms
+                    if (child_has_transform0)
+                    {
+                        body0.SetWorldTransform(ref orgtrans0);
+                    }
+
+                }
+
+                shape0.UnlockChildShapes();
             }
-
-
-            while (i-- != 0)
-            {
-                int child_index = collided_results[i];
-                if (swapped)
-                    m_triface1 = child_index;
-                else
-                    m_triface0 = child_index;
-
-                CollisionShape colshape0 = retriever0.GetChildShape(child_index);
-
-                if (child_has_transform0)
-                {
-                    body0.SetWorldTransform(orgtrans0 * shape0.GetChildTransform(child_index));
-                }
-
-                //collide two shapes
-                if (swapped)
-                {
-                    ShapeVsShapeCollision(body1, body0, shape1, colshape0);
-                }
-                else
-                {
-                    ShapeVsShapeCollision(body0, body1, colshape0, shape1);
-                }
-
-                //restore transforms
-                if (child_has_transform0)
-                {
-                    body0.SetWorldTransform(ref orgtrans0);
-                }
-
-            }
-
-            shape0.UnlockChildShapes();
         }
 
         public void GImpactVsCompoundshape(CollisionObject body0,
@@ -1010,7 +1019,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-    public class GIM_ShapeRetriever
+    public class GIM_ShapeRetriever : IDisposable
     {
         public GImpactShapeInterface m_gim_shape;
         public TriangleShapeEx m_trishape = new TriangleShapeEx();
@@ -1056,6 +1065,7 @@ namespace BulletXNA.BulletCollision
         public TetraShapeRetriever m_tetra_retriever = new TetraShapeRetriever();
         public ChildShapeRetriever m_current_retriever;
 
+        public GIM_ShapeRetriever() { } // for pool
         public GIM_ShapeRetriever(GImpactShapeInterface gim_shape)
         {
             m_gim_shape = gim_shape;
@@ -1076,11 +1086,37 @@ namespace BulletXNA.BulletCollision
             m_current_retriever.m_parent = this;
         }
 
+        public void Initialize(GImpactShapeInterface gim_shape)
+        {
+            m_gim_shape = gim_shape;
+            //select retriever
+            if (m_gim_shape.NeedsRetrieveTriangles())
+            {
+                m_current_retriever = m_tri_retriever;
+            }
+            else if (m_gim_shape.NeedsRetrieveTetrahedrons())
+            {
+                m_current_retriever = m_tetra_retriever;
+            }
+            else
+            {
+                m_current_retriever = m_child_retriever;
+            }
+
+            m_current_retriever.m_parent = this;
+        }
+
+
+
         public CollisionShape GetChildShape(int index)
         {
             return m_current_retriever.GetChildShape(index);
         }
 
+        public void Dispose()
+        {
+            BulletGlobals.GIM_ShapeRetrieverPool.Free(this);
+        }
 
     }
 
@@ -1088,7 +1124,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new GImpactCollisionAlgorithm(ci, body0, body1);
+            GImpactCollisionAlgorithm algo = BulletGlobals.GImpactCollisionAlgorithmPool.Get();
+            algo.Initialize(ci, body0, body1);
+            return algo;
         }
     }
 

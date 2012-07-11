@@ -28,6 +28,7 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public SphereBoxCollisionAlgorithm() { } // for pool
         public SphereBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
             : base(ci, col0, col1)
         {
@@ -35,6 +36,21 @@ namespace BulletXNA.BulletCollision
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
             
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(sphereObj, boxObj))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(sphereObj, boxObj);
+                m_ownManifold = true;
+            }
+        }
+
+
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped)
+        {
+            base.Initialize(ci, col0, col1);
+            m_isSwapped = isSwapped;
+            CollisionObject sphereObj = m_isSwapped ? col1 : col0;
+            CollisionObject boxObj = m_isSwapped ? col0 : col1;
+
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(sphereObj, boxObj))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(sphereObj, boxObj);
@@ -54,6 +70,7 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = false;
             }
             m_ownManifold = false;
+            BulletGlobals.SphereBoxCollisionAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
@@ -81,6 +82,39 @@ namespace BulletXNA.LinearMath
             return vector;
         }
 
+        public float this[int i]
+        {
+            get
+            {
+                switch (i)
+                {
+                    case (0): return X;
+                    case (1): return Y;
+                    case (2): return Z;
+                    case (3): return W;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            return 0.0f;
+                        }
+                }
+            }
+            set
+            {
+                switch (i)
+                {
+                    case (0): X = value; break;
+                    case (1): Y = value; break;
+                    case (2): Z = value; break;
+                    case (3): W = value; break;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            break;
+                        }
+                }
+            }
+        }
 
         private static IndexedVector4 _zero = new IndexedVector4(0f);
         private static IndexedVector4 _one = new IndexedVector4(1f);

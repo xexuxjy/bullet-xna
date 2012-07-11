@@ -36,8 +36,8 @@ namespace BulletXNADemos.Demos
 {
     public abstract class DemoApplication : Microsoft.Xna.Framework.Game
     {
-        protected int numiterations = 0;
-        protected int maxiterations = 0;
+        protected int m_numIterations = 0;
+        protected int m_maxIterations = 0;
         protected IProfileManager m_profileManager;
         protected IProfileIterator m_profileIterator;
         protected IDebugDraw m_debugDraw;
@@ -320,6 +320,7 @@ namespace BulletXNADemos.Demos
 
             m_aspect = m_glutScreenWidth / m_glutScreenHeight;
             m_perspective = IndexedMatrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(40.0f), m_aspect, m_nearClip, m_farClip);
+
         }
 
         //----------------------------------------------------------------------------------------------
@@ -629,8 +630,8 @@ namespace BulletXNADemos.Demos
             if (m_dynamicsWorld != null)
             {
                 m_dynamicsWorld.StepSimulation(ms, 1);
-                numiterations++;
-                if (maxiterations > 0 && numiterations > maxiterations)
+                m_numIterations++;
+                if (m_maxIterations > 0 && m_numIterations > m_maxIterations)
                 {
                     Cleanup();
                     Exit();
@@ -1648,7 +1649,7 @@ namespace BulletXNADemos.Demos
 
             //debugMode = DebugDrawModes.DBG_DrawWireframe | DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
             //DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits | DebugDrawModes.DBG_DrawWireframe;
-            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits;
+            DebugDrawModes debugMode = DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits | DebugDrawModes.DBG_DrawNormals;
             m_shapeDrawer = new XNA_ShapeDrawer(this);
             m_debugDraw = m_shapeDrawer;
             m_debugDraw.SetDebugMode(debugMode);

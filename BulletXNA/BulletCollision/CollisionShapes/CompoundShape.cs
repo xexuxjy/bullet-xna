@@ -79,7 +79,7 @@ namespace BulletXNA.BulletCollision
             {
                 DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
                 int index = m_children.Count;
-                child.m_treeNode = m_dynamicAabbTree.Insert(ref bounds, (Object)index);
+                child.m_treeNode = m_dynamicAabbTree.Insert(ref bounds, (object)index);
             }
 
             m_children.Add(child);

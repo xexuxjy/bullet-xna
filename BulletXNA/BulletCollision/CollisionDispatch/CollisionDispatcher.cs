@@ -83,23 +83,11 @@ namespace BulletXNA.BulletCollision
 
             // nothing in our pool so create a new one and return it.
             // need a way to flush the pool ideally
-            PersistentManifold manifold;
-            if (m_persistentManifoldsPool.Count == 0)
-            {
-                manifold = new PersistentManifold();
-                m_persistentManifoldsPool.Push(manifold);
-            }
-
-            // remove the last item in the pool.
-            manifold = m_persistentManifoldsPool.Pop();
+            PersistentManifold manifold = BulletGlobals.PersistentManifoldPool.Get();
             manifold.Initialise(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
 
             manifold.m_index1a = m_manifoldsPtr.Count;
 
-            if (manifold.m_index1a == 23)
-            {
-                int ibreak = 0;
-            }
 
             m_manifoldsPtr.Add(manifold);
 
@@ -134,7 +122,7 @@ namespace BulletXNA.BulletCollision
             }
 
             // and return it to free list.
-            m_persistentManifoldsPool.Push(manifold);
+            BulletGlobals.PersistentManifoldPool.Free(manifold);
         }
 
         public virtual void ClearManifold(PersistentManifold manifold)
@@ -264,13 +252,7 @@ namespace BulletXNA.BulletCollision
         {
             ManifoldResult manifoldResult = null;
 #if USE_POOLED_MANIFOLDRESULT
-            if (m_manifoldResultsPool.Count == 0)
-            {
-                manifoldResult = new ManifoldResult();
-                m_manifoldResultsPool.Push(manifoldResult);
-            }
-            Debug.Assert(m_manifoldResultsPool.Count > 0);
-            manifoldResult = m_manifoldResultsPool.Pop();
+            manifoldResult = BulletGlobals.ManifoldResultPool.Get();
 #endif
             manifoldResult.Initialise(o1, o2);
             return manifoldResult;
@@ -279,7 +261,7 @@ namespace BulletXNA.BulletCollision
         public void FreeManifoldResult(ManifoldResult result)
         {
 #if USE_POOLED_MANIFOLDRESULT
-            m_manifoldResultsPool.Push(result);
+            BulletGlobals.ManifoldResultPool.Free(result);
 #else
 
 #endif
@@ -287,8 +269,6 @@ namespace BulletXNA.BulletCollision
 
 
         private PersistentManifoldArray m_manifoldsPtr = new PersistentManifoldArray();
-        private Stack<PersistentManifold> m_persistentManifoldsPool = new Stack<PersistentManifold>();
-        private Stack<ManifoldResult> m_manifoldResultsPool = new Stack<ManifoldResult>();
 
         private DispatcherFlags m_dispatcherFlags;
 

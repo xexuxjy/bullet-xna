@@ -28,6 +28,9 @@ namespace BulletXNA.BulletCollision
 {
     public class ConvexPlaneCollisionAlgorithm : CollisionAlgorithm
     {
+
+        public ConvexPlaneCollisionAlgorithm() { } // for pool
+
         public ConvexPlaneCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
             : base(ci)
         {
@@ -48,6 +51,28 @@ namespace BulletXNA.BulletCollision
 
         }
 
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(ci);
+            m_manifoldPtr = mf;
+            m_ownManifold = false;
+            m_isSwapped = isSwapped;
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+            CollisionObject convexObj = m_isSwapped ? col1 : col0;
+            CollisionObject planeObj = m_isSwapped ? col0 : col1;
+
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(convexObj, planeObj))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj, planeObj);
+                m_ownManifold = true;
+            }
+
+        }
+
+
+
         public override void Cleanup()
         {
             if (m_ownManifold)
@@ -59,6 +84,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+            BulletGlobals.ConvexPlaneAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -213,14 +239,16 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
+            ConvexPlaneCollisionAlgorithm algo = BulletGlobals.ConvexPlaneAlgorithmPool.Get();
             if (!m_swapped)
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                algo.Initialize(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
             else
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                algo.Initialize(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
+            return algo;
         }
     };
 }

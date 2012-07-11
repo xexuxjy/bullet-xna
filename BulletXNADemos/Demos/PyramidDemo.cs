@@ -38,7 +38,7 @@ namespace BulletXNADemos.Demos
 
         public override void InitializeDemo()
         {
-            maxiterations = 500;
+            m_maxIterations = 500;
             SetCameraDistance(SCALING * 50f);
 
             //string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
@@ -102,7 +102,7 @@ namespace BulletXNADemos.Demos
 
         public override void ClientMoveAndDisplay(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            if (numiterations == 2)
+            if (m_numIterations == 2)
             {
                 int ibreak = 0;
             }

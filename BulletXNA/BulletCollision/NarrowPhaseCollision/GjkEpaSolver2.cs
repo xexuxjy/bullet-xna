@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 namespace BulletXNA.BulletCollision
 {
@@ -34,7 +35,7 @@ namespace BulletXNA.BulletCollision
 
         public static void Initialize(ConvexShape shape0,ref IndexedMatrix wtrs0,
             ConvexShape shape1,ref IndexedMatrix wtrs1,
-            GjkEpaSolver2Results results,
+            ref GjkEpaSolver2Results results,
             GjkEpaSolver2MinkowskiDiff shapeR,
             bool withmargins)
         {
@@ -48,9 +49,6 @@ namespace BulletXNA.BulletCollision
 
             shapeR.m_toshape1 = wtrs1._basis.TransposeTimes(ref wtrs0._basis);
             shapeR.m_toshape0 = wtrs0.InverseTimes(ref wtrs1);
-
-
-
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJK)
             {
@@ -67,137 +65,146 @@ namespace BulletXNA.BulletCollision
 
         
         
-        public static bool	Distance(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results	results)
+        public static bool	Distance(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results)
         {
-            GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
-            Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
-            GJK	gjk = new GJK();
-            GJKStatus gjk_status= gjk.Evaluate(shape,ref guess);
-            if(gjk_status == GJKStatus.Valid)
+            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
+            using (GJK gjk = BulletGlobals.GJKPool.Get())
             {
-                IndexedVector3	w0 = IndexedVector3.Zero;
-                IndexedVector3	w1 = IndexedVector3.Zero;
-                for(uint i=0;i<gjk.m_simplex.rank;++i)
+                Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, false);
+                gjk.Initialise();
+                GJKStatus gjk_status = gjk.Evaluate(shape, ref guess);
+                if (gjk_status == GJKStatus.Valid)
                 {
-                    float p=gjk.m_simplex.p[i];
-                    w0+=shape.Support(ref gjk.m_simplex.c[i].d,0)*p;
-                    IndexedVector3 temp = -gjk.m_simplex.c[i].d;
-                    w1+=shape.Support(ref temp,1)*p;
-                }
-                results.witnesses0 = wtrs0 * w0;
-                results.witnesses1 = wtrs0 * w1;
-                results.normal = w0 - w1;
-                results.distance =	results.normal.Length();
-                results.normal	/=	results.distance>GJK_MIN_DISTANCE?results.distance:1;
-                return(true);
-            }
-            else
-            {
-                //GjkEpaSolver2Status
-                results.status = (gjk_status==GJKStatus.Inside)?GjkEpaSolver2Status.Penetrating :GjkEpaSolver2Status.GJK_Failed	;
-                return(false);
-            }
-        }
-
-        public static bool Penetration(ConvexShape shape0, ref IndexedMatrix wtrs0, ConvexShape shape1, ref IndexedMatrix wtrs1, ref IndexedVector3 guess, GjkEpaSolver2Results results)
-        {
-            return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, results, true);
-        }
-
-        public static bool Penetration(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results results,bool usemargins)
-        {
-            GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
-            Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results, shape,usemargins);
-            GJK	gjk = new GJK();	
-            IndexedVector3 minusGuess = -guess;
-            GJKStatus	gjk_status=gjk.Evaluate(shape,ref minusGuess);
-            switch(gjk_status)
-            {
-            case GJKStatus.Inside:
-                {
-                    //EPA	epa = new EPA();
-                    eStatus	epa_status=epa.Evaluate(gjk,ref minusGuess);
-                    if(epa_status!=eStatus.Failed)
+                    IndexedVector3 w0 = IndexedVector3.Zero;
+                    IndexedVector3 w1 = IndexedVector3.Zero;
+                    for (uint i = 0; i < gjk.m_simplex.rank; ++i)
                     {
-                        IndexedVector3	w0 = IndexedVector3.Zero;
-                        for(uint i=0;i<epa.m_result.rank;++i)
-                        {
-                            // order of results here is 'different' , EPA.evaluate.
-                            w0+=shape.Support(ref epa.m_result.c[i].d,0)*epa.m_result.p[i];
-                        }
-                        results.status			=	GjkEpaSolver2Status.Penetrating;
-                        results.witnesses0 = wtrs0 * w0;
-                        results.witnesses1 = wtrs0 * (w0 - epa.m_normal * epa.m_depth);
-                        results.normal			=	-epa.m_normal;
-                        results.distance		=	-epa.m_depth;
-                        return(true);
-                    } else results.status=GjkEpaSolver2Status.EPA_Failed;
+                        float p = gjk.m_simplex.p[i];
+                        w0 += shape.Support(ref gjk.m_simplex.c[i].d, 0) * p;
+                        IndexedVector3 temp = -gjk.m_simplex.c[i].d;
+                        w1 += shape.Support(ref temp, 1) * p;
+                    }
+                    results.witnesses0 = wtrs0 * w0;
+                    results.witnesses1 = wtrs0 * w1;
+                    results.normal = w0 - w1;
+                    results.distance = results.normal.Length();
+                    results.normal /= results.distance > GJK_MIN_DISTANCE ? results.distance : 1;
+                    return (true);
                 }
-                break;
-            case GJKStatus.Failed:
-                results.status=GjkEpaSolver2Status.GJK_Failed;
-                break;
+                else
+                {
+                    //GjkEpaSolver2Status
+                    results.status = (gjk_status == GJKStatus.Inside) ? GjkEpaSolver2Status.Penetrating : GjkEpaSolver2Status.GJK_Failed;
+                    return (false);
+                }
+            }
+        }
+
+        public static bool Penetration(ConvexShape shape0, ref IndexedMatrix wtrs0, ConvexShape shape1, ref IndexedMatrix wtrs1, ref IndexedVector3 guess, ref GjkEpaSolver2Results results)
+        {
+            return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, true);
+        }
+
+        public static bool Penetration(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results,bool usemargins)
+        {
+            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
+            using(GJK gjk = BulletGlobals.GJKPool.Get())
+            {
+                Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, usemargins);
+                gjk.Initialise();
+                IndexedVector3 minusGuess = -guess;
+                GJKStatus gjk_status = gjk.Evaluate(shape, ref minusGuess);
+                switch (gjk_status)
+                {
+                    case GJKStatus.Inside:
+                        {
+                            //EPA	epa = new EPA();
+                            eStatus epa_status = epa.Evaluate(gjk, ref minusGuess);
+                            if (epa_status != eStatus.Failed)
+                            {
+                                IndexedVector3 w0 = IndexedVector3.Zero;
+                                for (uint i = 0; i < epa.m_result.rank; ++i)
+                                {
+                                    // order of results here is 'different' , EPA.evaluate.
+                                    w0 += shape.Support(ref epa.m_result.c[i].d, 0) * epa.m_result.p[i];
+                                }
+                                results.status = GjkEpaSolver2Status.Penetrating;
+                                results.witnesses0 = wtrs0 * w0;
+                                results.witnesses1 = wtrs0 * (w0 - epa.m_normal * epa.m_depth);
+                                results.normal = -epa.m_normal;
+                                results.distance = -epa.m_depth;
+                                return (true);
+                            }
+                            else results.status = GjkEpaSolver2Status.EPA_Failed;
+                        }
+                        break;
+                    case GJKStatus.Failed:
+                        results.status = GjkEpaSolver2Status.GJK_Failed;
+                        break;
+                }
             }
             return(false);
         }
 
         //
-        public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, GjkEpaSolver2Results results)
+        public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, ref GjkEpaSolver2Results results)
         {
-            GjkEpaSolver2MinkowskiDiff shape = new GjkEpaSolver2MinkowskiDiff();
-            SphereShape shape1 = BulletGlobals.SphereShapePool.Get();
-            shape1.Initialize(margin);
-            IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
-            wtrs0._origin = position;
-	        
-            Initialize(shape0,ref wtrs0,shape1,ref wtrs1,results,shape,false);
-            GJK	gjk = new GJK();	
-            IndexedVector3 guess = new IndexedVector3(1);
-            GJKStatus	gjk_status=gjk.Evaluate(shape,ref guess);
-            if(gjk_status==GJKStatus.Valid)
+            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
+            using (GJK gjk = BulletGlobals.GJKPool.Get())
             {
-                IndexedVector3	w0=IndexedVector3.Zero;
-                IndexedVector3	w1=IndexedVector3.Zero;
-                for(int i=0;i<gjk.m_simplex.rank;++i)
-                {
-                    float p=gjk.m_simplex.p[i];
-                    w0+=shape.Support( ref gjk.m_simplex.c[i].d,0)*p;
-                    IndexedVector3 temp = -gjk.m_simplex.c[i].d;
-                    w1+=shape.Support(ref temp,1)*p;
-                }
-                results.witnesses0 = wtrs0 * w0;
-                results.witnesses1 = wtrs0 * w1;
-                IndexedVector3	delta=	results.witnesses1-results.witnesses0;
-                float margin2 = shape0.GetMarginNonVirtual()+shape1.GetMarginNonVirtual();
-                float length = delta.Length();	
-                results.normal = delta/length;
-                results.witnesses0 +=	results.normal*margin2;
-                return(length-margin2);
-            }
-            else
-            {
-                if(gjk_status==GJKStatus.Inside)
-                {
-                    if(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref gjk.m_ray,results))
-                    {
-                        IndexedVector3	delta=	results.witnesses0-results.witnesses1;
-                        float length= delta.Length();
-                        if (length >= MathUtil.SIMD_EPSILON)
-                            results.normal	=	delta/length;			
-                        return(-length);
-                    }
-                }	
-            }
-            BulletGlobals.SphereShapePool.Free(shape1);
+                SphereShape shape1 = BulletGlobals.SphereShapePool.Get();
+                shape1.Initialize(margin);
+                IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
+                wtrs0._origin = position;
 
+                Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, false);
+                gjk.Initialise();
+                IndexedVector3 guess = new IndexedVector3(1);
+                GJKStatus gjk_status = gjk.Evaluate(shape, ref guess);
+                if (gjk_status == GJKStatus.Valid)
+                {
+                    IndexedVector3 w0 = IndexedVector3.Zero;
+                    IndexedVector3 w1 = IndexedVector3.Zero;
+                    for (int i = 0; i < gjk.m_simplex.rank; ++i)
+                    {
+                        float p = gjk.m_simplex.p[i];
+                        w0 += shape.Support(ref gjk.m_simplex.c[i].d, 0) * p;
+                        IndexedVector3 temp = -gjk.m_simplex.c[i].d;
+                        w1 += shape.Support(ref temp, 1) * p;
+                    }
+                    results.witnesses0 = wtrs0 * w0;
+                    results.witnesses1 = wtrs0 * w1;
+                    IndexedVector3 delta = results.witnesses1 - results.witnesses0;
+                    float margin2 = shape0.GetMarginNonVirtual() + shape1.GetMarginNonVirtual();
+                    float length = delta.Length();
+                    results.normal = delta / length;
+                    results.witnesses0 += results.normal * margin2;
+                    return (length - margin2);
+                }
+                else
+                {
+                    if (gjk_status == GJKStatus.Inside)
+                    {
+                        if (Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref gjk.m_ray, ref results))
+                        {
+                            IndexedVector3 delta = results.witnesses0 - results.witnesses1;
+                            float length = delta.Length();
+                            if (length >= MathUtil.SIMD_EPSILON)
+                                results.normal = delta / length;
+                            return (-length);
+                        }
+                    }
+                }
+                BulletGlobals.SphereShapePool.Free(shape1);
+            }
             return(MathUtil.SIMD_INFINITY);
         }
 
         //
-        public bool SignedDistance(ConvexShape	shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,GjkEpaSolver2Results results)
+        public bool SignedDistance(ConvexShape	shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results)
         {
-            if(!Distance(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,results))
-                return(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,results,false));
+            if(!Distance(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results))
+                return(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results,false));
             else
                 return(true);
         }
@@ -231,7 +238,7 @@ namespace BulletXNA.BulletCollision
         EPA_Failed		/* EPA phase fail, bigger problem, need to save parameters, and debug	*/ 
     }		
 
-    public class GjkEpaSolver2Results
+    public struct GjkEpaSolver2Results
     {
         public GjkEpaSolver2Status status;
         public IndexedVector3 witnesses0;
@@ -242,7 +249,7 @@ namespace BulletXNA.BulletCollision
 
 
         // MinkowskiDiff
-    public class GjkEpaSolver2MinkowskiDiff
+    public class GjkEpaSolver2MinkowskiDiff : IDisposable
     {
         public GjkEpaSolver2MinkowskiDiff()
         {
@@ -285,6 +292,11 @@ namespace BulletXNA.BulletCollision
                 return(Support0(ref d));
         }
 
+        public virtual void Dispose()
+        {
+            BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Free(this);
+        }
+
         public bool m_enableMargin;
         public ConvexShape[] m_shapes = new ConvexShape[2];
         public IndexedBasisMatrix m_toshape1 = IndexedBasisMatrix.Identity;
@@ -292,7 +304,7 @@ namespace BulletXNA.BulletCollision
 
     }
 
-    public struct sSV
+    public class sSV
     {
         public IndexedVector3 d;
         public IndexedVector3 w;
@@ -319,11 +331,11 @@ namespace BulletXNA.BulletCollision
         Failed		
     }
 
-    public class GJK
+    public class GJK : IDisposable
     {
         public GJK()
         {
-            Initialise();
+            //Initialise();
         }
         
         public void Initialise()
@@ -335,26 +347,27 @@ namespace BulletXNA.BulletCollision
             m_distance	=	0f;
             for (int i = 0; i < m_simplices.Length; ++i)
             {
-                m_simplices[i] = new sSimplex();
+                if (m_simplices[i] == null)
+                {
+                    m_simplices[i] = new sSimplex();
+                }
             }
 
             for (int i = 0; i < m_store.Length; ++i)
             {
-                m_store[i] = new sSV();
+                if (m_store[i] == null)
+                {
+                    m_store[i] = new sSV();
+                }
             }
-            // Free is a list of pointers/references so doesn't need objects.
-            //for (int i = 0; i < m_free.Length; ++i)
-            //{
-            //    m_free[i] = new sSV();
-            //}
         }
 
+        IndexedVector3[] lastw = new IndexedVector3[4];
         public GJKStatus Evaluate(GjkEpaSolver2MinkowskiDiff shapearg, ref IndexedVector3 guess)
         {
             uint iterations=0;
             float sqdist=0f;
             float alpha=0f;
-            IndexedVector3[] lastw = new IndexedVector3[4];
             uint clastw=0;
             /* Initialize solver		*/ 
             m_free[0] =	m_store[0];
@@ -375,7 +388,7 @@ namespace BulletXNA.BulletCollision
             m_simplices[0].p[0]	= 1;
             m_ray =	m_simplices[0].c[0].w;	
             sqdist =	sqrl;
-            lastw[0]=lastw[1]=lastw[2]=lastw[3]	=	m_ray;
+            lastw[0]=lastw[1]=lastw[2]=lastw[3]	= m_ray;
             /* Loop						*/ 
             do	
             {
@@ -412,7 +425,7 @@ namespace BulletXNA.BulletCollision
                     lastw[clastw=(clastw+1)&3]=w;
                 }
                 /* Check for termination				*/ 
-                float omega=IndexedVector3.Dot(m_ray,w)/rl;
+                float omega=IndexedVector3.Dot(ref m_ray,ref w)/rl;
                 alpha=Math.Max(omega,alpha);
                 if (((rl - alpha) - (GjkEpaSolver2.GJK_ACCURARY * rl)) <= 0)
                 {/* Return old simplex				*/ 
@@ -627,7 +640,7 @@ namespace BulletXNA.BulletCollision
             float l=d.LengthSquared();
             if (l > GjkEpaSolver2.GJK_SIMPLEX2_EPS)
             {
-                float t = (l>0f?(-IndexedVector3.Dot(a,d)/l):0f);
+                float t = (l>0f?(-IndexedVector3.Dot(ref a,ref d)/l):0f);
                 if(t>=1)		
                 { 
                     w.X=0f;
@@ -653,14 +666,20 @@ namespace BulletXNA.BulletCollision
         }
 
 
+        static uint[] imd3 = { 1, 2, 0 };
+        static IndexedVector3[] vt = new IndexedVector3[3];
+        static IndexedVector3[] dl = new IndexedVector3[3];
+        static bool inhere2 = false;
         public static float ProjectOrigin(ref IndexedVector3 a,
             ref IndexedVector3 b,
             ref IndexedVector3 c,
             ref IndexedVector4 w,ref uint m)
         {
-            uint[] imd3 = {1,2,0};
-            IndexedVector3[] vt  = {a,b,c};
-            IndexedVector3[] dl = {a-b,b-c,c-a};
+            Debug.Assert(inhere2 == false);
+            inhere2 = true;
+            vt[0] = a; vt[1] = b; vt[2] = c;
+            dl[0] = a - b; dl[1] = b - c; dl[2] = c - a;
+            
             IndexedVector3	n= IndexedVector3.Cross(dl[0],dl[1]);
             float l=n.LengthSquared();
             if (l > GjkEpaSolver2.GJK_SIMPLEX3_EPS)
@@ -679,15 +698,15 @@ namespace BulletXNA.BulletCollision
                             mindist	= subd;
                             m =	(uint)((((subm&1) != 0)?1<<i:0)+(((subm&2)!=0)?1<<(int)j:0));
 
-                            MathUtil.VectorComponent(ref w,(int)i, subw.X);
-                            MathUtil.VectorComponent(ref w,(int)j, subw.Y);
-                            MathUtil.VectorComponent(ref w,(int)imd3[j],0f);				
+                            w[(int)i] = subw.X;
+                            w[(int)j] = subw.Y;
+                            w[(int)imd3[j]] = 0f;
                         }
                     }
                 }
                 if(mindist<0)
                 {
-                    float d = IndexedVector3.Dot(a,n);	
+                    float d = IndexedVector3.Dot(ref a,ref n);	
                     float s = (float)Math.Sqrt(l);
                     IndexedVector3	p = n * (d/l);
                     mindist	=	p.LengthSquared();
@@ -696,20 +715,32 @@ namespace BulletXNA.BulletCollision
                     w.Y	= (IndexedVector3.Cross(dl[2],c-p)).Length()/s;
                     w.Z	= 1-(w.X+w.Y);
                 }
+                inhere2 = false;
                 return(mindist);
             }
+            inhere2 = false;
             return(-1);
         }
 
+
+        private static uint[] imd3a = { 1, 2, 0 };
+        private static IndexedVector3[] vta = new IndexedVector3[4];
+        private static IndexedVector3[] dla = new IndexedVector3[3];
+        private static bool inhere1 = false;
         public static float ProjectOrigin(ref IndexedVector3 a,
             ref IndexedVector3 b,
             ref IndexedVector3 c,
             ref IndexedVector3 d,
             ref IndexedVector4 w,ref uint m)
         {
-            uint[] imd3 ={1,2,0};
-            IndexedVector3[]	vt = {a,b,c,d};
-            IndexedVector3[]	dl= {a-d,b-d,c-d};
+            //uint[] imd3 ={1,2,0};
+            //IndexedVector3[]	vt = {a,b,c,d};
+            //IndexedVector3[]	dl= {a-d,b-d,c-d};
+            Debug.Assert(inhere1 == false);
+            inhere1 = true;
+            vta[0] = a; vta[1] = b; vta[2] = c; vta[3] = d;
+            dla[0] = a - d; dla[1] = b - d; dla[2] = c - d;
+
             float vl= Det(dl[0],dl[1],dl[2]);
             
             bool ng=(vl*IndexedVector3.Dot(a,IndexedVector3.Cross(b-c,a-b)))<=0;
@@ -731,9 +762,10 @@ namespace BulletXNA.BulletCollision
                             m			=	(uint)((((subm&1) != 0)?1<<i:0)+
                                 (((subm&2)!=0)?1<<(int)j:0)+
                                 (((subm&4)!=0)?8:0));
-                            MathUtil.VectorComponent(ref w,i,subw.X);
-                            MathUtil.VectorComponent(ref w,(int)j,subw.Y);
-                            MathUtil.VectorComponent(ref w,(int)imd3[j],0f);
+
+                            w[(int)i] = subw.X;
+                            w[(int)j] = subw.Y;
+                            w[(int)imd3[j]] = 0f;
                             w.W = subw.Z;
                         }
                     }
@@ -747,10 +779,18 @@ namespace BulletXNA.BulletCollision
                     w.Z	=	Det(b,a,d)/vl;
                     w.W	=	1-(w.X+w.Y+w.Z);
                 }
+                inhere1 = false;
                 return(mindist);
             }
+            inhere1 = false;
             return(-1);
         }
+
+        public void Dispose()
+        {
+            BulletGlobals.GJKPool.Free(this);
+        }
+
 
         public GjkEpaSolver2MinkowskiDiff m_shape;
         public IndexedVector3 m_ray;
@@ -850,6 +890,8 @@ namespace BulletXNA.BulletCollision
                 array[b] = temp;
             }
 
+        static sFace[] tetra = new sFace[4];
+
         public eStatus Evaluate(GJK gjk,ref IndexedVector3 guess)
         {
             sSimplex simplex=gjk.m_simplex;
@@ -873,11 +915,11 @@ namespace BulletXNA.BulletCollision
                     SwapSv(simplex.c,0,1);
                     SwapFloat(simplex.p,0,1);
                 }
-                /* Build initial hull	*/ 
-                sFace[]	tetra ={NewFace(simplex.c[0],simplex.c[1],simplex.c[2],true),
-                    NewFace(simplex.c[1],simplex.c[0],simplex.c[3],true),
-                    NewFace(simplex.c[2],simplex.c[1],simplex.c[3],true),
-                    NewFace(simplex.c[0],simplex.c[2],simplex.c[3],true)};
+                /* Build initial hull	*/
+                tetra[0] = NewFace(simplex.c[0], simplex.c[1], simplex.c[2], true);
+                tetra[1] = NewFace(simplex.c[1], simplex.c[0], simplex.c[3], true);
+                tetra[2] = NewFace(simplex.c[2], simplex.c[1], simplex.c[3], true);
+                tetra[3] = NewFace(simplex.c[0], simplex.c[2], simplex.c[3], true);
                 if(m_hull.Count==4)
                 {
                     sFace best=FindBest();
@@ -900,14 +942,14 @@ namespace BulletXNA.BulletCollision
                             bool valid = true;					
                             best.pass =	(uint)(++pass);
                             gjk.GetSupport(ref best.n,ref w);
-                            float wdist=IndexedVector3.Dot(best.n,w.w)-best.d;
+                            float wdist=IndexedVector3.Dot(ref best.n,ref w.w)-best.d;
                             if (wdist > GjkEpaSolver2.EPA_ACCURACY)
                             {
                                 for(int j=0;(j<3)&&valid;++j)
                                 {
                                     valid&=Expand(	pass,w,
                                         best.f[j],best.e[j],
-                                        horizon);
+                                        ref horizon);
                                 }
                                 if(valid&&(horizon.nf>=3))
                                 {
@@ -1000,7 +1042,7 @@ namespace BulletXNA.BulletCollision
                 face.p = face.p >= -GjkEpaSolver2.EPA_INSIDE_EPS ? 0 : face.p;
                 if(v)
                 {
-                    face.d = IndexedVector3.Dot(a.w,face.n)/l;
+                    face.d = IndexedVector3.Dot(ref a.w,ref face.n)/l;
                     face.n /= l;
                     if (forced || (face.d >= -GjkEpaSolver2.EPA_PLANE_EPS))
                     {
@@ -1044,14 +1086,14 @@ namespace BulletXNA.BulletCollision
             return minf;
         }
 
-        public bool	Expand(uint pass,sSV w,sFace f,uint e,sHorizon horizon)
+        static uint[] i1m3 = { 1, 2, 0 };
+        static uint[] i2m3 = { 2, 0, 1 };
+        public bool Expand(uint pass, sSV w, sFace f, uint e, ref sHorizon horizon)
         {
-            uint[]	i1m3 = {1,2,0};
-            uint[]  i2m3 = {2,0,1};
             if(f.pass!=pass)
             {
                 uint e1 = i1m3[e];
-                if ((IndexedVector3.Dot(f.n, w.w) - f.d) < -GjkEpaSolver2.EPA_PLANE_EPS)
+                if ((IndexedVector3.Dot(ref f.n, ref w.w) - f.d) < -GjkEpaSolver2.EPA_PLANE_EPS)
                 {
                     sFace nf = NewFace(f.c[e1],f.c[e],w,false);
                     if(nf != null)
@@ -1074,8 +1116,8 @@ namespace BulletXNA.BulletCollision
                 {
                     uint e2=i2m3[e];
                     f.pass = (uint)pass;
-                    if(	Expand(pass,w,f.f[e1],f.e[e1],horizon)&&
-                        Expand(pass,w,f.f[e2],f.e[e2],horizon))
+                    if(	Expand(pass,w,f.f[e1],f.e[e1],ref horizon)&&
+                        Expand(pass,w,f.f[e2],f.e[e2],ref horizon))
                     {
                         Remove(m_hull,f);
                         Append(m_stock,f);
@@ -1099,14 +1141,14 @@ namespace BulletXNA.BulletCollision
         public uint pass =0;
     }
 
-    public class sHorizon
+    public struct  sHorizon
     {
-        public sHorizon()
-        {
-            cf = null;
-            ff = null;
-            nf = 0;
-        }
+        //public sHorizon()
+        //{
+        //    cf = null;
+        //    ff = null;
+        //    nf = 0;
+        //}
         public sFace cf;
         public sFace ff;
         public uint nf;

@@ -254,7 +254,7 @@ namespace BulletXNA.BulletDynamics
 			}
 
 			solverConstraint.m_contactNormal = cp.m_normalWorldOnB;
-			solverConstraint.m_relpos1CrossNormal = IndexedVector3.Cross(ref rel_pos1, ref cp.m_normalWorldOnB);
+			solverConstraint.m_relpos1CrossNormal = IndexedVector3.Cross(rel_pos1, cp.m_normalWorldOnB);
 			solverConstraint.m_relpos2CrossNormal = IndexedVector3.Cross(rel_pos2, -cp.m_normalWorldOnB);
 
 
@@ -538,7 +538,8 @@ namespace BulletXNA.BulletDynamics
 						else
 						{
 							//re-calculate friction direction every frame, todo: check if this is really needed
-							TransformUtil.PlaneSpace1(ref cp.m_normalWorldOnB, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
+                            IndexedVector3 temp = cp.m_normalWorldOnB;
+							TransformUtil.PlaneSpace1(ref temp, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
 							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
 							{
 								ApplyAnisotropicFriction(colObj0, ref cp.m_lateralFrictionDir2);

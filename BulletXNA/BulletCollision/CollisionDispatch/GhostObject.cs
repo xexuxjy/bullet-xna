@@ -93,6 +93,7 @@ namespace BulletXNA.BulletCollision
 
         public void RayTest(ref IndexedVector3 rayFromWorld, ref IndexedVector3 rayToWorld, RayResultCallback resultCallback)
         {
+            int ibreak = 0;
         }
 
         ///this method is mainly for expert/internal use only.

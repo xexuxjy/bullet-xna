@@ -86,6 +86,7 @@
     <Compile Include="Demos\PyramidDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
     <Compile Include="Demos\SimpleCompoundDemo.cs" />
+    <Compile Include="Demos\StaticLevelDemo.cs" />
     <Compile Include="Demos\TerrainDemo.cs" />
     <Compile Include="Demos\XNA_ShapeDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -29,6 +29,7 @@ namespace BulletXNA.BulletCollision
 {
     public class CompoundCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public CompoundCollisionAlgorithm() { } // for pool
         public CompoundCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
             : base(ci, body0, body1)
         {
@@ -42,9 +43,25 @@ namespace BulletXNA.BulletCollision
             PreallocateChildAlgorithms(body0, body1);
         }
 
+        public virtual void Initialize(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            base.Initialize(ci, body0, body1);
+            m_isSwapped = isSwapped;
+            m_sharedManifold = ci.GetManifold();
+            m_ownsManifold = false;
+            CollisionObject colObj = m_isSwapped ? body1 : body0;
+            Debug.Assert(colObj.GetCollisionShape().IsCompound());
+            CompoundShape compoundShape = (CompoundShape)(colObj.GetCollisionShape());
+            m_compoundShapeRevision = compoundShape.GetUpdateRevision();
+            PreallocateChildAlgorithms(body0, body1);
+        }
+
+
         public override void Cleanup()
         {
             RemoveChildAlgorithms();
+            m_compoundShapeRevision = 0;
+            BulletGlobals.CompoundCollisionAlgorithmPool.Free(this);
         }
 
         private void RemoveChildAlgorithms()
@@ -55,11 +72,11 @@ namespace BulletXNA.BulletCollision
             {
                 if (m_childCollisionAlgorithms[i] != null)
                 {
-                    m_childCollisionAlgorithms[i].Cleanup();
                     m_dispatcher.FreeCollisionAlgorithm(m_childCollisionAlgorithms[i]);
                     m_childCollisionAlgorithms[i] = null;
                 }
             }
+            m_childCollisionAlgorithms.Clear();
         }
 
         private void PreallocateChildAlgorithms(CollisionObject body0, CollisionObject body1)
@@ -86,7 +103,8 @@ namespace BulletXNA.BulletCollision
                     CollisionShape tmpShape = colObj.GetCollisionShape();
                     CollisionShape childShape = compoundShape.GetChildShape(i);
                     colObj.InternalSetTemporaryCollisionShape(childShape);
-                    m_childCollisionAlgorithms.Add(m_dispatcher.FindAlgorithm(colObj, otherObj, m_sharedManifold));
+                    CollisionAlgorithm ca = m_dispatcher.FindAlgorithm(colObj, otherObj, m_sharedManifold);
+                    m_childCollisionAlgorithms.Add(ca);
                     colObj.InternalSetTemporaryCollisionShape(tmpShape);
                 }
             }
@@ -114,7 +132,7 @@ namespace BulletXNA.BulletCollision
 
             Dbvt tree = compoundShape.GetDynamicAabbTree();
             //use a dynamic aabb tree to cull potential child-overlaps
-            CompoundLeafCallback callback = new CompoundLeafCallback(colObj, otherObj, m_dispatcher, dispatchInfo, resultOut, m_childCollisionAlgorithms, m_sharedManifold);
+            CompoundLeafCallback callback = new CompoundLeafCallback(colObj, otherObj, m_dispatcher, dispatchInfo, resultOut,this, m_childCollisionAlgorithms, m_sharedManifold);
 
             ///we need to refresh all contact manifolds
             ///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep
@@ -214,6 +232,10 @@ namespace BulletXNA.BulletCollision
             {
                 if (m_childCollisionAlgorithms[i] != null)
                 {
+                    if (m_childCollisionAlgorithms[i] == this)
+                    {
+                        int ibreak = 0;
+                    }
                     m_childCollisionAlgorithms[i].GetAllContactManifolds(manifoldArray);
                 }
             }
@@ -292,8 +314,9 @@ namespace BulletXNA.BulletCollision
         public ManifoldResult m_resultOut;
         public IList<CollisionAlgorithm> m_childCollisionAlgorithms;
         public PersistentManifold m_sharedManifold;
+        public CompoundCollisionAlgorithm m_parent;
 
-        public CompoundLeafCallback(CollisionObject compoundObj, CollisionObject otherObj, IDispatcher dispatcher, DispatcherInfo dispatchInfo, ManifoldResult resultOut, IList<CollisionAlgorithm> childCollisionAlgorithms, PersistentManifold sharedManifold)
+        public CompoundLeafCallback(CollisionObject compoundObj, CollisionObject otherObj, IDispatcher dispatcher, DispatcherInfo dispatchInfo, ManifoldResult resultOut, CompoundCollisionAlgorithm parent,IList<CollisionAlgorithm> childCollisionAlgorithms, PersistentManifold sharedManifold)
         {
             m_compoundColObj = compoundObj;
             m_otherObj = otherObj;
@@ -302,6 +325,7 @@ namespace BulletXNA.BulletCollision
             m_resultOut = resultOut;
             m_childCollisionAlgorithms = childCollisionAlgorithms;
             m_sharedManifold = sharedManifold;
+            m_parent = parent;
         }
 
         public void ProcessChildShape(CollisionShape childShape, int index)
@@ -337,6 +361,10 @@ namespace BulletXNA.BulletCollision
                 if (m_childCollisionAlgorithms[index] == null)
                 {
                     m_childCollisionAlgorithms[index] = m_dispatcher.FindAlgorithm(m_compoundColObj, m_otherObj, m_sharedManifold);
+                    if (m_childCollisionAlgorithms[index] == m_parent)
+                    {
+                        int ibreak = 0;
+                    }
                 }
 
                 ///detect swapping case
@@ -388,7 +416,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(ci, body0, body1, false);
+            CompoundCollisionAlgorithm algo = BulletGlobals.CompoundCollisionAlgorithmPool.Get();
+            algo.Initialize(ci, body0, body1, false);
+            return algo;
         }
     }
 
@@ -396,7 +426,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new CompoundCollisionAlgorithm(ci, body0, body1, true);
+            CompoundCollisionAlgorithm algo = BulletGlobals.CompoundCollisionAlgorithmPool.Get();
+            algo.Initialize(ci, body0, body1, true);
+            return algo;
         }
     }
 

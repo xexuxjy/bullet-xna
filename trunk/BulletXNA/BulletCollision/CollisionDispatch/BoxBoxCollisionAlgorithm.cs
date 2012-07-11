@@ -29,11 +29,16 @@ namespace BulletXNA.BulletCollision
 {
     public class BoxBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-
+        public BoxBoxCollisionAlgorithm() { } // for pool
         public BoxBoxCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
             : base(ci)
         {
 
+        }
+
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            base.Initialize(ci);
         }
 
         public BoxBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
@@ -44,6 +49,17 @@ namespace BulletXNA.BulletCollision
                 m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
                 m_ownManifold = true;
             }
+        }
+
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            base.Initialize(ci);
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
+
         }
 
         public override void Cleanup()
@@ -57,6 +73,9 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+
+            BulletGlobals.BoxBoxCollisionAlgorithmPool.Free(this);
+
             base.Cleanup();
         }
 
@@ -122,7 +141,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new BoxBoxCollisionAlgorithm(null, ci, body0, body1);
+            BoxBoxCollisionAlgorithm algo = BulletGlobals.BoxBoxCollisionAlgorithmPool.Get();
+            algo.Initialize(null, ci, body0, body1);
+            return algo;
         }
     }
 }

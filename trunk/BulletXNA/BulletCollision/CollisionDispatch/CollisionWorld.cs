@@ -1686,7 +1686,6 @@ namespace BulletXNA.BulletCollision
                     //discrete collision detection query
                     algorithm.ProcessCollision(m_collisionObject, collisionObject, m_world.GetDispatchInfo(), contactPointResult);
 
-                    algorithm.Cleanup();
                     m_world.GetDispatcher().FreeCollisionAlgorithm(algorithm);
                 }
             }

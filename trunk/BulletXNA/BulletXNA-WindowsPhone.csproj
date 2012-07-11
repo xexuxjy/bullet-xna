@@ -222,6 +222,7 @@
     <Compile Include="LinearMath\ConvexHull.cs" />
     <Compile Include="LinearMath\MathUtil.cs" />
     <Compile Include="LinearMath\PersistentManifoldArray.cs" />
+    <Compile Include="LinearMath\PooledType.cs" />
     <Compile Include="LinearMath\UShortVector3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LinearMath\TransformUtil.cs" />

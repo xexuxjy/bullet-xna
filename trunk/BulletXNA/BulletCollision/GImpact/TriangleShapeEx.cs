@@ -22,6 +22,7 @@ subject to the following restrictions:
 */
 
 using BulletXNA.LinearMath;
+using System.Diagnostics;
 
 
 namespace BulletXNA.BulletCollision
@@ -58,18 +59,17 @@ namespace BulletXNA.BulletCollision
         }
 
         //! classify points that are closer
-        public void MergePoints(ref IndexedVector4 plane, float margin, ObjectArray<IndexedVector3> points, int point_count)
+        int[] point_indices = new int[MAX_TRI_CLIPPING];
+        public void MergePoints(ref IndexedVector4 plane, float margin, IndexedVector3[] points, int point_count)
         {
             m_point_count = 0;
             m_penetration_depth = -1000.0f;
-
-            int[] point_indices = new int[MAX_TRI_CLIPPING];
 
             int _k;
 
             for (_k = 0; _k < point_count; _k++)
             {
-                float _dist = -ClipPolygon.DistancePointPlane(ref plane, ref points.GetRawArray()[_k]) + margin;
+                float _dist = -ClipPolygon.DistancePointPlane(ref plane, ref points[_k]) + margin;
 
                 if (_dist >= 0.0f)
                 {
@@ -92,7 +92,6 @@ namespace BulletXNA.BulletCollision
                 m_points[_k] = points[point_indices[_k]];
             }
         }
-
     }
 
     public class PrimitiveTriangle
@@ -100,6 +99,8 @@ namespace BulletXNA.BulletCollision
         public IndexedVector3[] m_vertices = new IndexedVector3[3];
         public IndexedVector4 m_plane;
         public float m_margin;
+        GIM_TRIANGLE_CONTACT m_contacts1 = new GIM_TRIANGLE_CONTACT();
+
         //float m_dummy;
         public PrimitiveTriangle()
         {
@@ -162,11 +163,17 @@ namespace BulletXNA.BulletCollision
         \pre clipped_points must have MAX_TRI_CLIPPING size, and this triangle must have its plane calculated.
         \return the number of clipped points
         */
-        public int ClipTriangle(PrimitiveTriangle other, ObjectArray<IndexedVector3> clipped_points)
+        //public static ObjectArray<IndexedVector3> temp_points = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
+        //public static ObjectArray<IndexedVector3> temp_points1 = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
+
+        public static IndexedVector3[] temp_points = new IndexedVector3[GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING];
+        public static IndexedVector3[] temp_points1 = new IndexedVector3[GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING];
+
+        public int ClipTriangle(PrimitiveTriangle other, IndexedVector3[] clipped_points)
         {
             // edge 0
 
-            ObjectArray<IndexedVector3> temp_points = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
+            //ObjectArray<IndexedVector3> temp_points = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
 
             IndexedVector4 edgeplane;
 
@@ -180,7 +187,7 @@ namespace BulletXNA.BulletCollision
                 return 0;
             }
 
-            ObjectArray<IndexedVector3> temp_points1 = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
+            //ObjectArray<IndexedVector3> temp_points1 = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
 
 
             // edge 1
@@ -197,6 +204,9 @@ namespace BulletXNA.BulletCollision
             // edge 2
             GetEdgePlane(2, out edgeplane);
 
+            Debug.Assert(clipped_count < GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
+
+
             clipped_count = ClipPolygon.PlaneClipPolygon(ref edgeplane, temp_points1, clipped_count, clipped_points);
 
             return clipped_count;
@@ -207,19 +217,19 @@ namespace BulletXNA.BulletCollision
         /*!
         \pre this triangle and other must have their triangles calculated
         */
+        static IndexedVector3[] clipped_points = new IndexedVector3[(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING)];
+
         public bool FindTriangleCollisionClipMethod(PrimitiveTriangle other, GIM_TRIANGLE_CONTACT contacts)
         {
             float margin = m_margin + other.m_margin;
 
-            ObjectArray<IndexedVector3> clipped_points = new ObjectArray<IndexedVector3>(GIM_TRIANGLE_CONTACT.MAX_TRI_CLIPPING);
 
             int clipped_count;
             //create planes
             // plane v vs U points
 
-            GIM_TRIANGLE_CONTACT contacts1 = new GIM_TRIANGLE_CONTACT();
 
-            contacts1.m_separating_normal = m_plane;
+            m_contacts1.m_separating_normal = m_plane;
 
             clipped_count = ClipTriangle(other, clipped_points);
 
@@ -229,13 +239,13 @@ namespace BulletXNA.BulletCollision
             }
 
             //find most deep interval face1
-            contacts1.MergePoints(ref contacts1.m_separating_normal, margin, clipped_points, clipped_count);
-            if (contacts1.m_point_count == 0)
+            m_contacts1.MergePoints(ref m_contacts1.m_separating_normal, margin, clipped_points, clipped_count);
+            if (m_contacts1.m_point_count == 0)
             {
                 return false; // too far
             }
             //Normal pointing to this triangle
-            contacts1.m_separating_normal *= -1.0f;
+            m_contacts1.m_separating_normal *= -1.0f;
 
 
             //Clip tri1 by tri2 edges
@@ -257,13 +267,13 @@ namespace BulletXNA.BulletCollision
             }
 
             ////check most dir for contacts
-            if (contacts2.m_penetration_depth < contacts1.m_penetration_depth)
+            if (contacts2.m_penetration_depth < m_contacts1.m_penetration_depth)
             {
                 contacts.CopyFrom(contacts2);
             }
             else
             {
-                contacts.CopyFrom(contacts1);
+                contacts.CopyFrom(m_contacts1);
             }
             return true;
 

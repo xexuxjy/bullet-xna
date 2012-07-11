@@ -50,6 +50,8 @@ namespace BulletXNA.BulletCollision
 
         bool disableCcd = false;
 
+        public ConvexConvexAlgorithm() { } // for pool
+
         public ConvexConvexAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
             : base(ci, body0, body1)
         {
@@ -66,6 +68,23 @@ namespace BulletXNA.BulletCollision
             m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
         }
 
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(ci, body0, body1);
+            m_simplexSolver = simplexSolver;
+            m_pdSolver = pdSolver;
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_lowLevelOfDetail = false;
+#if USE_SEPDISTANCE_UTIL2
+            m_sepDistance ((static_cast<btConvexShape*>(body0.getCollisionShape())).getAngularMotionDisc(),
+			  (static_cast<btConvexShape*>(body1.getCollisionShape())).getAngularMotionDisc()),
+#endif
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+        }
+
         public override void Cleanup()
         {
             if (m_ownManifold)
@@ -77,6 +96,7 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = false;
             }
             m_manifoldPtr = null;
+            BulletGlobals.ConvexConvexAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -698,7 +718,9 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConvexAlgorithm(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            ConvexConvexAlgorithm cca = BulletGlobals.ConvexConvexAlgorithmPool.Get();
+            cca.Initialize(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            return cca;
         }
 
         public IConvexPenetrationDepthSolver m_pdSolver;

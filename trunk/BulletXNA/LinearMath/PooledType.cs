@@ -25,10 +25,6 @@ namespace BulletXNA.LinearMath
             m_pool.Push(obj);
         }
 
-        public void Reset()
-        {
-            m_pool.Clear();
-        }
 
         private Stack<T> m_pool = new Stack<T>();
     }

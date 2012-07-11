@@ -27,9 +27,18 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereTriangleCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public SphereTriangleCollisionAlgorithm() { } // for pool
         public SphereTriangleCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
             : base(ci, body0, body1)
         {
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_swapped = swapped;
+        }
+
+        public virtual void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
+        {
+            base.Initialize(ci, body0, body1);
             m_ownManifold = false;
             m_manifoldPtr = mf;
             m_swapped = swapped;
@@ -39,6 +48,11 @@ namespace BulletXNA.BulletCollision
             : base(ci)
         {
 
+        }
+
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            base.Initialize(ci);
         }
 
         public override void Cleanup()
@@ -53,6 +67,7 @@ namespace BulletXNA.BulletCollision
                 }
             }
             m_ownManifold = false;
+            BulletGlobals.SphereTriangleCollisionAlgorithmPool.Free(this);
         }
 
 
@@ -110,7 +125,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new SphereTriangleCollisionAlgorithm(ci.GetManifold(), ci, body0, body1, m_swapped);
+            SphereTriangleCollisionAlgorithm algo = BulletGlobals.SphereTriangleCollisionAlgorithmPool.Get();
+            algo.Initialize(ci.GetManifold(), ci, body0, body1, m_swapped);
+            return algo;
         }
     }
 }

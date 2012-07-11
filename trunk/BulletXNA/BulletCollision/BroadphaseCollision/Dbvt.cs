@@ -206,6 +206,13 @@ namespace BulletXNA.BulletCollision
             }
         }
 
+        public DbvtNode Insert(ref DbvtAabbMm box, int data)
+        {
+            DbvtNode leaf = CreateNode(this, null, ref box, data);
+            InsertLeaf(this, Root, leaf);
+            ++m_leaves;
+            return leaf;
+        }
 
 
         public DbvtNode Insert(ref DbvtAabbMm box, Object data)
@@ -850,6 +857,18 @@ namespace BulletXNA.BulletCollision
             return (leaves[0]);
         }
 
+        public static DbvtNode CreateNode(Dbvt pdbvt, DbvtNode parent, int data)
+        {
+            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
+            node.parent = parent;
+            node.data = null;
+            node.dataAsInt = data;
+            node._children[0] = null;
+            node._children[1] = null;
+            return (node);
+        }
+
+
         public static DbvtNode CreateNode(Dbvt pdbvt, DbvtNode parent, Object data)
         {
             DbvtNode node = BulletGlobals.DbvtNodePool.Get();
@@ -857,6 +876,7 @@ namespace BulletXNA.BulletCollision
             node.data = data;
             if (node.data is int)
             {
+                //Debug.Assert(false);
                 node.dataAsInt = (int)node.data;
             }
             node._children[0] = null;
@@ -876,10 +896,22 @@ namespace BulletXNA.BulletCollision
 
             if (node.data is int)
             {
+                Debug.Assert(false);
                 node.dataAsInt = (int)node.data;
             }
 
             return node;
+        }
+
+
+        public static DbvtNode CreateNode(Dbvt pdbvt,
+                                       DbvtNode parent,
+                                       ref DbvtAabbMm volume,
+                                       int data)
+        {
+            DbvtNode node = CreateNode(pdbvt, parent, data);
+            node.volume = volume;
+            return (node);
         }
 
 
@@ -1085,18 +1117,6 @@ namespace BulletXNA.BulletCollision
         public void Reset()
         {
             parent = null;
-
-            //if (_children[0] != null)
-            //{
-            //    Dbvt.DeleteNode(null, _children[0]);
-            //    _children[0] = null;
-            //}
-
-            //if (_children[1] != null)
-            //{
-            //    Dbvt.DeleteNode(null, _children[1]);
-            //    _children[1] = null;
-            //}
 
             data = null;
             dataAsInt = 0;

@@ -158,6 +158,11 @@ namespace BulletXNA.BulletCollision
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
+                if (localTransA._origin.Y > 1.09f && localTransA._origin.Y < 1.11f)
+                {
+                    int ibreak = 0;
+                }
+
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transA", localTransA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transB", localTransB);
 
@@ -215,12 +220,6 @@ namespace BulletXNA.BulletCollision
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "pWorld", pWorld);
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "qWorld", qWorld);
                     }
-
-                    if (m_simplexSolver.NumVertices() == 3)
-                    {
-                        int ibreak = 0;
-                    }
-
 
                     // potential exit, they don't overlap
                     if ((delta > 0f) && (delta * delta > squaredDistance * input.m_maximumDistanceSquared))
@@ -433,7 +432,7 @@ namespace BulletXNA.BulletCollision
 
                             if (lenSqr > (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                             {
-                                tmpNormalInB.Normalize();
+                                tmpNormalInB /= (float)Math.Sqrt(lenSqr);
                                 float distance2 = -(tmpPointOnA - tmpPointOnB).Length();
                                 //only replace valid penetrations when the result is deeper (check)
                                 if (!isValid || (distance2 < distance))
@@ -443,6 +442,12 @@ namespace BulletXNA.BulletCollision
                                     pointOnB = tmpPointOnB;
                                     normalInB = tmpNormalInB;
                                     isValid = true;
+
+
+
+                                    //FIXME! check2d THIS
+
+
                                     m_lastUsedMethod = 3;
                                 }
                                 else

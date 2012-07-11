@@ -114,6 +114,23 @@ namespace BulletXNA
         public static PooledType<ContinuousConvexCollision> ContinuousConvexCollisionPool = new PooledType<ContinuousConvexCollision>();
         public static PooledType<DbvtStackDataBlock> DbvtStackDataBlockPool = new PooledType<DbvtStackDataBlock>();
 
+        public static PooledType<BoxBoxCollisionAlgorithm> BoxBoxCollisionAlgorithmPool = new PooledType<BoxBoxCollisionAlgorithm>();
+        public static PooledType<CompoundCollisionAlgorithm> CompoundCollisionAlgorithmPool = new PooledType<CompoundCollisionAlgorithm>();
+        public static PooledType<ConvexConcaveCollisionAlgorithm> ConvexConcaveCollisionAlgorithmPool = new PooledType<ConvexConcaveCollisionAlgorithm>();
+        public static PooledType<ConvexConvexAlgorithm> ConvexConvexAlgorithmPool = new PooledType<ConvexConvexAlgorithm>();
+        public static PooledType<ConvexPlaneCollisionAlgorithm> ConvexPlaneAlgorithmPool = new PooledType<ConvexPlaneCollisionAlgorithm>();
+        public static PooledType<SphereBoxCollisionAlgorithm> SphereBoxCollisionAlgorithmPool = new PooledType<SphereBoxCollisionAlgorithm>();
+        public static PooledType<SphereSphereCollisionAlgorithm> SphereSphereCollisionAlgorithmPool = new PooledType<SphereSphereCollisionAlgorithm>();
+        public static PooledType<SphereTriangleCollisionAlgorithm> SphereTriangleCollisionAlgorithmPool = new PooledType<SphereTriangleCollisionAlgorithm>();
+        public static PooledType<GImpactCollisionAlgorithm> GImpactCollisionAlgorithmPool = new PooledType<GImpactCollisionAlgorithm>();
+        public static PooledType<GjkEpaSolver2MinkowskiDiff> GjkEpaSolver2MinkowskiDiffPool = new PooledType<GjkEpaSolver2MinkowskiDiff>();
+        public static PooledType<PersistentManifold> PersistentManifoldPool = new PooledType<PersistentManifold>();
+        public static PooledType<ManifoldResult> ManifoldResultPool = new PooledType<ManifoldResult>();
+        public static PooledType<GJK> GJKPool = new PooledType<GJK>();
+        public static PooledType<GIM_ShapeRetriever> GIM_ShapeRetrieverPool = new PooledType<GIM_ShapeRetriever>();
+
+
+
         public const bool debugRigidBody = true;
         public const bool debugCollisionWorld = false;
 		public const bool debugConstraints = false;

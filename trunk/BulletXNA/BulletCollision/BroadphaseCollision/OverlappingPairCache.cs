@@ -284,7 +284,6 @@ namespace BulletXNA.BulletCollision
         {
             if (pair.m_algorithm != null)
             {
-                pair.m_algorithm.Cleanup();
                 dispatcher.FreeCollisionAlgorithm(pair.m_algorithm);
                 pair.m_algorithm = null;
             }
@@ -632,7 +631,6 @@ namespace BulletXNA.BulletCollision
             if (pair.m_algorithm != null)
             {
                 {
-                    pair.m_algorithm.Cleanup();
                     dispatcher.FreeCollisionAlgorithm(pair.m_algorithm);
                     pair.m_algorithm = null;
                     OverlappingPairCacheGlobals.gRemovePairs--;

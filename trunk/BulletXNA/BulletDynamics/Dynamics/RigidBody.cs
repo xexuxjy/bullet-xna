@@ -237,6 +237,11 @@ namespace BulletXNA.BulletDynamics
             ApplyCentralForce(ref m_gravity);
         }
 
+        public void SetGravity(IndexedVector3 acceleration)
+        {
+            SetGravity(ref acceleration);
+        }
+
         public void SetGravity(ref IndexedVector3 acceleration)
         {
             if (m_inverseMass != 0f)

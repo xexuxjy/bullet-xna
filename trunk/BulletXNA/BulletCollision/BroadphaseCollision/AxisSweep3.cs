@@ -64,8 +64,8 @@ namespace BulletXNA.BulletCollision
 
     public class Handle : BroadphaseProxy
     {
-        public ushort[] m_minEdges = new ushort[3];
-        public ushort[] m_maxEdges = new ushort[3];
+        public UShortVector3 m_minEdges = new UShortVector3();
+        public UShortVector3 m_maxEdges = new UShortVector3();
         public BroadphaseProxy m_dbvtProxy;//for faster raycast
 
         public Handle()
@@ -736,12 +736,12 @@ namespace BulletXNA.BulletCollision
             FreeHandle(handle);
         }
 
+        static ushort[] min = new ushort[3], max = new ushort[3];
         public void UpdateHandle(ushort handle, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
             Handle pHandle = GetHandle(handle);
 
             // quantize the new bounds
-            ushort[] min = new ushort[3], max = new ushort[3];
             Quantize(min, ref aabbMin, 0);
             Quantize(max, ref aabbMax, 1);
 

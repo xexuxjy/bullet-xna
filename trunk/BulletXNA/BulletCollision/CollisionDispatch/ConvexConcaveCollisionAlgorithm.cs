@@ -29,6 +29,7 @@ namespace BulletXNA.BulletCollision
 
     public class ConvexConcaveCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public ConvexConcaveCollisionAlgorithm() { } // for pool
         public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
             : base(ci, body0, body1)
         {
@@ -36,6 +37,20 @@ namespace BulletXNA.BulletCollision
             m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
         }
 
+        public void Inititialize(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            base.Initialize(ci, body0, body1);
+            m_isSwapped = isSwapped;
+            if (m_convexTriangleCallback == null)
+            {
+                m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
+            }
+            else
+            {
+                m_convexTriangleCallback.Initialize(m_dispatcher, body0, body1, isSwapped);
+            }
+
+        }
         public override void Cleanup()
         {
             // empty on purpose...
@@ -43,8 +58,10 @@ namespace BulletXNA.BulletCollision
             if (m_convexTriangleCallback != null)
             {
                 m_convexTriangleCallback.Cleanup();
-                m_convexTriangleCallback = null;
+                // pool means we don't clear this
+                //m_convexTriangleCallback = null;
             }
+            BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Free(this);
         }
 
         //public override void processCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
@@ -347,6 +364,16 @@ namespace BulletXNA.BulletCollision
             ClearCache();
         }
 
+        public void Initialize(IDispatcher dispatcher, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            m_dispatcher = dispatcher;
+            m_convexBody = isSwapped ? body1 : body0;
+            m_triBody = isSwapped ? body0 : body1;
+            m_manifoldPtr = m_dispatcher.GetNewManifold(m_convexBody, m_triBody);
+            ClearCache();
+        }
+
+
         public virtual void Cleanup()
         {
             ClearCache();
@@ -448,7 +475,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, false);
+            ConvexConcaveCollisionAlgorithm algo = BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Get();
+            algo.Inititialize(ci, body0, body1, false);
+            return algo;
         }
     }
 
@@ -456,7 +485,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, true);
+            ConvexConcaveCollisionAlgorithm algo = BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Get();
+            algo.Inititialize(ci, body0, body1, true);
+            return algo;
         }
     }
 

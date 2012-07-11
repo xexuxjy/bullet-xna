@@ -809,17 +809,16 @@ namespace BulletXNADemos.Demos
             foreach (ModelScalingData modelScalingData in m_modelScalingData)
             {
                 //IndexedMatrix scale = IndexedMatrix.CreateScale(modelScalingData.scale);
-                Matrix[] transforms = new Matrix[modelScalingData.model.Bones.Count];
                 foreach (ModelMesh mesh in modelScalingData.model.Meshes)
                 {
-                    modelScalingData.model.CopyAbsoluteBoneTransformsTo(transforms);
+                    modelScalingData.model.CopyAbsoluteBoneTransformsTo(s_transforms);
                     foreach (BasicEffect effect in mesh.Effects)
                     {
-						effect.Texture = GetTexture(ref modelScalingData.color);
+						effect.Texture = GetTexture(modelScalingData.color);
                         effect.View = view;
                         effect.Projection = projection;
 
-                        effect.World = transforms[mesh.ParentBone.Index] * modelScalingData.transform.ToMatrix();
+                        effect.World = s_transforms[mesh.ParentBone.Index] * modelScalingData.transform.ToMatrix();
                     }
                     mesh.Draw();
                 }
@@ -1161,7 +1160,8 @@ namespace BulletXNADemos.Demos
 
         private int m_texturedVertexCount;
         private int m_lineIndex = 0;
-        
+
+        Matrix[] s_transforms = new Matrix[100];
         
         private VertexPositionNormalTexture[] m_texturedVertices = new VertexPositionNormalTexture[m_textureVertexMaxSize];
         private VertexPositionColor[] m_lineVertices = new VertexPositionColor[m_lineVertexMaxSize];
@@ -1187,6 +1187,11 @@ namespace BulletXNADemos.Demos
         private Texture2D m_lightTexture;
 
         private DebugDrawModes m_debugDrawModes;
+
+        private Texture2D GetTexture(IndexedVector3 color)
+        {
+            return GetTexture(ref color);
+        }
 
 		private Texture2D GetTexture(ref IndexedVector3 color)
 		{
@@ -1223,9 +1228,9 @@ namespace BulletXNADemos.Demos
         private BasicEffect m_vertexEffect;
     }
 
-	class ModelScalingData
+	struct ModelScalingData
 	{
-		public ModelScalingData() { }
+        //public ModelScalingData() { }
 		public ModelScalingData(Model _model, IndexedVector3 _scale, IndexedMatrix _transform)
 		{
 			IndexedMatrix scale = IndexedMatrix.CreateScale(_scale);
@@ -1304,6 +1309,20 @@ namespace BulletXNADemos.Demos
                 IndexedVector3 center = (triangle[0]+triangle[1]+triangle[2])*(1.0f/3.0f);
 
                 cross += center;
+                //if ((int)(m_debugDrawer.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
+                {
+
+                    m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
+                    //IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
+                    //normal.Normalize();
+                    //IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
+                    //m_debugDrawer.DrawLine(center, center + normal, normalColor);
+
+                    //m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
+                    //m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);
+                    //m_debugDrawer.DrawLine(ref wv2, ref wv0, ref m_color);
+                }
+
                 //m_shapeDrawer.DrawLine(ref center, ref cross, ref colour);                
 
 		    } 

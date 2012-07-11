@@ -25,17 +25,17 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class CollisionAlgorithmConstructionInfo
+    public struct CollisionAlgorithmConstructionInfo
     {
-        public CollisionAlgorithmConstructionInfo()
+        public static CollisionAlgorithmConstructionInfo Default()
         {
-            m_dispatcher1 = null;
-            m_manifold = null;
+            return new CollisionAlgorithmConstructionInfo(null, 0);
         }
 
         public CollisionAlgorithmConstructionInfo(IDispatcher dispatcher, int temp)
         {
             m_dispatcher1 = dispatcher;
+            m_manifold = null;
             //(void)temp;
         }
 
@@ -86,6 +86,13 @@ namespace BulletXNA.BulletCollision
             m_dispatcher = ci.GetDispatcher();
             ++BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
+
+        public virtual void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            m_dispatcher = ci.GetDispatcher();
+            ++BulletGlobals.s_collisionAlgorithmInstanceCount;
+        }
+
 
         public abstract void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 

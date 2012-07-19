@@ -446,7 +446,7 @@ namespace BulletXNA.BulletCollision
                 }
 
                 colAlgo.ProcessCollision(m_convexBody, m_triBody, m_dispatchInfoPtr, m_resultOut);
-                colAlgo.Cleanup();
+                //colAlgo.Cleanup();
                 ci.GetDispatcher().FreeCollisionAlgorithm(colAlgo);
                 colAlgo = null;
 

@@ -253,8 +253,8 @@ namespace BulletXNA.BulletCollision
 
 					        IndexedVector3 minAabb2,maxAabb2;
 
-					        if(colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
-					        {
+                            if(GetDispatchInfo().m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject())
+ 					        {
                                 IndexedMatrix m = colObj.GetInterpolationWorldTransform();
                                 (colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
 

@@ -351,6 +351,7 @@ namespace BulletXNA.LinearMath
             output.Z = value1.Z - value2.Z;
         }
 
+
         public static void Add(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
         {
             output.X = value1.X + value2.X;

@@ -305,8 +305,10 @@ namespace BulletXNA.LinearMath
 
         public IndexedMatrix InverseTimes(ref IndexedMatrix t)
         {
-            IndexedVector3 v = t._origin - _origin;
-            return new IndexedMatrix(_basis.TransposeTimes(t._basis),
+            IndexedVector3 v = new IndexedVector3(t._origin.X - _origin.X, t._origin.Y - _origin.Y, t._origin.Z-_origin.Z);
+            IndexedVector3 v2 = new IndexedVector3();
+            IndexedBasisMatrix.Multiply(ref v2,ref _basis,ref v);
+            return new IndexedMatrix(_basis.TransposeTimes(ref t._basis),
 			        v * _basis);
         }
 

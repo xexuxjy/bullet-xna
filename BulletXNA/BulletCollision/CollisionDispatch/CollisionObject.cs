@@ -318,6 +318,10 @@ namespace BulletXNA.BulletCollision
             m_internalType = types;
         }
 
+        public void GetWorldTransform(out IndexedMatrix worldTransform)
+        {
+            worldTransform = m_worldTransform;
+        }
 
 
         public IndexedMatrix GetWorldTransform()

@@ -855,7 +855,7 @@ namespace BulletXNA.BulletCollision
                     }
             }
 
-            vertex *= m_localScaling;
+            IndexedVector3.Multiply(ref vertex,ref vertex , ref m_localScaling);
         }
 
 

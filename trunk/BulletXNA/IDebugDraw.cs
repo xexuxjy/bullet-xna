@@ -72,7 +72,8 @@ namespace BulletXNA.LinearMath
             float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees);
 
         void LoadContent();
-    
+
+  
     }
 
 

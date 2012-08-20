@@ -22,12 +22,21 @@
  */
 
 using BulletXNA.LinearMath;
+using System;
 
 namespace BulletXNA.BulletCollision
 {
-    public class GjkConvexCast : IConvexCast
+    public class GjkConvexCast : IConvexCast,IDisposable
     {
+        public GjkConvexCast() { } // for pool 
         public GjkConvexCast(ConvexShape convexA, ConvexShape convexB, ISimplexSolverInterface simplexSolver)
+        {
+            m_convexA = convexA;
+            m_convexB = convexB;
+            m_simplexSolver = simplexSolver;
+        }
+
+        public void Initialize(ConvexShape convexA, ConvexShape convexB, ISimplexSolverInterface simplexSolver)
         {
             m_convexA = convexA;
             m_convexB = convexB;
@@ -167,6 +176,11 @@ namespace BulletXNA.BulletCollision
                 }
             }
             return false;
+        }
+
+        public void Dispose()
+        {
+            BulletGlobals.GjkConvexCastPool.Free(this);
         }
 
         private ISimplexSolverInterface m_simplexSolver;

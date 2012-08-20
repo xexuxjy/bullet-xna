@@ -305,8 +305,18 @@ namespace BulletXNA.LinearMath
 
         public static IndexedVector3 operator *(IndexedBasisMatrix m, IndexedVector3 v)
         {
-            return new IndexedVector3(m._el0.Dot(ref v), m._el1.Dot(ref v), m._el2.Dot(ref v));
+            return new IndexedVector3(m._el0.X * v.X + m._el0.Y * v.Y + m._el0.Z * v.Z,
+            m._el1.X * v.X + m._el1.Y * v.Y + m._el1.Z * v.Z,
+            m._el2.X * v.X + m._el2.Y * v.Y + m._el2.Z * v.Z);
         }
+
+        public static void Multiply(ref IndexedVector3 vout, ref IndexedBasisMatrix m, ref IndexedVector3 v)
+        {
+            vout = new IndexedVector3(m._el0.X * v.X + m._el0.Y * v.Y + m._el0.Z * v.Z,
+            m._el1.X * v.X + m._el1.Y * v.Y + m._el1.Z * v.Z,
+            m._el2.X * v.X + m._el2.Y * v.Y + m._el2.Z * v.Z);
+        }
+
 
         public static IndexedVector3 operator *(IndexedVector3 v, IndexedBasisMatrix m)
         {

@@ -238,6 +238,12 @@ namespace BulletXNADemos.Demos
 
         }
 
+        public void DrawFrustum(Microsoft.Xna.Framework.BoundingFrustum frustum)
+        {
+
+        }
+
+
         public void DrawSolidCube(ref IndexedVector3 halfExtents, ref IndexedMatrix matrix, ref IndexedMatrix view, ref IndexedMatrix projection, ref IndexedVector3 color)
         {
 			ModelScalingData modelScalingData = new ModelScalingData(m_cubeModel,halfExtents,matrix);
@@ -759,7 +765,7 @@ namespace BulletXNADemos.Demos
         
         public void RenderOthers(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
-
+            return;
             m_spriteBatch.Begin();
             for (int i = 0; i < m_textPositionColours.Count; ++i)
             {

@@ -128,7 +128,11 @@ namespace BulletXNA
         public static PooledType<ManifoldResult> ManifoldResultPool = new PooledType<ManifoldResult>();
         public static PooledType<GJK> GJKPool = new PooledType<GJK>();
         public static PooledType<GIM_ShapeRetriever> GIM_ShapeRetrieverPool = new PooledType<GIM_ShapeRetriever>();
-
+        public static PooledType<TriangleShape> TriangleShapePool = new PooledType<TriangleShape>();
+        public static PooledType<SphereTriangleDetector> SphereTriangleDetectorPool = new PooledType<SphereTriangleDetector>();
+        public static PooledType<CompoundLeafCallback> CompoundLeafCallbackPool = new PooledType<CompoundLeafCallback>();
+        public static PooledType<GjkConvexCast> GjkConvexCastPool = new PooledType<GjkConvexCast>();
+        public static PooledType<LocalTriangleSphereCastCallback> LocalTriangleSphereCastCallbackPool = new PooledType<LocalTriangleSphereCastCallback>();
 
 
         public const bool debugRigidBody = true;

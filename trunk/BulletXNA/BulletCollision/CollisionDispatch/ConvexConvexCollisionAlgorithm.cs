@@ -49,6 +49,8 @@ namespace BulletXNA.BulletCollision
         ///cache separating vector to speedup collision detection
 
         bool disableCcd = false;
+        ObjectArray<IndexedVector3> m_vertices = new ObjectArray<IndexedVector3>();
+
 
         public ConvexConvexAlgorithm() { } // for pool
 
@@ -255,11 +257,11 @@ namespace BulletXNA.BulletCollision
                             //we can also deal with convex versus triangle (without connectivity data)
                             if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetShapeType() == BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE)
                             {
-                                ObjectArray<IndexedVector3> vertices = new ObjectArray<IndexedVector3>();
+                                m_vertices.Clear();
                                 TriangleShape tri = polyhedronB as TriangleShape;
-                                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
-                                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
-                                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
 
                                 float threshold = m_manifoldPtr.GetContactBreakingThreshold();
                                 IndexedVector3 sepNormalWorldSpace = new IndexedVector3(0, 1, 0); ;
@@ -302,7 +304,7 @@ namespace BulletXNA.BulletCollision
                                 if (foundSepAxis)
                                 {
                                     PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(),
-                                        body0.GetWorldTransform(), vertices, minDist - threshold, maxDist, resultOut);
+                                        body0.GetWorldTransform(), m_vertices, minDist - threshold, maxDist, resultOut);
                                 }
 
                                 if (m_ownManifold)
@@ -469,30 +471,33 @@ namespace BulletXNA.BulletCollision
                 VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(convex0, sphere1, voronoiSimplex);
-                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
-                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                using (GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
                 {
+                    ccd1.Initialize(convex0, sphere1, voronoiSimplex);
+                    //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                    if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                        body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                    {
 
-                    //store result.m_fraction in both bodies
+                        //store result.m_fraction in both bodies
 
-                    if (body0.GetHitFraction() > result.m_fraction)
-                    {
-                        body0.SetHitFraction(result.m_fraction);
+                        if (body0.GetHitFraction() > result.m_fraction)
+                        {
+                            body0.SetHitFraction(result.m_fraction);
+                        }
+                        if (body1.GetHitFraction() > result.m_fraction)
+                        {
+                            body1.SetHitFraction(result.m_fraction);
+                        }
+                        if (resultFraction > result.m_fraction)
+                        {
+                            resultFraction = result.m_fraction;
+                        }
                     }
-                    if (body1.GetHitFraction() > result.m_fraction)
-                    {
-                        body1.SetHitFraction(result.m_fraction);
-                    }
-                    if (resultFraction > result.m_fraction)
-                    {
-                        resultFraction = result.m_fraction;
-                    }
+                    BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                    BulletGlobals.SphereShapePool.Free(sphere1);
+                    result.Cleanup();
                 }
-                BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
-                BulletGlobals.SphereShapePool.Free(sphere1);
-                result.Cleanup();
             }
 
             /// Sphere (for convex0) against Convex1
@@ -505,31 +510,33 @@ namespace BulletXNA.BulletCollision
                 VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(sphere0, convex1, voronoiSimplex);
-                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
-                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                using (GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
                 {
+                    ccd1.Initialize(sphere0, convex1, voronoiSimplex);
+                    //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                    if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                        body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                    {
 
-                    //store result.m_fraction in both bodies
+                        //store result.m_fraction in both bodies
 
-                    if (body0.GetHitFraction() > result.m_fraction)
-                    {
-                        body0.SetHitFraction(result.m_fraction);
+                        if (body0.GetHitFraction() > result.m_fraction)
+                        {
+                            body0.SetHitFraction(result.m_fraction);
+                        }
+                        if (body1.GetHitFraction() > result.m_fraction)
+                        {
+                            body1.SetHitFraction(result.m_fraction);
+                        }
+                        if (resultFraction > result.m_fraction)
+                        {
+                            resultFraction = result.m_fraction;
+                        }
                     }
-                    if (body1.GetHitFraction() > result.m_fraction)
-                    {
-                        body1.SetHitFraction(result.m_fraction);
-                    }
-                    if (resultFraction > result.m_fraction)
-                    {
-                        resultFraction = result.m_fraction;
-                    }
+                    BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                    BulletGlobals.SphereShapePool.Free(sphere0);
+                    result.Cleanup();
                 }
-                BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
-                BulletGlobals.SphereShapePool.Free(sphere0);
-                result.Cleanup();
-
             }
 
             return resultFraction;

@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
+using System;
 
 namespace BulletXNA.BulletCollision
 {
@@ -132,94 +133,97 @@ namespace BulletXNA.BulletCollision
 
             Dbvt tree = compoundShape.GetDynamicAabbTree();
             //use a dynamic aabb tree to cull potential child-overlaps
-            CompoundLeafCallback callback = new CompoundLeafCallback(colObj, otherObj, m_dispatcher, dispatchInfo, resultOut,this, m_childCollisionAlgorithms, m_sharedManifold);
-
-            ///we need to refresh all contact manifolds
-            ///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep
-            ///so we should add a 'refreshManifolds' in the btCollisionAlgorithm
+            using (CompoundLeafCallback callback = BulletGlobals.CompoundLeafCallbackPool.Get())
             {
-                PersistentManifoldArray manifoldArray = new PersistentManifoldArray();
-                for (int i = 0; i < m_childCollisionAlgorithms.Count; i++)
+                callback.Initialize(colObj, otherObj, m_dispatcher, dispatchInfo, resultOut, this, m_childCollisionAlgorithms, m_sharedManifold);
+
+                ///we need to refresh all contact manifolds
+                ///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep
+                ///so we should add a 'refreshManifolds' in the btCollisionAlgorithm
                 {
-                    if (m_childCollisionAlgorithms[i] != null)
+                    m_manifoldArray.Clear();
+                    for (int i = 0; i < m_childCollisionAlgorithms.Count; i++)
                     {
-                        m_childCollisionAlgorithms[i].GetAllContactManifolds(manifoldArray);
-                        for (int m = 0; m < manifoldArray.Count; m++)
+                        if (m_childCollisionAlgorithms[i] != null)
                         {
-                            if (manifoldArray[m].GetNumContacts() > 0)
+                            m_childCollisionAlgorithms[i].GetAllContactManifolds(m_manifoldArray);
+                            for (int m = 0; m < m_manifoldArray.Count; m++)
                             {
-                                resultOut.SetPersistentManifold(manifoldArray[m]);
-                                resultOut.RefreshContactPoints();
-                                resultOut.SetPersistentManifold(null);//??necessary?
+                                if (m_manifoldArray[m].GetNumContacts() > 0)
+                                {
+                                    resultOut.SetPersistentManifold(m_manifoldArray[m]);
+                                    resultOut.RefreshContactPoints();
+                                    resultOut.SetPersistentManifold(null);//??necessary?
+                                }
                             }
+                            m_manifoldArray.Clear();
                         }
-                        manifoldArray.Clear();
                     }
                 }
-            }
 
-            if (tree != null)
-            {
-
-                IndexedVector3 localAabbMin;
-                IndexedVector3 localAabbMax;
-                IndexedMatrix otherInCompoundSpace;
-                //otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
-                otherInCompoundSpace = colObj.GetWorldTransform().Inverse() * otherObj.GetWorldTransform();
-
-                otherObj.GetCollisionShape().GetAabb(ref otherInCompoundSpace, out localAabbMin, out localAabbMax);
-
-                DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
-                //process all children, that overlap with  the given AABB bounds
-                Dbvt.CollideTV(tree.m_root, ref bounds, callback);
-
-            }
-            else
-            {
-                //iterate over all children, perform an AABB check inside ProcessChildShape
-                int numChildren = m_childCollisionAlgorithms.Count;
-                for (int i = 0; i < numChildren; i++)
+                if (tree != null)
                 {
-                    callback.ProcessChildShape(compoundShape.GetChildShape(i), i);
+
+                    IndexedVector3 localAabbMin;
+                    IndexedVector3 localAabbMax;
+                    IndexedMatrix otherInCompoundSpace;
+                    //otherInCompoundSpace = MathUtil.BulletMatrixMultiply(colObj.GetWorldTransform(),otherObj.GetWorldTransform());
+                    otherInCompoundSpace = colObj.GetWorldTransform().Inverse() * otherObj.GetWorldTransform();
+
+                    otherObj.GetCollisionShape().GetAabb(ref otherInCompoundSpace, out localAabbMin, out localAabbMax);
+
+                    DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
+                    //process all children, that overlap with  the given AABB bounds
+                    Dbvt.CollideTV(tree.m_root, ref bounds, callback);
+
                 }
-            }
-
-            {
-                //iterate over all children, perform an AABB check inside ProcessChildShape
-                int numChildren = m_childCollisionAlgorithms.Count;
-
-                PersistentManifoldArray manifoldArray = new PersistentManifoldArray();
-                CollisionShape childShape = null;
-                IndexedMatrix orgTrans;
-                IndexedMatrix orgInterpolationTrans;
-                IndexedMatrix newChildWorldTrans;
-
-
-                for (int i = 0; i < numChildren; i++)
+                else
                 {
-                    if (m_childCollisionAlgorithms[i] != null)
+                    //iterate over all children, perform an AABB check inside ProcessChildShape
+                    int numChildren = m_childCollisionAlgorithms.Count;
+                    for (int i = 0; i < numChildren; i++)
                     {
-                        childShape = compoundShape.GetChildShape(i);
-                        //if not longer overlapping, remove the algorithm
-                        orgTrans = colObj.GetWorldTransform();
-                        orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
-                        IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
+                        callback.ProcessChildShape(compoundShape.GetChildShape(i), i);
+                    }
+                }
 
-                        newChildWorldTrans = orgTrans * childTrans;
+                {
+                    //iterate over all children, perform an AABB check inside ProcessChildShape
+                    int numChildren = m_childCollisionAlgorithms.Count;
 
-                        //perform an AABB check first
-                        IndexedVector3 aabbMin0;
-                        IndexedVector3 aabbMax0;
-                        IndexedVector3 aabbMin1;
-                        IndexedVector3 aabbMax1;
+                    m_manifoldArray.Clear();
+                    CollisionShape childShape = null;
+                    IndexedMatrix orgTrans;
+                    IndexedMatrix orgInterpolationTrans;
+                    IndexedMatrix newChildWorldTrans;
 
-                        childShape.GetAabb(ref newChildWorldTrans, out aabbMin0, out aabbMax0);
-                        otherObj.GetCollisionShape().GetAabb(otherObj.GetWorldTransform(), out aabbMin1, out aabbMax1);
 
-                        if (!AabbUtil2.TestAabbAgainstAabb2(ref aabbMin0, ref aabbMax0, ref aabbMin1, ref aabbMax1))
+                    for (int i = 0; i < numChildren; i++)
+                    {
+                        if (m_childCollisionAlgorithms[i] != null)
                         {
-                            m_dispatcher.FreeCollisionAlgorithm(m_childCollisionAlgorithms[i]);
-                            m_childCollisionAlgorithms[i] = null;
+                            childShape = compoundShape.GetChildShape(i);
+                            //if not longer overlapping, remove the algorithm
+                            orgTrans = colObj.GetWorldTransform();
+                            orgInterpolationTrans = colObj.GetInterpolationWorldTransform();
+                            IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
+
+                            newChildWorldTrans = orgTrans * childTrans;
+
+                            //perform an AABB check first
+                            IndexedVector3 aabbMin0;
+                            IndexedVector3 aabbMax0;
+                            IndexedVector3 aabbMin1;
+                            IndexedVector3 aabbMax1;
+
+                            childShape.GetAabb(ref newChildWorldTrans, out aabbMin0, out aabbMax0);
+                            otherObj.GetCollisionShape().GetAabb(otherObj.GetWorldTransform(), out aabbMin1, out aabbMax1);
+
+                            if (!AabbUtil2.TestAabbAgainstAabb2(ref aabbMin0, ref aabbMax0, ref aabbMin1, ref aabbMax1))
+                            {
+                                m_dispatcher.FreeCollisionAlgorithm(m_childCollisionAlgorithms[i]);
+                                m_childCollisionAlgorithms[i] = null;
+                            }
                         }
                     }
                 }
@@ -296,6 +300,8 @@ namespace BulletXNA.BulletCollision
 
 
         private IList<CollisionAlgorithm> m_childCollisionAlgorithms = new List<CollisionAlgorithm>();
+        private PersistentManifoldArray m_manifoldArray = new PersistentManifoldArray();
+
         private bool m_isSwapped;
 
         private PersistentManifold m_sharedManifold;
@@ -305,7 +311,7 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public class CompoundLeafCallback : DefaultCollide
+    public class CompoundLeafCallback : DefaultCollide, IDisposable
     {
         public CollisionObject m_compoundColObj;
         public CollisionObject m_otherObj;
@@ -316,6 +322,7 @@ namespace BulletXNA.BulletCollision
         public PersistentManifold m_sharedManifold;
         public CompoundCollisionAlgorithm m_parent;
 
+        public CompoundLeafCallback() { } // for pool
         public CompoundLeafCallback(CollisionObject compoundObj, CollisionObject otherObj, IDispatcher dispatcher, DispatcherInfo dispatchInfo, ManifoldResult resultOut, CompoundCollisionAlgorithm parent,IList<CollisionAlgorithm> childCollisionAlgorithms, PersistentManifold sharedManifold)
         {
             m_compoundColObj = compoundObj;
@@ -327,6 +334,19 @@ namespace BulletXNA.BulletCollision
             m_sharedManifold = sharedManifold;
             m_parent = parent;
         }
+
+        public void Initialize(CollisionObject compoundObj, CollisionObject otherObj, IDispatcher dispatcher, DispatcherInfo dispatchInfo, ManifoldResult resultOut, CompoundCollisionAlgorithm parent, IList<CollisionAlgorithm> childCollisionAlgorithms, PersistentManifold sharedManifold)
+        {
+            m_compoundColObj = compoundObj;
+            m_otherObj = otherObj;
+            m_dispatcher = dispatcher;
+            m_dispatchInfo = dispatchInfo;
+            m_resultOut = resultOut;
+            m_childCollisionAlgorithms = childCollisionAlgorithms;
+            m_sharedManifold = sharedManifold;
+            m_parent = parent;
+        }
+
 
         public void ProcessChildShape(CollisionShape childShape, int index)
         {
@@ -410,6 +430,15 @@ namespace BulletXNA.BulletCollision
             }
             ProcessChildShape(childShape, index);
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            BulletGlobals.CompoundLeafCallbackPool.Free(this);
+        }
+
+        #endregion
     }
 
     public class CompoundCreateFunc : CollisionAlgorithmCreateFunc

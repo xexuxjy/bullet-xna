@@ -26,10 +26,17 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface
+    public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface,IDisposable
     {
-
+        public SphereTriangleDetector() { } // for pool
         public SphereTriangleDetector(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
+        {
+            m_sphere = sphere;
+            m_triangle = triangle;
+            m_contactBreakingThreshold = contactBreakingThreshold;
+        }
+
+        public void Initialize(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
         {
             m_sphere = sphere;
             m_triangle = triangle;
@@ -42,10 +49,18 @@ namespace BulletXNA.BulletCollision
 
             float radius = m_sphere.GetRadius();
             float radiusWithThreshold = radius + contactBreakingThreshold;
+            IndexedVector3 v1 = new IndexedVector3();
+            IndexedVector3.Subtract(ref v1,ref vertices[1],ref vertices[0]);
+            IndexedVector3 v2 = new IndexedVector3();
+            IndexedVector3.Subtract(ref v2,ref vertices[2],ref vertices[0]);
 
-            IndexedVector3 normal = IndexedVector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+            IndexedVector3 normal = new IndexedVector3(v1.Y * v2.Z - v1.Z * v2.Y,v1.Z * v2.X - v1.X * v2.Z,v1.X * v2.Y - v1.Y * v2.X);
+
+            //IndexedVector3 normal = IndexedVector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+
             normal.Normalize();
-            IndexedVector3 p1ToCentre = sphereCenter - vertices[0];
+            IndexedVector3 p1ToCentre = new IndexedVector3();
+            IndexedVector3.Subtract(ref p1ToCentre,ref sphereCenter,ref vertices[0]);
             float distanceFromPlane = IndexedVector3.Dot(ref p1ToCentre, ref normal);
 
             if (distanceFromPlane < 0f)
@@ -227,6 +242,13 @@ namespace BulletXNA.BulletCollision
         private TriangleShape m_triangle;
         private float m_contactBreakingThreshold;
         private const float MAX_OVERLAP = 0f;
+
+
+
+        public void Dispose()
+        {
+            BulletGlobals.SphereTriangleDetectorPool.Free(this);
+        }
 
     }
 }

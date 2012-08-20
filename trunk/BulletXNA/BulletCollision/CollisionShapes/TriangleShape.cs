@@ -28,7 +28,7 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class TriangleShape : PolyhedralConvexShape
+    public class TriangleShape : PolyhedralConvexShape , IDisposable
     {
 
         public TriangleShape()
@@ -51,6 +51,13 @@ namespace BulletXNA.BulletCollision
             m_vertices1[2] = p2;
         }
 
+        public void Initialize(ref IndexedVector3 p0,ref IndexedVector3 p1,ref IndexedVector3 p2)
+        {
+            m_shapeType = BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE;
+            m_vertices1[0] = p0;
+            m_vertices1[1] = p1;
+            m_vertices1[2] = p2;
+        }
 
         public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)
 	    {
@@ -192,6 +199,11 @@ namespace BulletXNA.BulletCollision
                 supportVerticesOut[i] = new IndexedVector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
 		    }
 	    }
+
+        public void Dispose()
+        {
+            BulletGlobals.TriangleShapePool.Free(this);
+        }
 
         public IndexedVector3[] m_vertices1 = new IndexedVector3[3];
     }

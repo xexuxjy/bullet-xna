@@ -83,23 +83,27 @@ namespace BulletXNA.BulletCollision
             CollisionObject triObj = m_swapped ? body0 : body1;
 
             SphereShape sphere = sphereObj.GetCollisionShape() as SphereShape;
-            TriangleShape triangle = (TriangleShape)triObj.GetCollisionShape();
+            TriangleShape triangle = triObj.GetCollisionShape() as TriangleShape;
 
             /// report a contact. internally this will be kept persistent, and contact reduction is done
             resultOut.SetPersistentManifold(m_manifoldPtr);
-            SphereTriangleDetector detector = new SphereTriangleDetector(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
-            ClosestPointInput input = ClosestPointInput.Default();
-            input.m_maximumDistanceSquared = float.MaxValue;
-            input.m_transformA = sphereObj.GetWorldTransform();
-            input.m_transformB = triObj.GetWorldTransform();
-
-            bool swapResults = m_swapped;
-
-            detector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
-
-            if (m_ownManifold)
+            using (SphereTriangleDetector detector = BulletGlobals.SphereTriangleDetectorPool.Get())
             {
-                resultOut.RefreshContactPoints();
+
+                detector.Initialize(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
+                ClosestPointInput input = ClosestPointInput.Default();
+                input.m_maximumDistanceSquared = float.MaxValue;
+                sphereObj.GetWorldTransform(out input.m_transformA);
+                triObj.GetWorldTransform(out input.m_transformB);
+
+                bool swapResults = m_swapped;
+
+                detector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
+
+                if (m_ownManifold)
+                {
+                    resultOut.RefreshContactPoints();
+                }
             }
         }
 

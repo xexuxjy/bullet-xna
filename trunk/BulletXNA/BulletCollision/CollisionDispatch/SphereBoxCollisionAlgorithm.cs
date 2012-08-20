@@ -130,42 +130,39 @@ namespace BulletXNA.BulletCollision
         public float GetSphereDistance(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius)
         {
             float margins;
-            IndexedVector3[] bounds = new IndexedVector3[2];
             BoxShape boxShape = boxObj.GetCollisionShape() as BoxShape;
 
-            bounds[0] = -boxShape.GetHalfExtentsWithoutMargin();
-            bounds[1] = boxShape.GetHalfExtentsWithoutMargin();
+            m_sphereBoundsBoundsArray[0] = -boxShape.GetHalfExtentsWithoutMargin();
+            m_sphereBoundsBoundsArray[1] = boxShape.GetHalfExtentsWithoutMargin();
 
             margins = boxShape.GetMargin();//also add sphereShape margin?
 
             IndexedMatrix m44T = boxObj.GetWorldTransform();
 
-            IndexedVector3[] boundsVec = new IndexedVector3[2];
             float fPenetration;
 
-            boundsVec[0] = bounds[0];
-            boundsVec[1] = bounds[1];
+            m_sphereBoundsBoundsArray2[0] = m_sphereBoundsBoundsArray[0];
+            m_sphereBoundsBoundsArray2[1] = m_sphereBoundsBoundsArray[1];
 
             IndexedVector3 marginsVec = new IndexedVector3(margins);
 
             // add margins
-            bounds[0] += marginsVec;
-            bounds[1] -= marginsVec;
+            m_sphereBoundsBoundsArray[0] += marginsVec;
+            m_sphereBoundsBoundsArray[1] -= marginsVec;
 
             /////////////////////////////////////////////////
 
             IndexedVector3 tmp, prel, normal, v3P;
-            IndexedVector3[] n = new IndexedVector3[6];
 
             float fSep = 10000000.0f;
             float fSepThis;
 
-            n[0] = new IndexedVector3(-1, 0, 0);
-            n[1] = new IndexedVector3(0, -1, 0);
-            n[2] = new IndexedVector3(0, 0, -1);
-            n[3] = new IndexedVector3(1, 0, 0);
-            n[4] = new IndexedVector3(0, 1, 0);
-            n[5] = new IndexedVector3(0, 0, 1);
+            m_sphereBoundsNArray[0] = new IndexedVector3(-1, 0, 0);
+            m_sphereBoundsNArray[1] = new IndexedVector3(0, -1, 0);
+            m_sphereBoundsNArray[2] = new IndexedVector3(0, 0, -1);
+            m_sphereBoundsNArray[3] = new IndexedVector3(1, 0, 0);
+            m_sphereBoundsNArray[4] = new IndexedVector3(0, 1, 0);
+            m_sphereBoundsNArray[5] = new IndexedVector3(0, 0, 1);
 
             // convert  point in local space
             MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
@@ -177,10 +174,10 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < 6; i++)
             {
                 int j = i < 3 ? 0 : 1;
-                fSepThis = IndexedVector3.Dot((v3P - bounds[j]), n[i]);
+                fSepThis = IndexedVector3.Dot((v3P - m_sphereBoundsBoundsArray[j]), m_sphereBoundsNArray[i]);
                 if (fSepThis != 0f)
                 {
-                    v3P = v3P - n[i] * fSepThis;
+                    v3P = v3P - m_sphereBoundsNArray[i] * fSepThis;
                     bFound = true;
                 }
             }
@@ -189,8 +186,8 @@ namespace BulletXNA.BulletCollision
 
             if (bFound)
             {
-                bounds[0] = boundsVec[0];
-                bounds[1] = boundsVec[1];
+                m_sphereBoundsBoundsArray[0] = m_sphereBoundsBoundsArray2[0];
+                m_sphereBoundsBoundsArray[1] = m_sphereBoundsBoundsArray2[1];
 
                 normal = (prel - v3P);
                 normal.Normalize();
@@ -223,10 +220,10 @@ namespace BulletXNA.BulletCollision
             //////////////////////////////////////////////////
             // Deep penetration case
 
-            fPenetration = GetSpherePenetration(boxObj, ref v3PointOnBox, ref v3PointOnSphere, ref v3SphereCenter, fRadius, ref bounds[0], ref bounds[1]);
+            fPenetration = GetSpherePenetration(boxObj, ref v3PointOnBox, ref v3PointOnSphere, ref v3SphereCenter, fRadius, ref m_sphereBoundsBoundsArray[0], ref m_sphereBoundsBoundsArray[1]);
 
-            bounds[0] = boundsVec[0];
-            bounds[1] = boundsVec[1];
+            m_sphereBoundsBoundsArray[0] = m_sphereBoundsBoundsArray2[0];
+            m_sphereBoundsBoundsArray[1] = m_sphereBoundsBoundsArray2[1];
 
             if (fPenetration <= 0f)
             {
@@ -240,13 +237,10 @@ namespace BulletXNA.BulletCollision
 
         public float GetSpherePenetration(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-            IndexedVector3[] bounds = new IndexedVector3[2];
-
-            bounds[0] = aabbMin;
-            bounds[1] = aabbMax;
+            m_spherePenetrationBoundsArray[0] = aabbMin;
+            m_spherePenetrationBoundsArray[1] = aabbMax;
 
             IndexedVector3 p0, tmp, prel, normal;
-            IndexedVector3[] n = new IndexedVector3[6];
             float fSep = -10000000.0f;
             float fSepThis;
 
@@ -254,12 +248,12 @@ namespace BulletXNA.BulletCollision
             p0 = IndexedVector3.Zero;
             normal = IndexedVector3.Zero;
 
-            n[0] = new IndexedVector3(-1, 0, 0);
-            n[1] = new IndexedVector3(0, -1, 0);
-            n[2] = new IndexedVector3(0, 0, -1);
-            n[3] = new IndexedVector3(1, 0, 0);
-            n[4] = new IndexedVector3(0, 1, 0);
-            n[5] = new IndexedVector3(0, 0, 1);
+            m_spherePenetrationNArray[0] = new IndexedVector3(-1, 0, 0);
+            m_spherePenetrationNArray[1] = new IndexedVector3(0, -1, 0);
+            m_spherePenetrationNArray[2] = new IndexedVector3(0, 0, -1);
+            m_spherePenetrationNArray[3] = new IndexedVector3(1, 0, 0);
+            m_spherePenetrationNArray[4] = new IndexedVector3(0, 1, 0);
+            m_spherePenetrationNArray[5] = new IndexedVector3(0, 0, 1);
 
             IndexedMatrix m44T = boxObj.GetWorldTransform();
 
@@ -272,14 +266,14 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < 6; i++)
             {
                 int j = i < 3 ? 0 : 1;
-                if ((fSepThis = (IndexedVector3.Dot((prel - bounds[j]), n[i])) - fRadius) > 0f)
+                if ((fSepThis = (IndexedVector3.Dot((prel - m_spherePenetrationBoundsArray[j]), m_spherePenetrationNArray[i])) - fRadius) > 0f)
                 {
                     return 1f;
                 }
                 if (fSepThis > fSep)
                 {
-                    p0 = bounds[j];
-                    normal = n[i];
+                    p0 = m_spherePenetrationBoundsArray[j];
+                    normal = m_spherePenetrationNArray[i];
                     fSep = fSepThis;
                 }
             }
@@ -302,6 +296,11 @@ namespace BulletXNA.BulletCollision
         private bool m_ownManifold;
         private PersistentManifold m_manifoldPtr;
         private bool m_isSwapped;
+        private IndexedVector3[] m_sphereBoundsBoundsArray = new IndexedVector3[2];
+        private IndexedVector3[] m_sphereBoundsBoundsArray2 = new IndexedVector3[2];
+        private IndexedVector3[] m_sphereBoundsNArray = new IndexedVector3[6];
+        private IndexedVector3[] m_spherePenetrationBoundsArray = new IndexedVector3[2];
+        private IndexedVector3[] m_spherePenetrationNArray = new IndexedVector3[6];
 
     }
 }

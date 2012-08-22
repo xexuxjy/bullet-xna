@@ -87,6 +87,7 @@ namespace BulletXNADemos.Demos
 			BoxShape boardBack = new BoxShape(boardBackExtents);
 			BoxShape boardSide = new BoxShape(boardSideExtents);
 			BoxShape boardBar = new BoxShape(boardTopExtents);
+			PlaneShape boardFront = new PlaneShape(new IndexedVector(0,0,-1),1);
 			
 			CapsuleShape pinShape = new CapsuleShape(pinExtent);
 			
@@ -98,6 +99,9 @@ namespace BulletXNADemos.Demos
 			float mass = 0f;
 			
 			LocalCreateRigidBody(mass,trans,boardBack);
+			LocalCreateRigidBody(mass,trans,boardFront);
+			
+			
 			IndexedVector leftSide = new IndexedVector(boardCenter.X-boardBackExtents.X+boardSideExtent.X,boardCenter.Y,boardCenter.Z);
 			IndexedVector rightSide = new IndexedVector(boardCenter.X+boardBackExtents.X-boardSideExtent.X,boardCenter.Y,boardCenter.Z);
 
@@ -128,7 +132,14 @@ namespace BulletXNADemos.Demos
 			{
 				for(int j=0;j<numPinsY;++j)
 				{
-					trans = IndexedMatrix.CreateTranslation(topLeft+new IndexedVector3(pinSpacer.X*i,pinSpacer.Y*j,pinSpacer.Z));
+					IndexedVector3 pos = new IndexedVector3(pinSpacer.X*i,pinSpacer.Y*j,pinSpacer.Z);
+					// stagger rows.
+					if(i % 2 == 1)
+					{
+						pos.X + pinSpacer.X;
+					}
+				
+					trans = IndexedMatrix.CreateTranslation(topLeft+pos );
 					LocalCreateRigidBody(mass,trans,pinShape);
 				}
 			}

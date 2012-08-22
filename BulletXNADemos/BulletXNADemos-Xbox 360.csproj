@@ -83,6 +83,7 @@
     <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
+    <Compile Include="Demos\Pachinko.cs" />
     <Compile Include="Demos\PyramidDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
     <Compile Include="Demos\SimpleCompoundDemo.cs" />

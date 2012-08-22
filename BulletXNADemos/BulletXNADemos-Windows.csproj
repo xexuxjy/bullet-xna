@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.TerrainDemo</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.Pachinko</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>
@@ -128,6 +128,7 @@
     <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
+    <Compile Include="Demos\Pachinko.cs" />
     <Compile Include="Demos\PyramidDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
     <Compile Include="Demos\SimpleCompoundDemo.cs" />

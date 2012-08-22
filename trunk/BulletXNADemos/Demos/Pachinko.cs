@@ -28,6 +28,8 @@ using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
 using BulletXNA.LinearMath;
 using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace BulletXNADemos.Demos
 {
@@ -40,7 +42,10 @@ namespace BulletXNADemos.Demos
         public override void InitializeDemo()
         {
             //maxiterations = 10;
-            SetCameraDistance(SCALING * 50f);
+            SetCameraDistance(100f);
+            m_cameraTargetPosition = new IndexedVector3();
+            m_cameraPosition = new IndexedVector3(0, 0, -m_cameraDistance);
+
 
             //string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
             //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
@@ -72,80 +77,116 @@ namespace BulletXNADemos.Demos
         }
 
 
-		private void BuildBoard()
-		{
-			IndexedVector3 boardBackExtents = new IndexedVector(40,40,1) /2f;
-			IndexedVector3 boardSideExtent = new IndexedVector(1,40,1) /2f;
-			IndexedVector3 boardBarExtent = new IndexedVector(40,1,1)/2f;
-			IndexedVector3 pinExtent = new IndexedVector(0.5f,0.5f,1f);
+		    private void BuildBoard()
+		    {
+			    IndexedVector3 boardBackExtents = new IndexedVector3(40,40,2) /2f;
+			    IndexedVector3 boardSideExtents = new IndexedVector3(1,40,2) /2f;
+			    IndexedVector3 boardBarExtents = new IndexedVector3(40,1,2)/2f;
+			    IndexedVector3 pinExtent = new IndexedVector3(0.5f,1f,2f);
 			
 			
-			IndexedVector3 boardCenter = new IndexedVector3(0,0,0);
+			    IndexedVector3 boardCenter = new IndexedVector3(0,0,0);
 			
-			// build frame.objects
+			    // build frame.objects
 			
-			BoxShape boardBack = new BoxShape(boardBackExtents);
-			BoxShape boardSide = new BoxShape(boardSideExtents);
-			BoxShape boardBar = new BoxShape(boardTopExtents);
-			PlaneShape boardFront = new PlaneShape(new IndexedVector(0,0,-1),1);
+			    BoxShape boardBack = new BoxShape(boardBackExtents);
+			    BoxShape boardSide = new BoxShape(boardSideExtents);
+			    BoxShape boardBar = new BoxShape(boardBarExtents);
+			    StaticPlaneShape boardFront = new StaticPlaneShape(new IndexedVector3(0,0,-1),-(boardBackExtents.Z+boardSideExtents.Z));
 			
-			CapsuleShape pinShape = new CapsuleShape(pinExtent);
-			
-			
-			
-			// now RB's
-			IndexedMatrix trans = IndexedMatrix.CreateTranslation(boardCenter);
-			
-			float mass = 0f;
-			
-			LocalCreateRigidBody(mass,trans,boardBack);
-			LocalCreateRigidBody(mass,trans,boardFront);
-			
-			
-			IndexedVector leftSide = new IndexedVector(boardCenter.X-boardBackExtents.X+boardSideExtent.X,boardCenter.Y,boardCenter.Z);
-			IndexedVector rightSide = new IndexedVector(boardCenter.X+boardBackExtents.X-boardSideExtent.X,boardCenter.Y,boardCenter.Z);
+			    CollisionShape pinShape = new CapsuleShapeZ(pinExtent.Y,pinExtent.Z);
+                //pinShape = new SphereShape(pinExtent.Y);
 
-			IndexedVector topBar = new IndexedVector(boardCenter.X,boardCenter.Y+boardBackExtent.Y - boardBarExtent.Y,boardCenter.Z);
-			IndexedVector bottomBar = new IndexedVector(boardCenter.X,boardCenter.Y-boardBackExtent.Y + boardBarExtent.Y,boardCenter.Z);
+                m_cameraUp = Vector3.Up;
 			
+			    // now RB's
+                Matrix m = Matrix.Identity;
+                IndexedMatrix trans = m;
+                trans._origin = boardCenter;
 			
-			trans = IndexedMatrix.CreateTranslation(leftSide);
-			LocalCreateRigidBody(mass,trans,boardSide);
-			trans = IndexedMatrix.CreateTranslation(RightSide);
-			LocalCreateRigidBody(mass,trans,boardSide);
-			trans = IndexedMatrix.CreateTranslation(topBar);
-			LocalCreateRigidBody(mass,trans,boardBar);
-			trans = IndexedMatrix.CreateTranslation(bottomBar);
-			LocalCreateRigidBody(mass,trans,boardBar);
+			    float mass = 0f;
 			
-			// now place the pins? (simple offset grid to start)
-			
-			int numPinsX = 8;
-			int numPinsY = 8;
-			
-			// fixme
-			IndexedVector3 pinTopLeft = new IndexedVector3(0,0,0);
-			IndexedVector3 pinSpacer = new IndexedVector3(1,1,0);
-			
-			
-			for(int i=0;i<numPinsX;++i)
-			{
-				for(int j=0;j<numPinsY;++j)
-				{
-					IndexedVector3 pos = new IndexedVector3(pinSpacer.X*i,pinSpacer.Y*j,pinSpacer.Z);
-					// stagger rows.
-					if(i % 2 == 1)
-					{
-						pos.X + pinSpacer.X;
-					}
-				
-					trans = IndexedMatrix.CreateTranslation(topLeft+pos );
-					LocalCreateRigidBody(mass,trans,pinShape);
-				}
-			}
-			
-		}
+			    LocalCreateRigidBody(mass,trans,boardBack);
+                LocalCreateRigidBody(mass, trans, boardFront);
 
+
+                IndexedVector3 leftSide = new IndexedVector3(boardCenter.X - boardBackExtents.X + boardSideExtents.X, boardCenter.Y, boardCenter.Z + boardSideExtents.Z);
+                IndexedVector3 rightSide = new IndexedVector3(boardCenter.X + boardBackExtents.X - boardSideExtents.X, boardCenter.Y, boardCenter.Z + boardSideExtents.Z);
+
+                IndexedVector3 topBar = new IndexedVector3(boardCenter.X, boardCenter.Y + boardBackExtents.Y - boardBarExtents.Y, boardCenter.Z + boardSideExtents.Z);
+                IndexedVector3 bottomBar = new IndexedVector3(boardCenter.X, boardCenter.Y - boardBackExtents.Y + boardBarExtents.Y, boardCenter.Z + boardSideExtents.Z);
+
+
+                trans._origin = leftSide;
+                LocalCreateRigidBody(mass, trans, boardSide);
+                trans._origin = rightSide;
+                LocalCreateRigidBody(mass, trans, boardSide);
+                trans._origin = topBar;
+                LocalCreateRigidBody(mass, trans, boardBar);
+                trans._origin = bottomBar;
+                LocalCreateRigidBody(mass, trans, boardBar);
+
+
+
+
+                // now place the pins? (simple offset grid to start)
+
+                int numPinsX = 8;
+                int numPinsY = 8;
+
+                // fixme
+                IndexedVector3 pinTopLeft = new IndexedVector3(-boardBackExtents.X + 4, boardBackExtents.Y - 5, boardCenter.Z + boardSideExtents.Z);
+                IndexedVector3 pinSpacer = new IndexedVector3(pinExtent.Y * 4f, -pinExtent.Y * 4f, 0);
+
+
+                
+                float ballRadius = 0.5f;
+                m_dropSphereShape = new SphereShape(ballRadius);
+
+                m_ballDropSpot = new Vector3(1f, pinTopLeft.Y + 1, boardCenter.Z + boardBackExtents.Z+ballRadius);
+                new SphereShape(0.95f);
+
+
+                trans._origin = pinTopLeft;
+
+                LocalCreateRigidBody(mass, trans, pinShape);
+
+
+                for (int i = 0; i < numPinsX; ++i)
+                {
+                    for (int j = 0; j < numPinsY; ++j)
+                    {
+                        IndexedVector3 pos = new IndexedVector3(pinSpacer.X * i, (pinSpacer.Y * j), pinSpacer.Z);
+                        // stagger rows.
+                        if (j % 2 == 1)
+                        {
+                            pos.X += pinSpacer.X/2f;
+                        }
+
+                        trans._origin = pinTopLeft + pos;
+                        LocalCreateRigidBody(mass, trans, pinShape);
+                    }
+                }
+			
+		    }
+
+        public void DropBall()
+        {
+            LocalCreateRigidBody(10f, IndexedMatrix.CreateTranslation(m_ballDropSpot), m_dropSphereShape);
+
+
+
+
+        }
+
+        public override void KeyboardCallback(Microsoft.Xna.Framework.Input.Keys key, int x, int y, GameTime gameTime, bool released, ref Microsoft.Xna.Framework.Input.KeyboardState newState, ref Microsoft.Xna.Framework.Input.KeyboardState oldState)
+        {
+            base.KeyboardCallback(key, x, y, gameTime, released, ref newState, ref oldState);
+            if (key == Keys.V && released)
+            {
+                DropBall();
+            }
+        }
 
 
         static void Main(string[] args)
@@ -155,6 +196,9 @@ namespace BulletXNADemos.Demos
                 game.Run();
             }
         }
+
+        private IndexedVector3 m_ballDropSpot;
+        private SphereShape m_dropSphereShape = null;
 
     }
 }

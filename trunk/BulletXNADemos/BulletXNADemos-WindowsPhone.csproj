@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Demos\BasicDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
+    <Compile Include="Demos\Pachinko.cs" />
     <Compile Include="Demos\XNA_ShapeDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDebug\MathUtilDebug.cs" />

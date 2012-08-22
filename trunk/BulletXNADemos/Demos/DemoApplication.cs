@@ -522,7 +522,7 @@ namespace BulletXNADemos.Demos
             IndexedQuaternion rot = new IndexedQuaternion(m_cameraUp, razi);
             
             IndexedVector3 eyePos = new IndexedVector3();
-            eyePos[m_forwardAxis] = -m_cameraDistance;
+            eyePos[m_forwardAxis] = m_cameraDistance;
 
             IndexedVector3 forward = eyePos;
             if (forward.LengthSquared() < MathUtil.SIMD_EPSILON)

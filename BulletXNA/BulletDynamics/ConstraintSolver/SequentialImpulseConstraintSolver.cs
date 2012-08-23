@@ -109,7 +109,7 @@ namespace BulletXNA.BulletDynamics
 
 
 			//solverConstraint.m_originalContactPoint = 0;
-
+            solverConstraint.m_originalContactPoint = null;
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
 
@@ -407,7 +407,7 @@ namespace BulletXNA.BulletDynamics
 					frictionConstraint2.m_appliedImpulse = 0f;
 					m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex + 1] = frictionConstraint2;
 				}
-				m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex] = frictionConstraint1;
+                //m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex] = frictionConstraint1;
 
 			}
 		}
@@ -485,7 +485,7 @@ namespace BulletXNA.BulletDynamics
 
                     // will create if needed.
                     SolverConstraint solverConstraint = m_tmpSolverContactConstraintPool[m_tmpSolverContactConstraintPool.Count];
-                    solverConstraint.Reset();
+                    //solverConstraint.Reset();
 
                     RigidBody rb0 = solverBodyA;//RigidBody.Upcast(colObj0);
 					RigidBody rb1 = solverBodyB;//RigidBody.Upcast(colObj1);

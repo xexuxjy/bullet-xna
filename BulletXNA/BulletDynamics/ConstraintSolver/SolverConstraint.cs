@@ -82,7 +82,7 @@ namespace BulletXNA.BulletDynamics
             m_solverBodyB = null;
             m_companionIdB = 0;
             m_originalContactPointConstraint = null;
-            m_originalContactPointConstraint = null;
+            m_originalContactPoint = null;
             m_rhs = 0f;
             m_cfm = 0;
             m_lowerLimit = 0f;

@@ -44,6 +44,9 @@ namespace BulletXNA.BulletCollision
         public BoxBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
             : base(ci)
         {
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
@@ -54,6 +57,8 @@ namespace BulletXNA.BulletCollision
         public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
             base.Initialize(ci);
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);

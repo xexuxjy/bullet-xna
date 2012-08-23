@@ -325,19 +325,8 @@ namespace BulletXNA.BulletCollision
         ///m_positionWorldOnA is redundant information, see getPositionWorldOnA(), but for clarity
         public IndexedVector3 m_positionWorldOnA;
         public IndexedVector3 m_positionWorldOnB;
-        private IndexedVector3 m_normalWorldOnB1;
+        public IndexedVector3 m_normalWorldOnB;
 
-        public IndexedVector3 m_normalWorldOnB
-        {
-            get
-            {
-                return m_normalWorldOnB1;
-            }
-            set
-            {
-                m_normalWorldOnB1 = value;
-            }
-        }
 
         public float m_distance1;
         public float m_combinedFriction;

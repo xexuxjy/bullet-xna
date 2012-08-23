@@ -33,9 +33,11 @@ namespace BulletXNA.BulletCollision
             : base(ci, col0, col1)
         {
             m_isSwapped = isSwapped;
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
-            
+
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(sphereObj, boxObj))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(sphereObj, boxObj);
@@ -48,6 +50,9 @@ namespace BulletXNA.BulletCollision
         {
             base.Initialize(ci, col0, col1);
             m_isSwapped = isSwapped;
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+
             CollisionObject sphereObj = m_isSwapped ? col1 : col0;
             CollisionObject boxObj = m_isSwapped ? col0 : col1;
 
@@ -85,24 +90,21 @@ namespace BulletXNA.BulletCollision
             CollisionObject sphereObj = m_isSwapped ? body1 : body0;
             CollisionObject boxObj = m_isSwapped ? body0 : body1;
 
-            SphereShape sphere0 = sphereObj.GetCollisionShape() as SphereShape;
+            IndexedVector3 pOnBox = new IndexedVector3(); ;
 
-            //IndexedVector3 normalOnSurfaceB;
-            IndexedVector3 pOnBox = IndexedVector3.Zero, pOnSphere = IndexedVector3.Zero;
+            IndexedVector3 normalOnSurfaceB = new IndexedVector3();
+            float penetrationDepth = 0f;
             IndexedVector3 sphereCenter = sphereObj.GetWorldTransform()._origin;
+            SphereShape sphere0 = sphereObj.GetCollisionShape() as SphereShape;
             float radius = sphere0.GetRadius();
+            float maxContactDistance = m_manifoldPtr.GetContactBreakingThreshold();
 
-            float dist = GetSphereDistance(boxObj, ref pOnBox, ref pOnSphere, ref sphereCenter, radius);
             resultOut.SetPersistentManifold(m_manifoldPtr);
 
-            if (dist < MathUtil.SIMD_EPSILON)
+            if (GetSphereDistance(boxObj, ref pOnBox, ref normalOnSurfaceB, ref penetrationDepth, sphereCenter, radius, maxContactDistance))
             {
-                IndexedVector3 normalOnSurfaceB = (pOnBox - pOnSphere);
-                normalOnSurfaceB.Normalize();
-
                 /// report a contact. internally this will be kept persistent, and contact reduction is done
-
-                resultOut.AddContactPoint(ref normalOnSurfaceB, ref pOnBox, dist);
+                resultOut.AddContactPoint(normalOnSurfaceB, pOnBox, penetrationDepth);
             }
 
             if (m_ownManifold)
@@ -127,180 +129,150 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public float GetSphereDistance(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius)
+        public bool GetSphereDistance(CollisionObject boxObj, ref IndexedVector3 pointOnBox, ref IndexedVector3 normal, ref float penetrationDepth, IndexedVector3 sphereCenter, float fRadius, float maxContactDistance)
         {
-            float margins;
             BoxShape boxShape = boxObj.GetCollisionShape() as BoxShape;
+            IndexedVector3 boxHalfExtent = boxShape.GetHalfExtentsWithoutMargin();
+            float boxMargin = boxShape.GetMargin();
+            penetrationDepth = 1.0f;
 
-            m_sphereBoundsBoundsArray[0] = -boxShape.GetHalfExtentsWithoutMargin();
-            m_sphereBoundsBoundsArray[1] = boxShape.GetHalfExtentsWithoutMargin();
-
-            margins = boxShape.GetMargin();//also add sphereShape margin?
-
+            // convert the sphere position to the box's local space
             IndexedMatrix m44T = boxObj.GetWorldTransform();
+            IndexedVector3 sphereRelPos = m44T.InvXform(sphereCenter);
 
-            float fPenetration;
+            // Determine the closest point to the sphere center in the box
+            IndexedVector3 closestPoint = sphereRelPos;
+            closestPoint.X = (Math.Min(boxHalfExtent.X, closestPoint.X));
+            closestPoint.X = (Math.Max(-boxHalfExtent.X, closestPoint.X));
+            closestPoint.Y = (Math.Min(boxHalfExtent.Y, closestPoint.Y));
+            closestPoint.Y = (Math.Max(-boxHalfExtent.Y, closestPoint.Y));
+            closestPoint.Z = (Math.Min(boxHalfExtent.Z, closestPoint.Z));
+            closestPoint.Z = (Math.Max(-boxHalfExtent.Z, closestPoint.Z));
 
-            m_sphereBoundsBoundsArray2[0] = m_sphereBoundsBoundsArray[0];
-            m_sphereBoundsBoundsArray2[1] = m_sphereBoundsBoundsArray[1];
+            float intersectionDist = fRadius + boxMargin;
+            float contactDist = intersectionDist + maxContactDistance;
+            normal = sphereRelPos - closestPoint;
 
-            IndexedVector3 marginsVec = new IndexedVector3(margins);
-
-            // add margins
-            m_sphereBoundsBoundsArray[0] += marginsVec;
-            m_sphereBoundsBoundsArray[1] -= marginsVec;
-
-            /////////////////////////////////////////////////
-
-            IndexedVector3 tmp, prel, normal, v3P;
-
-            float fSep = 10000000.0f;
-            float fSepThis;
-
-            m_sphereBoundsNArray[0] = new IndexedVector3(-1, 0, 0);
-            m_sphereBoundsNArray[1] = new IndexedVector3(0, -1, 0);
-            m_sphereBoundsNArray[2] = new IndexedVector3(0, 0, -1);
-            m_sphereBoundsNArray[3] = new IndexedVector3(1, 0, 0);
-            m_sphereBoundsNArray[4] = new IndexedVector3(0, 1, 0);
-            m_sphereBoundsNArray[5] = new IndexedVector3(0, 0, 1);
-
-            // convert  point in local space
-            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
-
-            bool bFound = false;
-
-            v3P = prel;
-
-            for (int i = 0; i < 6; i++)
+            //if there is no penetration, we are done
+            float dist2 = normal.LengthSquared();
+            if (dist2 > contactDist * contactDist)
             {
-                int j = i < 3 ? 0 : 1;
-                fSepThis = IndexedVector3.Dot((v3P - m_sphereBoundsBoundsArray[j]), m_sphereBoundsNArray[i]);
-                if (fSepThis != 0f)
-                {
-                    v3P = v3P - m_sphereBoundsNArray[i] * fSepThis;
-                    bFound = true;
-                }
+                return false;
             }
 
-            //
+            float distance;
 
-            if (bFound)
+            //special case if the sphere center is inside the box
+            if (dist2 == 0.0f)
             {
-                m_sphereBoundsBoundsArray[0] = m_sphereBoundsBoundsArray2[0];
-                m_sphereBoundsBoundsArray[1] = m_sphereBoundsBoundsArray2[1];
-
-                normal = (prel - v3P);
-                normal.Normalize();
-                v3PointOnBox = v3P + normal * margins;
-                v3PointOnSphere = prel - normal * fRadius;
-
-                if ((IndexedVector3.Dot((v3PointOnSphere - v3PointOnBox), normal)) > 0f)
-                {
-                    return 1f;
-                }
-
-                // transform back in world space
-                tmp = m44T * v3PointOnBox;
-                v3PointOnBox = tmp;
-                tmp = m44T * v3PointOnSphere;
-                v3PointOnSphere = tmp;
-                float fSeps2 = (v3PointOnBox - v3PointOnSphere).LengthSquared();
-
-                //if this fails, fallback into deeper penetration case, below
-                if (fSeps2 > MathUtil.SIMD_EPSILON)
-                {
-                    fSep = (float)-Math.Sqrt(fSeps2);
-                    normal = (v3PointOnBox - v3PointOnSphere);
-                    normal *= 1f / fSep;
-                }
-
-                return fSep;
+                distance = -GetSpherePenetration(ref boxHalfExtent, ref sphereRelPos, ref closestPoint, ref normal);
+            }
+            else //compute the penetration details
+            {
+                distance = normal.Length();
+                normal /= distance;
             }
 
-            //////////////////////////////////////////////////
-            // Deep penetration case
-
-            fPenetration = GetSpherePenetration(boxObj, ref v3PointOnBox, ref v3PointOnSphere, ref v3SphereCenter, fRadius, ref m_sphereBoundsBoundsArray[0], ref m_sphereBoundsBoundsArray[1]);
-
-            m_sphereBoundsBoundsArray[0] = m_sphereBoundsBoundsArray2[0];
-            m_sphereBoundsBoundsArray[1] = m_sphereBoundsBoundsArray2[1];
-
-            if (fPenetration <= 0f)
-            {
-                return (fPenetration - margins);
-            }
-            else
-            {
-                return 1f;
-            }
-        }
-
-        public float GetSpherePenetration(CollisionObject boxObj, ref IndexedVector3 v3PointOnBox, ref IndexedVector3 v3PointOnSphere, ref IndexedVector3 v3SphereCenter, float fRadius, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
-        {
-            m_spherePenetrationBoundsArray[0] = aabbMin;
-            m_spherePenetrationBoundsArray[1] = aabbMax;
-
-            IndexedVector3 p0, tmp, prel, normal;
-            float fSep = -10000000.0f;
-            float fSepThis;
-
-            // set p0 and normal to a default value to shup up GCC
-            p0 = IndexedVector3.Zero;
-            normal = IndexedVector3.Zero;
-
-            m_spherePenetrationNArray[0] = new IndexedVector3(-1, 0, 0);
-            m_spherePenetrationNArray[1] = new IndexedVector3(0, -1, 0);
-            m_spherePenetrationNArray[2] = new IndexedVector3(0, 0, -1);
-            m_spherePenetrationNArray[3] = new IndexedVector3(1, 0, 0);
-            m_spherePenetrationNArray[4] = new IndexedVector3(0, 1, 0);
-            m_spherePenetrationNArray[5] = new IndexedVector3(0, 0, 1);
-
-            IndexedMatrix m44T = boxObj.GetWorldTransform();
-
-            // convert  point in local space
-
-            MathUtil.InverseTransform(ref m44T, ref v3SphereCenter, out prel);
-
-            ///////////
-
-            for (int i = 0; i < 6; i++)
-            {
-                int j = i < 3 ? 0 : 1;
-                if ((fSepThis = (IndexedVector3.Dot((prel - m_spherePenetrationBoundsArray[j]), m_spherePenetrationNArray[i])) - fRadius) > 0f)
-                {
-                    return 1f;
-                }
-                if (fSepThis > fSep)
-                {
-                    p0 = m_spherePenetrationBoundsArray[j];
-                    normal = m_spherePenetrationNArray[i];
-                    fSep = fSepThis;
-                }
-            }
-
-            v3PointOnBox = prel - normal * (IndexedVector3.Dot(normal, (prel - p0)));
-            v3PointOnSphere = v3PointOnBox + normal * fSep;
+            pointOnBox = closestPoint + normal * boxMargin;
+            //	v3PointOnSphere = sphereRelPos - (normal * fRadius);	
+            penetrationDepth = distance - intersectionDist;
 
             // transform back in world space
-            tmp = m44T * v3PointOnBox;
-            v3PointOnBox = tmp;
-            tmp = m44T * v3PointOnSphere;
-            v3PointOnSphere = tmp;
-            normal = (v3PointOnBox - v3PointOnSphere);
-            normal.Normalize();
+            IndexedVector3 tmp = m44T * pointOnBox;
+            pointOnBox = tmp;
+            //	tmp = m44T(v3PointOnSphere);
+            //	v3PointOnSphere = tmp;
+            tmp = m44T._basis * normal;
+            normal = tmp;
 
-            return fSep;
+            return true;
+        }
 
+
+
+
+        public float GetSpherePenetration(ref IndexedVector3 boxHalfExtent, ref IndexedVector3 sphereRelPos, ref IndexedVector3 closestPoint, ref IndexedVector3 normal)
+        {
+            //project the center of the sphere on the closest face of the box
+            float faceDist = boxHalfExtent.X - sphereRelPos.X;
+            float minDist = faceDist;
+            closestPoint.X = (boxHalfExtent.X);
+            normal = new IndexedVector3(1.0f, 0.0f, 0.0f);
+
+            faceDist = boxHalfExtent.X + sphereRelPos.X;
+            if (faceDist < minDist)
+            {
+                minDist = faceDist;
+                closestPoint = sphereRelPos;
+                closestPoint.X = (-boxHalfExtent.X);
+                normal = new IndexedVector3(-1.0f, 0.0f, 0.0f);
+            }
+
+            faceDist = boxHalfExtent.Y - sphereRelPos.Y;
+            if (faceDist < minDist)
+            {
+                minDist = faceDist;
+                closestPoint = sphereRelPos;
+                closestPoint.Y = (boxHalfExtent.Y);
+                normal = new IndexedVector3(0.0f, 1.0f, 0.0f);
+            }
+
+            faceDist = boxHalfExtent.Y + sphereRelPos.Y;
+            if (faceDist < minDist)
+            {
+                minDist = faceDist;
+                closestPoint = sphereRelPos;
+                closestPoint.Y = (-boxHalfExtent.Y);
+                normal = new IndexedVector3(0.0f, -1.0f, 0.0f);
+            }
+
+            faceDist = boxHalfExtent.Z - sphereRelPos.Z;
+            if (faceDist < minDist)
+            {
+                minDist = faceDist;
+                closestPoint = sphereRelPos;
+                closestPoint.Z = (boxHalfExtent.Z);
+                normal = new IndexedVector3(0.0f, 0.0f, 1.0f);
+            }
+
+            faceDist = boxHalfExtent.Z + sphereRelPos.Z;
+            if (faceDist < minDist)
+            {
+                minDist = faceDist;
+                closestPoint = sphereRelPos;
+                closestPoint.Z = (-boxHalfExtent.Z);
+                normal = new IndexedVector3(0.0f, 0.0f, -1.0f);
+            }
+
+            return minDist;
         }
 
         private bool m_ownManifold;
         private PersistentManifold m_manifoldPtr;
         private bool m_isSwapped;
-        private IndexedVector3[] m_sphereBoundsBoundsArray = new IndexedVector3[2];
-        private IndexedVector3[] m_sphereBoundsBoundsArray2 = new IndexedVector3[2];
-        private IndexedVector3[] m_sphereBoundsNArray = new IndexedVector3[6];
-        private IndexedVector3[] m_spherePenetrationBoundsArray = new IndexedVector3[2];
-        private IndexedVector3[] m_spherePenetrationNArray = new IndexedVector3[6];
-
     }
+
+
+    public class SphereBoxCreateFunc : CollisionAlgorithmCreateFunc
+    {
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            SphereBoxCollisionAlgorithm algo = BulletGlobals.SphereBoxCollisionAlgorithmPool.Get();
+            algo.Initialize(null, ci, body0, body1, false);
+            return algo;
+        }
+    }
+
+    public class SwappedSphereBoxCreateFunc : CollisionAlgorithmCreateFunc
+    {
+        public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            SphereBoxCollisionAlgorithm algo = BulletGlobals.SphereBoxCollisionAlgorithmPool.Get();
+            algo.Initialize(null, ci, body0, body1, true);
+            return algo;
+        }
+    }
+
+
+
 }

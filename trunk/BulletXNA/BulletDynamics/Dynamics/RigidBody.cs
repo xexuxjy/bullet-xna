@@ -553,6 +553,10 @@ namespace BulletXNA.BulletDynamics
 	    //Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
         public void InternalApplyImpulse(IndexedVector3 linearComponent, IndexedVector3 angularComponent, float impulseMagnitude,String caller)
         {
+            if (impulseMagnitude > 4f)
+            {
+                int ibreak = 0;
+            }
             InternalApplyImpulse(ref linearComponent, ref angularComponent, impulseMagnitude,caller);
         }
 	

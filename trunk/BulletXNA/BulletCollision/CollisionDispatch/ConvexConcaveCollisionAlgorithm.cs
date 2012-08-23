@@ -434,7 +434,7 @@ namespace BulletXNA.BulletCollision
 
             ///debug drawing of the overlapping triangles
             ///
-
+#if false
             if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawWireframe) > 0))
             {
                 IndexedVector3 color = new IndexedVector3(1, 1, 0);
@@ -448,7 +448,7 @@ namespace BulletXNA.BulletCollision
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[2], ref transformedTriangles[0], ref color);
 
             }
-
+#endif
             if (m_convexBody.GetCollisionShape().IsConvex())
             {
                 using (TriangleShape tm = BulletGlobals.TriangleShapePool.Get())
@@ -473,7 +473,6 @@ namespace BulletXNA.BulletCollision
                     }
 
                     colAlgo.ProcessCollision(m_convexBody, m_triBody, m_dispatchInfoPtr, m_resultOut);
-                    //colAlgo.Cleanup();
                     ci.GetDispatcher().FreeCollisionAlgorithm(colAlgo);
                     colAlgo = null;
 

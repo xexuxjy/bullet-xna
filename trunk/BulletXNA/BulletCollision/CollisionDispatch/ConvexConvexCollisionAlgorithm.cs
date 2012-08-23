@@ -574,9 +574,9 @@ namespace BulletXNA.BulletCollision
         {
             // compute the parameters of the closest points on each line segment
 
-            float dirA_dot_dirB = IndexedVector3.Dot(dirA, dirB);
-            float dirA_dot_trans = IndexedVector3.Dot(dirA, translation);
-            float dirB_dot_trans = IndexedVector3.Dot(dirB, translation);
+            float dirA_dot_dirB = IndexedVector3.Dot(ref dirA, ref dirB);
+            float dirA_dot_trans = IndexedVector3.Dot(ref dirA, ref translation);
+            float dirB_dot_trans = IndexedVector3.Dot(ref dirB, ref translation);
 
             float denom = 1.0f - dirA_dot_dirB * dirA_dot_dirB;
 

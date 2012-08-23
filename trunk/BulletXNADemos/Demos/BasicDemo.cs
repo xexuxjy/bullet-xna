@@ -52,7 +52,12 @@ namespace BulletXNADemos.Demos
 	        ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 
-	        m_broadphase = new DbvtBroadphase();
+
+            IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
+            IndexedVector3 worldMax = -worldMin;
+            m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
+
+            //m_broadphase = new DbvtBroadphase();
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
@@ -81,8 +86,8 @@ namespace BulletXNADemos.Demos
             LocalCreateRigidBody(mass, ref groundTransform, groundShape);
 	        {
 		        //create a few dynamic rigidbodies
-                //CollisionShape colShape = new BoxShape(new IndexedVector3(SCALING, SCALING, SCALING));
-                CollisionShape colShape = BuildCorner();
+                CollisionShape colShape = new BoxShape(new IndexedVector3(SCALING, SCALING, SCALING));
+                //CollisionShape colShape = BuildCorner();
 		        //btCollisionShape* colShape = new btSphereShape(btScalar(1.));
                 //CollisionShape colShape = new CylinderShape(new IndexedVector3(1f, 1, 1f));
 		        m_collisionShapes.Add(colShape);

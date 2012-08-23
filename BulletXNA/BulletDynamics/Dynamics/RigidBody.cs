@@ -505,7 +505,7 @@ namespace BulletXNA.BulletDynamics
 	
 	    public void	ApplyForce(ref IndexedVector3 force, ref IndexedVector3 rel_pos) 
 	    {
-		    ApplyCentralForce(ref force);
+            ApplyCentralForce(ref force);
             IndexedVector3 tempTorque = IndexedVector3.Cross(rel_pos,force);
             tempTorque *= m_angularFactor;
             ApplyTorque(IndexedVector3.Cross(rel_pos,(force * m_linearFactor)));
@@ -513,13 +513,8 @@ namespace BulletXNA.BulletDynamics
 	
 	    public void ApplyCentralImpulse(ref IndexedVector3 impulse)
 	    {
+
             m_linearVelocity += impulse * m_linearFactor * m_inverseMass;
-
-            if (m_inverseMass > 0f)
-            {
-                int ibreak = 0;
-            }
-
             MathUtil.SanityCheckVector(ref m_linearVelocity);
 	    }
 
@@ -543,7 +538,7 @@ namespace BulletXNA.BulletDynamics
 		    if (m_inverseMass != 0f)
 		    {
 			    ApplyCentralImpulse(ref impulse);
-			    if (m_angularFactor.X != 0f)
+			    if (m_angularFactor.LengthSquared() > 0f)
 			    {
 				    ApplyTorqueImpulse(IndexedVector3.Cross(rel_pos,(impulse*m_linearFactor)));
 			    }
@@ -946,7 +941,8 @@ namespace BulletXNA.BulletDynamics
                 m_deltaAngularVelocity.Z += angularComponent.Z *(impulseMagnitude * m_angularFactor.Z);
 
                 //m_deltaAngularVelocity += angularComponent*(impulseMagnitude*m_angularFactor);
-                
+
+
                 MathUtil.SanityCheckVector(ref m_deltaLinearVelocity);
                 MathUtil.SanityCheckVector(ref m_deltaAngularVelocity);
             }

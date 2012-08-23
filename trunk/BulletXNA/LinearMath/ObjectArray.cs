@@ -1147,12 +1147,7 @@ namespace BulletXNA.LinearMath
 					j--;
 				if (i<=j)
 				{
-                    int temp;
-                    temp = i;
-                    i = j;
-                    j = temp;
-
-
+                    Swap(i, j);
 					i++; j--;
 				}
 			} while (i<=j);

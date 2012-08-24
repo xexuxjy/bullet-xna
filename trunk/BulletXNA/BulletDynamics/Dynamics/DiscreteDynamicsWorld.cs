@@ -525,7 +525,7 @@ namespace BulletXNA.BulletDynamics
                 if (!body.IsStaticOrKinematicObject())
                 {
                     body.IntegrateVelocities(timeStep);
-                    //damping
+                    //dampingF
                     body.ApplyDamping(timeStep);
                     IndexedMatrix temp;
                     body.PredictIntegratedTransform(timeStep, out temp);

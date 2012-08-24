@@ -108,8 +108,8 @@ namespace BulletXNA.BulletDynamics
             }
 
 
-			//solverConstraint.m_originalContactPoint = 0;
-            solverConstraint.m_originalContactPoint = null;
+			solverConstraint.m_originalContactPoint = null;
+            //solverConstraint.m_originalContactPointConstraint = null;
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
 
@@ -407,7 +407,7 @@ namespace BulletXNA.BulletDynamics
 					frictionConstraint2.m_appliedImpulse = 0f;
 					m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex + 1] = frictionConstraint2;
 				}
-                //m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex] = frictionConstraint1;
+				m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex] = frictionConstraint1;
 
 			}
 		}
@@ -485,7 +485,7 @@ namespace BulletXNA.BulletDynamics
 
                     // will create if needed.
                     SolverConstraint solverConstraint = m_tmpSolverContactConstraintPool[m_tmpSolverContactConstraintPool.Count];
-                    //solverConstraint.Reset();
+                    solverConstraint.Reset();
 
                     RigidBody rb0 = solverBodyA;//RigidBody.Upcast(colObj0);
 					RigidBody rb1 = solverBodyB;//RigidBody.Upcast(colObj1);
@@ -655,6 +655,10 @@ namespace BulletXNA.BulletDynamics
 			//check magniture of applied impulse from SolverConstraint 
 			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
 
+            if (deltaImpulse > 200)
+            {
+                int ibreak = 0;
+            }
 
             float deltaVel1Dotn = (c.m_contactNormal.X * body1.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body1.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body1.m_deltaLinearVelocity.Z) +
             (c.m_relpos1CrossNormal.X * body1.m_deltaAngularVelocity.X) + (c.m_relpos1CrossNormal.Y * body1.m_deltaAngularVelocity.Y) + (c.m_relpos1CrossNormal.Z * body1.m_deltaAngularVelocity.Z);
@@ -787,11 +791,11 @@ namespace BulletXNA.BulletDynamics
 			{
 
 				SolverConstraint solveManifold = m_tmpSolverContactConstraintPool[j];
-                solveManifold.m_originalContactPoint.SetAppliedImpulse(solveManifold.m_appliedImpulse);
+                ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulse(solveManifold.m_appliedImpulse);
 				if ((infoGlobal.m_solverMode & SolverMode.SOLVER_USE_FRICTION_WARMSTARTING) != 0)
 				{
-                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
-                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
+                    ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
+                    ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
 				}
 
 				//do a callback here?
@@ -801,7 +805,7 @@ namespace BulletXNA.BulletDynamics
 			for (int j = 0; j < numPoolConstraints; j++)
 			{
 				SolverConstraint solverConstr = m_tmpSolverNonContactConstraintPool[j];
-				TypedConstraint constr = solverConstr.m_originalContactPointConstraint ;
+				TypedConstraint constr = solverConstr.m_originalContactPoint as TypedConstraint;
 				constr.InternalSetAppliedImpulse(solverConstr.m_appliedImpulse);
 				if (Math.Abs(solverConstr.m_appliedImpulse) >= constr.GetBreakingImpulseThreshold())
 				{
@@ -1016,7 +1020,7 @@ namespace BulletXNA.BulletDynamics
 
 
 
-                                solverConstraint.m_originalContactPointConstraint = constraint;
+                                solverConstraint.m_originalContactPoint = constraint;
 
                                 {
                                     IndexedVector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;

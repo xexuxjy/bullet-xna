@@ -73,6 +73,10 @@
     <XnaCompressContent>false</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_20_55_26.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_02_00.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_03_01.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_03_44.sap" />
     <None Include="Properties\AppManifest.xml">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </None>
@@ -81,7 +85,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Demos\BasicDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\Pachinko.cs" />
     <Compile Include="Demos\XNA_ShapeDrawer.cs" />

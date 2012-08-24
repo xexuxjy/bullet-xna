@@ -124,11 +124,11 @@ namespace BulletXNA.BulletCollision
 		        IndexedVector3 pOnB = vtxInPlaneWorld;
 		        resultOut.AddContactPoint(normalOnSurfaceB,pOnB,distance);
 	        }
-            //first perform a collision query with the non-perturbated collision objects
-            {
-                IndexedQuaternion rotq = IndexedQuaternion.Identity;
-                CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
-            }
+            ////first perform a collision query with the non-perturbated collision objects
+            //{
+            //    IndexedQuaternion rotq = IndexedQuaternion.Identity;
+            //    CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
+            //}
 
             if (convexShape.IsPolyhedral() && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
             {
@@ -150,7 +150,7 @@ namespace BulletXNA.BulletCollision
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
                     IndexedQuaternion rotq = new IndexedQuaternion(planeNormal, iterationAngle);
-                    rotq = MathUtil.QuaternionMultiply(IndexedQuaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
+                    rotq = IndexedQuaternion.Inverse(rotq) * perturbeRot *  rotq;
                     CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
                 }
             }
@@ -177,7 +177,7 @@ namespace BulletXNA.BulletCollision
             float planeConstant = planeShape.GetPlaneConstant();
 
             IndexedMatrix convexWorldTransform = convexObj.GetWorldTransform();
-            IndexedMatrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform; ;
+            IndexedMatrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform;
 
             //now perturbe the convex-world transform
 

@@ -196,7 +196,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         }
 
 #endif
-        static Comparison<PersistentManifold> sortPredicate = new Comparison<PersistentManifold>(PersistentManifoldSortPredicate);
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
             ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
@@ -224,11 +223,8 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 int numManifolds = m_islandmanifold.Count;
 
                 //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
-                //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
-                //((PersistentManifoldArray)m_islandmanifold).Sort();
 
-                //PersistentManifoldArray copy = new PersistentManifoldArray(m_islandmanifold);
-                m_islandmanifold.Sort(sortPredicate);
+                m_islandmanifold.QuickSort(m_sortPredicate);
 
                 //now process all active islands (sets of manifolds for now)
 
@@ -499,21 +495,21 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         }
 
 
-        private static int PersistentManifoldSortPredicate(PersistentManifold lhs, PersistentManifold rhs)
+        public class PersistentManifoldSortPredicate : IQSComparer<PersistentManifold>
         {
-            int rIslandIdA, lIslandIdB;
-            rIslandIdA = GetIslandId(rhs);
-            lIslandIdB = GetIslandId(lhs);
-            //return lIslandId0 < rIslandId0;
-            if (lIslandIdB < rIslandIdA)
-                return -1;
-            //else if (lIslandIdB > rIslandIdA)
-            //    return 1;
-            return 1;
+
+            public bool Compare(PersistentManifold lhs, PersistentManifold rhs)
+            {
+                return GetIslandId(lhs) < GetIslandId(rhs);
+            }
         }
+
+        private PersistentManifoldSortPredicate m_sortPredicate = new PersistentManifoldSortPredicate();
 
 
     }
+
+
 
     public interface IIslandCallback
     {

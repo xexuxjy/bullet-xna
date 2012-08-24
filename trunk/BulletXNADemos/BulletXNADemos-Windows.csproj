@@ -200,6 +200,12 @@
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_20_55_26.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_02_00.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_03_01.sap" />
+    <None Include="BulletXNADemos-WindowsPhone_2012_08_24_21_03_44.sap" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

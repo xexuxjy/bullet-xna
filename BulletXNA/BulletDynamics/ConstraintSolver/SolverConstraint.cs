@@ -49,8 +49,9 @@ namespace BulletXNA.BulletDynamics
 		public RigidBody m_solverBodyB;
 		public int m_companionIdB;
 		
-        public TypedConstraint m_originalContactPointConstraint;
-        public ManifoldPoint m_originalContactPoint;
+        //public TypedConstraint m_originalContactPointConstraint;
+        //public ManifoldPoint m_originalContactPoint;
+        public object m_originalContactPoint;
         public float m_rhs;
         public float m_cfm;
         public float m_lowerLimit;
@@ -81,8 +82,8 @@ namespace BulletXNA.BulletDynamics
             m_companionIdA = 0;
             m_solverBodyB = null;
             m_companionIdB = 0;
-            m_originalContactPointConstraint = null;
             m_originalContactPoint = null;
+            //m_originalContactPointConstraint = null;
             m_rhs = 0f;
             m_cfm = 0;
             m_lowerLimit = 0f;

@@ -57,11 +57,15 @@ namespace BulletXNADemos.Demos
 	        ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 
-	        //m_broadphase = new DbvtBroadphase();
+            //m_broadphase = new DbvtBroadphase();
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
             m_broadphase = new SimpleBroadphase(1000, pairCache);
+
+            IndexedVector3 worldAabbMin = new IndexedVector3(-200, -200, -200);
+            IndexedVector3 worldAabbMax = -worldAabbMin;
+            //m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, true);
 
 	        ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
 	        SequentialImpulseConstraintSolver sol = new SequentialImpulseConstraintSolver();
@@ -74,6 +78,16 @@ namespace BulletXNADemos.Demos
 			
 			BuildBoard();
 
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            m_updateCount++;
+            if (m_updateCount % m_frequency == 0)
+            {
+                //DropBall();
+            }
         }
 
 
@@ -172,7 +186,7 @@ namespace BulletXNADemos.Demos
 
         public void DropBall()
         {
-            LocalCreateRigidBody(10f, IndexedMatrix.CreateTranslation(m_ballDropSpot), m_dropSphereShape);
+            LocalCreateRigidBody(1f, IndexedMatrix.CreateTranslation(m_ballDropSpot), m_dropSphereShape);
 
 
 
@@ -199,6 +213,7 @@ namespace BulletXNADemos.Demos
 
         private IndexedVector3 m_ballDropSpot;
         private SphereShape m_dropSphereShape = null;
-
+        private int m_updateCount = 0;
+        private int m_frequency = 30;
     }
 }

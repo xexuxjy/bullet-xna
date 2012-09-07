@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
 
         public ManifoldPoint()
         {
-            m_constraintRow = new ConstraintRow[3];
+
         }
 
 
@@ -67,6 +67,9 @@ namespace BulletXNA.BulletCollision
             m_normalWorldOnB = normal;
             m_distance1 = distance;
 
+            m_constraintRow[0].Reset();
+            m_constraintRow[1].Reset();
+            m_constraintRow[2].Reset();
         }
 
         public float GetDistance()
@@ -158,6 +161,10 @@ namespace BulletXNA.BulletCollision
 
         public void SetAppliedImpulse(float value)
         {
+            if (value > 30)
+            {
+                int ibreak = 0;
+            }
             m_appliedImpulse = value;
         }
 
@@ -281,44 +288,6 @@ namespace BulletXNA.BulletCollision
             m_index1 = index;
         }
 
-        public void Reset()
-        {
-            m_userPersistentData = null;
-            m_appliedImpulse = 0f;
-            m_lateralFrictionInitialized = false;
-            m_appliedImpulseLateral1 = 0f;
-            m_appliedImpulseLateral2 = 0f;
-            m_lifeTime = 0;
-            m_constraintRow[0].m_accumImpulse = 0.0f;
-            m_constraintRow[1].m_accumImpulse = 0.0f;
-            m_constraintRow[2].m_accumImpulse = 0.0f;
-
-        }
-
-        public void Copy(ref ManifoldPoint other)
-        {
-            m_localPointA = other.m_localPointA;
-            m_localPointB = other.m_localPointB;
-            m_positionWorldOnA = other.m_positionWorldOnA;
-            m_positionWorldOnB = other.m_positionWorldOnB;
-            m_normalWorldOnB = other.m_normalWorldOnB;
-            m_distance1 = other.m_distance1;
-            m_combinedFriction = other.m_combinedFriction;
-            m_partId0 = other.m_partId0;
-            m_partId1 = other.m_partId1;
-            m_index0 = other.m_index0;
-            m_index1 = other.m_index1;
-            m_userPersistentData = other.m_userPersistentData;
-            m_appliedImpulse = other.m_appliedImpulse;
-            m_lateralFrictionInitialized = other.m_lateralFrictionInitialized;
-            m_appliedImpulseLateral1 = other.m_appliedImpulseLateral1;
-            m_appliedImpulseLateral2 = other.m_appliedImpulseLateral2;
-            m_lifeTime = other.m_lifeTime;
-            m_lateralFrictionDir1 = other.m_lateralFrictionDir1;
-            m_lateralFrictionDir2 = other.m_lateralFrictionDir2;
-        }
-
-
 
         public IndexedVector3 m_localPointA;
         public IndexedVector3 m_localPointB;
@@ -367,6 +336,17 @@ namespace BulletXNA.BulletCollision
         public float m_lowerLimit;
         public float m_upperLimit;
         public float m_accumImpulse;
+
+        public void Reset()
+        {
+            m_normal = new IndexedVector3();
+            m_rhs = 0f;
+            m_jacDiagInv = 0f;
+            m_lowerLimit = 0f;
+            m_upperLimit = 0f;
+            m_accumImpulse = 0f;
+        }
+
     }
 
 }

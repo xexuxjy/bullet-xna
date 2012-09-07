@@ -142,7 +142,7 @@ namespace BulletXNA.BulletCollision
             newPt.SetPositionWorldOnA(ref pointA);
             newPt.SetPositionWorldOnB(ref pointInWorld);
 
-            int insertIndex = m_manifoldPtr.GetCacheEntry(ref newPt);
+            int insertIndex = m_manifoldPtr.GetCacheEntry(newPt);
 
             newPt.SetCombinedFriction(CalculateCombinedFriction(m_body0, m_body1));
             newPt.SetCombinedRestitution(CalculateCombinedRestitution(m_body0, m_body1));
@@ -173,11 +173,11 @@ namespace BulletXNA.BulletCollision
             if (insertIndex >= 0)
             {
                 //const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
-                m_manifoldPtr.ReplaceContactPoint(ref newPt, insertIndex);
+                m_manifoldPtr.ReplaceContactPoint(newPt, insertIndex);
             }
             else
             {
-                insertIndex = m_manifoldPtr.AddManifoldPoint(ref newPt);
+                insertIndex = m_manifoldPtr.AddManifoldPoint(newPt);
             }
 
             

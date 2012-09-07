@@ -555,7 +555,12 @@ namespace BulletXNA.BulletCollision
             rayDirection.Y = MathUtil.FuzzyZero(rayDirection.Y) ? MathUtil.BT_LARGE_FLOAT : 1f / rayDirection.Y;
             rayDirection.Z = MathUtil.FuzzyZero(rayDirection.Z) ? MathUtil.BT_LARGE_FLOAT : 1f / rayDirection.Z;
 
-            bool[] sign = new bool[] { rayDirection.X < 0.0f, rayDirection.Y < 0.0f, rayDirection.Z < 0.0f };
+            //bool[] sign = new bool[] { rayDirection.X < 0.0f, rayDirection.Y < 0.0f, rayDirection.Z < 0.0f };
+            bool sign0 = rayDirection.X < 0.0f;
+            bool sign1 = rayDirection.Y < 0.0f;
+            bool sign2 = rayDirection.Z < 0.0f;
+
+
 #endif
 
             /* Quick pruning by quantized box */
@@ -609,12 +614,21 @@ namespace BulletXNA.BulletCollision
                 isLeafNode = rootNode.IsLeafNode();
                 if (boxBoxOverlap)
                 {
-                    IndexedVector3[] bounds = new IndexedVector3[2];
-                    UnQuantize(ref rootNode.m_quantizedAabbMin, out bounds[0]);
-                    UnQuantize(ref rootNode.m_quantizedAabbMax, out bounds[1]);
+                    //IndexedVector3[] bounds = new IndexedVector3[2];
+                    //UnQuantize(ref rootNode.m_quantizedAabbMin, out bounds[0]);
+                    //UnQuantize(ref rootNode.m_quantizedAabbMax, out bounds[1]);
+                    ///* Add box cast extents */
+                    //bounds[0] -= aabbMax;
+                    //bounds[1] -= aabbMin;
+
+                    IndexedVector3 minBound;
+                    IndexedVector3 maxBound;
+                    UnQuantize(ref rootNode.m_quantizedAabbMin, out minBound);
+                    UnQuantize(ref rootNode.m_quantizedAabbMax, out maxBound);
                     /* Add box cast extents */
-                    bounds[0] -= aabbMax;
-                    bounds[1] -= aabbMin;
+                    minBound -= aabbMax;
+                    maxBound -= aabbMin;
+
                     IndexedVector3 normal;
 #if false
 			        bool ra2 = btRayAabb2 (raySource, rayDirection, sign, bounds, param, 0.0, lambda_max);
@@ -630,7 +644,7 @@ namespace BulletXNA.BulletCollision
                     ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
 
                     BulletGlobals.StartProfile("btRayAabb2");
-                    rayBoxOverlap = AabbUtil2.RayAabb2(ref raySource, ref rayDirection, sign, bounds, out param, 0.0f, lambda_max);
+                    rayBoxOverlap = AabbUtil2.RayAabb2Alt(ref raySource, ref rayDirection, sign0,sign1,sign2, ref minBound,ref maxBound, out param, 0.0f, lambda_max);
                     BulletGlobals.StopProfile();
 #else
                     rayBoxOverlap = true;//btRayAabb(raySource, rayTarget, bounds[0], bounds[1], param, normal);
@@ -768,10 +782,17 @@ namespace BulletXNA.BulletCollision
                 MathUtil.FuzzyZero(rayDir.X) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.X,
                 MathUtil.FuzzyZero(rayDir.Y) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Y,
                 MathUtil.FuzzyZero(rayDir.Z) ? MathUtil.BT_LARGE_FLOAT : 1.0f / rayDir.Z);
-            bool[] sign = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
+            //bool[] sign = new bool[] { rayDirectionInverse.X < 0.0f, rayDirectionInverse.Y < 0.0f, rayDirectionInverse.Z < 0.0f };
+            bool sign0 = rayDirectionInverse.X < 0.0f;
+            bool sign1 = rayDirectionInverse.Y < 0.0f;
+            bool sign2 = rayDirectionInverse.Z < 0.0f;
+
 #endif
 
-            IndexedVector3[] bounds = new IndexedVector3[2];
+            //IndexedVector3[] bounds = new IndexedVector3[2];
+            IndexedVector3 minBound;
+            IndexedVector3 maxBound;
+
 
             while (curIndex < m_curNodeIndex)
             {
@@ -781,11 +802,11 @@ namespace BulletXNA.BulletCollision
 
                 walkIterations++;
 
-                bounds[0] = rootNode.m_aabbMinOrg;
-                bounds[1] = rootNode.m_aabbMaxOrg;
+                minBound = rootNode.m_aabbMinOrg;
+                maxBound = rootNode.m_aabbMaxOrg;
                 /* Add box cast extents */
-                bounds[0] -= aabbMax;
-                bounds[1] -= aabbMin;
+                minBound -= aabbMax;
+                maxBound -= aabbMin;
 
                 aabbOverlap = AabbUtil2.TestAabbAgainstAabb2(ref rayAabbMin, ref rayAabbMax, ref rootNode.m_aabbMinOrg, ref rootNode.m_aabbMaxOrg);
                 //perhaps profile if it is worth doing the aabbOverlap test first
@@ -794,7 +815,7 @@ namespace BulletXNA.BulletCollision
                 ///careful with this check: need to check division by zero (above) and fix the unQuantize method
                 ///thanks Joerg/hiker for the reproduction case!
                 ///http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=9&t=1858
-                rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2(ref raySource, ref rayDirectionInverse, sign, bounds, out param, 0.0f, lambda_max) : false;
+                rayBoxOverlap = aabbOverlap ? AabbUtil2.RayAabb2Alt(ref raySource, ref rayDirectionInverse, sign0,sign1,sign2, ref minBound,ref maxBound, out param, 0.0f, lambda_max) : false;
 
 #else
                 IndexedVector3 normal = IndexedVector3.Zero;

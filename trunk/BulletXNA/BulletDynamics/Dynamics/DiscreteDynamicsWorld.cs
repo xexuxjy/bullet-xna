@@ -1076,7 +1076,7 @@ namespace BulletXNA.BulletDynamics
             m_dispatcher = dispatcher;
         }
 
-        public override float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace)
+        public override float AddSingleResult(ref LocalConvexResult convexResult, bool normalInWorldSpace)
         {
             if (convexResult.m_hitCollisionObject == m_me)
                 return 1.0f;
@@ -1094,7 +1094,7 @@ namespace BulletXNA.BulletDynamics
             if (IndexedVector3.Dot(convexResult.m_hitNormalLocal, relativeVelocity) >= -m_allowedPenetration)
                 return 1f;
 
-            return base.AddSingleResult(convexResult, normalInWorldSpace);
+            return base.AddSingleResult(ref convexResult, normalInWorldSpace);
         }
 
         public override bool NeedsCollision(BroadphaseProxy proxy0)

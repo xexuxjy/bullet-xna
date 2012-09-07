@@ -37,6 +37,7 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleRaycastCallback : ITriangleCallback
     {
+        public TriangleRaycastCallback() { } // for pool
         public TriangleRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
         {
             m_from = from;
@@ -45,6 +46,14 @@ namespace BulletXNA.BulletCollision
             m_hitFraction = 1f;
         }
 
+        public virtual void Initialize(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
+        {
+            m_from = from;
+            m_to = to;
+            m_flags = flags;
+            m_hitFraction = 1f;
+
+        }
 
         public virtual bool graphics()
         {
@@ -152,7 +161,17 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleConvexcastCallback : ITriangleCallback
     {
+        public TriangleConvexcastCallback() { } // for pool
         public TriangleConvexcastCallback(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin)
+        {
+            m_convexShape = convexShape;
+            m_convexShapeFrom = convexShapeFrom;
+            m_convexShapeTo = convexShapeTo;
+            m_triangleToWorld = triangleToWorld;
+            m_triangleCollisionMargin = triangleCollisionMargin;
+        }
+
+        public virtual void Initialize(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin)
         {
             m_convexShape = convexShape;
             m_convexShapeFrom = convexShapeFrom;

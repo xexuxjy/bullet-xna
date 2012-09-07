@@ -22,7 +22,7 @@
  */
 
 //#define MAINTAIN_PERSISTENCY
-#define KEEP_DEEPEST_POINT
+//#define KEEP_DEEPEST_POINT
 //#define DEBUG_PERSISTENCY
 
 using System;
@@ -42,7 +42,7 @@ namespace BulletXNA.BulletCollision
     public class PersistentManifold : TypedObject, IComparable
     {
         /// sort cached points so most isolated points come first
-        private int SortCachedPoints(ref ManifoldPoint pt)
+        private int SortCachedPoints(ManifoldPoint pt)
         {
             //calculate 4 possible cases areas, and take biggest area
             //also need to keep 'deepest'
@@ -113,11 +113,6 @@ namespace BulletXNA.BulletCollision
         public PersistentManifold()
             : base((int)ContactManifoldTypes.BT_PERSISTENT_MANIFOLD_TYPE)
         {
-            //for (int i = 0; i < m_pointCache.Length; ++i)
-            //{
-            //    m_pointCache[i] = new ManifoldPoint();
-            //}
-            int ibreak = 0;
         }
 
         public PersistentManifold(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold)
@@ -128,10 +123,6 @@ namespace BulletXNA.BulletCollision
             m_contactBreakingThreshold = contactBreakingThreshold;
             m_contactProcessingThreshold = contactProcessingThreshold;
             m_cachedPoints = 0;
-            //for (int i = 0; i < m_pointCache.Length; ++i)
-            //{
-            //    m_pointCache[i] = new ManifoldPoint();
-            //}
         }
 
         public void Initialise(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold)
@@ -229,7 +220,7 @@ namespace BulletXNA.BulletCollision
             return m_contactProcessingThreshold;
         }
 
-        public int GetCacheEntry(ref ManifoldPoint newPoint)
+        public int GetCacheEntry(ManifoldPoint newPoint)
         {
             //float shortestDist = GetContactBreakingThreshold() * GetContactBreakingThreshold();
             float shortestDist = GetContactBreakingThreshold(); 
@@ -255,9 +246,9 @@ namespace BulletXNA.BulletCollision
             return nearestPoint;
         }
 
-        public int AddManifoldPoint(ref ManifoldPoint newPoint)
+        public int AddManifoldPoint(ManifoldPoint newPoint)
         {
-            Debug.Assert(ValidContactDistance(ref newPoint));
+            Debug.Assert(ValidContactDistance(newPoint));
 
             int insertIndex = GetNumContacts();
             if (insertIndex == MANIFOLD_CACHE_SIZE)
@@ -265,7 +256,7 @@ namespace BulletXNA.BulletCollision
                 if (MANIFOLD_CACHE_SIZE >= 4)
                 {
                     //sort cache so best points come first, based on area
-                    insertIndex = SortCachedPoints(ref newPoint);
+                    insertIndex = SortCachedPoints(newPoint);
                 }
                 else
                 {
@@ -307,6 +298,7 @@ namespace BulletXNA.BulletCollision
             {
                 //m_pointCache[index].Copy(m_pointCache[lastUsedIndex])
                 m_pointCache[index] = m_pointCache[lastUsedIndex];
+                m_pointCache[lastUsedIndex] = null; //?
                 //get rid of duplicated userPersistentData pointer
                 //m_pointCache[lastUsedIndex].Reset();
             }
@@ -315,9 +307,9 @@ namespace BulletXNA.BulletCollision
             m_cachedPoints--;
         }
 
-        public void ReplaceContactPoint(ref ManifoldPoint newPoint, int insertIndex)
+        public void ReplaceContactPoint(ManifoldPoint newPoint, int insertIndex)
         {
-            Debug.Assert(ValidContactDistance(ref newPoint));
+            Debug.Assert(ValidContactDistance(newPoint));
 
 
 #if MAINTAIN_PERSISTENCY
@@ -349,7 +341,7 @@ namespace BulletXNA.BulletCollision
 #endif
         }
 
-        public bool ValidContactDistance(ref ManifoldPoint pt)
+        public bool ValidContactDistance(ManifoldPoint pt)
         {
             return pt.m_distance1 <= GetContactBreakingThreshold();
         }
@@ -388,7 +380,7 @@ namespace BulletXNA.BulletCollision
             {
                 ManifoldPoint manifoldPoint = m_pointCache[i];
                 //contact becomes invalid when signed distance exceeds margin (projected on contactnormal direction)
-                if (!ValidContactDistance(ref manifoldPoint))
+                if (!ValidContactDistance(manifoldPoint))
                 {
                     RemoveContactPoint(i);
                 }

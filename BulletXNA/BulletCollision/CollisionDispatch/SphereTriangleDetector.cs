@@ -124,7 +124,6 @@ namespace BulletXNA.BulletCollision
                     }
                     else
                     {
-                        float distance = 0.0f;
                         resultNormal = normal;
                         point = contactPoint;
                         depth = -radius;
@@ -161,7 +160,9 @@ namespace BulletXNA.BulletCollision
             r3 = IndexedVector3.Dot(ref edge3_normal, ref p3_to_p);
             if ((r1 > 0 && r2 > 0 && r3 > 0) ||
                  (r1 <= 0 && r2 <= 0 && r3 <= 0))
+            {
                 return true;
+            }
             return false;
         }
 

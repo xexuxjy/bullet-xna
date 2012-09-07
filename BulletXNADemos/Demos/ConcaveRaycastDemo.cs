@@ -411,21 +411,23 @@ public class btRaycastBar
 #else
 		for (int i = 0; i < NUMRAYS_IN_BAR; i++)
 		{
-			ClosestRayResultCallback cb = new ClosestRayResultCallback(source[i], dest[i]);
-			
-			cw.RayTest (ref source[i], ref dest[i], cb);
-			if (cb.HasHit ())
-			{
-				hit[i] = cb.m_hitPointWorld;
-				normal[i] = cb.m_hitNormalWorld;
-			    normal[i] = IndexedVector3.Normalize(normal[i]);
-			} 
-            else 
+            using (ClosestRayResultCallback cb = BulletGlobals.ClosestRayResultCallbackPool.Get())
             {
-				hit[i] = dest[i];
-				normal[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
-			}
+                cb.Initialize(source[i], dest[i]);
 
+                cw.RayTest(ref source[i], ref dest[i], cb);
+                if (cb.HasHit())
+                {
+                    hit[i] = cb.m_hitPointWorld;
+                    normal[i] = cb.m_hitNormalWorld;
+                    normal[i] = IndexedVector3.Normalize(normal[i]);
+                }
+                else
+                {
+                    hit[i] = dest[i];
+                    normal[i] = new IndexedVector3(1.0f, 0.0f, 0.0f);
+                }
+            }
 		}
 #if USE_BT_CLOCK
 		ms += frame_timer.getTimeMilliseconds ();

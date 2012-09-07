@@ -1110,22 +1110,25 @@ namespace BulletXNADemos.Demos
                 //apply an impulse
                 if (m_dynamicsWorld != null)
                 {
-                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(new IndexedVector3(m_cameraPosition), rayTo);
-                    IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
-                    IndexedVector3 ivTo = new IndexedVector3(rayTo);
-                    m_dynamicsWorld.RayTest(ref ivPos,ref ivTo, rayCallback);
-                    if (rayCallback.HasHit())
+                    using (ClosestRayResultCallback rayCallback = BulletGlobals.ClosestRayResultCallbackPool.Get())
                     {
-                        RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
-                        if (body != null)
+                        rayCallback.Initialize(new IndexedVector3(m_cameraPosition), rayTo);
+                        IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
+                        IndexedVector3 ivTo = new IndexedVector3(rayTo);
+                        m_dynamicsWorld.RayTest(ref ivPos, ref ivTo, rayCallback);
+                        if (rayCallback.HasHit())
                         {
-                            body.SetActivationState(ActivationState.ACTIVE_TAG);
-                            IndexedVector3 impulse = rayTo;
-                            impulse.Normalize();
-                            float impulseStrength = 10f;
-                            impulse *= impulseStrength;
-                            IndexedVector3 relPos = rayCallback.m_hitPointWorld - body.GetCenterOfMassPosition();
-                            body.ApplyImpulse(ref impulse, ref relPos);
+                            RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
+                            if (body != null)
+                            {
+                                body.SetActivationState(ActivationState.ACTIVE_TAG);
+                                IndexedVector3 impulse = rayTo;
+                                impulse.Normalize();
+                                float impulseStrength = 10f;
+                                impulse *= impulseStrength;
+                                IndexedVector3 relPos = rayCallback.m_hitPointWorld - body.GetCenterOfMassPosition();
+                                body.ApplyImpulse(ref impulse, ref relPos);
+                            }
                         }
                     }
                 }

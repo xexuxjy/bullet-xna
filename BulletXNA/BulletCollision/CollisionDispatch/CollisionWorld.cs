@@ -26,6 +26,7 @@
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 using BulletXNA.BulletDynamics;
+using System;
 
 namespace BulletXNA.BulletCollision
 {
@@ -544,12 +545,6 @@ namespace BulletXNA.BulletCollision
                         if (castResult.m_fraction < resultCallback.m_closestHitFraction)
                         {
 
-                            //if (resultCallback.m_closestHitFraction != 1f)
-                            //{
-                            //    int ibreak = 0;
-                            //    convexCaster.calcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult);
-                            //}
-
                             //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
                             //rotate normal into worldspace
                             castResult.m_normal = rayFromTrans._basis * castResult.m_normal;
@@ -558,7 +553,7 @@ namespace BulletXNA.BulletCollision
                             castResult.m_normal.Normalize();
                             LocalRayResult localRayResult = new LocalRayResult(
                                     collisionObject,
-                                    null,
+                                    //null, // updated to allow different ctor on struct
                                     ref castResult.m_normal,
                                     castResult.m_fraction
                                 );
@@ -589,10 +584,12 @@ namespace BulletXNA.BulletCollision
                         IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
 
                         IndexedMatrix transform = IndexedMatrix.Identity;
-                        BridgeTriangleRaycastCallback rcb = new BridgeTriangleRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, triangleMesh, ref transform);
-                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
-                        triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
-                        rcb.Cleanup();
+                        using (BridgeTriangleRaycastCallback rcb = BulletGlobals.BridgeTriangleRaycastCallbackPool.Get())
+                        {
+                            rcb.Initialize(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, triangleMesh, ref transform);
+                            rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                            triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
+                        }
                     }
                     else if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape)
                     {
@@ -603,10 +600,12 @@ namespace BulletXNA.BulletCollision
                         IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
 
                         IndexedMatrix transform = IndexedMatrix.Identity;
-                        BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, heightField, ref transform);
-                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
-                        heightField.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
-                        rcb.Cleanup();
+                        using (BridgeTriangleConcaveRaycastCallback rcb = BulletGlobals.BridgeTriangleConcaveRaycastCallbackPool.Get())
+                        {
+                            rcb.Initialize(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, heightField, ref transform);
+                            rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                            heightField.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
+                        }
                     }
                     else
                     {
@@ -620,16 +619,18 @@ namespace BulletXNA.BulletCollision
 
                         //ConvexCast::CastResult
                         IndexedMatrix transform = IndexedMatrix.Identity;
-                        BridgeTriangleConcaveRaycastCallback rcb = new BridgeTriangleConcaveRaycastCallback(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, concaveShape, ref transform);
-                        rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+                        using (BridgeTriangleConcaveRaycastCallback rcb = BulletGlobals.BridgeTriangleConcaveRaycastCallbackPool.Get())
+                        {
+                            rcb.Initialize(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, concaveShape, ref transform);
+                            rcb.m_hitFraction = resultCallback.m_closestHitFraction;
 
-                        IndexedVector3 rayAabbMinLocal = rayFromLocal;
-                        MathUtil.VectorMin(ref rayToLocal, ref rayAabbMinLocal);
-                        IndexedVector3 rayAabbMaxLocal = rayFromLocal;
-                        MathUtil.VectorMax(ref rayToLocal, ref rayAabbMaxLocal);
+                            IndexedVector3 rayAabbMinLocal = rayFromLocal;
+                            MathUtil.VectorMin(ref rayToLocal, ref rayAabbMinLocal);
+                            IndexedVector3 rayAabbMaxLocal = rayFromLocal;
+                            MathUtil.VectorMax(ref rayToLocal, ref rayAabbMaxLocal);
 
-                        concaveShape.ProcessAllTriangles(rcb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
-                        rcb.Cleanup();
+                            concaveShape.ProcessAllTriangles(rcb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
+                        }
                     }
                     BulletGlobals.StopProfile();
                 }
@@ -711,14 +712,14 @@ namespace BulletXNA.BulletCollision
                             LocalConvexResult localConvexResult = new LocalConvexResult
                                         (
                                             collisionObject,
-                                            null,
+                                            //null, // updated to allow different ctor on struct
                                             ref castResult.m_normal,
                                             ref castResult.m_hitPoint,
                                             castResult.m_fraction
                                         );
 
                             bool normalInWorldSpace = true;
-                            resultCallback.AddSingleResult(localConvexResult, normalInWorldSpace);
+                            resultCallback.AddSingleResult(ref localConvexResult, normalInWorldSpace);
 
                         }
                     }
@@ -744,14 +745,17 @@ namespace BulletXNA.BulletCollision
 
 						IndexedMatrix rotationXform = new IndexedMatrix(worldTocollisionObject._basis * convexToTrans._basis,new IndexedVector3(0));
 
-						BridgeTriangleConvexcastCallback tccb = new BridgeTriangleConvexcastCallback(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, triangleMesh, ref colObjWorldTransform);
-						tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-						tccb.m_allowedPenetration = allowedPenetration;
+                        using (BridgeTriangleConvexcastCallback tccb = BulletGlobals.BridgeTriangleConvexcastCallbackPool.Get())
+                        {
+                            tccb.Initialize(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, triangleMesh, ref colObjWorldTransform);
+                            tccb.m_hitFraction = resultCallback.m_closestHitFraction;
+                            tccb.m_allowedPenetration = allowedPenetration;
 
-						IndexedVector3 boxMinLocal;
-						IndexedVector3 boxMaxLocal;
-						castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
-						triangleMesh.PerformConvexCast(tccb, ref convexFromLocal, ref convexToLocal, ref boxMinLocal, ref boxMaxLocal);
+                            IndexedVector3 boxMinLocal;
+                            IndexedVector3 boxMaxLocal;
+                            castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
+                            triangleMesh.PerformConvexCast(tccb, ref convexFromLocal, ref convexToLocal, ref boxMinLocal, ref boxMaxLocal);
+                        }
 						BulletGlobals.StopProfile();
 					}
 					else
@@ -775,14 +779,14 @@ namespace BulletXNA.BulletCollision
 										LocalConvexResult localConvexResult = new LocalConvexResult
 											(
 											collisionObject,
-											null,
+                                            //null, // updated to allow different ctor on struct
 											ref castResult.m_normal,
 											ref castResult.m_hitPoint,
 											castResult.m_fraction
 											);
 
 										bool normalInWorldSpace = true;
-										resultCallback.AddSingleResult(localConvexResult, normalInWorldSpace);
+										resultCallback.AddSingleResult(ref localConvexResult, normalInWorldSpace);
 									}
 								}
 							}
@@ -798,24 +802,27 @@ namespace BulletXNA.BulletCollision
                             // rotation of box in local mesh space = MeshRotation^-1 * ConvexToRotation
                             IndexedMatrix rotationXform = new IndexedMatrix(worldTocollisionObject._basis * convexToTrans._basis, new IndexedVector3(0));
 
-							BridgeTriangleConvexcastCallback2 tccb = new BridgeTriangleConvexcastCallback2(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
-							tccb.m_hitFraction = resultCallback.m_closestHitFraction;
-							tccb.m_allowedPenetration = allowedPenetration;
-							IndexedVector3 boxMinLocal;
-							IndexedVector3 boxMaxLocal;
-							castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
+                            using (BridgeTriangleConvexcastCallback tccb = BulletGlobals.BridgeTriangleConvexcastCallbackPool.Get())
+                            {
+                                tccb.Initialize(castShape, ref convexFromTrans, ref convexToTrans, resultCallback, collisionObject, concaveShape, ref colObjWorldTransform);
+                                tccb.m_hitFraction = resultCallback.m_closestHitFraction;
+                                tccb.m_allowedPenetration = allowedPenetration;
+                                IndexedVector3 boxMinLocal;
+                                IndexedVector3 boxMaxLocal;
+                                castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
 
-							IndexedVector3 rayAabbMinLocal = convexFromLocal;
-							MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
-							//rayAabbMinLocal.setMin(convexToLocal);
-							IndexedVector3 rayAabbMaxLocal = convexFromLocal;
-							//rayAabbMaxLocal.setMax(convexToLocal);
-							MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
+                                IndexedVector3 rayAabbMinLocal = convexFromLocal;
+                                MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
+                                //rayAabbMinLocal.setMin(convexToLocal);
+                                IndexedVector3 rayAabbMaxLocal = convexFromLocal;
+                                //rayAabbMaxLocal.setMax(convexToLocal);
+                                MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
 
-							rayAabbMinLocal += boxMinLocal;
-							rayAabbMaxLocal += boxMaxLocal;
-							concaveShape.ProcessAllTriangles(tccb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
-							BulletGlobals.StopProfile();
+                                rayAabbMinLocal += boxMinLocal;
+                                rayAabbMaxLocal += boxMaxLocal;
+                                concaveShape.ProcessAllTriangles(tccb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
+                                BulletGlobals.StopProfile();
+                            }
 						}
 					}
 				}
@@ -870,7 +877,7 @@ namespace BulletXNA.BulletCollision
 
     ///LocalShapeInfo gives extra information for complex shapes
     ///Currently, only btTriangleMeshShape is available, so it just contains triangleIndex and subpart
-    public class LocalShapeInfo
+    public struct LocalShapeInfo
     {
         public int m_shapePart;
         public int m_triangleIndex;
@@ -884,7 +891,7 @@ namespace BulletXNA.BulletCollision
     public struct LocalRayResult
     {
         public LocalRayResult(CollisionObject collisionObject,
-            LocalShapeInfo localShapeInfo,
+            ref LocalShapeInfo localShapeInfo,
             ref IndexedVector3 hitNormalLocal,
             float hitFraction)
         {
@@ -893,6 +900,17 @@ namespace BulletXNA.BulletCollision
             m_hitNormalLocal = hitNormalLocal;
             m_hitFraction = hitFraction;
         }
+
+        public LocalRayResult(CollisionObject collisionObject,
+            ref IndexedVector3 hitNormalLocal,
+            float hitFraction)
+        {
+            m_collisionObject = collisionObject;
+            m_hitNormalLocal = hitNormalLocal;
+            m_hitFraction = hitFraction;
+            m_localShapeInfo = new LocalShapeInfo();
+        }
+
 
         public CollisionObject m_collisionObject;
         public LocalShapeInfo m_localShapeInfo;
@@ -942,8 +960,9 @@ namespace BulletXNA.BulletCollision
         public EFlags m_flags;
     }
 
-    public class ClosestRayResultCallback : RayResultCallback
+    public class ClosestRayResultCallback : RayResultCallback,IDisposable
     {
+        public ClosestRayResultCallback() { } // for pool
 
         public ClosestRayResultCallback(IndexedVector3 rayFromWorld, IndexedVector3 rayToWorld)
         {
@@ -972,7 +991,6 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
             m_closestHitFraction = 1f;
             m_collisionObject = null;
-
         }
 
 
@@ -1008,14 +1026,21 @@ namespace BulletXNA.BulletCollision
             return rayResult.m_hitFraction;
         }
 
+        public void Dispose()
+        {
+            Cleanup();
+            BulletGlobals.ClosestRayResultCallbackPool.Free(this);
+        }
+
+
     }
 
 
 
-    public class LocalConvexResult
+    public struct LocalConvexResult
     {
         public LocalConvexResult(CollisionObject hitCollisionObject,
-            LocalShapeInfo localShapeInfo,
+            ref LocalShapeInfo localShapeInfo,
             ref IndexedVector3 hitNormalLocal,
             ref IndexedVector3 hitPointLocal,
             float hitFraction
@@ -1027,6 +1052,20 @@ namespace BulletXNA.BulletCollision
             m_hitPointLocal = hitPointLocal;
             m_hitFraction = hitFraction;
         }
+
+        public LocalConvexResult(CollisionObject hitCollisionObject,
+            ref IndexedVector3 hitNormalLocal,
+            ref IndexedVector3 hitPointLocal,
+            float hitFraction
+            )
+        {
+            m_hitCollisionObject = hitCollisionObject;
+            m_hitNormalLocal = hitNormalLocal;
+            m_hitPointLocal = hitPointLocal;
+            m_hitFraction = hitFraction;
+            m_localShapeInfo = new LocalShapeInfo();
+        }
+
 
         public CollisionObject m_hitCollisionObject;
         public LocalShapeInfo m_localShapeInfo;
@@ -1112,7 +1151,7 @@ namespace BulletXNA.BulletCollision
             return collides;
         }
 
-        public abstract float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace);
+        public abstract float AddSingleResult(ref LocalConvexResult convexResult, bool normalInWorldSpace);
 
         public float m_closestHitFraction;
         public CollisionFilterGroups m_collisionFilterGroup;
@@ -1145,7 +1184,7 @@ namespace BulletXNA.BulletCollision
             m_hitCollisionObject = null;
         }
 
-        public override float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace)
+        public override float AddSingleResult(ref LocalConvexResult convexResult, bool normalInWorldSpace)
         {
             //caller already does the filter on the m_closestHitFraction
             //btAssert(convexResult.m_hitFraction <= m_closestHitFraction);
@@ -1173,12 +1212,14 @@ namespace BulletXNA.BulletCollision
         public CollisionObject m_hitCollisionObject;
     }
     //ConvexCast::CastResult
-    public class BridgeTriangleRaycastCallback : TriangleRaycastCallback
+    public class BridgeTriangleRaycastCallback : TriangleRaycastCallback,IDisposable
     {
         public RayResultCallback m_resultCallback;
         public CollisionObject m_collisionObject;
         public TriangleMeshShape m_triangleMesh;
         public IndexedMatrix m_colObjWorldTransform;
+
+        public BridgeTriangleRaycastCallback() { } // for pool
 
         public BridgeTriangleRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to,
             RayResultCallback resultCallback, CollisionObject collisionObject, TriangleMeshShape triangleMesh, ref IndexedMatrix colObjWorldTransform) :
@@ -1191,40 +1232,10 @@ namespace BulletXNA.BulletCollision
             m_colObjWorldTransform = colObjWorldTransform;
         }
 
-
-        public override float ReportHit(ref IndexedVector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex)
+        public virtual void Initialize(ref IndexedVector3 from, ref IndexedVector3 to,
+            RayResultCallback resultCallback, CollisionObject collisionObject, TriangleMeshShape triangleMesh, ref IndexedMatrix colObjWorldTransform)
         {
-            LocalShapeInfo shapeInfo = new LocalShapeInfo();
-            shapeInfo.m_shapePart = partId;
-            shapeInfo.m_triangleIndex = triangleIndex;
-
-            IndexedVector3 hitNormalWorld = m_colObjWorldTransform._basis * hitNormalLocal;
-
-            LocalRayResult rayResult = new LocalRayResult
-            (m_collisionObject,
-                shapeInfo,
-                ref hitNormalWorld,
-                hitFraction);
-
-            bool normalInWorldSpace = true;
-            return m_resultCallback.AddSingleResult(ref rayResult, normalInWorldSpace);
-        }
-
-        public override void Cleanup()
-        {
-            base.Cleanup();
-        }
-    }
-
-
-    public class BridgeTriangleConcaveRaycastCallback : TriangleRaycastCallback
-    {
-
-        public BridgeTriangleConcaveRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to,
-            RayResultCallback resultCallback, CollisionObject collisionObject, ConcaveShape triangleMesh, ref IndexedMatrix colObjWorldTransform) :
-            //@BP Mod
-            base(ref from, ref to, resultCallback.m_flags)
-        {
+            base.Initialize(ref from, ref to, resultCallback.m_flags);
             m_resultCallback = resultCallback;
             m_collisionObject = collisionObject;
             m_triangleMesh = triangleMesh;
@@ -1242,7 +1253,7 @@ namespace BulletXNA.BulletCollision
 
             LocalRayResult rayResult = new LocalRayResult
             (m_collisionObject,
-                shapeInfo,
+                ref shapeInfo,
                 ref hitNormalWorld,
                 hitFraction);
 
@@ -1250,6 +1261,69 @@ namespace BulletXNA.BulletCollision
             return m_resultCallback.AddSingleResult(ref rayResult, normalInWorldSpace);
         }
 
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+            BulletGlobals.BridgeTriangleRaycastCallbackPool.Free(this);
+        }
+
+    }
+
+
+    public class BridgeTriangleConcaveRaycastCallback : TriangleRaycastCallback,IDisposable
+    {
+        public BridgeTriangleConcaveRaycastCallback() { } // for pool
+
+        public BridgeTriangleConcaveRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to,
+            RayResultCallback resultCallback, CollisionObject collisionObject, ConcaveShape triangleMesh, ref IndexedMatrix colObjWorldTransform) :
+            //@BP Mod
+            base(ref from, ref to, resultCallback.m_flags)
+        {
+            m_resultCallback = resultCallback;
+            m_collisionObject = collisionObject;
+            m_triangleMesh = triangleMesh;
+            m_colObjWorldTransform = colObjWorldTransform;
+        }
+
+        public void Initialize(ref IndexedVector3 from, ref IndexedVector3 to,
+            RayResultCallback resultCallback, CollisionObject collisionObject, ConcaveShape triangleMesh, ref IndexedMatrix colObjWorldTransform)
+        {
+            base.Initialize(ref from, ref to, resultCallback.m_flags);
+            m_resultCallback = resultCallback;
+            m_collisionObject = collisionObject;
+            m_triangleMesh = triangleMesh;
+            m_colObjWorldTransform = colObjWorldTransform;
+        }
+
+
+        public override float ReportHit(ref IndexedVector3 hitNormalLocal, float hitFraction, int partId, int triangleIndex)
+        {
+            LocalShapeInfo shapeInfo = new LocalShapeInfo();
+            shapeInfo.m_shapePart = partId;
+            shapeInfo.m_triangleIndex = triangleIndex;
+
+            IndexedVector3 hitNormalWorld = m_colObjWorldTransform._basis * hitNormalLocal;
+
+            LocalRayResult rayResult = new LocalRayResult
+            (m_collisionObject,
+                ref shapeInfo,
+                ref hitNormalWorld,
+                hitFraction);
+
+            bool normalInWorldSpace = true;
+            return m_resultCallback.AddSingleResult(ref rayResult, normalInWorldSpace);
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+            BulletGlobals.BridgeTriangleConcaveRaycastCallbackPool.Free(this);
+        }
 
         public IndexedMatrix m_colObjWorldTransform;
         RayResultCallback m_resultCallback;
@@ -1260,47 +1334,10 @@ namespace BulletXNA.BulletCollision
 
 
     //ConvexCast::CastResult
-    public class BridgeTriangleConvexcastCallback : TriangleConvexcastCallback
+    public class BridgeTriangleConvexcastCallback : TriangleConvexcastCallback,IDisposable
     {
+        public BridgeTriangleConvexcastCallback() { } // for pool
         public BridgeTriangleConvexcastCallback(ConvexShape castShape, ref IndexedMatrix from, ref IndexedMatrix to,
-            ConvexResultCallback resultCallback, CollisionObject collisionObject, TriangleMeshShape triangleMesh, ref IndexedMatrix triangleToWorld) :
-            base(castShape, ref from, ref to, ref triangleToWorld, triangleMesh.GetMargin())
-        {
-            m_resultCallback = resultCallback;
-            m_collisionObject = collisionObject;
-            m_triangleMesh = triangleMesh;
-        }
-
-        public override float ReportHit(ref IndexedVector3 hitNormalLocal, ref IndexedVector3 hitPointLocal, float hitFraction, int partId, int triangleIndex)
-        {
-            LocalShapeInfo shapeInfo = new LocalShapeInfo();
-            shapeInfo.m_shapePart = partId;
-            shapeInfo.m_triangleIndex = triangleIndex;
-            if (hitFraction <= m_resultCallback.m_closestHitFraction)
-            {
-                LocalConvexResult convexResult = new LocalConvexResult
-                (m_collisionObject,
-                    shapeInfo,
-                    ref hitNormalLocal,
-                    ref hitPointLocal,
-                    hitFraction);
-
-                bool normalInWorldSpace = true;
-                return m_resultCallback.AddSingleResult(convexResult, normalInWorldSpace);
-            }
-            return hitFraction;
-        }
-        ConvexResultCallback m_resultCallback;
-        CollisionObject m_collisionObject;
-        TriangleMeshShape m_triangleMesh;
-    };
-
-
-    //ConvexCast::CastResult
-    public class BridgeTriangleConvexcastCallback2 : TriangleConvexcastCallback
-    {
-
-        public BridgeTriangleConvexcastCallback2(ConvexShape castShape, ref IndexedMatrix from, ref IndexedMatrix to,
             ConvexResultCallback resultCallback, CollisionObject collisionObject, ConcaveShape triangleMesh, ref IndexedMatrix triangleToWorld) :
             base(castShape, ref from, ref to, ref triangleToWorld, triangleMesh.GetMargin())
         {
@@ -1309,6 +1346,14 @@ namespace BulletXNA.BulletCollision
             m_triangleMesh = triangleMesh;
         }
 
+        public void Initialize(ConvexShape castShape, ref IndexedMatrix from, ref IndexedMatrix to,
+            ConvexResultCallback resultCallback, CollisionObject collisionObject, ConcaveShape triangleMesh, ref IndexedMatrix triangleToWorld)
+        {
+            base.Initialize(castShape, ref from, ref to, ref triangleToWorld, triangleMesh.GetMargin());
+            m_resultCallback = resultCallback;
+            m_collisionObject = collisionObject;
+            m_triangleMesh = triangleMesh;
+        }
 
         public override float ReportHit(ref IndexedVector3 hitNormalLocal, ref IndexedVector3 hitPointLocal, float hitFraction, int partId, int triangleIndex)
         {
@@ -1319,22 +1364,28 @@ namespace BulletXNA.BulletCollision
             {
                 LocalConvexResult convexResult = new LocalConvexResult
                 (m_collisionObject,
-                    shapeInfo,
+                    ref shapeInfo,
                     ref hitNormalLocal,
                     ref hitPointLocal,
                     hitFraction);
 
-                bool normalInWorldSpace = false;
-
-                return m_resultCallback.AddSingleResult(convexResult, normalInWorldSpace);
+                bool normalInWorldSpace = m_triangleMesh is TriangleMeshShape;
+                return m_resultCallback.AddSingleResult(ref convexResult, normalInWorldSpace);
             }
             return hitFraction;
         }
+
+        public void Dispose()
+        {
+            Cleanup();
+            BulletGlobals.BridgeTriangleConvexcastCallbackPool.Free(this);
+        }
+
+
         ConvexResultCallback m_resultCallback;
         CollisionObject m_collisionObject;
         ConcaveShape m_triangleMesh;
-
-    }
+    };
 
 
 
@@ -1539,16 +1590,19 @@ namespace BulletXNA.BulletCollision
  	 return m_userCallback.NeedsCollision(proxy0);
 }
 
-        public override float AddSingleResult(LocalConvexResult r, bool b)
+        public override float AddSingleResult(ref LocalConvexResult r, bool b)
         {
             LocalShapeInfo shapeInfo = new LocalShapeInfo();
             shapeInfo.m_shapePart = -1;
             shapeInfo.m_triangleIndex = m_i;
-            if (r.m_localShapeInfo == null)
-            {
-                r.m_localShapeInfo = shapeInfo;
-            }
-            float result = m_userCallback.AddSingleResult(r, b);
+            r.m_localShapeInfo = shapeInfo;
+            // FIXME - THIS MAY BREAK....
+            //if (r.m_localShapeInfo == null)
+            //{
+            //    r.m_localShapeInfo = shapeInfo;
+            //}
+
+            float result = m_userCallback.AddSingleResult(ref r, b);
             m_closestHitFraction = m_userCallback.m_closestHitFraction;
             return result;
         }
@@ -1572,10 +1626,11 @@ namespace BulletXNA.BulletCollision
             LocalShapeInfo shapeInfo = new LocalShapeInfo();
             shapeInfo.m_shapePart = -1;
             shapeInfo.m_triangleIndex = m_i;
-            if (r.m_localShapeInfo == null)
-            {
-                r.m_localShapeInfo = shapeInfo;
-            }
+            r.m_localShapeInfo = shapeInfo;
+            //if (r.m_localShapeInfo == null)
+            //{
+            //    r.m_localShapeInfo = shapeInfo;
+            //}
             float result = m_userCallback.AddSingleResult(ref r, b);
             m_closestHitFraction = m_userCallback.m_closestHitFraction;
 
@@ -1804,6 +1859,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual void Cleanup()
         {
+
         }
     }
 

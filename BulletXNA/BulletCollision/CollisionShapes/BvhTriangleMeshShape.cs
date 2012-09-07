@@ -114,9 +114,11 @@ namespace BulletXNA.BulletCollision
         {
             if (m_bvh != null)
             {
-                MyNodeOverlapCallback myNodeCallback = new MyNodeOverlapCallback(callback, m_meshInterface);
-                m_bvh.ReportRayOverlappingNodex(myNodeCallback, ref raySource, ref rayTarget);
-                myNodeCallback.Cleanup();
+                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                {
+                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    m_bvh.ReportRayOverlappingNodex(myNodeCallback, ref raySource, ref rayTarget);
+                }
             }
         }
 
@@ -125,9 +127,11 @@ namespace BulletXNA.BulletCollision
         {
             if (m_bvh != null)
             {
-                MyNodeOverlapCallback myNodeCallback = new MyNodeOverlapCallback(callback, m_meshInterface);
-                m_bvh.ReportBoxCastOverlappingNodex(myNodeCallback, ref boxSource, ref boxTarget, ref boxMin, ref boxMax);
-                myNodeCallback.Cleanup();
+                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                {
+                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    m_bvh.ReportBoxCastOverlappingNodex(myNodeCallback, ref boxSource, ref boxTarget, ref boxMin, ref boxMax);
+                }
             }
         }
 
@@ -139,9 +143,11 @@ namespace BulletXNA.BulletCollision
 #else
             if (m_bvh != null)
             {
-                MyNodeOverlapCallback myNodeCallback = new MyNodeOverlapCallback(callback, m_meshInterface);
-                m_bvh.ReportAabbOverlappingNodex(myNodeCallback, ref aabbMin, ref aabbMax);
-                myNodeCallback.Cleanup();
+                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                {
+                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    m_bvh.ReportAabbOverlappingNodex(myNodeCallback, ref aabbMin, ref aabbMax);
+                }
             }
 #endif
         }
@@ -229,109 +235,123 @@ namespace BulletXNA.BulletCollision
         private bool m_ownsBvh;
         private TriangleInfoMap m_triangleInfoMap;
 
-        class MyNodeOverlapCallback : INodeOverlapCallback
-        {
-            public StridingMeshInterface m_meshInterface;
-            public ITriangleCallback m_callback;
-            IndexedVector3[] m_triangle = new IndexedVector3[3];
-
-            public MyNodeOverlapCallback(ITriangleCallback callback, StridingMeshInterface meshInterface)
-            {
-                m_meshInterface = meshInterface;
-                m_callback = callback;
-
-            }
-
-            public virtual void ProcessNode(int nodeSubPart, int nodeTriangleIndex)
-            {
-                //m_triangle.Clear();            
-                Object vertexBase;
-                int numVerts;
-                PHY_ScalarType type;
-                int stride;
-                Object indexBase;
-                int indexStride;
-                int numfaces;
-                PHY_ScalarType indicesType;
-
-                m_meshInterface.GetLockedReadOnlyVertexIndexBase(
-                    out vertexBase,
-                    out numVerts,
-                    out type,
-                    out stride,
-                    out indexBase,
-                    out indexStride,
-                    out numfaces,
-                    out indicesType,
-                    nodeSubPart);
-
-                //unsigned int* gfxbase = (unsigned int*)(indexbase+nodeTriangleIndex*indexstride);
-                // force index stride to be 1 regardless.
-                indexStride = 3;
-                int indexIndex = nodeTriangleIndex * indexStride;
-
-                Debug.Assert(indicesType == PHY_ScalarType.PHY_INTEGER || indicesType == PHY_ScalarType.PHY_SHORT);
-
-
-
-                IndexedVector3 meshScaling = m_meshInterface.GetScaling();
-                int[] indexRaw = ((ObjectArray<int>)indexBase).GetRawArray();
-
-
-                if (vertexBase is ObjectArray<IndexedVector3>)
-                {
-                    IndexedVector3[] vertexBaseRaw = ((ObjectArray<IndexedVector3>)vertexBase).GetRawArray();
-                    for (int j = 2; j >= 0; j--)
-                    {
-                        m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
-                        //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
-                        m_triangle[j] *= meshScaling;
-                    }
-                }
-#if XNA
-                else if (vertexBase is ObjectArray<Microsoft.Xna.Framework.Vector3>)
-                {
-                    Microsoft.Xna.Framework.Vector3[] vertexBaseRaw = ((ObjectArray<Microsoft.Xna.Framework.Vector3>)vertexBase).GetRawArray();
-                    for (int j = 2; j >= 0; j--)
-                    {
-                        m_triangle[j] = new IndexedVector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
-                        //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
-                        m_triangle[j] *= meshScaling;
-                    }
-                }
-#endif
-                else if (vertexBase is ObjectArray<float>)
-                {
-                    float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();
-                    for (int j = 2; j >= 0; j--)
-                    {
-                        int offset = indexRaw[indexIndex + j] * 3;
-                        m_triangle[j] = new IndexedVector3(floats[offset] * meshScaling.X, floats[offset + 1] * meshScaling.Y, floats[offset + 2] * meshScaling.Z);
-                    }
-                }
-                else
-                {
-
-                    Debug.Assert(false, "Unsupported type.");
-                }
-
-
-                //FIXME - Debug here and on quantized Bvh walking
-                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBVHTriangleMesh)
-                {
-                    BulletGlobals.g_streamWriter.WriteLine("BVH Triangle");
-                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[0]);
-                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[1]);
-                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[2]);
-                }
-                /* Perform ray vs. triangle collision here */
-                m_callback.ProcessTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
-                m_meshInterface.UnLockReadOnlyVertexBase(nodeSubPart);
-            }
-
-            public virtual void Cleanup()
-            {
-            }
-        }
     }
+    public class MyNodeOverlapCallback : INodeOverlapCallback, IDisposable
+    {
+        public StridingMeshInterface m_meshInterface;
+        public ITriangleCallback m_callback;
+        IndexedVector3[] m_triangle = new IndexedVector3[3];
+
+        public MyNodeOverlapCallback() { } // for pool
+        public MyNodeOverlapCallback(ITriangleCallback callback, StridingMeshInterface meshInterface)
+        {
+            m_meshInterface = meshInterface;
+            m_callback = callback;
+
+        }
+
+        public void Initialize(ITriangleCallback callback, StridingMeshInterface meshInterface)
+        {
+            m_meshInterface = meshInterface;
+            m_callback = callback;
+        }
+
+        public virtual void ProcessNode(int nodeSubPart, int nodeTriangleIndex)
+        {
+            //m_triangle.Clear();            
+            Object vertexBase;
+            int numVerts;
+            PHY_ScalarType type;
+            int stride;
+            Object indexBase;
+            int indexStride;
+            int numfaces;
+            PHY_ScalarType indicesType;
+
+            m_meshInterface.GetLockedReadOnlyVertexIndexBase(
+                out vertexBase,
+                out numVerts,
+                out type,
+                out stride,
+                out indexBase,
+                out indexStride,
+                out numfaces,
+                out indicesType,
+                nodeSubPart);
+
+            //unsigned int* gfxbase = (unsigned int*)(indexbase+nodeTriangleIndex*indexstride);
+            // force index stride to be 1 regardless.
+            indexStride = 3;
+            int indexIndex = nodeTriangleIndex * indexStride;
+
+            Debug.Assert(indicesType == PHY_ScalarType.PHY_INTEGER || indicesType == PHY_ScalarType.PHY_SHORT);
+
+            IndexedVector3 meshScaling = m_meshInterface.GetScaling();
+            int[] indexRaw = ((ObjectArray<int>)indexBase).GetRawArray();
+
+
+            if (vertexBase is ObjectArray<IndexedVector3>)
+            {
+                IndexedVector3[] vertexBaseRaw = ((ObjectArray<IndexedVector3>)vertexBase).GetRawArray();
+                for (int j = 2; j >= 0; j--)
+                {
+                    m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
+                    //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                    m_triangle[j] *= meshScaling;
+                }
+            }
+#if XNA
+            else if (vertexBase is ObjectArray<Microsoft.Xna.Framework.Vector3>)
+            {
+                Microsoft.Xna.Framework.Vector3[] vertexBaseRaw = ((ObjectArray<Microsoft.Xna.Framework.Vector3>)vertexBase).GetRawArray();
+                for (int j = 2; j >= 0; j--)
+                {
+                    m_triangle[j] = new IndexedVector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
+                    //IndexedVector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
+                    m_triangle[j] *= meshScaling;
+                }
+            }
+#endif
+            else if (vertexBase is ObjectArray<float>)
+            {
+                float[] floats = ((ObjectArray<float>)vertexBase).GetRawArray();
+                for (int j = 2; j >= 0; j--)
+                {
+                    int offset = indexRaw[indexIndex + j] * 3;
+                    m_triangle[j] = new IndexedVector3(floats[offset] * meshScaling.X, floats[offset + 1] * meshScaling.Y, floats[offset + 2] * meshScaling.Z);
+                }
+            }
+            else
+            {
+
+                Debug.Assert(false, "Unsupported type.");
+            }
+
+
+            //FIXME - Debug here and on quantized Bvh walking
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBVHTriangleMesh)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("BVH Triangle");
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[0]);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[1]);
+                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[2]);
+            }
+            /* Perform ray vs. triangle collision here */
+            m_callback.ProcessTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
+            m_meshInterface.UnLockReadOnlyVertexBase(nodeSubPart);
+        }
+
+        public virtual void Cleanup()
+        {
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+            BulletGlobals.MyNodeOverlapCallbackPool.Free(this);
+        }
+
+
+    }
+
 }

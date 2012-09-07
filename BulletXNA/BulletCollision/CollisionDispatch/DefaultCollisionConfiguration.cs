@@ -74,9 +74,11 @@ namespace BulletXNA.BulletCollision
 	public DefaultCollisionConfiguration(DefaultCollisionConstructionInfo constructionInfo)
     {
         m_simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+        m_useEpaPenetrationAlgorithm = true;
+
         m_pdSolver = new GjkEpaPenetrationDepthSolver();
         //m_pdSolver = new MinkowskiPenetrationDepthSolver();
-        m_useEpaPenetrationAlgorithm = true;
+
 
 	    //default CreationFunctions, filling the m_doubleDispatch table
 	    m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver,m_pdSolver);

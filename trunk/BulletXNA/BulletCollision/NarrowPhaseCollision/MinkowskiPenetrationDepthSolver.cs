@@ -29,6 +29,12 @@ namespace BulletXNA.BulletCollision
 {
     public class MinkowskiPenetrationDepthSolver : IConvexPenetrationDepthSolver
     {
+
+        IndexedVector4[] supportVerticesABatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+        IndexedVector4[] supportVerticesBBatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+        IndexedVector3[] seperatingAxisInABatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+        IndexedVector3[] seperatingAxisInBBatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
+        
         public bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref IndexedMatrix transA, ref IndexedMatrix transB,
                 ref IndexedVector3 v, ref IndexedVector3 pa, ref IndexedVector3 pb, IDebugDraw debugDraw)
         {
@@ -44,10 +50,6 @@ namespace BulletXNA.BulletCollision
 #if USE_BATCHED_SUPPORT
 
 
-            IndexedVector4[] supportVerticesABatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
-            IndexedVector4[] supportVerticesBBatch = new IndexedVector4[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
-            IndexedVector3[] seperatingAxisInABatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
-            IndexedVector3[] seperatingAxisInBBatch = new IndexedVector3[NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2];
 
 
             int numSampleDirections = NUM_UNITSPHERE_POINTS;

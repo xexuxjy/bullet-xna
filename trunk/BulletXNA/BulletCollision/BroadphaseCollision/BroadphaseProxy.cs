@@ -239,6 +239,9 @@ namespace BulletXNA.BulletCollision
         //don't use this data, it will be removed in future version.
         public Object m_internalInfo1;
         public int m_internalTmpValue;
+
+        public int m_index; // if we maintain this then it saves a lot on searches... (only on hashedcache at the mo)
+
     }
 
     public enum BroadphaseNativeTypes

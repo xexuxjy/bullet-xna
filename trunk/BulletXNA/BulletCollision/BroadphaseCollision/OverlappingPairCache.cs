@@ -125,7 +125,9 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(pair.m_pProxy0.GetUid() == proxyId1);
             Debug.Assert(pair.m_pProxy1.GetUid() == proxyId2);
 
-            int pairIndex = m_overlappingPairArray.IndexOf(pair);
+            //int pairIndex = m_overlappingPairArray.IndexOf(pair);
+            // we've already found this.
+            int pairIndex = pair.m_index;
 
             Debug.Assert(pairIndex < m_overlappingPairArray.Count);
 
@@ -503,7 +505,8 @@ namespace BulletXNA.BulletCollision
             }
 
             //btAssert(index < m_overlappingPairArray.size());
-
+            // if we know this then don't we don't need to look it up again..
+            rawPairArray[index].m_index = index;
             return rawPairArray[index];
         }
 
@@ -623,7 +626,7 @@ namespace BulletXNA.BulletCollision
                 }
             }
 
-            return 0;
+            return null;
         }
 
         public void CleanOverlappingPair(BroadphasePair pair, IDispatcher dispatcher)
@@ -647,7 +650,7 @@ namespace BulletXNA.BulletCollision
             {
                 return null;
             }
-            // MAN - 2.76 - uses expand noninitializing....??
+
             BroadphasePair pair = new BroadphasePair(proxy0, proxy1);
             m_overlappingPairArray.Add(pair);
 

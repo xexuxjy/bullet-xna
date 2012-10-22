@@ -212,6 +212,21 @@ namespace BulletXNA.LinearMath
 			this._version++;
 		}
 
+        // removes the last numElements from the array (
+        public void Truncate(int numElements)
+        {
+            if (this._size > 0 && numElements <= this._size)
+            {
+                int newLength = this._size - numElements;
+                Array.Clear(this._items, newLength, numElements);
+                this._size = newLength;
+            }
+            this._version++;
+
+
+        }
+
+
 		public bool Contains(T item)
 		{
 			if (item == null)
@@ -606,6 +621,7 @@ namespace BulletXNA.LinearMath
                 {
                     // copy the last item to this position
                     this._items[index] = this._items[_size - 1];
+                    this._items[_size - 1] = default(T);
                 }
                 --_size;
                 return true;

@@ -323,6 +323,12 @@ namespace BulletXNA.LinearMath
             return new IndexedVector3(m.TDotX(ref v), m.TDotY(ref v), m.TDotZ(ref v));
         }
 
+        public static void Multiply(ref IndexedVector3 vout, ref IndexedVector3 vin, ref IndexedBasisMatrix m)
+        {
+            vout = new IndexedVector3(m.TDotX(ref vin), m.TDotY(ref vin), m.TDotZ(ref vin));
+        }
+
+
         public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, IndexedBasisMatrix m2)
         {
             return new IndexedBasisMatrix(

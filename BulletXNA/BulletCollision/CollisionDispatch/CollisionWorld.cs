@@ -173,7 +173,7 @@ namespace BulletXNA.BulletCollision
             if (GetDebugDrawer() != null && ((GetDebugDrawer().GetDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
             {
                 int numManifolds = GetDispatcher().GetNumManifolds();
-                IndexedVector3 color = IndexedVector3.Zero;
+                IndexedVector3 color = new IndexedVector3(1,1,0.5f);
                 for (int i=0;i<numManifolds;i++)
                 {
                     PersistentManifold contactManifold = GetDispatcher().GetManifoldByIndexInternal(i);
@@ -257,7 +257,7 @@ namespace BulletXNA.BulletCollision
                             if(GetDispatchInfo().m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject())
  					        {
                                 IndexedMatrix m = colObj.GetInterpolationWorldTransform();
-                                (colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
+                                //(colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
 
 						        colObj.GetCollisionShape().GetAabb(m,out minAabb2,out maxAabb2);
 						        minAabb2 -= contactThreshold;
@@ -294,12 +294,12 @@ namespace BulletXNA.BulletCollision
             BulletGlobals.StartProfile("rayTest");
             /// use the broadphase to accelerate the search for objects, based on their aabb
             /// and for each object with ray-aabb overlap, perform an exact ray test
-            SingleRayCallback rayCB = BulletGlobals.SingleRayCallbackPool.Get();
-            rayCB.Initialize(ref rayFromWorld, ref rayToWorld, this, resultCallback);
+            using (SingleRayCallback rayCB = BulletGlobals.SingleRayCallbackPool.Get())
+            {
+                rayCB.Initialize(ref rayFromWorld, ref rayToWorld, this, resultCallback);
 
 #if !USE_BRUTEFORCE_RAYBROADPHASE
-            m_broadphasePairCache.RayTest(ref rayFromWorld, ref rayToWorld, rayCB);
-            rayCB.Cleanup();
+                m_broadphasePairCache.RayTest(ref rayFromWorld, ref rayToWorld, rayCB);
 
 #else
 	        for (int i=0;i<GetNumCollisionObjects();i++)
@@ -307,6 +307,7 @@ namespace BulletXNA.BulletCollision
 		        rayCB.Process(m_collisionObjects[i].GetBroadphaseHandle());
 	        }	
 #endif //USE_BRUTEFORCE_RAYBROADPHASE
+            }
             BulletGlobals.StopProfile();
         }
 
@@ -413,6 +414,13 @@ namespace BulletXNA.BulletCollision
             //btAssert( m_collisionObjects.findLinearSearch(collisionObject)  == m_collisionObjects.size());
 
             Debug.Assert(collisionObject != null);
+            //Debug.Assert(!m_collisionObjects.Contains(collisionObject));
+
+            if (m_collisionObjects.Contains(collisionObject))
+            {
+                return;
+            }
+
             m_collisionObjects.Add(collisionObject);
 
             //calculate new AABB
@@ -545,6 +553,12 @@ namespace BulletXNA.BulletCollision
                         if (castResult.m_fraction < resultCallback.m_closestHitFraction)
                         {
 
+                            //if (resultCallback.m_closestHitFraction != 1f)
+                            //{
+                            //    int ibreak = 0;
+                            //    convexCaster.calcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult);
+                            //}
+
                             //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
                             //rotate normal into worldspace
                             castResult.m_normal = rayFromTrans._basis * castResult.m_normal;
@@ -624,10 +638,10 @@ namespace BulletXNA.BulletCollision
                             rcb.Initialize(ref rayFromLocal, ref rayToLocal, resultCallback, collisionObject, concaveShape, ref transform);
                             rcb.m_hitFraction = resultCallback.m_closestHitFraction;
 
-                            IndexedVector3 rayAabbMinLocal = rayFromLocal;
-                            MathUtil.VectorMin(ref rayToLocal, ref rayAabbMinLocal);
-                            IndexedVector3 rayAabbMaxLocal = rayFromLocal;
-                            MathUtil.VectorMax(ref rayToLocal, ref rayAabbMaxLocal);
+                        IndexedVector3 rayAabbMinLocal = rayFromLocal;
+                        MathUtil.VectorMin(ref rayToLocal, ref rayAabbMinLocal);
+                        IndexedVector3 rayAabbMaxLocal = rayFromLocal;
+                        MathUtil.VectorMax(ref rayToLocal, ref rayAabbMaxLocal);
 
                             concaveShape.ProcessAllTriangles(rcb, ref rayAabbMinLocal, ref rayAabbMaxLocal);
                         }
@@ -811,12 +825,12 @@ namespace BulletXNA.BulletCollision
                                 IndexedVector3 boxMaxLocal;
                                 castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
 
-                                IndexedVector3 rayAabbMinLocal = convexFromLocal;
-                                MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
-                                //rayAabbMinLocal.setMin(convexToLocal);
-                                IndexedVector3 rayAabbMaxLocal = convexFromLocal;
-                                //rayAabbMaxLocal.setMax(convexToLocal);
-                                MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
+							IndexedVector3 rayAabbMinLocal = convexFromLocal;
+							MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
+							//rayAabbMinLocal.setMin(convexToLocal);
+							IndexedVector3 rayAabbMaxLocal = convexFromLocal;
+							//rayAabbMaxLocal.setMax(convexToLocal);
+							MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
 
                                 rayAabbMinLocal += boxMinLocal;
                                 rayAabbMaxLocal += boxMaxLocal;
@@ -991,6 +1005,7 @@ namespace BulletXNA.BulletCollision
             m_rayToWorld = rayToWorld;
             m_closestHitFraction = 1f;
             m_collisionObject = null;
+
         }
 
 
@@ -1326,9 +1341,9 @@ namespace BulletXNA.BulletCollision
         }
 
         public IndexedMatrix m_colObjWorldTransform;
-        RayResultCallback m_resultCallback;
-        CollisionObject m_collisionObject;
-        ConcaveShape m_triangleMesh;
+        public RayResultCallback m_resultCallback;
+        public CollisionObject m_collisionObject;
+        public ConcaveShape m_triangleMesh;
     }
 
 
@@ -1389,7 +1404,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-    public class SingleRayCallback : BroadphaseRayCallback
+    public class SingleRayCallback : BroadphaseRayCallback,IDisposable
     {
         public SingleRayCallback()
         {
@@ -1465,17 +1480,21 @@ namespace BulletXNA.BulletCollision
         public override void Cleanup()
         {
             base.Cleanup();
+        }
+
+        public void Dispose()
+        {
             BulletGlobals.SingleRayCallbackPool.Free(this);
         }
 
 
-        IndexedVector3 m_rayFromWorld;
-        IndexedVector3 m_rayToWorld;
-        IndexedMatrix m_rayFromTrans;
-        IndexedMatrix m_rayToTrans;
-        IndexedVector3 m_hitNormal;
-        CollisionWorld m_world;
-        RayResultCallback m_resultCallback;
+        public IndexedVector3 m_rayFromWorld;
+        public IndexedVector3 m_rayToWorld;
+        public IndexedMatrix m_rayFromTrans;
+        public IndexedMatrix m_rayToTrans;
+        public IndexedVector3 m_hitNormal;
+        public CollisionWorld m_world;
+        public RayResultCallback m_resultCallback;
 
     }
 
@@ -1859,7 +1878,6 @@ namespace BulletXNA.BulletCollision
 
         public virtual void Cleanup()
         {
-
         }
     }
 

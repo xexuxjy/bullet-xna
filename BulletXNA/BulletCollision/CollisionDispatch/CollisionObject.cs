@@ -298,7 +298,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public float GetFriction()
+        public virtual float GetFriction()
         {
             return m_friction;
         }
@@ -318,11 +318,11 @@ namespace BulletXNA.BulletCollision
             m_internalType = types;
         }
 
-        public void GetWorldTransform(out IndexedMatrix worldTransform)
-        {
-            worldTransform = m_worldTransform;
-        }
 
+        public void GetWorldTransform(out IndexedMatrix m)
+        {
+            m = m_worldTransform;
+        }
 
         public IndexedMatrix GetWorldTransform()
         {
@@ -523,6 +523,15 @@ namespace BulletXNA.BulletCollision
         }
 
 
+        public void Translate(ref IndexedVector3 v)
+        {
+            m_worldTransform._origin += v;
+        }
+
+        public void Translate(IndexedVector3 v)
+        {
+            m_worldTransform._origin += v;
+        }
 
 
         public IndexedMatrix m_worldTransform;

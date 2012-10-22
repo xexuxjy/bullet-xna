@@ -1423,6 +1423,37 @@ namespace BulletXNA.BulletCollision
         }
     }
 
+    public class DbvtDraw : ICollide
+    {
+        public virtual void Process(DbvtNode n, DbvtNode n2) { }
+        public virtual void Process(DbvtNode n) 
+        {
+            IndexedMatrix im = IndexedMatrix.Identity;
+            IndexedVector3 color = new IndexedVector3(1, 1, 1);
+            BulletGlobals.gDebugDraw.DrawBox(ref n.volume._min, ref n.volume._max, ref im, ref color);
+
+        }
+
+        public virtual void Process(DbvtNode n, float f)
+        {
+            IndexedMatrix im = IndexedMatrix.Identity;
+            IndexedVector3 color = new IndexedVector3(1, 1, 1);
+            BulletGlobals.gDebugDraw.DrawBox(ref n.volume._min,ref n.volume._max, ref im,ref color);
+            
+        }
+        public virtual bool Descent(DbvtNode n)
+        {
+            return true;
+        }
+        public virtual bool AllLeaves(DbvtNode n)
+        {
+            return true;
+        }
+
+    }
+
+
+
     public class DbvtStackDataBlock : IDisposable
     {
         public ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();

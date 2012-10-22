@@ -1,4 +1,4 @@
-﻿/*
+﻿ /*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -351,7 +351,10 @@ namespace BulletXNA.BulletDynamics
             {
                 if (!body.IsStaticObject())
                 {
-                    m_nonStaticRigidBodies.Add(body);
+                    if (!m_nonStaticRigidBodies.Contains(body))
+                    {
+                        m_nonStaticRigidBodies.Add(body);
+                    }
                 }
                 else
                 {

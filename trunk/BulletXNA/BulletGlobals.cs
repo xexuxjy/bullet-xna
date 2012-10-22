@@ -138,6 +138,7 @@ namespace BulletXNA
         public static PooledType<BridgeTriangleConvexcastCallback> BridgeTriangleConvexcastCallbackPool = new PooledType<BridgeTriangleConvexcastCallback>();
         public static PooledType<MyNodeOverlapCallback> MyNodeOverlapCallbackPool = new PooledType<MyNodeOverlapCallback>();
         public static PooledType<ClosestRayResultCallback> ClosestRayResultCallbackPool = new PooledType<ClosestRayResultCallback>();
+        public static PooledType<DebugDrawcallback> DebugDrawcallbackPool = new PooledType<DebugDrawcallback>();
 
         public const bool debugRigidBody = true;
         public const bool debugCollisionWorld = false;

@@ -129,7 +129,7 @@ namespace BulletXNA.BulletCollision
 
     }
 
-    public class BroadphaseRayTester : ICollide
+    public class BroadphaseRayTester : ICollide,IDisposable
     {
         public BroadphaseRayTester() { } // for pool
 
@@ -165,6 +165,10 @@ namespace BulletXNA.BulletCollision
             return true;
         }
 
+        public void Dispose()
+        {
+            BulletGlobals.BroadphaseRayTesterPool.Free(this);
+        }
 
         BroadphaseRayCallback m_rayCallback;
     }
@@ -482,32 +486,39 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             RayTest(ref rayFrom, ref rayTo, rayCallback, ref min, ref max);
         }
 
+        public void Visualise()
+        {
+            DbvtDraw dd = new DbvtDraw();
+            Dbvt.EnumNodes(m_sets[0].m_root,dd);
+        }
+
+
         public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-            BroadphaseRayTester callback = BulletGlobals.BroadphaseRayTesterPool.Get();
-            callback.Initialize(rayCallback);
-            
+            using (BroadphaseRayTester callback = BulletGlobals.BroadphaseRayTesterPool.Get())
+            {
+                callback.Initialize(rayCallback);
 
-            m_sets[0].RayTestInternal(m_sets[0].m_root,
-                ref rayFrom,
-                ref rayTo,
-                ref rayCallback.m_rayDirectionInverse,
-                rayCallback.m_signs,
-                rayCallback.m_lambda_max,
-                ref aabbMin,
-                ref aabbMax,
-                callback);
+                m_sets[0].RayTestInternal(m_sets[0].m_root,
+                    ref rayFrom,
+                    ref rayTo,
+                    ref rayCallback.m_rayDirectionInverse,
+                    rayCallback.m_signs,
+                    rayCallback.m_lambda_max,
+                    ref aabbMin,
+                    ref aabbMax,
+                    callback);
 
-            m_sets[1].RayTestInternal(m_sets[1].m_root,
-                ref rayFrom,
-                ref rayTo,
-                ref rayCallback.m_rayDirectionInverse,
-                rayCallback.m_signs,
-                rayCallback.m_lambda_max,
-                ref aabbMin,
-                ref aabbMax,
-                callback);
-            BulletGlobals.BroadphaseRayTesterPool.Free(callback);
+                m_sets[1].RayTestInternal(m_sets[1].m_root,
+                    ref rayFrom,
+                    ref rayTo,
+                    ref rayCallback.m_rayDirectionInverse,
+                    rayCallback.m_signs,
+                    rayCallback.m_lambda_max,
+                    ref aabbMin,
+                    ref aabbMax,
+                    callback);
+            }
         }
 
         public virtual void GetAabb(BroadphaseProxy absproxy, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
@@ -771,11 +782,19 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     }
                 }
 
-                //perform a sort, to sort 'invalid' pairs to the end
-                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
+                if (invalidPair > 0)
+                {
+                    if (invalidPair < overlappingPairArray.Count)
+                    {
+                        int ibreak = 0;
+                    }
+                    //perform a sort, to sort 'invalid' pairs to the end
+                    overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
 
-                //overlappingPairArray.resize(overlappingPairArray.size() - invalidPair);
-                //overlappingPairArray.Capacity = overlappingPairArray.Count - invalidPair;
+                    //overlappingPairArray.resize(overlappingPairArray.size() - invalidPair);
+                    overlappingPairArray.Truncate(invalidPair);
+
+                }
             }
 
         }

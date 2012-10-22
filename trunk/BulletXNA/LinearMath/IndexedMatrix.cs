@@ -102,6 +102,16 @@ namespace BulletXNA.LinearMath
                                                     matrix1._basis._el2.Dot(ref v) + matrix1._origin.Z);
         }
 
+
+        public static void Multiply(out IndexedVector3 vout, ref IndexedMatrix matrix1, ref IndexedVector3 vin)
+        {
+            vout = new IndexedVector3(matrix1._basis._el0.Dot(ref vin) + matrix1._origin.X,
+                                                   matrix1._basis._el1.Dot(ref vin) + matrix1._origin.Y,
+                                                    matrix1._basis._el2.Dot(ref vin) + matrix1._origin.Z);
+        }
+
+
+
         //public static IndexedVector3 operator *(IndexedVector3 v,IndexedMatrix matrix1)
         //{
         //    return new IndexedVector3(matrix1._basis[0].Dot(ref v) + matrix1._origin.X,

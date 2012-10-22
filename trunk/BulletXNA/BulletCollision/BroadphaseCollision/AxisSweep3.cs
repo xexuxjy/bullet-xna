@@ -115,6 +115,12 @@ namespace BulletXNA.BulletCollision
         protected DbvtBroadphase m_raycastAccelerator;
         protected IOverlappingPairCache m_nullPairCache;
 
+
+        public DbvtBroadphase GetAccelerator()
+        {
+            return m_raycastAccelerator;
+        }
+
         // allocation/deallocation
         protected ushort AllocHandle()
         {

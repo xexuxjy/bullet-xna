@@ -79,18 +79,21 @@ namespace BulletXNA.BulletCollision
         public CollisionAlgorithm()
         {
             ++BulletGlobals.s_collisionAlgorithmInstanceCount;
+            colAgorithmId = BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
 
         public CollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
         {
             m_dispatcher = ci.GetDispatcher();
             ++BulletGlobals.s_collisionAlgorithmInstanceCount;
+            colAgorithmId = BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
 
         public virtual void Initialize(CollisionAlgorithmConstructionInfo ci)
         {
             m_dispatcher = ci.GetDispatcher();
             ++BulletGlobals.s_collisionAlgorithmInstanceCount;
+            colAgorithmId = BulletGlobals.s_collisionAlgorithmInstanceCount;
         }
 
 
@@ -110,6 +113,8 @@ namespace BulletXNA.BulletCollision
         }
 
         protected IDispatcher m_dispatcher;
+
+        public int colAgorithmId;
 
     }
 }

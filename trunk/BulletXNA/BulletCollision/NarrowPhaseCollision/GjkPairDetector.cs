@@ -115,8 +115,11 @@ namespace BulletXNA.BulletCollision
             IndexedMatrix localTransA = input.m_transformA;
             IndexedMatrix localTransB = input.m_transformB;
             IndexedVector3 positionOffset = (localTransA._origin + localTransB._origin) * .5f;
-            localTransA._origin -= positionOffset;
-            localTransB._origin -= positionOffset;
+            
+            
+            IndexedVector3.Subtract(out localTransA._origin, ref localTransA._origin,ref positionOffset);
+            IndexedVector3.Subtract(out localTransB._origin, ref localTransB._origin, ref positionOffset);
+            //localTransB._origin -= positionOffset;
 
             bool check2d = m_minkowskiA.IsConvex2d() && m_minkowskiB.IsConvex2d();
 
@@ -158,11 +161,6 @@ namespace BulletXNA.BulletCollision
 
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
-                if (localTransA._origin.Y > 1.09f && localTransA._origin.Y < 1.11f)
-                {
-                    int ibreak = 0;
-                }
-
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transA", localTransA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transB", localTransB);
 
@@ -182,10 +180,6 @@ namespace BulletXNA.BulletCollision
                 //while (true)
                 {
                     count++;
-                    if (gNumGjkChecks == 3 && count == 4)
-                    {
-                        int ibreak = 0;
-                    }
 
                     IndexedVector3 seperatingAxisInA = (-m_cachedSeparatingAxis) * input.m_transformA._basis;
                     IndexedVector3 seperatingAxisInB = m_cachedSeparatingAxis * input.m_transformB._basis;
@@ -203,8 +197,8 @@ namespace BulletXNA.BulletCollision
                         qWorld.Z = 0.0f;
                     }
 
-                    IndexedVector3 w = pWorld - qWorld;
-                    delta = IndexedVector3.Dot(m_cachedSeparatingAxis, w);
+                    IndexedVector3 w = new IndexedVector3(pWorld.X - qWorld.X,pWorld.Y - qWorld.Y,pWorld.Z - qWorld.Z);
+                    IndexedVector3.Dot(ref m_cachedSeparatingAxis, ref w,out delta);
 
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
@@ -240,8 +234,6 @@ namespace BulletXNA.BulletCollision
                     // are we getting any closer ?
                     float f0 = squaredDistance - delta;
                     float f1 = squaredDistance * REL_ERROR2;
-
-
 
                     if (f0 <= f1)
                     {

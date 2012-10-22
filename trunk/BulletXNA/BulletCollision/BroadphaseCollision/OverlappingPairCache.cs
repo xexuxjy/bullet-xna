@@ -650,7 +650,7 @@ namespace BulletXNA.BulletCollision
             {
                 return null;
             }
-
+            
             BroadphasePair pair = new BroadphasePair(proxy0, proxy1);
             m_overlappingPairArray.Add(pair);
 

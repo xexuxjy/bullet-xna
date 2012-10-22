@@ -66,7 +66,7 @@ namespace BulletXNA
 							BoxShape boxShape = shape as BoxShape;
 							IndexedVector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
 							IndexedVector3 negHalfExtents = -halfExtents;
-							debugDraw.DrawBox(ref negHalfExtents, ref halfExtents, ref worldTransform, ref color);
+                            debugDraw.DrawBox(ref negHalfExtents, ref halfExtents, ref worldTransform, ref color);
 							break;
 						}
 
@@ -215,10 +215,11 @@ namespace BulletXNA
 								///@todo pass camera, for some culling? no -> we are not a graphics lib
 								IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
 								IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
-
-                                //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
-                                //concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
-                                //drawCallback.Cleanup();
+                                using (DebugDrawcallback drawCallback = BulletGlobals.DebugDrawcallbackPool.Get())
+                                {
+                                    drawCallback.Initialise(debugDraw, ref worldTransform, ref color);
+                                    concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                                }
 							}
 							else if (shape.GetShapeType() == BroadphaseNativeTypes.CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE)
 							{
@@ -590,7 +591,7 @@ namespace BulletXNA
                              4,5,6,6,7,4}; // face f
 	}
 
-	public class DebugDrawcallback : ITriangleCallback, IInternalTriangleIndexCallback
+	public class DebugDrawcallback : ITriangleCallback, IInternalTriangleIndexCallback,IDisposable
 	{
 		IDebugDraw m_debugDrawer;
 		IndexedVector3 m_color;
@@ -601,12 +602,22 @@ namespace BulletXNA
 			return true;
 		}
 
+        public DebugDrawcallback() { } // for pool
+
 		public DebugDrawcallback(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color)
 		{
 			m_debugDrawer = debugDrawer;
 			m_color = color;
 			m_worldTrans = worldTrans;
 		}
+
+        public void Initialise(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color)
+        {
+            m_debugDrawer = debugDrawer;
+            m_color = color;
+            m_worldTrans = worldTrans;
+        }
+
 
 		public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle, int partId, int triangleIndex)
 		{
@@ -623,6 +634,14 @@ namespace BulletXNA
             wv1 = m_worldTrans * triangle[1];
             wv2 = m_worldTrans * triangle[2];
 
+            if ((int)(m_debugDrawer.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
+            {
+                IndexedVector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
+                IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
+                normal.Normalize();
+                IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
+                //m_debugDrawer.DrawLine(center, center + normal, normalColor);
+            }
 
 			m_debugDrawer.DrawLine(ref wv0, ref wv1, ref m_color);
 			m_debugDrawer.DrawLine(ref wv1, ref wv2, ref m_color);
@@ -640,6 +659,11 @@ namespace BulletXNA
 		public virtual void Cleanup()
 		{
 		}
+
+        public void Dispose()
+        {
+            BulletGlobals.DebugDrawcallbackPool.Free(this);
+        }
 
 	}
 

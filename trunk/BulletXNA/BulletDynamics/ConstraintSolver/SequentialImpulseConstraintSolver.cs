@@ -61,6 +61,9 @@ namespace BulletXNA.BulletDynamics
 
 		public SequentialImpulseConstraintSolver()
 		{
+
+			//FIXME RHS SEEMS TO BE OUT
+
 			m_tmpSolverContactConstraintPool = new ObjectArray<SolverConstraint>();
 			m_tmpSolverNonContactConstraintPool = new ObjectArray<SolverConstraint>();
 			m_tmpSolverContactFrictionConstraintPool = new ObjectArray<SolverConstraint>();
@@ -107,8 +110,6 @@ namespace BulletXNA.BulletDynamics
 
 			solverConstraint.m_originalContactPoint = null;
             //solverConstraint.m_originalContactPointConstraint = null;
-            //solverConstraint.m_originalContactPointConstraint = null;
-
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
 
@@ -148,10 +149,6 @@ namespace BulletXNA.BulletDynamics
 #endif //COMPUTE_IMPULSE_DENOM
 			float denom = relaxation / (denom0 + denom1);
 			solverConstraint.m_jacDiagABInv = denom;
-            if (denom > 8f)
-            {
-                int ibreak = 0;
-            }
 			MathUtil.SanityCheckFloat(solverConstraint.m_jacDiagABInv);
 #if _USE_JACOBIAN
 	        solverConstraint.m_jac =  new JacobianEntry (
@@ -175,12 +172,8 @@ namespace BulletXNA.BulletDynamics
 				//float positionalError = 0f;
 
 				float velocityError = desiredVelocity - rel_vel;
-                float velocityImpulse = (velocityError * solverConstraint.m_jacDiagABInv);
-                if (velocityImpulse > 40f)
-                {
-                    int ibreak = 0;
-                }
-
+				float damper = 1f;
+				float velocityImpulse = (velocityError * solverConstraint.m_jacDiagABInv) * damper;
 				solverConstraint.m_rhs = velocityImpulse;
 				solverConstraint.m_cfm = cfmSlip;
 				solverConstraint.m_lowerLimit = 0;
@@ -216,24 +209,24 @@ namespace BulletXNA.BulletDynamics
 
             // cross
 
-            //IndexedVector3 torqueAxis0 = new IndexedVector3(rel_pos1.Y *cp.m_normalWorldOnB.Z - rel_pos1.Z * cp.m_normalWorldOnB.Y,
-            //    rel_pos1.Z *cp.m_normalWorldOnB.X - rel_pos1.X * cp.m_normalWorldOnB.Z,
-            //    rel_pos1.X *cp.m_normalWorldOnB.Y - rel_pos1.Y * cp.m_normalWorldOnB.X);
+            IndexedVector3 torqueAxis0 = new IndexedVector3(rel_pos1.Y *cp.m_normalWorldOnB.Z - rel_pos1.Z * cp.m_normalWorldOnB.Y,
+                rel_pos1.Z *cp.m_normalWorldOnB.X - rel_pos1.X * cp.m_normalWorldOnB.Z,
+                rel_pos1.X *cp.m_normalWorldOnB.Y - rel_pos1.Y * cp.m_normalWorldOnB.X);
 
-            //IndexedVector3 torqueAxis1 = new IndexedVector3(rel_pos2.Y *cp.m_normalWorldOnB.Z - rel_pos2.Z * cp.m_normalWorldOnB.Y,
-            //    rel_pos2.Z *cp.m_normalWorldOnB.X - rel_pos2.X * cp.m_normalWorldOnB.Z,
-            //    rel_pos2.X *cp.m_normalWorldOnB.Y - rel_pos2.Y * cp.m_normalWorldOnB.X);
-
-
-            //solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : IndexedVector3.Zero;
-            ////IndexedVector3 torqueAxis1 = IndexedVector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
-            //solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : IndexedVector3.Zero;
+            IndexedVector3 torqueAxis1 = new IndexedVector3(rel_pos2.Y *cp.m_normalWorldOnB.Z - rel_pos2.Z * cp.m_normalWorldOnB.Y,
+                rel_pos2.Z *cp.m_normalWorldOnB.X - rel_pos2.X * cp.m_normalWorldOnB.Z,
+                rel_pos2.X *cp.m_normalWorldOnB.Y - rel_pos2.Y * cp.m_normalWorldOnB.X);
 
 
-            IndexedVector3 torqueAxis0 = IndexedVector3.Cross(ref rel_pos1, ref cp.m_normalWorldOnB);
             solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : IndexedVector3.Zero;
-            IndexedVector3 torqueAxis1 = IndexedVector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
+            //IndexedVector3 torqueAxis1 = IndexedVector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
             solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : IndexedVector3.Zero;
+
+
+            //IndexedVector3 torqueAxis0 = IndexedVector3.Cross(ref rel_pos1, ref cp.m_normalWorldOnB);
+            //solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : IndexedVector3.Zero;
+            //IndexedVector3 torqueAxis1 = IndexedVector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
+            //solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : IndexedVector3.Zero;
 
 			{
 #if COMPUTE_IMPULSE_DENOM
@@ -258,10 +251,6 @@ namespace BulletXNA.BulletDynamics
 				float denom = relaxation / (denom0 + denom1);
 				MathUtil.SanityCheckFloat(denom);
 				solverConstraint.m_jacDiagABInv = denom;
-                if (denom > 8f)
-                {
-                    int ibreak = 0;
-                }
 			}
 
 			solverConstraint.m_contactNormal = cp.m_normalWorldOnB;
@@ -327,6 +316,11 @@ namespace BulletXNA.BulletDynamics
 
 				float positionalError = 0f;
 
+                if (rel_vel2 > 20)
+                {
+                    int ibreak = 0;
+                }
+
 				float velocityError = restitution - rel_vel2;// * damping;
 
 				if (penetration > 0f)
@@ -345,11 +339,6 @@ namespace BulletXNA.BulletDynamics
 				{
 					//combine position and velocity into rhs
 					solverConstraint.m_rhs = penetrationImpulse + velocityImpulse;
-                    if (solverConstraint.m_rhs > 200f)
-                    {
-                        int ibreak = 0;
-                    }
-
 					solverConstraint.m_rhsPenetration = 0f;
 				}
 				else
@@ -428,9 +417,30 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
+		//protected void initSolverBody(SolverBody solverBody, CollisionObject collisionObject)
+		//{
+		//    RigidBody rb = collisionObject != null ? RigidBody.upcast(collisionObject) : null;
+
+		//    solverBody.setDeltaLinearVelocity(IndexedVector3.Zero);
+		//    solverBody.setDeltaLinearVelocity(IndexedVector3.Zero);
+
+		//    if (rb != null)
+		//    {
+		//        solverBody.m_invMass = rb.getInvMass();
+		//        solverBody.m_originalBody = rb;
+		//        solverBody.m_angularFactor = rb.getAngularFactor();
+		//    } else
+		//    {
+		//        solverBody.m_invMass = 0f;
+		//        solverBody.m_originalBody = null;
+		//        solverBody.m_angularFactor = 1f;
+		//    }
+		//}
+
 		protected float RestitutionCurve(float rel_vel, float restitution)
 		{
-			float rest = restitution * -rel_vel;
+            // base on rest2 ?
+			float rest = (restitution * restitution * -rel_vel);
 			return rest;
 		}
 
@@ -599,7 +609,7 @@ namespace BulletXNA.BulletDynamics
 
 		protected void ResolveSingleConstraintRowGeneric(RigidBody body1, RigidBody body2, ref SolverConstraint c)
 		{
-                m_genericCount++;   
+            m_genericCount++;
                 float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
 
                 float deltaVel1Dotn = (c.m_contactNormal.X * body1.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body1.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body1.m_deltaLinearVelocity.Z) +
@@ -676,12 +686,6 @@ namespace BulletXNA.BulletDynamics
 			{
 				c.m_appliedImpulse = sum;
 			}
-
-            if (c.m_appliedImpulse > 40f)
-            {
-                int ibreak = 0;
-            }
-
 
             IndexedVector3 temp = new IndexedVector3(c.m_contactNormal.X * body1.m_invMass.X,c.m_contactNormal.Y * body1.m_invMass.Y,c.m_contactNormal.Z * body1.m_invMass.Z);
             body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse, "ResolveSingleConstraintRowLowerLimit-body1");
@@ -1104,7 +1108,7 @@ namespace BulletXNA.BulletDynamics
 			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
 
-
+			///@todo: use stack allocator for such temporarily memory, same for solver bodies/constraints
             m_orderNonContactConstraintPool.EnsureCapacity(numNonContactPool);///
             m_orderTmpConstraintPool.EnsureCapacity(numConstraintPool);
             m_orderFrictionConstraintPool.EnsureCapacity(numFrictionPool);

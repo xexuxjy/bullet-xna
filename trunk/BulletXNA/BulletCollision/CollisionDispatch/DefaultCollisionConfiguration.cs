@@ -67,18 +67,16 @@ namespace BulletXNA.BulletCollision
     CollisionAlgorithmCreateFunc m_triangleSphereCF;
     CollisionAlgorithmCreateFunc m_planeConvexCF;
     CollisionAlgorithmCreateFunc m_convexPlaneCF;
-	
+    CollisionAlgorithmCreateFunc m_convexAlgo2DCF;
     public DefaultCollisionConfiguration() : this(new DefaultCollisionConstructionInfo())
     {
     }
 	public DefaultCollisionConfiguration(DefaultCollisionConstructionInfo constructionInfo)
     {
         m_simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+        //m_pdSolver = new GjkEpaPenetrationDepthSolver();
+        m_pdSolver = new MinkowskiPenetrationDepthSolver();
         m_useEpaPenetrationAlgorithm = true;
-
-        m_pdSolver = new GjkEpaPenetrationDepthSolver();
-        //m_pdSolver = new MinkowskiPenetrationDepthSolver();
-
 
 	    //default CreationFunctions, filling the m_doubleDispatch table
 	    m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver,m_pdSolver);
@@ -92,6 +90,7 @@ namespace BulletXNA.BulletCollision
         m_sphereBoxCF = new SphereBoxCreateFunc();
         m_boxSphereCF = new SwappedSphereBoxCreateFunc();
 
+        m_convexAlgo2DCF = new Convex2dConvex2dCreateFunc(m_simplexSolver, m_pdSolver);
 	    m_sphereTriangleCF = new SphereTriangleCreateFunc();
 	    m_triangleSphereCF = new SphereTriangleCreateFunc();
 	    m_triangleSphereCF.m_swapped = true;
@@ -148,6 +147,10 @@ namespace BulletXNA.BulletCollision
 		    return	m_boxSphereCF;
 	    }
 
+        if ((proxyType0 == BroadphaseNativeTypes.CONVEX_2D_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeTypes.CONVEX_2D_SHAPE_PROXYTYPE))
+        {
+            return m_convexAlgo2DCF;
+        }
 
 	    if ((proxyType0 == BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE ) && (proxyType1==BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE))
 	    {

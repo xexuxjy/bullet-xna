@@ -71,9 +71,8 @@ namespace BulletXNA.LinearMath
         void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
             float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees);
 
-        void LoadContent();
-
-  
+        //void LoadContent();
+    
     }
 
 

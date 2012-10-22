@@ -235,6 +235,13 @@ namespace BulletXNA.LinearMath
                 v.X * v2.Y - v.Y * v2.X);
         }
 
+        public static void Cross(out IndexedVector3 r,ref IndexedVector3 v, ref IndexedVector3 v2)
+        {
+            r = new IndexedVector3(
+                v.Y * v2.Z - v.Z * v2.Y,
+                v.Z * v2.X - v.X * v2.Z,
+                v.X * v2.Y - v.Y * v2.X);
+        }
 
 
 
@@ -344,13 +351,17 @@ namespace BulletXNA.LinearMath
             output.Z = value1.Z * value2.Z * value3;
         }
 
-        public static void Subtract(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
+        public static void Subtract(out IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
         {
             output.X = value1.X - value2.X;
             output.Y = value1.Y - value2.Y;
             output.Z = value1.Z - value2.Z;
         }
 
+        public static IndexedVector3 Subtract(ref IndexedVector3 value1, ref IndexedVector3 value2)
+        {
+            return new IndexedVector3(value1.X - value2.X,value1.Y - value2.Y,value1.Z - value2.Z);
+        }
 
         public static void Add(ref IndexedVector3 output, ref IndexedVector3 value1, ref IndexedVector3 value2)
         {

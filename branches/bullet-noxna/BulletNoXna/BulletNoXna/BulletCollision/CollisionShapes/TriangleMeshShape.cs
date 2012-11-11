@@ -171,9 +171,9 @@ namespace BulletXNA.BulletCollision
 	    }
 
 	    //debugging
-	    public override String GetName()
+	    public override string Name
         {
-            return "TRIANGLEMESH";
+            get { return "TRIANGLEMESH"; }
         }
 
         private bool m_inConstructor;  // hacky attempt to get correct callback in construction
@@ -256,6 +256,26 @@ namespace BulletXNA.BulletCollision
 
 		public virtual void InternalProcessTriangleIndex(Vector3[] triangle,int partId,int triangleIndex)
 		{
+            if (BulletGlobals.gDebugDraw != null)
+            {
+                if ((int)(BulletGlobals.gDebugDraw.GetDebugMode() & DebugDrawModes.DrawNormals) != 0)
+                {
+                    Vector3 wv0, wv1, wv2;
+                    wv0 = triangle[0];
+                    wv1 = triangle[1];
+                    wv2 = triangle[2];
+
+
+                    Vector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
+                    Vector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
+                    normal.Normalize();
+                    Vector3 normalColor = new Vector3(1, 0, 1);
+                    BulletGlobals.gDebugDraw.DrawLine(center, center + normal, normalColor);
+                }
+            }
+
+
+
             if (AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax))
             {
                 //check aabb in triangle-space, before doing this

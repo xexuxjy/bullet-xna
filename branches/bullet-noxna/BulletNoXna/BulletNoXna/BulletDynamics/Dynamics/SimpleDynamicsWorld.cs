@@ -173,13 +173,13 @@ namespace BulletXNA.BulletDynamics
 				RigidBody body = RigidBody.Upcast(colObj);
 				if (body != null)
 				{
-					if (body.IsActive() && (!body.IsStaticObject))
+					if (body.IsActive && (!body.IsStaticObject))
 					{
 						Vector3 minAabb;
 						Vector3 maxAabb;
 						colObj.CollisionShape.GetAabb(colObj.GetWorldTransform(), out minAabb, out maxAabb);
 						IBroadphaseInterface bp = GetBroadphase();
-						bp.SetAabb(body.GetBroadphaseHandle(), ref minAabb, ref maxAabb, m_dispatcher1);
+						bp.SetAabb(body.BroadphaseHandle, ref minAabb, ref maxAabb, m_dispatcher1);
 					}
 				}
 			}
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletDynamics
 				{
 					if (!body.IsStaticObject)
 					{
-						if (body.IsActive())
+						if (body.IsActive)
 						{
 							body.ApplyGravity();
 							body.IntegrateVelocities(timeStep);
@@ -268,7 +268,7 @@ namespace BulletXNA.BulletDynamics
 				RigidBody body = RigidBody.Upcast(colObj);
 				if (body != null)
 				{
-					if (body.IsActive() && (!body.IsStaticObject))
+					if (body.IsActive && (!body.IsStaticObject))
 					{
 						body.PredictIntegratedTransform(timeStep, out predictedTrans);
 						body.ProceedToTransform(ref predictedTrans);

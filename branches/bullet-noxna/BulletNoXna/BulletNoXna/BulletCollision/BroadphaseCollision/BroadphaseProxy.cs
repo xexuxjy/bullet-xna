@@ -76,7 +76,7 @@ namespace BulletXNA.BulletCollision
 
         public static bool IsNonMoving(BroadphaseNativeType proxyType)
         {
-            return (IsConcave(proxyType) && !(proxyType == BroadphaseNativeType.GIMPACT_SHAPE_PROXYTYPE));
+            return (IsConcave(proxyType) && !(proxyType == BroadphaseNativeType.GImpactShape));
         }
 
 
@@ -142,6 +142,16 @@ namespace BulletXNA.BulletCollision
         }
     }
 
+    public class BroadphasePairQuickSort : IQSComparer<BroadphasePair>
+    {
+
+        public bool  Compare(BroadphasePair lhs, BroadphasePair rhs)
+        {
+            return BroadphasePair.IsLessThen(lhs, rhs);
+        }
+    }
+
+
     public class BroadphasePair : IComparable
     {
         public BroadphasePair()
@@ -181,7 +191,7 @@ namespace BulletXNA.BulletCollision
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj))
+            if (this ==  obj)
             {
                 return true;
             }
@@ -190,7 +200,7 @@ namespace BulletXNA.BulletCollision
                 if (obj is BroadphasePair)
                 {
                     BroadphasePair that = (BroadphasePair)obj;
-                    return ReferenceEquals(this.m_pProxy0, that.m_pProxy0) && ReferenceEquals(this.m_pProxy1, that.m_pProxy1);
+                    return m_pProxy0 == that.m_pProxy0 && m_pProxy1 == that.m_pProxy1;
                 }
             }
             return false;
@@ -200,15 +210,18 @@ namespace BulletXNA.BulletCollision
         {
             int uidA0 = a.m_pProxy0 != null ? a.m_pProxy0.GetUid() : -1;
             int uidB0 = b.m_pProxy0 != null ? b.m_pProxy0.GetUid() : -1;
+            if (uidA0 > uidB0)
+            {
+                return true;
+            }
+
             int uidA1 = a.m_pProxy1 != null ? a.m_pProxy1.GetUid() : -1;
             int uidB1 = b.m_pProxy1 != null ? b.m_pProxy1.GetUid() : -1;
+            int colAlgIdA = a.m_algorithm != null ? a.m_algorithm.colAgorithmId : 0;
+            int colAlgIdB = b.m_algorithm != null ? b.m_algorithm.colAgorithmId : 0;
 
-            //return uidA0 > uidB0 || 
-            //   (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
-            //   (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1 && a.m_algorithm > b.m_algorithm); 
-            return uidA0 > uidB0 ||
-               (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
-               (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1);
+            return (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
+               (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1) && colAlgIdA > colAlgIdB;
         }
 
         #region IComparable Members
@@ -221,6 +234,7 @@ namespace BulletXNA.BulletCollision
         #endregion
 
 
+        public int m_index; // if we maintain this then it saves a lot on searches...
 
         public BroadphaseProxy m_pProxy0;
         public BroadphaseProxy m_pProxy1;
@@ -265,7 +279,7 @@ namespace BulletXNA.BulletCollision
         //terrain
         TERRAIN_SHAPE_PROXYTYPE,
         ///Used for GIMPACT Trimesh integration
-        GIMPACT_SHAPE_PROXYTYPE,
+        GImpactShape,
         ///Multimaterial mesh
         MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE,
 

@@ -1,4 +1,4 @@
-﻿/*
+﻿ /*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -39,6 +39,7 @@ namespace BulletXNA.BulletDynamics
             m_constraints = new ObjectArray<TypedConstraint>();
             m_sortedConstraints = new ObjectArray<TypedConstraint>();
             m_islandSortPredicate = new SortConstraintOnIslandPredicate();
+            m_islandQuickSortPredicate = new QuickSortConstraintOnIslandPredicate();
             m_actions = new List<IActionInterface>();
             m_nonStaticRigidBodies = new ObjectArray<RigidBody>();
             m_islandManager = new SimulationIslandManager();
@@ -185,7 +186,7 @@ namespace BulletXNA.BulletDynamics
                 for (int i = 0; i < length; ++i)
                 {
                     RigidBody body = m_nonStaticRigidBodies[i];
-                    if (body.IsActive())
+                    if (body.IsActive)
                     {
                         SynchronizeSingleMotionState(body);
                     }
@@ -246,14 +247,19 @@ namespace BulletXNA.BulletDynamics
             m_actions.Remove(action);
         }
 
-        public SimulationIslandManager GetSimulationIslandManager()
+        public SimulationIslandManager SimulationIslandManager
         {
-            return m_islandManager;
+            get { return m_islandManager; }
         }
 
-        public CollisionWorld GetCollisionWorld()
+        public CollisionWorld CollisionWorld
         {
-            return this;
+            get { return this; }
+        }
+
+        public override void SetGravity(Vector3 gravity)
+        {
+            SetGravity(ref gravity);
         }
 
         public override void SetGravity(ref Vector3 gravity)
@@ -263,7 +269,7 @@ namespace BulletXNA.BulletDynamics
             for (int i = 0; i < length; ++i)
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
-                if (body.IsActive() && ((body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY) != 0))
+                if (body.IsActive && ((body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY) != 0))
                 {
                     body.SetGravity(ref gravity);
                 }
@@ -345,7 +351,10 @@ namespace BulletXNA.BulletDynamics
             {
                 if (!body.IsStaticObject)
                 {
-                    m_nonStaticRigidBodies.Add(body);
+                    if (!m_nonStaticRigidBodies.Contains(body))
+                    {
+                        m_nonStaticRigidBodies.Add(body);
+                    }
                 }
                 else
                 {
@@ -432,10 +441,7 @@ namespace BulletXNA.BulletDynamics
 
 	    public override int	NumConstraints
         {
-            get
-            {
-                return m_constraints.Count;
-            }
+            get { return m_constraints.Count; }
         }
 
         public override TypedConstraint GetConstraint(int index)
@@ -465,7 +471,7 @@ namespace BulletXNA.BulletDynamics
             for (int i = 0; i < length; ++i)
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
-                if (body != null && body.IsActive())
+                if (body != null && body.IsActive)
                 {
                     body.ApplyGravity();
                 }
@@ -515,13 +521,14 @@ namespace BulletXNA.BulletDynamics
                 BulletGlobals.g_streamWriter.WriteLine("PredictUnconstraintMotion [{0}][{1}]", length, timeStep);
             }
 
-            for (int i = 0; i < length; ++i)
+            //for (int i = 0; i < length;i++)
+            for (int i = 0; i < m_nonStaticRigidBodies.Count;i++ )
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
                 if (!body.IsStaticOrKinematicObject)
                 {
                     body.IntegrateVelocities(timeStep);
-                    //damping
+                    //dampingF
                     body.ApplyDamping(timeStep);
                     Matrix temp;
                     body.PredictIntegratedTransform(timeStep, out temp);
@@ -551,7 +558,7 @@ namespace BulletXNA.BulletDynamics
                 {
                     body.SetHitFraction(1f);
 
-                    if (body.IsActive() && (!body.IsStaticOrKinematicObject))
+                    if (body.IsActive && (!body.IsStaticOrKinematicObject))
                     {
                         body.PredictIntegratedTransform(timeStep, out predictedTrans);
                         float squareMotion = (predictedTrans.Translation - body.GetWorldTransform().Translation).LengthSquared();
@@ -561,52 +568,34 @@ namespace BulletXNA.BulletDynamics
                         {
                             BulletGlobals.StartProfile("CCD motion clamping");
 
-                            if (body.CollisionShape.IsConvex())
+                            if (body.CollisionShape.IsConvex)
                             {
                                 gNumClampedCcdMotions++;
-#if USE_STATIC_ONLY
-					class StaticOnlyCallback : public btClosestNotMeConvexResultCallback
-					{
-					public:
 
-						StaticOnlyCallback (btCollisionObject* me,const btVector3& fromA,const btVector3& toA,btOverlappingPairCache* pairCache,btDispatcher* dispatcher) : 
-						  btClosestNotMeConvexResultCallback(me,fromA,toA,pairCache,dispatcher)
-						{
-						}
-
-					  	virtual bool needsCollision(btBroadphaseProxy* proxy0) const
-						{
-							btCollisionObject* otherObj = (btCollisionObject*) proxy0.m_clientObject;
-							if (!otherObj.isStaticOrKinematicObject())
-								return false;
-							return btClosestNotMeConvexResultCallback::needsCollision(proxy0);
-						}
-					};
-
-					StaticOnlyCallback sweepResults(body,body.GetWorldTransform()._origin,predictedTrans._origin,getBroadphase().getOverlappingPairCache(),getDispatcher());
-#else
-                                ClosestNotMeConvexResultCallback sweepResults = new ClosestNotMeConvexResultCallback(body, body.GetWorldTransform().Translation, predictedTrans.Translation, GetBroadphase().GetOverlappingPairCache(), GetDispatcher());
-#endif
-                                //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                SphereShape tmpSphere = new SphereShape(body.CcdSweptSphereRadius);//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
-
-                                sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
-                                sweepResults.m_collisionFilterMask = body.GetBroadphaseProxy().m_collisionFilterMask;
-                                Matrix modifiedPredictedTrans = predictedTrans;
-                                modifiedPredictedTrans._basis = body.GetWorldTransform()._basis;
-
-                                modifiedPredictedTrans.Translation = predictedTrans.Translation;
-
-                                ConvexSweepTest(tmpSphere, body.GetWorldTransform(), modifiedPredictedTrans, sweepResults, 0f);
-                                if (sweepResults.HasHit && (sweepResults.m_closestHitFraction < 1.0f))
+                                using (ClosestNotMeConvexResultCallback sweepResults = BulletGlobals.ClosestNotMeConvexResultCallbackPool.Get())
                                 {
+                                    sweepResults.Initialize(body, body.GetWorldTransform().Translation, predictedTrans.Translation, GetBroadphase().GetOverlappingPairCache(), GetDispatcher());
+                                    //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
+                                    SphereShape tmpSphere = BulletGlobals.SphereShapePool.Get();
+                                    tmpSphere.Initialize(body.CcdSweptSphereRadius);//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
+                                    sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
 
-                                    //printf("clamped integration to hit fraction = %f\n",fraction);
-                                    body.SetHitFraction(sweepResults.m_closestHitFraction);
-                                    body.PredictIntegratedTransform(timeStep * body.GetHitFraction(), out predictedTrans);
-                                    body.SetHitFraction(0.0f);
-                                    body.ProceedToTransform(ref predictedTrans);
+                                    sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
+                                    sweepResults.m_collisionFilterMask = body.GetBroadphaseProxy().m_collisionFilterMask;
+                                    Matrix modifiedPredictedTrans = predictedTrans;
+                                    modifiedPredictedTrans._basis = body.GetWorldTransform()._basis;
+
+                                    modifiedPredictedTrans.Translation = predictedTrans.Translation;
+
+                                    ConvexSweepTest(tmpSphere, body.GetWorldTransform(), modifiedPredictedTrans, sweepResults, 0f);
+                                    if (sweepResults.HasHit && (sweepResults.m_closestHitFraction < 1.0f))
+                                    {
+
+                                        //printf("clamped integration to hit fraction = %f\n",fraction);
+                                        body.SetHitFraction(sweepResults.m_closestHitFraction);
+                                        body.PredictIntegratedTransform(timeStep * body.GetHitFraction(), out predictedTrans);
+                                        body.SetHitFraction(0.0f);
+                                        body.ProceedToTransform(ref predictedTrans);
 
 #if false
 						btVector3 linVel = body.getLinearVelocity();
@@ -626,19 +615,22 @@ namespace BulletXNA.BulletDynamics
 							printf("sm2=%f\n",sm2);
 						}
 #else
-                                    //response  between two dynamic objects without friction, assuming 0 penetration depth
-                                    float appliedImpulse = 0.0f;
-                                    float depth = 0.0f;
-                                    appliedImpulse = ContactConstraint.ResolveSingleCollision(body, sweepResults.m_hitCollisionObject, ref sweepResults.m_hitPointWorld, ref sweepResults.m_hitNormalWorld, GetSolverInfo(), depth);
+                                        //response  between two dynamic objects without friction, assuming 0 penetration depth
+                                        float appliedImpulse = 0.0f;
+                                        float depth = 0.0f;
+                                        appliedImpulse = ContactConstraint.ResolveSingleCollision(body, sweepResults.m_hitCollisionObject, ref sweepResults.m_hitPointWorld, ref sweepResults.m_hitNormalWorld, GetSolverInfo(), depth);
 
 
 #endif
 
-                                    continue;
+                                        continue;
+                                    }
+
+
+                                    BulletGlobals.SphereShapePool.Free(tmpSphere);
                                 }
                             }
                             BulletGlobals.StopProfile();
-
                         }
 
 
@@ -655,7 +647,7 @@ namespace BulletXNA.BulletDynamics
 
             BulletGlobals.StartProfile("calculateSimulationIslands");
 
-            GetSimulationIslandManager().UpdateActivationState(GetCollisionWorld(), GetCollisionWorld().GetDispatcher());
+            SimulationIslandManager.UpdateActivationState(CollisionWorld, CollisionWorld.GetDispatcher());
             {
                 int length = m_constraints.Count;
                 for (int i = 0; i < length; ++i)
@@ -667,9 +659,9 @@ namespace BulletXNA.BulletDynamics
                     if (((colObj0 != null) && (!colObj0.IsStaticOrKinematicObject)) &&
                         ((colObj1 != null) && (!colObj1.IsStaticOrKinematicObject)))
                     {
-                        if (colObj0.IsActive() || colObj1.IsActive())
+                        if (colObj0.IsActive || colObj1.IsActive)
                         {
-                            GetSimulationIslandManager().GetUnionFind().Unite((colObj0).GetIslandTag(),
+                            SimulationIslandManager.GetUnionFind().Unite((colObj0).GetIslandTag(),
                                 (colObj1).GetIslandTag());
                         }
                     }
@@ -677,7 +669,7 @@ namespace BulletXNA.BulletDynamics
             }
 
             //Store the island id in each body
-            GetSimulationIslandManager().StoreIslandActivationState(GetCollisionWorld());
+            SimulationIslandManager.StoreIslandActivationState(CollisionWorld);
             BulletGlobals.StopProfile();
         }
 
@@ -695,7 +687,8 @@ namespace BulletXNA.BulletDynamics
             {
                 //sortedConstraints.quickSort(btSortConstraintOnIslandPredicate());
                 // If this sort is removed then the constraint gets twitchy...
-                m_sortedConstraints.Sort(m_islandSortPredicate);
+                //m_sortedConstraints.Sort(m_islandSortPredicate);
+                m_sortedConstraints.QuickSort(m_islandQuickSortPredicate);
             }
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
@@ -719,7 +712,7 @@ namespace BulletXNA.BulletDynamics
                 BulletGlobals.g_streamWriter.WriteLine("prepareSolve");
             }
 
-            m_constraintSolver.PrepareSolve(GetCollisionWorld().NumCollisionObjects, GetCollisionWorld().GetDispatcher().GetNumManifolds());
+            m_constraintSolver.PrepareSolve(CollisionWorld.NumCollisionObjects, CollisionWorld.GetDispatcher().GetNumManifolds());
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
@@ -727,7 +720,7 @@ namespace BulletXNA.BulletDynamics
             }
 
             /// solve all the constraints for this island
-            m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), m_solverIslandCallback);
+            m_islandManager.BuildAndProcessIslands(CollisionWorld.GetDispatcher(), CollisionWorld, m_solverIslandCallback);
 
             m_solverIslandCallback.ProcessConstraints();
 
@@ -882,6 +875,7 @@ namespace BulletXNA.BulletDynamics
         protected ObjectArray<TypedConstraint> m_constraints;
         protected ObjectArray<TypedConstraint> m_sortedConstraints;
         protected SortConstraintOnIslandPredicate m_islandSortPredicate;
+        protected QuickSortConstraintOnIslandPredicate m_islandQuickSortPredicate;
         protected ObjectArray<RigidBody> m_nonStaticRigidBodies;
 
 
@@ -1025,15 +1019,6 @@ namespace BulletXNA.BulletDynamics
                         //printf("deferred\n");
                     }
                 }
-
-
-                //                ///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
-                //                if (numManifolds + numCurConstraints > 0)
-                //                {
-                ////solveGroup(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifold,int numManifolds,ObjectArray<TypedConstraint> constraints,int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
-                //                    m_solver.solveGroup(bodies,numBodies,manifolds, numManifolds,startConstraint,numCurConstraints,m_solverInfo,m_debugDrawer,m_dispatcher);
-                //                }
-
             }
         }
 
@@ -1053,17 +1038,38 @@ namespace BulletXNA.BulletDynamics
     }
 
 
-    public class ClosestNotMeConvexResultCallback : ClosestConvexResultCallback
+    public class ClosestNotMeConvexResultCallback : ClosestConvexResultCallback,IDisposable
     {
         public CollisionObject m_me;
         public float m_allowedPenetration;
         public IOverlappingPairCache m_pairCache;
         public IDispatcher m_dispatcher;
 
+
+        public ClosestNotMeConvexResultCallback() { }  // for pool
         public ClosestNotMeConvexResultCallback(CollisionObject me, Vector3 fromA, Vector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
             : this(me, ref fromA, ref toA, pairCache, dispatcher)
         {
         }
+
+        public virtual void Initialize(CollisionObject me, ref Vector3 fromA, ref Vector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
+        {
+            base.Initialize(ref fromA,ref toA);
+            m_allowedPenetration = 0.0f;
+            m_me = me;
+            m_pairCache = pairCache;
+            m_dispatcher = dispatcher;
+        }
+
+        public virtual void Initialize(CollisionObject me, Vector3 fromA, Vector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
+        {
+            base.Initialize(ref fromA, ref toA);
+            m_allowedPenetration = 0.0f;
+            m_me = me;
+            m_pairCache = pairCache;
+            m_dispatcher = dispatcher;
+        }
+
         public ClosestNotMeConvexResultCallback(CollisionObject me, ref Vector3 fromA, ref Vector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher) :
             base(ref fromA, ref toA)
         {
@@ -1073,7 +1079,7 @@ namespace BulletXNA.BulletDynamics
             m_dispatcher = dispatcher;
         }
 
-        public override float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace)
+        public override float AddSingleResult(ref LocalConvexResult convexResult, bool normalInWorldSpace)
         {
             if (convexResult.m_hitCollisionObject == m_me)
                 return 1.0f;
@@ -1091,7 +1097,7 @@ namespace BulletXNA.BulletDynamics
             if (Vector3.Dot(convexResult.m_hitNormalLocal, relativeVelocity) >= -m_allowedPenetration)
                 return 1f;
 
-            return base.AddSingleResult(convexResult, normalInWorldSpace);
+            return base.AddSingleResult(ref convexResult, normalInWorldSpace);
         }
 
         public override bool NeedsCollision(BroadphaseProxy proxy0)
@@ -1112,7 +1118,7 @@ namespace BulletXNA.BulletDynamics
 #if false
 			    ///don't do CCD when there are already contact points (touching contact/penetration)
                 ObjectArray<PersistentManifold> manifoldArray = new ObjectArray<PersistentManifold>();
-			    BroadphasePair collisionPair = m_pairCache.FindPair(m_me.GetBroadphaseHandle(),proxy0);
+			    BroadphasePair collisionPair = m_pairCache.FindPair(m_me.BroadphaseHandle,proxy0);
 			    if (collisionPair != null)
 			    {
 				    if (collisionPair.m_algorithm != null)
@@ -1133,6 +1139,13 @@ namespace BulletXNA.BulletDynamics
             }
             return false;
         }
+
+        public void Dispose()
+        {
+            BulletGlobals.ClosestNotMeConvexResultCallbackPool.Free(this);
+        }
+
+    
     }
 
     public class SortConstraintOnIslandPredicate : IComparer<TypedConstraint>
@@ -1149,5 +1162,18 @@ namespace BulletXNA.BulletDynamics
         #endregion
     }
 
+    public class QuickSortConstraintOnIslandPredicate : IQSComparer<TypedConstraint>
+    {
+        #region IComparer<TypedConstraint> Members
+
+        public bool Compare(TypedConstraint lhs, TypedConstraint rhs)
+        {
+            int rIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(rhs);
+            int lIslandId0 = DiscreteDynamicsWorld.GetConstraintIslandId(lhs);
+            return lIslandId0 < rIslandId0;
+        }
+
+        #endregion
+    }
 
 }

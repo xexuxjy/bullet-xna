@@ -206,9 +206,9 @@ namespace BulletXNA.BulletCollision
     	}
 
 	    //debugging
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "CylinderY";
+		    get { return "CylinderY"; }
 	    }
 
         public Vector3 CylinderLocalSupportX(Vector3 halfExtents,Vector3 v) 
@@ -306,9 +306,9 @@ namespace BulletXNA.BulletCollision
         }
     	
 		    //debugging
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "CylinderX";
+		    get { return "CylinderX"; }
 	    }
 
         public override float Radius
@@ -347,9 +347,9 @@ namespace BulletXNA.BulletCollision
         }
 
         //debugging
-        public override String GetName()
+        public override string Name
         {
-            return "CylinderZ";
+            get { return "CylinderZ"; }
         }
 
         public override float Radius

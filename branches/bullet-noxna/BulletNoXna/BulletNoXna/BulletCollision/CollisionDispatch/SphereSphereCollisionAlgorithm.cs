@@ -27,16 +27,12 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereSphereCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public SphereSphereCollisionAlgorithm() { } // for pool
         public SphereSphereCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
             : base(ci, body0, body1)
         {
-            /*
-                if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
-                {
-                    m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
-                    m_ownManifold = true;
-                }
-            */
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
 
             // for some reason theres no check in 2.76 or 2.78 for a needs collision, just a check on pointer being null.
             if (m_manifoldPtr == null)
@@ -47,11 +43,30 @@ namespace BulletXNA.BulletCollision
 
         }
 
+        public virtual void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject colObj0, CollisionObject colObj1)
+        {
+            base.Initialize(ci, colObj0, colObj1);
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+
+            if (m_manifoldPtr == null)
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(colObj0, colObj1);
+                m_ownManifold = true;
+            }
+        }
+
         public SphereSphereCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
             : base(ci)
         {
 
         }
+
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            base.Initialize(ci);
+        }
+
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
@@ -128,11 +143,9 @@ namespace BulletXNA.BulletCollision
                 if (m_manifoldPtr != null)
                 {
                     m_dispatcher.ReleaseManifold(m_manifoldPtr);
-                    m_manifoldPtr = null;
                 }
-                m_ownManifold = false;
             }
-            m_ownManifold = false;
+            BulletGlobals.SphereSphereCollisionAlgorithmPool.Free(this);
         }
 
         public bool m_ownManifold;
@@ -144,7 +157,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new SphereSphereCollisionAlgorithm(null, ci, body0, body1);
+            SphereSphereCollisionAlgorithm algo = BulletGlobals.SphereSphereCollisionAlgorithmPool.Get();
+            algo.Initialize(null, ci, body0, body1);
+            return algo;
         }
     }
 }

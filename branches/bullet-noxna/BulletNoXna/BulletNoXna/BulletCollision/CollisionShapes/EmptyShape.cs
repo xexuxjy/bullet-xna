@@ -63,9 +63,9 @@ namespace BulletXNA.BulletCollision
             inertia = Vector3.Zero;
         }
 	
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "Empty";
+		    get { return "Empty"; }
 	    }
 
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 vec1, ref Vector3 vec2)

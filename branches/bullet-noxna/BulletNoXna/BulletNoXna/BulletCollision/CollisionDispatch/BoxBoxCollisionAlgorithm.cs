@@ -29,21 +29,42 @@ namespace BulletXNA.BulletCollision
 {
     public class BoxBoxCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
-
+        public BoxBoxCollisionAlgorithm() { } // for pool
         public BoxBoxCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci)
             : base(ci)
         {
 
         }
 
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            base.Initialize(ci);
+        }
+
         public BoxBoxCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
             : base(ci)
         {
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+
             if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
             {
                 m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
                 m_ownManifold = true;
             }
+        }
+
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
+        {
+            base.Initialize(ci);
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);
+                m_ownManifold = true;
+            }
+
         }
 
         public override void Cleanup()
@@ -57,6 +78,9 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+
+            BulletGlobals.BoxBoxCollisionAlgorithmPool.Free(this);
+
             base.Cleanup();
         }
 
@@ -85,12 +109,12 @@ namespace BulletXNA.BulletCollision
 	            m_manifoldPtr.ClearManifold();
 #endif //USE_PERSISTENT_CONTACTS
 
-            ClosestPointInput input = new ClosestPointInput();
+            ClosestPointInput input = ClosestPointInput.Default();
             input.m_maximumDistanceSquared = float.MaxValue;
             input.m_transformA = body0.GetWorldTransform();
             input.m_transformB = body1.GetWorldTransform();
 
-            BoxBoxDetector.GetClosestPoints(box0,box1,input, resultOut, dispatchInfo.getDebugDraw(), false);
+            BoxBoxDetector.GetClosestPoints(box0,box1,ref input, resultOut, dispatchInfo.getDebugDraw(), false);
 
 #if USE_PERSISTENT_CONTACTS
             //  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
@@ -122,7 +146,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new BoxBoxCollisionAlgorithm(null, ci, body0, body1);
+            BoxBoxCollisionAlgorithm algo = BulletGlobals.BoxBoxCollisionAlgorithmPool.Get();
+            algo.Initialize(null, ci, body0, body1);
+            return algo;
         }
     }
 }

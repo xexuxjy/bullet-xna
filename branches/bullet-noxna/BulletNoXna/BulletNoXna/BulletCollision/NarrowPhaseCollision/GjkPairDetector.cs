@@ -30,9 +30,16 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class GjkPairDetector : IDiscreteCollisionDetectorInterface
+    public class GjkPairDetector : IDiscreteCollisionDetectorInterface,IDisposable
     {
+        public GjkPairDetector() { } // for pool
+
         public GjkPairDetector(ConvexShape objectA, ConvexShape objectB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
+        {
+            Initialize(objectA, objectB, simplexSolver, penetrationDepthSolver);
+        }
+
+        public void Initialize(ConvexShape objectA, ConvexShape objectB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             m_minkowskiA = objectA;
             m_minkowskiB = objectB;
@@ -52,12 +59,18 @@ namespace BulletXNA.BulletCollision
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
-                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector [{0}] [{1}]", objectA.Name, objectB.Name));
             }
-
         }
 
+
+
         public GjkPairDetector(ConvexShape objectA, ConvexShape objectB, BroadphaseNativeType shapeTypeA, BroadphaseNativeType shapeTypeB, float marginA, float marginB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
+        {
+            Initialize(objectA, objectB, shapeTypeA, shapeTypeB, marginA, marginB, simplexSolver,penetrationDepthSolver);
+        }
+
+        public void Initialize(ConvexShape objectA, ConvexShape objectB, BroadphaseNativeType shapeTypeA, BroadphaseNativeType shapeTypeB, float marginA, float marginB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             m_minkowskiA = objectA;
             m_minkowskiB = objectB;
@@ -73,23 +86,26 @@ namespace BulletXNA.BulletCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
-			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
-                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector-alt [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
+                BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector-alt [{0}] [{1}]", objectA.Name, objectB.Name));
             }
 
         }
 
-        public virtual void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw)
+
+
+
+        public virtual void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw)
         {
-            GetClosestPoints(input, output, debugDraw, false);
+            GetClosestPoints(ref input, output, debugDraw, false);
         }
-        public virtual void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
+        public virtual void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
         {
-            GetClosestPointsNonVirtual(input, output, debugDraw);
+            GetClosestPointsNonVirtual(ref input, output, debugDraw);
         }
 
-        public void GetClosestPointsNonVirtual(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw)
+        public void GetClosestPointsNonVirtual(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw)
         {
             m_cachedSeparatingDistance = 0f;
 
@@ -102,7 +118,7 @@ namespace BulletXNA.BulletCollision
             localTransA.Translation -= positionOffset;
             localTransB.Translation -= positionOffset;
 
-            bool check2d = m_minkowskiA.IsConvex2d() && m_minkowskiB.IsConvex2d();
+            bool check2d = m_minkowskiA.IsConvex2d && m_minkowskiB.IsConvex2d;
 
             float marginA = m_marginA;
             float marginB = m_marginB;
@@ -161,10 +177,6 @@ namespace BulletXNA.BulletCollision
                 //while (true)
                 {
                     count++;
-                    if (gNumGjkChecks == 3 && count == 4)
-                    {
-                        int ibreak = 0;
-                    }
 
                     Vector3 seperatingAxisInA = (-m_cachedSeparatingAxis) * input.m_transformA._basis;
                     Vector3 seperatingAxisInB = m_cachedSeparatingAxis * input.m_transformB._basis;
@@ -182,8 +194,8 @@ namespace BulletXNA.BulletCollision
                         qWorld.Z = 0.0f;
                     }
 
-                    Vector3 w = pWorld - qWorld;
-                    delta = Vector3.Dot(m_cachedSeparatingAxis, w);
+                    Vector3 w = new Vector3(pWorld.X - qWorld.X,pWorld.Y - qWorld.Y,pWorld.Z - qWorld.Z);
+                    Vector3.Dot(ref m_cachedSeparatingAxis, ref w,out delta);
 
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
@@ -199,12 +211,6 @@ namespace BulletXNA.BulletCollision
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "pWorld", pWorld);
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "qWorld", qWorld);
                     }
-
-                    if (m_simplexSolver.NumVertices() == 3)
-                    {
-                        int ibreak = 0;
-                    }
-
 
                     // potential exit, they don't overlap
                     if ((delta > 0f) && (delta * delta > squaredDistance * input.m_maximumDistanceSquared))
@@ -225,8 +231,6 @@ namespace BulletXNA.BulletCollision
                     // are we getting any closer ?
                     float f0 = squaredDistance - delta;
                     float f1 = squaredDistance * REL_ERROR2;
-
-
 
                     if (f0 <= f1)
                     {
@@ -417,7 +421,7 @@ namespace BulletXNA.BulletCollision
 
                             if (lenSqr > (MathUtil.SIMD_EPSILON * MathUtil.SIMD_EPSILON))
                             {
-                                tmpNormalInB.Normalize();
+                                tmpNormalInB /= (float)Math.Sqrt(lenSqr);
                                 float distance2 = -(tmpPointOnA - tmpPointOnB).Length();
                                 //only replace valid penetrations when the result is deeper (check)
                                 if (!isValid || (distance2 < distance))
@@ -427,6 +431,12 @@ namespace BulletXNA.BulletCollision
                                     pointOnB = tmpPointOnB;
                                     normalInB = tmpNormalInB;
                                     isValid = true;
+
+
+
+                                    //FIXME! check2d THIS
+
+
                                     m_lastUsedMethod = 3;
                                 }
                                 else
@@ -534,6 +544,13 @@ namespace BulletXNA.BulletCollision
         {
             m_ignoreMargin = ignoreMargin;
         }
+
+        public virtual void Dispose()
+        {
+
+            BulletGlobals.GjkPairDetectorPool.Free(this);
+        }
+
 
         public int m_lastUsedMethod;
         public int m_curIter;

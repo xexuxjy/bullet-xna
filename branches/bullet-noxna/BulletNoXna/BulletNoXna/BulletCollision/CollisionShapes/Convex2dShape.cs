@@ -73,9 +73,9 @@ namespace BulletXNA.BulletCollision
 		}
 
 
-		public override String GetName()
+		public override string Name
 		{
-			return "Convex2dShape";
+			get { return "Convex2dShape"; }
 		}
 		
 

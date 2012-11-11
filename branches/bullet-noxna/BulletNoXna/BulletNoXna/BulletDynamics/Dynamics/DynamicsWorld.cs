@@ -91,7 +91,8 @@ namespace BulletXNA.BulletDynamics
 
 		//once a rigidbody is added to the dynamics world, it will get this gravity assigned
 		//existing rigidbodies in the world get gravity assigned too, during this method
-		public abstract void SetGravity(ref Vector3 gravity);
+        public abstract void SetGravity(ref Vector3 gravity);
+        public abstract void SetGravity(Vector3 gravity);
 
         public abstract Vector3 GetGravity();
 
@@ -110,10 +111,7 @@ namespace BulletXNA.BulletDynamics
 
         public virtual int NumConstraints
         {
-            get
-            {
-                return 0;
-            }
+            get { return 0; }
         }
 
         public virtual TypedConstraint GetConstraint(int index)

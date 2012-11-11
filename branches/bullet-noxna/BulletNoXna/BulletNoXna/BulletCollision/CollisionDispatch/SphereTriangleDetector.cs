@@ -26,10 +26,17 @@ using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface
+    public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface,IDisposable
     {
-
+        public SphereTriangleDetector() { } // for pool
         public SphereTriangleDetector(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
+        {
+            m_sphere = sphere;
+            m_triangle = triangle;
+            m_contactBreakingThreshold = contactBreakingThreshold;
+        }
+
+        public void Initialize(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
         {
             m_sphere = sphere;
             m_triangle = triangle;
@@ -146,7 +153,9 @@ namespace BulletXNA.BulletCollision
             r3 = Vector3.Dot(ref edge3_normal, ref p3_to_p);
             if ((r1 > 0 && r2 > 0 && r3 > 0) ||
                  (r1 <= 0 && r2 <= 0 && r3 <= 0))
+            {
                 return true;
+            }
             return false;
         }
 
@@ -159,7 +168,7 @@ namespace BulletXNA.BulletCollision
 
         #region IDiscreteCollisionDetectorInterface Members
 
-        public void GetClosestPoints(ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
+        public void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults)
         {
             Matrix transformA = input.m_transformA;
             Matrix transformB = input.m_transformB;
@@ -227,6 +236,13 @@ namespace BulletXNA.BulletCollision
         private TriangleShape m_triangle;
         private float m_contactBreakingThreshold;
         private const float MAX_OVERLAP = 0f;
+
+
+
+        public void Dispose()
+        {
+            BulletGlobals.SphereTriangleDetectorPool.Free(this);
+        }
 
     }
 }

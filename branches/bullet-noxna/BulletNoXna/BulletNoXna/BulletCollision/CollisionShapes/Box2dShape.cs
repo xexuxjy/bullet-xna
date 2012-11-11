@@ -339,9 +339,9 @@ namespace BulletXNA.BulletCollision
 
 
 		//debugging
-		public override String GetName()
+		public override string Name
 		{
-			return "Box2d";
+			get { return "Box2d"; }
 		}
 
 		public override int	GetNumPreferredPenetrationDirections()

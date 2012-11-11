@@ -80,7 +80,7 @@ namespace BulletXNA.BulletDynamics
 			Vector3 vel = vel1 - vel2;
 			float rel_vel = normal.Dot(ref vel);
 
-			float combinedRestitution = body1.GetRestitution() * colObj2.GetRestitution();
+			float combinedRestitution = body1.Restitution * colObj2.Restitution;
 			float restitution = combinedRestitution * -rel_vel;
 
 			float positionalError = solverInfo.m_erp * -distance / solverInfo.m_timeStep;

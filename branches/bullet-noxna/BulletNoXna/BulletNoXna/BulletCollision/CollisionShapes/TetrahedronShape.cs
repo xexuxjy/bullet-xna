@@ -223,9 +223,9 @@ namespace BulletXNA.BulletCollision
 
 
 	    ///getName is for debugging
-	    public override String GetName()
+	    public override string Name
         { 
-            return "btBU_Simplex1to4";
+            get { return "btBU_Simplex1to4"; }
         }
 
 	    protected int	m_numVertices;

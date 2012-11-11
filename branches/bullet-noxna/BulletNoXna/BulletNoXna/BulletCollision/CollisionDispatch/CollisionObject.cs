@@ -108,103 +108,62 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public Vector3 GetAnisotropicFriction()
+        public Vector3 AnisotropicFriction
         {
-            return m_anisotropicFriction;
+            get { return m_anisotropicFriction; }
+            set
+            {
+                m_anisotropicFriction = value;
+                m_hasAnisotropicFriction = (value.X != 1f) || (value.Y != 1f) || (value.Z != 1f);
+            }
         }
 
-
-
-        public void SetAnisotropicFriction(ref Vector3 anisotropicFriction)
+        public bool HasAnisotropicFriction
         {
-            m_anisotropicFriction = anisotropicFriction;
-            m_hasAnisotropicFriction = (anisotropicFriction.X != 1f) || (anisotropicFriction.Y != 1f) || (anisotropicFriction.Z != 1f);
+            get { return m_hasAnisotropicFriction; }
         }
 
-
-
-        public bool HasAnisotropicFriction()
+        public float ContactProcessingThreshold
         {
-            return m_hasAnisotropicFriction;
+            get { return m_contactProcessingThreshold; }
+            set { m_contactProcessingThreshold = value; }
         }
-
-
-
-        public void SetContactProcessingThreshold(float contactProcessingThreshold)
-        {
-            m_contactProcessingThreshold = contactProcessingThreshold;
-        }
-
-
-
-        public float GetContactProcessingThreshold()
-        {
-            return m_contactProcessingThreshold;
-        }
-
-
 
         public bool IsStaticObject
         {
-            get
-            {
-                return (m_collisionFlags & CollisionFlags.CF_STATIC_OBJECT) != 0;
-            }
+            get { return (m_collisionFlags & CollisionFlags.CF_STATIC_OBJECT) != 0; }
         }
-
-
 
         public bool IsKinematicObject
         {
-            get
-            {
-                return (m_collisionFlags & CollisionFlags.CF_KINEMATIC_OBJECT) != 0;
-            }
+            get { return (m_collisionFlags & CollisionFlags.CF_KINEMATIC_OBJECT) != 0; }
         }
-
-
 
         public bool IsStaticOrKinematicObject
         {
-            get
-            {
-                return (m_collisionFlags & (CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_STATIC_OBJECT)) != 0;
-            }
+            get { return (m_collisionFlags & (CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_STATIC_OBJECT)) != 0; }
         }
-
-
 
         public bool HasContactResponse
         {
-            get
-            {
-                return (m_collisionFlags & CollisionFlags.CF_NO_CONTACT_RESPONSE) == 0;
-            }
+            get { return (m_collisionFlags & CollisionFlags.CF_NO_CONTACT_RESPONSE) == 0; }
         }
-
-
-
-        public virtual void SetCollisionShape(CollisionShape collisionShape)
-        {
-            m_collisionShape = collisionShape;
-            m_rootCollisionShape = collisionShape;
-        }
-
-
 
         public CollisionShape CollisionShape
         {
-            get
+            get { return m_collisionShape; }
+            set
             {
-                return m_collisionShape;
+                m_collisionShape = value;
+                m_rootCollisionShape = value;
             }
         }
 
 
 
-        public CollisionShape GetRootCollisionShape()
+        public CollisionShape RootCollisionShape
         {
-            return m_rootCollisionShape;
+            get { return m_rootCollisionShape; }
         }
 
 
@@ -280,38 +239,25 @@ namespace BulletXNA.BulletCollision
 
 
 
-        public bool IsActive()
+        public bool IsActive
         {
-            ActivationState activationState = ActivationState;
-            return (activationState != ActivationState.IslandSleeping && activationState != ActivationState.DisableSimulation);
+            get
+            {
+                ActivationState activationState = ActivationState;
+                return (activationState != ActivationState.IslandSleeping && activationState != ActivationState.DisableSimulation);
+            }
         }
 
-
-
-        public void SetRestitution(float rest)
+        public float Restitution
         {
-            m_restitution = rest;
+            get { return m_restitution; }
+            set { m_restitution = value; }
         }
 
-
-
-        public float GetRestitution()
+        public virtual float Friction
         {
-            return m_restitution;
-        }
-
-
-
-        public void SetFriction(float frict)
-        {
-            m_friction = frict;
-        }
-
-
-
-        public float GetFriction()
-        {
-            return m_friction;
+            get { return m_friction; }
+            set { m_friction = value; }
         }
 
 
@@ -351,20 +297,11 @@ namespace BulletXNA.BulletCollision
             m_worldTransform = worldTrans;
         }
 
-
-
-        public BroadphaseProxy GetBroadphaseHandle()
+        public BroadphaseProxy BroadphaseHandle
         {
-            return m_broadphaseHandle;
+            get { return m_broadphaseHandle; }
+            set { m_broadphaseHandle = value; }
         }
-
-
-
-        public void SetBroadphaseHandle(BroadphaseProxy handle)
-        {
-            m_broadphaseHandle = handle;
-        }
-
 
 
         public Matrix GetInterpolationWorldTransform()
@@ -532,9 +469,18 @@ namespace BulletXNA.BulletCollision
         }
 
 
+        public void Translate(ref Vector3 v)
+        {
+            m_worldTransform.Translation += v;
+        }
+
+        public void Translate(Vector3 v)
+        {
+            m_worldTransform.Translation += v;
+        }
 
 
-        protected Matrix m_worldTransform;
+        public Matrix m_worldTransform;
         protected Matrix m_interpolationWorldTransform = Matrix.Identity;
         protected Vector3 m_interpolationAngularVelocity;
         protected Vector3 m_interpolationLinearVelocity;

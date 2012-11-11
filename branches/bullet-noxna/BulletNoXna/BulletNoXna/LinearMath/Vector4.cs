@@ -27,6 +27,7 @@ SOFTWARE.
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -88,6 +89,40 @@ namespace BulletXNA.LinearMath
         public static Vector4 UnitW
         {
             get { return unitWVector; }
+        }
+
+        public float this[int i]
+        {
+            get
+            {
+                switch (i)
+                {
+                    case (0): return X;
+                    case (1): return Y;
+                    case (2): return Z;
+                    case (3): return W;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            return 0.0f;
+                        }
+                }
+            }
+            set
+            {
+                switch (i)
+                {
+                    case (0): X = value; break;
+                    case (1): Y = value; break;
+                    case (2): Z = value; break;
+                    case (3): W = value; break;
+                    default:
+                        {
+                            Debug.Assert(false);
+                            break;
+                        }
+                }
+            }
         }
 
         #endregion Properties
@@ -537,6 +572,11 @@ namespace BulletXNA.LinearMath
                                  (vector.X * matrix._basis[0, 1]) + (vector.Y * matrix._basis[1, 1]) + (vector.Z * matrix._basis[2, 1]) + (vector.W * matrix.Translation.Y),
                                  (vector.X * matrix._basis[0, 2]) + (vector.Y * matrix._basis[1, 2]) + (vector.Z * matrix._basis[2, 2]) + (vector.W * matrix.Translation.Z),
                                  vector.W);
+        }
+
+        public Vector3 ToVector3()
+        {
+            return new Vector3(X, Y, Z);
         }
 
         public override string ToString()

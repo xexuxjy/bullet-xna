@@ -112,9 +112,9 @@ namespace BulletXNA.BulletCollision
 	    }
 
 	    //debugging
-	    public override String GetName()
+	    public override string Name
         {
-            return "STATICPLANE";
+            get { return "STATICPLANE"; }
         }
 
 

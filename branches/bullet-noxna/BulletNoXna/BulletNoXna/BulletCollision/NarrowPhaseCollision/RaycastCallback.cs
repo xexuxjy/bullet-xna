@@ -37,6 +37,7 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleRaycastCallback : ITriangleCallback
     {
+        public TriangleRaycastCallback() { } // for pool
         public TriangleRaycastCallback(ref Vector3 from, ref Vector3 to, EFlags flags)
         {
             m_from = from;
@@ -45,6 +46,14 @@ namespace BulletXNA.BulletCollision
             m_hitFraction = 1f;
         }
 
+        public virtual void Initialize(ref Vector3 from, ref Vector3 to, EFlags flags)
+        {
+            m_from = from;
+            m_to = to;
+            m_flags = flags;
+            m_hitFraction = 1f;
+
+        }
 
         public virtual bool graphics()
         {
@@ -152,7 +161,17 @@ namespace BulletXNA.BulletCollision
 
     public abstract class TriangleConvexcastCallback : ITriangleCallback
     {
+        public TriangleConvexcastCallback() { } // for pool
         public TriangleConvexcastCallback(ConvexShape convexShape, ref Matrix convexShapeFrom, ref Matrix convexShapeTo, ref Matrix triangleToWorld, float triangleCollisionMargin)
+        {
+            m_convexShape = convexShape;
+            m_convexShapeFrom = convexShapeFrom;
+            m_convexShapeTo = convexShapeTo;
+            m_triangleToWorld = triangleToWorld;
+            m_triangleCollisionMargin = triangleCollisionMargin;
+        }
+
+        public virtual void Initialize(ConvexShape convexShape, ref Matrix convexShapeFrom, ref Matrix convexShapeTo, ref Matrix triangleToWorld, float triangleCollisionMargin)
         {
             m_convexShape = convexShape;
             m_convexShapeFrom = convexShapeFrom;
@@ -172,7 +191,7 @@ namespace BulletXNA.BulletCollision
             TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
             triangleShape.Margin = m_triangleCollisionMargin;
 
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+            VoronoiSimplexSolver simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
             GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
 
             //#define  USE_SUBSIMPLEX_CONVEX_CAST 1
@@ -181,10 +200,11 @@ namespace BulletXNA.BulletCollision
 	        SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(m_convexShape, triangleShape, simplexSolver);
 #else
             //btGjkConvexCast	convexCaster(m_convexShape,&triangleShape,&simplexSolver);
-            ContinuousConvexCollision convexCaster = new ContinuousConvexCollision(m_convexShape, triangleShape, simplexSolver, gjkEpaPenetrationSolver);
+            ContinuousConvexCollision convexCaster = BulletGlobals.ContinuousConvexCollisionPool.Get();
+            convexCaster.Initialize(m_convexShape, triangleShape, simplexSolver, gjkEpaPenetrationSolver);
 #endif //#USE_SUBSIMPLEX_CONVEX_CAST
 
-            CastResult castResult = new CastResult();
+            CastResult castResult = BulletGlobals.CastResultPool.Get();
             castResult.m_fraction = 1f;
             if (convexCaster.CalcTimeOfImpact(ref m_convexShapeFrom, ref m_convexShapeTo, ref m_triangleToWorld, ref m_triangleToWorld, castResult))
             {
@@ -206,6 +226,10 @@ namespace BulletXNA.BulletCollision
                     }
                 }
             }
+
+            BulletGlobals.ContinuousConvexCollisionPool.Free(convexCaster);
+            BulletGlobals.VoronoiSimplexSolverPool.Free(simplexSolver);
+            castResult.Cleanup();
         }
 
         public virtual void Cleanup()

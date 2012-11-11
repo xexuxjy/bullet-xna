@@ -183,9 +183,9 @@ namespace BulletXNA.BulletCollision
 		    return m_childConvexShape;
 	    }
 
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "UniformScalingShape";
+		    get { return "UniformScalingShape"; }
 	    }
 
         private ConvexShape m_childConvexShape;

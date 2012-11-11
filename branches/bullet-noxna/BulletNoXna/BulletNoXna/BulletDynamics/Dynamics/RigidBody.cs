@@ -69,10 +69,10 @@ namespace BulletXNA.BulletDynamics
 
         public int m_debugBodyId;
 
-        protected Vector3 m_deltaLinearVelocity;
-        protected Vector3 m_deltaAngularVelocity;
+        public Vector3 m_deltaLinearVelocity;
+        public Vector3 m_deltaAngularVelocity;
         protected Vector3 m_angularFactor;
-        protected Vector3 m_invMass;
+        public Vector3 m_invMass;
         protected Vector3 m_pushVelocity;
         protected Vector3 m_turnVelocity;
 
@@ -151,7 +151,7 @@ namespace BulletXNA.BulletDynamics
 	        m_friction = constructionInfo.m_friction;
 	        m_restitution = constructionInfo.m_restitution;
 
-	        SetCollisionShape( constructionInfo.m_collisionShape );
+	        CollisionShape = constructionInfo.m_collisionShape;
 	        m_debugBodyId = uniqueId++;
         	
 	        SetMassProps(constructionInfo.m_mass, constructionInfo.m_localInertia);
@@ -237,6 +237,11 @@ namespace BulletXNA.BulletDynamics
             ApplyCentralForce(ref m_gravity);
         }
 
+        public void SetGravity(Vector3 acceleration)
+        {
+            SetGravity(ref acceleration);
+        }
+
         public void SetGravity(ref Vector3 acceleration)
         {
             if (m_inverseMass != 0f)
@@ -253,8 +258,8 @@ namespace BulletXNA.BulletDynamics
 
         public void SetDamping(float lin_damping, float ang_damping)
         {
-            m_linearDamping = MathHelper.Clamp(lin_damping, 0f, 1f);
-            m_angularDamping = MathHelper.Clamp(ang_damping, 0f, 1f);
+            m_linearDamping = MathUtil.Clamp(lin_damping, 0f, 1f);
+            m_angularDamping = MathUtil.Clamp(ang_damping, 0f, 1f);
 
         }
 
@@ -500,7 +505,7 @@ namespace BulletXNA.BulletDynamics
 	
 	    public void	ApplyForce(ref Vector3 force, ref Vector3 rel_pos) 
 	    {
-		    ApplyCentralForce(ref force);
+            ApplyCentralForce(ref force);
             Vector3 tempTorque = Vector3.Cross(rel_pos,force);
             tempTorque *= m_angularFactor;
             ApplyTorque(Vector3.Cross(rel_pos,(force * m_linearFactor)));
@@ -508,13 +513,8 @@ namespace BulletXNA.BulletDynamics
 	
 	    public void ApplyCentralImpulse(ref Vector3 impulse)
 	    {
+
             m_linearVelocity += impulse * m_linearFactor * m_inverseMass;
-
-            if (m_inverseMass > 0f)
-            {
-                int ibreak = 0;
-            }
-
             MathUtil.SanityCheckVector(ref m_linearVelocity);
 	    }
 
@@ -538,7 +538,7 @@ namespace BulletXNA.BulletDynamics
 		    if (m_inverseMass != 0f)
 		    {
 			    ApplyCentralImpulse(ref impulse);
-			    if (m_angularFactor.X != 0f)
+			    if (m_angularFactor.LengthSquared() > 0f)
 			    {
 				    ApplyTorqueImpulse(Vector3.Cross(rel_pos,(impulse*m_linearFactor)));
 			    }
@@ -548,6 +548,10 @@ namespace BulletXNA.BulletDynamics
 	    //Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
         public void InternalApplyImpulse(Vector3 linearComponent, Vector3 angularComponent, float impulseMagnitude,String caller)
         {
+            if (impulseMagnitude > 20f)
+            {
+                int ibreak = 0;
+            }
             InternalApplyImpulse(ref linearComponent, ref angularComponent, impulseMagnitude,caller);
         }
 	
@@ -633,7 +637,14 @@ namespace BulletXNA.BulletDynamics
 	    public Vector3 GetVelocityInLocalPoint(ref Vector3 rel_pos)
 	    {
 		    //we also calculate lin/ang velocity for kinematic objects
-		    return m_linearVelocity + Vector3.Cross(m_angularVelocity,rel_pos);
+
+            Vector3 temp = new Vector3(m_angularVelocity.Y * rel_pos.Z - m_angularVelocity.Z * rel_pos.Y,
+                m_angularVelocity.Z * rel_pos.X - m_angularVelocity.X * rel_pos.Z,
+                m_angularVelocity.X * rel_pos.Y - m_angularVelocity.Y * rel_pos.X);
+
+            return new Vector3(m_linearVelocity.X + temp.X, m_linearVelocity.Y + temp.Y, m_linearVelocity.Z + temp.Z);
+
+            //return m_linearVelocity + IndexedVector3.Cross(m_angularVelocity,rel_pos);
 
 		    //for kinematic objects, we could also use use:
 		    //		return 	(m_worldTransform(rel_pos) - m_interpolationWorldTransform(rel_pos)) / m_kinematicTimeStep;
@@ -727,10 +738,7 @@ namespace BulletXNA.BulletDynamics
 	    //btMotionState allows to automatic synchronize the world transform for active objects
 	    public IMotionState	MotionState
 	    {
-            get
-            {
-                return m_optionalMotionState;
-            }
+            get { return m_optionalMotionState; }
             set
             {
                 m_optionalMotionState = value;
@@ -811,9 +819,12 @@ namespace BulletXNA.BulletDynamics
 	        for (int i = 0; i < m_constraintRefs.Count; ++i)
 	        {
 		        TypedConstraint c = m_constraintRefs[i];
-                if (c.GetRigidBodyA() == otherRb || c.GetRigidBodyB() == otherRb)
+                if (c.IsEnabled())
                 {
-                    return false;
+                    if (c.GetRigidBodyA() == otherRb || c.GetRigidBodyB() == otherRb)
+                    {
+                        return false;
+                    }
                 }
 	        }
 
@@ -925,9 +936,19 @@ namespace BulletXNA.BulletDynamics
 			}
 
 		    if (m_inverseMass != 0f)
-		    {
-			    m_deltaLinearVelocity += linearComponent*impulseMagnitude;
-			    m_deltaAngularVelocity += angularComponent*(impulseMagnitude*m_angularFactor);
+            {   
+                m_deltaLinearVelocity.X += impulseMagnitude * linearComponent.X;
+                m_deltaLinearVelocity.Y += impulseMagnitude * linearComponent.Y;
+                m_deltaLinearVelocity.Z += impulseMagnitude * linearComponent.Z;
+                //m_deltaLinearVelocity += linearComponent*impulseMagnitude;
+                
+                m_deltaAngularVelocity.X += angularComponent.X * (impulseMagnitude * m_angularFactor.X);
+                m_deltaAngularVelocity.Y += angularComponent.Y  * (impulseMagnitude * m_angularFactor.Y);
+                m_deltaAngularVelocity.Z += angularComponent.Z *(impulseMagnitude * m_angularFactor.Z);
+
+                //m_deltaAngularVelocity += angularComponent*(impulseMagnitude*m_angularFactor);
+
+
                 MathUtil.SanityCheckVector(ref m_deltaLinearVelocity);
                 MathUtil.SanityCheckVector(ref m_deltaAngularVelocity);
             }
@@ -953,7 +974,7 @@ namespace BulletXNA.BulletDynamics
 	    {
 		    if (m_inverseMass != 0f)
 		    {
-			    LinearVelocity += m_deltaLinearVelocity;
+			    SetLinearVelocity(LinearVelocity+ m_deltaLinearVelocity);
 			    SetAngularVelocity(GetAngularVelocity()+m_deltaAngularVelocity);
 			    m_deltaLinearVelocity = Vector3.Zero;
                 m_deltaAngularVelocity = Vector3.Zero;
@@ -978,7 +999,7 @@ namespace BulletXNA.BulletDynamics
 
 	        if (m_inverseMass != 0f)
 	        {
-                LinearVelocity += m_deltaLinearVelocity;
+		        SetLinearVelocity(LinearVelocity+ m_deltaLinearVelocity);
 		        SetAngularVelocity(GetAngularVelocity()+m_deltaAngularVelocity);
         		
 		        //correct the position/orientation based on push/turn recovery

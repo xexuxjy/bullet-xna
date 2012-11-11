@@ -19,7 +19,7 @@ subject to the following restrictions:
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-//using Microsoft.Xna.Framework;
+
 
 namespace BulletXNA.LinearMath
 {
@@ -124,24 +124,24 @@ namespace BulletXNA.LinearMath
         }
     }
 
-//------- Plane ----------
+//------- IndexedVector4 ----------
 
 
-//public static Plane PlaneFlip(Plane &plane){return Plane(-plane.normal,-plane.dist);}
-//inline int operator==( Plane &a, Plane &b ) { return (a.normal==b.normal && a.dist==b.dist); }
-//inline int coplanar( Plane &a, Plane &b ) { return (a==b || a==PlaneFlip(b)); }
+//public static IndexedVector4 PlaneFlip(IndexedVector4 &IndexedVector4){return IndexedVector4(-IndexedVector4.normal,-IndexedVector4.dist);}
+//inline int operator==( IndexedVector4 &a, IndexedVector4 &b ) { return (a.normal==b.normal && a.dist==b.dist); }
+//inline int coplanar( IndexedVector4 &a, IndexedVector4 &b ) { return (a==b || a==PlaneFlip(b)); }
 
 
 //--------- Utility Functions ------
 
-//Vector3  PlaneLineIntersection(Plane plane, Vector3 p0, Vector3 p1);
-//Vector3  PlaneProject(Plane plane, Vector3 point);
+//IndexedVector3  PlaneLineIntersection(IndexedVector4 IndexedVector4, IndexedVector3 p0, IndexedVector3 p1);
+//IndexedVector3  PlaneProject(IndexedVector4 IndexedVector4, IndexedVector3 point);
 
-//Vector3  ThreePlaneIntersection(Plane p0,Plane p1, Plane p2);
+//IndexedVector3  ThreePlaneIntersection(IndexedVector4 p0,IndexedVector4 p1, IndexedVector4 p2);
 
-//float   DistanceBetweenLines(ref Vector3 ustart, ref Vector3 udir, ref Vector3 vstart, ref Vector3 vdir, Vector3 *upoint=NULL, Vector3 *vpoint=NULL);
-//Vector3  TriNormal(ref Vector3 v0, ref Vector3 v1, ref Vector3 v2);
-//Vector3  NormalOf(Vector3 *vert, int n);
+//float   DistanceBetweenLines(ref IndexedVector3 ustart, ref IndexedVector3 udir, ref IndexedVector3 vstart, ref IndexedVector3 vdir, IndexedVector3 *upoint=NULL, IndexedVector3 *vpoint=NULL);
+//IndexedVector3  TriNormal(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2);
+//IndexedVector3  NormalOf(IndexedVector3 *vert, int n);
 
 
 [Flags]
@@ -158,28 +158,6 @@ public enum HullError
 	QE_OK,            // success!
 	QE_FAIL           // failed.
 }
-
-public class Plane
-{
-	public Vector3 Normal;
-	public float Distance;   // distance below origin - the D from plane equasion Ax+By+Cz+D=0
-	
-    public Plane(ref Vector3 n, float d)
-    {
-        Normal = n;
-        Distance = d;
-    }
-
-    public Plane(Vector3 n, float d)
-    {
-        Normal = n;
-        Distance = d;
-    }
-
-    public Plane()
-    {
-    }
-};
 
 //typedef ConvexH::HalfEdge HalfEdge;
 
@@ -204,7 +182,7 @@ public class ConvexH
 	}
 	public IList<Vector3> vertices = new ObjectArray<Vector3>();
 	public IList<HalfEdge> edges = new ObjectArray<HalfEdge>();
-	public IList<Plane> facets = new ObjectArray<Plane>();
+    public IList<Vector4> facets = new ObjectArray<Vector4>();
 	
     public ConvexH(int vertices_size,int edges_size,int facets_size)
     {
@@ -1358,11 +1336,11 @@ public class HullTriangle : int3
                 }
             }
         }
-        public static Vector3 ThreePlaneIntersection(Plane p0, Plane p1, Plane p2)
+        public static Vector3 ThreePlaneIntersection(Vector4 p0, Vector4 p1, Vector4 p2)
         {
-            Vector3 N1 = new Vector3(p0.Normal);
-            Vector3 N2 = new Vector3(p1.Normal);
-            Vector3 N3 = new Vector3(p2.Normal);
+            Vector3 N1 = p0.ToVector3();
+            Vector3 N2 = p1.ToVector3();
+            Vector3 N3 = p2.ToVector3();
 
             Vector3 n2n3 = Vector3.Cross(N2, N3);
             Vector3 n3n1 = Vector3.Cross(N3, N1);
@@ -1373,9 +1351,9 @@ public class HullTriangle : int3
             Debug.Assert(Math.Abs(quotient) > 0.000001f);
 
             quotient = -1.0f / quotient;
-            n2n3 *= p0.Distance;
-            n3n1 *= p1.Distance;
-            n1n2 *= p2.Distance;
+            n2n3 *= p0.W;
+            n3n1 *= p1.W;
+            n1n2 *= p2.W;
 
             Vector3 potentialVertex = n2n3;
             potentialVertex += n3n1;
@@ -1387,18 +1365,18 @@ public class HullTriangle : int3
         }
 
 
-        public static Vector3 PlaneLineIntersection(ref Plane plane, ref Vector3 p0, ref Vector3 p1)
+        public static Vector3 PlaneLineIntersection(ref Vector4 plane, ref Vector3 p0, ref Vector3 p1)
         {
-            // returns the point where the line p0-p1 intersects the plane n&
+            // returns the point where the line p0-p1 intersects the IndexedVector4 n&
             Vector3 dif = p1 - p0;
-            float dn = Vector3.Dot(plane.Normal, dif);
-            float t = -(plane.Distance + Vector3.Dot(plane.Normal, p0)) / dn;
+            float dn = Vector3.Dot(plane.ToVector3(), dif);
+            float t = -(plane.W + Vector3.Dot(plane.ToVector3(), p0)) / dn;
             return p0 + (dif * t);
         }
 
-        public static Vector3 PlaneProject(ref Plane plane, ref Vector3 point)
+        public static Vector3 PlaneProject(ref Vector4 plane, ref Vector3 point)
         {
-            return point - new Vector3(plane.Normal) * (Vector3.Dot(point, plane.Normal) + plane.Distance);
+            return point - plane.ToVector3() * (Vector3.Dot(point, plane.ToVector3()) + plane.W);
         }
 
         public static Vector3 TriNormal(Vector3 v0, Vector3 v1, Vector3 v2)
@@ -1430,40 +1408,36 @@ public class HullTriangle : int3
             float dist = (float)Math.Abs(distu - distv);
             if (upoint.HasValue)
             {
-                Plane plane = new Plane();
-                plane.Normal = Vector3.Cross(vdir, cp);
-                plane.Normal.Normalize();
-                plane.Distance = -Vector3.Dot(plane.Normal, vstart);
+                Vector4 plane = new Vector4(Vector3.Cross(vdir, cp).Normalized(), 0);
+                plane.W = -Vector3.Dot(plane.ToVector3(), vstart);
                 Vector3 a = ustart + udir;
                 upoint = PlaneLineIntersection(ref plane, ref ustart, ref a);
             }
             if (vpoint.HasValue)
             {
-                Plane plane = new Plane();
-                plane.Normal = Vector3.Cross(udir, cp);
-                plane.Normal.Normalize();
-                plane.Distance = -Vector3.Dot(plane.Normal, ustart);
+                Vector4 plane = new Vector4(Vector3.Cross(udir, cp).Normalized(), 0);
+                plane.W = -Vector3.Dot(plane.ToVector3(), ustart);
                 Vector3 a = vstart + vdir;
                 vpoint = PlaneLineIntersection(ref plane, ref vstart, ref a);
             }
             return dist;
         }
 
-        public static PlaneIntersectType PlaneTest(ref Plane p, ref Vector3 v)
+        public static PlaneIntersectType PlaneTest(ref Vector4 p, ref Vector3 v)
         {
             float planetestepsilon = 0.0001f;
-            float a = Vector3.Dot(v, p.Normal) + p.Distance;
+            float a = Vector3.Dot(v, p.ToVector3()) + p.W;
             PlaneIntersectType flag = (a > planetestepsilon) ? PlaneIntersectType.OVER : ((a < -planetestepsilon) ? PlaneIntersectType.UNDER : PlaneIntersectType.COPLANAR);
             return flag;
         }
 
-        public static PlaneIntersectType SplitTest(ConvexH convex, ref Plane plane)
+        public static PlaneIntersectType SplitTest(ConvexH convex, ref Vector4 IndexedVector4)
         {
             PlaneIntersectType flag = PlaneIntersectType.COPLANAR;
             for (int i = 0; i < convex.vertices.Count; i++)
             {
                 Vector3 vtx = convex.vertices[i];
-                flag |= PlaneTest(ref plane, ref vtx);
+                flag |= PlaneTest(ref IndexedVector4, ref vtx);
             }
             return flag;
         }

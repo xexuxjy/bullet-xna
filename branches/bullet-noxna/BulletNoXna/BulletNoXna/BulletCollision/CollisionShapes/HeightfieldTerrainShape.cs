@@ -119,7 +119,8 @@ namespace BulletXNA.BulletCollision
 
         public class QuadTreeNode
         {
-            public BoundingBox boundingBox;// int[] quantizedAabbMin = new int[3];
+            public Vector3 vmin;
+            public Vector3 vmax;
             //public int[] quantizedAabbMax = new int[3];
             public QuadTreeNode[] children;
             public int depth;
@@ -127,10 +128,10 @@ namespace BulletXNA.BulletCollision
             public QuadTreeNode()
             { }
 
-            public QuadTreeNode(ref BoundingBox parentBB, int xAxis, int yAxis, int zAxis, float xDiff, float zDiff, bool x, bool z, int d)
+            public QuadTreeNode(ref Vector3 minv, ref Vector3 maxv,int xAxis, int yAxis, int zAxis, float xDiff, float zDiff, bool x, bool z, int d)
             {
-                Vector3 iv3Min = parentBB.Minimum;
-                Vector3 iv3Max = new Vector3();
+                Vector3 iv3Min = minv;
+                Vector3 iv3Max = maxv;
                 iv3Min[xAxis] += (x ? xDiff : 0);
                 iv3Min[zAxis] += (z ? zDiff : 0);
                 // large numbers here , but not max as float/int conversion gets broken
@@ -141,7 +142,6 @@ namespace BulletXNA.BulletCollision
                 iv3Max[xAxis] = iv3Min[xAxis] + xDiff;
                 iv3Max[zAxis] = iv3Min[zAxis] + zDiff;
                 depth = d;
-                boundingBox = new BoundingBox(iv3Min, iv3Max);
 
                 //System.Console.WriteLine("QTN min[{0}][{1}][{2}] max[{3}][{4}][{5}] xd[{6}] zd[{7}] xt[{8}] zt[{9}] d[{10}]", quantizedAabbMin[0], quantizedAabbMin[1], quantizedAabbMin[2], quantizedAabbMax[0], quantizedAabbMax[1], quantizedAabbMax[2], xDiff, zDiff, x, z, d);
 
@@ -149,36 +149,108 @@ namespace BulletXNA.BulletCollision
 
             }
 
-            public bool Intersects(Ray ray)
+            public bool Intersects(Vector3 source,Vector3 direction)
             {
-                return boundingBox.Intersects(ref ray);
-                //return children == null;
-                //return true;
+                float num1 = 0.0f;
+                float num2 = MathUtil.SIMD_INFINITY;
+                if (Math.Abs(direction.X) < 9.99999997475243E-07)
+                {
+                    if (direction.X < vmin.X || direction.X > vmax.X)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    float num3 = 1f / direction.X;
+                    float num4 = (vmin.X - direction.X) * num3;
+                    float num5 = (vmax.X - direction.X) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+                    num1 = (num4 > num1) ? num4 : num1;
+                    num2 = (num5 < num2) ? num5 : num2;
+
+
+                    if (num1 > num2)
+                    {
+                        return false;
+                    }
+                }
+                if (Math.Abs(direction.Y) < 9.99999997475243E-07)
+                {
+                    if (source.Y < vmin.Y || source.Y > vmax.Y)
+                        return false;
+                }
+                else
+                {
+                    float num3 = 1f / direction.Y;
+                    float num4 = (vmin.Y - source.Y) * num3;
+                    float num5 = (vmax.Y - source.Y) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+                    num1 = (num4 > num1) ? num4 : num1;
+                    num2 = (num5 < num2) ? num5 : num2;
+                    if (num1 > num2)
+                    {
+                        return false;
+                    }
+                }
+                if (Math.Abs(direction.Z) < 9.99999997475243E-07)
+                {
+                    if (source.Z < vmin.Z || source.Z > vmax.Z)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    float num3 = 1f / direction.Z;
+                    float num4 = (vmin.Z - source.Z) * num3;
+                    float num5 = (vmax.Z - source.Z) * num3;
+                    if (num4 > num5)
+                    {
+                        float num6 = num4;
+                        num4 = num5;
+                        num5 = num6;
+                    }
+
+                    num1 = (num4 > num1) ? num4 : num1;
+                    float num7 = (num5 < num2) ? num5 : num2;
+                    if (num1 > num7)
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
 
-            public void AdjustHeightValues(int xAxis, int yAxis, int zAxis, ref float min, ref float max, HeightfieldTerrainShape shape)
+            public void AdjustHeightValues(int xAxis,int yAxis,int zAxis,ref float min,ref float max,HeightfieldTerrainShape shape)
             {
                 if (children == null)
                 {
-                    Vector3 iv3Min = new Vector3(boundingBox.Minimum);
-                    Vector3 iv3Max = new Vector3(boundingBox.Maximum);
 
-                    min = iv3Min[yAxis];
-                    max = iv3Max[yAxis];
-
+                    min = vmin[yAxis];
+                    max = vmax[yAxis];
+                    
                     int[] clampedMin = new int[3];
                     int[] clampedMax = new int[3];
 
-                    shape.QuantizeWithClamp(clampedMin, ref iv3Min, 0);
-                    shape.QuantizeWithClamp(clampedMax, ref iv3Max, 1);
-
+                    shape.QuantizeWithClamp(clampedMin, ref vmin, 0);
+                    shape.QuantizeWithClamp(clampedMax, ref vmax, 1);
+                    
                     shape.InspectVertexHeights(clampedMin[xAxis], clampedMax[xAxis], clampedMin[zAxis], clampedMax[zAxis], yAxis, ref min, ref max);
 
-                    iv3Min[yAxis] = min;
-                    iv3Max[yAxis] = max;
-
-                    boundingBox = new BoundingBox(iv3Min, iv3Max);
-
+                    vmin[yAxis] = min;
+                    vmax[yAxis] = max;
+                    
                 }
                 else
                 {
@@ -187,7 +259,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-                    children[0].AdjustHeightValues(xAxis, yAxis, zAxis, ref newMin, ref newMax, shape);
+                    children[0].AdjustHeightValues(xAxis,yAxis, zAxis,ref newMin, ref newMax,shape);
                     if (newMin < min)
                     {
                         min = newMin;
@@ -224,24 +296,18 @@ namespace BulletXNA.BulletCollision
                         max = newMax;
                     }
 
-                    Vector3 iv3Min = new Vector3(boundingBox.Minimum);
-                    Vector3 iv3Max = new Vector3(boundingBox.Maximum);
-
-                    iv3Min[yAxis] = min;
-                    iv3Max[yAxis] = max;
-
-                    boundingBox = new BoundingBox(iv3Min, iv3Max);
-
+                    vmin[yAxis] = min;
+                    vmax[yAxis] = max;
                 }
             }
         }
 
         public void RebuildQuadTree()
         {
-            RebuildQuadTree(5, 4);
+            RebuildQuadTree(5,4);
         }
 
-        public void RebuildQuadTree(int maxDepth, int minNodeSize)
+        public void RebuildQuadTree(int maxDepth,int minNodeSize)
         {
             m_minNodeSize = minNodeSize;
             m_maxDepth = maxDepth;
@@ -268,25 +334,26 @@ namespace BulletXNA.BulletCollision
                 zAxis = 1;
             }
 
-            m_rootQuadTreeNode.boundingBox = new BoundingBox(m_localAabbMin, m_localAabbMax);
+            m_rootQuadTreeNode.vmin = m_localAabbMin;
+            m_rootQuadTreeNode.vmax = m_localAabbMax;
 
             BuildNodes(m_rootQuadTreeNode, 0, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
             // cheat second pass to rebuild heights.
             // adjust heights.
-            m_rootQuadTreeNode.AdjustHeightValues(xAxis, yAxis, zAxis, ref min, ref max, this);
+            m_rootQuadTreeNode.AdjustHeightValues(xAxis,yAxis, zAxis,ref min, ref max,this);
 
         }
 
 
 
-        private void BuildNodes(QuadTreeNode parent, int depth, int maxDepth, int minNodeSize, int xAxis, int yAxis, int zAxis)
+        private void BuildNodes(QuadTreeNode parent,int depth,int maxDepth,int minNodeSize,int xAxis,int yAxis,int zAxis)
         {
             if (depth < maxDepth)
             {
                 if (parent.children == null)
                 {
 
-                    Vector3 diff = (parent.boundingBox.Maximum - parent.boundingBox.Minimum) / 2;
+                    Vector3 diff = (parent.vmax - parent.vmin) / 2;
 
 
                     // don;t split too low.
@@ -295,13 +362,13 @@ namespace BulletXNA.BulletCollision
                         parent.children = new QuadTreeNode[4];
                         //split nodes
 
-                        parent.children[0] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
-                        BuildNodes(parent.children[0], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
-                        parent.children[1] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
+                        parent.children[0] = new QuadTreeNode(ref parent.vmin, ref parent.vmax,xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, false, depth);
+                        BuildNodes(parent.children[0], depth + 1, maxDepth, minNodeSize,xAxis, yAxis, zAxis);
+                        parent.children[1] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, false, depth);
                         BuildNodes(parent.children[1], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
-                        parent.children[2] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
+                        parent.children[2] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], false, true, depth);
                         BuildNodes(parent.children[2], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
-                        parent.children[3] = new QuadTreeNode(ref parent.boundingBox, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
+                        parent.children[3] = new QuadTreeNode(ref parent.vmin, ref parent.vmax, xAxis, yAxis, zAxis, diff[xAxis], diff[zAxis], true, true, depth);
                         BuildNodes(parent.children[3], depth + 1, maxDepth, minNodeSize, xAxis, yAxis, zAxis);
                     }
                 }
@@ -314,7 +381,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        private void InspectVertexHeights(int startX, int endX, int startZ, int endZ, int upAxis, ref float min, ref float max)
+        private void InspectVertexHeights(int startX,int endX,int startZ,int endZ,int upAxis,ref float min,ref float max)
         {
             Vector3 vertex = new Vector3();
             Vector3 invScale = new Vector3(1f) / m_localScaling;
@@ -330,7 +397,7 @@ namespace BulletXNA.BulletCollision
                     {
                         min = height;
                     }
-                    if (height > max)
+                    if (height> max)
                     {
                         max = height;
                     }
@@ -389,11 +456,11 @@ namespace BulletXNA.BulletCollision
                     localRaySource += m_localOrigin;
                     localRayTarget += m_localOrigin;
 
-                    //Ray ray = new Ray(raySource, rayTarget);
-                    Ray ray = new Ray(localRaySource, (localRayTarget - localRaySource).Normalized());
+                    Vector3 direction = (localRayTarget - localRaySource);
+                    direction.Normalize();
 
                     // build list of squares
-                    QueryNode(m_rootQuadTreeNode, results, ray);
+                    QueryNode(m_rootQuadTreeNode, results, localRaySource, direction);
 
 
                     // go through each of the results.
@@ -404,8 +471,8 @@ namespace BulletXNA.BulletCollision
                         int startJ = 0;
                         int endJ = m_heightStickLength - 1;
 
-                        Vector3 iv3Min = quadTreeNode.boundingBox.Minimum;
-                        Vector3 iv3Max = quadTreeNode.boundingBox.Maximum;
+                        Vector3 iv3Min = quadTreeNode.vmin;
+                        Vector3 iv3Max = quadTreeNode.vmax;
 
                         switch (m_upAxis)
                         {
@@ -457,13 +524,13 @@ namespace BulletXNA.BulletCollision
 #if DEBUG_ACCELERATOR
                         if (BulletGlobals.gDebugDraw != null)
                         {
-                            IndexedVector3 drawMin = iv3Min;
-                            IndexedVector3 drawMax = iv3Max;
+                            Vector3 drawMin = iv3Min;
+                            Vector3 drawMax = iv3Max;
 
-                            IndexedVector3 worldMin = LocalToWorld2(drawMin);
-                            IndexedVector3 worldMax = LocalToWorld2(drawMax);
+                            Vector3 worldMin = LocalToWorld2(drawMin);
+                            Vector3 worldMax = LocalToWorld2(drawMax);
 
-                            BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new IndexedVector3(1, 1, 0));
+                            BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new Vector3(1, 1, 0));
                         }
 #endif
 
@@ -566,7 +633,7 @@ namespace BulletXNA.BulletCollision
                         local = Vector3.Zero;
                         break;
                     }
-            }
+                }   
             local *= m_localScaling;
 
             // dodgy hack as we don't have access to the rigidbody for the world transform
@@ -578,7 +645,7 @@ namespace BulletXNA.BulletCollision
 
         private Vector3 LocalToWorld(Vector3 local)
         {
-            Vector3 world = local * m_localScaling;
+            Vector3 world = local *m_localScaling;
 
             // account for local origin
             world -= m_localOrigin;
@@ -586,7 +653,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, Ray ray)
+        public void QueryNode(QuadTreeNode node, ObjectArray<QuadTreeNode> results, Vector3 source,Vector3 direction)
         {
             //if(node.children == null && node.Intersects(raySource,rayTarget))
             // add the lowest level.
@@ -598,13 +665,13 @@ namespace BulletXNA.BulletCollision
                 if (BulletGlobals.gDebugDraw != null)
                 {
 
-                    IndexedVector3 drawMin = new IndexedVector3(node.boundingBox.Min);
-                    IndexedVector3 drawMax = new IndexedVector3(node.boundingBox.Max);
+                    Vector3 drawMin = new Vector3(node.boundingBox.Min);
+                    Vector3 drawMax = new Vector3(node.boundingBox.Max);
 
-                    IndexedVector3 worldMin = LocalToWorld2(drawMin);
-                    IndexedVector3 worldMax = LocalToWorld2(drawMax);
+                    Vector3 worldMin = LocalToWorld2(drawMin);
+                    Vector3 worldMax = LocalToWorld2(drawMax);
 
-                    BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new IndexedVector3(1, 1, 1));
+                    BulletGlobals.gDebugDraw.DrawAabb(worldMin, worldMax, new Vector3(1, 1, 1));
                 }
 #endif
             }
@@ -615,9 +682,9 @@ namespace BulletXNA.BulletCollision
                 // simple rescursive for now.
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (node.children[i].Intersects(ray))
+                    if (node.children[i].Intersects(source,direction))
                     {
-                        QueryNode(node.children[i], results, ray);
+                        QueryNode(node.children[i], results, source,direction);
                     }
                 }
             }
@@ -786,8 +853,8 @@ namespace BulletXNA.BulletCollision
                         break;
                     }
             }
-            Vector3.Multiply(ref vertex, ref vertex, ref m_localScaling);
-            //vertex *= m_localScaling;
+
+            Vector3.Multiply(ref vertex,ref vertex , ref m_localScaling);
         }
 
 
@@ -902,6 +969,11 @@ namespace BulletXNA.BulletCollision
             - convert input aabb to a range of heightfield grid points (quantize)
             - iterate over all triangles in that subset of the grid
          */
+        //quantize the aabbMin and aabbMax, and adjust the start/end ranges
+        int[] quantizedAabbMin = new int[3];
+        int[] quantizedAabbMax = new int[3];
+        Vector3[] vertices = new Vector3[3];
+
         public override void ProcessAllTriangles(ITriangleCallback callback, ref Vector3 aabbMin, ref Vector3 aabbMax)
         {
             // scale down the input aabb's so they are in local (non-scaled) coordinates
@@ -914,9 +986,6 @@ namespace BulletXNA.BulletCollision
             localAabbMin += m_localOrigin;
             localAabbMax += m_localOrigin;
 
-            //quantize the aabbMin and aabbMax, and adjust the start/end ranges
-            int[] quantizedAabbMin = new int[3];
-            int[] quantizedAabbMax = new int[3];
             QuantizeWithClamp(quantizedAabbMin, ref localAabbMin, 0);
             QuantizeWithClamp(quantizedAabbMax, ref localAabbMax, 1);
 
@@ -992,7 +1061,6 @@ namespace BulletXNA.BulletCollision
 #endif
 
 
-            Vector3[] vertices = new Vector3[3];
             for (int j = startJ; j < endJ; j++)
             {
                 for (int x = startX; x < endX; x++)
@@ -1046,9 +1114,9 @@ namespace BulletXNA.BulletCollision
         }
 
         //debugging
-        public override String GetName()
+        public override string Name
         {
-            return "HEIGHTFIELD";
+            get { return "HEIGHTFIELD"; }
         }
     }
 }

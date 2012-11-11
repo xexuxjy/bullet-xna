@@ -64,8 +64,8 @@ namespace BulletXNA.BulletCollision
 
     public class Handle : BroadphaseProxy
     {
-        public ushort[] m_minEdges = new ushort[3];
-        public ushort[] m_maxEdges = new ushort[3];
+        public UShortVector3 m_minEdges = new UShortVector3();
+        public UShortVector3 m_maxEdges = new UShortVector3();
         public BroadphaseProxy m_dbvtProxy;//for faster raycast
 
         public Handle()
@@ -114,6 +114,12 @@ namespace BulletXNA.BulletCollision
         ///can be disabled using a optional argument in the constructor
         protected DbvtBroadphase m_raycastAccelerator;
         protected IOverlappingPairCache m_nullPairCache;
+
+
+        public DbvtBroadphase Accelerator
+        {
+            get { return m_raycastAccelerator; }
+        }
 
         // allocation/deallocation
         protected ushort AllocHandle()
@@ -560,10 +566,10 @@ namespace BulletXNA.BulletCollision
             if (m_pairCache.HasDeferredRemoval())
             {
 
-                IList<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
+                ObjectArray<BroadphasePair> overlappingPairArray = m_pairCache.GetOverlappingPairArray();
 
                 //perform a sort, to find duplicates and to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
                 //overlappingPairArray.resize(overlappingPairArray.size() - m_invalidPair);
                 m_invalidPair = 0;
 
@@ -620,10 +626,9 @@ namespace BulletXNA.BulletCollision
                 ///if you don't like to skip the invalid pairs in the array, execute following code:
 #if CLEAN_INVALID_PAIRS
 
-                //perform a sort, to sort 'invalid' pairs to the end
-                ((List<BroadphasePair>)overlappingPairArray).Sort();
+                overlappingPairArray.QuickSort(new BroadphasePairQuickSort());
 
-                //overlappingPairArray.Capacity = (overlappingPairArray.Count - m_invalidPair);
+                overlappingPairArray.Resize(overlappingPairArray.Count - m_invalidPair);
                 m_invalidPair = 0;
 #endif//CLEAN_INVALID_PAIRS
 
@@ -737,12 +742,12 @@ namespace BulletXNA.BulletCollision
             FreeHandle(handle);
         }
 
+        static ushort[] min = new ushort[3], max = new ushort[3];
         public void UpdateHandle(ushort handle, ref Vector3 aabbMin, ref Vector3 aabbMax, IDispatcher dispatcher)
         {
             Handle pHandle = GetHandle(handle);
 
             // quantize the new bounds
-            ushort[] min = new ushort[3], max = new ushort[3];
             Quantize(min, ref aabbMin, 0);
             Quantize(max, ref aabbMax, 1);
 

@@ -73,30 +73,33 @@ namespace BulletXNA.BulletCollision
             Vector3 pointOnBWorld = Vector3.Zero;
 
             {
-                ClosestPointInput input = new ClosestPointInput();
+                ClosestPointInput input = ClosestPointInput.Default();
 
-                GjkPairDetector gjkPairDetector = new GjkPairDetector(min0, min1, m_simplexSolver, m_pdSolver);
-                //TODO: if (dispatchInfo.m_useContinuous)
-                gjkPairDetector.SetMinkowskiA(min0);
-                gjkPairDetector.SetMinkowskiB(min1);
-
+                using (GjkPairDetector gjkPairDetector = BulletGlobals.GjkPairDetectorPool.Get())
                 {
-                    input.m_maximumDistanceSquared = min0.Margin + min1.Margin + m_manifoldPtr.GetContactBreakingThreshold();
-                    input.m_maximumDistanceSquared *= input.m_maximumDistanceSquared;
+                    gjkPairDetector.Initialize(min0, min1, m_simplexSolver, m_pdSolver);
+                    //TODO: if (dispatchInfo.m_useContinuous)
+                    gjkPairDetector.SetMinkowskiA(min0);
+                    gjkPairDetector.SetMinkowskiB(min1);
+
+                    {
+                        input.m_maximumDistanceSquared = min0.Margin + min1.Margin + m_manifoldPtr.GetContactBreakingThreshold();
+                        input.m_maximumDistanceSquared *= input.m_maximumDistanceSquared;
+                    }
+
+                    input.m_transformA = body0.GetWorldTransform();
+                    input.m_transformB = body1.GetWorldTransform();
+
+                    gjkPairDetector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), false);
+
+                    if (BulletGlobals.g_streamWriter != null)
+                    {
+                        BulletGlobals.g_streamWriter.WriteLine("c2dc2d processCollision");
+                        MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformA", input.m_transformA);
+                        MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformB", input.m_transformB);
+                    }
                 }
-
-                input.m_transformA = body0.GetWorldTransform();
-                input.m_transformB = body1.GetWorldTransform();
-
-                gjkPairDetector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
-
-                if (BulletGlobals.g_streamWriter != null)
-                {
-                    BulletGlobals.g_streamWriter.WriteLine("c2dc2d processCollision");
-                    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformA", input.m_transformA);
-                    MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformB", input.m_transformB);
-                }
-
+                //BulletGlobals.GjkPairDetectorPool.Free(gjkPairDetector);
                 //btVector3 v0,v1;
                 //btVector3 sepNormalWorldSpace;
 
@@ -138,12 +141,15 @@ namespace BulletXNA.BulletCollision
             {
                 ConvexShape convex0 = body0.CollisionShape as ConvexShape;
 
-                SphereShape sphere1 = new SphereShape(body1.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
-                CastResult result = new CastResult();
-                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                SphereShape sphere1 = BulletGlobals.SphereShapePool.Get();
+                sphere1.Initialize(body1.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = BulletGlobals.CastResultPool.Get();
+                VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(convex0, sphere1, voronoiSimplex);
+                using(GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
+                {
+                    ccd1.Initialize(convex0, sphere1, voronoiSimplex);
                 //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
                 if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
                     body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
@@ -166,6 +172,10 @@ namespace BulletXNA.BulletCollision
                         resultFraction = result.m_fraction;
                     }
 
+                }
+                BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                BulletGlobals.SphereShapePool.Free(sphere1);
+                result.Cleanup();
                 }
             }
 
@@ -173,37 +183,44 @@ namespace BulletXNA.BulletCollision
             {
                 ConvexShape convex1 = body1.CollisionShape as ConvexShape;
 
-                SphereShape sphere0 = new SphereShape(body0.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
-                CastResult result = new CastResult();
-                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                SphereShape sphere0 = BulletGlobals.SphereShapePool.Get();
+                sphere0.Initialize(body0.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = BulletGlobals.CastResultPool.Get();
+                VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(sphere0, convex1, voronoiSimplex);
-                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
-                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                using (GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
                 {
-
-                    //store result.m_fraction in both bodies
-
-                    if (body0.GetHitFraction() > result.m_fraction)
+                    ccd1.Initialize(sphere0, convex1, voronoiSimplex);
+                    //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                    if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                        body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
                     {
-                        body0.SetHitFraction(result.m_fraction);
-                    }
 
-                    if (body1.GetHitFraction() > result.m_fraction)
-                    {
-                        body1.SetHitFraction(result.m_fraction);
-                    }
+                        //store result.m_fraction in both bodies
 
-                    if (resultFraction > result.m_fraction)
-                    {
-                        resultFraction = result.m_fraction;
-                    }
+                        if (body0.GetHitFraction() > result.m_fraction)
+                        {
+                            body0.SetHitFraction(result.m_fraction);
+                        }
 
+                        if (body1.GetHitFraction() > result.m_fraction)
+                        {
+                            body1.SetHitFraction(result.m_fraction);
+                        }
+
+                        if (resultFraction > result.m_fraction)
+                        {
+                            resultFraction = result.m_fraction;
+                        }
+
+                    }
+                    BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                    BulletGlobals.SphereShapePool.Free(sphere0);
+                    result.Cleanup();
                 }
             }
-
+            
             return resultFraction;
         }
 

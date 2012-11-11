@@ -27,6 +27,7 @@ namespace BulletXNA.BulletCollision
 {
     public class ContinuousConvexCollision : IConvexCast
     {
+        public ContinuousConvexCollision() { } // for pool
         public ContinuousConvexCollision(ConvexShape shapeA, ConvexShape shapeB)
         {
             m_convexA = shapeA;
@@ -48,6 +49,31 @@ namespace BulletXNA.BulletCollision
             m_planeShape = plane;
         }
 
+        public virtual void Initialize(ConvexShape shapeA, ConvexShape shapeB)
+        {
+            m_convexA = shapeA;
+            m_convexB1 = shapeB;
+            m_simplexSolver = null;
+            m_penetrationDepthSolver = null;
+        }
+
+        public virtual void Initialize(ConvexShape shapeA, ConvexShape shapeB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver)
+        {
+            m_convexA = shapeA;
+            m_convexB1 = shapeB;
+            m_simplexSolver = simplexSolver;
+            m_penetrationDepthSolver = penetrationDepthSolver;
+        }
+
+        public void Initialize(ConvexShape shapeA, StaticPlaneShape plane)
+        {
+            m_convexA = shapeA;
+            m_planeShape = plane;
+            m_simplexSolver = null;
+            m_penetrationDepthSolver = null;
+        }
+
+
 
         public virtual bool CalcTimeOfImpact(ref Matrix fromA, ref Matrix toA, ref Matrix fromB, ref Matrix toB, CastResult result)
         {
@@ -56,8 +82,8 @@ namespace BulletXNA.BulletCollision
             TransformUtil.CalculateVelocity(ref fromA, ref toA, 1f, out linVelA, out angVelA);
             TransformUtil.CalculateVelocity(ref fromB, ref toB, 1f, out linVelB, out angVelB);
 
-            float boundingRadiusA = m_convexA.GetAngularMotionDisc();
-            float boundingRadiusB = m_convexB1 != null ? m_convexB1.GetAngularMotionDisc() : 0.0f;
+            float boundingRadiusA = m_convexA.AngularMotionDisc;
+            float boundingRadiusB = m_convexB1 != null ? m_convexB1.AngularMotionDisc : 0.0f;
 
             float maxAngularProjectedVelocity = angVelA.Length() * boundingRadiusA + angVelB.Length() * boundingRadiusB;
             Vector3 relLinVel = (linVelB - linVelA);
@@ -202,10 +228,10 @@ namespace BulletXNA.BulletCollision
             {
                 m_simplexSolver.Reset();
                 GjkPairDetector gjk = new GjkPairDetector(m_convexA, m_convexB1, m_convexA.ShapeType, m_convexB1.ShapeType, m_convexA.Margin, m_convexB1.Margin, m_simplexSolver, m_penetrationDepthSolver);
-                ClosestPointInput input = new ClosestPointInput();
+                ClosestPointInput input = ClosestPointInput.Default();
                 input.m_transformA = transA;
                 input.m_transformB = transB;
-                gjk.GetClosestPoints(input, pointCollector, null);
+                gjk.GetClosestPoints(ref input, pointCollector, null);
             }
             else
             {

@@ -541,7 +541,7 @@ namespace DemoFramework
 
             FieldOfView = (float)Math.PI / 4;
             Freelook = new FreeLook(Input);
-            Ambient = (Color4)Color.Gray;
+            Ambient = new Color4(0xFF808080);
 
             try
             {

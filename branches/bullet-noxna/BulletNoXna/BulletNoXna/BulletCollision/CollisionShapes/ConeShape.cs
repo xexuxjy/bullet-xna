@@ -97,9 +97,9 @@ namespace BulletXNA.BulletCollision
 	    }
 
 
-	    public override String GetName() 
+	    public override string Name
 	    {
-		    return "Cone";
+		    get { return "Cone"; }
 	    }
     		
 	    ///choose upAxis index

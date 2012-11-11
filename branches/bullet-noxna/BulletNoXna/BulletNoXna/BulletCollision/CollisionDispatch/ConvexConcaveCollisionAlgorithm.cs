@@ -22,6 +22,7 @@
  */
 
 using BulletXNA.LinearMath;
+using System;
 
 namespace BulletXNA.BulletCollision
 {
@@ -29,6 +30,7 @@ namespace BulletXNA.BulletCollision
 
     public class ConvexConcaveCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public ConvexConcaveCollisionAlgorithm() { } // for pool
         public ConvexConcaveCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
             : base(ci, body0, body1)
         {
@@ -36,6 +38,20 @@ namespace BulletXNA.BulletCollision
             m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
         }
 
+        public void Inititialize(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            base.Initialize(ci, body0, body1);
+            m_isSwapped = isSwapped;
+            if (m_convexTriangleCallback == null)
+            {
+                m_convexTriangleCallback = new ConvexTriangleCallback(m_dispatcher, body0, body1, isSwapped);
+            }
+            else
+            {
+                m_convexTriangleCallback.Initialize(m_dispatcher, body0, body1, isSwapped);
+            }
+
+        }
         public override void Cleanup()
         {
             // empty on purpose...
@@ -43,8 +59,10 @@ namespace BulletXNA.BulletCollision
             if (m_convexTriangleCallback != null)
             {
                 m_convexTriangleCallback.Cleanup();
-                m_convexTriangleCallback = null;
+                // pool means we don't clear this
+                //m_convexTriangleCallback = null;
             }
+            BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Free(this);
         }
 
         //public override void processCollision (CollisionObject body0,CollisionObject body1,DispatcherInfo dispatchInfo,ManifoldResult resultOut)
@@ -155,12 +173,12 @@ namespace BulletXNA.BulletCollision
             CollisionObject convexBody = m_isSwapped ? bodyB : bodyA;
             CollisionObject triBody = m_isSwapped ? bodyA : bodyB;
 
-            if (triBody.CollisionShape.IsConcave())
+            if (triBody.CollisionShape.IsConcave)
             {
                 CollisionObject triOb = triBody;
                 ConcaveShape concaveShape = triOb.CollisionShape as ConcaveShape;
 
-                if (convexBody.CollisionShape.IsConvex())
+                if (convexBody.CollisionShape.IsConvex)
                 {
                     float collisionMarginTriangle = concaveShape.Margin;
 
@@ -202,7 +220,7 @@ namespace BulletXNA.BulletCollision
             Matrix convexFromLocal = triInv * convexbody.GetWorldTransform();
             Matrix convexToLocal = triInv * convexbody.GetInterpolationWorldTransform();
 
-            if (triBody.CollisionShape.IsConcave())
+            if (triBody.CollisionShape.IsConcave)
             {
                 Vector3 rayAabbMin = convexFromLocal.Translation;
                 MathUtil.VectorMin(convexToLocal.Translation, ref rayAabbMin);
@@ -213,27 +231,29 @@ namespace BulletXNA.BulletCollision
                 rayAabbMax += ccdRadius0;
 
                 float curHitFraction = 1f; //is this available?
-                LocalTriangleSphereCastCallback raycastCallback = new LocalTriangleSphereCastCallback(ref convexFromLocal, ref convexToLocal,
+                using (LocalTriangleSphereCastCallback raycastCallback = BulletGlobals.LocalTriangleSphereCastCallbackPool.Get())
+                {
+                    raycastCallback.Initialize(ref convexFromLocal, ref convexToLocal,
                     convexbody.CcdSweptSphereRadius, curHitFraction);
 
-                raycastCallback.m_hitFraction = convexbody.GetHitFraction();
+                    raycastCallback.m_hitFraction = convexbody.GetHitFraction();
 
-                CollisionObject concavebody = triBody;
+                    CollisionObject concavebody = triBody;
 
-                ConcaveShape triangleMesh = concavebody.CollisionShape as ConcaveShape;
+                    ConcaveShape triangleMesh = concavebody.CollisionShape as ConcaveShape;
 
-                if (triangleMesh != null)
-                {
-                    triangleMesh.ProcessAllTriangles(raycastCallback, ref rayAabbMin, ref rayAabbMax);
-                }
+                    if (triangleMesh != null)
+                    {
+                        triangleMesh.ProcessAllTriangles(raycastCallback, ref rayAabbMin, ref rayAabbMax);
+                    }
 
-                if (raycastCallback.m_hitFraction < convexbody.GetHitFraction())
-                {
-                    convexbody.SetHitFraction(raycastCallback.m_hitFraction);
-                    return raycastCallback.m_hitFraction;
+                    if (raycastCallback.m_hitFraction < convexbody.GetHitFraction())
+                    {
+                        convexbody.SetHitFraction(raycastCallback.m_hitFraction);
+                        return raycastCallback.m_hitFraction;
+                    }
                 }
             }
-
             return 1;
         }
 
@@ -257,7 +277,7 @@ namespace BulletXNA.BulletCollision
     }
 
 
-    public class LocalTriangleSphereCastCallback : ITriangleCallback
+    public class LocalTriangleSphereCastCallback : ITriangleCallback,IDisposable
     {
         public Matrix m_ccdSphereFromTrans;
         public Matrix m_ccdSphereToTrans;
@@ -270,6 +290,7 @@ namespace BulletXNA.BulletCollision
         {
             return false;
         }
+        public LocalTriangleSphereCastCallback() { } // for pool
 
         public LocalTriangleSphereCastCallback(ref Matrix from, ref Matrix to, float ccdSphereRadius, float hitFraction)
         {
@@ -279,35 +300,61 @@ namespace BulletXNA.BulletCollision
             m_hitFraction = hitFraction;
         }
 
+        public void Initialize(ref Matrix from, ref Matrix to, float ccdSphereRadius, float hitFraction)
+        {
+            m_ccdSphereFromTrans = from;
+            m_ccdSphereToTrans = to;
+            m_ccdSphereRadius = ccdSphereRadius;
+            m_hitFraction = hitFraction;
+        }
+
         public virtual void Cleanup()
         {
+            
         }
 
         public void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex)
         {
             //do a swept sphere for now
             Matrix ident = Matrix.Identity;
-            CastResult castResult = new CastResult();
+            CastResult castResult = BulletGlobals.CastResultPool.Get();
             castResult.m_fraction = m_hitFraction;
-            SphereShape pointShape = new SphereShape(m_ccdSphereRadius);
-            TriangleShape triShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-            SubSimplexConvexCast convexCaster = new SubSimplexConvexCast(pointShape, triShape, simplexSolver);
-            //GjkConvexCast	convexCaster(&pointShape,convexShape,&simplexSolver);
-            //ContinuousConvexCollision convexCaster(&pointShape,convexShape,&simplexSolver,0);
-            //local space?
-
-            if (convexCaster.CalcTimeOfImpact(ref m_ccdSphereFromTrans, ref m_ccdSphereToTrans,
-                ref ident, ref ident, castResult))
+            SphereShape pointShape = BulletGlobals.SphereShapePool.Get();
+            pointShape.Initialize(m_ccdSphereRadius);
+            using (TriangleShape triShape = BulletGlobals.TriangleShapePool.Get())
             {
-                if (m_hitFraction > castResult.m_fraction)
-                {
-                    m_hitFraction = castResult.m_fraction;
-                }
-            }
+                triShape.Initialize(ref triangle[0], ref triangle[1], ref triangle[2]);
+                VoronoiSimplexSolver simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+                SubSimplexConvexCast convexCaster = BulletGlobals.SubSimplexConvexCastPool.Get();
+                convexCaster.Initialize(pointShape, triShape, simplexSolver);
+                //GjkConvexCast	convexCaster(&pointShape,convexShape,&simplexSolver);
+                //ContinuousConvexCollision convexCaster(&pointShape,convexShape,&simplexSolver,0);
+                //local space?
 
+                if (convexCaster.CalcTimeOfImpact(ref m_ccdSphereFromTrans, ref m_ccdSphereToTrans,
+                    ref ident, ref ident, castResult))
+                {
+                    if (m_hitFraction > castResult.m_fraction)
+                    {
+                        m_hitFraction = castResult.m_fraction;
+                    }
+                }
+                BulletGlobals.SubSimplexConvexCastPool.Free(convexCaster);
+                BulletGlobals.VoronoiSimplexSolverPool.Free(simplexSolver);
+                BulletGlobals.SphereShapePool.Free(pointShape);
+                castResult.Cleanup();
+            }
         }
 
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            BulletGlobals.LocalTriangleSphereCastCallbackPool.Free(this);
+        }
+
+        #endregion
     };
 
     public class ConvexTriangleCallback : ITriangleCallback
@@ -341,6 +388,16 @@ namespace BulletXNA.BulletCollision
             m_manifoldPtr = m_dispatcher.GetNewManifold(m_convexBody, m_triBody);
             ClearCache();
         }
+
+        public void Initialize(IDispatcher dispatcher, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        {
+            m_dispatcher = dispatcher;
+            m_convexBody = isSwapped ? body1 : body0;
+            m_triBody = isSwapped ? body0 : body1;
+            m_manifoldPtr = m_dispatcher.GetNewManifold(m_convexBody, m_triBody);
+            ClearCache();
+        }
+
 
         public virtual void Cleanup()
         {
@@ -377,11 +434,11 @@ namespace BulletXNA.BulletCollision
 
             ///debug drawing of the overlapping triangles
             ///
-
-            if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().GetDebugMode() & DebugDrawModes.DrawWireframe) > 0))
+#if false
+            if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawWireframe) > 0))
             {
                 Vector3 color = new Vector3(1, 1, 0);
-                Matrix tr = ob.GetWorldTransform();
+                IndexedMatrix tr = ob.GetWorldTransform();
 
                 Vector3[] transformedTriangles = new Vector3[3];
                 Vector3.Transform(triangle, ref tr, transformedTriangles);
@@ -391,34 +448,36 @@ namespace BulletXNA.BulletCollision
                 m_dispatchInfoPtr.getDebugDraw().DrawLine(ref transformedTriangles[2], ref transformedTriangles[0], ref color);
 
             }
-
-            if (m_convexBody.CollisionShape.IsConvex())
+#endif
+            if (m_convexBody.CollisionShape.IsConvex)
             {
-                TriangleShape tm = new TriangleShape(triangle[0], triangle[1], triangle[2]);
-                tm.Margin = m_collisionMarginTriangle;
-
-                CollisionShape tmpShape = ob.CollisionShape;
-                ob.InternalSetTemporaryCollisionShape(tm);
-
-                CollisionAlgorithm colAlgo = ci.GetDispatcher().FindAlgorithm(m_convexBody, m_triBody, m_manifoldPtr);
-                ///this should use the btDispatcher, so the actual registered algorithm is used
-                //		btConvexConvexAlgorithm cvxcvxalgo(m_manifoldPtr,ci,m_convexBody,m_triBody);
-
-                if (m_resultOut.GetBody0Internal() == m_triBody)
+                using (TriangleShape tm = BulletGlobals.TriangleShapePool.Get())
                 {
-                    m_resultOut.SetShapeIdentifiersA(partId, triangleIndex);
-                }
-                else
-                {
-                    m_resultOut.SetShapeIdentifiersB(partId, triangleIndex);
-                }
+                    tm.Initialize(ref triangle[0], ref triangle[1], ref triangle[2]);
+                    tm.Margin = m_collisionMarginTriangle;
 
-                colAlgo.ProcessCollision(m_convexBody, m_triBody, m_dispatchInfoPtr, m_resultOut);
-                colAlgo.Cleanup();
-                ci.GetDispatcher().FreeCollisionAlgorithm(colAlgo);
-                colAlgo = null;
+                    CollisionShape tmpShape = ob.CollisionShape;
+                    ob.InternalSetTemporaryCollisionShape(tm);
 
-                ob.InternalSetTemporaryCollisionShape(tmpShape);
+                    CollisionAlgorithm colAlgo = ci.GetDispatcher().FindAlgorithm(m_convexBody, m_triBody, m_manifoldPtr);
+                    ///this should use the btDispatcher, so the actual registered algorithm is used
+                    //		btConvexConvexAlgorithm cvxcvxalgo(m_manifoldPtr,ci,m_convexBody,m_triBody);
+
+                    if (m_resultOut.GetBody0Internal() == m_triBody)
+                    {
+                        m_resultOut.SetShapeIdentifiersA(partId, triangleIndex);
+                    }
+                    else
+                    {
+                        m_resultOut.SetShapeIdentifiersB(partId, triangleIndex);
+                    }
+
+                    colAlgo.ProcessCollision(m_convexBody, m_triBody, m_dispatchInfoPtr, m_resultOut);
+                    ci.GetDispatcher().FreeCollisionAlgorithm(colAlgo);
+                    colAlgo = null;
+
+                    ob.InternalSetTemporaryCollisionShape(tmpShape);
+                }
             }
         }
 
@@ -443,7 +502,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, false);
+            ConvexConcaveCollisionAlgorithm algo = BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Get();
+            algo.Inititialize(ci, body0, body1, false);
+            return algo;
         }
     }
 
@@ -451,7 +512,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConcaveCollisionAlgorithm(ci, body0, body1, true);
+            ConvexConcaveCollisionAlgorithm algo = BulletGlobals.ConvexConcaveCollisionAlgorithmPool.Get();
+            algo.Inititialize(ci, body0, body1, true);
+            return algo;
         }
     }
 

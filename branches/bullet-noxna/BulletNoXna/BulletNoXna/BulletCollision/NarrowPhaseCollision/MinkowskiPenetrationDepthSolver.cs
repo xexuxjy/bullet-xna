@@ -24,6 +24,7 @@
 #define USE_BATCHED_SUPPORT
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
     public class MinkowskiPenetrationDepthSolver : IConvexPenetrationDepthSolver
@@ -31,7 +32,7 @@ namespace BulletXNA.BulletCollision
         public bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref Matrix transA, ref Matrix transB,
                 ref Vector3 v, ref Vector3 pa, ref Vector3 pb, IDebugDraw debugDraw)
         {
-            bool check2d = convexA.IsConvex2d() && convexB.IsConvex2d();
+            bool check2d = convexA.IsConvex2d && convexB.IsConvex2d;
 
 
             float minProj = float.MaxValue;
@@ -54,8 +55,12 @@ namespace BulletXNA.BulletCollision
             for (int i = 0; i < numSampleDirections; i++)
             {
                 Vector3 norm = sPenetrationDirections[i];
-                seperatingAxisInABatch[i] = (-norm) * transA._basis;
-                seperatingAxisInBBatch[i] = norm * transB._basis;
+                Vector3 negNorm = -norm;
+
+                IndexedBasisMatrix.Multiply(ref seperatingAxisInABatch[i], ref negNorm, ref transA._basis);
+                IndexedBasisMatrix.Multiply(ref seperatingAxisInBBatch[i], ref norm, ref transB._basis);
+                //seperatingAxisInABatch[i] = (-norm) * transA._basis;
+                //seperatingAxisInBBatch[i] = norm * transB._basis;
             }
 
             {
@@ -66,10 +71,11 @@ namespace BulletXNA.BulletCollision
                     {
                         Vector3 norm;
                         convexA.GetPreferredPenetrationDirection(i, out norm);
-                        norm = transA._basis * norm;
+                        IndexedBasisMatrix.Multiply(ref norm ,ref transA._basis ,ref norm);
                         sPenetrationDirections[numSampleDirections] = norm;
-                        seperatingAxisInABatch[numSampleDirections] = (-norm) * transA._basis;
-                        seperatingAxisInBBatch[numSampleDirections] = norm * transB._basis;
+                        Vector3 negNorm = -norm;
+                        IndexedBasisMatrix.Multiply(ref seperatingAxisInABatch[numSampleDirections], ref negNorm,ref transA._basis);
+                        IndexedBasisMatrix.Multiply(ref seperatingAxisInBBatch[numSampleDirections] ,ref norm ,ref transB._basis);
                         numSampleDirections++;
                     }
                 }
@@ -83,10 +89,11 @@ namespace BulletXNA.BulletCollision
                     {
                         Vector3 norm;
                         convexB.GetPreferredPenetrationDirection(i, out norm);
-                        norm = transB._basis * norm;
+                        IndexedBasisMatrix.Multiply(ref norm, ref transB._basis, ref norm);
                         sPenetrationDirections[numSampleDirections] = norm;
-                        seperatingAxisInABatch[numSampleDirections] = (-norm) * transA._basis;
-                        seperatingAxisInBBatch[numSampleDirections] = norm * transB._basis;
+                        Vector3 negNorm = -norm;
+                        IndexedBasisMatrix.Multiply(ref seperatingAxisInABatch[numSampleDirections],ref negNorm,ref transA._basis);
+                        IndexedBasisMatrix.Multiply(ref seperatingAxisInBBatch[numSampleDirections],ref norm ,ref transB._basis);
                         numSampleDirections++;
                     }
                 }
@@ -109,8 +116,8 @@ namespace BulletXNA.BulletCollision
                 pInA = new Vector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
                 qInB = new Vector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
 
-			    pWorld = transA * pInA;	
-			    qWorld = transB * qInB;
+			    Matrix.Multiply(out  pWorld ,ref transA ,ref pInA);
+                Matrix.Multiply(out  qWorld, ref transB, ref qInB);	
                 if (check2d)
                 {
                     // shouldn't this be Y ?
@@ -119,8 +126,8 @@ namespace BulletXNA.BulletCollision
                 }
 
 
-                w = qWorld - pWorld;
-                float delta = Vector3.Dot(norm, w);
+                Vector3.Subtract(out w ,ref qWorld ,ref pWorld);
+                float delta = Vector3.Dot(ref norm, ref w);
                 //find smallest delta
                 if (delta < minProj)
                 {
@@ -226,7 +233,8 @@ namespace BulletXNA.BulletCollision
 
 
 
-            GjkPairDetector gjkdet = new GjkPairDetector(convexA, convexB, simplexSolver, null);
+            GjkPairDetector gjkdet = BulletGlobals.GjkPairDetectorPool.Get();
+            gjkdet.Initialize(convexA, convexB, simplexSolver, null);
 
             float offsetDist = minProj;
             Vector3 offset = minNorm * offsetDist;
@@ -245,7 +253,7 @@ namespace BulletXNA.BulletCollision
             MinkowskiIntermediateResult res = new MinkowskiIntermediateResult();
             gjkdet.SetCachedSeperatingAxis(-minNorm);
 
-            gjkdet.GetClosestPoints(input, res, debugDraw, false);
+            gjkdet.GetClosestPoints(ref input, res, debugDraw, false);
 
             float correctedMinNorm = minProj - res.m_depth;
 
@@ -270,6 +278,8 @@ namespace BulletXNA.BulletCollision
 
 
             }
+
+            BulletGlobals.GjkPairDetectorPool.Free(gjkdet);
             return res.m_hasResult;
         }
 

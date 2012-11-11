@@ -27,9 +27,18 @@ namespace BulletXNA.BulletCollision
 {
     public class SphereTriangleCollisionAlgorithm : ActivatingCollisionAlgorithm
     {
+        public SphereTriangleCollisionAlgorithm() { } // for pool
         public SphereTriangleCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
             : base(ci, body0, body1)
         {
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_swapped = swapped;
+        }
+
+        public virtual void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool swapped)
+        {
+            base.Initialize(ci, body0, body1);
             m_ownManifold = false;
             m_manifoldPtr = mf;
             m_swapped = swapped;
@@ -39,6 +48,11 @@ namespace BulletXNA.BulletCollision
             : base(ci)
         {
 
+        }
+
+        public override void Initialize(CollisionAlgorithmConstructionInfo ci)
+        {
+            base.Initialize(ci);
         }
 
         public override void Cleanup()
@@ -53,6 +67,7 @@ namespace BulletXNA.BulletCollision
                 }
             }
             m_ownManifold = false;
+            BulletGlobals.SphereTriangleCollisionAlgorithmPool.Free(this);
         }
 
 
@@ -68,23 +83,27 @@ namespace BulletXNA.BulletCollision
             CollisionObject triObj = m_swapped ? body0 : body1;
 
             SphereShape sphere = sphereObj.CollisionShape as SphereShape;
-            TriangleShape triangle = (TriangleShape)triObj.CollisionShape;
+            TriangleShape triangle = triObj.CollisionShape as TriangleShape;
 
             /// report a contact. internally this will be kept persistent, and contact reduction is done
             resultOut.SetPersistentManifold(m_manifoldPtr);
-            SphereTriangleDetector detector = new SphereTriangleDetector(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
-            ClosestPointInput input = new ClosestPointInput();
-            input.m_maximumDistanceSquared = float.MaxValue;
-            input.m_transformA = sphereObj.GetWorldTransform();
-            input.m_transformB = triObj.GetWorldTransform();
-
-            bool swapResults = m_swapped;
-
-            detector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
-
-            if (m_ownManifold)
+            using (SphereTriangleDetector detector = BulletGlobals.SphereTriangleDetectorPool.Get())
             {
-                resultOut.RefreshContactPoints();
+
+                detector.Initialize(sphere, triangle, m_manifoldPtr.GetContactBreakingThreshold());
+                ClosestPointInput input = ClosestPointInput.Default();
+                input.m_maximumDistanceSquared = float.MaxValue;
+                sphereObj.GetWorldTransform(out input.m_transformA);
+                triObj.GetWorldTransform(out input.m_transformB);
+
+                bool swapResults = m_swapped;
+
+                detector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), swapResults);
+
+                if (m_ownManifold)
+                {
+                    resultOut.RefreshContactPoints();
+                }
             }
         }
 
@@ -110,7 +129,9 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new SphereTriangleCollisionAlgorithm(ci.GetManifold(), ci, body0, body1, m_swapped);
+            SphereTriangleCollisionAlgorithm algo = BulletGlobals.SphereTriangleCollisionAlgorithmPool.Get();
+            algo.Initialize(ci.GetManifold(), ci, body0, body1, m_swapped);
+            return algo;
         }
     }
 }

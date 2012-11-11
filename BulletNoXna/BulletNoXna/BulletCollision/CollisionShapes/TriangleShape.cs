@@ -23,11 +23,12 @@
 
 using System;
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
-    public class TriangleShape : PolyhedralConvexShape
+    public class TriangleShape : PolyhedralConvexShape , IDisposable
     {
 
         public TriangleShape()
@@ -50,6 +51,13 @@ namespace BulletXNA.BulletCollision
             m_vertices1[2] = p2;
         }
 
+        public void Initialize(ref Vector3 p0, ref Vector3 p1, ref Vector3 p2)
+        {
+            m_shapeType = BroadphaseNativeType.TriangleShape;
+            m_vertices1[0] = p0;
+            m_vertices1[1] = p1;
+            m_vertices1[2] = p2;
+        }
 
         public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
 	    {
@@ -117,9 +125,9 @@ namespace BulletXNA.BulletCollision
 		    return false;
 	    }
 
-        public override String GetName()
+        public override string Name
         {
-            return "Triangle";
+            get { return "Triangle"; }
         }
 
         public override int GetNumPreferredPenetrationDirections()
@@ -191,6 +199,11 @@ namespace BulletXNA.BulletCollision
                 supportVerticesOut[i] = new Vector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
 		    }
 	    }
+
+        public void Dispose()
+        {
+            BulletGlobals.TriangleShapePool.Free(this);
+        }
 
         public Vector3[] m_vertices1 = new Vector3[3];
     }

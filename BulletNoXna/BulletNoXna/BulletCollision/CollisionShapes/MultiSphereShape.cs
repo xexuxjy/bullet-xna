@@ -141,9 +141,9 @@ namespace BulletXNA.BulletCollision
 	    }
 
 
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "MultiSphere";
+		    get { return "MultiSphere"; }
 	    }
 
         private IList<Vector3> m_localPositionArray = new List<Vector3>();

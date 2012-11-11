@@ -16,6 +16,7 @@ using Device = SharpDX.Direct3D10.Device;
 using Mesh = SharpDX.Direct3D10.Mesh;
 using Matrix = BulletXNA.LinearMath.Matrix;
 using Vector3 = BulletXNA.LinearMath.Vector3;
+using Color = System.Drawing.Color;
 
 namespace DemoFramework
 {

@@ -102,9 +102,9 @@ namespace BulletXNA.BulletCollision
             return m_shapeB;
         }
 
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "MinkowskiSum";
+		    get { return "MinkowskiSum"; }
 	    }
 
         private Matrix m_transA;

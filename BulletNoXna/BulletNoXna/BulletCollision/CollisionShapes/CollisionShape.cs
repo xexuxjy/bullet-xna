@@ -63,18 +63,21 @@ namespace BulletXNA.BulletCollision
         }
 
 	    ///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
-	    public virtual float GetAngularMotionDisc()
+	    public virtual float AngularMotionDisc
         {
-	        Vector3	center;
-	        float disc;
-            GetBoundingSphere(out center, out disc);
-	        disc += (center).Length();
-	        return disc;
+            get
+            {
+                Vector3 center;
+                float disc;
+                GetBoundingSphere(out center, out disc);
+                disc += (center).Length();
+                return disc;
+            }
         }
 
 	    public virtual float GetContactBreakingThreshold(float defaultContactThreshold)
         {
-	        return GetAngularMotionDisc() * defaultContactThreshold;
+	        return AngularMotionDisc * defaultContactThreshold;
         }
 
 
@@ -109,7 +112,7 @@ namespace BulletXNA.BulletCollision
 		        temporalAabbMinz += linMotion.Z;
 
 	        //add conservative angular motion
-	        float angularMotion = angvel.Length() * GetAngularMotionDisc() * timeStep;
+	        float angularMotion = angvel.Length() * AngularMotionDisc * timeStep;
             Vector3 angularMotion3d = new Vector3(angularMotion);
 	        temporalAabbMin = new Vector3(temporalAabbMinx,temporalAabbMiny,temporalAabbMinz);
 	        temporalAabbMax = new Vector3(temporalAabbMaxx,temporalAabbMaxy,temporalAabbMaxz);
@@ -119,44 +122,44 @@ namespace BulletXNA.BulletCollision
 
         }
 	
-        public bool	IsPolyhedral()
+        public bool	IsPolyhedral
 	    {
-		    return BroadphaseProxy.IsPolyhedral(ShapeType);
+            get { return BroadphaseProxy.IsPolyhedral(ShapeType); }
 	    }
 
-	    public bool	IsConvex()
+	    public bool	IsConvex
 	    {
-		    return BroadphaseProxy.IsConvex(ShapeType);
+            get { return BroadphaseProxy.IsConvex(ShapeType); }
 	    }
 
-        public bool	IsNonMoving()
+        public bool	IsNonMoving
 	    {
-		    return BroadphaseProxy.IsNonMoving(ShapeType);
+            get { return BroadphaseProxy.IsNonMoving(ShapeType); }
 	    }
 
-        public bool	IsConvex2d()
+        public bool	IsConvex2d
 	    {
-		    return BroadphaseProxy.IsConvex2d(ShapeType);
+            get { return BroadphaseProxy.IsConvex2d(ShapeType); }
 	    }
 
-        public bool	IsConcave() 
+        public bool	IsConcave
 	    {
-		    return BroadphaseProxy.IsConcave(ShapeType);
+            get { return BroadphaseProxy.IsConcave(ShapeType); }
 	    }
-	    public bool	IsCompound() 
+	    public bool	IsCompound
 	    {
-		    return BroadphaseProxy.IsCompound(ShapeType);
+            get { return BroadphaseProxy.IsCompound(ShapeType); }
 	    }
 
-        public bool	IsSoftBody()
+        public bool	IsSoftBody
 	    {
-		    return BroadphaseProxy.IsSoftBody(ShapeType);
+            get { return BroadphaseProxy.IsSoftBody(ShapeType); }
 	    }
 
 	    ///isInfinite is used to catch simulation error (aabb check)
-	    public bool IsInfinite()
+	    public bool IsInfinite
 	    {
-		    return BroadphaseProxy.IsInfinite(ShapeType);
+            get { return BroadphaseProxy.IsInfinite(ShapeType); }
 	    }
 
         // defining these as virtual rather then abstract as the whole impementation agains _SPU_ seems odd
@@ -173,17 +176,14 @@ namespace BulletXNA.BulletCollision
         }
 
         //debugging support
-        public virtual String GetName()
+        public virtual String Name
         {
-            return "Not-Defined";
+            get { return "Not-Defined"; }
         }
 
         public BroadphaseNativeType ShapeType
         {
-            get
-            {
-                return m_shapeType;
-            }
+            get { return m_shapeType; }
         }
 
         public abstract float Margin { get; set; }
@@ -194,9 +194,9 @@ namespace BulletXNA.BulletCollision
 		    m_userPointer = userPtr;
 	    }
 
-	    public Object GetUserPointer()
+	    public Object UserObject
 	    {
-		    return m_userPointer;
+            get { return m_userPointer; }
 	    }
 
         protected BroadphaseNativeType m_shapeType;

@@ -42,9 +42,8 @@ namespace BulletXNA.BulletDynamics
 		}
 		protected Vector3 PerpindicularComponent(ref Vector3 direction, ref Vector3 normal)
 		{
-			float magnitude = 1f - Vector3.Dot(direction, normal);
-			return normal * magnitude;
-		}
+            return direction - ParallelComponent(ref direction, ref normal);
+        }
 
 		protected bool RecoverFromPenetration(CollisionWorld collisionWorld)
 		{
@@ -107,16 +106,16 @@ namespace BulletXNA.BulletDynamics
 		{
 			// phase 1: up
 			Matrix start = Matrix.Identity, end = Matrix.Identity;
-			m_targetPosition = m_currentPosition + upAxisDirection[m_upAxis] * (m_stepHeight + (m_verticalOffset > 0.9f ? m_verticalOffset : 0.0f));
+			m_targetPosition = m_currentPosition + upAxisDirection[m_upAxis] * (m_stepHeight + (m_verticalOffset > 0.0f ? m_verticalOffset : 0.0f));
 
 
 			/* FIXME: Handle penetration properly */
-			start.Translation = (m_currentPosition + upAxisDirection[m_upAxis] * 0.1f);
-			end.Translation = m_targetPosition;
+            start.Translation = (m_currentPosition + upAxisDirection[m_upAxis] * (m_convexShape.Margin + m_addedMargin));
+            end.Translation = (m_targetPosition);
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, -upAxisDirection[m_upAxis], 0.7071f);
-			callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
-			callback.m_collisionFilterMask = GetGhostObject().GetBroadphaseHandle().m_collisionFilterMask;
+			callback.m_collisionFilterGroup = GetGhostObject().BroadphaseHandle.m_collisionFilterGroup;
+			callback.m_collisionFilterMask = GetGhostObject().BroadphaseHandle.m_collisionFilterMask;
 
 			if (m_useGhostObjectSweepTest)
 			{
@@ -212,8 +211,8 @@ namespace BulletXNA.BulletDynamics
 				Vector3 sweepDirNegative = m_currentPosition - m_targetPosition;
 
 				KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, sweepDirNegative, 0f);
-				callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
-				callback.m_collisionFilterMask = GetGhostObject().GetBroadphaseHandle().m_collisionFilterMask;
+				callback.m_collisionFilterGroup = GetGhostObject().BroadphaseHandle.m_collisionFilterGroup;
+				callback.m_collisionFilterMask = GetGhostObject().BroadphaseHandle.m_collisionFilterMask;
 
 
 				float margin = m_convexShape.Margin;
@@ -271,7 +270,7 @@ namespace BulletXNA.BulletDynamics
 		}
 		protected void StepDown(CollisionWorld collisionWorld, float dt)
 		{
-            Matrix start = Matrix.Identity, end = Matrix.Identity;
+			Matrix start = Matrix.Identity, end = Matrix.Identity;
 
 			// phase 3: down
 			/*float additionalDownStep = (m_wasOnGround && !onGround()) ? m_stepHeight : 0.0;
@@ -294,15 +293,17 @@ namespace BulletXNA.BulletDynamics
             end.Translation = m_targetPosition;
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, upAxisDirection[m_upAxis], m_maxSlopeCosine);
-			callback.m_collisionFilterGroup = GetGhostObject().GetBroadphaseHandle().m_collisionFilterGroup;
-			callback.m_collisionFilterMask = GetGhostObject().GetBroadphaseHandle().m_collisionFilterMask;
+			callback.m_collisionFilterGroup = GetGhostObject().BroadphaseHandle.m_collisionFilterGroup;
+			callback.m_collisionFilterMask = GetGhostObject().BroadphaseHandle.m_collisionFilterMask;
 
 			if (m_useGhostObjectSweepTest)
 			{
+                // this doesn't work....
 				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
 			}
 			else
 			{
+                // this works....
 				collisionWorld.ConvexSweepTest(m_convexShape, start, end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
 			}
 
@@ -310,6 +311,10 @@ namespace BulletXNA.BulletDynamics
 			{
 				// we dropped a fraction of the height -> hit floor
 				m_currentPosition = MathUtil.Interpolate3(ref m_currentPosition, ref m_targetPosition, callback.m_closestHitFraction);
+                m_verticalVelocity = 0.0f;
+                m_verticalOffset = 0.0f;
+                m_wasJumping = false;
+
 			}
 			else
 			{
@@ -497,7 +502,7 @@ namespace BulletXNA.BulletDynamics
 				m_wasJumping = true;
 
 				//currently no jumping.
-				//IndexedMatrix xform;
+				//Matrix xform;
 				//m_rigidBody.getMotionState().getWorldTransform (out xform);
 				//Vector3 up = xform.Up;
 				//up.Normalize ();
@@ -626,12 +631,12 @@ namespace BulletXNA.BulletDynamics
 			m_me = me;
 		}
 
-		public override float AddSingleResult(LocalRayResult rayResult, bool normalInWorldSpace)
+		public override float AddSingleResult(ref LocalRayResult rayResult, bool normalInWorldSpace)
 		{
 			if (rayResult.m_collisionObject == m_me)
 				return 1.0f;
 
-			return base.AddSingleResult(rayResult, normalInWorldSpace);
+			return base.AddSingleResult(ref rayResult, normalInWorldSpace);
 		}
 
 		protected CollisionObject m_me;
@@ -648,7 +653,7 @@ namespace BulletXNA.BulletDynamics
 			m_minSlopeDot = minSlopeDot;
 		}
 
-		public override float AddSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace)
+		public override float AddSingleResult(ref LocalConvexResult convexResult, bool normalInWorldSpace)
 	    {
 			if (convexResult.m_hitCollisionObject == m_me)
 			{
@@ -671,7 +676,7 @@ namespace BulletXNA.BulletDynamics
 				return 1.0f;
 			}
 
-		    return base.AddSingleResult (convexResult, normalInWorldSpace);
+		    return base.AddSingleResult (ref convexResult, normalInWorldSpace);
 	    }
 
 		protected CollisionObject m_me;

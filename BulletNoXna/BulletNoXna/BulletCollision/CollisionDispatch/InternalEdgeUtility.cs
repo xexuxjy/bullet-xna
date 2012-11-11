@@ -1,4 +1,4 @@
-﻿#define BT_INTERNAL_EDGE_DEBUG_DRAW
+#define BT_INTERNAL_EDGE_DEBUG_DRAW
 #define DEBUG_INTERNAL_EDGE
 using System;
 using System.Diagnostics;
@@ -533,13 +533,13 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             BvhTriangleMeshShape trimesh = null;
 
-            if (colObj0.GetRootCollisionShape().ShapeType == BroadphaseNativeType.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
+            if (colObj0.RootCollisionShape.ShapeType == BroadphaseNativeType.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
             {
                 //trimesh = ((ScaledBvhTriangleMeshShape)colObj0.GetRootCollisionShape()).GetChildShape();
             }
             else
             {
-                trimesh = (BvhTriangleMeshShape)colObj0.GetRootCollisionShape();
+                trimesh = (BvhTriangleMeshShape)colObj0.RootCollisionShape;
             }
 
             TriangleInfoMap triangleInfoMapPtr = (TriangleInfoMap)trimesh.GetTriangleInfoMap();

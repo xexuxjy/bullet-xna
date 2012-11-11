@@ -22,18 +22,32 @@
  */
 
 using System;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
 {
     public class SphereShape : ConvexInternalShape
     {
+        public SphereShape()
+            : this(1f)
+        {
+        }
+
 	    public SphereShape (float radius)
 	    {
 		    m_shapeType = BroadphaseNativeType.SphereShape;
 		    m_implicitShapeDimensions.X  = radius;
 		    m_collisionMargin = radius;
 	    }
+
+        public void Initialize(float radius)
+        {
+            m_shapeType = BroadphaseNativeType.SphereShape;
+            m_implicitShapeDimensions.X = radius;
+            m_collisionMargin = radius;
+        }
+
 	
 	    public override Vector3	LocalGetSupportingVertex(ref Vector3 vec)
         {
@@ -81,10 +95,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual float Radius 
         {
-            get
-            {
-                return m_implicitShapeDimensions.X * m_localScaling.X;
-            }
+            get { return m_implicitShapeDimensions.X * m_localScaling.X; }
         }
 
 	    public void	SetUnscaledRadius(float	radius)
@@ -94,9 +105,9 @@ namespace BulletXNA.BulletCollision
 	    }
 
 	    //debugging
-	    public override String GetName()
+	    public override string Name
         {
-            return "SPHERE";
+            get { return "SPHERE"; }
         }
 
 
@@ -110,6 +121,10 @@ namespace BulletXNA.BulletCollision
             }
 	    }
 
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
 
     }
 }

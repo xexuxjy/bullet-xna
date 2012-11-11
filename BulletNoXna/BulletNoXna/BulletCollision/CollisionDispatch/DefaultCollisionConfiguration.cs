@@ -59,35 +59,24 @@ namespace BulletXNA.BulletCollision
     CollisionAlgorithmCreateFunc m_swappedCompoundCreateFunc;
     CollisionAlgorithmCreateFunc m_emptyCreateFunc;
     CollisionAlgorithmCreateFunc m_sphereSphereCF;
-#if USE_BUGGY_SPHERE_BOX_ALGORITHM
     CollisionAlgorithmCreateFunc m_sphereBoxCF;
     CollisionAlgorithmCreateFunc m_boxSphereCF;
-#endif //USE_BUGGY_SPHERE_BOX_ALGORITHM
 
     CollisionAlgorithmCreateFunc m_boxBoxCF;
     CollisionAlgorithmCreateFunc m_sphereTriangleCF;
     CollisionAlgorithmCreateFunc m_triangleSphereCF;
     CollisionAlgorithmCreateFunc m_planeConvexCF;
     CollisionAlgorithmCreateFunc m_convexPlaneCF;
-	
+    CollisionAlgorithmCreateFunc m_convexAlgo2DCF;
     public DefaultCollisionConfiguration() : this(new DefaultCollisionConstructionInfo())
     {
     }
 	public DefaultCollisionConfiguration(DefaultCollisionConstructionInfo constructionInfo)
     {
-    	m_simplexSolver = new VoronoiSimplexSolver();
-        m_pdSolver = new GjkEpaPenetrationDepthSolver();
-        //m_pdSolver = new MinkowskiPenetrationDepthSolver();
+        m_simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+        //m_pdSolver = new GjkEpaPenetrationDepthSolver();
+        m_pdSolver = new MinkowskiPenetrationDepthSolver();
         m_useEpaPenetrationAlgorithm = true;
-//#define USE_EPA 1
-//#ifdef USE_EPA
-//    mem = btAlignedAlloc(sizeof(btGjkEpaPenetrationDepthSolver),16);
-//    m_pdSolver = new (mem)btGjkEpaPenetrationDepthSolver;
-//#else
-//    mem = btAlignedAlloc(sizeof(btMinkowskiPenetrationDepthSolver),16);
-//    m_pdSolver = new (mem)btMinkowskiPenetrationDepthSolver;
-//#endif//USE_EPA	
-	
 
 	    //default CreationFunctions, filling the m_doubleDispatch table
 	    m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver,m_pdSolver);
@@ -98,14 +87,10 @@ namespace BulletXNA.BulletCollision
 	    m_emptyCreateFunc = new EmptyCreateFunc();
 	
     	m_sphereSphereCF = new SphereSphereCreateFunc();
-//#ifdef USE_BUGGY_SPHERE_BOX_ALGORITHM
-//    mem = btAlignedAlloc(sizeof(btSphereBoxCollisionAlgorithm::CreateFunc),16);
-//    m_sphereBoxCF = new(mem) btSphereBoxCollisionAlgorithm::CreateFunc;
-//    mem = btAlignedAlloc(sizeof(btSphereBoxCollisionAlgorithm::CreateFunc),16);
-//    m_boxSphereCF = new (mem)btSphereBoxCollisionAlgorithm::CreateFunc;
-//    m_boxSphereCF->m_swapped = true;
-//#endif //USE_BUGGY_SPHERE_BOX_ALGORITHM
+        m_sphereBoxCF = new SphereBoxCreateFunc();
+        m_boxSphereCF = new SwappedSphereBoxCreateFunc();
 
+        m_convexAlgo2DCF = new Convex2dConvex2dCreateFunc(m_simplexSolver, m_pdSolver);
 	    m_sphereTriangleCF = new SphereTriangleCreateFunc();
 	    m_triangleSphereCF = new SphereTriangleCreateFunc();
 	    m_triangleSphereCF.m_swapped = true;
@@ -117,47 +102,6 @@ namespace BulletXNA.BulletCollision
 	    m_planeConvexCF = new ConvexPlaneCreateFunc();
 	    m_planeConvexCF.m_swapped = true;
     	
-	    ///calculate maximum element size, big enough to fit any collision algorithm in the memory pool
-        //int maxSize = sizeof(btConvexConvexAlgorithm);
-        //int maxSize2 = sizeof(btConvexConcaveCollisionAlgorithm);
-        //int maxSize3 = sizeof(btCompoundCollisionAlgorithm);
-        //int sl = sizeof(btConvexSeparatingDistanceUtil);
-        //sl = sizeof(btGjkPairDetector);
-        //int	collisionAlgorithmMaxElementSize = btMax(maxSize,maxSize2);
-        //collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize,maxSize3);
-
-        //if (constructionInfo.m_stackAlloc)
-        //{
-        //    m_ownsStackAllocator = false;
-        //    this->m_stackAlloc = constructionInfo.m_stackAlloc;
-        //} else
-        //{
-        //    m_ownsStackAllocator = true;
-        //    void* mem = btAlignedAlloc(sizeof(btStackAlloc),16);
-        //    m_stackAlloc = new(mem)btStackAlloc(constructionInfo.m_defaultStackAllocatorSize);
-        //}
-    		
-        //if (constructionInfo.m_persistentManifoldPool)
-        //{
-        //    m_ownsPersistentManifoldPool = false;
-        //    m_persistentManifoldPool = constructionInfo.m_persistentManifoldPool;
-        //} else
-        //{
-        //    m_ownsPersistentManifoldPool = true;
-        //    void* mem = btAlignedAlloc(sizeof(btPoolAllocator),16);
-        //    m_persistentManifoldPool = new (mem) btPoolAllocator(sizeof(btPersistentManifold),constructionInfo.m_defaultMaxPersistentManifoldPoolSize);
-        //}
-    	
-        //if (constructionInfo.m_collisionAlgorithmPool)
-        //{
-        //    m_ownsCollisionAlgorithmPool = false;
-        //    m_collisionAlgorithmPool = constructionInfo.m_collisionAlgorithmPool;
-        //} else
-        //{
-        //    m_ownsCollisionAlgorithmPool = true;
-        //    void* mem = btAlignedAlloc(sizeof(btPoolAllocator),16);
-        //    m_collisionAlgorithmPool = new(mem) btPoolAllocator(collisionAlgorithmMaxElementSize,constructionInfo.m_defaultMaxCollisionAlgorithmPoolSize);
-        //}
     }
 
     public virtual void Cleanup()
@@ -187,11 +131,12 @@ namespace BulletXNA.BulletCollision
 
     public virtual CollisionAlgorithmCreateFunc GetCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
     {
-	    if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1==BroadphaseNativeType.SphereShape))
+
+        if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1 == BroadphaseNativeType.SphereShape))
 	    {
 		    return	m_sphereSphereCF;
 	    }
-#if USE_BUGGY_SPHERE_BOX_ALGORITHM
+
 	    if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1==BroadphaseNativeType.BoxShape))
 	    {
 		    return	m_sphereBoxCF;
@@ -201,8 +146,11 @@ namespace BulletXNA.BulletCollision
 	    {
 		    return	m_boxSphereCF;
 	    }
-#endif //USE_BUGGY_SPHERE_BOX_ALGORITHM
 
+        if ((proxyType0 == BroadphaseNativeType.Convex2DShape) && (proxyType1 == BroadphaseNativeType.Convex2DShape))
+        {
+            return m_convexAlgo2DCF;
+        }
 
 	    if ((proxyType0 == BroadphaseNativeType.SphereShape ) && (proxyType1==BroadphaseNativeType.TriangleShape))
 	    {
@@ -283,9 +231,13 @@ namespace BulletXNA.BulletCollision
         }
         public void SetPlaneConvexMultipointIterations(int numPerturbationIterations, int minimumPointsPerturbationThreshold)
         {
-            ConvexPlaneCreateFunc planeCreateFunc = (ConvexPlaneCreateFunc)m_planeConvexCF;
-	        planeCreateFunc.m_numPerturbationIterations = numPerturbationIterations;
-	        planeCreateFunc.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+            ConvexPlaneCreateFunc cpCF = (ConvexPlaneCreateFunc)m_convexPlaneCF;
+            cpCF.m_numPerturbationIterations = numPerturbationIterations;
+            cpCF.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+            ConvexPlaneCreateFunc pcCF = (ConvexPlaneCreateFunc)m_planeConvexCF;
+	        pcCF.m_numPerturbationIterations = numPerturbationIterations;
+	        pcCF.m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
         }
     }
 }

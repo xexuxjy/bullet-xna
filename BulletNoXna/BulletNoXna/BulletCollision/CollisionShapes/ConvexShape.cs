@@ -65,7 +65,7 @@ namespace BulletXNA.BulletCollision
             Vector3 result = Vector3.Zero;
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
             {
-                BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual " + GetName());
+                BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual " + Name);
             }
 
             switch (m_shapeType)
@@ -218,7 +218,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] = halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
                             newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
@@ -232,7 +232,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] =  -halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * capsuleShape.GetLocalScalingNV() * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
                             newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)

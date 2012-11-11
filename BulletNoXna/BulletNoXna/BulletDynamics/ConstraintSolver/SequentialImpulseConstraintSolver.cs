@@ -1240,11 +1240,11 @@ namespace BulletXNA.BulletDynamics
 
 		private static void ApplyAnisotropicFriction(CollisionObject colObj, ref Vector3 frictionDirection)
 		{
-			if (colObj != null && colObj.HasAnisotropicFriction())
+			if (colObj != null && colObj.HasAnisotropicFriction)
 			{
 				// transform to local coordinates
                 Vector3 loc_lateral = frictionDirection * colObj.GetWorldTransform()._basis;
-				Vector3 friction_scaling = colObj.GetAnisotropicFriction();
+				Vector3 friction_scaling = colObj.AnisotropicFriction;
 				//apply anisotropic friction
 				loc_lateral *= friction_scaling;
 				// ... and transform it back to global coordinates

@@ -27,6 +27,8 @@ namespace BulletXNA.BulletCollision
 {
     public class GjkEpaPenetrationDepthSolver : IConvexPenetrationDepthSolver
     {
+        public GjkEpaPenetrationDepthSolver() { } // for pool
+
         public virtual bool CalcPenDepth(ISimplexSolverInterface simplexSolver, ConvexShape convexA, ConvexShape convexB, ref Matrix transA, ref Matrix transB,
                 ref Vector3 v, ref Vector3 wWitnessOnA, ref Vector3 wWitnessOnB, IDebugDraw debugDraw)
         {
@@ -36,7 +38,7 @@ namespace BulletXNA.BulletCollision
             GjkEpaSolver2Results results = new GjkEpaSolver2Results();
             if (GjkEpaSolver2.Penetration(convexA, ref transA,
                                         convexB, ref transB,
-                                        ref guessVector, results))
+                                        ref guessVector, ref results))
             {
                 //	debugDraw->drawLine(results.witnesses[1],results.witnesses[1]+results.normal,btVector3(255,0,0));
                 //resultOut->addContactPoint(results.normal,results.witnesses[1],-results.depth);
@@ -47,7 +49,7 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                if (GjkEpaSolver2.Distance(convexA, ref transA, convexB, ref transB, ref guessVector, results))
+                if (GjkEpaSolver2.Distance(convexA, ref transA, convexB, ref transB, ref guessVector, ref results))
                 {
                     wWitnessOnA = results.witnesses0;
                     wWitnessOnB = results.witnesses1;

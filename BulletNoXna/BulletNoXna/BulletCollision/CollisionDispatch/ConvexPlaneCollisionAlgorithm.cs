@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -23,10 +23,14 @@
 
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
     public class ConvexPlaneCollisionAlgorithm : CollisionAlgorithm
     {
+
+        public ConvexPlaneCollisionAlgorithm() { } // for pool
+
         public ConvexPlaneCollisionAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
             : base(ci)
         {
@@ -47,6 +51,28 @@ namespace BulletXNA.BulletCollision
 
         }
 
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1, bool isSwapped, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(ci);
+            m_manifoldPtr = mf;
+            m_ownManifold = false;
+            m_isSwapped = isSwapped;
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+            CollisionObject convexObj = m_isSwapped ? col1 : col0;
+            CollisionObject planeObj = m_isSwapped ? col0 : col1;
+
+            if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(convexObj, planeObj))
+            {
+                m_manifoldPtr = m_dispatcher.GetNewManifold(convexObj, planeObj);
+                m_ownManifold = true;
+            }
+
+        }
+
+
+
         public override void Cleanup()
         {
             if (m_ownManifold)
@@ -58,6 +84,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
+            BulletGlobals.ConvexPlaneAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -97,13 +124,13 @@ namespace BulletXNA.BulletCollision
 		        Vector3 pOnB = vtxInPlaneWorld;
 		        resultOut.AddContactPoint(normalOnSurfaceB,pOnB,distance);
 	        }
-            //first perform a collision query with the non-perturbated collision objects
-            {
-                Quaternion rotq = Quaternion.Identity;
-                CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
-            }
+            ////first perform a collision query with the non-perturbated collision objects
+            //{
+            //    IndexedQuaternion rotq = IndexedQuaternion.Identity;
+            //    CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
+            //}
 
-            if (convexShape.IsPolyhedral() && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
+            if (convexShape.IsPolyhedral && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
             {
                 Vector3 v0;
                 Vector3 v1;
@@ -112,7 +139,7 @@ namespace BulletXNA.BulletCollision
 
                 float angleLimit = 0.125f * MathUtil.SIMD_PI;
                 float perturbeAngle;
-                float radius = convexShape.GetAngularMotionDisc();
+                float radius = convexShape.AngularMotionDisc;
                 perturbeAngle = BulletGlobals.gContactBreakingThreshold / radius;
                 if (perturbeAngle > angleLimit)
                 {
@@ -122,8 +149,8 @@ namespace BulletXNA.BulletCollision
                 for (int i = 0; i < m_numPerturbationIterations; i++)
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                    Quaternion rotq = Quaternion.CreateFromAxisAngle(planeNormal, iterationAngle);
-                    rotq = MathUtil.QuaternionMultiply(Quaternion.Inverse(rotq), MathUtil.QuaternionMultiply(perturbeRot, rotq));
+                    Quaternion rotq = new Quaternion(planeNormal, iterationAngle);
+                    rotq = Quaternion.Inverse(rotq) * perturbeRot *  rotq;
                     CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
                 }
             }
@@ -212,14 +239,16 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
+            ConvexPlaneCollisionAlgorithm algo = BulletGlobals.ConvexPlaneAlgorithmPool.Get();
             if (!m_swapped)
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                algo.Initialize(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
             else
             {
-                return new ConvexPlaneCollisionAlgorithm(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+                algo.Initialize(null, ci, body0, body1, true, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
             }
+            return algo;
         }
     };
 }

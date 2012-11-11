@@ -79,22 +79,16 @@ namespace BulletXNA.BulletCollision
                 Math.Min(body0.CollisionShape.GetContactBreakingThreshold(BulletGlobals.gContactBreakingThreshold), body1.CollisionShape.GetContactBreakingThreshold(BulletGlobals.gContactBreakingThreshold))
                 : BulletGlobals.gContactBreakingThreshold;
 
-            float contactProcessingThreshold = Math.Min(body0.GetContactProcessingThreshold(), body1.GetContactProcessingThreshold());
+            float contactProcessingThreshold = Math.Min(body0.ContactProcessingThreshold, body1.ContactProcessingThreshold);
 
             // nothing in our pool so create a new one and return it.
             // need a way to flush the pool ideally
-            PersistentManifold manifold;
-            if (m_persistentManifoldsPool.Count == 0)
-            {
-                manifold = new PersistentManifold();
-                m_persistentManifoldsPool.Push(manifold);
-            }
-
-            // remove the last item in the pool.
-            manifold = m_persistentManifoldsPool.Pop();
+            PersistentManifold manifold = BulletGlobals.PersistentManifoldPool.Get();
             manifold.Initialise(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
 
             manifold.m_index1a = m_manifoldsPtr.Count;
+
+
             m_manifoldsPtr.Add(manifold);
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
@@ -128,7 +122,7 @@ namespace BulletXNA.BulletCollision
             }
 
             // and return it to free list.
-            m_persistentManifoldsPool.Push(manifold);
+            BulletGlobals.PersistentManifoldPool.Free(manifold);
         }
 
         public virtual void ClearManifold(PersistentManifold manifold)
@@ -170,7 +164,7 @@ namespace BulletXNA.BulletCollision
 	        }
 #endif //BT_DEBUG
 
-            if ((!body0.IsActive()) && (!body1.IsActive()))
+            if ((!body0.IsActive) && (!body1.IsActive))
             {
                 needsCollision = false;
             }
@@ -192,9 +186,9 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DispatchAllCollisionPairs(IOverlappingPairCache pairCache, DispatcherInfo dispatchInfo, IDispatcher dispatcher)
         {
-            CollisionPairCallback collisionCallback = new CollisionPairCallback(dispatchInfo, this);
-            pairCache.ProcessAllOverlappingPairs(collisionCallback, dispatcher);
-            collisionCallback.cleanup();
+            m_collisionCallback.Initialize(dispatchInfo, this);
+            pairCache.ProcessAllOverlappingPairs(m_collisionCallback, dispatcher);
+            m_collisionCallback.cleanup();
         }
 
         public void SetNearCallback(INearCallback nearCallback)
@@ -258,13 +252,7 @@ namespace BulletXNA.BulletCollision
         {
             ManifoldResult manifoldResult = null;
 #if USE_POOLED_MANIFOLDRESULT
-            if (m_manifoldResultsPool.Count == 0)
-            {
-                manifoldResult = new ManifoldResult();
-                m_manifoldResultsPool.Push(manifoldResult);
-            }
-            Debug.Assert(m_manifoldResultsPool.Count > 0);
-            manifoldResult = m_manifoldResultsPool.Pop();
+            manifoldResult = BulletGlobals.ManifoldResultPool.Get();
 #endif
             manifoldResult.Initialise(o1, o2);
             return manifoldResult;
@@ -273,7 +261,7 @@ namespace BulletXNA.BulletCollision
         public void FreeManifoldResult(ManifoldResult result)
         {
 #if USE_POOLED_MANIFOLDRESULT
-            m_manifoldResultsPool.Push(result);
+            BulletGlobals.ManifoldResultPool.Free(result);
 #else
 
 #endif
@@ -281,8 +269,6 @@ namespace BulletXNA.BulletCollision
 
 
         private ObjectArray<PersistentManifold> m_manifoldsPtr = new ObjectArray<PersistentManifold>();
-        private Stack<PersistentManifold> m_persistentManifoldsPool = new Stack<PersistentManifold>();
-        private Stack<ManifoldResult> m_manifoldResultsPool = new Stack<ManifoldResult>();
 
         private DispatcherFlags m_dispatcherFlags;
 
@@ -292,6 +278,7 @@ namespace BulletXNA.BulletCollision
         private INearCallback m_nearCallback;
         private ICollisionConfiguration m_collisionConfiguration;
 
+        private CollisionPairCallback m_collisionCallback = new CollisionPairCallback(null, null);
 
         public static int gNumManifold = 0;
 
@@ -308,6 +295,12 @@ namespace BulletXNA.BulletCollision
     public class CollisionPairCallback : IOverlapCallback
     {
         public CollisionPairCallback(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
+        {
+            m_dispatchInfo = dispatchInfo;
+            m_dispatcher = dispatcher;
+        }
+
+        public void Initialize(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
         {
             m_dispatchInfo = dispatchInfo;
             m_dispatcher = dispatcher;

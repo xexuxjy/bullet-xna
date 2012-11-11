@@ -135,14 +135,14 @@ namespace BulletXNA.BulletCollision
                 MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
-            ManifoldPoint newPt = BulletGlobals.GetManifoldPoint();
+            ManifoldPoint newPt = BulletGlobals.ManifoldPointPool.Get();
             newPt.Initialise(ref localA, ref localB, ref normalOnBInWorld, depth);
             
 
             newPt.SetPositionWorldOnA(ref pointA);
             newPt.SetPositionWorldOnB(ref pointInWorld);
 
-            int insertIndex = m_manifoldPtr.GetCacheEntry(ref newPt);
+            int insertIndex = m_manifoldPtr.GetCacheEntry(newPt);
 
             newPt.SetCombinedFriction(CalculateCombinedFriction(m_body0, m_body1));
             newPt.SetCombinedRestitution(CalculateCombinedRestitution(m_body0, m_body1));
@@ -173,11 +173,11 @@ namespace BulletXNA.BulletCollision
             if (insertIndex >= 0)
             {
                 //const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
-                m_manifoldPtr.ReplaceContactPoint(ref newPt, insertIndex);
+                m_manifoldPtr.ReplaceContactPoint(newPt, insertIndex);
             }
             else
             {
-                insertIndex = m_manifoldPtr.AddManifoldPoint(ref newPt);
+                insertIndex = m_manifoldPtr.AddManifoldPoint(newPt);
             }
 
             
@@ -219,7 +219,7 @@ namespace BulletXNA.BulletCollision
         ///User can override this material combiner by implementing gContactAddedCallback and setting body0->m_collisionFlags |= btCollisionObject::customMaterialCallback;
         private float CalculateCombinedFriction(CollisionObject body0, CollisionObject body1)
         {
-            float friction = body0.GetFriction() * body1.GetFriction();
+            float friction = body0.Friction * body1.Friction;
 
             const float MAX_FRICTION = 10f;
             if (friction < -MAX_FRICTION)
@@ -232,7 +232,7 @@ namespace BulletXNA.BulletCollision
 
         private float CalculateCombinedRestitution(CollisionObject body0, CollisionObject body1)
         {
-            return body0.GetRestitution() * body1.GetRestitution();
+            return body0.Restitution * body1.Restitution;
         }
 
         protected PersistentManifold m_manifoldPtr;

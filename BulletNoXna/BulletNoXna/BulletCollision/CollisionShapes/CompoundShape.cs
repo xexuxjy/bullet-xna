@@ -289,9 +289,9 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public override String GetName()
+        public override string Name
         {
-            return "Compound";
+            get { return "Compound"; }
         }
 
         //this is optional, but should make collision queries faster, by culling non-overlapping nodes

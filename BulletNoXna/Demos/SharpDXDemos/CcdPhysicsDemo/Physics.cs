@@ -131,7 +131,7 @@ namespace CcdPhysicsDemo
                 linVel.Normalize();
                 body.LinearVelocity = linVel * shootBoxInitialSpeed;
                 body.SetAngularVelocity(Vector3.Zero);
-                body.SetContactProcessingThreshold(1e30f);
+                body.ContactProcessingThreshold = 1e30f;
 
                 ///when using m_ccdMode, disable regular CCD
                 if (ccdMode)

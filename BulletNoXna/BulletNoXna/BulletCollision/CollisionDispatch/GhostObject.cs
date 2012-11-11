@@ -51,8 +51,12 @@ namespace BulletXNA.BulletCollision
             /* Compute AABB that encompasses angular movement */
             Vector3 linVel, angVel;
             TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
+
+            // FIXME MAN check this - should be a get/set rotation call, basis copy like this may break with scale?
             Matrix R = Matrix.Identity;
             R._basis = convexFromTrans._basis;
+
+
             castShape.CalculateTemporalAabb(ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
 
             /// go over all objects, and if the ray intersects their aabb + cast shape aabb,
@@ -61,7 +65,7 @@ namespace BulletXNA.BulletCollision
             {
                 CollisionObject collisionObject = m_overlappingObjects[i];
                 //only perform raycast if filterMask matches
-                if (resultCallback.NeedsCollision(collisionObject.GetBroadphaseHandle()))
+                if (resultCallback.NeedsCollision(collisionObject.BroadphaseHandle))
                 {
                     //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
                     Vector3 collisionObjectAabbMin;
@@ -89,6 +93,7 @@ namespace BulletXNA.BulletCollision
 
         public void RayTest(ref Vector3 rayFromWorld, ref Vector3 rayToWorld, RayResultCallback resultCallback)
         {
+            int ibreak = 0;
         }
 
         ///this method is mainly for expert/internal use only.
@@ -162,7 +167,7 @@ namespace BulletXNA.BulletCollision
         ///this method is mainly for expert/internal use only.
         public override void AddOverlappingObjectInternal(BroadphaseProxy otherProxy, BroadphaseProxy thisProxy)
         {
-            BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : GetBroadphaseHandle();
+            BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : BroadphaseHandle;
             Debug.Assert(actualThisProxy != null);
 
             CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
@@ -177,7 +182,7 @@ namespace BulletXNA.BulletCollision
         public override void RemoveOverlappingObjectInternal(BroadphaseProxy otherProxy, IDispatcher dispatcher, BroadphaseProxy thisProxy)
         {
             CollisionObject otherObject = otherProxy.m_clientObject as CollisionObject;
-            BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : GetBroadphaseHandle();
+            BroadphaseProxy actualThisProxy = thisProxy != null ? thisProxy : BroadphaseHandle;
             Debug.Assert(actualThisProxy != null);
 
             Debug.Assert(otherObject != null);

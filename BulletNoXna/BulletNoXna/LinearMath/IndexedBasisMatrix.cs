@@ -304,13 +304,29 @@ namespace BulletXNA.LinearMath
 
         public static Vector3 operator *(IndexedBasisMatrix m, Vector3 v)
         {
-            return new Vector3(m._Row0.Dot(ref v), m._Row1.Dot(ref v), m._Row2.Dot(ref v));
+            return new Vector3(m._Row0.X * v.X + m._Row0.Y * v.Y + m._Row0.Z * v.Z,
+            m._Row1.X * v.X + m._Row1.Y * v.Y + m._Row1.Z * v.Z,
+            m._Row2.X * v.X + m._Row2.Y * v.Y + m._Row2.Z * v.Z);
         }
+
+        public static void Multiply(ref Vector3 vout, ref IndexedBasisMatrix m, ref Vector3 v)
+        {
+            vout = new Vector3(m._Row0.X * v.X + m._Row0.Y * v.Y + m._Row0.Z * v.Z,
+            m._Row1.X * v.X + m._Row1.Y * v.Y + m._Row1.Z * v.Z,
+            m._Row2.X * v.X + m._Row2.Y * v.Y + m._Row2.Z * v.Z);
+        }
+
 
         public static Vector3 operator *(Vector3 v, IndexedBasisMatrix m)
         {
             return new Vector3(m.TDotX(ref v), m.TDotY(ref v), m.TDotZ(ref v));
         }
+
+        public static void Multiply(ref Vector3 vout, ref Vector3 vin, ref IndexedBasisMatrix m)
+        {
+            vout = new Vector3(m.TDotX(ref vin), m.TDotY(ref vin), m.TDotZ(ref vin));
+        }
+
 
         public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, IndexedBasisMatrix m2)
         {
@@ -318,6 +334,20 @@ namespace BulletXNA.LinearMath
                 m2.TDotX(ref m1._Row0), m2.TDotY(ref m1._Row0), m2.TDotZ(ref m1._Row0),
                 m2.TDotX(ref m1._Row1), m2.TDotY(ref m1._Row1), m2.TDotZ(ref m1._Row1),
                 m2.TDotX(ref m1._Row2), m2.TDotY(ref m1._Row2), m2.TDotZ(ref m1._Row2));
+        }
+
+
+        public static IndexedBasisMatrix operator *(IndexedBasisMatrix m1, float s)
+        {
+            return new IndexedBasisMatrix(m1._Row0 * s, m1._Row1 * s, m1._Row2 * s);
+        }
+
+        public static IndexedBasisMatrix CreateScale(Vector3 scale)
+        {
+            return new IndexedBasisMatrix(new Vector3(scale.X, 0, 0),
+            new Vector3(0, scale.Y, 0),
+            new Vector3(0, 0, scale.Z));
+
         }
 
 
@@ -578,26 +608,69 @@ namespace BulletXNA.LinearMath
         }
 
 
-        public void SetNewForward(Vector3 forward)
-        {
-            forward.Normalize();
-            // Re-calculate Right
-            Vector3 right = Vector3.Cross(forward, this[0]);
+        //public void SetNewForward(IndexedVector3 forward)
+        //{
+        //    forward.Normalize();
+        //    // Re-calculate Right
+        //    IndexedVector3 right = Vector3.Cross(forward, this[0]);
 
-            // The same instability may cause the 3 orientation vectors may
-            // also diverge. Either the Up or Direction vector needs to be
-            // re-computed with a cross product to ensure orthagonality
-            Vector3 up = Vector3.Cross(right, forward);
-            this[0] = right;
-            this[1] = up;
-            this[2] = forward;
+        //    // The same instability may cause the 3 orientation vectors may
+        //    // also diverge. Either the Up or Direction vector needs to be
+        //    // re-computed with a cross product to ensure orthagonality
+        //    IndexedVector3 up = Vector3.Cross(right, forward);
+        //    this[0] = right;
+        //    this[1] = up;
+        //    this[2] = forward;
+        //   }
+
+        public static IndexedBasisMatrix CreateRotationX(float radians)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            IndexedBasisMatrix _basis;
+            _basis._Row0 = new Vector3(1, 0, 0);
+            _basis._Row1 = new Vector3(0, num1, num2);
+            _basis._Row2 = new Vector3(0, -num2, num1);
+            return _basis;
         }
+
+        public static void CreateRotationX(float radians, out IndexedBasisMatrix _basis)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            _basis._Row0 = new Vector3(1, 0, 0);
+            _basis._Row1 = new Vector3(0, num1, num2);
+            _basis._Row2 = new Vector3(0, -num2, num1);
+        }
+
+        public static IndexedBasisMatrix CreateRotationZ(float radians)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            IndexedBasisMatrix _basis;
+            _basis._Row0 = new Vector3(num1, num2, 0);
+            _basis._Row1 = new Vector3(-num2, num1, 0);
+            _basis._Row2 = new Vector3(0, 0, 1);
+            return _basis;
+        }
+
+        public static void CreateRotationZ(float radians, out IndexedBasisMatrix _basis)
+        {
+            float num1 = (float)Math.Cos((double)radians);
+            float num2 = (float)Math.Sin((double)radians);
+            _basis._Row0 = new Vector3(num1, num2, 0);
+            _basis._Row1 = new Vector3(-num2, num1, 0);
+            _basis._Row2 = new Vector3(0, 0, 1);
+        }
+
+
+
 
         public static IndexedBasisMatrix CreateRotationY(float radians)
         {
             float num1 = (float)Math.Cos((double)radians);
             float num2 = (float)Math.Sin((double)radians);
-            IndexedBasisMatrix ibm = new IndexedBasisMatrix(num1, 0.0f, -num2, 0.0f, 1f, 0.0f, num2, 0.0f, num1);
+            IndexedBasisMatrix ibm = new IndexedBasisMatrix(num1,0.0f, -num2,0.0f,1f,0.0f,num2,0.0f,num1);
             return ibm;
         }
 
@@ -660,6 +733,34 @@ namespace BulletXNA.LinearMath
         {
             get { return this[2]; }
             set { this[2] = value; }
+        }
+
+        public void GetOpenGLMatrix(out Vector3 v1, out Vector3 v2, out Vector3 v3)
+        {
+		    v1.X  = _Row0.X; 
+		    v1.Y  = _Row1.X;
+		    v1.Z  = _Row2.X;
+		    //m[3]  = btScalar(0.0); 
+		    v2.X  = _Row0.Y;
+		    v2.Y  = _Row1.Y;
+		    v2.Z  = _Row2.Y;
+		    //m[7]  = btScalar(0.0); 
+		    v3.X  = _Row0.Z; 
+		    v3.Y  = _Row1.Z;
+		    v3.Z = _Row2.Z;
+		    //m[11] = btScalar(0.0); 
+
+        }
+        public void SetOpenGLMatrix(Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            SetOpenGLMatrix(ref v1, ref v2, ref v3);
+        }
+
+        public void SetOpenGLMatrix(ref Vector3 v1, ref Vector3 v2, ref Vector3 v3)
+        {
+            _Row0 = new Vector3(v1.X, v2.X, v3.X);
+            _Row1 = new Vector3(v1.Y, v2.Y, v3.Y);
+            _Row2 = new Vector3(v1.Z, v2.Z, v3.Z);
         }
 
 

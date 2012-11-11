@@ -27,6 +27,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -90,7 +91,7 @@ namespace BulletXNA.BulletCollision
                         {
                             m_cachedP1 = m_simplexPointsP[0];
                             m_cachedP2 = m_simplexPointsQ[0];
-                            m_cachedV = m_cachedP1 - m_cachedP2; //== m_simplexVectorW[0]
+                            Vector3.Subtract(out m_cachedV,ref m_cachedP1 ,ref m_cachedP2); //== m_simplexVectorW[0]
                             m_cachedBC.Reset();
                             m_cachedBC.SetBarycentricCoordinates(1, 0, 0, 0);
                             m_cachedValidClosest = m_cachedBC.IsValid();
@@ -104,13 +105,13 @@ namespace BulletXNA.BulletCollision
                             Vector3 nearest;
 
                             Vector3 p = Vector3.Zero;
-                            Vector3 diff = p - from;
-                            Vector3 v = to - from;
-                            float t = Vector3.Dot(v, diff);
+                            Vector3 diff = Vector3.Subtract(ref p, ref from);
+                            Vector3 v = Vector3.Subtract(ref to, ref from); 
+                            float t = Vector3.Dot(ref v, ref diff);
 
                             if (t > 0)
                             {
-                                float dotVV = Vector3.Dot(v, v);
+                                float dotVV = Vector3.Dot(ref v, ref v);
                                 if (t < dotVV)
                                 {
                                     t /= dotVV;
@@ -257,7 +258,6 @@ namespace BulletXNA.BulletCollision
 
         public bool ClosestPtPointTetrahedron(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, ref SubSimplexClosestResult finalResult)
         {
-            SubSimplexClosestResult tempResult = new SubSimplexClosestResult();
 
             // Start ref assuming point inside all halfspaces, so closest to itself
             finalResult.m_closestPointOnSimplex = p;
@@ -279,6 +279,8 @@ namespace BulletXNA.BulletCollision
                 return false;
             }
 
+            SubSimplexClosestResult tempResult = BulletGlobals.SubSimplexClosestResultPool.Get();
+            tempResult.Reset();
 
             float bestSqDist = float.MaxValue;
             // If point outside face abc then compute closest point on abc
@@ -387,6 +389,8 @@ namespace BulletXNA.BulletCollision
 
             }
 
+            BulletGlobals.SubSimplexClosestResultPool.Free(tempResult);
+
             //help! we ended up full !
 
             if (finalResult.m_usedVertices.Get(0) &&
@@ -403,10 +407,18 @@ namespace BulletXNA.BulletCollision
 
         public int PointOutsideOfPlane(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d)
         {
-            Vector3 normal = Vector3.Cross((b - a), (c - a));
+            Vector3 ba, ca, normal, pa, da;
+            Vector3.Subtract(out ba, ref b, ref a);
+            Vector3.Subtract(out ca, ref c, ref a);
+            Vector3.Cross(out normal, ref ba, ref ca);
 
-            float signp = Vector3.Dot((p - a), normal); // [AP AB AC]
-            float signd = Vector3.Dot((d - a), normal); // [AD AB AC]
+            Vector3.Subtract(out pa, ref p, ref a);
+            Vector3.Subtract(out da, ref d, ref a);
+
+            float signp, signd;
+            Vector3.Dot(ref pa, ref normal, out signp);// [AP AB AC]
+            Vector3.Dot(ref da, ref normal, out signd);// [AD AB AC]
+            
 
 #if CATCH_DEGENERATE_TETRAHEDRON
             if (signd * signd < (1e-4f * 1e-4f))
@@ -424,11 +436,14 @@ namespace BulletXNA.BulletCollision
             result.m_usedVertices.SetAll(false);
 
             // Check if P in vertex region outside A
-            Vector3 ab = b - a;
-            Vector3 ac = c - a;
-            Vector3 ap = p - a;
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
+            Vector3 ab, ac, ap;
+            Vector3.Subtract(out ab, ref b, ref a);
+            Vector3.Subtract(out ac, ref c, ref a);
+            Vector3.Subtract(out ap, ref p, ref a);
+            
+            float d1,d2;
+            Vector3.Dot(ref ab, ref ap, out d1);
+            Vector3.Dot(ref ac, ref ap, out d2);
             if (d1 <= 0f && d2 <= 0f)
             {
                 result.m_closestPointOnSimplex = a;
@@ -438,9 +453,11 @@ namespace BulletXNA.BulletCollision
             }
 
             // Check if P in vertex region outside B
-            Vector3 bp = p - b;
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
+            Vector3 bp;
+            Vector3.Subtract(out bp, ref p, ref b);
+            float d3,d4;
+            Vector3.Dot(ref ab, ref bp, out d3);
+            Vector3.Dot(ref ac, ref bp, out d4);
             if (d3 >= 0f && d4 <= d3)
             {
                 result.m_closestPointOnSimplex = b;
@@ -463,9 +480,12 @@ namespace BulletXNA.BulletCollision
             }
 
             // Check if P in vertex region outside C
-            Vector3 cp = p - c;
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
+            Vector3 cp;
+            Vector3.Subtract(out cp, ref p, ref c);
+            float d5, d6;
+            Vector3.Dot(ref ab, ref cp, out d5);
+            Vector3.Dot(ref ac, ref cp, out d6);
+
             if (d6 >= 0f && d5 <= d6)
             {
                 result.m_closestPointOnSimplex = c;

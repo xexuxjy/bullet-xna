@@ -196,9 +196,9 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public override String GetName()
+        public override string Name
 	    {
-		    return "CapsuleShape";
+		    get { return "CapsuleShape"; }
 	    }
 
 	    public int GetUpAxis()
@@ -234,9 +234,9 @@ namespace BulletXNA.BulletCollision
         }
     		
 	    //debugging
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "CapsuleX";
+		    get { return "CapsuleX"; }
         }
     }
 
@@ -250,9 +250,9 @@ namespace BulletXNA.BulletCollision
             m_implicitShapeDimensions= new Vector3(radius, radius, 0.5f * height);
         }
         //debugging
-	    public override String GetName()
+	    public override string Name
 	    {
-		    return "CapsuleZ";
+		    get { return "CapsuleZ"; }
 	    }
     }
 

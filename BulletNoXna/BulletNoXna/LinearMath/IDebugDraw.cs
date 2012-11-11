@@ -91,6 +91,8 @@ namespace BulletXNA.LinearMath
         EnableCCD = 1024,
         DrawConstraints = (1 << 11),
         DrawConstraintLimits = (1 << 12),
+        DrawFastWireframe = (1 << 13),
+        DrawNormals = (1 << 14),
         All = DrawWireframe | DrawAabb | DrawFeaturesText | DrawContactPoints | DrawText | DrawConstraints | DrawConstraintLimits,
         MaxDebugDrawMode
     }

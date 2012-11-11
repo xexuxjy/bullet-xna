@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
@@ -128,17 +129,20 @@ namespace BulletXNA.LinearMath
             Resize(newsize, true);
         }
 
-        public void	Resize(int newsize,bool allocate)
+        public void	Resize(int newsize,bool allocateOrReset)
 		{
 			int curSize = Count;
 
 			if (newsize < curSize)
 			{
-                if (allocate)
+                if (allocateOrReset)
                 {
                     for (int i = newsize; i < curSize; i++)
                     {
-                        this._items[i] = new T();
+                        if (this._items[i] == null)
+                        {
+                            this._items[i] = new T();
+                        }
                     }
                 }
                 else
@@ -148,23 +152,29 @@ namespace BulletXNA.LinearMath
                         this._items[i] = default(T);
                     }
                 }
-			} else
+			} 
+            else
 			{
 				if (newsize > Count)
 				{
-					Capacity = newsize;
+					EnsureCapacity(newsize);
 				}
-                if(allocate)
+                if (allocateOrReset)
                 {
 				    for (int i=curSize;i<newsize;i++)
 				    {
-					    this._items[i] = new T();
+                        if (this._items[i] == null)
+                        {
+                            this._items[i] = new T();
+                        }
 				    }
                 }
 
 			}
 
             this._size = newsize;
+            this._version++;
+
 		}
 	
 
@@ -201,6 +211,21 @@ namespace BulletXNA.LinearMath
 			}
 			this._version++;
 		}
+
+        // removes the last numElements from the array (
+        public void Truncate(int numElements)
+        {
+            if (this._size > 0 && numElements <= this._size)
+            {
+                int newLength = this._size - numElements;
+                Array.Clear(this._items, newLength, numElements);
+                this._size = newLength;
+            }
+            this._version++;
+
+
+        }
+
 
 		public bool Contains(T item)
 		{
@@ -260,7 +285,7 @@ namespace BulletXNA.LinearMath
 			Array.Copy(this._items, index, array, arrayIndex, count);
 		}
 
-		private void EnsureCapacity(int min)
+		public void EnsureCapacity(int min)
 		{
 			if (this._items.Length < min)
 			{
@@ -574,9 +599,9 @@ namespace BulletXNA.LinearMath
         // Remove the item if it exits, order of the data isn't preserved and last item is copied into it's place.
         public bool RemoveQuick(T item)
         {
-            int index = this.IndexOf(item);
-            if (index >= 0)
-            {
+			int index = this.IndexOf(item);
+			if (index >= 0)
+			{
                 if (_size > 0)
                 {
                     // copy the last item to this position
@@ -585,10 +610,10 @@ namespace BulletXNA.LinearMath
                 --_size;
                 return true;
             }
-            return false;
-        }
+			return false;
+		}
 
-        public bool RemoveAtQuick(int index)
+        public bool RemoveAtQuick(int  index)
         {
             if (index >= 0)
             {
@@ -596,6 +621,7 @@ namespace BulletXNA.LinearMath
                 {
                     // copy the last item to this position
                     this._items[index] = this._items[_size - 1];
+                    this._items[_size - 1] = default(T);
                 }
                 --_size;
                 return true;
@@ -684,6 +710,14 @@ namespace BulletXNA.LinearMath
 				this._version++;
 			}
 		}
+
+
+        public void	PopBack()
+		{
+			Debug.Assert(Count>0);
+            RemoveAtQuick(Count - 1);
+		}
+
 
 		public void Reverse()
 		{
@@ -886,12 +920,12 @@ namespace BulletXNA.LinearMath
 		{
 			get
 			{
-                //checkAndGrow(index);
-                int diff = index + 1 - _size;
-                for (int i = 0; i < diff; ++i)
-                {
-                    Add(new T());
-                }
+                CheckAndGrow(index);
+                //int diff = index + 1 - _size;
+                //for (int i = 0; i < diff; ++i)
+                //{
+                //    Add(new T());
+                //}
 
 				if (index >= this._size)
 				{
@@ -901,13 +935,13 @@ namespace BulletXNA.LinearMath
 			}
 			set
 			{
-                int diff = index + 1 - _size;
-                for (int i = 0; i < diff; ++i)
-                {
-                    Add(new T());
-                }
+                CheckAndGrow(index);
+                //int diff = index + 1 - _size;
+                //for (int i = 0; i < diff; ++i)
+                //{
+                //    Add(new T());
+                //}
 
-                //checkAndGrow(index);
 				if (index >= this._size)
 				{
 					throw new Exception("ThrowHelper.ThrowArgumentOutOfRangeException()");
@@ -966,36 +1000,49 @@ namespace BulletXNA.LinearMath
 		{
 			get
 			{
-                //checkAndGrow(index);
-                int diff = index + 1 - _size;
-                for (int i = 0; i < diff; ++i)
-                {
-                    Add(new T());
-                }
+                CheckAndGrow(index);
+                //int diff = index + 1 - _size;
+                //for (int i = 0; i < diff; ++i)
+                //{
+                //    Add(new T());
+                //}
 
 				return this[index];
 			}
 			set
 			{
-                //checkAndGrow(index);
-                int diff = index + 1 - _size;
-                for (int i = 0; i < diff; ++i)
-                {
-                    Add(new T());
-                }
+                CheckAndGrow(index);
+                //int diff = index + 1 - _size;
+                //for (int i = 0; i < diff; ++i)
+                //{
+                //    Add(new T());
+                //}
 
 				ObjectArray<T>.VerifyValueType(value);
 				this[index] = (T)value;
 			}
 		}
 
-		private void checkAndGrow(int newSize)
+		private void CheckAndGrow(int newSize)
 		{
-			int diff = newSize+1 - _size;
+            // make space if needed...
+            if (newSize >= this._items.Length)
+            {
+                this.EnsureCapacity(newSize+1);
+            }
+
+            // only create if we have to??
+            int diff = newSize+1 - _size;
 			for(int i=0;i<diff;++i)
 			{
-				Add(new T());
+                if (this._items[this._size] == null)
+                {
+                    this._items[this._size] = new T();
+                }
+                this._size++;
 			}
+            this._version++;
+
 		}
 
 		// Nested Types
@@ -1090,10 +1137,58 @@ namespace BulletXNA.LinearMath
 		}
 
 
+		public void QuickSort(IQSComparer<T> comparer)
+		{
+			//don't sort 0 or 1 elements
+			if (Count > 1)
+			{
+				QuickSortInternal(comparer,0,Count-1);
+			}
+		}
 
-	}
+		
+		void QuickSortInternal(IQSComparer<T> comparer ,int lo, int hi)
+		{
+		//  lo is the lower index, hi is the upper index
+		//  of the region of array a that is to be sorted
+			int i=lo, j=hi;
+			T x=this._items[(lo+hi)/2];
+
+			//  partition
+			do
+			{    
+				while (comparer.Compare(this._items[i],x)) 
+					i++; 
+				while (comparer.Compare(x,this._items[j])) 
+					j--;
+				if (i<=j)
+				{
+                    Swap(i, j);
+					i++; j--;
+				}
+			} while (i<=j);
+
+			//  recursion
+			if (lo<j) 
+				QuickSortInternal( comparer, lo, j);
+			if (i<hi) 
+				QuickSortInternal( comparer, i, hi);
+		}
+
+
+        //private void checkAndGrow(int newSize)
+        //{
+        //    int diff = newSize + 1 - _size;
+        //    for (int i = 0; i < diff; ++i)
+        //    {
+        //        Add(new T());
+        //    }
+        //}
+
+    }
+
+    public interface IQSComparer<T>
+    {
+        bool Compare(T lhs, T rhs);
+    }
 }
-
- 
- 
- 

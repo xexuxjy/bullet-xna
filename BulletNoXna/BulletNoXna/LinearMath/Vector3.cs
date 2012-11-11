@@ -148,6 +148,13 @@ namespace BulletXNA.LinearMath
                 v.X * v2.Y - v.Y * v2.X);
         }
 
+        public static void Cross(out Vector3 r, ref Vector3 v, ref Vector3 v2)
+        {
+            r = new Vector3(
+                v.Y * v2.Z - v.Z * v2.Y,
+                v.Z * v2.X - v.X * v2.Z,
+                v.X * v2.Y - v.Y * v2.X);
+        }
 
 
 
@@ -200,11 +207,16 @@ namespace BulletXNA.LinearMath
             output.Z = value1.Z * value2.Z;
         }
 
-        public static void Subtract(ref Vector3 output, ref Vector3 value1, ref Vector3 value2)
+        public static void Subtract(out Vector3 output, ref Vector3 value1, ref Vector3 value2)
         {
             output.X = value1.X - value2.X;
             output.Y = value1.Y - value2.Y;
             output.Z = value1.Z - value2.Z;
+        }
+
+        public static Vector3 Subtract(ref Vector3 value1, ref Vector3 value2)
+        {
+            return new Vector3(value1.X - value2.X, value1.Y - value2.Y, value1.Z - value2.Z);
         }
 
         public static Vector3 operator /(Vector3 value, float scaleFactor)

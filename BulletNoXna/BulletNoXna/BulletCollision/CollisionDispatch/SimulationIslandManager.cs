@@ -196,7 +196,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         }
 
 #endif
-        static Comparison<PersistentManifold> sortPredicate = new Comparison<PersistentManifold>(PersistentManifoldSortPredicate);
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
             ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
@@ -224,26 +223,8 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 int numManifolds = m_islandmanifold.Count;
 
                 //we should do radix sort, it it much faster (O(n) instead of O (n log2(n))
-                //m_islandmanifold.quickSort(btPersistentManifoldSortPredicate());
-                //((ObjectArray<PersistentManifold>)m_islandmanifold).Sort();
 
-                //ObjectArray<PersistentManifold> copy = new ObjectArray<PersistentManifold>(m_islandmanifold);
-                m_islandmanifold.Sort(sortPredicate);
-
-                //for (int i = 0; i < m_islandmanifold.Count; ++i)
-                //{
-                //    if (copy[i] != m_islandmanifold[i])
-                //    {
-
-                //        int island0 = ((CollisionObject)m_islandmanifold[i].GetBody0()).GetIslandTag();
-                //        int island1 = ((CollisionObject)m_islandmanifold[i].GetBody1()).GetIslandTag();
-
-                //        int islandc0 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
-                //        int islandc1 = ((CollisionObject)copy[i].GetBody0()).GetIslandTag();
-
-                //        int ibreak = 0;
-                //    }
-                //}
+                m_islandmanifold.QuickSort(m_sortPredicate);
 
                 //now process all active islands (sets of manifolds for now)
 
@@ -260,14 +241,14 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     }
 
 
-                    bool islandSleeping = false;
+                    bool islandSleeping = true;
 
                     for (endIslandIndex = startIslandIndex; (endIslandIndex < numElem) && (GetUnionFind().GetElement(endIslandIndex).m_id == islandId); endIslandIndex++)
                     {
                         int i = GetUnionFind().GetElement(endIslandIndex).m_sz;
                         CollisionObject colObj0 = collisionObjects[i];
                         m_islandBodies.Add(colObj0);
-                        if (colObj0.IsActive())
+                        if (colObj0.IsActive)
                         {
                             islandSleeping = false;
                         }
@@ -315,8 +296,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                             m_subList.Add(m_islandmanifold[startManifoldIndex + i]);
                         }
 
-
-
                         callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_subList, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
                     }
@@ -326,7 +305,6 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("islandSleeping.");
                         }
-
                     }
 
                     if (numIslandManifolds != 0)
@@ -469,11 +447,17 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     //kinematic objects don't merge islands, but wake up all connected objects
                     if (colObj0.IsKinematicObject && colObj0.ActivationState != ActivationState.IslandSleeping)
                     {
-                        colObj1.Activate();
+                        if (colObj0.HasContactResponse)
+                        {
+                            colObj1.Activate();
+                        }
                     }
                     if (colObj1.IsKinematicObject && colObj1.ActivationState != ActivationState.IslandSleeping)
                     {
-                        colObj0.Activate();
+                        if (colObj1.HasContactResponse)
+                        {
+                            colObj0.Activate();
+                        }
                     }
                     if (m_splitIslands)
                     {
@@ -511,21 +495,21 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         }
 
 
-        private static int PersistentManifoldSortPredicate(PersistentManifold lhs, PersistentManifold rhs)
+        public class PersistentManifoldSortPredicate : IQSComparer<PersistentManifold>
         {
-            int rIslandIdA, lIslandIdB;
-            rIslandIdA = GetIslandId(rhs);
-            lIslandIdB = GetIslandId(lhs);
-            //return lIslandId0 < rIslandId0;
-            if (lIslandIdB < rIslandIdA)
-                return -1;
-            //else if (lIslandIdB > rIslandIdA)
-            //    return 1;
-            return 1;
+
+            public bool Compare(PersistentManifold lhs, PersistentManifold rhs)
+            {
+                return GetIslandId(lhs) < GetIslandId(rhs);
+            }
         }
+
+        private PersistentManifoldSortPredicate m_sortPredicate = new PersistentManifoldSortPredicate();
 
 
     }
+
+
 
     public interface IIslandCallback
     {

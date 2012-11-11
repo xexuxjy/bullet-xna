@@ -37,6 +37,8 @@ namespace BulletXNA.BulletCollision
 		public Box2dBox2dCollisionAlgorithm(PersistentManifold mf,CollisionAlgorithmConstructionInfo ci,CollisionObject body0,CollisionObject body1) :
 			base(ci,body0,body1)
 		{
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
 			if (m_manifoldPtr == null && m_dispatcher.NeedsCollision(body0, body1))
 			{
 				m_manifoldPtr = m_dispatcher.GetNewManifold(body0, body1);

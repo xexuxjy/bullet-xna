@@ -33,7 +33,7 @@ namespace BulletXNA.BulletCollision
 	    {
             return GetHalfExtentsWithoutMargin() + new Vector3(Margin);
 		    //Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-		    //Vector3 margin = new Vector3(GetMargin());
+		    //Vector3 margin = new Vector3(Margin);
 		    //halfExtents += margin;
 		    //return halfExtents;
 	    }
@@ -299,10 +299,10 @@ namespace BulletXNA.BulletCollision
 
 
 	    //debugging
-	    public override String GetName()
-	    {
-		    return "Box";
-	    }
+		public override string Name
+		{
+			get { return "Box"; }
+		}
 
 	    public override int GetNumPreferredPenetrationDirections()
 	    {

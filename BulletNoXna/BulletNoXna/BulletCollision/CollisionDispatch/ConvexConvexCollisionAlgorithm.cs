@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -26,6 +26,7 @@
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
     public class ConvexConvexAlgorithm : ActivatingCollisionAlgorithm
@@ -48,6 +49,10 @@ namespace BulletXNA.BulletCollision
         ///cache separating vector to speedup collision detection
 
         bool disableCcd = false;
+        ObjectArray<Vector3> m_vertices = new ObjectArray<Vector3>();
+
+
+        public ConvexConvexAlgorithm() { } // for pool
 
         public ConvexConvexAlgorithm(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
             : base(ci, body0, body1)
@@ -65,6 +70,23 @@ namespace BulletXNA.BulletCollision
             m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
         }
 
+        public void Initialize(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+        {
+            base.Initialize(ci, body0, body1);
+            m_simplexSolver = simplexSolver;
+            m_pdSolver = pdSolver;
+            m_ownManifold = false;
+            m_manifoldPtr = mf;
+            m_lowLevelOfDetail = false;
+#if USE_SEPDISTANCE_UTIL2
+            m_sepDistance ((static_cast<btConvexShape*>(body0.CollisionShape)).getAngularMotionDisc(),
+			  (static_cast<btConvexShape*>(body1.CollisionShape)).getAngularMotionDisc()),
+#endif
+            m_numPerturbationIterations = numPerturbationIterations;
+            m_minimumPointsPerturbationThreshold = minimumPointsPerturbationThreshold;
+
+        }
+
         public override void Cleanup()
         {
             if (m_ownManifold)
@@ -76,6 +98,7 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = false;
             }
             m_manifoldPtr = null;
+            BulletGlobals.ConvexConvexAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -95,7 +118,7 @@ namespace BulletXNA.BulletCollision
 
             ConvexShape min0 = body0.CollisionShape as ConvexShape;
             ConvexShape min1 = body1.CollisionShape as ConvexShape;
-            Vector3 normalOnB = new Vector3(0,1,0);
+            Vector3 normalOnB = new Vector3(0, 1, 0);
             Vector3 pointOnBWorld = Vector3.Zero;
 #if !BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
             if ((min0.ShapeType == BroadphaseNativeType.CapsuleShape) && (min1.ShapeType == BroadphaseNativeType.CapsuleShape))
@@ -135,12 +158,14 @@ namespace BulletXNA.BulletCollision
             {
 
 
-                ClosestPointInput input = new ClosestPointInput();
+                ClosestPointInput input = ClosestPointInput.Default();
 
-                GjkPairDetector gjkPairDetector = new GjkPairDetector(min0, min1, m_simplexSolver, m_pdSolver);
-                //TODO: if (dispatchInfo.m_useContinuous)
-                gjkPairDetector.SetMinkowskiA(min0);
-                gjkPairDetector.SetMinkowskiB(min1);
+                using (GjkPairDetector gjkPairDetector = BulletGlobals.GjkPairDetectorPool.Get())
+                {
+                    gjkPairDetector.Initialize(min0, min1, m_simplexSolver, m_pdSolver);
+                    //TODO: if (dispatchInfo.m_useContinuous)
+                    gjkPairDetector.SetMinkowskiA(min0);
+                    gjkPairDetector.SetMinkowskiB(min1);
 
 #if USE_SEPDISTANCE_UTIL2
 	        if (dispatchInfo.m_useConvexConservativeDistanceUtil)
@@ -149,151 +174,153 @@ namespace BulletXNA.BulletCollision
 	        } 
             else
 #endif //USE_SEPDISTANCE_UTIL2
-                {
-                    input.m_maximumDistanceSquared = min0.Margin + min1.Margin + m_manifoldPtr.GetContactBreakingThreshold();
-                    input.m_maximumDistanceSquared *= input.m_maximumDistanceSquared;
-                }
+                    {
+                        input.m_maximumDistanceSquared = min0.Margin + min1.Margin + m_manifoldPtr.GetContactBreakingThreshold();
+                        input.m_maximumDistanceSquared *= input.m_maximumDistanceSquared;
+                    }
 
-                //input.m_stackAlloc = dispatchInfo.m_stackAllocator;
-                input.m_transformA = body0.GetWorldTransform();
-                input.m_transformB = body1.GetWorldTransform();
-
-
-if (min0.IsPolyhedral() && min1.IsPolyhedral())
-	{
+                    //input.m_stackAlloc = dispatchInfo.m_stackAllocator;
+                    input.m_transformA = body0.GetWorldTransform();
+                    input.m_transformB = body1.GetWorldTransform();
 
 
-		DummyResult dummy = new DummyResult();
+                    if (min0.IsPolyhedral && min1.IsPolyhedral)
+                    {
 
 
-		PolyhedralConvexShape polyhedronA = min0 as PolyhedralConvexShape;
-		PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
-		if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
-		{
-			float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+                        DummyResult dummy = new DummyResult();
 
-            float minDist = float.MinValue;
-			Vector3 sepNormalWorldSpace = new Vector3(0,1,0);
-			bool foundSepAxis  = true;
 
-			if (dispatchInfo.m_enableSatConvex)
-			{
-				foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
-					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
-					body0.GetWorldTransform(), 
-					body1.GetWorldTransform(),
-					out sepNormalWorldSpace);
-			} else
-			{
+                        PolyhedralConvexShape polyhedronA = min0 as PolyhedralConvexShape;
+                        PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
+                        if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
+                        {
+                            float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+
+                            float minDist = float.MinValue;
+                            Vector3 sepNormalWorldSpace = new Vector3(0, 1, 0);
+                            bool foundSepAxis = true;
+
+                            if (dispatchInfo.m_enableSatConvex)
+                            {
+                                foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+                                    polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                    body0.GetWorldTransform(),
+                                    body1.GetWorldTransform(),
+                                    out sepNormalWorldSpace);
+                            }
+                            else
+                            {
 
 #if ZERO_MARGIN
                 gjkPairDetector.SetIgnoreMargin(true);
                 gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
 #else
 
-                gjkPairDetector.GetClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
+                                gjkPairDetector.GetClosestPoints(ref input, dummy, dispatchInfo.m_debugDraw);
 #endif
 
-				float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
-				if (l2>MathUtil.SIMD_EPSILON)
-				{
-					sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
-					//minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();
-					minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.Margin-min1.Margin;
-	
+                                float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+                                if (l2 > MathUtil.SIMD_EPSILON)
+                                {
+                                    sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis() * (1.0f / l2);
+                                    //minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();
+                                    minDist = gjkPairDetector.GetCachedSeparatingDistance() - min0.Margin - min1.Margin;
+
 #if ZERO_MARGIN
 					foundSepAxis = true;//gjkPairDetector.getCachedSeparatingDistance()<0.f;
 #else
-					foundSepAxis = gjkPairDetector.GetCachedSeparatingDistance()<(min0.Margin+min1.Margin);
+                                    foundSepAxis = gjkPairDetector.GetCachedSeparatingDistance() < (min0.Margin + min1.Margin);
 #endif
-                }
-			}
-			if (foundSepAxis)
-			{
-//				printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+                                }
+                            }
+                            if (foundSepAxis)
+                            {
+                                //				printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
 
-				PolyhedralContactClipping.ClipHullAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
-					body0.GetWorldTransform(), 
-					body1.GetWorldTransform(), minDist-threshold, threshold, resultOut);
- 				
-			}
-			if (m_ownManifold)
-			{
-				resultOut.RefreshContactPoints();
-			}
-			return;
+                                PolyhedralContactClipping.ClipHullAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                    body0.GetWorldTransform(),
+                                    body1.GetWorldTransform(), minDist - threshold, threshold, resultOut);
 
-		} 
-        else
-		{
+                            }
+                            if (m_ownManifold)
+                            {
+                                resultOut.RefreshContactPoints();
+                            }
 
-			//we can also deal with convex versus triangle (without connectivity data)
-			if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.ShapeType==BroadphaseNativeType.TriangleShape)
-			{
-                ObjectArray<Vector3> vertices = new ObjectArray<Vector3>();
-                TriangleShape tri = polyhedronB as TriangleShape;
-                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
-                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
-                vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
-                
-                float threshold = m_manifoldPtr.GetContactBreakingThreshold();
-                Vector3 sepNormalWorldSpace = new Vector3(0, 1, 0); ;
-				float minDist = float.MinValue;
-				float maxDist = threshold;
-				
-				bool foundSepAxis = false;
-				if (false)
-				{
-					polyhedronB.InitializePolyhedralFeatures();
-                    foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
-					polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
-					body0.GetWorldTransform(), 
-					body1.GetWorldTransform(),
-					out sepNormalWorldSpace);
-				//	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+                            return;
 
-				} else
-				{
+                        }
+                        else
+                        {
+
+                            //we can also deal with convex versus triangle (without connectivity data)
+                            if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.ShapeType == BroadphaseNativeType.TriangleShape)
+                            {
+                                m_vertices.Clear();
+                                TriangleShape tri = polyhedronB as TriangleShape;
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[0]);
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[1]);
+                                m_vertices.Add(body1.GetWorldTransform() * tri.m_vertices1[2]);
+
+                                float threshold = m_manifoldPtr.GetContactBreakingThreshold();
+                                Vector3 sepNormalWorldSpace = new Vector3(0, 1, 0); ;
+                                float minDist = float.MinValue;
+                                float maxDist = threshold;
+
+                                bool foundSepAxis = false;
+                                if (false)
+                                {
+                                    polyhedronB.InitializePolyhedralFeatures();
+                                    foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
+                                    polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                    body0.GetWorldTransform(),
+                                    body1.GetWorldTransform(),
+                                    out sepNormalWorldSpace);
+                                    //	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+
+                                }
+                                else
+                                {
 #if ZERO_MARGIN
 					gjkPairDetector.SetIgnoreMargin(true);
 					gjkPairDetector.GetClosestPoints(input,resultOut,dispatchInfo.m_debugDraw);
 #else
-					gjkPairDetector.GetClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+                                    gjkPairDetector.GetClosestPoints(ref input, dummy, dispatchInfo.m_debugDraw);
 #endif//ZERO_MARGIN
-					
-					float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
-					if (l2>MathUtil.SIMD_EPSILON)
-					{
-						sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis()*(1.0f/l2);
-						//minDist = gjkPairDetector.getCachedSeparatingDistance();
-						//maxDist = threshold;
-						minDist = gjkPairDetector.GetCachedSeparatingDistance()-min0.Margin-min1.Margin;
-						foundSepAxis = true;
-					}
-				}
 
-				
-			if (foundSepAxis)
-			{
-				PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), 
-					body0.GetWorldTransform(), vertices, minDist-threshold, maxDist, resultOut);
-			}
-								
-				if (m_ownManifold)
-				{
-					resultOut.RefreshContactPoints();
-				}
-				
-				return;
-			}
-			
-		}
+                                    float l2 = gjkPairDetector.GetCachedSeparatingAxis().LengthSquared();
+                                    if (l2 > MathUtil.SIMD_EPSILON)
+                                    {
+                                        sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis() * (1.0f / l2);
+                                        //minDist = gjkPairDetector.getCachedSeparatingDistance();
+                                        //maxDist = threshold;
+                                        minDist = gjkPairDetector.GetCachedSeparatingDistance() - min0.Margin - min1.Margin;
+                                        foundSepAxis = true;
+                                    }
+                                }
 
 
-	}
+                                if (foundSepAxis)
+                                {
+                                    PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(),
+                                        body0.GetWorldTransform(), m_vertices, minDist - threshold, maxDist, resultOut);
+                                }
+
+                                if (m_ownManifold)
+                                {
+                                    resultOut.RefreshContactPoints();
+                                }
+                                return;
+                            }
+
+                        }
 
 
-                gjkPairDetector.GetClosestPoints(input, resultOut, dispatchInfo.getDebugDraw(), false);
+                    }
+
+
+                    gjkPairDetector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), false);
 #if USE_SEPDISTANCE_UTIL2
 	float sepDist = 0.f;
 	if (dispatchInfo.m_useConvexConservativeDistanceUtil)
@@ -307,82 +334,83 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 	}
 #endif //USE_SEPDISTANCE_UTIL2
 
-                //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
+                    //now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
 
-                //perform perturbation when more then 'm_minimumPointsPerturbationThreshold' points
-                if (m_numPerturbationIterations > 0 && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
-                {
-                    Vector3 v0, v1;
+                    //perform perturbation when more then 'm_minimumPointsPerturbationThreshold' points
+                    if (m_numPerturbationIterations > 0 && resultOut.GetPersistentManifold().GetNumContacts() < m_minimumPointsPerturbationThreshold)
+                    {
+                        Vector3 v0, v1;
 
-                    Vector3 sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis();
-                    sepNormalWorldSpace.Normalize();
-                    TransformUtil.PlaneSpace1(ref sepNormalWorldSpace, out v0, out v1);
+                        Vector3 sepNormalWorldSpace = gjkPairDetector.GetCachedSeparatingAxis();
+                        sepNormalWorldSpace.Normalize();
+                        TransformUtil.PlaneSpace1(ref sepNormalWorldSpace, out v0, out v1);
 
-                    bool perturbeA = true;
-                    const float angleLimit = 0.125f * MathUtil.SIMD_PI;
-                    float perturbeAngle;
-                    float radiusA = min0.GetAngularMotionDisc();
-                    float radiusB = min1.GetAngularMotionDisc();
-                    if (radiusA < radiusB)
-                    {
-                        perturbeAngle = BulletGlobals.gContactBreakingThreshold / radiusA;
-                        perturbeA = true;
-                    }
-                    else
-                    {
-                        perturbeAngle = BulletGlobals.gContactBreakingThreshold / radiusB;
-                        perturbeA = false;
-                    }
-                    if (perturbeAngle > angleLimit)
-                    {
-                        perturbeAngle = angleLimit;
-                    }
-
-                    Matrix unPerturbedTransform;
-                    if (perturbeA)
-                    {
-                        unPerturbedTransform = input.m_transformA;
-                    }
-                    else
-                    {
-                        unPerturbedTransform = input.m_transformB;
-                    }
-
-                    for (int i = 0; i < m_numPerturbationIterations; i++)
-                    {
-                        if (v0.LengthSquared() > MathUtil.SIMD_EPSILON)
+                        bool perturbeA = true;
+                        const float angleLimit = 0.125f * MathUtil.SIMD_PI;
+                        float perturbeAngle;
+                        float radiusA = min0.AngularMotionDisc;
+                        float radiusB = min1.AngularMotionDisc;
+                        if (radiusA < radiusB)
                         {
-
-                            Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0, perturbeAngle);
-                            float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
-                            Quaternion rotq = Quaternion.CreateFromAxisAngle(sepNormalWorldSpace, iterationAngle);
-
-                            if (perturbeA)
-                            {
-                                input.m_transformA._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body0.GetWorldTransform()._basis);
-                                input.m_transformB = body1.GetWorldTransform();
-                              
-                                input.m_transformB = body1.GetWorldTransform();
-#if DEBUG_CONTACTS
-                                dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformA, 10.0f);
-#endif //DEBUG_CONTACTS
-                            }
-                            else
-                            {
-                                input.m_transformA = body0.GetWorldTransform();
-                                input.m_transformB._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body1.GetWorldTransform()._basis);
-#if DEBUG_CONTACTS
-                                dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformB, 10.0f);
-#endif
-                            }
-
-                            PerturbedContactResult perturbedResultOut = new PerturbedContactResult(resultOut, ref input.m_transformA, ref input.m_transformB, ref unPerturbedTransform, perturbeA, dispatchInfo.getDebugDraw());
-                            gjkPairDetector.GetClosestPoints(input, perturbedResultOut, dispatchInfo.getDebugDraw(), false);
+                            perturbeAngle = BulletGlobals.gContactBreakingThreshold / radiusA;
+                            perturbeA = true;
+                        }
+                        else
+                        {
+                            perturbeAngle = BulletGlobals.gContactBreakingThreshold / radiusB;
+                            perturbeA = false;
+                        }
+                        if (perturbeAngle > angleLimit)
+                        {
+                            perturbeAngle = angleLimit;
                         }
 
+                        Matrix unPerturbedTransform;
+                        if (perturbeA)
+                        {
+                            unPerturbedTransform = input.m_transformA;
+                        }
+                        else
+                        {
+                            unPerturbedTransform = input.m_transformB;
+                        }
 
+                        for (int i = 0; i < m_numPerturbationIterations; i++)
+                        {
+                            if (v0.LengthSquared() > MathUtil.SIMD_EPSILON)
+                            {
+
+                                Quaternion perturbeRot = new Quaternion(v0, perturbeAngle);
+                                float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
+                                Quaternion rotq = new Quaternion(sepNormalWorldSpace, iterationAngle);
+
+                                if (perturbeA)
+                                {
+                                    input.m_transformA._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body0.GetWorldTransform()._basis);
+                                    input.m_transformB = body1.GetWorldTransform();
+
+                                    input.m_transformB = body1.GetWorldTransform();
+#if DEBUG_CONTACTS
+                                    dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformA, 10.0f);
+#endif //DEBUG_CONTACTS
+                                }
+                                else
+                                {
+                                    input.m_transformA = body0.GetWorldTransform();
+                                    input.m_transformB._basis = (new IndexedBasisMatrix(MathUtil.QuaternionInverse(rotq) * perturbeRot * rotq) * body1.GetWorldTransform()._basis);
+#if DEBUG_CONTACTS
+                                    dispatchInfo.m_debugDraw.DrawTransform(ref input.m_transformB, 10.0f);
+#endif
+                                }
+
+                                PerturbedContactResult perturbedResultOut = new PerturbedContactResult(resultOut, ref input.m_transformA, ref input.m_transformB, ref unPerturbedTransform, perturbeA, dispatchInfo.getDebugDraw());
+                                gjkPairDetector.GetClosestPoints(ref input, perturbedResultOut, dispatchInfo.getDebugDraw(), false);
+
+                            }
+
+
+                        }
                     }
-                }
 
 
 
@@ -393,7 +421,7 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 	        }
 #endif //USE_SEPDISTANCE_UTIL2
 
-
+                }
             }
 
             if (m_ownManifold)
@@ -437,31 +465,38 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             {
                 ConvexShape convex0 = body0.CollisionShape as ConvexShape;
 
-                SphereShape sphere1 = new SphereShape(body1.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
-                CastResult result = new CastResult();
-                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                SphereShape sphere1 = BulletGlobals.SphereShapePool.Get();
+                sphere1.Initialize(body1.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = BulletGlobals.CastResultPool.Get();
+                VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(convex0, sphere1, voronoiSimplex);
-                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
-                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                using (GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
                 {
+                    ccd1.Initialize(convex0, sphere1, voronoiSimplex);
+                    //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                    if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                        body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                    {
 
-                    //store result.m_fraction in both bodies
+                        //store result.m_fraction in both bodies
 
-                    if (body0.GetHitFraction() > result.m_fraction)
-                    {
-                        body0.SetHitFraction(result.m_fraction);
+                        if (body0.GetHitFraction() > result.m_fraction)
+                        {
+                            body0.SetHitFraction(result.m_fraction);
+                        }
+                        if (body1.GetHitFraction() > result.m_fraction)
+                        {
+                            body1.SetHitFraction(result.m_fraction);
+                        }
+                        if (resultFraction > result.m_fraction)
+                        {
+                            resultFraction = result.m_fraction;
+                        }
                     }
-                    if (body1.GetHitFraction() > result.m_fraction)
-                    {
-                        body1.SetHitFraction(result.m_fraction);
-                    }
-                    if (resultFraction > result.m_fraction)
-                    {
-                        resultFraction = result.m_fraction;
-                    }
+                    BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                    BulletGlobals.SphereShapePool.Free(sphere1);
+                    result.Cleanup();
                 }
             }
 
@@ -469,31 +504,38 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
             {
                 ConvexShape convex1 = body1.CollisionShape as ConvexShape;
 
-                SphereShape sphere0 = new SphereShape(body0.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
-                CastResult result = new CastResult();
-                VoronoiSimplexSolver voronoiSimplex = new VoronoiSimplexSolver();
+                SphereShape sphere0 = BulletGlobals.SphereShapePool.Get();
+                sphere0.Initialize(body0.CcdSweptSphereRadius); //todo: allow non-zero sphere sizes, for better approximation
+                CastResult result = BulletGlobals.CastResultPool.Get();
+                VoronoiSimplexSolver voronoiSimplex = BulletGlobals.VoronoiSimplexSolverPool.Get();
                 //SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
                 ///Simplification, one object is simplified as a sphere
-                GjkConvexCast ccd1 = new GjkConvexCast(sphere0, convex1, voronoiSimplex);
-                //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-                if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
-                    body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                using (GjkConvexCast ccd1 = BulletGlobals.GjkConvexCastPool.Get())
                 {
+                    ccd1.Initialize(sphere0, convex1, voronoiSimplex);
+                    //ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
+                    if (ccd1.CalcTimeOfImpact(body0.GetWorldTransform(), body0.GetInterpolationWorldTransform(),
+                        body1.GetWorldTransform(), body1.GetInterpolationWorldTransform(), result))
+                    {
 
-                    //store result.m_fraction in both bodies
+                        //store result.m_fraction in both bodies
 
-                    if (body0.GetHitFraction() > result.m_fraction)
-                    {
-                        body0.SetHitFraction(result.m_fraction);
+                        if (body0.GetHitFraction() > result.m_fraction)
+                        {
+                            body0.SetHitFraction(result.m_fraction);
+                        }
+                        if (body1.GetHitFraction() > result.m_fraction)
+                        {
+                            body1.SetHitFraction(result.m_fraction);
+                        }
+                        if (resultFraction > result.m_fraction)
+                        {
+                            resultFraction = result.m_fraction;
+                        }
                     }
-                    if (body1.GetHitFraction() > result.m_fraction)
-                    {
-                        body1.SetHitFraction(result.m_fraction);
-                    }
-                    if (resultFraction > result.m_fraction)
-                    {
-                        resultFraction = result.m_fraction;
-                    }
+                    BulletGlobals.VoronoiSimplexSolverPool.Free(voronoiSimplex);
+                    BulletGlobals.SphereShapePool.Free(sphere0);
+                    result.Cleanup();
                 }
             }
 
@@ -532,9 +574,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
         {
             // compute the parameters of the closest points on each line segment
 
-            float dirA_dot_dirB = Vector3.Dot(dirA, dirB);
-            float dirA_dot_trans = Vector3.Dot(dirA, translation);
-            float dirB_dot_trans = Vector3.Dot(dirB, translation);
+            float dirA_dot_dirB = Vector3.Dot(ref dirA, ref dirB);
+            float dirA_dot_trans = Vector3.Dot(ref dirA, ref translation);
+            float dirB_dot_trans = Vector3.Dot(ref dirB, ref translation);
 
             float denom = 1.0f - dirA_dot_dirB * dirA_dot_dirB;
 
@@ -683,7 +725,9 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            return new ConvexConvexAlgorithm(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            ConvexConvexAlgorithm cca = BulletGlobals.ConvexConvexAlgorithmPool.Get();
+            cca.Initialize(ci.GetManifold(), ci, body0, body1, m_simplexSolver, m_pdSolver, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);
+            return cca;
         }
 
         public IConvexPenetrationDepthSolver m_pdSolver;
@@ -747,20 +791,20 @@ if (min0.IsPolyhedral() && min1.IsPolyhedral())
 
     }
 
-    	public struct DummyResult : IDiscreteCollisionDetectorInterfaceResult
-		{
-			public void SetShapeIdentifiersA(int partId0,int index0){}
-			public void SetShapeIdentifiersB(int partId1,int index1){}
+    public struct DummyResult : IDiscreteCollisionDetectorInterfaceResult
+    {
+        public void SetShapeIdentifiersA(int partId0, int index0) { }
+        public void SetShapeIdentifiersB(int partId1, int index1) { }
 
-			public void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
-			{
-			}
+        public void AddContactPoint(Vector3 normalOnBInWorld, Vector3 pointInWorld, float depth)
+        {
+        }
 
-			public void AddContactPoint(ref Vector3 normalOnBInWorld,ref Vector3 pointInWorld,float depth) 
-			{
-			}
-		}
-		
+        public void AddContactPoint(ref Vector3 normalOnBInWorld, ref Vector3 pointInWorld, float depth)
+        {
+        }
+    }
+
 
 
 }

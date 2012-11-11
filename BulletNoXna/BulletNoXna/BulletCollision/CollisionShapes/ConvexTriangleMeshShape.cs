@@ -109,9 +109,9 @@ namespace BulletXNA.BulletCollision
         }
 	
 	    //debugging
-        public override String GetName()
+        public override string Name
         {
-            return "ConvexTrimesh";
+            get { return "ConvexTrimesh"; }
         }
 
         public override int GetNumVertices()

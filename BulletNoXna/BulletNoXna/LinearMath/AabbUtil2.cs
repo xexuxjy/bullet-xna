@@ -140,6 +140,42 @@ namespace BulletXNA
             return ((tmin < lambda_max) && (tmax > lambda_min));
         }
 
+        public static bool RayAabb2Alt(ref Vector3 rayFrom,
+                                  ref Vector3 rayInvDirection,
+                                  bool raySign0,bool raySign1,bool raySign2,
+                                  ref Vector3 minBounds,
+                                  ref Vector3 maxBounds,
+                                  out float tmin,
+                                  float lambda_min,
+                                  float lambda_max)
+        {
+            float tmax, tymin, tymax, tzmin, tzmax;
+            tmin = ((raySign0 ? maxBounds : minBounds).X - rayFrom.X) * rayInvDirection.X;
+            tmax = ((raySign0 ? minBounds : maxBounds).X - rayFrom.X) * rayInvDirection.X;
+
+            tymin = ((raySign1 ? maxBounds : minBounds).Y - rayFrom.Y) * rayInvDirection.Y;
+            tymax = ((raySign1 ? minBounds : maxBounds).Y - rayFrom.Y) * rayInvDirection.Y;
+
+            if ((tmin > tymax) || (tymin > tmax))
+                return false;
+
+            if (tymin > tmin)
+                tmin = tymin;
+
+            if (tymax < tmax)
+                tmax = tymax;
+
+            tzmin = ((raySign2? maxBounds: minBounds).Z - rayFrom.Z) * rayInvDirection.Z;
+            tzmax = ((raySign2 ? minBounds : maxBounds).Z - rayFrom.Z) * rayInvDirection.Z;
+
+            if ((tmin > tzmax) || (tzmin > tmax))
+                return false;
+            if (tzmin > tmin)
+                tmin = tzmin;
+            if (tzmax < tmax)
+                tmax = tzmax;
+            return ((tmin < lambda_max) && (tmax > lambda_min));
+        }
 
         public static bool RayAabb(Vector3 rayFrom,
                                     Vector3 rayTo,

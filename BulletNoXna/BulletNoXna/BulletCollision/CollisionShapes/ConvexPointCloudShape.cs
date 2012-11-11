@@ -164,9 +164,9 @@ namespace BulletXNA.BulletCollision
         }
     
 	    //debugging
-	    public override String GetName()
+	    public override string Name
         {
-            return "ConvexPointCloud";
+            get { return "ConvexPointCloud"; }
         }
 
         public override int GetNumVertices()

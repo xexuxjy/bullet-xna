@@ -351,9 +351,9 @@ namespace BulletXNA.BulletCollision
                 j._el1 = new IndexedVector3(0, o2, 0);
                 j._el2 = new IndexedVector3(0, 0, o2);
 
-                j._el0 = o * -o.X;
-                j._el1 = o * -o.Y;
-                j._el2 = o * -o.Z;
+                j._el0 += o * -o.X;
+                j._el1 += o * -o.Y;
+                j._el2 += o * -o.Z;
 
                 //add inertia tensor of pointmass
                 tensor[0] += masses[k] * j[0];

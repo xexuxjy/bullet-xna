@@ -278,7 +278,163 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DebugDrawObject(ref IndexedMatrix worldTransform, CollisionShape shape, ref IndexedVector3 color)
         {
-            DrawHelper.DebugDrawObject(ref worldTransform, shape, ref color, GetDebugDrawer());
+            // Draw a small simplex at the center of the object
+            GetDebugDrawer().DrawTransform(ref worldTransform, 1.0f);
+
+            switch (shape.GetShapeType())
+            {
+                case BroadphaseNativeTypes.COMPOUND_SHAPE_PROXYTYPE:
+                    {
+                        CompoundShape compoundShape = (CompoundShape)shape;
+                        for (int i = compoundShape.GetNumChildShapes() - 1; i >= 0; i--)
+                        {
+                            IndexedMatrix childTrans = compoundShape.GetChildTransform(i);
+                            CollisionShape colShape = compoundShape.GetChildShape(i);
+                            IndexedMatrix temp = worldTransform * childTrans;
+                            DebugDrawObject(ref temp, colShape, ref color);
+                        }
+                        break;
+                    }
+                case (BroadphaseNativeTypes.BOX_SHAPE_PROXYTYPE):
+                    {
+                        BoxShape boxShape = shape as BoxShape;
+                        IndexedVector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
+                        IndexedVector3 negHalfExtents = -halfExtents;
+                        GetDebugDrawer().DrawBox(ref negHalfExtents, ref halfExtents, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeTypes.SPHERE_SHAPE_PROXYTYPE:
+                    {
+                        SphereShape sphereShape = shape as SphereShape;
+                        float radius = sphereShape.GetMargin();//radius doesn't include the margin, so draw with margin
+                        GetDebugDrawer().DrawSphere(radius, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeTypes.MULTI_SPHERE_SHAPE_PROXYTYPE:
+                    {
+                        MultiSphereShape multiSphereShape = (MultiSphereShape)shape;
+
+                        for (int i = multiSphereShape.GetSphereCount() - 1; i >= 0; i--)
+                        {
+                            IndexedMatrix childTransform = worldTransform;
+                            childTransform._origin += multiSphereShape.GetSpherePosition(i);
+                            GetDebugDrawer().DrawSphere(multiSphereShape.GetSphereRadius(i), ref childTransform, ref color);
+                        }
+                        break;
+                    }
+                case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
+                    {
+                        CapsuleShape capsuleShape = shape as CapsuleShape;
+
+                        float radius = capsuleShape.GetRadius();
+                        float halfHeight = capsuleShape.GetHalfHeight();
+
+                        int upAxis = capsuleShape.GetUpAxis();
+                        GetDebugDrawer().DrawCapsule(radius, halfHeight, upAxis, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeTypes.CONE_SHAPE_PROXYTYPE:
+                    {
+                        ConeShape coneShape = (ConeShape)shape;
+                        float radius = coneShape.GetRadius();//+coneShape->getMargin();
+                        float height = coneShape.GetHeight();//+coneShape->getMargin();
+
+                        int upAxis = coneShape.GetConeUpIndex();
+                        GetDebugDrawer().DrawCone(radius, height, upAxis, ref worldTransform, ref color);
+                        break;
+
+                    }
+                case BroadphaseNativeTypes.CYLINDER_SHAPE_PROXYTYPE:
+                    {
+                        CylinderShape cylinder = (CylinderShape)shape;
+                        int upAxis = cylinder.GetUpAxis();
+                        float radius = cylinder.GetRadius();
+
+                        float halfHeight = cylinder.GetHalfExtentsWithMargin()[upAxis];
+                        GetDebugDrawer().DrawCylinder(radius, halfHeight, upAxis, ref worldTransform, ref color);
+                        break;
+                    }
+
+                case BroadphaseNativeTypes.STATIC_PLANE_PROXYTYPE:
+                    {
+                        StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
+                        float planeConst = staticPlaneShape.GetPlaneConstant();
+                        IndexedVector3 planeNormal = staticPlaneShape.GetPlaneNormal();
+                        GetDebugDrawer().DrawPlane(ref planeNormal, planeConst, ref worldTransform, ref color);
+                        break;
+                    }
+                default:
+                    {
+                        if (shape.IsPolyhedral())/// for polyhedral shapes
+                        {
+                            PolyhedralConvexShape polyshape = shape as PolyhedralConvexShape;
+                            ConvexPolyhedron poly = polyshape.GetConvexPolyhedron();
+                            if (poly != null)
+                            {
+                                for (int i = 0; i < poly.m_faces.Count; i++)
+                                {
+                                    IndexedVector3 centroid = IndexedVector3.Zero;
+                                    int numVerts = poly.m_faces[i].m_indices.Count;
+                                    if (numVerts != 0)
+                                    {
+                                        int lastV = poly.m_faces[i].m_indices[numVerts - 1];
+                                        for (int v = 0; v < poly.m_faces[i].m_indices.Count; v++)
+                                        {
+                                            int curVert = poly.m_faces[i].m_indices[v];
+                                            centroid += poly.m_vertices[curVert];
+                                            GetDebugDrawer().DrawLine(worldTransform * poly.m_vertices[lastV], worldTransform * poly.m_vertices[curVert], color);
+                                            lastV = curVert;
+                                        }
+                                    }
+                                    centroid *= 1.0f / (float)(numVerts);
+
+                                    IndexedVector3 normalColor = new IndexedVector3(1, 1, 0);
+                                    IndexedVector3 faceNormal = new IndexedVector3(poly.m_faces[i].m_plane[0], poly.m_faces[i].m_plane[1], poly.m_faces[i].m_plane[2]);
+                                    GetDebugDrawer().DrawLine(worldTransform * centroid, worldTransform * (centroid + faceNormal), normalColor);
+                                }
+
+                            }
+                            else
+                            {
+                                for (int i = 0; i < polyshape.GetNumEdges(); i++)
+                                {
+                                    IndexedVector3 a, b;
+                                    polyshape.GetEdge(i, out a, out b);
+                                    IndexedVector3 wa = worldTransform * a;
+                                    IndexedVector3 wb = worldTransform * b;
+                                    GetDebugDrawer().DrawLine(ref wa, ref wb, ref color);
+                                }
+                            }
+                        }
+                        
+                        if (shape.IsConcave())
+                        {
+                            ConcaveShape concaveMesh = (ConcaveShape)shape;
+
+                            ///@todo pass camera, for some culling? no -> we are not a graphics lib
+                            IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+                            IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
+                            using (BulletXNA.DebugDrawcallback drawCallback = BulletGlobals.DebugDrawcallbackPool.Get())
+                            {
+                                drawCallback.Initialise(GetDebugDrawer(), ref worldTransform, ref color);
+                                concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                            }
+                        }
+                        else if (shape.GetShapeType() == BroadphaseNativeTypes.CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE)
+                        {
+                            ConvexTriangleMeshShape convexMesh = (ConvexTriangleMeshShape)shape;
+                            //todo: pass camera for some culling			
+                            IndexedVector3 aabbMax = MathUtil.MAX_VECTOR;
+                            IndexedVector3 aabbMin = MathUtil.MIN_VECTOR;
+
+                            //DebugDrawcallback drawCallback;
+                            //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
+                            //convexMesh.GetMeshInterface().InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                            //drawCallback.Cleanup();
+                        }
+                        break;
+                    }
+            }
         }
 
 

@@ -717,9 +717,10 @@ namespace BulletXNA.BulletDynamics
 
 		public void GetAngularLowerLimit(out IndexedVector3 angularLower)
 		{
-			angularLower = new IndexedVector3(m_angularLimits[0].m_loLimit,
-			angularLower.Y = m_angularLimits[1].m_loLimit,
-			angularLower.Z = m_angularLimits[2].m_loLimit);
+			angularLower = new IndexedVector3(
+			m_angularLimits[0].m_loLimit,
+			m_angularLimits[1].m_loLimit,
+			m_angularLimits[2].m_loLimit);
 		}
 
 		public void GetAngularUpperLimit(out IndexedVector3 angularUpper)

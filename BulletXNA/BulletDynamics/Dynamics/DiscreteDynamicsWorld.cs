@@ -374,46 +374,24 @@ namespace BulletXNA.BulletDynamics
         public override void DebugDrawWorld()
         {
             BulletGlobals.StartProfile("debugDrawWorld");
-            base.DebugDrawWorld();
-            //if (getDebugDrawer() != null && ((getDebugDrawer().getDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
-            //{
-            //    int numManifolds = getDispatcher().getNumManifolds();
-            //    IndexedVector3 color = IndexedVector3.Zero;
-            //    for (int i=0;i<numManifolds;i++)
-            //    {
-            //        PersistentManifold contactManifold = getDispatcher().getManifoldByIndexInternal(i);
-            //        //btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold.getBody0());
-            //        //btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold.getBody1());
 
-            //        int numContacts = contactManifold.getNumContacts();
-            //        for (int j=0;j<numContacts;j++)
-            //        {
-            //            ManifoldPoint cp = contactManifold.getContactPoint(j);
-            //            getDebugDrawer().drawContactPoint(cp.getPositionWorldOnB(),cp.getNormalWorldOnB(),cp.getDistance(),cp.getLifeTime(),color);
-            //        }
-            //    }
-            //}
-            bool drawConstraints = false;
+            base.DebugDrawWorld();
+
             if (GetDebugDrawer() != null)
             {
                 DebugDrawModes mode = GetDebugDrawer().GetDebugMode();
                 if ((mode & (DebugDrawModes.DBG_DrawConstraints | DebugDrawModes.DBG_DrawConstraintLimits)) != 0)
                 {
-                    drawConstraints = true;
-
-                    if (drawConstraints)
+                    for (int i = GetNumConstraints() - 1; i >= 0; i--)
                     {
-                        for (int i = GetNumConstraints() - 1; i >= 0; i--)
-                        {
-                            TypedConstraint constraint = GetConstraint(i);
-                            DrawHelper.DebugDrawConstraint(constraint, GetDebugDrawer());
-                        }
+                        TypedConstraint constraint = GetConstraint(i);
+                        DrawHelper.DebugDrawConstraint(constraint, GetDebugDrawer());
                     }
                 }
                 if (mode != 0)
                 {
-                    int LengthSquared = m_actions.Count;
-                    for (int i = 0; i < LengthSquared; ++i)
+                    int actionsCount = m_actions.Count;
+                    for (int i = 0; i < actionsCount; ++i)
                     {
                         m_actions[i].DebugDraw(m_debugDrawer);
                     }

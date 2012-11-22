@@ -51,14 +51,13 @@ namespace BulletXNADemos.Demos
 	//clean-up memory of dynamically created shape hulls
 
 
-    public class XNA_ShapeDrawer : IDebugDraw
+    public class XNA_ShapeDrawer : DebugDraw
     {
 
         public XNA_ShapeDrawer(Game game)
         {
             m_game = game;
         }
-
 
         public void LoadContent()
         {
@@ -264,7 +263,7 @@ namespace BulletXNADemos.Demos
             }
         }
 
-        public void DrawText(String text, IndexedVector3 position, IndexedVector3 color)
+        public override void DrawText(String text, IndexedVector3 position, IndexedVector3 color)
         {
             DrawText(text, ref position, ref color);
         }
@@ -887,12 +886,12 @@ namespace BulletXNADemos.Demos
         }
 
         #region IDebugDraw Members
-        public void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 fromColor)
+        public override void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 fromColor)
         {
-            DrawLine(ref from, ref to, ref fromColor);
+            DrawLine(ref from, ref to, ref fromColor, ref fromColor);
         }
 
-        public void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor)
+        public override void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor)
         {
             DrawLine(ref from, ref to, ref fromColor, ref fromColor);
         }
@@ -915,21 +914,8 @@ namespace BulletXNADemos.Demos
 
         public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha)
         {
-			DrawLine(transform * (new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)) , transform * (new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMin.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMin.Y, boxMax.Z)), transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMax.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), color);
-			DrawLine(transform *(new IndexedVector3(boxMin.X, boxMax.Y, boxMax.Z)), transform *(new IndexedVector3(boxMin.X, boxMin.Y, boxMax.Z)), color);
-
+            DrawBox(ref boxMin, ref boxMax, ref transform, ref color);
         }
-
 
         public void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color)
         {
@@ -941,219 +927,42 @@ namespace BulletXNADemos.Demos
             //throw new NotImplementedException();
         }
 
-        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 n0, ref IndexedVector3 n1, ref IndexedVector3 n2, ref IndexedVector3 color, float alpha)
-        {
-            DrawTriangle(ref v0, ref v1, ref v2, ref color, alpha);
-        }
-
-        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 color, float alpha)
-        {
-            DrawLine(ref v0, ref v1, ref color);
-            DrawLine(ref v1, ref v2, ref color);
-            DrawLine(ref v2, ref v0, ref color);
-        }
-
-        public void DrawContactPoint(IndexedVector3 PointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color)
+        public override void DrawContactPoint(IndexedVector3 PointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color)
         {
             DrawContactPoint(ref PointOnB, ref normalOnB, distance, lifeTime, ref color);
         }
 
-        public void DrawContactPoint(ref IndexedVector3 PointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color)
+        public override void DrawContactPoint(ref IndexedVector3 PointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color)
         {
             IndexedVector3 from = PointOnB;
             IndexedVector3 to = PointOnB + (normalOnB * 1f);
             DrawLine(ref from, ref to, ref color);
         }
 
-        public void ReportErrorWarning(string warningString)
+        public override void ReportErrorWarning(string warningString)
         {
             //throw new NotImplementedException();
         }
 
-        public void Draw3dText(ref IndexedVector3 location, string textString)
+        public override void Draw3dText(ref IndexedVector3 location, string textString)
         {
             //throw new NotImplementedException();
         }
 
-        public void SetDebugMode(DebugDrawModes debugMode)
+        public override void SetDebugMode(DebugDrawModes debugMode)
         {
             m_debugDrawModes = debugMode;
         }
 
-        public DebugDrawModes GetDebugMode()
+        public override DebugDrawModes GetDebugMode()
         {
             return m_debugDrawModes;
-        }
-
-        public void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
-        {
-            DrawAabb(ref from, ref to, ref color);
         }
 
         public void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
         {
             IndexedMatrix identity = IndexedMatrix.Identity;
             DrawBox(ref from, ref to, ref identity, ref color, 0f);
-        }
-
-        public void DrawTransform(ref IndexedMatrix transform, float orthoLen)
-        {
-            IndexedVector3 start = transform._origin;
-            IndexedVector3 temp = start + transform._basis * new IndexedVector3(orthoLen, 0, 0);
-            IndexedVector3 colour = new IndexedVector3(0.7f, 0, 0);
-            DrawLine(ref start, ref temp, ref colour);
-            temp = start + transform._basis * new IndexedVector3(0, orthoLen, 0);
-            colour = new IndexedVector3(0, 0.7f, 0);
-            DrawLine(ref start, ref temp, ref colour);
-            temp = start + transform._basis * new IndexedVector3(0, 0, orthoLen);
-            colour = new IndexedVector3(0, 0, 0.7f);
-            DrawLine(ref start, ref temp, ref colour);
-        }
-
-        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref IndexedVector3 color, bool drawSect)
-        {
-            DrawArc(ref center, ref normal, ref axis, radiusA, radiusB, minAngle, maxAngle, ref color, drawSect, 10f);
-        }
-
-        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle, ref IndexedVector3 color, bool drawSect, float stepDegrees)
-        {
-            IndexedVector3 vx = axis;
-            IndexedVector3 vy = IndexedVector3.Cross(normal, axis);
-            float step = stepDegrees * MathUtil.SIMD_RADS_PER_DEG;
-            int nSteps = (int)((maxAngle - minAngle) / step);
-            if (nSteps == 0)
-            {
-                nSteps = 1;
-            }
-            IndexedVector3 prev = center + radiusA * vx * (float)Math.Cos(minAngle) + radiusB * vy * (float)Math.Sin(minAngle);
-            if (drawSect)
-            {
-                DrawLine(ref center, ref prev, ref color);
-            }
-            for (int i = 1; i <= nSteps; i++)
-            {
-                float angle = minAngle + (maxAngle - minAngle) * i / nSteps;
-                IndexedVector3 next = center + radiusA * vx * (float)Math.Cos(angle) + radiusB * vy * (float)Math.Sin(angle);
-                DrawLine(ref prev, ref next, ref color);
-                prev = next;
-            }
-            if (drawSect)
-            {
-                DrawLine(ref center, ref prev, ref color);
-            }
-        }
-
-        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color)
-        {
-            DrawSpherePatch(ref center, ref up, ref axis, radius, minTh, maxTh, minPs, maxPs, ref color, 10);
-        }
-
-        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius, float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees)
-        {
-            IndexedVector3[] vA;
-            IndexedVector3[] vB;
-            IndexedVector3[] pvA, pvB, pT;
-            IndexedVector3 npole = center + up * radius;
-            IndexedVector3 spole = center - up * radius;
-            IndexedVector3 arcStart = IndexedVector3.Zero;
-            float step = stepDegrees * MathUtil.SIMD_RADS_PER_DEG;
-            IndexedVector3 kv = up;
-            IndexedVector3 iv = axis;
-
-            IndexedVector3 jv = IndexedVector3.Cross(kv, iv);
-            bool drawN = false;
-            bool drawS = false;
-            if (minTh <= -MathUtil.SIMD_HALF_PI)
-            {
-                minTh = -MathUtil.SIMD_HALF_PI + step;
-                drawN = true;
-            }
-            if (maxTh >= MathUtil.SIMD_HALF_PI)
-            {
-                maxTh = MathUtil.SIMD_HALF_PI - step;
-                drawS = true;
-            }
-            if (minTh > maxTh)
-            {
-                minTh = -MathUtil.SIMD_HALF_PI + step;
-                maxTh = MathUtil.SIMD_HALF_PI - step;
-                drawN = drawS = true;
-            }
-            int n_hor = (int)((maxTh - minTh) / step) + 1;
-            if (n_hor < 2) n_hor = 2;
-            float step_h = (maxTh - minTh) / (n_hor - 1);
-            bool isClosed = false;
-            if (minPs > maxPs)
-            {
-                minPs = -MathUtil.SIMD_PI + step;
-                maxPs = MathUtil.SIMD_PI;
-                isClosed = true;
-            }
-            else if ((maxPs - minPs) >= MathUtil.SIMD_PI * 2f)
-            {
-                isClosed = true;
-            }
-            else
-            {
-                isClosed = false;
-            }
-            int n_vert = (int)((maxPs - minPs) / step) + 1;
-            if (n_vert < 2) n_vert = 2;
-
-            vA = new IndexedVector3[n_vert];
-            vB = new IndexedVector3[n_vert];
-            pvA = vA; pvB = vB;
-
-            float step_v = (maxPs - minPs) / (float)(n_vert - 1);
-            for (int i = 0; i < n_hor; i++)
-            {
-                float th = minTh + i * step_h;
-                float sth = radius * (float)Math.Sin(th);
-                float cth = radius * (float)Math.Cos(th);
-                for (int j = 0; j < n_vert; j++)
-                {
-                    float psi = minPs + (float)j * step_v;
-                    float sps = (float)Math.Sin(psi);
-                    float cps = (float)Math.Cos(psi);
-                    pvB[j] = center + cth * cps * iv + cth * sps * jv + sth * kv;
-                    if (i != 0)
-                    {
-                        DrawLine(pvA[j], pvB[j], color);
-                    }
-                    else if (drawS)
-                    {
-                        DrawLine(spole, pvB[j], color);
-                    }
-                    if (j != 0)
-                    {
-                        DrawLine(pvB[j - 1], pvB[j], color);
-                    }
-                    else
-                    {
-                        arcStart = pvB[j];
-                    }
-                    if ((i == (n_hor - 1)) && drawN)
-                    {
-                        DrawLine(npole, pvB[j], color);
-                    }
-                    if (isClosed)
-                    {
-                        if (j == (n_vert - 1))
-                        {
-                            DrawLine(arcStart, pvB[j], color);
-                        }
-                    }
-                    else
-                    {
-                        if (((i == 0) || (i == (n_hor - 1))) && ((j == 0) || (j == (n_vert - 1))))
-                        {
-                            DrawLine(center, pvB[j], color);
-                        }
-                    }
-                }
-                pT = pvA; pvA = pvB; pvB = pT;
-            }
-
         }
 
         #endregion

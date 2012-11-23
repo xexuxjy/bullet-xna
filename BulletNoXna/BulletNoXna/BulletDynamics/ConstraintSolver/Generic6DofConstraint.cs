@@ -717,9 +717,10 @@ namespace BulletXNA.BulletDynamics
 
 		public void GetAngularLowerLimit(out Vector3 angularLower)
 		{
-			angularLower = new Vector3(m_angularLimits[0].m_loLimit,
-			angularLower.Y = m_angularLimits[1].m_loLimit,
-			angularLower.Z = m_angularLimits[2].m_loLimit);
+            angularLower = new Vector3(
+            m_angularLimits[0].m_loLimit,
+            m_angularLimits[1].m_loLimit,
+            m_angularLimits[2].m_loLimit);
 		}
 
 		public void GetAngularUpperLimit(out Vector3 angularUpper)
@@ -731,6 +732,47 @@ namespace BulletXNA.BulletDynamics
 
 		}
 
+        public Vector3 LinearLowerLimit
+        {
+            get { return m_linearLimits.m_lowerLimit; }
+            set { m_linearLimits.m_lowerLimit = value; }
+        }
+
+        public Vector3 LinearUpperLimit
+        {
+            get { return m_linearLimits.m_upperLimit; }
+            set { m_linearLimits.m_upperLimit = value; }
+        }
+
+        public Vector3 AngularLowerLimit
+        {
+            get
+            {
+                return new Vector3(
+                m_angularLimits[0].m_loLimit,
+                m_angularLimits[1].m_loLimit,
+                m_angularLimits[2].m_loLimit);
+            }
+            set
+            {
+                SetAngularLowerLimit(ref value);
+            }
+        }
+
+        public Vector3 AngularUpperLimit
+        {
+            get
+            {
+                return new Vector3(
+                m_angularLimits[0].m_hiLimit,
+                m_angularLimits[1].m_hiLimit,
+                m_angularLimits[2].m_hiLimit);
+            }
+            set
+            {
+                SetAngularUpperLimit(ref value);
+            }
+        }
 
 		public virtual void SetAxis(ref Vector3 axis1, ref Vector3 axis2)
 		{
@@ -760,21 +802,21 @@ namespace BulletXNA.BulletDynamics
 			CalculateTransforms();
 		}
 
-        public void SetParam(ConstraintParams num, float value, int axis)
+        public void SetParam(ConstraintParam num, float value, int axis)
         {
             if ((axis >= 0) && (axis < 3))
             {
                 switch (num)
                 {
-                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                    case ConstraintParam.StopErp:
                         m_linearLimits.m_stopERP[axis] = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;
-                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                    case ConstraintParam.StopCfm:
                         m_linearLimits.m_stopCFM[axis] = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;
-                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                    case ConstraintParam.Cfm:
                         m_linearLimits.m_normalCFM[axis] = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;
@@ -787,15 +829,15 @@ namespace BulletXNA.BulletDynamics
             {
                 switch (num)
                 {
-                    case ConstraintParams.BT_CONSTRAINT_STOP_ERP:
+                    case ConstraintParam.StopErp:
                         m_angularLimits[axis - 3].m_stopERP = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_ERP_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;
-                    case ConstraintParams.BT_CONSTRAINT_STOP_CFM:
+                    case ConstraintParam.StopCfm:
                         m_angularLimits[axis - 3].m_stopCFM = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_STOP << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;
-                    case ConstraintParams.BT_CONSTRAINT_CFM:
+                    case ConstraintParam.Cfm:
                         m_angularLimits[axis - 3].m_normalCFM = value;
                         m_flags |= (int)SixDofFlags.BT_6DOF_FLAGS_CFM_NORM << (axis * BT_6DOF_FLAGS_AXIS_SHIFT);
                         break;

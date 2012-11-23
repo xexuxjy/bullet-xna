@@ -304,9 +304,9 @@ namespace BulletXNA.BulletCollision
 			get { return "Box"; }
 		}
 
-	    public override int GetNumPreferredPenetrationDirections()
+	    public override int NumPreferredPenetrationDirections
 	    {
-		    return 6;
+            get { return 6; }
 	    }
 
         public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)

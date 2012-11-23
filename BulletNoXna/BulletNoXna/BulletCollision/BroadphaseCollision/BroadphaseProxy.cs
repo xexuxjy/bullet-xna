@@ -277,7 +277,7 @@ namespace BulletXNA.BulletCollision
         ///used for demo integration FAST/Swift collision library and Bullet
         FAST_CONCAVE_MESH_PROXYTYPE,
         //terrain
-        TERRAIN_SHAPE_PROXYTYPE,
+        TerrainShape,
         ///Used for GIMPACT Trimesh integration
         GImpactShape,
         ///Multimaterial mesh

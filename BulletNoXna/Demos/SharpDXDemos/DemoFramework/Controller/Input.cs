@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using SharpDX.Windows;
 
 namespace DemoFramework
 {
@@ -17,26 +16,50 @@ namespace DemoFramework
         public Point MousePoint { get; private set; }
         public int MouseWheelDelta { get; private set; }
 
-        Form form;
-
-        public Input(Form form)
+        Control _control;
+        public Control Control
         {
-            this.form = form;
-            form.KeyDown += new KeyEventHandler(form_KeyDown);
-            form.KeyUp += new KeyEventHandler(form_KeyUp);
-            form.MouseDown += new MouseEventHandler(form_MouseDown);
-            form.MouseMove += new MouseEventHandler(form_MouseMove);
-            form.MouseUp += new MouseEventHandler(form_MouseUp);
-            form.MouseWheel += new MouseEventHandler(form_MouseWheel);
+            get { return _control; }
+            set
+            {
+                Release();
+                _control = value;
+                _control.KeyDown += ControlOnKeyDown;
+                _control.KeyUp += ControlOnKeyUp;
+                _control.MouseDown += ControlOnMouseDown;
+                _control.MouseMove += ControlOnMouseMove;
+                _control.MouseUp += ControlOnMouseUp;
+                _control.MouseWheel += ControlOnMouseWheel;
+            }
+        }
+
+        public Input(Control control)
+        {
+            Control = control;
 
             KeysDown = new List<Keys>();
             KeysPressed = new List<Keys>();
             KeysReleased = new List<Keys>();
-            MousePoint = form.PointToClient(Cursor.Position);
+            MousePoint = control.PointToClient(Cursor.Position);
             MouseWheelDelta = 0;
         }
 
-        void form_KeyDown(object sender, KeyEventArgs e)
+        public void Release()
+        {
+            if (_control == null)
+                return;
+
+            _control.KeyDown -= ControlOnKeyDown;
+            _control.KeyUp -= ControlOnKeyUp;
+            _control.MouseDown -= ControlOnMouseDown;
+            _control.MouseMove -= ControlOnMouseMove;
+            _control.MouseUp -= ControlOnMouseUp;
+            _control.MouseWheel -= ControlOnMouseWheel;
+
+            _control = null;
+        }
+
+        void ControlOnKeyDown(object sender, KeyEventArgs e)
         {
             Keys key = e.KeyData & ~Keys.Shift;
 
@@ -47,7 +70,7 @@ namespace DemoFramework
             }
         }
 
-        void form_KeyUp(object sender, KeyEventArgs e)
+        void ControlOnKeyUp(object sender, KeyEventArgs e)
         {
             Keys key = e.KeyData & ~Keys.Shift;
 
@@ -64,7 +87,7 @@ namespace DemoFramework
             MouseWheelDelta = 0;
         }
 
-        void form_MouseDown(object sender, MouseEventArgs e)
+        void ControlOnMouseDown(object sender, MouseEventArgs e)
         {
             MousePoint = e.Location;
 
@@ -72,8 +95,11 @@ namespace DemoFramework
                 return;
 
             // Don't consider mouse clicks outside of the client area
-            if (form.Focused == false || form.ClientRectangle.Contains(MousePoint) == false)
+            if (_control.ClientRectangle.Contains(MousePoint) == false)
                 return;
+
+            //if (_control.Focused == false && _control.CanFocus)
+            //    return;
 
             if (e.Button == MouseButtons.Left)
             {
@@ -93,12 +119,12 @@ namespace DemoFramework
             }
         }
 
-        void form_MouseMove(object sender, MouseEventArgs e)
+        void ControlOnMouseMove(object sender, MouseEventArgs e)
         {
             MousePoint = e.Location;
         }
 
-        void form_MouseUp(object sender, MouseEventArgs e)
+        void ControlOnMouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -113,7 +139,7 @@ namespace DemoFramework
             }
         }
 
-        void form_MouseWheel(object sender, MouseEventArgs e)
+        void ControlOnMouseWheel(object sender, MouseEventArgs e)
         {
             MouseWheelDelta = e.Delta;
         }

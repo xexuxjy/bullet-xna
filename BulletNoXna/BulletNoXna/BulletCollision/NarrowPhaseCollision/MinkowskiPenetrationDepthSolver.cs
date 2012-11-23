@@ -64,7 +64,7 @@ namespace BulletXNA.BulletCollision
             }
 
             {
-                int numPDA = convexA.GetNumPreferredPenetrationDirections();
+                int numPDA = convexA.NumPreferredPenetrationDirections;
                 if (numPDA > 0)
                 {
                     for (int i = 0; i < numPDA; i++)
@@ -82,7 +82,7 @@ namespace BulletXNA.BulletCollision
             }
 
             {
-                int numPDB = convexB.GetNumPreferredPenetrationDirections();
+                int numPDB = convexB.NumPreferredPenetrationDirections;
                 if (numPDB > 0)
                 {
                     for (int i = 0; i < numPDB; i++)
@@ -141,7 +141,7 @@ namespace BulletXNA.BulletCollision
             int numSampleDirections = NUM_UNITSPHERE_POINTS;
 
 	        {
-		        int numPDA = convexA.GetNumPreferredPenetrationDirections();
+		        int numPDA = convexA.NumPreferredPenetrationDirections;
 		        if (numPDA > 0)
 		        {
 			        for (int i=0;i<numPDA;i++)
@@ -156,7 +156,7 @@ namespace BulletXNA.BulletCollision
 	        }
 
 	        {
-		        int numPDB = convexB.GetNumPreferredPenetrationDirections();
+		        int numPDB = convexB.NumPreferredPenetrationDirections;
 		        if (numPDB > 0)
 		        {
 			        for (int i=0;i<numPDB;i++)

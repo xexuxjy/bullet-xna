@@ -55,10 +55,10 @@ namespace BulletXNA.BulletDynamics
 			///apply gravity, predict motion
 			PredictUnconstraintMotion(timeStep);
 
-			DispatcherInfo dispatchInfo = GetDispatchInfo();
+			DispatcherInfo dispatchInfo = DispatchInfo;
 			dispatchInfo.SetTimeStep(timeStep);
 			dispatchInfo.SetStepCount(0);
-			dispatchInfo.SetDebugDraw(GetDebugDrawer());
+			dispatchInfo.SetDebugDraw(DebugDrawer);
 
 			///perform collision detection
 			PerformDiscreteCollisionDetection();

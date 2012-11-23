@@ -93,7 +93,7 @@ namespace BulletXNA.BulletCollision
             minAabb -= contactThreshold;
             maxAabb += contactThreshold;
 
-            if(GetDispatchInfo().m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
+            if(DispatchInfo.m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
 	        {
 		        Vector3 minAabb2,maxAabb2;
 		        colObj.CollisionShape.GetAabb(colObj.GetInterpolationWorldTransform(),out minAabb2 ,out maxAabb2);
@@ -155,24 +155,22 @@ namespace BulletXNA.BulletCollision
             BulletGlobals.StopProfile();
         }
 
-
-        public virtual void SetDebugDrawer(IDebugDraw debugDrawer)
+        public virtual IDebugDraw DebugDrawer
         {
-            m_debugDrawer = debugDrawer;
-            BulletGlobals.gDebugDraw = debugDrawer;
-        }
-
-        public virtual IDebugDraw GetDebugDrawer()
-        {
-            return m_debugDrawer;
+            get { return m_debugDrawer; }
+            set
+            {
+                m_debugDrawer = value;
+                BulletGlobals.gDebugDraw = value;
+            }
         }
 
         public virtual void DebugDrawWorld()
         {
-            if (GetDebugDrawer() != null && ((GetDebugDrawer().GetDebugMode() & DebugDrawModes.DrawContactPoints) != 0))
+            if (DebugDrawer != null && ((DebugDrawer.DebugMode & DebugDrawModes.DrawContactPoints) != 0))
             {
                 int numManifolds = GetDispatcher().GetNumManifolds();
-                Vector3 color = Vector3.Zero;
+                Vector3 color = new Vector3(1,1,0.5f);
                 for (int i=0;i<numManifolds;i++)
                 {
                     PersistentManifold contactManifold = GetDispatcher().GetManifoldByIndexInternal(i);
@@ -183,14 +181,14 @@ namespace BulletXNA.BulletCollision
                     for (int j=0;j<numContacts;j++)
                     {
                         ManifoldPoint cp = contactManifold.GetContactPoint(j);
-                        GetDebugDrawer().DrawContactPoint(cp.GetPositionWorldOnB(),cp.GetNormalWorldOnB(),cp.GetDistance(),cp.GetLifeTime(),color);
+                        DebugDrawer.DrawContactPoint(cp.GetPositionWorldOnB(),cp.GetNormalWorldOnB(),cp.GetDistance(),cp.GetLifeTime(),color);
                     }
                 }
             }
 
-            if (GetDebugDrawer() != null)
+            if (DebugDrawer != null)
             {
-                DebugDrawModes debugMode = GetDebugDrawer().GetDebugMode();
+                DebugDrawModes debugMode = DebugDrawer.DebugMode;
                 bool wireFrame = (debugMode & DebugDrawModes.DrawWireframe) != 0;
                 bool aabb = (debugMode & DebugDrawModes.DrawAabb) != 0;
 
@@ -253,7 +251,7 @@ namespace BulletXNA.BulletCollision
 
 					        Vector3 minAabb2,maxAabb2;
 
-                            if(GetDispatchInfo().m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject)
+                            if(DispatchInfo.m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject)
  					        {
                                 Matrix m = colObj.GetInterpolationWorldTransform();
                                 //(colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
@@ -277,7 +275,163 @@ namespace BulletXNA.BulletCollision
 
         public virtual void DebugDrawObject(ref Matrix worldTransform, CollisionShape shape, ref Vector3 color)
         {
-            //DrawHelper.DebugDrawObject(ref worldTransform, shape, ref color, GetDebugDrawer());
+            // Draw a small simplex at the center of the object
+            DebugDrawer.DrawTransform(ref worldTransform, 1.0f);
+
+            switch (shape.ShapeType)
+            {
+                case BroadphaseNativeType.CompoundShape:
+                    {
+                        CompoundShape compoundShape = (CompoundShape)shape;
+                        for (int i = compoundShape.GetNumChildShapes() - 1; i >= 0; i--)
+                        {
+                            Matrix childTrans = compoundShape.GetChildTransform(i);
+                            CollisionShape colShape = compoundShape.GetChildShape(i);
+                            Matrix temp = worldTransform * childTrans;
+                            DebugDrawObject(ref temp, colShape, ref color);
+                        }
+                        break;
+                    }
+                case (BroadphaseNativeType.BoxShape):
+                    {
+                        BoxShape boxShape = shape as BoxShape;
+                        Vector3 halfExtents = boxShape.GetHalfExtentsWithMargin();
+                        Vector3 negHalfExtents = -halfExtents;
+                        DebugDrawer.DrawBox(ref negHalfExtents, ref halfExtents, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeType.SphereShape:
+                    {
+                        SphereShape sphereShape = shape as SphereShape;
+                        float radius = sphereShape.Margin;//radius doesn't include the margin, so draw with margin
+                        DebugDrawer.DrawSphere(radius, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeType.MultiSphereShape:
+                    {
+                        MultiSphereShape multiSphereShape = (MultiSphereShape)shape;
+
+                        for (int i = multiSphereShape.SphereCount - 1; i >= 0; i--)
+                        {
+                            Matrix childTransform = worldTransform;
+                            childTransform.Translation += multiSphereShape.GetSpherePosition(i);
+                            DebugDrawer.DrawSphere(multiSphereShape.GetSphereRadius(i), ref childTransform, ref color);
+                        }
+                        break;
+                    }
+                case BroadphaseNativeType.CapsuleShape:
+                    {
+                        CapsuleShape capsuleShape = shape as CapsuleShape;
+
+                        float radius = capsuleShape.Radius;
+                        float halfHeight = capsuleShape.HalfHeight;
+
+                        int upAxis = capsuleShape.UpAxis;
+                        DebugDrawer.DrawCapsule(radius, halfHeight, upAxis, ref worldTransform, ref color);
+                        break;
+                    }
+                case BroadphaseNativeType.ConeShape:
+                    {
+                        ConeShape coneShape = (ConeShape)shape;
+                        float radius = coneShape.Radius;//+coneShape.Margin;
+                        float height = coneShape.Height;//+coneShape.Margin;
+
+                        int upAxis = coneShape.ConeUpIndex;
+                        DebugDrawer.DrawCone(radius, height, upAxis, ref worldTransform, ref color);
+                        break;
+
+                    }
+                case BroadphaseNativeType.CylinderShape:
+                    {
+                        CylinderShape cylinder = (CylinderShape)shape;
+                        int upAxis = cylinder.UpAxis;
+                        float radius = cylinder.Radius;
+
+                        float halfHeight = cylinder.GetHalfExtentsWithMargin()[upAxis];
+                        DebugDrawer.DrawCylinder(radius, halfHeight, upAxis, ref worldTransform, ref color);
+                        break;
+                    }
+
+                case BroadphaseNativeType.StaticPlane:
+                    {
+                        StaticPlaneShape staticPlaneShape = shape as StaticPlaneShape;
+                        float planeConst = staticPlaneShape.PlaneConstant;
+                        Vector3 planeNormal = staticPlaneShape.GetPlaneNormal();
+                        DebugDrawer.DrawPlane(ref planeNormal, planeConst, ref worldTransform, ref color);
+                        break;
+                    }
+                default:
+                    {
+                        if (shape.IsPolyhedral)/// for polyhedral shapes
+                        {
+                            PolyhedralConvexShape polyshape = shape as PolyhedralConvexShape;
+                            ConvexPolyhedron poly = polyshape.ConvexPolyhedron;
+                            if (poly != null)
+                            {
+                                for (int i = 0; i < poly.m_faces.Count; i++)
+                                {
+                                    Vector3 centroid = Vector3.Zero;
+                                    int numVerts = poly.m_faces[i].m_indices.Count;
+                                    if (numVerts != 0)
+                                    {
+                                        int lastV = poly.m_faces[i].m_indices[numVerts - 1];
+                                        for (int v = 0; v < poly.m_faces[i].m_indices.Count; v++)
+                                        {
+                                            int curVert = poly.m_faces[i].m_indices[v];
+                                            centroid += poly.m_vertices[curVert];
+                                            DebugDrawer.DrawLine(worldTransform * poly.m_vertices[lastV], worldTransform * poly.m_vertices[curVert], color);
+                                            lastV = curVert;
+                                        }
+                                    }
+                                    centroid *= 1.0f / (float)(numVerts);
+
+                                    Vector3 normalColor = new Vector3(1, 1, 0);
+                                    Vector3 faceNormal = new Vector3(poly.m_faces[i].m_plane[0], poly.m_faces[i].m_plane[1], poly.m_faces[i].m_plane[2]);
+                                    DebugDrawer.DrawLine(worldTransform * centroid, worldTransform * (centroid + faceNormal), normalColor);
+                                }
+
+                            }
+                            else
+                            {
+                                for (int i = 0; i < polyshape.GetNumEdges(); i++)
+                                {
+                                    Vector3 a, b;
+                                    polyshape.GetEdge(i, out a, out b);
+                                    Vector3 wa = worldTransform * a;
+                                    Vector3 wb = worldTransform * b;
+                                    DebugDrawer.DrawLine(ref wa, ref wb, ref color);
+                                }
+                            }
+                        }
+
+                        if (shape.IsConcave)
+                        {
+                            ConcaveShape concaveMesh = (ConcaveShape)shape;
+
+                            ///@todo pass camera, for some culling? no -> we are not a graphics lib
+                            Vector3 aabbMax = MathUtil.MAX_VECTOR;
+                            Vector3 aabbMin = MathUtil.MIN_VECTOR;
+                            //using (BulletXNA.DebugDrawcallback drawCallback = BulletGlobals.DebugDrawcallbackPool.Get())
+                            {
+                                //drawCallback.Initialise(DebugDrawer, ref worldTransform, ref color);
+                                //concaveMesh.ProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                            }
+                        }
+                        else if (shape.ShapeType == BroadphaseNativeType.ConvexTriangleMeshShape)
+                        {
+                            ConvexTriangleMeshShape convexMesh = (ConvexTriangleMeshShape)shape;
+                            //todo: pass camera for some culling			
+                            Vector3 aabbMax = MathUtil.MAX_VECTOR;
+                            Vector3 aabbMin = MathUtil.MIN_VECTOR;
+
+                            //DebugDrawcallback drawCallback;
+                            //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
+                            //convexMesh.GetMeshInterface().InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                            //drawCallback.Cleanup();
+                        }
+                        break;
+                    }
+            }
         }
 
 
@@ -440,21 +594,21 @@ namespace BulletXNA.BulletCollision
                 );
         }
 
-        public ObjectArray<CollisionObject> GetCollisionObjectArray()
+        public ObjectArray<CollisionObject> CollisionObjectArray
         {
-            return m_collisionObjects;
+            get { return m_collisionObjects; }
         }
 
-        public DispatcherInfo GetDispatchInfo()
+        public DispatcherInfo DispatchInfo
         {
-            return m_dispatchInfo;
+            get { return m_dispatchInfo; }
         }
 
         public virtual void PerformDiscreteCollisionDetection()
         {
             BulletGlobals.StartProfile("performDiscreteCollisionDetection");
 
-            DispatcherInfo dispatchInfo = GetDispatchInfo();
+            DispatcherInfo dispatchInfo = DispatchInfo;
 
             UpdateAabbs();
 
@@ -603,7 +757,7 @@ namespace BulletXNA.BulletCollision
                             triangleMesh.PerformRaycast(rcb, ref rayFromLocal, ref rayToLocal);
                         }
                     }
-                    else if (collisionShape.ShapeType == BroadphaseNativeType.TERRAIN_SHAPE_PROXYTYPE && collisionShape is HeightfieldTerrainShape)
+                    else if (collisionShape.ShapeType == BroadphaseNativeType.TerrainShape && collisionShape is HeightfieldTerrainShape)
                     {
                         ///optimized version for btBvhTriangleMeshShape
                         HeightfieldTerrainShape heightField = (HeightfieldTerrainShape)collisionShape;
@@ -1756,7 +1910,7 @@ namespace BulletXNA.BulletCollision
                 {
                     BridgedManifoldResult contactPointResult = new BridgedManifoldResult(m_collisionObject, collisionObject, m_resultCallback);
                     //discrete collision detection query
-                    algorithm.ProcessCollision(m_collisionObject, collisionObject, m_world.GetDispatchInfo(), contactPointResult);
+                    algorithm.ProcessCollision(m_collisionObject, collisionObject, m_world.DispatchInfo, contactPointResult);
 
                     m_world.GetDispatcher().FreeCollisionAlgorithm(algorithm);
                 }
@@ -1802,7 +1956,7 @@ namespace BulletXNA.BulletCollision
 
             Vector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
 
-            if ((int)(m_debugDrawer.GetDebugMode() & DebugDrawModes.DrawNormals) != 0)
+            if ((int)(m_debugDrawer.DebugMode & DebugDrawModes.DrawNormals) != 0)
             {
 
                 Vector3 normal = (wv1 - wv0).Cross(wv2 - wv0);

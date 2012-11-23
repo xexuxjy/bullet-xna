@@ -49,10 +49,18 @@ namespace BulletXNA.BulletCollision
 
             float radius = m_sphere.Radius;
             float radiusWithThreshold = radius + contactBreakingThreshold;
+            Vector3 v1;
+            Vector3.Subtract(out v1,ref vertices[1],ref vertices[0]);
+            Vector3 v2;
+            Vector3.Subtract(out v2, ref vertices[2], ref vertices[0]);
 
-            Vector3 normal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+            Vector3 normal = new Vector3(v1.Y * v2.Z - v1.Z * v2.Y, v1.Z * v2.X - v1.X * v2.Z, v1.X * v2.Y - v1.Y * v2.X);
+
+            //IndexedVector3 normal = IndexedVector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+
             normal.Normalize();
-            Vector3 p1ToCentre = sphereCenter - vertices[0];
+            Vector3 p1ToCentre;
+            Vector3.Subtract(out p1ToCentre, ref sphereCenter, ref vertices[0]);
             float distanceFromPlane = Vector3.Dot(ref p1ToCentre, ref normal);
 
             if (distanceFromPlane < 0f)

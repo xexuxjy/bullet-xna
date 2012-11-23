@@ -38,7 +38,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CcdPhysicsDemo.cs" />
-    <Compile Include="Physics.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DemoFramework\DemoFramework.csproj">

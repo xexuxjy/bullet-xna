@@ -200,9 +200,9 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public IList<CompoundShapeChild> GetChildList()
+        public IList<CompoundShapeChild> ChildList
         {
-            return m_children;
+            get { return m_children; }
         }
 
         ///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
@@ -353,9 +353,9 @@ namespace BulletXNA.BulletCollision
                 j._Row1 = new Vector3(0, o2, 0);
                 j._Row2 = new Vector3(0, 0, o2);
 
-                j._Row0 = o * -o.X;
-                j._Row1 = o * -o.Y;
-                j._Row2 = o * -o.Z;
+                j._Row0 += o * -o.X;
+                j._Row1 += o * -o.Y;
+                j._Row2 += o * -o.Z;
 
                 //add inertia tensor of pointmass
                 tensor[0] += masses[k] * j[0];

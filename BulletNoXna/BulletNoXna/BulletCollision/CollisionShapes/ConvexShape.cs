@@ -190,8 +190,8 @@ namespace BulletXNA.BulletCollision
                         Vector3 vec0 = localDir;
 
                         CapsuleShape capsuleShape = this as CapsuleShape;
-                        float halfHeight = capsuleShape.GetHalfHeight();
-                        int capsuleUpAxis = capsuleShape.GetUpAxis();
+                        float halfHeight = capsuleShape.HalfHeight;
+                        int capsuleUpAxis = capsuleShape.UpAxis;
 
                         float radius = capsuleShape.Radius;
                         Vector3 supVec = new Vector3();
@@ -218,7 +218,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] = halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.MarginNV;
                             newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
@@ -232,7 +232,7 @@ namespace BulletXNA.BulletCollision
                             pos[capsuleUpAxis] =  -halfHeight;
 
                             //vtx = pos +vec*(radius);
-                            vtx = pos + vec * (radius) - vec * capsuleShape.GetMarginNV();
+                            vtx = pos + vec * (radius) - vec * capsuleShape.MarginNV;
                             newDot = Vector3.Dot(ref vec, ref vtx);
 
                             if (newDot > maxDot)
@@ -303,29 +303,29 @@ namespace BulletXNA.BulletCollision
                 case BroadphaseNativeType.BoxShape:
                     {
                         BoxShape convexShape = this as BoxShape;
-                        return convexShape.GetMarginNV();
+                        return convexShape.MarginNV;
                     }
                 case BroadphaseNativeType.TriangleShape:
                     {
                         TriangleShape triangleShape = this as TriangleShape;
-                        return triangleShape.GetMarginNV();
+                        return triangleShape.MarginNV;
                     }
                 case BroadphaseNativeType.CylinderShape:
                     {
                         CylinderShape cylShape = this as CylinderShape;
-                        return cylShape.GetMarginNV();
+                        return cylShape.MarginNV;
                     }
                 case BroadphaseNativeType.CapsuleShape:
                     {
                         CapsuleShape capsuleShape = this as CapsuleShape;
-                        return capsuleShape.GetMarginNV();
+                        return capsuleShape.MarginNV;
                     }
                 case BroadphaseNativeType.CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
                 /* fall through */
                 case BroadphaseNativeType.ConvexHullShape:
                     {
                         PolyhedralConvexShape convexHullShape = this as PolyhedralConvexShape;
-                        return convexHullShape.GetMarginNV();
+                        return convexHullShape.MarginNV;
                     }
                 default:
                     return this.Margin;
@@ -391,8 +391,8 @@ namespace BulletXNA.BulletCollision
                         CapsuleShape capsuleShape = this as CapsuleShape;
                         float r = capsuleShape.Radius;
                         Vector3 halfExtents = new Vector3(r);
-                        int m_upAxis = capsuleShape.GetUpAxis();
-                        halfExtents[m_upAxis] =  r + capsuleShape.GetHalfHeight();
+                        int m_upAxis = capsuleShape.UpAxis;
+                        halfExtents[m_upAxis] =  r + capsuleShape.HalfHeight;
                         float nvMargin = capsuleShape.GetMarginNonVirtual();
                         halfExtents += new Vector3(nvMargin);
 
@@ -448,7 +448,7 @@ namespace BulletXNA.BulletCollision
 
         public abstract void GetAabbSlow(ref Matrix t, out Vector3 aabbMin, out Vector3 aabbMax);
 
-        public abstract int GetNumPreferredPenetrationDirections();
+        public abstract int NumPreferredPenetrationDirections{get;}
 
         public abstract void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector);
 

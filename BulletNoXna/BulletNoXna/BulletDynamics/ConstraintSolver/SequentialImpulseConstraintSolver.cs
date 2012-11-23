@@ -253,7 +253,7 @@ namespace BulletXNA.BulletDynamics
 			}
 
 			///warm starting (or zero if disabled)
-			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_WARMSTARTING))
+			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.UseWarmStarting))
 			{
 				solverConstraint.m_appliedImpulse = cp.GetAppliedImpulse() * infoGlobal.m_warmstartingFactor;
 				if (rb0 != null)
@@ -317,11 +317,11 @@ namespace BulletXNA.BulletDynamics
 		protected void SetFrictionConstraintImpulse(ref SolverConstraint solverConstraint, RigidBody rb0, RigidBody rb1,
 										 ManifoldPoint cp, ContactSolverInfo infoGlobal)
 		{
-			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_FRICTION_WARMSTARTING))
+			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.UseFrictionWarmStarting))
 			{
 				{
 					SolverConstraint frictionConstraint1 = m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex];
-					if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_WARMSTARTING))
+					if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.UseWarmStarting))
 					{
 						frictionConstraint1.m_appliedImpulse = cp.m_appliedImpulseLateral1 * infoGlobal.m_warmstartingFactor;
 						if (rb0 != null)
@@ -341,10 +341,10 @@ namespace BulletXNA.BulletDynamics
 
 				}
 
-				if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
+				if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 				{
 					SolverConstraint frictionConstraint2 = m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex + 1];
-					if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_WARMSTARTING))
+					if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.UseWarmStarting))
 					{
 						frictionConstraint2.m_appliedImpulse = cp.m_appliedImpulseLateral2 * infoGlobal.m_warmstartingFactor;
 						if (rb0 != null)
@@ -367,7 +367,7 @@ namespace BulletXNA.BulletDynamics
 			{
 				SolverConstraint frictionConstraint1 = m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex];
 				frictionConstraint1.m_appliedImpulse = 0f;
-				if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
+				if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 				{
 					SolverConstraint frictionConstraint2 = m_tmpSolverContactFrictionConstraintPool[solverConstraint.m_frictionIndex + 1];
 					frictionConstraint2.m_appliedImpulse = 0f;
@@ -478,15 +478,15 @@ namespace BulletXNA.BulletDynamics
 
 					solverConstraint.m_frictionIndex = m_tmpSolverContactFrictionConstraintPool.Count;
 
-					if (!(TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_ENABLE_FRICTION_DIRECTION_CACHING)) || !cp.GetLateralFrictionInitialized())
+					if (!(TestSolverMode(infoGlobal.m_solverMode, SolverMode.EnableFrictionDirectionCaching)) || !cp.GetLateralFrictionInitialized())
 					{
 						cp.m_lateralFrictionDir1 = vel - cp.m_normalWorldOnB * rel_vel;
 						float lat_rel_vel = cp.m_lateralFrictionDir1.LengthSquared();
-						if (!TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION) && lat_rel_vel > MathUtil.SIMD_EPSILON)
+						if (!TestSolverMode(infoGlobal.m_solverMode, SolverMode.DisableVelocityDependentFrictionDirection) && lat_rel_vel > MathUtil.SIMD_EPSILON)
 						{
 							cp.m_lateralFrictionDir1 /= (float)Math.Sqrt(lat_rel_vel);
 
-							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
+							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 							{
 								cp.m_lateralFrictionDir2 = Vector3.Cross(cp.m_lateralFrictionDir1, cp.m_normalWorldOnB);
 								cp.m_lateralFrictionDir2.Normalize();//??
@@ -504,7 +504,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							//re-calculate friction direction every frame, todo: check if this is really needed
 							TransformUtil.PlaneSpace1(ref cp.m_normalWorldOnB, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
-							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
+							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 							{
 								ApplyAnisotropicFriction(colObj0, ref cp.m_lateralFrictionDir2);
 								ApplyAnisotropicFriction(colObj1, ref cp.m_lateralFrictionDir2);
@@ -522,7 +522,7 @@ namespace BulletXNA.BulletDynamics
 					{
 						AddFrictionConstraint(ref cp.m_lateralFrictionDir1, solverBodyA, solverBodyB, frictionIndex, cp, ref rel_pos1, ref rel_pos2, colObj0, colObj1, relaxation, cp.m_contactMotion1, cp.m_contactCFM1);
 
-						if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_USE_2_FRICTION_DIRECTIONS))
+						if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 						{
 							AddFrictionConstraint(ref cp.m_lateralFrictionDir2, solverBodyA, solverBodyB, frictionIndex, cp, ref rel_pos1, ref rel_pos2, colObj0, colObj1, relaxation, cp.m_contactMotion2, cp.m_contactCFM2);
 						}
@@ -741,7 +741,7 @@ namespace BulletXNA.BulletDynamics
 
 				SolverConstraint solveManifold = m_tmpSolverContactConstraintPool[j];
                 solveManifold.m_originalContactPoint.SetAppliedImpulse(solveManifold.m_appliedImpulse);
-				if ((infoGlobal.m_solverMode & SolverMode.SOLVER_USE_FRICTION_WARMSTARTING) != 0)
+				if ((infoGlobal.m_solverMode & SolverMode.UseFrictionWarmStarting) != 0)
 				{
                     solveManifold.m_originalContactPoint.SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
                     solveManifold.m_originalContactPoint.SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
@@ -1118,7 +1118,7 @@ namespace BulletXNA.BulletDynamics
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
 
 			//should traverse the contacts random order...
-			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.SOLVER_RANDMIZE_ORDER))
+			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.RandomizeOrder))
 			{
 				if ((iteration & 7) == 0)
 				{

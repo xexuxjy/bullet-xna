@@ -106,9 +106,9 @@ namespace BulletXNA.BulletCollision
 		    return	m_planeNormal;
 	    }
 
-	    public float GetPlaneConstant()
+	    public float PlaneConstant
 	    {
-		    return	m_planeConstant;
+            get { return m_planeConstant; }
 	    }
 
 	    //debugging

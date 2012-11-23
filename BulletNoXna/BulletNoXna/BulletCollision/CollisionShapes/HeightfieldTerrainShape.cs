@@ -881,7 +881,7 @@ namespace BulletXNA.BulletCollision
                 "Bad height data type enum");
 
             // initialize member variables
-            m_shapeType = BroadphaseNativeType.TERRAIN_SHAPE_PROXYTYPE;
+            m_shapeType = BroadphaseNativeType.TerrainShape;
             m_heightStickWidth = heightStickWidth;
             m_heightStickLength = heightStickLength;
             m_minHeight = minHeight;

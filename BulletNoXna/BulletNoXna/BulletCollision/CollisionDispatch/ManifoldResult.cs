@@ -184,8 +184,8 @@ namespace BulletXNA.BulletCollision
             //User can override friction and/or restitution
             if (BulletGlobals.gContactAddedCallback != null &&
                 //and if either of the two bodies requires custom material
-                 ((m_body0.GetCollisionFlags() & CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK) != 0 ||
-                   (m_body1.GetCollisionFlags() & CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK) != 0))
+                 ((m_body0.GetCollisionFlags() & CollisionFlags.CustomMaterialCallback) != 0 ||
+                   (m_body1.GetCollisionFlags() & CollisionFlags.CustomMaterialCallback) != 0))
             {
                 //experimental feature info, for per-triangle material etc.
                 CollisionObject obj0 = isSwapped ? m_body1 : m_body0;

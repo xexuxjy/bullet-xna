@@ -35,7 +35,7 @@ namespace BulletXNA.BulletCollision
     {
         public static void GetPlaneEquation(StaticPlaneShape plane,out Vector4 equation)
         {
-            equation = new Vector4(plane.GetPlaneNormal(),plane.GetPlaneConstant());
+            equation = new Vector4(plane.GetPlaneNormal(),plane.PlaneConstant);
 
         }
 
@@ -48,7 +48,7 @@ namespace BulletXNA.BulletCollision
             equation.X = trans._basis.GetRow(0).Dot(ref planeNormal);
             equation.Y = trans._basis.GetRow(1).Dot(ref planeNormal);
             equation.Z = trans._basis.GetRow(2).Dot(ref planeNormal);
-            equation.W = trans.Translation.Dot(ref planeNormal) + plane.GetPlaneConstant();
+            equation.W = trans.Translation.Dot(ref planeNormal) + plane.PlaneConstant;
         }
     }
 

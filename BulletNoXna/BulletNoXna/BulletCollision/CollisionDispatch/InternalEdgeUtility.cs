@@ -5,6 +5,8 @@ using System.Diagnostics;
 using BulletXNA.LinearMath;
 
 
+
+
 namespace BulletXNA.BulletCollision.CollisionDispatch
 {
     public class InternalEdgeUtility
@@ -349,7 +351,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             trimeshShape.SetTriangleInfoMap(triangleInfoMap);
 
-            StridingMeshInterface meshInterface = trimeshShape.GetMeshInterface();
+            StridingMeshInterface meshInterface = trimeshShape.MeshInterface;
             Vector3 meshScaling = meshInterface.GetScaling();
 
             for (int partId = 0; partId < meshInterface.GetNumSubParts(); partId++)
@@ -375,22 +377,6 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                             int[] indexList = ((ObjectArray<int>)indexbase).GetRawArray();
 
                             if (vertexbase is ObjectArray<Vector3>)
-                            {
-                                Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
-                                int indexCounter = 0;
-                                for (int triangleIndex = 0; triangleIndex < numfaces; triangleIndex++)
-                                {
-                                    int index1 = indexList[triangleIndex];
-                                    int index2 = indexList[triangleIndex + 1];
-                                    int index3 = indexList[triangleIndex + 2];
-
-                                    triangleVerts[0] = new Vector3(vertexList[index1]) * meshScaling;
-                                    triangleVerts[1] = new Vector3(vertexList[index2]) * meshScaling;
-                                    triangleVerts[2] = new Vector3(vertexList[index3]) * meshScaling;
-                                    ProcessResult(triangleVerts, out aabbMin, out aabbMax, trimeshShape, partId, triangleIndex, triangleInfoMap);
-                                }
-                            }
-                            else if (vertexbase is ObjectArray<Vector3>)
                             {
                                 Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
                                 int indexCounter = 0;

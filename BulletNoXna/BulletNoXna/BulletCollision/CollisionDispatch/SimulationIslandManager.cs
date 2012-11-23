@@ -95,8 +95,8 @@ public void UpdateActivationState(CollisionWorld colWorld,IDispatcher dispatcher
 
 		int i;
         
-        CollisionObject[] collisionObjects = colWorld.GetCollisionObjectArray().GetRawArray();
-        int length = colWorld.GetCollisionObjectArray().Count;
+        CollisionObject[] collisionObjects = colWorld.CollisionObjectArray.GetRawArray();
+        int length = colWorld.CollisionObjectArray.Count;
 		for (i=0;i<length; i++)
 		{
 			CollisionObject collisionObject= collisionObjects[i];
@@ -122,8 +122,8 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 	{
 		int index = 0;
 		int i;
-        CollisionObject[] collisionObjects = colWorld.GetCollisionObjectArray().GetRawArray();
-        int length = colWorld.GetCollisionObjectArray().Count;
+        CollisionObject[] collisionObjects = colWorld.CollisionObjectArray.GetRawArray();
+        int length = colWorld.CollisionObjectArray.Count;
 		for (i=0;i<length; i++)
 		{
 			CollisionObject collisionObject= collisionObjects[i];
@@ -149,12 +149,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
         public virtual void UpdateActivationState(CollisionWorld collisionWorld, IDispatcher dispatcher)
         {
-            InitUnionFind(collisionWorld.GetCollisionObjectArray().Count);
+            InitUnionFind(collisionWorld.CollisionObjectArray.Count);
 
             // put the index into m_controllers into m_tag	
             {
                 int index = 0;
-                ObjectArray<CollisionObject> list = collisionWorld.GetCollisionObjectArray();
+                ObjectArray<CollisionObject> list = collisionWorld.CollisionObjectArray;
                 int length = list.Count;
                 CollisionObject[] rawList = list.GetRawArray();
                 for (int i = 0; i < length; ++i)
@@ -174,7 +174,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         public virtual void StoreIslandActivationState(CollisionWorld collisionWorld)
         {
             int index = 0;
-            ObjectArray<CollisionObject> list = collisionWorld.GetCollisionObjectArray();
+            ObjectArray<CollisionObject> list = collisionWorld.CollisionObjectArray;
             int length = list.Count;
             CollisionObject[] rawList = list.GetRawArray();
             for (int i = 0; i < length; ++i)
@@ -198,7 +198,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 #endif
         public void BuildAndProcessIslands(IDispatcher dispatcher, CollisionWorld collisionWorld, IIslandCallback callback)
         {
-            ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
+            ObjectArray<CollisionObject> collisionObjects = collisionWorld.CollisionObjectArray;
 
             BuildIslands(dispatcher, collisionWorld);
 
@@ -322,7 +322,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
         {
             BulletGlobals.StartProfile("islandUnionFindAndQuickSort");
 
-            ObjectArray<CollisionObject> collisionObjects = collisionWorld.GetCollisionObjectArray();
+            ObjectArray<CollisionObject> collisionObjects = collisionWorld.CollisionObjectArray;
 
             m_islandmanifold.Clear();
 

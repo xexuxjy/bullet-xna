@@ -29,13 +29,13 @@ namespace BulletXNA.BulletCollision
     [Flags]
     public enum CollisionFlags
     {
-        CF_STATIC_OBJECT = 1,
-        CF_KINEMATIC_OBJECT = 2,
-        CF_NO_CONTACT_RESPONSE = 4,
-        CF_CUSTOM_MATERIAL_CALLBACK = 8,
-        CF_CHARACTER_OBJECT = 16,
-        CF_DISABLE_VISUALIZE_OBJECT = 32, //disable debug drawing
-        CF_DISABLE_SPU_COLLISION_PROCESSING = 64//disable parallel/SPU processing
+        StaticObject = 1,
+        KinematicObject = 2,
+        NoContactResponse = 4,
+        CustomMaterialCallback = 8,
+        CharacterObject = 16,
+        DisableVisualizeObject = 32, //disable debug drawing
+        DisableSpuCollisionProcessing = 64//disable parallel/SPU processing
     }
 
 
@@ -77,7 +77,7 @@ namespace BulletXNA.BulletCollision
             m_broadphaseHandle = null;
             m_collisionShape = null;
             m_rootCollisionShape = null;
-            m_collisionFlags = CollisionFlags.CF_STATIC_OBJECT;
+            m_collisionFlags = CollisionFlags.StaticObject;
             m_islandTag1 = -1;
             m_companionId = -1;
             m_activationState1 = ActivationState.ActiveTag;
@@ -101,7 +101,7 @@ namespace BulletXNA.BulletCollision
 
         public bool MergesSimulationIslands()
         {
-            CollisionFlags collisionMask = CollisionFlags.CF_STATIC_OBJECT | CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_NO_CONTACT_RESPONSE;
+            CollisionFlags collisionMask = CollisionFlags.StaticObject | CollisionFlags.KinematicObject | CollisionFlags.NoContactResponse;
             ///static objects, kinematic and object without contact response don't merge islands
             return ((m_collisionFlags & collisionMask) == 0);
         }
@@ -131,22 +131,22 @@ namespace BulletXNA.BulletCollision
 
         public bool IsStaticObject
         {
-            get { return (m_collisionFlags & CollisionFlags.CF_STATIC_OBJECT) != 0; }
+            get { return (m_collisionFlags & CollisionFlags.StaticObject) != 0; }
         }
 
         public bool IsKinematicObject
         {
-            get { return (m_collisionFlags & CollisionFlags.CF_KINEMATIC_OBJECT) != 0; }
+            get { return (m_collisionFlags & CollisionFlags.KinematicObject) != 0; }
         }
 
         public bool IsStaticOrKinematicObject
         {
-            get { return (m_collisionFlags & (CollisionFlags.CF_KINEMATIC_OBJECT | CollisionFlags.CF_STATIC_OBJECT)) != 0; }
+            get { return (m_collisionFlags & (CollisionFlags.KinematicObject | CollisionFlags.StaticObject)) != 0; }
         }
 
         public bool HasContactResponse
         {
-            get { return (m_collisionFlags & CollisionFlags.CF_NO_CONTACT_RESPONSE) == 0; }
+            get { return (m_collisionFlags & CollisionFlags.NoContactResponse) == 0; }
         }
 
         public CollisionShape CollisionShape
@@ -229,7 +229,7 @@ namespace BulletXNA.BulletCollision
         }
         public void Activate(bool forceActivation)
         {
-            CollisionFlags collMask = CollisionFlags.CF_STATIC_OBJECT | CollisionFlags.CF_KINEMATIC_OBJECT;
+            CollisionFlags collMask = CollisionFlags.StaticObject | CollisionFlags.KinematicObject;
             if (forceActivation || ((m_collisionFlags & collMask) == 0))
             {
                 ActivationState = ActivationState.ActiveTag;

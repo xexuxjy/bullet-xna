@@ -122,10 +122,10 @@ namespace BulletXNA.BulletDynamics
             }
 
             //process some debugging flags
-            if (GetDebugDrawer() != null)
+            if (DebugDrawer != null)
             {
-                IDebugDraw debugDrawer = GetDebugDrawer();
-                BulletGlobals.gDisableDeactivation = ((debugDrawer.GetDebugMode() & DebugDrawModes.NoDeactivation) != 0);
+                IDebugDraw debugDrawer = DebugDrawer;
+                BulletGlobals.gDisableDeactivation = ((debugDrawer.DebugMode & DebugDrawModes.NoDeactivation) != 0);
             }
             if (numSimulationSubSteps != 0)
             {
@@ -375,7 +375,7 @@ namespace BulletXNA.BulletDynamics
         {
             BulletGlobals.StartProfile("debugDrawWorld");
             base.DebugDrawWorld();
-            //if (getDebugDrawer() != null && ((getDebugDrawer().getDebugMode() & DebugDrawModes.DBG_DrawContactPoints) != 0))
+            //if (DebugDrawer != null && ((DebugDrawer.DebugMode & DebugDrawModes.DBG_DrawContactPoints) != 0))
             //{
             //    int numManifolds = getDispatcher().getNumManifolds();
             //    Vector3 color = Vector3.Zero;
@@ -389,14 +389,14 @@ namespace BulletXNA.BulletDynamics
             //        for (int j=0;j<numContacts;j++)
             //        {
             //            ManifoldPoint cp = contactManifold.getContactPoint(j);
-            //            getDebugDrawer().drawContactPoint(cp.getPositionWorldOnB(),cp.getNormalWorldOnB(),cp.getDistance(),cp.getLifeTime(),color);
+            //            DebugDrawer.drawContactPoint(cp.getPositionWorldOnB(),cp.getNormalWorldOnB(),cp.getDistance(),cp.getLifeTime(),color);
             //        }
             //    }
             //}
             bool drawConstraints = false;
-            if (GetDebugDrawer() != null)
+            if (DebugDrawer != null)
             {
-                DebugDrawModes mode = GetDebugDrawer().GetDebugMode();
+                DebugDrawModes mode = DebugDrawer.DebugMode;
                 if ((mode & (DebugDrawModes.DrawConstraints | DebugDrawModes.DrawConstraintLimits)) != 0)
                 {
                     drawConstraints = true;
@@ -406,7 +406,7 @@ namespace BulletXNA.BulletDynamics
                         for (int i = NumConstraints - 1; i >= 0; i--)
                         {
                             TypedConstraint constraint = GetConstraint(i);
-                            //DrawHelper.DebugDrawConstraint(constraint, GetDebugDrawer());
+                            //DrawHelper.DebugDrawConstraint(constraint, DebugDrawer);
                         }
                     }
                 }
@@ -564,7 +564,7 @@ namespace BulletXNA.BulletDynamics
                         float squareMotion = (predictedTrans.Translation - body.GetWorldTransform().Translation).LengthSquared();
 
                         //if (body.GetCcdSquareMotionThreshold() != 0 && body.GetCcdSquareMotionThreshold() < squareMotion)
-                        if (GetDispatchInfo().m_useContinuous && body.GetCcdSquareMotionThreshold() != 0.0f && body.GetCcdSquareMotionThreshold() < squareMotion)
+                        if (DispatchInfo.m_useContinuous && body.GetCcdSquareMotionThreshold() != 0.0f && body.GetCcdSquareMotionThreshold() < squareMotion)
                         {
                             BulletGlobals.StartProfile("CCD motion clamping");
 
@@ -578,7 +578,7 @@ namespace BulletXNA.BulletDynamics
                                     //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
                                     SphereShape tmpSphere = BulletGlobals.SphereShapePool.Get();
                                     tmpSphere.Initialize(body.CcdSweptSphereRadius);//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                    sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
+                                    sweepResults.m_allowedPenetration = DispatchInfo.GetAllowedCcdPenetration();
 
                                     sweepResults.m_collisionFilterGroup = body.GetBroadphaseProxy().m_collisionFilterGroup;
                                     sweepResults.m_collisionFilterMask = body.GetBroadphaseProxy().m_collisionFilterMask;
@@ -804,11 +804,11 @@ namespace BulletXNA.BulletDynamics
             ///apply gravity, predict motion
             PredictUnconstraintMotion(timeStep);
 
-            DispatcherInfo dispatchInfo = GetDispatchInfo();
+            DispatcherInfo dispatchInfo = DispatchInfo;
 
             dispatchInfo.SetTimeStep(timeStep);
             dispatchInfo.SetStepCount(0);
-            dispatchInfo.SetDebugDraw(GetDebugDrawer());
+            dispatchInfo.SetDebugDraw(DebugDrawer);
 
             ///perform collision detection
             PerformDiscreteCollisionDetection();

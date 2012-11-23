@@ -93,13 +93,13 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-	    public ConvexShape GetShapeA()
-        { 
-            return m_shapeA;
+	    public ConvexShape ShapeA
+        {
+            get { return m_shapeA; }
         }
-	    public ConvexShape GetShapeB()
-        { 
-            return m_shapeB;
+	    public ConvexShape ShapeB
+        {
+            get { return m_shapeB; }
         }
 
 	    public override string Name

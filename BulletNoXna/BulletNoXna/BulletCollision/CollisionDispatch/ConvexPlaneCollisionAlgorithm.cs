@@ -102,7 +102,7 @@ namespace BulletXNA.BulletCollision
 
             bool hasCollision = false;
 	        Vector3 planeNormal = planeShape.GetPlaneNormal();
-	        float planeConstant = planeShape.GetPlaneConstant();
+	        float planeConstant = planeShape.PlaneConstant;
 	        Matrix planeInConvex;
 	        planeInConvex= convexObj.GetWorldTransform().Inverse() * planeObj.GetWorldTransform();
             Matrix convexInPlaneTrans;
@@ -174,7 +174,7 @@ namespace BulletXNA.BulletCollision
 
             bool hasCollision = false;
             Vector3 planeNormal = planeShape.GetPlaneNormal();
-            float planeConstant = planeShape.GetPlaneConstant();
+            float planeConstant = planeShape.PlaneConstant;
 
             Matrix convexWorldTransform = convexObj.GetWorldTransform();
             Matrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform; ;

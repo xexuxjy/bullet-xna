@@ -1028,9 +1028,9 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public StridingMeshInterface GetMeshInterface()
+        public StridingMeshInterface MeshInterface
         {
-            return m_meshInterface;
+            get { return m_meshInterface; }
         }
 
 

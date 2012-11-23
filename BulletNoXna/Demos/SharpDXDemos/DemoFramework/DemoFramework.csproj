@@ -57,10 +57,15 @@
     <Compile Include="Controller\Input.cs" />
     <Compile Include="Controller\MouseController.cs" />
     <Compile Include="Demo.cs" />
-    <Compile Include="InfoText.cs" />
+    <Compile Include="Graphics\BufferedDebugDraw.cs" />
+    <Compile Include="Graphics\Graphics.cs" />
+    <Compile Include="Graphics\MeshFactory.cs" />
+    <Compile Include="Graphics\SharpDX\InfoText.cs" />
+    <Compile Include="Graphics\SharpDX\MathHelper.cs" />
+    <Compile Include="Graphics\SharpDX\MeshFactory.cs" />
+    <Compile Include="Graphics\SharpDX\PhysicsDebugDraw.cs" />
+    <Compile Include="Graphics\SharpDX\SharpDXGraphics.cs" />
     <Compile Include="LibraryTest.cs" />
-    <Compile Include="MathHelper.cs" />
-    <Compile Include="MeshFactory.cs" />
     <Compile Include="PhysicsContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -71,6 +76,10 @@
     <None Include="shader.fx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\SharpDX\grender.fx" />
+    <EmbeddedResource Include="Graphics\SharpDX\shader.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

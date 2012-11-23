@@ -49,7 +49,7 @@ namespace BulletXNA.BulletDynamics
 		{
 			bool penetration = false;
 
-			collisionWorld.GetDispatcher().DispatchAllCollisionPairs(m_ghostObject.GetOverlappingPairCache(), collisionWorld.GetDispatchInfo(), collisionWorld.GetDispatcher());
+			collisionWorld.GetDispatcher().DispatchAllCollisionPairs(m_ghostObject.GetOverlappingPairCache(), collisionWorld.DispatchInfo, collisionWorld.GetDispatcher());
 
 			m_currentPosition = m_ghostObject.GetWorldTransform().Translation;
 
@@ -119,7 +119,7 @@ namespace BulletXNA.BulletDynamics
 
 			if (m_useGhostObjectSweepTest)
 			{
-				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
+				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.DispatchInfo.GetAllowedCcdPenetration());
 			}
 			else
 			{
@@ -221,11 +221,11 @@ namespace BulletXNA.BulletDynamics
 
 				if (m_useGhostObjectSweepTest)
 				{
-					m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
+					m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.DispatchInfo.GetAllowedCcdPenetration());
 				}
 				else
 				{
-					collisionWorld.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
+					collisionWorld.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.DispatchInfo.GetAllowedCcdPenetration());
 				}
 
 				m_convexShape.Margin = margin;
@@ -299,12 +299,12 @@ namespace BulletXNA.BulletDynamics
 			if (m_useGhostObjectSweepTest)
 			{
                 // this doesn't work....
-				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
+				m_ghostObject.ConvexSweepTest(m_convexShape, ref start, ref end, callback, collisionWorld.DispatchInfo.GetAllowedCcdPenetration());
 			}
 			else
 			{
                 // this works....
-				collisionWorld.ConvexSweepTest(m_convexShape, start, end, callback, collisionWorld.GetDispatchInfo().GetAllowedCcdPenetration());
+				collisionWorld.ConvexSweepTest(m_convexShape, start, end, callback, collisionWorld.DispatchInfo.GetAllowedCcdPenetration());
 			}
 
 			if (callback.HasHit)

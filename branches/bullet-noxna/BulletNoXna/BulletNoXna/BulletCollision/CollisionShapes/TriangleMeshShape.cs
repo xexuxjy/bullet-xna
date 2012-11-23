@@ -155,9 +155,9 @@ namespace BulletXNA.BulletCollision
             return m_meshInterface.GetScaling();
         }
 	
-	    public StridingMeshInterface GetMeshInterface()
+	    public StridingMeshInterface MeshInterface
 	    {
-		    return m_meshInterface;
+            get { return m_meshInterface; }
 	    }
 
 	    public Vector3 GetLocalAabbMin()
@@ -258,7 +258,7 @@ namespace BulletXNA.BulletCollision
 		{
             if (BulletGlobals.gDebugDraw != null)
             {
-                if ((int)(BulletGlobals.gDebugDraw.GetDebugMode() & DebugDrawModes.DrawNormals) != 0)
+                if ((int)(BulletGlobals.gDebugDraw.DebugMode & DebugDrawModes.DrawNormals) != 0)
                 {
                     Vector3 wv0, wv1, wv2;
                     wv0 = triangle[0];

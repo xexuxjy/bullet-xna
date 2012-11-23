@@ -44,7 +44,7 @@ namespace DemoFramework
             //remove the rigidbodies from the dynamics world and delete them
             for (i = World.NumCollisionObjects - 1; i >= 0; i--)
             {
-                CollisionObject obj = World.GetCollisionObjectArray()[i];
+                CollisionObject obj = World.CollisionObjectArray[i];
                 RigidBody body = obj as RigidBody;
                 if (body != null && body.MotionState != null)
                 {
@@ -98,31 +98,6 @@ namespace DemoFramework
             World.AddRigidBody(body);
 
             return body;
-        }
-
-        public virtual void ShootBox(Vector3 camPos, Vector3 destination)
-        {
-            if (World == null)
-                return;
-
-            float mass = 1.0f;
-
-            if (shootBoxShape == null)
-            {
-                shootBoxShape = new BoxShape(new Vector3(1.0f, 1.0f, 1.0f));
-                //shootBoxShape.InitializePolyhedralFeatures();
-            }
-
-            RigidBody body = LocalCreateRigidBody(mass, Matrix.CreateTranslation(camPos), shootBoxShape);
-            body.SetLinearFactor(new Vector3(1, 1, 1));
-            //body.Restitution = 1;
-
-            Vector3 linVel = destination - camPos;
-            linVel.Normalize();
-
-            body.LinearVelocity = linVel * shootBoxInitialSpeed;
-            body.CcdMotionThreshold = 0.5f;
-            body.CcdSweptSphereRadius = 0.9f;
         }
     };
 };

@@ -46,8 +46,8 @@ namespace BulletXNA.BulletCollision
 	        float radius = Radius;
 
 	        Vector3 halfExtents = new Vector3(radius);
-            float val = halfExtents[GetUpAxis()];
-	        halfExtents[GetUpAxis()] = val +GetHalfHeight();
+            float val = halfExtents[UpAxis];
+	        halfExtents[UpAxis] = val + HalfHeight;
 
 	        float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
 
@@ -115,7 +115,7 @@ namespace BulletXNA.BulletCollision
 
 	        {
 		        Vector3 pos = Vector3.Zero;
-		        pos[GetUpAxis()] = GetHalfHeight();
+		        pos[UpAxis] = HalfHeight;
 
 		        vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
 		        newDot = vec.Dot(ref vtx);
@@ -127,7 +127,7 @@ namespace BulletXNA.BulletCollision
 	        }
 	        {
                 Vector3 pos = Vector3.Zero;
-                pos[GetUpAxis()] = -GetHalfHeight();
+                pos[UpAxis] = -HalfHeight;
 
                 vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
                 newDot = vec.Dot(ref vtx);
@@ -154,7 +154,7 @@ namespace BulletXNA.BulletCollision
 		        float newDot = 0f;
 	            {
 		            Vector3 pos = Vector3.Zero;
-                    pos[GetUpAxis()] = GetHalfHeight();
+                    pos[UpAxis] = HalfHeight;
 
 		            vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
                     newDot = vec.Dot(ref vtx);
@@ -166,7 +166,7 @@ namespace BulletXNA.BulletCollision
 	            }
 	            {
                     Vector3 pos = Vector3.Zero;
-                    pos[GetUpAxis()] = -GetHalfHeight();
+                    pos[UpAxis] = -HalfHeight;
 
                     vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
                     newDot = vec.Dot(ref vtx);
@@ -182,7 +182,7 @@ namespace BulletXNA.BulletCollision
 	    public override void GetAabb (ref Matrix trans, out Vector3 aabbMin, out Vector3 aabbMax)
 	    {
 	        Vector3 halfExtents = new Vector3(Radius);
-            halfExtents[m_upAxis] = Radius + GetHalfHeight();
+            halfExtents[m_upAxis] = Radius + HalfHeight;
 
 	        halfExtents += new Vector3(Margin);
             IndexedBasisMatrix abs_b = trans._basis.Absolute();
@@ -201,9 +201,9 @@ namespace BulletXNA.BulletCollision
 		    get { return "CapsuleShape"; }
 	    }
 
-	    public int GetUpAxis()
+	    public int UpAxis
 	    {
-		    return m_upAxis;
+            get { return m_upAxis; }
 	    }
 
 	    public float Radius
@@ -215,9 +215,9 @@ namespace BulletXNA.BulletCollision
             }
 	    }
 
-	    public float GetHalfHeight()
+	    public float HalfHeight
 	    {
-            return m_implicitShapeDimensions[m_upAxis];
+            get { return m_implicitShapeDimensions[m_upAxis]; }
 	    }
         protected int m_upAxis;
 

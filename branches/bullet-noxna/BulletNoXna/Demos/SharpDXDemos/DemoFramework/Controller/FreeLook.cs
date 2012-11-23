@@ -12,6 +12,7 @@ namespace DemoFramework
 
         Input input;
         MouseController mouseController;
+        bool doUpdate;
 
         public FreeLook(Input input)
         {
@@ -29,12 +30,18 @@ namespace DemoFramework
             // Convert direction vector to Y-up for MouseController
             Matrix swapAxis = Matrix.CreateRotationAxis(Vector3.Cross(Up, Vector3.UnitY), Angle(Up, Vector3.UnitY));
             mouseController.Vector = swapAxis * Vector3.Normalize(eye - target);
+
+            doUpdate = true;
         }
 
         public bool Update(float frameDelta)
         {
             if (mouseController.Update() == false && input.KeysDown.Count == 0)
-                return false;
+            {
+                if (!doUpdate)
+                    return false;
+                doUpdate = false;
+            }
 
             // MouseController is Y-up, convert to Up-up
             Matrix swapAxis = Matrix.CreateRotationAxis(Vector3.Cross(Vector3.UnitY, Up), Angle(Vector3.UnitY, Up));
@@ -68,7 +75,7 @@ namespace DemoFramework
             return true;
         }
 
-        // vectors must be normalized
+        // vertices must be normalized
         float Angle(Vector3 v1, Vector3 v2)
         {
             return (float)Math.Acos(Vector3.Dot(v1, v2));

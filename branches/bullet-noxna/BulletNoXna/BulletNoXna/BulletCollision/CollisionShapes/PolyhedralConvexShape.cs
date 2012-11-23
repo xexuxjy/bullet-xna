@@ -182,9 +182,9 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public ConvexPolyhedron GetConvexPolyhedron()
+        public ConvexPolyhedron ConvexPolyhedron
         {
-            return m_polyhedron;
+            get { return m_polyhedron; }
         }
 
         public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(Vector3[] vectors, Vector4[] supportVerticesOut, int numVectors)

@@ -163,9 +163,9 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public override int GetNumPreferredPenetrationDirections()
+        public override int NumPreferredPenetrationDirections
         {
-	        return m_childConvexShape.GetNumPreferredPenetrationDirections();
+            get { return m_childConvexShape.NumPreferredPenetrationDirections; }
         }
 	
         public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
@@ -173,14 +173,14 @@ namespace BulletXNA.BulletCollision
             m_childConvexShape.GetPreferredPenetrationDirection(index, out penetrationVector);
         }
 
-	    public float GetUniformScalingFactor()
+	    public float UniformScalingFactor
 	    {
-		    return m_uniformScalingFactor;
+            get { return m_uniformScalingFactor; }
 	    }
 
-	    public ConvexShape GetChildShape() 
+	    public ConvexShape ChildShape
 	    {
-		    return m_childConvexShape;
+            get { return m_childConvexShape; }
 	    }
 
 	    public override string Name

@@ -70,8 +70,8 @@ namespace BulletXNA.BulletCollision
         }
 
 
-	    public float GetRadius()  { return m_radius;}
-	    public float GetHeight()  { return m_height;}
+        public float Radius { get { return m_radius; } }
+        public float Height { get { return m_height; } }
 
 
 	    public override void CalculateLocalInertia(float mass, out Vector3 inertia) 
@@ -135,9 +135,9 @@ namespace BulletXNA.BulletCollision
 
         }
     		
-	    public int GetConeUpIndex() 
+	    public int ConeUpIndex
 	    {
-		    return m_coneIndices[1];
+            get { return m_coneIndices[1]; }
 	    }
 
 	    protected float m_sinAngle;

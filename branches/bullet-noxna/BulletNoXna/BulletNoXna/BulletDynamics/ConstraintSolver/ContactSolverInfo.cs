@@ -67,7 +67,7 @@ namespace BulletXNA.BulletDynamics
 		    m_splitImpulsePenetrationThreshold = -0.02f;
             m_linearSlop = 0f;
 		    m_warmstartingFactor=0.85f;
-            m_solverMode = SolverMode.SOLVER_USE_WARMSTARTING | SolverMode.SOLVER_SIMD;//SOLVER_RANDMIZE_ORDER
+            m_solverMode = SolverMode.UseWarmStarting | SolverMode.Simd;//RandomizeOrder
 		    m_restingContactRestitutionThreshold = 2;//resting contact lifetime threshold to disable restitution
             m_minimumSolverBatchSize = 128; //try to combine islands until the amount of constraints reaches this limit
             //m_minimumSolverBatchSize = 1;
@@ -76,15 +76,15 @@ namespace BulletXNA.BulletDynamics
     [Flags]
     public enum SolverMode
     {
-        SOLVER_RANDMIZE_ORDER = 1,
-        SOLVER_FRICTION_SEPARATE = 2,
-        SOLVER_USE_WARMSTARTING = 4,
-        SOLVER_USE_FRICTION_WARMSTARTING = 8,
-        SOLVER_USE_2_FRICTION_DIRECTIONS = 16,
-        SOLVER_ENABLE_FRICTION_DIRECTION_CACHING = 32,
-        SOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION = 64,
-        SOLVER_CACHE_FRIENDLY = 128,
-        SOLVER_SIMD = 256,	//enabled for Windows, the solver innerloop is branchless SIMD, 40% faster than FPU/scalar version
-        SOLVER_CUDA = 512	//will be open sourced during Game Developers Conference 2009. Much faster.
+        RandomizeOrder = 1,
+        FrictionSeparate = 2,
+        UseWarmStarting = 4,
+        UseFrictionWarmStarting = 8,
+        Use2FrictionDirections = 16,
+        EnableFrictionDirectionCaching = 32,
+        DisableVelocityDependentFrictionDirection = 64,
+        CacheFriendly = 128,
+        Simd = 256,	//enabled for Windows, the solver innerloop is branchless SIMD, 40% faster than FPU/scalar version
+        Cuda = 512	//will be open sourced during Game Developers Conference 2009. Much faster.
     }
 }

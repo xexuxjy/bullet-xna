@@ -91,39 +91,6 @@ namespace BulletXNA.BulletCollision
             set { m_root = value; }
         }
 
-
-
-        public static bool Intersect(ref DbvtAabbMm a, ref DbvtAabbMm b)
-        {
-            Vector3 amin = a.Mins();
-            Vector3 amax = a.Maxs();
-            Vector3 bmin = b.Mins();
-            Vector3 bmax = b.Maxs();
-            return ((amin.X <= bmin.X) &&
-                (amin.Y <= bmax.Y) &&
-                (amin.Z <= bmax.Z) &&
-                (amax.X >= bmin.X) &&
-                (amax.Y >= bmin.Y) &&
-                (amax.Z >= bmin.Z));
-        }
-
-
-
-        public static bool Intersect(ref DbvtAabbMm a, ref Vector3 b)
-        {
-            Vector3 amin = a.Mins();
-            Vector3 amax = a.Maxs();
-
-            return ((b.X >= amin.X) &&
-                    (b.Y >= amin.Y) &&
-                    (b.Z >= amin.Z) &&
-                    (b.X <= amax.X) &&
-                    (b.Y <= amax.Y) &&
-                    (b.Z <= amax.Z));
-        }
-
-
-
         public void Clear()
         {
             if (m_root != null)
@@ -522,6 +489,8 @@ namespace BulletXNA.BulletCollision
                                   DbvtNode root1,
                                   ICollide collideable)
         {
+            //CollideTT(root0, root1, collideable);
+            //return;
             if (root0 != null && root1 != null)
             {
                 int depth = 1;
@@ -546,7 +515,7 @@ namespace BulletXNA.BulletCollision
                             m_stkStack[depth++] = new sStkNN(p.a._children[0], p.a._children[1]);
                         }
                     }
-                    else if (Intersect(ref p.a.volume, ref p.b.volume))
+                    else if (DbvtAabbMm.Intersect(ref p.a.volume, ref p.b.volume))
                     {
                         if (p.a.IsInternal())
                         {
@@ -576,7 +545,7 @@ namespace BulletXNA.BulletCollision
                             }
                         }
                     }
-                } while (depth != 0);
+                } while (depth > 0);
             }
         }
 

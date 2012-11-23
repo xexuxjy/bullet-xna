@@ -67,9 +67,9 @@ namespace BulletXNA.BulletCollision
             m_childConvexShape.CalculateLocalInertia(mass, out inertia);
 		}
 
-		public ConvexShape GetChildShape() 
+		public ConvexShape ChildShape
 		{
-			return m_childConvexShape;
+            get { return m_childConvexShape; }
 		}
 
 
@@ -116,9 +116,9 @@ namespace BulletXNA.BulletCollision
             }
 		}
 
-		public override int	GetNumPreferredPenetrationDirections()
+		public override int	NumPreferredPenetrationDirections
 		{
-			return m_childConvexShape.GetNumPreferredPenetrationDirections();
+            get { return m_childConvexShape.NumPreferredPenetrationDirections; }
 		}
 		
 		public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)

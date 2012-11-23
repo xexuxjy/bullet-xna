@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision
         {
 	        int numSampleDirections = NUM_UNITSPHERE_POINTS;
 	        {
-		        int numPDA = m_shape.GetNumPreferredPenetrationDirections();
+		        int numPDA = m_shape.NumPreferredPenetrationDirections;
 		        if (numPDA != 0)
 		        {
 			        for (int i=0;i<numPDA;i++)
@@ -112,19 +112,19 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public int NumTriangles()
+        public int NumTriangles
         {
-            return m_indices.Count / 3;
+            get { return m_indices.Count / 3; }
         }
 
-        public int NumVertices()
+        public int NumVertices
         {
-            return m_vertices.Count;
+            get { return m_vertices.Count; }
         }
 
-        public int NumIndices()
+        public int NumIndices
         {
-            return m_indices.Count;
+            get { return m_indices.Count; }
         }
 
         public IList<Vector3> m_vertices = new ObjectArray<Vector3>();

@@ -45,9 +45,9 @@ namespace BulletXNA.BulletCollision
             base.Cleanup();
         }
 
-	    public StridingMeshInterface GetMeshInterface()
+	    public StridingMeshInterface MeshInterface
 	    {
-		    return m_stridingMesh;
+            get { return m_stridingMesh; }
 	    }
 
 	    public override Vector3 LocalGetSupportingVertex(ref Vector3 vec)

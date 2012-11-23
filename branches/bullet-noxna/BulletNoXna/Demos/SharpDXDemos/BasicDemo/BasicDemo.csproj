@@ -38,12 +38,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BasicDemo.cs" />
-    <Compile Include="Physics.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BulletNoXna, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\BulletNoXna\bin\Debug\BulletNoXna.dll</HintPath>
+      <HintPath>..\..\..\BulletNoXna\bin\Release\BulletNoXna.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>..\SharpDX.dll</HintPath>

@@ -359,12 +359,12 @@ namespace BulletXNA.BulletDynamics
         {
 	        if (MathUtil.FuzzyZero(mass))
 	        {
-		        m_collisionFlags |= CollisionFlags.CF_STATIC_OBJECT;
+		        m_collisionFlags |= CollisionFlags.StaticObject;
 		        m_inverseMass = 0f;
 	        } 
             else
 	        {
-		        m_collisionFlags &= (~CollisionFlags.CF_STATIC_OBJECT);
+		        m_collisionFlags &= (~CollisionFlags.StaticObject);
 		        m_inverseMass = 1.0f / mass;
 	        }
 

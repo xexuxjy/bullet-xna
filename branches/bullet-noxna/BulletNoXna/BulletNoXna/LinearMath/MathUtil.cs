@@ -1433,7 +1433,7 @@ namespace BulletXNA
             return (xa - ya).LengthSquared();
         }
 
-        public static T Clamp<T>(T value, T max, T min)
+        public static T Clamp<T>(T value, T min, T max)
          where T : System.IComparable<T>
         {
             T result = value;

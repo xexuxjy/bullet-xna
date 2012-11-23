@@ -125,9 +125,9 @@ namespace BulletXNA.BulletCollision
             }
         }
 	
-	    public int	GetSphereCount()
+	    public int	SphereCount
 	    {
-		    return m_localPositionArray.Count;
+            get { return m_localPositionArray.Count; }
 	    }
 
 	    public Vector3 GetSpherePosition(int index)

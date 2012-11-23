@@ -162,6 +162,7 @@
     <Compile Include="IMotionState.cs" />
     <Compile Include="IProfile.cs" />
     <Compile Include="LinearMath\ConvexHullComputer.cs" />
+    <Compile Include="LinearMath\DebugDraw.cs" />
     <Compile Include="LinearMath\IndexedBasisMatrix.cs" />
     <Compile Include="LinearMath\Matrix.cs" />
     <Compile Include="LinearMath\MathHelper.cs" />

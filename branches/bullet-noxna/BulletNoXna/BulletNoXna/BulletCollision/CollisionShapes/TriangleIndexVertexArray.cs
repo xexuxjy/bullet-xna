@@ -61,7 +61,7 @@ namespace BulletXNA.BulletCollision
 	        indexedMesh.m_numVertices = numVertices;
 	        indexedMesh.m_vertexBase = vertexBase;
 
-            if (vertexBase is ObjectArray<Vector3> || vertexBase is ObjectArray<Vector3>)
+            if (vertexBase is ObjectArray<Vector3>)
             {
                 indexedMesh.m_vertexStride = 1;
             }

@@ -435,7 +435,7 @@ namespace BulletXNA.BulletCollision
             ///debug drawing of the overlapping triangles
             ///
 #if false
-            if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().GetDebugMode() & DebugDrawModes.DBG_DrawWireframe) > 0))
+            if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().DebugMode & DebugDrawModes.DBG_DrawWireframe) > 0))
             {
                 Vector3 color = new Vector3(1, 1, 0);
                 IndexedMatrix tr = ob.GetWorldTransform();

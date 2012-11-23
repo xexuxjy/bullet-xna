@@ -130,8 +130,8 @@ namespace BulletXNA.BulletCollision
 
                 float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.GetHalfHeight(), capsuleA.Radius,
-                    capsuleB.GetHalfHeight(), capsuleB.Radius, capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
+                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.HalfHeight, capsuleA.Radius,
+                    capsuleB.HalfHeight, capsuleB.Radius, capsuleA.UpAxis, capsuleB.UpAxis,
                     body0.GetWorldTransform(), body1.GetWorldTransform(), threshold);
 
                 if (dist < threshold)
@@ -193,7 +193,7 @@ namespace BulletXNA.BulletCollision
 
                         PolyhedralConvexShape polyhedronA = min0 as PolyhedralConvexShape;
                         PolyhedralConvexShape polyhedronB = min1 as PolyhedralConvexShape;
-                        if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.GetConvexPolyhedron() != null)
+                        if (polyhedronA.ConvexPolyhedron != null && polyhedronB.ConvexPolyhedron != null)
                         {
                             float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
@@ -204,7 +204,7 @@ namespace BulletXNA.BulletCollision
                             if (dispatchInfo.m_enableSatConvex)
                             {
                                 foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
-                                    polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                    polyhedronA.ConvexPolyhedron, polyhedronB.ConvexPolyhedron,
                                     body0.GetWorldTransform(),
                                     body1.GetWorldTransform(),
                                     out sepNormalWorldSpace);
@@ -238,7 +238,7 @@ namespace BulletXNA.BulletCollision
                             {
                                 //				printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
 
-                                PolyhedralContactClipping.ClipHullAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                PolyhedralContactClipping.ClipHullAgainstHull(sepNormalWorldSpace, polyhedronA.ConvexPolyhedron, polyhedronB.ConvexPolyhedron,
                                     body0.GetWorldTransform(),
                                     body1.GetWorldTransform(), minDist - threshold, threshold, resultOut);
 
@@ -255,7 +255,7 @@ namespace BulletXNA.BulletCollision
                         {
 
                             //we can also deal with convex versus triangle (without connectivity data)
-                            if (polyhedronA.GetConvexPolyhedron() != null && polyhedronB.ShapeType == BroadphaseNativeType.TriangleShape)
+                            if (polyhedronA.ConvexPolyhedron != null && polyhedronB.ShapeType == BroadphaseNativeType.TriangleShape)
                             {
                                 m_vertices.Clear();
                                 TriangleShape tri = polyhedronB as TriangleShape;
@@ -273,7 +273,7 @@ namespace BulletXNA.BulletCollision
                                 {
                                     polyhedronB.InitializePolyhedralFeatures();
                                     foundSepAxis = PolyhedralContactClipping.FindSeparatingAxis(
-                                    polyhedronA.GetConvexPolyhedron(), polyhedronB.GetConvexPolyhedron(),
+                                    polyhedronA.ConvexPolyhedron, polyhedronB.ConvexPolyhedron,
                                     body0.GetWorldTransform(),
                                     body1.GetWorldTransform(),
                                     out sepNormalWorldSpace);
@@ -303,7 +303,7 @@ namespace BulletXNA.BulletCollision
 
                                 if (foundSepAxis)
                                 {
-                                    PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.GetConvexPolyhedron(),
+                                    PolyhedralContactClipping.ClipFaceAgainstHull(sepNormalWorldSpace, polyhedronA.ConvexPolyhedron,
                                         body0.GetWorldTransform(), m_vertices, minDist - threshold, maxDist, resultOut);
                                 }
 

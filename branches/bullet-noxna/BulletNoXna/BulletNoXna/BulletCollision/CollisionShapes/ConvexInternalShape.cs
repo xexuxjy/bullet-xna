@@ -154,14 +154,14 @@ namespace BulletXNA.BulletCollision
             }
 	    }
 
-	    public float GetMarginNV()
+	    public float MarginNV
 	    {
-		    return m_collisionMargin;
+            get { return m_collisionMargin; }
 	    }
 
-        public override int GetNumPreferredPenetrationDirections()
+        public override int NumPreferredPenetrationDirections
 	    {
-		    return 0;
+            get { return 0; }
 	    }
 	
 	    public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)

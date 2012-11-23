@@ -130,10 +130,10 @@ namespace BulletXNA.BulletCollision
             get { return "Triangle"; }
         }
 
-        public override int GetNumPreferredPenetrationDirections()
-	    {
-		    return 2;
-	    }
+        public override int NumPreferredPenetrationDirections
+        {
+            get { return 2; }
+        }
 
         public override void GetPreferredPenetrationDirection(int index, out Vector3 penetrationVector)
         {

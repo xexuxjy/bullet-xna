@@ -974,50 +974,43 @@ namespace BulletXNA
             v1 = new IndexedVector3(vecin.Z, 0f, -vecin.X);
             v2 = new IndexedVector3(-vecin.Y, vecin.X, 0f);
         }
+
+        [Conditional("DEBUG")]
         public static void SanityCheckVector(IndexedVector3 v)
         {
-#if DEBUG
             SanityCheckVector(ref v);
-#endif
         }
+
+        [Conditional("DEBUG")]
         public static void ZeroCheckVector(IndexedVector3 v)
         {
-#if DEBUG
-
             ZeroCheckVector(ref v);
-#endif
         }
 
+        [Conditional("DEBUG")]
         public static void ZeroCheckVector(ref IndexedVector3 v)
         {
-#if DEBUG
-
             if (FuzzyZero(v.LengthSquared()))
             {
                 int ibreak = 0;
                 //Debug.Assert(false);
             }
-#endif
         }
+
+        [Conditional("DEBUG")]
         public static void SanityCheckVector(ref IndexedVector3 v)
         {
-#if DEBUG
-
             if (float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z))
             {
                 int ibreak = 0;
                 Debug.Assert(false);
             }
-#endif
         }
 
+        [Conditional("DEBUG")]
         public static void SanityCheckFloat(float f)
         {
-#if DEBUG
-
             Debug.Assert(!float.IsInfinity(f) && !float.IsNaN(f));
-#endif
-
         }
 
         //        public static void Vector3FromFloat(out IndexedVector3 v, float[] fa)

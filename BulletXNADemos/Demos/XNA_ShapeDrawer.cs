@@ -896,7 +896,7 @@ namespace BulletXNADemos.Demos
             DrawLine(ref from, ref to, ref fromColor, ref fromColor);
         }
 
-        public void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor)
+        public override void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor)
         {
             if (m_lineIndex < m_lineVertexMaxSize - 2)
             {
@@ -907,7 +907,7 @@ namespace BulletXNADemos.Demos
                 m_lineVertices[m_lineIndex++].Color = new Color(toColor.ToVector3());
             }
         }
-        public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix trans, ref IndexedVector3 color)
+        public override void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix trans, ref IndexedVector3 color)
         {
             DrawBox(ref boxMin, ref boxMax, ref trans, ref color, 1f);
         }
@@ -915,16 +915,6 @@ namespace BulletXNADemos.Demos
         public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha)
         {
             DrawBox(ref boxMin, ref boxMax, ref transform, ref color);
-        }
-
-        public void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color)
-        {
-            DrawSphere(ref p, radius, ref color);
-        }
-
-        public void DrawSphere(ref IndexedVector3 p, float radius, ref IndexedVector3 color)
-        {
-            //throw new NotImplementedException();
         }
 
         public override void DrawContactPoint(IndexedVector3 PointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color)
@@ -959,7 +949,7 @@ namespace BulletXNADemos.Demos
             return m_debugDrawModes;
         }
 
-        public void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
+        public override void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
         {
             IndexedMatrix identity = IndexedMatrix.Identity;
             DrawBox(ref from, ref to, ref identity, ref color, 0f);

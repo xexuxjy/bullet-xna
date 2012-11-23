@@ -37,12 +37,12 @@ namespace BulletXNA.LinearMath
         public abstract void SetDebugMode(DebugDrawModes debugMode);
         public abstract DebugDrawModes GetDebugMode();
 
-        public void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor)
+        public virtual void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor)
         {
             DrawLine(ref from, ref to, ref fromColor);
         }
 
-        public void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedVector3 color)
+        public virtual void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedVector3 color)
         {
             DrawLine(bbMin, new IndexedVector3(bbMax.X, bbMin.Y, bbMin.Z), color);
             DrawLine(new IndexedVector3(bbMax.X, bbMin.Y, bbMin.Z), new IndexedVector3(bbMax.X, bbMax.Y, bbMin.Z), color);
@@ -58,7 +58,7 @@ namespace BulletXNA.LinearMath
             DrawLine(new IndexedVector3(bbMin.X, bbMax.Y, bbMax.Z), new IndexedVector3(bbMin.X, bbMin.Y, bbMax.Z), color);
         }
 
-        public void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedMatrix trans, ref IndexedVector3 color)
+        public virtual void DrawBox(ref IndexedVector3 bbMin, ref IndexedVector3 bbMax, ref IndexedMatrix trans, ref IndexedVector3 color)
         {
             DrawLine(trans * bbMin, trans * new IndexedVector3(bbMax.X, bbMin.Y, bbMin.Z), color);
             DrawLine(trans * new IndexedVector3(bbMax.X, bbMin.Y, bbMin.Z), trans * new IndexedVector3(bbMax.X, bbMax.Y, bbMin.Z), color);
@@ -74,7 +74,7 @@ namespace BulletXNA.LinearMath
             DrawLine(trans * new IndexedVector3(bbMin.X, bbMax.Y, bbMax.Z), trans * new IndexedVector3(bbMin.X, bbMin.Y, bbMax.Z), color);
         }
 
-        public void DrawSphere(float radius, ref IndexedMatrix transform, ref IndexedVector3 color)
+        public virtual void DrawSphere(float radius, ref IndexedMatrix transform, ref IndexedVector3 color)
         {
             IndexedVector3 start = transform._origin;
 
@@ -101,36 +101,36 @@ namespace BulletXNA.LinearMath
             DrawLine(start - zoffs, start - yoffs, color);
         }
 
-        public void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color)
+        public virtual void DrawSphere(IndexedVector3 p, float radius, IndexedVector3 color)
         {
             IndexedMatrix tr = IndexedMatrix.CreateTranslation(p);
             DrawSphere(radius, ref tr, ref color);
         }
 
-        public void DrawSphere(ref IndexedVector3 p, float radius, ref IndexedVector3 color)
+        public virtual void DrawSphere(ref IndexedVector3 p, float radius, ref IndexedVector3 color)
         {
             IndexedMatrix tr = IndexedMatrix.CreateTranslation(p);
             DrawSphere(radius, ref tr, ref color);
         }
 
-        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 n0, ref IndexedVector3 n1, ref IndexedVector3 n2, ref IndexedVector3 color, float alpha)
+        public virtual void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 n0, ref IndexedVector3 n1, ref IndexedVector3 n2, ref IndexedVector3 color, float alpha)
         {
             DrawTriangle(ref v0, ref v1, ref v2, ref color, alpha);
         }
 
-        public void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 color, float alpha)
+        public virtual void DrawTriangle(ref IndexedVector3 v0, ref IndexedVector3 v1, ref IndexedVector3 v2, ref IndexedVector3 color, float alpha)
         {
             DrawLine(ref v0, ref v1, ref color);
             DrawLine(ref v1, ref v2, ref color);
             DrawLine(ref v2, ref v0, ref color);
         }
 
-        public void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
+        public virtual void DrawAabb(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color)
         {
             DrawAabb(ref from, ref to, ref color);
         }
 
-        public void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
+        public virtual void DrawAabb(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 color)
         {
             IndexedVector3 halfExtents = (to - from) * 0.5f;
             IndexedVector3 center = (to + from) * 0.5f;
@@ -161,7 +161,7 @@ namespace BulletXNA.LinearMath
             }
         }
 
-        public void DrawTransform(ref IndexedMatrix transform, float orthoLen)
+        public virtual void DrawTransform(ref IndexedMatrix transform, float orthoLen)
         {
             IndexedVector3 start = transform._origin;
             IndexedVector3 temp = start + transform._basis * new IndexedVector3(orthoLen, 0, 0);
@@ -175,13 +175,13 @@ namespace BulletXNA.LinearMath
             DrawLine(ref start, ref temp, ref colour);
         }
 
-        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
+        public virtual void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
             ref IndexedVector3 color, bool drawSect)
         {
             DrawArc(ref center, ref normal, ref axis, radiusA, radiusB, minAngle, maxAngle, ref color, drawSect, 10f);
         }
 
-        public void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
+        public virtual void DrawArc(ref IndexedVector3 center, ref IndexedVector3 normal, ref IndexedVector3 axis, float radiusA, float radiusB, float minAngle, float maxAngle,
             ref IndexedVector3 color, bool drawSect, float stepDegrees)
         {
             IndexedVector3 vx = axis;
@@ -210,13 +210,13 @@ namespace BulletXNA.LinearMath
             }
         }
 
-        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
+        public virtual void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
             float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color)
         {
             DrawSpherePatch(ref center, ref up, ref axis, radius, minTh, maxTh, minPs, maxPs, ref color, 10.0f);
         }
 
-        public void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
+        public virtual void DrawSpherePatch(ref IndexedVector3 center, ref IndexedVector3 up, ref IndexedVector3 axis, float radius,
             float minTh, float maxTh, float minPs, float maxPs, ref IndexedVector3 color, float stepDegrees)
         {
             IndexedVector3[] vA;
@@ -324,7 +324,7 @@ namespace BulletXNA.LinearMath
             }
         }
 
-        public void DrawCapsule(float radius, float halfHeight, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
+        public virtual void DrawCapsule(float radius, float halfHeight, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
         {
             IndexedVector3 capStart = IndexedVector3.Zero; ;
             capStart[upAxis] = -halfHeight;
@@ -368,7 +368,7 @@ namespace BulletXNA.LinearMath
             DrawLine(start + transform._basis * capStart, start + transform._basis * capEnd, color);
         }
 
-        public void DrawCylinder(float radius, float halfHeight, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
+        public virtual void DrawCylinder(float radius, float halfHeight, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
         {
             IndexedVector3 start = transform._origin;
             IndexedVector3 offsetHeight = IndexedVector3.Zero;
@@ -379,7 +379,7 @@ namespace BulletXNA.LinearMath
             DrawLine(start + transform._basis * offsetHeight - offsetRadius, start + transform._basis * -offsetHeight - offsetRadius, color);
         }
 
-        public void DrawCone(float radius, float height, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
+        public virtual void DrawCone(float radius, float height, int upAxis, ref IndexedMatrix transform, ref IndexedVector3 color)
         {
             IndexedVector3 start = transform._origin;
 
@@ -397,7 +397,7 @@ namespace BulletXNA.LinearMath
             DrawLine(start + transform._basis * offsetHeight, start + transform._basis * -offsetHeight - offset2Radius, color);
         }
 
-        public void DrawPlane(ref IndexedVector3 planeNormal, float planeConst, ref IndexedMatrix transform, ref IndexedVector3 color)
+        public virtual void DrawPlane(ref IndexedVector3 planeNormal, float planeConst, ref IndexedMatrix transform, ref IndexedVector3 color)
         {
             IndexedVector3 planeOrigin = planeNormal * planeConst;
             IndexedVector3 vec0, vec1;

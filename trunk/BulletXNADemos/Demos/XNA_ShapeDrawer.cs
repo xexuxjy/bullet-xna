@@ -263,7 +263,7 @@ namespace BulletXNADemos.Demos
             }
         }
 
-        public override void DrawText(String text, IndexedVector3 position, IndexedVector3 color)
+        public void DrawText(String text, IndexedVector3 position, IndexedVector3 color)
         {
             DrawText(text, ref position, ref color);
         }
@@ -914,7 +914,7 @@ namespace BulletXNADemos.Demos
 
         public void DrawBox(ref IndexedVector3 boxMin, ref IndexedVector3 boxMax, ref IndexedMatrix transform, ref IndexedVector3 color, float alpha)
         {
-            DrawBox(ref boxMin, ref boxMax, ref transform, ref color);
+            base.DrawBox(ref boxMin, ref boxMax, ref transform, ref color);
         }
 
         public override void DrawContactPoint(IndexedVector3 PointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color)

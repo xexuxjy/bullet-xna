@@ -33,7 +33,6 @@ namespace BulletXNA.LinearMath
         public abstract void DrawContactPoint(IndexedVector3 pointOnB, IndexedVector3 normalOnB, float distance, int lifeTime, IndexedVector3 color);
         public abstract void DrawContactPoint(ref IndexedVector3 pointOnB, ref IndexedVector3 normalOnB, float distance, int lifeTime, ref IndexedVector3 color);
         public abstract void ReportErrorWarning(String warningString);
-        public abstract void DrawText(String text, IndexedVector3 location, IndexedVector3 color);
         public abstract void SetDebugMode(DebugDrawModes debugMode);
         public abstract DebugDrawModes GetDebugMode();
 

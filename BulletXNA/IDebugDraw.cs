@@ -27,7 +27,6 @@ namespace BulletXNA.LinearMath
 {
     public interface IDebugDraw
     {
-        void DrawText(String text, IndexedVector3 location, IndexedVector3 color);
         void DrawLine(IndexedVector3 from, IndexedVector3 to, IndexedVector3 color);
         void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor);
         void DrawLine(ref IndexedVector3 from, ref IndexedVector3 to, ref IndexedVector3 fromColor, ref IndexedVector3 toColor);

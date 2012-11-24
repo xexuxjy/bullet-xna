@@ -14,9 +14,9 @@ namespace BulletXNADemos.Demos
         int frameCounter = 0;
         TimeSpan elapsedTime = TimeSpan.Zero;
         Vector3 m_location;
-        IDebugDraw m_debugDraw;
+        XNA_ShapeDrawer m_debugDraw;
 
-        public FrameRateCounter(Game game,Vector3 location,IDebugDraw debugDraw)
+        public FrameRateCounter(Game game, Vector3 location, XNA_ShapeDrawer debugDraw)
             : base(game)
         {
             content = new ContentManager(game.Services);

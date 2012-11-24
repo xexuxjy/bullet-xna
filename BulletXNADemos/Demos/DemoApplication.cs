@@ -161,7 +161,7 @@ namespace BulletXNADemos.Demos
             RenderScenePass(0, gameTime);
             IndexedVector3 location = new IndexedVector3(10, 10, 0);
             IndexedVector3 colour = new IndexedVector3(1,1,1);
-            m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)), location, colour);
+            m_shapeDrawer.DrawText(String.Format("Memory [{0}]", System.GC.GetTotalMemory(false)), ref location, ref colour);
             int	xOffset = 10;
             int yStart = 20;
 		    int yIncr = 15;

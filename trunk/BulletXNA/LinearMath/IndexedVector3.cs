@@ -663,7 +663,7 @@ namespace BulletXNA.LinearMath
 
         public int MinAxis()
         {
-            return X < Y ? (Y < Z ? 0 : 2) : (X < Z ? 1 : 2);
+            return X < Y ? (X < Z ? 0 : 2) : (Y < Z ? 1 : 2);
         }
 
         public override string ToString()

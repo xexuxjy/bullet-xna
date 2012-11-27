@@ -61,7 +61,8 @@ namespace BulletXNADemos.Demos
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
-            m_broadphase = new SimpleBroadphase(1000, pairCache);
+            //m_broadphase = new SimpleBroadphase(1000, pairCache);
+            m_broadphase = new DbvtBroadphase();
 
             IndexedVector3 worldAabbMin = new IndexedVector3(-200, -200, -200);
             IndexedVector3 worldAabbMax = -worldAabbMin;
@@ -109,6 +110,8 @@ namespace BulletXNADemos.Demos
 			    StaticPlaneShape boardFront = new StaticPlaneShape(new IndexedVector3(0,0,-1),-(boardBackExtents.Z+boardSideExtents.Z));
 			
 			    CollisionShape pinShape = new CapsuleShapeZ(pinExtent.Y,pinExtent.Z);
+                //pinShape = new BoxShape(pinExtent);
+
                 //pinShape = new SphereShape(pinExtent.Y);
 
                 m_cameraUp = Vector3.Up;
@@ -120,8 +123,8 @@ namespace BulletXNADemos.Demos
 			
 			    float mass = 0f;
 			
-			    LocalCreateRigidBody(mass,trans,boardBack);
-                LocalCreateRigidBody(mass, trans, boardFront);
+                //LocalCreateRigidBody(mass,trans,boardBack);
+                //LocalCreateRigidBody(mass, trans, boardFront);
 
 
                 IndexedVector3 leftSide = new IndexedVector3(boardCenter.X - boardBackExtents.X + boardSideExtents.X, boardCenter.Y, boardCenter.Z + boardSideExtents.Z);
@@ -154,12 +157,15 @@ namespace BulletXNADemos.Demos
 
 
                 
-                float ballRadius = 0.5f;
+                float ballRadius = 0.9f;
+                float fudge = 3f;
                 m_dropSphereShape = new SphereShape(ballRadius);
 
                 m_ballDropSpot = new Vector3(1f, pinTopLeft.Y + 1, boardCenter.Z + boardBackExtents.Z+ballRadius);
-                new SphereShape(0.95f);
+                //new SphereShape(0.95f);
 
+
+                m_debugDraw.SetDebugMode(m_debugDraw.GetDebugMode() | DebugDrawModes.DBG_DrawAabb);
 
                 trans._origin = pinTopLeft;
 
@@ -186,7 +192,8 @@ namespace BulletXNADemos.Demos
 
         public void DropBall()
         {
-            LocalCreateRigidBody(1f, IndexedMatrix.CreateTranslation(m_ballDropSpot), m_dropSphereShape);
+            RigidBody rb = LocalCreateRigidBody(1f, IndexedMatrix.CreateTranslation(m_ballDropSpot), m_dropSphereShape);
+            rb.SetLinearFactor(new IndexedVector3(1, 1, 0));
 
 
 

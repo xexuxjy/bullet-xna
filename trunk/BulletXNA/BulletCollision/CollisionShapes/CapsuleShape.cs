@@ -50,7 +50,7 @@ namespace BulletXNA.BulletCollision
             float val = halfExtents[GetUpAxis()];
 	        halfExtents[GetUpAxis()] = val +GetHalfHeight();
 
-	        float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
+	        const float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
 
 	        float lx=2f*(halfExtents.X+margin);
 	        float ly=2f*(halfExtents.Y+margin);

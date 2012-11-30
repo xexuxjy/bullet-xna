@@ -294,7 +294,7 @@ namespace BulletXNADemos.Demos
                 frameInB._origin = new IndexedVector3(0, 5, 0);
 
 		        ConeTwistConstraint pCT = new ConeTwistConstraint(pBodyA, pBodyB, ref frameInA, ref frameInB);
-		        pCT.SetLimit(MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_PI * 0.8f, 1.0f,0.3f,1.0f); // soft limit == hard limit
+		        pCT.SetLimit(MathUtil.SIMD_QUARTER_PI * 0.6f, MathUtil.SIMD_QUARTER_PI, MathUtil.SIMD_PI * 0.8f, 0.5f); // soft limit == hard limit
 		        m_dynamicsWorld.AddConstraint(pCT, true);
 		        pCT.SetDbgDrawSize(5.0f);
 	        }

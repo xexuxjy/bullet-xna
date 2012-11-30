@@ -110,7 +110,7 @@ namespace BulletXNA
 						{
 							//const float length = float(5);
 							float length = dbgDrawSize;
-							int nSegments = 8 * 4;
+							const int nSegments = 8 * 4;
 							float fAngleInRadians = MathUtil.SIMD_2_PI * (float)(nSegments - 1) / (float)nSegments;
 							IndexedVector3 pPrev = pCT.GetPointForAngle(fAngleInRadians, length);
                             pPrev = tr * pPrev;

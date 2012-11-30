@@ -355,6 +355,11 @@ namespace BulletXNA.BulletDynamics
 			SetLimit(_swingSpan1, _swingSpan2, _twistSpan, 1f, .3f, 1f);
 		}
 
+        public void SetLimit(float _swingSpan1, float _swingSpan2, float _twistSpan, float _softness)
+        {
+            SetLimit(_swingSpan1, _swingSpan2, _twistSpan, _softness, .3f, 1f);
+        }
+
 		public void SetLimit(float _swingSpan1, float _swingSpan2, float _twistSpan, float _softness, float _biasFactor, float _relaxationFactor)
 		{
 			m_swingSpan1 = _swingSpan1;

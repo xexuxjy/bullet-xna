@@ -878,8 +878,6 @@ namespace BulletXNA.BulletDynamics
                 return 0f;
 			}
 
-            int lastConstraint = startConstraint + numConstraints;
-
 			IndexedVector3 zero = IndexedVector3.Zero;
 
 			if (infoGlobal.m_splitImpulse)
@@ -913,10 +911,11 @@ namespace BulletXNA.BulletDynamics
             if (true)
             {
                 int j;
-                for (j = 0; j < numConstraints; j++)
+                int lastConstraint = startConstraint + numConstraints;
+                for (j = startConstraint; j < lastConstraint; j++)
                 {
                     TypedConstraint constraint = constraints[j];
-                    //constraint->buildJacobian();
+                    //constraint.BuildJacobian();
                     constraint.InternalSetAppliedImpulse(0.0f);
                 }
             }
@@ -928,12 +927,12 @@ namespace BulletXNA.BulletDynamics
 					int totalNumRows = 0;
 					//calculate the total number of contraint rows
                     m_tmpConstraintSizesPool.Resize(numConstraints);
-                    for (int i = startConstraint; i < lastConstraint; i++)
+                    for (int i = 0; i < numConstraints; i++)
 					{
                         ConstraintInfo1 info1 = m_tmpConstraintSizesPool[i];
-						if (constraints[i].IsEnabled())
+						if (constraints[startConstraint + i].IsEnabled())
 						{
-							constraints[i].GetInfo1(info1);
+							constraints[startConstraint + i].GetInfo1(info1);
 						}
 						else
 						{
@@ -1014,14 +1013,14 @@ namespace BulletXNA.BulletDynamics
                                 SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[currentRow + j];
 
 
-                                if (solverConstraint.m_upperLimit >= constraints[i].GetBreakingImpulseThreshold())
+                                if (solverConstraint.m_upperLimit >= constraint.GetBreakingImpulseThreshold())
                                 {
-                                    solverConstraint.m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
+                                    solverConstraint.m_upperLimit = constraint.GetBreakingImpulseThreshold();
                                 }
 
-                                if (solverConstraint.m_lowerLimit <= -constraints[i].GetBreakingImpulseThreshold())
+                                if (solverConstraint.m_lowerLimit <= -constraint.GetBreakingImpulseThreshold())
                                 {
-                                    solverConstraint.m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
+                                    solverConstraint.m_lowerLimit = -constraint.GetBreakingImpulseThreshold();
                                 }
 
 

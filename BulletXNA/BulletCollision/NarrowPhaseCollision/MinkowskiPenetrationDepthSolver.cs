@@ -110,31 +110,33 @@ namespace BulletXNA.BulletCollision
                     // shouldn't this be Y ?
                     norm.Z = 0;
                 }
-                seperatingAxisInA = seperatingAxisInABatch[i];
-                seperatingAxisInB = seperatingAxisInBBatch[i];
-
-                pInA = new IndexedVector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
-                qInB = new IndexedVector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
-
-			    IndexedMatrix.Multiply(out  pWorld ,ref transA ,ref pInA);
-                IndexedMatrix.Multiply(out  qWorld, ref transB, ref qInB);	
-                if (check2d)
+                if (norm.LengthSquared() > 0.01f)
                 {
-                    // shouldn't this be Y ?
-                    pWorld.Z = 0f;
-                    qWorld.Z = 0f;
-                }
+                    seperatingAxisInA = seperatingAxisInABatch[i];
+                    seperatingAxisInB = seperatingAxisInBBatch[i];
 
+                    pInA = new IndexedVector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
+                    qInB = new IndexedVector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
 
-                IndexedVector3.Subtract(out w ,ref qWorld ,ref pWorld);
-                float delta = IndexedVector3.Dot(ref norm, ref w);
-                //find smallest delta
-                if (delta < minProj)
-                {
-                    minProj = delta;
-                    minNorm = norm;
-                    minA = pWorld;
-                    minB = qWorld;
+                    IndexedMatrix.Multiply(out  pWorld, ref transA, ref pInA);
+                    IndexedMatrix.Multiply(out  qWorld, ref transB, ref qInB);
+                    if (check2d)
+                    {
+                        // shouldn't this be Y ?
+                        pWorld.Z = 0f;
+                        qWorld.Z = 0f;
+                    }
+
+                    IndexedVector3.Subtract(out w, ref qWorld, ref pWorld);
+                    float delta = IndexedVector3.Dot(ref norm, ref w);
+                    //find smallest delta
+                    if (delta < minProj)
+                    {
+                        minProj = delta;
+                        minNorm = norm;
+                        minA = pWorld;
+                        minB = qWorld;
+                    }
                 }
             }
 #else
@@ -283,7 +285,7 @@ namespace BulletXNA.BulletCollision
             return res.m_hasResult;
         }
 
-        private readonly static int NUM_UNITSPHERE_POINTS = 42;
+        private const int NUM_UNITSPHERE_POINTS = 42;
         private readonly static IndexedVector3[] sPenetrationDirections = {
             new IndexedVector3(0.000000f , -0.000000f,-1.000000f),
             new IndexedVector3(0.723608f , -0.525725f,-0.447219f),

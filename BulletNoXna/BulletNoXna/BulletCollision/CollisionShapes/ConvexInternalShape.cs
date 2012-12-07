@@ -22,6 +22,7 @@
  */
 
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision

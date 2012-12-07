@@ -23,6 +23,7 @@
 
 using System;
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -139,9 +140,10 @@ namespace BulletXNA.BulletCollision
 	        float ly=2f*(halfExtents.Y);
 	        float lz=2f*(halfExtents.Z);
 
-	        inertia= new Vector3(mass/(12.0f) * (ly*ly + lz*lz),
-					        mass/(12.0f) * (lx*lx + lz*lz),
-					        mass/(12.0f) * (lx*lx + ly*ly));
+            float mass12 = mass / 12.0f;
+            inertia = new Vector3(mass12 * (ly * ly + lz * lz),
+                            mass12 * (lx * lx + lz * lz),
+                            mass12 * (lx * lx + ly * ly));
         }
 
 	    public override void GetPlane(out Vector3 planeNormal, out Vector3 planeSupport, int i)
@@ -149,7 +151,7 @@ namespace BulletXNA.BulletCollision
 		    //this plane might not be aligned...
             Vector4 plane;
 		    GetPlaneEquation(out plane, i);
-            planeNormal = new Vector3(plane);
+            planeNormal = plane.ToVector3();
             Vector3 negNormal = -planeNormal;
 		    planeSupport = LocalGetSupportingVertex(ref negNormal);
 	    }

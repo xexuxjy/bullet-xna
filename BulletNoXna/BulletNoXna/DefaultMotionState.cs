@@ -58,6 +58,21 @@ namespace BulletXNA
         {
             m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
         }
+
+        public virtual void Rotate(Quaternion iq)
+        {
+            Matrix im = Matrix.CreateFromQuaternion(iq);
+            im.Translation = m_graphicsWorldTrans.Translation;
+            SetWorldTransform(ref im);
+        }
+
+        public virtual void Translate(Vector3 v)
+        {
+            m_graphicsWorldTrans.Translation += v;
+        }
+
+
+
         public Matrix m_graphicsWorldTrans;
         public Matrix m_centerOfMassOffset;
         public Matrix m_startWorldTrans;

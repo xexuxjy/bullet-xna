@@ -25,6 +25,7 @@ using System;
 using System.Diagnostics;
 using BulletXNA.BulletCollision;
 using BulletXNA.LinearMath;
+using System.Collections.Generic;
 
 namespace BulletXNA.BulletDynamics
 {
@@ -35,8 +36,13 @@ namespace BulletXNA.BulletDynamics
 		protected ObjectArray<SolverConstraint> m_tmpSolverNonContactConstraintPool;
 		protected ObjectArray<SolverConstraint> m_tmpSolverContactFrictionConstraintPool;
 		protected ObjectArray<int> m_orderTmpConstraintPool;
+        protected ObjectArray<int> m_orderNonContactConstraintPool;
 		protected ObjectArray<int> m_orderFrictionConstraintPool;
 		protected ObjectArray<ConstraintInfo1> m_tmpConstraintSizesPool;
+        protected ObjectArray<ConstraintInfo2> m_tmpConstraintInfo2Pool;
+
+        protected int m_maxOverrideNumSolverIterations;
+
 
 		// FIXME - MAN - decide where this lives.
 		static int gNumSplitImpulseRecoveries = 0;
@@ -45,6 +51,13 @@ namespace BulletXNA.BulletDynamics
 		protected ulong m_btSeed2;
 
 		protected int m_counter;
+
+        protected int m_lowerLimitCount = 0;
+        protected int m_genericCount = 0;
+        protected int m_setupCount = 0;
+        protected int m_iterCount = 0;
+        protected int m_finishCount = 0;
+
 
 		public SequentialImpulseConstraintSolver()
 		{
@@ -57,6 +70,8 @@ namespace BulletXNA.BulletDynamics
 			m_tmpConstraintSizesPool = new ObjectArray<ConstraintInfo1>();
 			m_orderTmpConstraintPool = new ObjectArray<int>();
 			m_orderFrictionConstraintPool = new ObjectArray<int>();
+            m_orderNonContactConstraintPool = new ObjectArray<int>();
+            m_tmpConstraintInfo2Pool = new ObjectArray<ConstraintInfo2>();
 		}
 
 		public virtual void Cleanup()
@@ -93,10 +108,13 @@ namespace BulletXNA.BulletDynamics
             }
 
 
-			//solverConstraint.m_originalContactPoint = 0;
-
+			solverConstraint.m_originalContactPoint = null;
+            //solverConstraint.m_originalContactPointConstraint = null;
 			solverConstraint.m_appliedImpulse = 0f;
 			solverConstraint.m_appliedPushImpulse = 0f;
+
+
+
 
 			{
 				Vector3 ftorqueAxis1 = Vector3.Cross(rel_pos1, solverConstraint.m_contactNormal);
@@ -165,12 +183,12 @@ namespace BulletXNA.BulletDynamics
 
 		public SolverConstraint AddFrictionConstraint(ref Vector3 normalAxis, RigidBody solverBodyA, RigidBody solverBodyB, int frictionIndex, ManifoldPoint cp, ref Vector3 rel_pos1, ref Vector3 rel_pos2, CollisionObject colObj0, CollisionObject colObj1, float relaxation, float desiredVelocity, float cfmSlip)
 		{
-			SolverConstraint solverConstraint = new SolverConstraint();
-
+            // will create the object
+            SolverConstraint solverConstraint = m_tmpSolverContactFrictionConstraintPool[m_tmpSolverContactFrictionConstraintPool.Count];
+            solverConstraint.Reset();
 			solverConstraint.m_frictionIndex = frictionIndex;
 			SetupFrictionConstraint(ref solverConstraint, ref normalAxis, solverBodyA, solverBodyB, cp, ref rel_pos1, ref rel_pos2,
 									colObj0, colObj1, relaxation, desiredVelocity, cfmSlip);
-			m_tmpSolverContactFrictionConstraintPool.Add(solverConstraint);
 			return solverConstraint;
 		}
 
@@ -178,8 +196,8 @@ namespace BulletXNA.BulletDynamics
 								ContactSolverInfo infoGlobal, ref Vector3 vel, ref float rel_vel, ref float relaxation,
 								out Vector3 rel_pos1, out Vector3 rel_pos2)
 		{
-			RigidBody rb0 = RigidBody.Upcast(colObj0);
-			RigidBody rb1 = RigidBody.Upcast(colObj1);
+            RigidBody rb0 = colObj0 as RigidBody;// RigidBody.Upcast(colObj0);
+            RigidBody rb1 = colObj1 as RigidBody;//RigidBody.Upcast(colObj1);
 
 			Vector3 pos1 = cp.GetPositionWorldOnA();
 			Vector3 pos2 = cp.GetPositionWorldOnB();
@@ -189,10 +207,26 @@ namespace BulletXNA.BulletDynamics
 
 			relaxation = 1f;
 
-			Vector3 torqueAxis0 = Vector3.Cross(rel_pos1, cp.m_normalWorldOnB);
+            // cross
+
+            Vector3 torqueAxis0 = new Vector3(rel_pos1.Y *cp.m_normalWorldOnB.Z - rel_pos1.Z * cp.m_normalWorldOnB.Y,
+                rel_pos1.Z *cp.m_normalWorldOnB.X - rel_pos1.X * cp.m_normalWorldOnB.Z,
+                rel_pos1.X *cp.m_normalWorldOnB.Y - rel_pos1.Y * cp.m_normalWorldOnB.X);
+
+            Vector3 torqueAxis1 = new Vector3(rel_pos2.Y *cp.m_normalWorldOnB.Z - rel_pos2.Z * cp.m_normalWorldOnB.Y,
+                rel_pos2.Z *cp.m_normalWorldOnB.X - rel_pos2.X * cp.m_normalWorldOnB.Z,
+                rel_pos2.X *cp.m_normalWorldOnB.Y - rel_pos2.Y * cp.m_normalWorldOnB.X);
+
+
             solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : Vector3.Zero;
-            Vector3 torqueAxis1 = Vector3.Cross(rel_pos2, cp.GetNormalWorldOnB());
+            //Vector3 torqueAxis1 = Vector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
             solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : Vector3.Zero;
+
+
+            //Vector3 torqueAxis0 = Vector3.Cross(ref rel_pos1, ref cp.m_normalWorldOnB);
+            //solverConstraint.m_angularComponentA = rb0 != null ? rb0.GetInvInertiaTensorWorld() * torqueAxis0 * rb0.GetAngularFactor() : Vector3.Zero;
+            //Vector3 torqueAxis1 = Vector3.Cross(ref rel_pos2, ref cp.m_normalWorldOnB);
+            //solverConstraint.m_angularComponentB = rb1 != null ? rb1.GetInvInertiaTensorWorld() * -torqueAxis1 * rb1.GetAngularFactor() : Vector3.Zero;
 
 			{
 #if COMPUTE_IMPULSE_DENOM
@@ -205,12 +239,12 @@ namespace BulletXNA.BulletDynamics
 				if (rb0 != null)
 				{
 					vec = Vector3.Cross(ref solverConstraint.m_angularComponentA, ref rel_pos1);
-					denom0 = rb0.GetInvMass() + Vector3.Dot(cp.GetNormalWorldOnB(), vec);
+                    denom0 = rb0.GetInvMass() + Vector3.Dot(cp.m_normalWorldOnB, vec);
 				}
 				if (rb1 != null)
 				{
 					vec = Vector3.Cross((-solverConstraint.m_angularComponentB), rel_pos2);
-					denom1 = rb1.GetInvMass() + Vector3.Dot(cp.GetNormalWorldOnB(), vec);
+                    denom1 = rb1.GetInvMass() + Vector3.Dot(cp.m_normalWorldOnB, vec);
 				}
 #endif //COMPUTE_IMPULSE_DENOM
 
@@ -230,7 +264,7 @@ namespace BulletXNA.BulletDynamics
 
 			vel = vel1 - vel2;
 
-			rel_vel = Vector3.Dot(cp.GetNormalWorldOnB(), vel);
+            rel_vel = Vector3.Dot(cp.m_normalWorldOnB, vel);
 
 			float penetration = cp.GetDistance() + infoGlobal.m_linearSlop;
 
@@ -281,6 +315,11 @@ namespace BulletXNA.BulletDynamics
 				rel_vel2 = vel1Dotn + vel2Dotn;
 
 				float positionalError = 0f;
+
+                if (rel_vel2 > 20)
+                {
+                    int ibreak = 0;
+                }
 
 				float velocityError = restitution - rel_vel2;// * damping;
 
@@ -400,20 +439,21 @@ namespace BulletXNA.BulletDynamics
 
 		protected float RestitutionCurve(float rel_vel, float restitution)
 		{
-			float rest = restitution * -rel_vel;
+            // base on rest2 ?
+			float rest = (restitution * restitution * -rel_vel);
 			return rest;
 		}
 
 		protected void ConvertContact(PersistentManifold manifold, ContactSolverInfo infoGlobal)
 		{
-			CollisionObject colObj0, colObj1;
+			CollisionObject colObj0 = null, colObj1 = null;
 
 
 			colObj0 = manifold.GetBody0() as CollisionObject;
 			colObj1 = manifold.GetBody1() as CollisionObject;
 
-			RigidBody solverBodyA = RigidBody.Upcast(colObj0);
-			RigidBody solverBodyB = RigidBody.Upcast(colObj1);
+			RigidBody solverBodyA = colObj0 as RigidBody;//RigidBody.Upcast(colObj0);
+            RigidBody solverBodyB = colObj1 as RigidBody;//RigidBody.Upcast(colObj1);
 
 			///avoid collision response between two static objects
 			if ((solverBodyA == null || solverBodyA.GetInvMass() == 0f) && (solverBodyB == null || solverBodyB.GetInvMass() == 0f))
@@ -429,12 +469,12 @@ namespace BulletXNA.BulletDynamics
                     String nameA = solverBodyA != null ? (String)solverBodyA.UserObject : "Null";
                     String nameB = solverBodyA != null ? (String)solverBodyB.UserObject : "Null";
 
-                    BulletGlobals.g_streamWriter.WriteLine("ConvertContact [{0}][{1}][{2}][{3}][{4}]", j, nameA,nameB, cp.GetDistance() ,manifold.GetContactProcessingThreshold());
+                    BulletGlobals.g_streamWriter.WriteLine("ConvertContact [{0}][{1}][{2}][{3}][{4}]", j, nameA,nameB, cp.GetDistance() ,manifold.ContactProcessingThreshold);
                     MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, cp);
                 }
 
 
-				if (cp.GetDistance() <= manifold.GetContactProcessingThreshold())
+				if (cp.GetDistance() <= manifold.ContactProcessingThreshold)
 				{
 					//                    Vector3 pos1 = cp.getPositionWorldOnA();
 					//                    Vector3 pos2 = cp.getPositionWorldOnB();
@@ -449,11 +489,12 @@ namespace BulletXNA.BulletDynamics
 
 					int frictionIndex = m_tmpSolverContactConstraintPool.Count;
 
-					SolverConstraint solverConstraint = new SolverConstraint();
-					//m_tmpSolverContactConstraintPool.Add(solverConstraint);
+                    // will create if needed.
+                    SolverConstraint solverConstraint = m_tmpSolverContactConstraintPool[m_tmpSolverContactConstraintPool.Count];
+                    solverConstraint.Reset();
 
-					RigidBody rb0 = RigidBody.Upcast(colObj0);
-					RigidBody rb1 = RigidBody.Upcast(colObj1);
+                    RigidBody rb0 = solverBodyA;//RigidBody.Upcast(colObj0);
+					RigidBody rb1 = solverBodyB;//RigidBody.Upcast(colObj1);
 					solverConstraint.m_solverBodyA = rb0 != null ? rb0 : GetFixedBody();
 					solverConstraint.m_solverBodyB = rb1 != null ? rb1 : GetFixedBody();
 
@@ -503,7 +544,8 @@ namespace BulletXNA.BulletDynamics
 						else
 						{
 							//re-calculate friction direction every frame, todo: check if this is really needed
-							TransformUtil.PlaneSpace1(ref cp.m_normalWorldOnB, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
+                            Vector3 temp = cp.m_normalWorldOnB;
+							TransformUtil.PlaneSpace1(ref temp, out cp.m_lateralFrictionDir1, out cp.m_lateralFrictionDir2);
 							if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.Use2FrictionDirections))
 							{
 								ApplyAnisotropicFriction(colObj0, ref cp.m_lateralFrictionDir2);
@@ -528,7 +570,7 @@ namespace BulletXNA.BulletDynamics
 						}
 					}
 					SetFrictionConstraintImpulse(ref solverConstraint, rb0, rb1, cp, infoGlobal);
-					m_tmpSolverContactConstraintPool.Add(solverConstraint);
+                    
 				}
 			}
 		}
@@ -567,55 +609,68 @@ namespace BulletXNA.BulletDynamics
 
 		protected void ResolveSingleConstraintRowGeneric(RigidBody body1, RigidBody body2, ref SolverConstraint c)
 		{
-			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
-			float deltaVel1Dotn = Vector3.Dot(c.m_contactNormal, body1.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos1CrossNormal, body1.InternalGetDeltaAngularVelocity());
-			float deltaVel2Dotn = -Vector3.Dot(c.m_contactNormal, body2.InternalGetDeltaLinearVelocity()) + Vector3.Dot(c.m_relpos2CrossNormal, body2.InternalGetDeltaAngularVelocity());
+            m_genericCount++;
+                float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
 
-            float originalDeltaImpulse = deltaImpulse;
+                float deltaVel1Dotn = (c.m_contactNormal.X * body1.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body1.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body1.m_deltaLinearVelocity.Z) +
+                (c.m_relpos1CrossNormal.X * body1.m_deltaAngularVelocity.X) + (c.m_relpos1CrossNormal.Y * body1.m_deltaAngularVelocity.Y) + (c.m_relpos1CrossNormal.Z * body1.m_deltaAngularVelocity.Z);
 
-			//float delta_rel_vel	= deltaVel1Dotn-deltaVel2Dotn;
-			deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
-			deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;
-
-
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver && false)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("ResolveSingleConstraintRowGeneric start [{0}][{1}][{2}][{3}].", originalDeltaImpulse,deltaVel1Dotn,deltaVel2Dotn,c.m_jacDiagABInv);
-            }
+                float deltaVel2Dotn = -((c.m_contactNormal.X * body2.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body2.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body2.m_deltaLinearVelocity.Z)) +
+                (c.m_relpos2CrossNormal.X * body2.m_deltaAngularVelocity.X) + (c.m_relpos2CrossNormal.Y * body2.m_deltaAngularVelocity.Y) + (c.m_relpos2CrossNormal.Z * body2.m_deltaAngularVelocity.Z);
 
 
+                float originalDeltaImpulse = deltaImpulse;
+
+                deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
+                deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;
 
 
-			float sum = c.m_appliedImpulse + deltaImpulse;
-			if (sum < c.m_lowerLimit)
-			{
-				deltaImpulse = c.m_lowerLimit - c.m_appliedImpulse;
-				c.m_appliedImpulse = c.m_lowerLimit;
-			}
-			else if (sum > c.m_upperLimit)
-			{
-				deltaImpulse = c.m_upperLimit - c.m_appliedImpulse;
-				c.m_appliedImpulse = c.m_upperLimit;
-			}
-			else
-			{
-				c.m_appliedImpulse = sum;
-			}
-			Vector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
-			body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse,"ResolveSingleConstraintGeneric-body1");
+                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver && false)
+                {
+                    BulletGlobals.g_streamWriter.WriteLine("ResolveSingleConstraintRowGeneric start [{0}][{1}][{2}][{3}].", originalDeltaImpulse, deltaVel1Dotn, deltaVel2Dotn, c.m_jacDiagABInv);
+                }
 
+                float sum = c.m_appliedImpulse + deltaImpulse;
+                if (sum < c.m_lowerLimit)
+                {
+                    deltaImpulse = c.m_lowerLimit - c.m_appliedImpulse;
+                    c.m_appliedImpulse = c.m_lowerLimit;
+                }
+                else if (sum > c.m_upperLimit)
+                {
+                    deltaImpulse = c.m_upperLimit - c.m_appliedImpulse;
+                    c.m_appliedImpulse = c.m_upperLimit;
+                }
+                else
+                {
+                    c.m_appliedImpulse = sum;
+                }
 
-			temp = -c.m_contactNormal * body2.InternalGetInvMass();
-			body2.InternalApplyImpulse(ref temp, ref c.m_angularComponentB, deltaImpulse,"ResolveSingleConstraintGeneric-body2");
+                Vector3 temp = new Vector3(c.m_contactNormal.X * body1.m_invMass.X, c.m_contactNormal.Y * body1.m_invMass.Y, c.m_contactNormal.Z * body1.m_invMass.Z);
+
+                body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse, "ResolveSingleConstraintGeneric-body1");
+
+                temp = new Vector3(-c.m_contactNormal.X * body2.m_invMass.X, -c.m_contactNormal.Y * body2.m_invMass.Y, -c.m_contactNormal.Z * body2.m_invMass.Z);
+
+                body2.InternalApplyImpulse(ref temp, ref c.m_angularComponentB, deltaImpulse, "ResolveSingleConstraintGeneric-body2");
 		}
 
 		protected void ResolveSingleConstraintRowLowerLimit(RigidBody body1, RigidBody body2, ref SolverConstraint c)
 		{
-
+            m_lowerLimitCount++;
 			//check magniture of applied impulse from SolverConstraint 
 			float deltaImpulse = c.m_rhs - c.m_appliedImpulse * c.m_cfm;
-			float deltaVel1Dotn = c.m_contactNormal.Dot(body1.InternalGetDeltaLinearVelocity()) + c.m_relpos1CrossNormal.Dot(body1.InternalGetDeltaAngularVelocity());
-			float deltaVel2Dotn = -c.m_contactNormal.Dot(body2.InternalGetDeltaLinearVelocity()) + c.m_relpos2CrossNormal.Dot(body2.InternalGetDeltaAngularVelocity());
+
+            if (deltaImpulse > 200)
+            {
+                int ibreak = 0;
+            }
+
+            float deltaVel1Dotn = (c.m_contactNormal.X * body1.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body1.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body1.m_deltaLinearVelocity.Z) +
+            (c.m_relpos1CrossNormal.X * body1.m_deltaAngularVelocity.X) + (c.m_relpos1CrossNormal.Y * body1.m_deltaAngularVelocity.Y) + (c.m_relpos1CrossNormal.Z * body1.m_deltaAngularVelocity.Z);
+
+            float deltaVel2Dotn = -((c.m_contactNormal.X * body2.m_deltaLinearVelocity.X) + (c.m_contactNormal.Y * body2.m_deltaLinearVelocity.Y) + (c.m_contactNormal.Z * body2.m_deltaLinearVelocity.Z)) +
+            (c.m_relpos2CrossNormal.X * body2.m_deltaAngularVelocity.X) + (c.m_relpos2CrossNormal.Y * body2.m_deltaAngularVelocity.Y) + (c.m_relpos2CrossNormal.Z * body2.m_deltaAngularVelocity.Z);
 
 			deltaImpulse -= deltaVel1Dotn * c.m_jacDiagABInv;
 			deltaImpulse -= deltaVel2Dotn * c.m_jacDiagABInv;
@@ -631,10 +686,11 @@ namespace BulletXNA.BulletDynamics
 			{
 				c.m_appliedImpulse = sum;
 			}
-			Vector3 temp = c.m_contactNormal * body1.InternalGetInvMass();
+
+            Vector3 temp = new Vector3(c.m_contactNormal.X * body1.m_invMass.X,c.m_contactNormal.Y * body1.m_invMass.Y,c.m_contactNormal.Z * body1.m_invMass.Z);
             body1.InternalApplyImpulse(ref temp, ref c.m_angularComponentA, deltaImpulse, "ResolveSingleConstraintRowLowerLimit-body1");
 
-			temp = -c.m_contactNormal * body2.InternalGetInvMass();
+            temp = new Vector3(-c.m_contactNormal.X * body2.m_invMass.X, -c.m_contactNormal.Y * body2.m_invMass.Y, -c.m_contactNormal.Z * body2.m_invMass.Z);
             body2.InternalApplyImpulse(ref temp, ref c.m_angularComponentB, deltaImpulse, "ResolveSingleConstraintRowLowerLimit-body2");
 
 		}
@@ -669,17 +725,17 @@ namespace BulletXNA.BulletDynamics
 		}
 
 
-		public virtual float SolveGroup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+		public virtual float SolveGroup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
 			BulletGlobals.StartProfile("solveGroup");
 			//you need to provide at least some bodies
 			Debug.Assert(bodies.Count > 0);
 
-            SolveGroupCacheFriendlySetup(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
+            SolveGroupCacheFriendlySetup(bodies, numBodies, manifoldPtr, startManifold, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
 
-            SolveGroupCacheFriendlyIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
+            SolveGroupCacheFriendlyIterations(bodies, numBodies, manifoldPtr, startManifold, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer, dispatcher);
 
-            SolveGroupCacheFriendlyFinish(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
+            SolveGroupCacheFriendlyFinish(bodies, numBodies, manifoldPtr, startManifold, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
 
             BulletGlobals.StopProfile();
 			return 0.0f;
@@ -707,7 +763,7 @@ namespace BulletXNA.BulletDynamics
 			return s_fixed;
 		}
 
-        protected virtual void SolveGroupCacheFriendlySplitImpulseIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+        protected virtual void SolveGroupCacheFriendlySplitImpulseIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
 			if (infoGlobal.m_splitImpulse)
 			{
@@ -726,8 +782,9 @@ namespace BulletXNA.BulletDynamics
 			}
 		}
 
-		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+		protected virtual float SolveGroupCacheFriendlyFinish(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
+            m_finishCount++;
 			int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
@@ -740,11 +797,11 @@ namespace BulletXNA.BulletDynamics
 			{
 
 				SolverConstraint solveManifold = m_tmpSolverContactConstraintPool[j];
-                solveManifold.m_originalContactPoint.SetAppliedImpulse(solveManifold.m_appliedImpulse);
+                ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulse(solveManifold.m_appliedImpulse);
 				if ((infoGlobal.m_solverMode & SolverMode.UseFrictionWarmStarting) != 0)
 				{
-                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
-                    solveManifold.m_originalContactPoint.SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
+                    ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulseLateral1(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse);
+                    ((ManifoldPoint)solveManifold.m_originalContactPoint).SetAppliedImpulseLateral2(m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex + 1].m_appliedImpulse);
 				}
 
 				//do a callback here?
@@ -754,7 +811,7 @@ namespace BulletXNA.BulletDynamics
 			for (int j = 0; j < numPoolConstraints; j++)
 			{
 				SolverConstraint solverConstr = m_tmpSolverNonContactConstraintPool[j];
-				TypedConstraint constr = solverConstr.m_originalContactPointConstraint ;
+				TypedConstraint constr = solverConstr.m_originalContactPoint as TypedConstraint;
 				constr.InternalSetAppliedImpulse(solverConstr.m_appliedImpulse);
 				if (Math.Abs(solverConstr.m_appliedImpulse) >= constr.GetBreakingImpulseThreshold())
 				{
@@ -786,9 +843,10 @@ namespace BulletXNA.BulletDynamics
 					}
 				}
 			}
-			m_tmpSolverContactConstraintPool.Clear();
-			m_tmpSolverNonContactConstraintPool.Clear();
-			m_tmpSolverContactFrictionConstraintPool.Clear();
+			m_tmpSolverContactConstraintPool.Resize(0);
+            m_tmpSolverNonContactConstraintPool.Resize(0);
+            m_tmpSolverContactFrictionConstraintPool.Resize(0);
+            m_tmpConstraintInfo2Pool.Resize(0);
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
             {
@@ -797,16 +855,15 @@ namespace BulletXNA.BulletDynamics
 
 			return 0f;
 		}
-		//protected float solveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
-		//protected float solveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
-		//{
-		//    return 0f;
-		//}
 
-        protected virtual float SolveGroupCacheFriendlySetup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+        protected virtual float SolveGroupCacheFriendlySetup(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
+            m_setupCount++;
 			BulletGlobals.StartProfile("solveGroupCacheFriendlySetup");
-			m_counter++;
+
+            m_maxOverrideNumSolverIterations = 0;
+            
+            m_counter++;
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
             {
@@ -821,23 +878,14 @@ namespace BulletXNA.BulletDynamics
                 return 0f;
 			}
 
-            for (int i = 0; i < numManifolds; ++i)
-            {
-                if (manifold[i].GetNumContacts() > 0)
-                {
-                    int ibreak = 0;
-                }
-            }
-
-            int lastConstraint = startConstraint + numConstraints;
-
 			Vector3 zero = Vector3.Zero;
 
 			if (infoGlobal.m_splitImpulse)
 			{
 				for (int i = 0; i < numBodies; i++)
 				{
-					RigidBody body = RigidBody.Upcast(bodies[i]);
+                    //RigidBody body = RigidBody.Upcast(bodies[i]);
+                    RigidBody body = bodies[i] as RigidBody;
 					if (body != null)
 					{	
 						body.InternalSetDeltaLinearVelocity(ref zero);
@@ -851,8 +899,8 @@ namespace BulletXNA.BulletDynamics
 			{
 				for (int i = 0; i < numBodies; i++)
 				{
-					RigidBody body = RigidBody.Upcast(bodies[i]);
-					if (body != null)
+                    RigidBody body = bodies[i] as RigidBody;
+                    if (body != null)
 					{	
 						body.InternalSetDeltaLinearVelocity(ref zero);
 						body.InternalSetDeltaAngularVelocity(ref zero);
@@ -860,6 +908,17 @@ namespace BulletXNA.BulletDynamics
 				}
 			}
 
+            if (true)
+            {
+                int j;
+                int lastConstraint = startConstraint + numConstraints;
+                for (j = startConstraint; j < lastConstraint; j++)
+                {
+                    TypedConstraint constraint = constraints[j];
+                    //constraint.BuildJacobian();
+                    constraint.InternalSetAppliedImpulse(0.0f);
+                }
+            }
 
 			//if (1)
 			{
@@ -867,14 +926,13 @@ namespace BulletXNA.BulletDynamics
 
 					int totalNumRows = 0;
 					//calculate the total number of contraint rows
-					m_tmpConstraintSizesPool.Clear();
-                    for (int i = startConstraint; i < lastConstraint; i++)
+                    m_tmpConstraintSizesPool.Resize(numConstraints);
+                    for (int i = 0; i < numConstraints; i++)
 					{
-						ConstraintInfo1 info1 = new ConstraintInfo1();
-						m_tmpConstraintSizesPool.Add(info1);
-						if (constraints[i].IsEnabled())
+                        ConstraintInfo1 info1 = m_tmpConstraintSizesPool[i];
+						if (constraints[startConstraint + i].IsEnabled())
 						{
-							constraints[i].GetInfo1(info1);
+							constraints[startConstraint + i].GetInfo1(info1);
 						}
 						else
 						{
@@ -885,7 +943,7 @@ namespace BulletXNA.BulletDynamics
 						totalNumRows += info1.m_numConstraintRows;
 					}
 
-					ResizeSolverConstraintList(m_tmpSolverNonContactConstraintPool, totalNumRows);
+                    m_tmpSolverNonContactConstraintPool.Resize(totalNumRows);
 
 					///setup the btSolverConstraints
 					int currentRow = 0;
@@ -895,132 +953,133 @@ namespace BulletXNA.BulletDynamics
 						ConstraintInfo1 info1a = m_tmpConstraintSizesPool[i];
 
 						if (info1a.m_numConstraintRows != 0)
-						{
-							Debug.Assert(currentRow < totalNumRows);
+                        {
+                            Debug.Assert(currentRow < totalNumRows);
 
-							//SolverConstraint currentConstraintRow = m_tmpSolverNonContactConstraintPool[currentRow];
-							TypedConstraint constraint = constraints[startConstraint + i];
+                            TypedConstraint constraint = constraints[startConstraint + i];
 
-							RigidBody rbA = constraint.GetRigidBodyA();
-							RigidBody rbB = constraint.GetRigidBodyB();
+                            RigidBody rbA = constraint.GetRigidBodyA();
+                            RigidBody rbB = constraint.GetRigidBodyB();
 
+                            int overrideNumSolverIterations = constraint.GetOverrideNumSolverIterations() > 0 ? constraint.GetOverrideNumSolverIterations() : infoGlobal.m_numIterations;
+                            {
 
-							for (int j = currentRow; j < (currentRow + info1a.m_numConstraintRows); j++)
-							{
-								SolverConstraint solverConstraint = new SolverConstraint();
-								solverConstraint.m_lowerLimit = float.MinValue;
-								solverConstraint.m_upperLimit = float.MaxValue;
-								solverConstraint.m_appliedImpulse = 0f;
-								solverConstraint.m_appliedPushImpulse = 0f;
-								solverConstraint.m_solverBodyA = rbA;
-								solverConstraint.m_solverBodyB = rbB;
-								m_tmpSolverNonContactConstraintPool[j] = solverConstraint;
+                                if (overrideNumSolverIterations > m_maxOverrideNumSolverIterations)
+                                {
+                                    m_maxOverrideNumSolverIterations = overrideNumSolverIterations;
+                                }
+                            }
+
+                            for (int j = 0; j < info1a.m_numConstraintRows; j++)
+                            {
+                                int index = currentRow + j;
+                                SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[index];
+                                solverConstraint.Reset();
+                                solverConstraint.m_lowerLimit = -MathUtil.SIMD_INFINITY;
+                                solverConstraint.m_upperLimit = MathUtil.SIMD_INFINITY;
+                                solverConstraint.m_appliedImpulse = 0f;
+                                solverConstraint.m_appliedPushImpulse = 0f;
+                                solverConstraint.m_solverBodyA = rbA;
+                                solverConstraint.m_solverBodyB = rbB;
+                                solverConstraint.m_overrideNumSolverIterations = overrideNumSolverIterations;
 							}
 
-							rbA.InternalSetDeltaLinearVelocity(ref zero);
-							rbA.InternalSetDeltaAngularVelocity(ref zero);
-							rbB.InternalSetDeltaLinearVelocity(ref zero);
-							rbB.InternalSetDeltaAngularVelocity(ref zero);
+                            rbA.InternalSetDeltaLinearVelocity(ref zero);
+                            rbA.InternalSetDeltaAngularVelocity(ref zero);
+                            rbB.InternalSetDeltaLinearVelocity(ref zero);
+                            rbB.InternalSetDeltaAngularVelocity(ref zero);
+                            ConstraintInfo2 info2 = m_tmpConstraintInfo2Pool[m_tmpConstraintInfo2Pool.Count];
 
-							ConstraintInfo2 info2 = new ConstraintInfo2();
-							info2.m_solverConstraints = new SolverConstraint[info1a.m_numConstraintRows];
+
+                            Debug.Assert(info1a.m_numConstraintRows <= ConstraintInfo2.maxConstraints);
+                            info2.m_numRows = info1a.m_numConstraintRows;
 							// MAN - copy the data into the info block for passing to the constraints
 							for (int j = 0; j < info1a.m_numConstraintRows; ++j)
 							{
 								info2.m_solverConstraints[j] = m_tmpSolverNonContactConstraintPool[currentRow + j];
 							}
 
-							info2.fps = 1f / infoGlobal.m_timeStep;
-							info2.erp = infoGlobal.m_erp;
-							info2.m_numIterations = infoGlobal.m_numIterations;
-							info2.m_damping = infoGlobal.m_damping;
-							constraint.GetInfo2(info2);
+                            info2.fps = 1f / infoGlobal.m_timeStep;
+                            info2.erp = infoGlobal.m_erp;
+                            info2.m_numIterations = infoGlobal.m_numIterations;
+                            info2.m_damping = infoGlobal.m_damping;
+                            constraint.GetInfo2(info2);
 
 
+                            //FIXME - log the output of the solverconstraints for comparison.
+
+                            for (int j = 0; j < (info1a.m_numConstraintRows); j++)
+                            {
+                                SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[currentRow + j];
 
 
-							///finalize the constraint setup
-							///
-
-							for (int j = 0; j < info1a.m_numConstraintRows; ++j)
-							{
-								m_tmpSolverNonContactConstraintPool[currentRow + j] = info2.m_solverConstraints[j];
-							}
-
-							//FIXME - log the output of the solverconstraints for comparison.
-
-							for (int j = 0; j < (info1a.m_numConstraintRows); j++)
-							{
-								SolverConstraint solverConstraint = m_tmpSolverNonContactConstraintPool[currentRow + j];
-
-
-                                if (solverConstraint.m_upperLimit >= constraints[i].GetBreakingImpulseThreshold())
+                                if (solverConstraint.m_upperLimit >= constraint.GetBreakingImpulseThreshold())
                                 {
-                                    solverConstraint.m_upperLimit = constraints[i].GetBreakingImpulseThreshold();
+                                    solverConstraint.m_upperLimit = constraint.GetBreakingImpulseThreshold();
                                 }
 
-                                if (solverConstraint.m_lowerLimit <= -constraints[i].GetBreakingImpulseThreshold())
+                                if (solverConstraint.m_lowerLimit <= -constraint.GetBreakingImpulseThreshold())
                                 {
-                                    solverConstraint.m_lowerLimit = -constraints[i].GetBreakingImpulseThreshold();
+                                    solverConstraint.m_lowerLimit = -constraint.GetBreakingImpulseThreshold();
                                 }
 
 
 
-								solverConstraint.m_originalContactPointConstraint = constraint;
+                                solverConstraint.m_originalContactPoint = constraint;
 
-								{
-									Vector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;
+                                {
+                                    Vector3 ftorqueAxis1 = solverConstraint.m_relpos1CrossNormal;
                                     solverConstraint.m_angularComponentA = constraint.GetRigidBodyA().GetInvInertiaTensorWorld() * ftorqueAxis1 * constraint.GetRigidBodyA().GetAngularFactor();
-								}
-								{
-									Vector3 ftorqueAxis2 = solverConstraint.m_relpos2CrossNormal;
+                                }
+                                {
+                                    Vector3 ftorqueAxis2 = solverConstraint.m_relpos2CrossNormal;
                                     solverConstraint.m_angularComponentB = constraint.GetRigidBodyB().GetInvInertiaTensorWorld() * ftorqueAxis2 * constraint.GetRigidBodyB().GetAngularFactor();
-								}
+                                }
 
-								{
-									Vector3 iMJlA = solverConstraint.m_contactNormal * rbA.GetInvMass();
+                                {
+                                    Vector3 iMJlA = solverConstraint.m_contactNormal * rbA.GetInvMass();
                                     Vector3 iMJaA = rbA.GetInvInertiaTensorWorld() * solverConstraint.m_relpos1CrossNormal;
-									Vector3 iMJlB = solverConstraint.m_contactNormal * rbB.GetInvMass();//sign of normal?
+                                    Vector3 iMJlB = solverConstraint.m_contactNormal * rbB.GetInvMass();//sign of normal?
                                     Vector3 iMJaB = rbB.GetInvInertiaTensorWorld() * solverConstraint.m_relpos2CrossNormal;
 
-									float sum = Vector3.Dot(iMJlA, solverConstraint.m_contactNormal);
-									float a = Vector3.Dot(iMJaA, solverConstraint.m_relpos1CrossNormal);
-									float b = Vector3.Dot(iMJlB, solverConstraint.m_contactNormal);
-									float c = Vector3.Dot(iMJaB, solverConstraint.m_relpos2CrossNormal);
+                                    float sum = Vector3.Dot(ref iMJlA, ref solverConstraint.m_contactNormal);
+                                    float a = Vector3.Dot(ref iMJaA, ref solverConstraint.m_relpos1CrossNormal);
+                                    float b = Vector3.Dot(ref iMJlB, ref solverConstraint.m_contactNormal);
+                                    float c = Vector3.Dot(ref iMJaB, ref solverConstraint.m_relpos2CrossNormal);
 									sum += a;
 									sum += b;
 									sum += c;
 
-									solverConstraint.m_jacDiagABInv = 1f / sum;
+                                    solverConstraint.m_jacDiagABInv = 1f / sum;
 
-									MathUtil.SanityCheckFloat(solverConstraint.m_jacDiagABInv);
-								}
+                                    MathUtil.SanityCheckFloat(solverConstraint.m_jacDiagABInv);
+                                }
 
 
-								///fix rhs
-								///todo: add force/torque accelerators
-								{
-									float rel_vel;
-									float vel1Dotn = Vector3.Dot(solverConstraint.m_contactNormal, rbA.LinearVelocity) + Vector3.Dot(solverConstraint.m_relpos1CrossNormal, rbA.GetAngularVelocity());
-									float vel2Dotn = -Vector3.Dot(solverConstraint.m_contactNormal, rbB.LinearVelocity) + Vector3.Dot(solverConstraint.m_relpos2CrossNormal, rbB.GetAngularVelocity());
+                                ///fix rhs
+                                ///todo: add force/torque accelerators
+                                {
+                                    float rel_vel;
+                                    float vel1Dotn = Vector3.Dot(solverConstraint.m_contactNormal, rbA.LinearVelocity) + Vector3.Dot(solverConstraint.m_relpos1CrossNormal, rbA.GetAngularVelocity());
+                                    float vel2Dotn = -Vector3.Dot(solverConstraint.m_contactNormal, rbB.LinearVelocity) + Vector3.Dot(solverConstraint.m_relpos2CrossNormal, rbB.GetAngularVelocity());
 
-									rel_vel = vel1Dotn + vel2Dotn;
+                                    rel_vel = vel1Dotn + vel2Dotn;
 
-									float restitution = 0f;
-									float positionalError = solverConstraint.m_rhs;//already filled in by getConstraintInfo2
-									float velocityError = restitution - rel_vel * info2.m_damping;
-									float penetrationImpulse = positionalError * solverConstraint.m_jacDiagABInv;
-									float velocityImpulse = velocityError * solverConstraint.m_jacDiagABInv;
-									solverConstraint.m_rhs = penetrationImpulse + velocityImpulse;
-									solverConstraint.m_appliedImpulse = 0f;
+                                    float restitution = 0f;
+                                    float positionalError = solverConstraint.m_rhs;//already filled in by getConstraintInfo2
+                                    float velocityError = restitution - rel_vel * info2.m_damping;
+                                    float penetrationImpulse = positionalError * solverConstraint.m_jacDiagABInv;
+                                    float velocityImpulse = velocityError * solverConstraint.m_jacDiagABInv;
+                                    solverConstraint.m_rhs = penetrationImpulse + velocityImpulse;
+                                    solverConstraint.m_appliedImpulse = 0f;
 
-								}
-								if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
-								{
-									TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, j);
-								}
+                                }
+                                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+                                {
+                                    TypedConstraint.PrintSolverConstraint(BulletGlobals.g_streamWriter, solverConstraint, j);
+                                }
 
-								m_tmpSolverNonContactConstraintPool[currentRow + j] = solverConstraint;
+                                //m_tmpSolverNonContactConstraintPool[currentRow + j] = solverConstraint;
 							}
 
 
@@ -1029,13 +1088,14 @@ namespace BulletXNA.BulletDynamics
                             //    TypedConstraint.PrintInfo2(BulletGlobals.g_streamWriter,constraint,info2);
                             //}
 
-						}
+                        }
 						currentRow += m_tmpConstraintSizesPool[i].m_numConstraintRows;
 					}
 				}
 
 				{
-					for (int i = 0; i < numManifolds; i++)
+                    int lastManifold = startManifold + numManifolds;
+                    for (int i = startManifold; i < lastManifold; i++)
 					{
                         ConvertContact(manifold[i], infoGlobal);
 					}
@@ -1044,22 +1104,27 @@ namespace BulletXNA.BulletDynamics
 
 			ContactSolverInfo info = infoGlobal;
 
+            int numNonContactPool = m_tmpSolverNonContactConstraintPool.Count;
 			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
 
 			///@todo: use stack allocator for such temporarily memory, same for solver bodies/constraints
-			//m_orderTmpConstraintPool.Capacity = numConstraintPool;
-			//m_orderFrictionConstraintPool.Capacity = numFrictionPool;
-			m_orderTmpConstraintPool.Clear();
-			m_orderFrictionConstraintPool.Clear();
+            m_orderNonContactConstraintPool.EnsureCapacity(numNonContactPool);///
+            m_orderTmpConstraintPool.EnsureCapacity(numConstraintPool);
+            m_orderFrictionConstraintPool.EnsureCapacity(numFrictionPool);
+
 			{
+                for (int i = 0; i < numNonContactPool; i++)
+                {
+                    m_orderNonContactConstraintPool[i] = i;
+                }
 				for (int i = 0; i < numConstraintPool; i++)
 				{
-					m_orderTmpConstraintPool.Add(i);
+					m_orderTmpConstraintPool[i] = i;
 				}
 				for (int i = 0; i < numFrictionPool; i++)
 				{
-					m_orderFrictionConstraintPool.Add(i);
+                    m_orderFrictionConstraintPool[i] = i;
 				}
 			}
 
@@ -1077,8 +1142,9 @@ namespace BulletXNA.BulletDynamics
 		}
 
 		//protected virtual float solveGroupCacheFriendlyIterations()
-		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
+		protected float SolveGroupCacheFriendlyIterations(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifoldPtr, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer, IDispatcher dispatcher)
 		{
+            m_iterCount++;
             BulletGlobals.StartProfile("solveGroupCacheFriendlyIterations");
 
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
@@ -1087,22 +1153,19 @@ namespace BulletXNA.BulletDynamics
             }
 
 
-            SolverConstraint[] rawTmpSolverNonContactConstraintPool = m_tmpSolverNonContactConstraintPool.GetRawArray();
-            ///solve all joint constraints
-            ///
-            int poolSize = m_tmpSolverNonContactConstraintPool.Count;
+            {
+		        ///this is a special step to resolve penetrations (just for contacts)
+		        SolveGroupCacheFriendlySplitImpulseIterations(bodies ,numBodies,manifoldPtr,startManifold,numManifolds,constraints,startConstraint,numConstraints,infoGlobal,debugDrawer);
 
-			//should traverse the contacts random order...
-			{
-				SolveGroupCacheFriendlySplitImpulseIterations(bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
+		        int maxIterations = m_maxOverrideNumSolverIterations > infoGlobal.m_numIterations? m_maxOverrideNumSolverIterations : infoGlobal.m_numIterations;
 
-				for (int iteration = 0; iteration < infoGlobal.m_numIterations; iteration++)
-				{
-                    SolveSingleIteration(iteration, bodies, numBodies, manifoldPtr, numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
-				}
-
-			}
-
+		        //for ( int iteration = maxIterations-1  ; iteration >= 0;iteration--)
+                for (int iteration = 0; iteration < maxIterations; iteration++)
+                {
+			        SolveSingleIteration(iteration, bodies, numBodies, manifoldPtr,startManifold,numManifolds, constraints, startConstraint, numConstraints, infoGlobal, debugDrawer);
+		        }
+		
+	        }
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
             {
                 BulletGlobals.g_streamWriter.WriteLine("SolveGroupCacheFriendlyIterations stop.");
@@ -1112,75 +1175,96 @@ namespace BulletXNA.BulletDynamics
 			return 0.0f;
 		}
 
-        protected float SolveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
+        protected float SolveSingleIteration(int iteration, ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifold, int startManifold, int numManifolds, ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer)
 		{
+            int numNonContactPool = m_tmpSolverNonContactConstraintPool.Count;
 			int numConstraintPool = m_tmpSolverContactConstraintPool.Count;
 			int numFrictionPool = m_tmpSolverContactFrictionConstraintPool.Count;
+
+
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine( "solveSingleIter [{0}][{1}][{2}].", numNonContactPool, numConstraintPool, numFrictionPool);
+	        }
+
 
 			//should traverse the contacts random order...
 			if (TestSolverMode(infoGlobal.m_solverMode, SolverMode.RandomizeOrder))
 			{
-				if ((iteration & 7) == 0)
-				{
-					for (int j = 0; j < numConstraintPool; ++j)
-					{
-						int tmp = m_orderTmpConstraintPool[j];
-						int swapi = RandInt2(j + 1);
-						m_orderTmpConstraintPool[j] = m_orderTmpConstraintPool[swapi];
-						m_orderTmpConstraintPool[swapi] = tmp;
-					}
+                if ((iteration & 7) == 0)
+                {
+                    for (int j = 0; j < numNonContactPool; ++j)
+                    {
+                        int tmp = m_orderNonContactConstraintPool[j];
+                        int swapi = RandInt2(j + 1);
+                        m_orderNonContactConstraintPool[j] = m_orderNonContactConstraintPool[swapi];
+                        m_orderNonContactConstraintPool[swapi] = tmp;
+                    }
 
-					for (int j = 0; j < numFrictionPool; ++j)
-					{
-						int tmp = m_orderFrictionConstraintPool[j];
-						int swapi = RandInt2(j + 1);
-						m_orderFrictionConstraintPool[j] = m_orderFrictionConstraintPool[swapi];
-						m_orderFrictionConstraintPool[swapi] = tmp;
-					}
-				}
+                    //contact/friction constraints are not solved more than 
+                    if (iteration < infoGlobal.m_numIterations)
+                    {
+                        for (int j = 0; j < numConstraintPool; ++j)
+                        {
+                            int tmp = m_orderTmpConstraintPool[j];
+                            int swapi = RandInt2(j + 1);
+                            m_orderTmpConstraintPool[j] = m_orderTmpConstraintPool[swapi];
+                            m_orderTmpConstraintPool[swapi] = tmp;
+                        }
+
+                        for (int j = 0; j < numFrictionPool; ++j)
+                        {
+                            int tmp = m_orderFrictionConstraintPool[j];
+                            int swapi = RandInt2(j + 1);
+                            m_orderFrictionConstraintPool[j] = m_orderFrictionConstraintPool[swapi];
+                            m_orderFrictionConstraintPool[swapi] = tmp;
+                        }
+                    }
+                }
 			}
 
 			SolverConstraint[] rawTmpSolverNonContactConstraintPool = m_tmpSolverNonContactConstraintPool.GetRawArray();
+            int[] rawOrderNonContactConstraintPool = m_orderNonContactConstraintPool.GetRawArray();
 			///solve all joint constraints
-			///
-			int poolSize = m_tmpSolverNonContactConstraintPool.Count;
-			for (int j = 0; j < poolSize; j++)
-			{
-				SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[j];
+		    for (int j=0;j<m_tmpSolverNonContactConstraintPool.Count;j++)
+		    {
+                SolverConstraint constraint = rawTmpSolverNonContactConstraintPool[rawOrderNonContactConstraintPool[j]];
+                if (iteration < constraint.m_overrideNumSolverIterations)
+                {
+				    ResolveSingleConstraintRowGeneric(constraint.m_solverBodyA,constraint.m_solverBodyB,ref constraint);
+                }
+		    }
 
-				ResolveSingleConstraintRowGeneric(constraint.m_solverBodyA, constraint.m_solverBodyB, ref constraint);
-				rawTmpSolverNonContactConstraintPool[j] = constraint;
-			}
+		    if (iteration< infoGlobal.m_numIterations)
+		    {
+                SolverConstraint[] rawTmpSolverContactConstraintPool = m_tmpSolverContactConstraintPool.GetRawArray();
+                int[] rawOrderTmpConstraintPool = m_orderTmpConstraintPool.GetRawArray();
 
-			///solve all contact constraints
-			///
-			SolverConstraint[] rawTmpSolverContactConstraintPool = m_tmpSolverContactConstraintPool.GetRawArray();
-			int[] rawOrderTmpConstraintPool = m_orderTmpConstraintPool.GetRawArray();
-			int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
-			for (int j = 0; j < numPoolConstraints; j++)
-			{
-				SolverConstraint solveManifold = rawTmpSolverContactConstraintPool[rawOrderTmpConstraintPool[j]];
-				ResolveSingleConstraintRowLowerLimit(solveManifold.m_solverBodyA, solveManifold.m_solverBodyB, ref solveManifold);
-				rawTmpSolverContactConstraintPool[rawOrderTmpConstraintPool[j]] = solveManifold;
-			}
-			///solve all friction constraints
-			int numFrictionPoolConstraints = m_tmpSolverContactFrictionConstraintPool.Count;
-			SolverConstraint[] rawTmpSolverContactFrictionConstraintPool = m_tmpSolverContactFrictionConstraintPool.GetRawArray();
-			int[] rawOrderFrictionConstraintPool = m_orderFrictionConstraintPool.GetRawArray();
-			for (int j = 0; j < numFrictionPoolConstraints; j++)
-			{
-				SolverConstraint solveManifold = rawTmpSolverContactFrictionConstraintPool[rawOrderFrictionConstraintPool[j]];
-				float totalImpulse = rawTmpSolverContactConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse;
+			    ///solve all contact constraints
+			    int numPoolConstraints = m_tmpSolverContactConstraintPool.Count;
+			    for (int j=0;j<numPoolConstraints;j++)
+			    {
+                    SolverConstraint solveManifold = rawTmpSolverContactConstraintPool[rawOrderTmpConstraintPool[j]];
+				    ResolveSingleConstraintRowLowerLimit(solveManifold.m_solverBodyA,solveManifold.m_solverBodyB,ref solveManifold);
+			    }
+			    ///solve all friction constraints
+			    int numFrictionPoolConstraints = m_tmpSolverContactFrictionConstraintPool.Count;
+                SolverConstraint[] rawTmpSolverContactFrictionConstraintPool = m_tmpSolverContactFrictionConstraintPool.GetRawArray();
+                int[] rawOrderFrictionConstraintPool = m_orderFrictionConstraintPool.GetRawArray();
+                for (int j = 0; j < numFrictionPoolConstraints; j++)
+			    {
+				    SolverConstraint solveManifold = rawTmpSolverContactFrictionConstraintPool[rawOrderFrictionConstraintPool[j]];
+				    float totalImpulse = m_tmpSolverContactConstraintPool[solveManifold.m_frictionIndex].m_appliedImpulse;
 
-				if (totalImpulse > 0f)
-				{
-					solveManifold.m_lowerLimit = -(solveManifold.m_friction * totalImpulse);
-					solveManifold.m_upperLimit = solveManifold.m_friction * totalImpulse;
+				    if (totalImpulse>0f)
+				    {
+					    solveManifold.m_lowerLimit = -(solveManifold.m_friction*totalImpulse);
+					    solveManifold.m_upperLimit = solveManifold.m_friction*totalImpulse;
 
-					ResolveSingleConstraintRowGeneric(solveManifold.m_solverBodyA, solveManifold.m_solverBodyB, ref solveManifold);
-				}
-				rawTmpSolverContactFrictionConstraintPool[rawOrderFrictionConstraintPool[j]] = solveManifold;
-			}
+					    ResolveSingleConstraintRowGeneric(solveManifold.m_solverBodyA,solveManifold.m_solverBodyB,ref solveManifold);
+				    }
+			    }
+            }
 			return 0f;
 		}
 
@@ -1225,7 +1309,14 @@ namespace BulletXNA.BulletDynamics
 					}
 				}
 			}
-			return (int)(r % un);
+
+            int result = (int)(r % un);
+            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugSolver)
+            {
+                BulletGlobals.g_streamWriter.WriteLine("random[{0}][{1}].",n,result);
+	        }
+
+            return result;
 		}
 
 		public void SetRandSeed(ulong seed)
@@ -1249,28 +1340,6 @@ namespace BulletXNA.BulletDynamics
 				loc_lateral *= friction_scaling;
 				// ... and transform it back to global coordinates
                 frictionDirection = colObj.GetWorldTransform()._basis * loc_lateral;
-			}
-		}
-
-		public static void ResizeSolverConstraintList(ObjectArray<SolverConstraint> list, int newSize)
-		{
-			int listSize = list.Count;
-			int sizeDiff = newSize - listSize;
-			// grow if needed
-			if (listSize < newSize)
-			{
-				for (int i = 0; i < sizeDiff; ++i)
-				{
-					list.Add(new SolverConstraint());
-				}
-			}
-			else
-			{
-				// Trim down
-				for (int i = sizeDiff; i < 0; ++i)
-				{
-					list.RemoveAt(list.Count - 1);
-				}
 			}
 		}
 

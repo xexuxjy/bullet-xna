@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -362,7 +363,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b = t._basis.Absolute();
                         Vector3 center = t.Translation;
-                        Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));
+                        Vector3 extent = new Vector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;
@@ -398,7 +399,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b  = t._basis.Absolute();
                         Vector3 center = t.Translation;
-                        Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));		
+                        Vector3 extent = new Vector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));		
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;

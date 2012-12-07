@@ -23,6 +23,7 @@
 
 using System;
 using System.Diagnostics;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
@@ -354,6 +355,11 @@ namespace BulletXNA.BulletDynamics
 			SetLimit(_swingSpan1, _swingSpan2, _twistSpan, 1f, .3f, 1f);
 		}
 
+        public void SetLimit(float _swingSpan1, float _swingSpan2, float _twistSpan, float _softness)
+        {
+            SetLimit(_swingSpan1, _swingSpan2, _twistSpan, _softness, .3f, 1f);
+        }
+
 		public void SetLimit(float _swingSpan1, float _swingSpan2, float _twistSpan, float _softness, float _biasFactor, float _relaxationFactor)
 		{
 			m_swingSpan1 = _swingSpan1;
@@ -497,6 +503,12 @@ namespace BulletXNA.BulletDynamics
                 Matrix trDeltaAB = trB * trPose * trA.Inverse();
 				Quaternion qDeltaAB = trDeltaAB.GetRotation();
 				Vector3 swingAxis = new Vector3(qDeltaAB.X, qDeltaAB.Y, qDeltaAB.Z);
+                float swingAxisLen2 = swingAxis.LengthSquared();
+                if (MathUtil.FuzzyZero(swingAxisLen2))
+                {
+                    return;
+                }
+
 				m_swingAxis = swingAxis;
 				m_swingAxis.Normalize();
 				m_swingCorrection = MathUtil.QuatAngle(ref qDeltaAB);
@@ -780,7 +792,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							swingAngle = -swingLimit * softness;
 						}
-						qTargetCone = Quaternion.CreateFromAxisAngle(swingAxis, swingAngle);
+						qTargetCone = new Quaternion(swingAxis, swingAngle);
 					}
 				}
 
@@ -801,7 +813,7 @@ namespace BulletXNA.BulletDynamics
 						{
 							twistAngle = -m_twistSpan * softness;
 						}
-						qTargetTwist = Quaternion.CreateFromAxisAngle(twistAxis, twistAngle);
+						qTargetTwist = new Quaternion(twistAxis, twistAngle);
 					}
 				}
 
@@ -837,7 +849,7 @@ namespace BulletXNA.BulletDynamics
 			// convert into point in constraint space:
 			// note: twist is x-axis, swing 1 and 2 are along the z and y axes respectively
 			Vector3 vSwingAxis = new Vector3(0, xEllipse, -yEllipse);
-			Quaternion qSwing = Quaternion.CreateFromAxisAngle(vSwingAxis, swingLimit);
+			Quaternion qSwing = new Quaternion(vSwingAxis, swingLimit);
 			Vector3 vPointInConstraintSpace = new Vector3(fLength, 0, 0);
 			return MathUtil.QuatRotate(ref qSwing, ref vPointInConstraintSpace);
 		}
@@ -911,7 +923,7 @@ namespace BulletXNA.BulletDynamics
 
 			if (twistAngle > MathUtil.SIMD_PI) // long way around. flip quat and recalculate.
 			{
-				qMinTwist = Quaternion.Negate(qTwist);
+				qMinTwist = -(qTwist);
 				twistAngle = MathUtil.QuatAngle(ref qTwist);
 			}
 			if (twistAngle < 0f)
@@ -1083,9 +1095,9 @@ namespace BulletXNA.BulletDynamics
             Vector3 omegaB = Vector3.Zero; bodyB.InternalGetAngularVelocity(ref omegaB);
 			Matrix trAPred;
 			Vector3 zerovec = new Vector3(0,0,0);
-			TransformUtil.IntegrateTransform(trACur, zerovec, omegaA, timeStep, out trAPred);
+			TransformUtil.IntegrateTransform(ref trACur, ref zerovec, ref omegaA, timeStep, out trAPred);
 			Matrix trBPred;
-			TransformUtil.IntegrateTransform(trBCur, zerovec, omegaB, timeStep, out trBPred);
+			TransformUtil.IntegrateTransform(ref trBCur, ref zerovec, ref omegaB, timeStep, out trBPred);
 
 			// compute desired transforms in world
 			Matrix trPose = Matrix.CreateFromQuaternion(m_qTarget);

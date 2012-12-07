@@ -24,6 +24,7 @@
 using System;
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
     public class UniformScalingShape : ConvexShape
@@ -124,7 +125,7 @@ namespace BulletXNA.BulletCollision
 	
 #else
 
-	float margin = getMargin();
+	float margin = Margin;
 	for (int i=0;i<3;i++)
 	{
 		Vector3 vec(float(0.),float(0.),float(0.));

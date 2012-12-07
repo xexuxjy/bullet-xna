@@ -231,7 +231,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 isConvex = (dotA < 0f);
 
                                 correctedAngle = isConvex ? ang4 : -ang4;
-                                Quaternion orn2 = Quaternion.CreateFromAxisAngle(calculatedEdge, -correctedAngle);
+                                Quaternion orn2 = new Quaternion(calculatedEdge, -correctedAngle);
                                 Matrix rotateMatrix = Matrix.CreateFromQuaternion(orn2);
                                 calculatedNormalB = new IndexedBasisMatrix(orn2) * normalA;
                             }
@@ -246,7 +246,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 1:
                                     {
                                         Vector3 edge1 = m_triangleVerticesA[0] - m_triangleVerticesA[1];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1, -correctedAngle);
+                                        Quaternion orn = new Quaternion(edge1, -correctedAngle);
                                         Vector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         float bla = Vector3.Dot(computedNormalB, normalB);
                                         if (bla < 0)
@@ -272,7 +272,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 2:
                                     {
                                         Vector3 edge1 = m_triangleVerticesA[2] - m_triangleVerticesA[0];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1, -correctedAngle);
+                                        Quaternion orn = new Quaternion(edge1, -correctedAngle);
                                         Vector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (Vector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -294,7 +294,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                                 case 3:
                                     {
                                         Vector3 edge1 = m_triangleVerticesA[1] - m_triangleVerticesA[2];
-                                        Quaternion orn = Quaternion.CreateFromAxisAngle(edge1, -correctedAngle);
+                                        Quaternion orn = new Quaternion(edge1, -correctedAngle);
                                         Vector3 computedNormalB = MathUtil.QuatRotate(orn, normalA);
                                         if (Vector3.Dot(computedNormalB, normalB) < 0)
                                         {
@@ -488,7 +488,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle < correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge, diffAngle);
+                    Quaternion rotation = new Quaternion(edge, diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }
@@ -499,7 +499,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
                 if (curAngle > correctedEdgeAngle)
                 {
                     float diffAngle = correctedEdgeAngle - curAngle;
-                    Quaternion rotation = Quaternion.CreateFromAxisAngle(edge, diffAngle);
+                    Quaternion rotation = new Quaternion(edge, diffAngle);
                     clampedLocalNormal = new IndexedBasisMatrix(rotation) * localContactNormalOnB;
                     return true;
                 }
@@ -513,7 +513,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
         /// Changes a btManifoldPoint collision normal to the normal from the mesh.
         public static void AdjustInternalEdgeContacts(ManifoldPoint cp, CollisionObject colObj0, CollisionObject colObj1, int partId0, int index0, InternalEdgeAdjustFlags normalAdjustFlags)
         {
-            //btAssert(colObj0.GetCollisionShape().GetShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
+            //btAssert(colObj0.CollisionShape.ShapeType == TriangleShape);
             if (colObj0.CollisionShape.ShapeType != BroadphaseNativeType.TriangleShape)
                 return;
 
@@ -521,7 +521,7 @@ namespace BulletXNA.BulletCollision.CollisionDispatch
 
             if (colObj0.RootCollisionShape.ShapeType == BroadphaseNativeType.SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
             {
-                //trimesh = ((ScaledBvhTriangleMeshShape)colObj0.GetRootCollisionShape()).GetChildShape();
+                //trimesh = ((ScaledBvhTriangleMeshShape)colObj0.RootCollisionShape).GetChildShape();
             }
             else
             {

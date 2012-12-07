@@ -23,7 +23,7 @@
 
 //using System;
 //using System.Collections.Generic;
-//using Microsoft.Xna.Framework;
+//
 //using BulletXNA.BulletDynamics.Dynamics;
 
 //namespace BulletXNA.BulletDynamics.ConstraintSolver
@@ -137,7 +137,7 @@
 //        {
 //            if (m_originalBody != null)
 //            {
-//                velocity = m_originalBody.getLinearVelocity()+m_deltaLinearVelocity + (Vector3.Cross((m_originalBody.getAngularVelocity()+m_deltaAngularVelocity),rel_pos));
+//                velocity = m_originalBody.LinearVelocity+m_deltaLinearVelocity + (Vector3.Cross((m_originalBody.getAngularVelocity()+m_deltaAngularVelocity),rel_pos));
 //            }
 //            else
 //            {
@@ -187,7 +187,7 @@
 //        {
 //            if (m_originalBody != null)
 //            {
-//                m_originalBody.setLinearVelocity(m_originalBody.getLinearVelocity()+ m_deltaLinearVelocity);
+//                m_originalBody.setLinearVelocity(m_originalBody.LinearVelocity+ m_deltaLinearVelocity);
 //                m_originalBody.setAngularVelocity(m_originalBody.getAngularVelocity()+m_deltaAngularVelocity);
 //                //m_originalBody.setCompanionId(-1);
 //            }
@@ -198,7 +198,7 @@
 //        {
 //            if (m_originalBody != null)
 //            {
-//                m_originalBody.setLinearVelocity(m_originalBody.getLinearVelocity()+ m_deltaLinearVelocity);
+//                m_originalBody.setLinearVelocity(m_originalBody.LinearVelocity+ m_deltaLinearVelocity);
 //                m_originalBody.setAngularVelocity(m_originalBody.getAngularVelocity()+m_deltaAngularVelocity);
     			
 //                //correct the position/orientation based on push/turn recovery

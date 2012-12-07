@@ -717,10 +717,10 @@ namespace BulletXNA.BulletDynamics
 
 		public void GetAngularLowerLimit(out Vector3 angularLower)
 		{
-            angularLower = new Vector3(
-            m_angularLimits[0].m_loLimit,
-            m_angularLimits[1].m_loLimit,
-            m_angularLimits[2].m_loLimit);
+			angularLower = new Vector3(
+			m_angularLimits[0].m_loLimit,
+			m_angularLimits[1].m_loLimit,
+			m_angularLimits[2].m_loLimit);
 		}
 
 		public void GetAngularUpperLimit(out Vector3 angularUpper)
@@ -781,9 +781,9 @@ namespace BulletXNA.BulletDynamics
 			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
 
 			Matrix frameInW = Matrix.Identity;
-            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
-                                    xAxis[1], yAxis[1], zAxis[1],
-                                   xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._basis = new IndexedBasisMatrix(xAxis.X, yAxis.X, zAxis.X,
+                                    xAxis.Y, yAxis.Y, zAxis.Y,
+                                   xAxis.Z, yAxis.Z, zAxis.Z);
 
 			// now get constraint frame in local coordinate systems
             m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;
@@ -994,12 +994,30 @@ namespace BulletXNA.BulletDynamics
 			{
 				m_currentLimit = 1;//low limit violation
 				m_currentLimitError = test_value - m_loLimit;
+                if (m_currentLimitError > MathUtil.SIMD_PI)
+                {
+                    m_currentLimitError -= MathUtil.SIMD_2_PI;
+                }
+                else if (m_currentLimitError < -MathUtil.SIMD_PI)
+                {
+                    m_currentLimitError += MathUtil.SIMD_2_PI;
+                }
+
 				return 1;
 			}
 			else if (test_value > m_hiLimit)
 			{
 				m_currentLimit = 2;//High limit violation
 				m_currentLimitError = test_value - m_hiLimit;
+                if (m_currentLimitError > MathUtil.SIMD_PI)
+                {
+                    m_currentLimitError -= MathUtil.SIMD_2_PI;
+                }
+                else if (m_currentLimitError < -MathUtil.SIMD_PI)
+                {
+                    m_currentLimitError += MathUtil.SIMD_2_PI;
+                }
+
 				return 2;
 			};
 

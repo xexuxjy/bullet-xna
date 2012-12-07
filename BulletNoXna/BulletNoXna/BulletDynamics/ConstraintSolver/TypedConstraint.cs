@@ -69,6 +69,7 @@ namespace BulletXNA.BulletDynamics
 
 
 		private bool m_needsFeedback;
+        private int m_overrideNumSolverIterations;
 
 		protected TypedConstraintType m_constraintType;
 
@@ -159,6 +160,17 @@ namespace BulletXNA.BulletDynamics
 			return m_appliedImpulse;
 		}
 
+	    public int	GetOverrideNumSolverIterations()
+	    {
+		    return m_overrideNumSolverIterations;
+	    }
+
+	    ///override the number of constraint solver iterations used to solve this constraint
+	    ///-1 will use the default number of iterations, as specified in SolverInfo.m_numIterations
+	    public void SetOverrideNumSolverIterations(int overideNumIterations)
+	    {
+		    m_overrideNumSolverIterations = overideNumIterations;
+	    }
 
 
 		protected float GetMotorFactor(float pos, float lowLim, float uppLim, float vel, float timeFact)
@@ -374,9 +386,9 @@ namespace BulletXNA.BulletDynamics
 			if (writer != null)
 			{
 
-                writer.WriteLine(String.Format("getInfo2 [{0}] [{1}] [{2}] [{3}]", constraint.m_userConstraintId, constraint.GetObjectType(), (string)constraint.GetRigidBodyA().UserObject, (string)constraint.GetRigidBodyB().UserObject));
-				writer.WriteLine(String.Format("numRows [{0}] fps[{1:0.00000000}] erp[{2:0.00000000}] findex[{3}] numIter[{4}]", info2.m_solverConstraints.Length, info2.fps, info2.erp, info2.findex, info2.m_numIterations));
-				for (int i = 0; i < info2.m_solverConstraints.Length; ++i)
+				writer.WriteLine(String.Format("getInfo2 [{0}] [{1}] [{2}] [{3}]", constraint.m_userConstraintId, constraint.GetObjectType(), (string)constraint.GetRigidBodyA().UserObject, (string)constraint.GetRigidBodyB().UserObject));
+				writer.WriteLine(String.Format("numRows [{0}] fps[{1:0.00000000}] erp[{2:0.00000000}] findex[{3}] numIter[{4}]", info2.m_numRows, info2.fps, info2.erp, info2.findex, info2.m_numIterations));
+				for (int i = 0; i < info2.m_numRows; ++i)
 				{
 					writer.WriteLine(String.Format("TypedConstraint[{0}]", i));
 					writer.WriteLine("ContactNormal");
@@ -395,7 +407,7 @@ namespace BulletXNA.BulletDynamics
 		{
 			if (writer != null)
 			{
-                writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index, (String)constraint.m_solverBodyA.UserObject, (String)constraint.m_solverBodyB.UserObject);
+				writer.WriteLine("SolverConstraint[{0}][{1}][{2}]", index,(String)constraint.m_solverBodyA.UserObject,(String)constraint.m_solverBodyB.UserObject);
                 MathUtil.PrintVector3(writer, "relPos1CrossNormal", constraint.m_relpos1CrossNormal);
                 MathUtil.PrintVector3(writer, "contactNormal", constraint.m_contactNormal);
                 MathUtil.PrintVector3(writer, "m_angularComponentA", constraint.m_angularComponentA);
@@ -414,14 +426,22 @@ namespace BulletXNA.BulletDynamics
 	{
 		public int m_numConstraintRows;
 		public int nub;
+
+        ~ConstraintInfo1()
+        {
+            int ibreak = 0;
+        }
+
 	}
 
 	public class ConstraintInfo2
 	{
+        // little dodgy...
+        public const int maxConstraints = 6;
 		// Workaround for the idea of having multiple solver constraints and row count.
 		// This should be populated with a list of the SolverConstraint for a give Constraint. - MAN
-		public SolverConstraint[] m_solverConstraints;
-
+        public SolverConstraint[] m_solverConstraints = new SolverConstraint[maxConstraints];
+        public int m_numRows = 0;
 		// integrator parameters: frames per second (1/stepsize), default error
 		// reduction parameter (0..1).
 		public float fps;
@@ -436,6 +456,25 @@ namespace BulletXNA.BulletDynamics
 		//damping of the velocity
 		public float m_damping;
 
+        public void Reset()
+        {
+
+            for (int i = 0; i < maxConstraints; ++i)
+            {
+                m_solverConstraints[i] = null;
+            }
+            m_numRows = 0;
+            fps = 0f;
+            erp = 0;
+            findex = 0;
+            m_numIterations = 0;
+            m_damping = 0f;
+        }
+
+        ~ConstraintInfo2()
+        {
+            int ibreak = 0;
+        }
 	}
 
 

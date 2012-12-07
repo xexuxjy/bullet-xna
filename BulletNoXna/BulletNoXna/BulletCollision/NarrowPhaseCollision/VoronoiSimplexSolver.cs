@@ -407,7 +407,7 @@ namespace BulletXNA.BulletCollision
 
         public int PointOutsideOfPlane(ref Vector3 p, ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d)
         {
-            Vector3 ba, ca, normal, pa, da;
+            Vector3 ba, ca, normal,pa,da;
             Vector3.Subtract(out ba, ref b, ref a);
             Vector3.Subtract(out ca, ref c, ref a);
             Vector3.Cross(out normal, ref ba, ref ca);
@@ -436,14 +436,14 @@ namespace BulletXNA.BulletCollision
             result.m_usedVertices.SetAll(false);
 
             // Check if P in vertex region outside A
-            Vector3 ab, ac, ap;
-            Vector3.Subtract(out ab, ref b, ref a);
+            Vector3 ab,ac,ap;
+            Vector3.Subtract(out ab,ref b,ref a);
             Vector3.Subtract(out ac, ref c, ref a);
             Vector3.Subtract(out ap, ref p, ref a);
             
             float d1,d2;
-            Vector3.Dot(ref ab, ref ap, out d1);
-            Vector3.Dot(ref ac, ref ap, out d2);
+            Vector3.Dot(ref ab, ref ap,out d1);
+            Vector3.Dot(ref ac, ref ap,out d2);
             if (d1 <= 0f && d2 <= 0f)
             {
                 result.m_closestPointOnSimplex = a;
@@ -456,8 +456,8 @@ namespace BulletXNA.BulletCollision
             Vector3 bp;
             Vector3.Subtract(out bp, ref p, ref b);
             float d3,d4;
-            Vector3.Dot(ref ab, ref bp, out d3);
-            Vector3.Dot(ref ac, ref bp, out d4);
+            Vector3.Dot(ref ab, ref bp,out d3);
+            Vector3.Dot(ref ac, ref bp,out d4);
             if (d3 >= 0f && d4 <= d3)
             {
                 result.m_closestPointOnSimplex = b;

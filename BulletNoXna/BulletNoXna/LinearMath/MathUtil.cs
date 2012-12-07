@@ -35,23 +35,23 @@ namespace BulletXNA
         public static float[,] BasisMatrixToFloatArray(ref IndexedBasisMatrix m)
         {
             float[,] result = new float[3, 3];
-            result[0, 0] = m._Row0.X;
-            result[0, 1] = m._Row0.Y;
-            result[0, 2] = m._Row0.Z;
-            result[1, 0] = m._Row1.X;
-            result[1, 1] = m._Row1.Y;
-            result[1, 2] = m._Row1.Z;
-            result[2, 0] = m._Row2.X;
-            result[2, 1] = m._Row2.Y;
-            result[2, 2] = m._Row2.Z;
+            result[0, 0] = m._el0.X;
+            result[0, 1] = m._el0.Y;
+            result[0, 2] = m._el0.Z;
+            result[1, 0] = m._el1.X;
+            result[1, 1] = m._el1.Y;
+            result[1, 2] = m._el1.Z;
+            result[2, 0] = m._el2.X;
+            result[2, 1] = m._el2.Y;
+            result[2, 2] = m._el2.Z;
             return result;
         }
 
         public static void FloatArrayToBasisMatrix(float[,] f, ref IndexedBasisMatrix m)
         {
-            m._Row0 = new Vector3(f[0, 0], f[0, 1], f[0, 2]);
-            m._Row1 = new Vector3(f[1, 0], f[1, 1], f[1, 2]);
-            m._Row2 = new Vector3(f[2, 0], f[2, 1], f[2, 2]);
+            m._el0 = new Vector3(f[0, 0], f[0, 1], f[0, 2]);
+            m._el1 = new Vector3(f[1, 0], f[1, 1], f[1, 2]);
+            m._el2 = new Vector3(f[2, 0], f[2, 1], f[2, 2]);
         }
 
 
@@ -282,52 +282,6 @@ namespace BulletXNA
         //            }
         //            Debug.Assert(false);
         //        }
-
-
-        public static float VectorComponent(Vector4 v, int i)
-        {
-            return VectorComponent(ref v, i);
-        }
-
-        public static float VectorComponent(ref Vector4 v, int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return v.X;
-                case 1:
-                    return v.Y;
-                case 2:
-                    return v.Z;
-                case 3:
-                    return v.W;
-                default:
-                    Debug.Assert(false);
-                    return 0.0f;
-            }
-        }
-
-
-
-        public static void VectorComponent(ref Vector4 v, int i, float f)
-        {
-            switch (i)
-            {
-                case 0:
-                    v.X = f;
-                    return;
-                case 1:
-                    v.Y = f;
-                    return;
-                case 2:
-                    v.Z = f;
-                    return;
-                case 3:
-                    v.W = f;
-                    return;
-            }
-            Debug.Assert(false);
-        }
 
         //        public static Matrix AbsoluteMatrix(Matrix input)
         //        {
@@ -974,50 +928,43 @@ namespace BulletXNA
             v1 = new Vector3(vecin.Z, 0f, -vecin.X);
             v2 = new Vector3(-vecin.Y, vecin.X, 0f);
         }
+
+        [Conditional("DEBUG")]
         public static void SanityCheckVector(Vector3 v)
         {
-#if DEBUG
             SanityCheckVector(ref v);
-#endif
         }
+
+        [Conditional("DEBUG")]
         public static void ZeroCheckVector(Vector3 v)
         {
-#if DEBUG
-
             ZeroCheckVector(ref v);
-#endif
         }
 
+        [Conditional("DEBUG")]
         public static void ZeroCheckVector(ref Vector3 v)
         {
-#if DEBUG
-
             if (FuzzyZero(v.LengthSquared()))
             {
                 int ibreak = 0;
                 //Debug.Assert(false);
             }
-#endif
         }
+
+        [Conditional("DEBUG")]
         public static void SanityCheckVector(ref Vector3 v)
         {
-#if DEBUG
-
             if (float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z))
             {
                 int ibreak = 0;
                 Debug.Assert(false);
             }
-#endif
         }
 
+        [Conditional("DEBUG")]
         public static void SanityCheckFloat(float f)
         {
-#if DEBUG
-
             Debug.Assert(!float.IsInfinity(f) && !float.IsNaN(f));
-#endif
-
         }
 
         //        public static void Vector3FromFloat(out Vector3 v, float[] fa)

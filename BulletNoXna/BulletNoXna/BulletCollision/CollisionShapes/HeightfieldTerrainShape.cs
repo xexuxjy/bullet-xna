@@ -25,6 +25,7 @@ using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
 
@@ -478,38 +479,38 @@ namespace BulletXNA.BulletCollision
                         {
                             case 0:
                                 {
-                                    if (iv3Min[1] > startX)
-                                        startX = (int)iv3Min[1];
-                                    if (iv3Max[1] < endX)
-                                        endX = (int)iv3Max[1];
-                                    if (iv3Min[2] > startJ)
-                                        startJ = (int)iv3Min[2];
-                                    if (iv3Max[2] < endJ)
-                                        endJ = (int)iv3Max[2];
+                                    if (iv3Min.Y > startX)
+                                        startX = (int)iv3Min.Y;
+                                    if (iv3Max.Y < endX)
+                                        endX = (int)iv3Max.Y;
+                                    if (iv3Min.Z > startJ)
+                                        startJ = (int)iv3Min.Z;
+                                    if (iv3Max.Z < endJ)
+                                        endJ = (int)iv3Max.Z;
                                     break;
                                 }
                             case 1:
                                 {
-                                    if (iv3Min[0] > startX)
-                                        startX = (int)iv3Min[0];
-                                    if (iv3Max[0] < endX)
-                                        endX = (int)iv3Max[0];
-                                    if (iv3Min[2] > startJ)
-                                        startJ = (int)iv3Min[2];
-                                    if (iv3Max[2] < endJ)
-                                        endJ = (int)iv3Max[2];
+                                    if (iv3Min.X > startX)
+                                        startX = (int)iv3Min.X;
+                                    if (iv3Max.X < endX)
+                                        endX = (int)iv3Max.X;
+                                    if (iv3Min.Z > startJ)
+                                        startJ = (int)iv3Min.Z;
+                                    if (iv3Max.Z < endJ)
+                                        endJ = (int)iv3Max.Z;
                                     break;
                                 };
                             case 2:
                                 {
-                                    if (iv3Min[0] > startX)
-                                        startX = (int)iv3Min[0];
-                                    if (iv3Max[0] < endX)
-                                        endX = (int)iv3Max[0];
-                                    if (iv3Min[1] > startJ)
-                                        startJ = (int)iv3Min[1];
-                                    if (iv3Max[1] < endJ)
-                                        endJ = (int)iv3Max[1];
+                                    if (iv3Min.X > startX)
+                                        startX = (int)iv3Min.X;
+                                    if (iv3Max.X < endX)
+                                        endX = (int)iv3Max.X;
+                                    if (iv3Min.Y > startJ)
+                                        startJ = (int)iv3Min.Y;
+                                    if (iv3Max.Y < endJ)
+                                        endJ = (int)iv3Max.Y;
                                     break;
                                 }
                             default:
@@ -951,9 +952,9 @@ namespace BulletXNA.BulletCollision
 
             IndexedBasisMatrix abs_b = t._basis.Absolute();
             Vector3 center = t.Translation;
-            Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents),
-		                                                abs_b[1].Dot(ref halfExtents),
-		                                                abs_b[2].Dot(ref halfExtents));
+            Vector3 extent = new Vector3(abs_b._el0.Dot(ref halfExtents),
+		                                                abs_b._el1.Dot(ref halfExtents),
+		                                                abs_b._el2.Dot(ref halfExtents));
 
             extent += new Vector3(Margin);
 

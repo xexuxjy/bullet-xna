@@ -22,6 +22,7 @@
  */
 
 using System;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -47,9 +48,9 @@ namespace BulletXNA.BulletCollision
 
 	        Vector3 halfExtents = new Vector3(radius);
             float val = halfExtents[UpAxis];
-	        halfExtents[UpAxis] = val + HalfHeight;
+	        halfExtents[UpAxis] = val +HalfHeight;
 
-	        float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
+	        const float margin = CollisionMargin.CONVEX_DISTANCE_MARGIN;
 
 	        float lx=2f*(halfExtents.X+margin);
 	        float ly=2f*(halfExtents.Y+margin);
@@ -117,7 +118,7 @@ namespace BulletXNA.BulletCollision
 		        Vector3 pos = Vector3.Zero;
 		        pos[UpAxis] = HalfHeight;
 
-		        vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
+		        vtx = pos +vec*(radius) - vec * Margin;
 		        newDot = vec.Dot(ref vtx);
 		        if (newDot > maxDot)
 		        {
@@ -129,7 +130,7 @@ namespace BulletXNA.BulletCollision
                 Vector3 pos = Vector3.Zero;
                 pos[UpAxis] = -HalfHeight;
 
-                vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
+                vtx = pos + vec * (radius) - vec * Margin;
                 newDot = vec.Dot(ref vtx);
                 if (newDot > maxDot)
                 {
@@ -156,7 +157,7 @@ namespace BulletXNA.BulletCollision
 		            Vector3 pos = Vector3.Zero;
                     pos[UpAxis] = HalfHeight;
 
-		            vtx = pos +vec*m_localScaling*(radius) - vec * Margin;
+		            vtx = pos +vec*(radius) - vec * Margin;
                     newDot = vec.Dot(ref vtx);
 		            if (newDot > maxDot)
 		            {
@@ -168,7 +169,7 @@ namespace BulletXNA.BulletCollision
                     Vector3 pos = Vector3.Zero;
                     pos[UpAxis] = -HalfHeight;
 
-                    vtx = pos + vec * m_localScaling * (radius) - vec * Margin;
+                    vtx = pos + vec * (radius) - vec * Margin;
                     newDot = vec.Dot(ref vtx);
                     if (newDot > maxDot)
                     {
@@ -187,9 +188,9 @@ namespace BulletXNA.BulletCollision
 	        halfExtents += new Vector3(Margin);
             IndexedBasisMatrix abs_b = trans._basis.Absolute();
             Vector3 center = trans.Translation;
-            Vector3 extent = new Vector3(abs_b[0].Dot(ref halfExtents),
-                                           abs_b[1].Dot(ref halfExtents),
-                                           abs_b[2].Dot(ref halfExtents));
+            Vector3 extent = new Vector3(abs_b._el0.Dot(ref halfExtents),
+                                           abs_b._el1.Dot(ref halfExtents),
+                                           abs_b._el2.Dot(ref halfExtents));
     		
 	        aabbMin = center - extent;
 	        aabbMax = center + extent;

@@ -42,19 +42,26 @@ namespace BulletXNA.BulletDynamics
         public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, Matrix frameInA, Matrix frameInB, bool useLinearReferenceFrameA)
             : this(rbA, rbB, ref frameInA, ref frameInB, useLinearReferenceFrameA)
         {
+            Init();
         }
 
         
         public Generic6DofSpringConstraint(RigidBody rbA, RigidBody rbB, ref Matrix frameInA, ref Matrix frameInB ,bool useLinearReferenceFrameA) : base(rbA,rbB,ref frameInA,ref frameInB,useLinearReferenceFrameA)
         {
+            Init();
+        }
+
+        protected void Init()
+        {
             m_constraintType = TypedConstraintType.D6Spring;
-			for (int i = 0; i < s_degreesOfFreedom; ++i)
+            for (int i = 0; i < s_degreesOfFreedom; ++i)
             {
                 m_springEnabled[i] = false;
                 m_equilibriumPoint[i] = 0.0f;
                 m_springStiffness[i] = 0.0f;
                 m_springDamping[i] = 1.0f;
             }
+
         }
 
 
@@ -171,9 +178,9 @@ namespace BulletXNA.BulletDynamics
 			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
 
 			Matrix frameInW = Matrix.Identity;
-            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
-                                    xAxis[1], yAxis[1], zAxis[1],
-                                   xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._basis = new IndexedBasisMatrix(xAxis.X, yAxis.X, zAxis.X,
+                                    xAxis.Y, yAxis.Y, zAxis.Y,
+                                   xAxis.Z, yAxis.Z, zAxis.Z);
 
 			// now get constraint frame in local coordinate systems
             m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;

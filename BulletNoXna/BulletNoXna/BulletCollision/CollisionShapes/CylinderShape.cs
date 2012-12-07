@@ -22,6 +22,7 @@
  */
 
 using System;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision
@@ -46,7 +47,7 @@ namespace BulletXNA.BulletCollision
 	    public virtual Vector3 GetHalfExtentsWithMargin()
 	    {
 		    Vector3 halfExtents = GetHalfExtentsWithoutMargin();
-            Vector3 margin = new Vector3(Margin);
+		    Vector3 margin = new Vector3(Margin);
 		    halfExtents += margin;
 		    return halfExtents;
 	    }

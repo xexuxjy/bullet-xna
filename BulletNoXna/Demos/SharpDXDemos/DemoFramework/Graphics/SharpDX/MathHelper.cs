@@ -7,9 +7,9 @@ namespace DemoFramework.SharpDX
         public static Matrix Convert(ref BulletXNA.LinearMath.Matrix m)
         {
             return new Matrix(
-                m._basis._Row0.X, m._basis._Row1.X, m._basis._Row2.X, 0,
-                m._basis._Row0.Y, m._basis._Row1.Y, m._basis._Row2.Y, 0,
-                m._basis._Row0.Z, m._basis._Row1.Z, m._basis._Row2.Z, 0,
+                m._basis._el0.X, m._basis._el1.X, m._basis._el2.X, 0,
+                m._basis._el0.Y, m._basis._el1.Y, m._basis._el2.Y, 0,
+                m._basis._el0.Z, m._basis._el1.Z, m._basis._el2.Z, 0,
                 m.Translation.X, m.Translation.Y, m.Translation.Z, 1);
         }
 

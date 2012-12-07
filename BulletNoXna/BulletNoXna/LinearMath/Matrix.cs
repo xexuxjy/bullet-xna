@@ -97,17 +97,17 @@ namespace BulletXNA.LinearMath
             //return new Vector3(matrix1._basis[0].Dot(ref v) + matrix1.Translation.X, 
             //                           matrix1._basis[1].Dot(ref v) + matrix1.Translation.Y,
             //                            matrix1._basis[2].Dot(ref v) + matrix1.Translation.Z);
-            return new Vector3(matrix1._basis._Row0.Dot(ref v) + matrix1.Translation.X,
-                                                   matrix1._basis._Row1.Dot(ref v) + matrix1.Translation.Y,
-                                                    matrix1._basis._Row2.Dot(ref v) + matrix1.Translation.Z);
+            return new Vector3(matrix1._basis._el0.Dot(ref v) + matrix1.Translation.X,
+                                                   matrix1._basis._el1.Dot(ref v) + matrix1.Translation.Y,
+                                                    matrix1._basis._el2.Dot(ref v) + matrix1.Translation.Z);
         }
 
 
         public static void Multiply(out Vector3 vout, ref Matrix matrix1, ref Vector3 vin)
         {
-            vout = new Vector3(matrix1._basis._Row0.Dot(ref vin) + matrix1.Translation.X,
-                                                   matrix1._basis._Row1.Dot(ref vin) + matrix1.Translation.Y,
-                                                    matrix1._basis._Row2.Dot(ref vin) + matrix1.Translation.Z);
+            vout = new Vector3(matrix1._basis._el0.Dot(ref vin) + matrix1.Translation.X,
+                                                   matrix1._basis._el1.Dot(ref vin) + matrix1.Translation.Y,
+                                                    matrix1._basis._el2.Dot(ref vin) + matrix1.Translation.Z);
         }
 
 
@@ -132,8 +132,8 @@ namespace BulletXNA.LinearMath
         //{
         //    float num = scaleFactor;
         //    Matrix Matrix;
-        //    Matrix._basis._Row0 = matrix1._Row0  * scaleFactor;
-        //    Matrix._basis._Row1 = matrix1._Row1 * scaleFactor;
+        //    Matrix._basis._el0 = matrix1._el0  * scaleFactor;
+        //    Matrix._basis._el1 = matrix1._el1 * scaleFactor;
         //    Matrix._basis._Row3 = matrix1._Row3 * scaleFactor;
         //    Matrix._basis.Row3 = matrix1.Row3 * scaleFactor;
         //    return Matrix;
@@ -142,9 +142,9 @@ namespace BulletXNA.LinearMath
         //public static Matrix operator *(float scaleFactor, Matrix matrix1)
         //{
         //    Matrix Matrix;
-        //    Matrix._basis._Row0 = matrix1._basis._Row0 * scaleFactor;
-        //    Matrix._basis._Row1 = matrix1._basis._Row1 * scaleFactor;
-        //    Matrix._basis._Row2 = matrix1._basis._Row2 * scaleFactor;
+        //    Matrix._basis._el0 = matrix1._basis._el0 * scaleFactor;
+        //    Matrix._basis._el1 = matrix1._basis._el1 * scaleFactor;
+        //    Matrix._basis._el2 = matrix1._basis._el2 * scaleFactor;
         //    Matrix.Translation = matrix1.Translation * scaleFactor;
         //    return Matrix;
         //}

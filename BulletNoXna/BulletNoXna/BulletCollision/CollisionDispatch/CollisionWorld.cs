@@ -93,7 +93,7 @@ namespace BulletXNA.BulletCollision
             minAabb -= contactThreshold;
             maxAabb += contactThreshold;
 
-            if(DispatchInfo.m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY)
+            if (DispatchInfo.m_useContinuous && colObj.GetInternalType() == CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject)
 	        {
 		        Vector3 minAabb2,maxAabb2;
 		        colObj.CollisionShape.GetAabb(colObj.GetInterpolationWorldTransform(),out minAabb2 ,out maxAabb2);
@@ -254,7 +254,7 @@ namespace BulletXNA.BulletCollision
                             if(DispatchInfo.m_useContinuous && colObj.GetInternalType()==CollisionObjectTypes.CO_RIGID_BODY && !colObj.IsStaticOrKinematicObject)
  					        {
                                 Matrix m = colObj.GetInterpolationWorldTransform();
-                                //(colObj as RigidBody).GetMotionState().GetWorldTransform(out m);
+                                //(colObj as RigidBody).MotionState.GetWorldTransform(out m);
 
 						        colObj.CollisionShape.GetAabb(m,out minAabb2,out maxAabb2);
 						        minAabb2 -= contactThreshold;
@@ -333,8 +333,8 @@ namespace BulletXNA.BulletCollision
                 case BroadphaseNativeType.ConeShape:
                     {
                         ConeShape coneShape = (ConeShape)shape;
-                        float radius = coneShape.Radius;//+coneShape.Margin;
-                        float height = coneShape.Height;//+coneShape.Margin;
+                        float radius = coneShape.Radius;//+coneShape->Margin;
+                        float height = coneShape.Height;//+coneShape->Margin;
 
                         int upAxis = coneShape.ConeUpIndex;
                         DebugDrawer.DrawCone(radius, height, upAxis, ref worldTransform, ref color);
@@ -403,7 +403,7 @@ namespace BulletXNA.BulletCollision
                                 }
                             }
                         }
-
+                        
                         if (shape.IsConcave)
                         {
                             ConcaveShape concaveMesh = (ConcaveShape)shape;
@@ -426,7 +426,7 @@ namespace BulletXNA.BulletCollision
 
                             //DebugDrawcallback drawCallback;
                             //DebugDrawcallback drawCallback = new DebugDrawcallback(debugDraw, ref worldTransform, ref color);
-                            //convexMesh.GetMeshInterface().InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
+                            //convexMesh.MeshInterface.InternalProcessAllTriangles(drawCallback, ref aabbMin, ref aabbMax);
                             //drawCallback.Cleanup();
                         }
                         break;
@@ -508,7 +508,8 @@ namespace BulletXNA.BulletCollision
                 Vector3 angVel;
                 TransformUtil.CalculateVelocity(ref convexFromTrans, ref convexToTrans, 1.0f, out linVel, out angVel);
                 Vector3 zeroLinVel = new Vector3();
-                Matrix R = new Matrix(convexFromTrans._basis,Vector3.Zero);
+                Matrix R = Matrix.Identity;
+                R.SetRotation(convexFromTrans.GetRotation());
                 castShape.CalculateTemporalAabb(ref R, ref zeroLinVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);
             }
 
@@ -900,7 +901,7 @@ namespace BulletXNA.BulletCollision
             {
 				if (collisionShape.IsConcave)
 				{
-                    if (collisionShape.ShapeType == BroadphaseNativeType.TriangleMeshShape)
+					if (collisionShape.ShapeType == BroadphaseNativeType.TriangleMeshShape)
 					{
 						BulletGlobals.StartProfile("convexSweepbtBvhTriangleMesh");
 						BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
@@ -977,12 +978,12 @@ namespace BulletXNA.BulletCollision
                                 Vector3 boxMaxLocal;
                                 castShape.GetAabb(ref rotationXform, out boxMinLocal, out boxMaxLocal);
 
-                                Vector3 rayAabbMinLocal = convexFromLocal;
-                                MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
-                                //rayAabbMinLocal.setMin(convexToLocal);
-                                Vector3 rayAabbMaxLocal = convexFromLocal;
-                                //rayAabbMaxLocal.setMax(convexToLocal);
-                                MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
+							Vector3 rayAabbMinLocal = convexFromLocal;
+							MathUtil.VectorMin(ref convexToLocal, ref rayAabbMinLocal);
+							//rayAabbMinLocal.setMin(convexToLocal);
+							Vector3 rayAabbMaxLocal = convexFromLocal;
+							//rayAabbMaxLocal.setMax(convexToLocal);
+							MathUtil.VectorMax(ref convexToLocal, ref rayAabbMaxLocal);
 
                                 rayAabbMinLocal += boxMinLocal;
                                 rayAabbMaxLocal += boxMaxLocal;

@@ -28,7 +28,7 @@ using BulletXNA.LinearMath;
 namespace BulletXNA.BulletDynamics
 {
 
-    public struct SolverConstraint
+    public class SolverConstraint
     {
 	    public Vector3	m_relpos1CrossNormal;
         public Vector3 m_contactNormal;
@@ -49,13 +49,50 @@ namespace BulletXNA.BulletDynamics
 		public RigidBody m_solverBodyB;
 		public int m_companionIdB;
 		
-        public TypedConstraint m_originalContactPointConstraint;
-        public ManifoldPoint m_originalContactPoint;
+        //public TypedConstraint m_originalContactPointConstraint;
+        //public ManifoldPoint m_originalContactPoint;
+        public object m_originalContactPoint;
         public float m_rhs;
         public float m_cfm;
         public float m_lowerLimit;
         public float m_upperLimit;
         public float m_rhsPenetration;
+        public int m_overrideNumSolverIterations = -1;
+
+        public SolverConstraint()
+        {
+            int i = 0;
+        }
+
+
+        public void Reset()
+        {
+            m_relpos1CrossNormal = Vector3.Zero;
+            m_contactNormal = Vector3.Zero;
+            m_relpos2CrossNormal = Vector3.Zero;
+            m_angularComponentA = Vector3.Zero;
+            m_angularComponentB = Vector3.Zero;
+            m_appliedPushImpulse = 0f;
+            m_appliedImpulse = 0f;
+            m_friction = 0f;
+            m_jacDiagABInv = 0f;
+            m_numConsecutiveRowsPerKernel = 0;
+            m_frictionIndex = 0;
+            m_solverBodyA = null;
+            m_companionIdA = 0;
+            m_solverBodyB = null;
+            m_companionIdB = 0;
+            m_originalContactPoint = null;
+            //m_originalContactPointConstraint = null;
+            m_rhs = 0f;
+            m_cfm = 0;
+            m_lowerLimit = 0f;
+            m_upperLimit = 0f;
+            m_rhsPenetration = 0f;
+            m_overrideNumSolverIterations = -1;
+
+        }
+
 
         public void PrintSolverConstraint(TextWriter tw)
         {

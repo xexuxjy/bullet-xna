@@ -72,7 +72,7 @@ namespace BulletXNA.BulletDynamics
 				ContactSolverInfo infoGlobal = new ContactSolverInfo();
 				infoGlobal.m_timeStep = timeStep;
 				m_constraintSolver.PrepareSolve(0, numManifolds);
-				m_constraintSolver.SolveGroup(null, 0, manifoldPtr, numManifolds, null, 0, 0, infoGlobal, m_debugDrawer, m_dispatcher1);
+				m_constraintSolver.SolveGroup(null, 0, manifoldPtr, 0, numManifolds, null, 0, 0, infoGlobal, m_debugDrawer, m_dispatcher1);
 				m_constraintSolver.AllSolved(infoGlobal, m_debugDrawer);
 			}
 

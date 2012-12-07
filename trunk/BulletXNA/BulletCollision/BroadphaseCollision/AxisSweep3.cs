@@ -71,17 +71,17 @@ namespace BulletXNA.BulletCollision
         public Handle()
             : base()
         {
-            m_minEdges[0] = m_minEdges[1] = m_minEdges[2] = 52685;
-            m_maxEdges[0] = m_maxEdges[1] = m_maxEdges[2] = 52685;
+            m_minEdges.X = m_minEdges.Y = m_minEdges.Z = 52685;
+            m_maxEdges.X = m_maxEdges.Y = m_maxEdges.Z = 52685;
         }
 
         public void SetNextFree(ushort next)
         {
-            m_minEdges[0] = next;
+            m_minEdges.X = next;
         }
         public ushort GetNextFree()
         {
-            return m_minEdges[0];
+            return m_minEdges.X;
         }
     }
 
@@ -685,12 +685,12 @@ namespace BulletXNA.BulletCollision
             }
 
             // now sort the new edges to their correct position
-            SortMinDown(0, pHandle.m_minEdges[0], dispatcher, false);
-            SortMaxDown(0, pHandle.m_maxEdges[0], dispatcher, false);
-            SortMinDown(1, pHandle.m_minEdges[1], dispatcher, false);
-            SortMaxDown(1, pHandle.m_maxEdges[1], dispatcher, false);
-            SortMinDown(2, pHandle.m_minEdges[2], dispatcher, true);
-            SortMaxDown(2, pHandle.m_maxEdges[2], dispatcher, true);
+            SortMinDown(0, pHandle.m_minEdges.X, dispatcher, false);
+            SortMaxDown(0, pHandle.m_maxEdges.X, dispatcher, false);
+            SortMinDown(1, pHandle.m_minEdges.Y, dispatcher, false);
+            SortMaxDown(1, pHandle.m_maxEdges.Y, dispatcher, false);
+            SortMinDown(2, pHandle.m_minEdges.Z, dispatcher, true);
+            SortMaxDown(2, pHandle.m_maxEdges.Z, dispatcher, true);
 
 
             return handle;

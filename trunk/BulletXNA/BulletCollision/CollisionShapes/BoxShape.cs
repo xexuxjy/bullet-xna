@@ -138,9 +138,10 @@ namespace BulletXNA.BulletCollision
 	        float ly=2f*(halfExtents.Y);
 	        float lz=2f*(halfExtents.Z);
 
-	        inertia= new IndexedVector3(mass/(12.0f) * (ly*ly + lz*lz),
-					        mass/(12.0f) * (lx*lx + lz*lz),
-					        mass/(12.0f) * (lx*lx + ly*ly));
+            float mass12 = mass / 12.0f;
+            inertia = new IndexedVector3(mass12 * (ly * ly + lz * lz),
+                            mass12 * (lx * lx + lz * lz),
+                            mass12 * (lx * lx + ly * ly));
         }
 
 	    public override void GetPlane(out IndexedVector3 planeNormal, out IndexedVector3 planeSupport, int i)

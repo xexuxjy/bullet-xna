@@ -181,7 +181,7 @@ namespace BulletXNA.BulletCollision
 		float r = m_radius / (float)Math.Sqrt(3.0f);
 		int LargestExtent = mE.MaxAxis();
 		float Step = (mE[LargestExtent]*0.5f - r)/1024.0f;
-		m_extents[0] = m_extents[1] = m_extents[2] = r;
+		m_extents.X = m_extents.Y = m_extents.Z = r;
 		m_extents[LargestExtent] = mE[LargestExtent]*0.5f;
 		bool FoundBox = false;
 		for(int j=0;j<1024;j++)
@@ -196,7 +196,7 @@ namespace BulletXNA.BulletCollision
 		}
 		if(!FoundBox)
 		{
-			m_extents[0] = m_extents[1] = m_extents[2] = r;
+			m_extents.X = m_extents.Y = m_extents.Z = r;
 		}
 		else
 		{
@@ -230,14 +230,14 @@ namespace BulletXNA.BulletCollision
 	        for(int p=0;p<8;p++)
 	        {
 		        IndexedVector3 LocalPt = IndexedVector3.Zero;
-		        if(p==0)		LocalPt = m_localCenter + new IndexedVector3(m_extents[0], m_extents[1], m_extents[2]);
-		        else if(p==1)	LocalPt = m_localCenter + new IndexedVector3(m_extents[0], m_extents[1], -m_extents[2]);
-		        else if(p==2)	LocalPt = m_localCenter + new IndexedVector3(m_extents[0], -m_extents[1], m_extents[2]);
-		        else if(p==3)	LocalPt = m_localCenter + new IndexedVector3(m_extents[0], -m_extents[1], -m_extents[2]);
-		        else if(p==4)	LocalPt = m_localCenter + new IndexedVector3(-m_extents[0], m_extents[1], m_extents[2]);
-		        else if(p==5)	LocalPt = m_localCenter + new IndexedVector3(-m_extents[0], m_extents[1], -m_extents[2]);
-		        else if(p==6)	LocalPt = m_localCenter + new IndexedVector3(-m_extents[0], -m_extents[1], m_extents[2]);
-		        else if(p==7)	LocalPt = m_localCenter + new IndexedVector3(-m_extents[0], -m_extents[1], -m_extents[2]);
+		        if(p==0)		LocalPt = m_localCenter + new IndexedVector3(m_extents.X, m_extents.Y, m_extents.Z);
+		        else if(p==1)	LocalPt = m_localCenter + new IndexedVector3(m_extents.X, m_extents.Y, -m_extents.Z);
+		        else if(p==2)	LocalPt = m_localCenter + new IndexedVector3(m_extents.X, -m_extents.Y, m_extents.Z);
+		        else if(p==3)	LocalPt = m_localCenter + new IndexedVector3(m_extents.X, -m_extents.Y, -m_extents.Z);
+		        else if(p==4)	LocalPt = m_localCenter + new IndexedVector3(-m_extents.X, m_extents.Y, m_extents.Z);
+		        else if(p==5)	LocalPt = m_localCenter + new IndexedVector3(-m_extents.X, m_extents.Y, -m_extents.Z);
+		        else if(p==6)	LocalPt = m_localCenter + new IndexedVector3(-m_extents.X, -m_extents.Y, m_extents.Z);
+		        else if(p==7)	LocalPt = m_localCenter + new IndexedVector3(-m_extents.X, -m_extents.Y, -m_extents.Z);
 
 		        for(int i=0;i<m_faces.Count;i++)
 		        {

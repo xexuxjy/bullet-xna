@@ -238,9 +238,9 @@ namespace BulletXNA.BulletCollision
             // in global coordinates.
             if (normalR != null)
             {
-                normal[0] = normalR[0 + normalROffset];
-                normal[1] = normalR[4 + normalROffset];
-                normal[2] = normalR[8 + normalROffset];
+                normal.X = normalR[0 + normalROffset];
+                normal.Y = normalR[4 + normalROffset];
+                normal.Z = normalR[8 + normalROffset];
             }
             else
             {
@@ -375,9 +375,9 @@ namespace BulletXNA.BulletCollision
             // for the indident face. the other axis numbers of the indicent face
             // are stored in a1,a2.
             int lanr, a1, a2;
-            if (anr[1] > anr[0])
+            if (anr.Y > anr.X)
             {
-                if (anr[1] > anr[2])
+                if (anr.Y > anr.Z)
                 {
                     a1 = 0;
                     lanr = 1;
@@ -392,7 +392,7 @@ namespace BulletXNA.BulletCollision
             }
             else
             {
-                if (anr[0] > anr[2])
+                if (anr.X > anr.Z)
                 {
                     lanr = 0;
                     a1 = 1;
@@ -407,20 +407,22 @@ namespace BulletXNA.BulletCollision
             }
 
             // compute center point of incident face, in reference-face coordinates
-            IndexedVector3 center = new IndexedVector3(); ;
+            IndexedVector3 center;
             if (nr[lanr] < 0)
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    center[i] = pb[i] - pa[i] + Sb[lanr] * Rb[i * 4 + lanr];
-                }
+                center = new IndexedVector3(
+                    pb.X - pa.X + Sb[lanr] * Rb[lanr],
+                    pb.Y - pa.Y + Sb[lanr] * Rb[lanr + 4],
+                    pb.Z - pa.Z + Sb[lanr] * Rb[lanr + 8]
+                );
             }
             else
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    center[i] = pb[i] - pa[i] - Sb[lanr] * Rb[i * 4 + lanr];
-                }
+                center = new IndexedVector3(
+                    pb.X - pa.X - Sb[lanr] * Rb[lanr],
+                    pb.Y - pa.Y - Sb[lanr] * Rb[lanr + 4],
+                    pb.Z - pa.Z - Sb[lanr] * Rb[lanr + 8]
+                );
             }
 
 
@@ -866,7 +868,7 @@ namespace BulletXNA.BulletCollision
                 {
                     s = s2;
                     normalR = null;
-                    normalC[0] = (n1) / l; normalC[1] = (n2) / l; normalC[2] = (n3) / l;
+                    normalC.X = (n1) / l; normalC.Y = (n2) / l; normalC.Z = (n3) / l;
                     invert_normal = ((expr1) < 0);
                     invert_normal = ((expr1) < 0);
                     code = (cc);
@@ -931,17 +933,17 @@ namespace BulletXNA.BulletCollision
         public static void DMULTIPLY1_331(ref IndexedVector3 A, float[] B, ref IndexedVector3 C)
         {
 
-            A[0] = DDOT41(B, 0, ref C, 0);
-            A[1] = DDOT41(B, 1, ref C, 0);
-            A[2] = DDOT41(B, 2, ref C, 0);
+            A.X = DDOT41(B, 0, ref C, 0);
+            A.Y = DDOT41(B, 1, ref C, 0);
+            A.Z = DDOT41(B, 2, ref C, 0);
         }
 
 
         public static void DMULTIPLY0_331(ref IndexedVector3 A, float[] B, ref IndexedVector3 C)
         {
-            A[0] = DDOT(B, 0, ref C, 0);
-            A[1] = DDOT(B, 4, ref C, 0);
-            A[2] = DDOT(B, 8, ref C, 0);
+            A.X = DDOT(B, 0, ref C, 0);
+            A.Y = DDOT(B, 4, ref C, 0);
+            A.Z = DDOT(B, 8, ref C, 0);
         }
 
         //public static void DMULTIPLY0_331(float[] A, float[] B, float[] C)

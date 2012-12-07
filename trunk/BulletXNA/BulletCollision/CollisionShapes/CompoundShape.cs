@@ -225,9 +225,9 @@ namespace BulletXNA.BulletCollision
 
     	    IndexedVector3 center = trans * localCenter;
 
-	        IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
-		                            abs_b[1].Dot(ref localHalfExtents),
-		                            abs_b[2].Dot(ref localHalfExtents));
+	        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
+		                            abs_b._el1.Dot(ref localHalfExtents),
+		                            abs_b._el2.Dot(ref localHalfExtents));
  
             aabbMin = center - extent;
             aabbMax = center + extent;
@@ -334,15 +334,15 @@ namespace BulletXNA.BulletCollision
 
                 //compute inertia tensor in coordinate system of compound shape
                 IndexedBasisMatrix j = t._basis.Transpose();
-                j[0] *= i[0];
-                j[1] *= i[1];
-                j[2] *= i[2];
+                j._el0 *= i.X;
+                j._el1 *= i.Y;
+                j._el2 *= i.Z;
                 j = t._basis * j;
 
                 //add inertia tensor
-                tensor[0] += j[0];
-                tensor[1] += j[1];
-                tensor[2] += j[2];
+                tensor._el0 += j._el0;
+                tensor._el1 += j._el1;
+                tensor._el2 += j._el2;
                 //tensor += j;
 
                 //compute inertia tensor of pointmass at o
@@ -356,9 +356,9 @@ namespace BulletXNA.BulletCollision
                 j._el2 += o * -o.Z;
 
                 //add inertia tensor of pointmass
-                tensor[0] += masses[k] * j[0];
-                tensor[1] += masses[k] * j[1];
-                tensor[2] += masses[k] * j[2];
+                tensor._el0 += masses[k] * j._el0;
+                tensor._el1 += masses[k] * j._el1;
+                tensor._el2 += masses[k] * j._el2;
             }
             tensor.Diagonalize(out principal, 0.00001f, 20);
             inertia = new IndexedVector3(tensor._el0.X, tensor._el1.Y, tensor._el2.Z);

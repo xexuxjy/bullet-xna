@@ -283,52 +283,6 @@ namespace BulletXNA
         //            Debug.Assert(false);
         //        }
 
-
-        public static float VectorComponent(IndexedVector4 v, int i)
-        {
-            return VectorComponent(ref v, i);
-        }
-
-        public static float VectorComponent(ref IndexedVector4 v, int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return v.X;
-                case 1:
-                    return v.Y;
-                case 2:
-                    return v.Z;
-                case 3:
-                    return v.W;
-                default:
-                    Debug.Assert(false);
-                    return 0.0f;
-            }
-        }
-
-
-
-        public static void VectorComponent(ref IndexedVector4 v, int i, float f)
-        {
-            switch (i)
-            {
-                case 0:
-                    v.X = f;
-                    return;
-                case 1:
-                    v.Y = f;
-                    return;
-                case 2:
-                    v.Z = f;
-                    return;
-                case 3:
-                    v.W = f;
-                    return;
-            }
-            Debug.Assert(false);
-        }
-
         //        public static IndexedMatrix AbsoluteMatrix(IndexedMatrix input)
         //        {
         //            return AbsoluteMatrix(ref input);

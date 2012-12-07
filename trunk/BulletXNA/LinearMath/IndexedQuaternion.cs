@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
@@ -19,19 +16,29 @@ namespace BulletXNA.LinearMath
 
         public IndexedQuaternion(IndexedVector3 axis, float angle)
         {
-            // un-necessary really :(
-            X = Y = Z = W = 0f;
-            SetRotation(ref axis, angle);
+            //SetRotation(ref axis, angle);
+
+            float d = axis.Length();
+            Debug.Assert(d != 0.0f);
+            float halfAngle = angle * 0.5f;
+            float s = (float)Math.Sin(halfAngle) / d;
+            X = axis.X * s;
+            Y = axis.Y * s;
+            Z = axis.Z * s;
+            W = (float)Math.Cos(halfAngle);
         }
 
         public void SetRotation(ref IndexedVector3 axis, float angle)
-	    {
-		    float d = axis.Length();
-		    Debug.Assert(d != 0.0f);
-            float s = (float)Math.Sin(angle * 0.5f) / d;
-		    SetValue(axis.X * s, axis.Y * s, axis.Z * s, 
-			    (float)Math.Cos(angle * 0.5f));
-	    }
+        {
+            float d = axis.Length();
+            Debug.Assert(d != 0.0f);
+            float halfAngle = angle * 0.5f;
+            float s = (float)Math.Sin(halfAngle) / d;
+            X = axis.X * s;
+            Y = axis.Y * s;
+            Z = axis.Z * s;
+            W = (float)Math.Cos(halfAngle);
+        }
 
         public void SetValue(float x, float y, float z, float w)
         {

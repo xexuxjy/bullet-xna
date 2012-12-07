@@ -272,9 +272,9 @@ namespace BulletXNA
             IndexedBasisMatrix  abs_b = t._basis.Absolute();
             IndexedVector3 center = t._origin;
 
-            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtentsWithMargin),
-                                                        abs_b[1].Dot(ref halfExtentsWithMargin),
-                                                        abs_b[2].Dot(ref halfExtentsWithMargin));
+            IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtentsWithMargin),
+                                                        abs_b._el1.Dot(ref halfExtentsWithMargin),
+                                                        abs_b._el2.Dot(ref halfExtentsWithMargin));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
@@ -292,9 +292,9 @@ namespace BulletXNA
             IndexedBasisMatrix abs_b = trans._basis.Absolute();
             IndexedVector3 center = trans * localCenter;
 
-            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
-                                                        abs_b[1].Dot(ref localHalfExtents),
-                                                        abs_b[2].Dot(ref localHalfExtents));
+            IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
+                                                        abs_b._el1.Dot(ref localHalfExtents),
+                                                        abs_b._el2.Dot(ref localHalfExtents));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
@@ -312,9 +312,9 @@ namespace BulletXNA
             IndexedBasisMatrix abs_b = trans._basis.Absolute();
             IndexedVector3 center = trans * localCenter;
 
-            IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref localHalfExtents),
-                                                        abs_b[1].Dot(ref localHalfExtents),
-                                                        abs_b[2].Dot(ref localHalfExtents));
+            IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
+                                                        abs_b._el1.Dot(ref localHalfExtents),
+                                                        abs_b._el2.Dot(ref localHalfExtents));
 
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;

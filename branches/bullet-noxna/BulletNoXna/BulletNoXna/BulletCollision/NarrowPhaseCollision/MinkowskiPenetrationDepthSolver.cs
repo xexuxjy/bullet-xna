@@ -239,7 +239,7 @@ namespace BulletXNA.BulletCollision
             float offsetDist = minProj;
             Vector3 offset = minNorm * offsetDist;
 
-            ClosestPointInput input;// = new ClosestPointInput();
+            ClosestPointInput input = ClosestPointInput.Default();
 
             Vector3 newOrg = transA.Translation + offset;
 

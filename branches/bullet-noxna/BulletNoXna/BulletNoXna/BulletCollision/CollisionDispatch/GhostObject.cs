@@ -54,7 +54,7 @@ namespace BulletXNA.BulletCollision
 
             // FIXME MAN check this - should be a get/set rotation call, basis copy like this may break with scale?
             Matrix R = Matrix.Identity;
-            R._basis = convexFromTrans._basis;
+            R.SetRotation(convexFromTrans.GetRotation());
 
 
             castShape.CalculateTemporalAabb(ref R, ref linVel, ref angVel, 1.0f, out castShapeAabbMin, out castShapeAabbMax);

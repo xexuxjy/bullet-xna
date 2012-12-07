@@ -157,6 +157,9 @@
     <Compile Include="BulletDynamics\Dynamics\IActionInterface.cs" />
     <Compile Include="BulletDynamics\Dynamics\RigidBody.cs" />
     <Compile Include="BulletDynamics\Dynamics\SimpleDynamicsWorld.cs" />
+    <Compile Include="BulletDynamics\Vehicle\RaycastVehicle.cs" />
+    <Compile Include="BulletDynamics\Vehicle\VehicleRaycaster.cs" />
+    <Compile Include="BulletDynamics\Vehicle\WheelInfo.cs" />
     <Compile Include="BulletGlobals.cs" />
     <Compile Include="DefaultMotionState.cs" />
     <Compile Include="IMotionState.cs" />

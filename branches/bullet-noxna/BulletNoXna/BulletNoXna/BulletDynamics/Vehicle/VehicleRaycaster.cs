@@ -21,23 +21,27 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-using BulletXNA.BulletCollision;
+using System;
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletDynamics
 {
-    public interface IConstraintSolver
+    public interface IVehicleRaycaster
     {
-	    void PrepareSolve (int numBodies , int numManifolds);
-
-	    ///solve a group of constraints
-	    float SolveGroup(ObjectArray<CollisionObject> bodies,int numBodies,ObjectArray<PersistentManifold> manifold,int startManifold,int numManifolds,ObjectArray<TypedConstraint> constraints, int startConstraint, int numConstraints, ContactSolverInfo info,IDebugDraw debugDrawer, IDispatcher dispatcher);
-
-	    void AllSolved (ContactSolverInfo info ,IDebugDraw debugDrawer);
-
-	    ///clear internal cached data and reset random seed
-	    void Reset();
-
-        void Cleanup();
+        Object CastRay(ref Vector3 from,ref Vector3 to, ref VehicleRaycasterResult result);
     }
+
+    public class VehicleRaycasterResult
+	{
+        public VehicleRaycasterResult() 
+        {
+            m_distFraction = -1f;
+            m_hitNormalInWorld = Vector3.Zero;
+            m_hitPointInWorld = Vector3.Zero;
+        }
+
+        public Vector3	m_hitPointInWorld;
+		public Vector3	m_hitNormalInWorld;
+		public float m_distFraction;
+	}
 }

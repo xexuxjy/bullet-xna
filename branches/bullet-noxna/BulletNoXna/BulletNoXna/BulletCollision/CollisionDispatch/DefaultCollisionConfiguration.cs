@@ -132,7 +132,7 @@ namespace BulletXNA.BulletCollision
     public virtual CollisionAlgorithmCreateFunc GetCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
     {
 
-        if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1 == BroadphaseNativeType.SphereShape))
+	    if ((proxyType0 == BroadphaseNativeType.SphereShape) && (proxyType1==BroadphaseNativeType.SphereShape))
 	    {
 		    return	m_sphereSphereCF;
 	    }
@@ -142,7 +142,7 @@ namespace BulletXNA.BulletCollision
 		    return	m_sphereBoxCF;
 	    }
 
-	    if ((proxyType0 == BroadphaseNativeType.BoxShape) && (proxyType1==BroadphaseNativeType.SphereShape))
+	    if ((proxyType0 == BroadphaseNativeType.BoxShape ) && (proxyType1==BroadphaseNativeType.SphereShape))
 	    {
 		    return	m_boxSphereCF;
 	    }

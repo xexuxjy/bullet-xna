@@ -22,6 +22,7 @@
  */
 
 using System;
+
 using BulletXNA.LinearMath;
 
 namespace BulletXNA.BulletCollision

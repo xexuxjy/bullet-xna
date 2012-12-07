@@ -63,9 +63,9 @@ namespace BulletXNA.BulletCollision
             shapeR.EnableMargin(withmargins);
         }
 
-
-
-        public static bool Distance(ConvexShape shape0, ref Matrix wtrs0, ConvexShape shape1, ref Matrix wtrs1, ref Vector3 guess, ref GjkEpaSolver2Results results)
+        
+        
+        public static bool	Distance(ConvexShape shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,ref GjkEpaSolver2Results results)
         {
             using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
             using (GJK gjk = BulletGlobals.GJKPool.Get())
@@ -105,7 +105,7 @@ namespace BulletXNA.BulletCollision
             return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, true);
         }
 
-        public static bool Penetration(ConvexShape shape0, ref Matrix wtrs0, ConvexShape shape1, ref Matrix wtrs1, ref Vector3 guess, ref GjkEpaSolver2Results results, bool usemargins)
+        public static bool Penetration(ConvexShape shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,ref GjkEpaSolver2Results results,bool usemargins)
         {
             using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
             using(GJK gjk = BulletGlobals.GJKPool.Get())
@@ -201,7 +201,7 @@ namespace BulletXNA.BulletCollision
         }
 
         //
-        public bool SignedDistance(ConvexShape shape0, ref Matrix wtrs0, ConvexShape shape1, ref Matrix wtrs1, ref Vector3 guess, ref GjkEpaSolver2Results results)
+        public bool SignedDistance(ConvexShape	shape0,ref Matrix wtrs0,ConvexShape shape1,ref Matrix wtrs1,ref Vector3 guess,ref GjkEpaSolver2Results results)
         {
             if(!Distance(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results))
                 return(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results,false));
@@ -464,7 +464,7 @@ namespace BulletXNA.BulletCollision
                         if((mask&(1<<(int)i)) != 0)
                         {
                             ns.c[ns.rank] =	cs.c[i];
-                            float weight = MathUtil.VectorComponent(ref weights, (int)i);
+                            float weight = weights[(int)i];
                             ns.p[ns.rank++]	= weight;
                             m_ray += cs.c[i].w * weight;
                         }
@@ -679,8 +679,8 @@ namespace BulletXNA.BulletCollision
             inhere2 = true;
             vt[0] = a; vt[1] = b; vt[2] = c;
             dl[0] = a - b; dl[1] = b - c; dl[2] = c - a;
-
-            Vector3 n = Vector3.Cross(dl[0], dl[1]);
+            
+            Vector3	n= Vector3.Cross(dl[0],dl[1]);
             float l=n.LengthSquared();
             if (l > GjkEpaSolver2.GJK_SIMPLEX3_EPS)
             {
@@ -731,7 +731,7 @@ namespace BulletXNA.BulletCollision
             ref Vector3 b,
             ref Vector3 c,
             ref Vector3 d,
-            ref Vector4 w, ref uint m)
+            ref Vector4 w,ref uint m)
         {
             //uint[] imd3 ={1,2,0};
             //Vector3[]	vt = {a,b,c,d};
@@ -892,7 +892,7 @@ namespace BulletXNA.BulletCollision
 
         static sFace[] tetra = new sFace[4];
 
-        public eStatus Evaluate(GJK gjk, ref Vector3 guess)
+        public eStatus Evaluate(GJK gjk,ref Vector3 guess)
         {
             sSimplex simplex=gjk.m_simplex;
             if((simplex.rank>1)&&gjk.EncloseOrigin())

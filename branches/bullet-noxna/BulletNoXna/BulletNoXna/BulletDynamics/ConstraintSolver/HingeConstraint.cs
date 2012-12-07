@@ -26,6 +26,7 @@
 using System;
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletDynamics
 {
 	public class HingeConstraint : TypedConstraint

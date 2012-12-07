@@ -36,6 +36,7 @@ namespace BulletXNA.BulletDynamics
 
 	    public ConstraintSetting m_setting = new ConstraintSetting();
 
+
         public Point2PointConstraint(RigidBody rbA, RigidBody rbB, ref Vector3 pivotInA, ref Vector3 pivotInB)
             : base(TypedConstraintType.Point2Point,rbA,rbB)
         {

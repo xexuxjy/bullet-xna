@@ -97,8 +97,8 @@ namespace BulletXNA.BulletCollision
             BoxShape box0 = col0.CollisionShape as BoxShape;
             BoxShape box1 = col1.CollisionShape as BoxShape;
 
-            //if (((String)col0.getUserPointer()).Contains("Box") &&
-            //    ((String)col1.getUserPointer()).Contains("Box") )
+            //if (((String)col0.UserObject).Contains("Box") &&
+            //    ((String)col1.UserObject).Contains("Box") )
             //{
             //    int ibreak = 0;
             //}

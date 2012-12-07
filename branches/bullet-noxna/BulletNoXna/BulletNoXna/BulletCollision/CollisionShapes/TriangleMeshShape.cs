@@ -113,9 +113,9 @@ namespace BulletXNA.BulletCollision
 
             Vector3 center = trans * localCenter;
 
-            Vector3 extent = new Vector3(abs_b[0].Dot(ref localHalfExtents),
-                   abs_b[1].Dot(ref localHalfExtents),
-                  abs_b[2].Dot(ref localHalfExtents));
+            Vector3 extent = new Vector3(abs_b._el0.Dot(ref localHalfExtents),
+                   abs_b._el1.Dot(ref localHalfExtents),
+                  abs_b._el2.Dot(ref localHalfExtents));
 
             aabbMin = center - extent;
             aabbMax = center + extent;

@@ -70,7 +70,7 @@ namespace BulletXNA.BulletCollision
         //    CollisionObject convexBody = m_isSwapped ? body1 : body0;
         //    CollisionObject triBody = m_isSwapped ? body0 : body1;
 
-        //    if (triBody.CollisionShape.isConcave())
+        //    if (triBody.CollisionShape.IsConcave)
         //    {
         //        CollisionObject triOb = triBody;
         //        ConcaveShape concaveShape = (ConcaveShape)(triOb.CollisionShape);
@@ -438,7 +438,7 @@ namespace BulletXNA.BulletCollision
             if (m_dispatchInfoPtr != null && m_dispatchInfoPtr.getDebugDraw() != null && ((m_dispatchInfoPtr.getDebugDraw().DebugMode & DebugDrawModes.DBG_DrawWireframe) > 0))
             {
                 Vector3 color = new Vector3(1, 1, 0);
-                IndexedMatrix tr = ob.GetWorldTransform();
+                Matrix tr = ob.GetWorldTransform();
 
                 Vector3[] transformedTriangles = new Vector3[3];
                 Vector3.Transform(triangle, ref tr, transformedTriangles);

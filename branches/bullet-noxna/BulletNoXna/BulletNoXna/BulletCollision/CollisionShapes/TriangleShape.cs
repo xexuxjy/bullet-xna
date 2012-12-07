@@ -51,7 +51,7 @@ namespace BulletXNA.BulletCollision
             m_vertices1[2] = p2;
         }
 
-        public void Initialize(ref Vector3 p0, ref Vector3 p1, ref Vector3 p2)
+        public void Initialize(ref Vector3 p0,ref Vector3 p1,ref Vector3 p2)
         {
             m_shapeType = BroadphaseNativeType.TriangleShape;
             m_vertices1[0] = p0;

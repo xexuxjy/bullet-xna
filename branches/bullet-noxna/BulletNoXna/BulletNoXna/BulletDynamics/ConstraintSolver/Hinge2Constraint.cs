@@ -53,9 +53,9 @@ namespace BulletXNA.BulletDynamics
             Vector3 yAxis = Vector3.Cross(zAxis,xAxis); // we want right coordinate system
 
             Matrix frameInW = Matrix.Identity;
-            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
-                                    xAxis[1], yAxis[1], zAxis[1],
-                                   xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._basis = new IndexedBasisMatrix(xAxis.X, yAxis.X, zAxis.X,
+                                    xAxis.Y, yAxis.Y, zAxis.Y,
+                                   xAxis.Z, yAxis.Z, zAxis.Z);
             frameInW.Translation = anchor;
 
             // now get constraint frame in local coordinate systems

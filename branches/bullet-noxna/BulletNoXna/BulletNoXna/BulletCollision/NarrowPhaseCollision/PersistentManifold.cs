@@ -215,9 +215,9 @@ namespace BulletXNA.BulletCollision
             return m_contactBreakingThreshold;
         }
 
-        public float GetContactProcessingThreshold()
+        public float ContactProcessingThreshold
         {
-            return m_contactProcessingThreshold;
+            get { return m_contactProcessingThreshold; }
         }
 
         public int GetCacheEntry(ManifoldPoint newPoint)

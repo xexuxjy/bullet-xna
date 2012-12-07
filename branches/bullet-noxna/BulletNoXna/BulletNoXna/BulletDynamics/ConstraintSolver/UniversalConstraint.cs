@@ -62,13 +62,13 @@ namespace BulletXNA.BulletDynamics
 	        // new position of X, allowed limits are (-PI,PI);
 	        // So to simulate ODE Universal joint we should use parent axis as Z, child axis as Y and limit all other DOFs
 	        // Build the frame in world coordinate system first
-	        Vector3 zAxis = Vector3.Normalize(axis1);
-	        Vector3 yAxis = Vector3.Normalize(axis2);
+	        Vector3 zAxis = Vector3.Normalize(m_axis1);
+	        Vector3 yAxis = Vector3.Normalize(m_axis2);
 	        Vector3 xAxis = Vector3.Cross(yAxis,zAxis); // we want right coordinate system
 	        Matrix frameInW = Matrix.Identity;
-            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
-                                    xAxis[1], yAxis[1], zAxis[1],
-                                    xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._basis = new IndexedBasisMatrix(xAxis.X, yAxis.X, zAxis.X,
+                                    xAxis.Y, yAxis.Y, zAxis.Y,
+                                    xAxis.Z, yAxis.Z, zAxis.Z);
             frameInW.Translation = anchor;
 	        // now get constraint frame in local coordinate systems
 			//m_frameInA = MathUtil.inverseTimes(rbA.getCenterOfMassTransform(),frameInW);
@@ -101,9 +101,9 @@ namespace BulletXNA.BulletDynamics
 			Vector3 xAxis = Vector3.Cross(yAxis, zAxis); // we want right coordinate system
 
 			Matrix frameInW = Matrix.Identity;
-            frameInW._basis = new IndexedBasisMatrix(xAxis[0], yAxis[0], zAxis[0],
-                                xAxis[1], yAxis[1], zAxis[1],
-                                xAxis[2], yAxis[2], zAxis[2]);
+            frameInW._basis = new IndexedBasisMatrix(xAxis.X, yAxis.X, zAxis.X,
+                                xAxis.Y, yAxis.Y, zAxis.Y,
+                                xAxis.Z, yAxis.Z, zAxis.Z);
 
 			// now get constraint frame in local coordinate systems
             m_frameInA = m_rbA.GetCenterOfMassTransform().Inverse() * frameInW;

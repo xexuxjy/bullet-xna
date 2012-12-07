@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision
             m_dispatcherFlags = DispatcherFlags.CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD;
             SetNearCallback(new DefaultNearCallback());
 
-            int maxTypes = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
+            const int maxTypes = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
             m_doubleDispatch = new CollisionAlgorithmCreateFunc[maxTypes, maxTypes];
             for (int i = 0; i < maxTypes; i++)
             {
@@ -156,7 +156,7 @@ namespace BulletXNA.BulletCollision
         	if ((m_dispatcherFlags & DispatcherFlags.CD_STATIC_STATIC_REPORTED == 0))
 	        {
 		        //broadphase filtering already deals with this
-		        if ((body0.IsStaticOrKinematicObject()) && body1.isStaticOrKinematicObject())
+		        if ((body0.IsStaticOrKinematicObject) && body1.IsStaticOrKinematicObject)
 		        {
                     m_dispatcherFlags |= DispatcherFlags.CD_STATIC_STATIC_REPORTED;
 			        System.err.Writeline("warning CollisionDispatcher::needsCollision: static-static collision!\n");

@@ -32,7 +32,6 @@ namespace BulletXNA.BulletCollision
     {
         private UnionFind m_unionFind;
         private ObjectArray<PersistentManifold> m_islandmanifold;
-        private ObjectArray<PersistentManifold> m_subList;
 
         private ObjectArray<CollisionObject> m_islandBodies;
 
@@ -43,7 +42,6 @@ namespace BulletXNA.BulletCollision
             m_splitIslands = true;
             m_unionFind = new UnionFind();
             m_islandmanifold = new ObjectArray<PersistentManifold>();
-            m_subList = new ObjectArray<PersistentManifold>();
             m_islandBodies = new ObjectArray<CollisionObject>();
         }
 
@@ -212,7 +210,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
             {
                 ObjectArray<PersistentManifold> manifolds = dispatcher.GetInternalManifoldPointer();
                 int maxNumManifolds = dispatcher.GetNumManifolds();
-                callback.ProcessIsland(collisionObjects, collisionObjects.Count, manifolds, maxNumManifolds, -1);
+                callback.ProcessIsland(collisionObjects, collisionObjects.Count, manifolds, 0, maxNumManifolds, -1);
             }
             else
             {
@@ -289,14 +287,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
                     if (!islandSleeping)
                     {
-                        // pass shortedned list to callback.
-                        m_subList.Clear();
-                        for (int i = 0; i < numIslandManifolds; ++i)
-                        {
-                            m_subList.Add(m_islandmanifold[startManifoldIndex + i]);
-                        }
-
-                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_subList, numIslandManifolds, islandId);
+                        callback.ProcessIsland(m_islandBodies, m_islandBodies.Count, m_islandmanifold, startManifoldIndex, numIslandManifolds, islandId);
                         //			printf("Island callback of size:%d bodies, %d manifolds\n",islandBodies.size(),numIslandManifolds);
                     }
                     else
@@ -384,14 +375,15 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     {
                         int i = GetUnionFind().GetElement(idx).m_sz;
                         CollisionObject colObj0 = collisionObjects[i];
-                        if ((colObj0.GetIslandTag() != islandId) && (colObj0.GetIslandTag() != -1))
+                        int islandTag = colObj0.GetIslandTag();
+                        if (islandTag != islandId && islandTag != -1)
                         {
                             //					printf("error in island management\n");
                         }
 
-                        Debug.Assert((colObj0.GetIslandTag() == islandId) || (colObj0.GetIslandTag() == -1));
+                        Debug.Assert((islandTag == islandId) || (islandTag == -1));
 
-                        if (colObj0.GetIslandTag() == islandId)
+                        if (islandTag == islandId)
                         {
                             colObj0.ActivationState = ActivationState.IslandSleeping;
                         }
@@ -404,19 +396,20 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                         int i = GetUnionFind().GetElement(idx).m_sz;
 
                         CollisionObject colObj0 = collisionObjects[i];
-                        if ((colObj0.GetIslandTag() != islandId) && (colObj0.GetIslandTag() != -1))
+                        int islandTag = colObj0.GetIslandTag();
+                        if (islandTag != islandId && islandTag != -1)
                         {
                             //					printf("error in island management\n");
                         }
 
-                        Debug.Assert((colObj0.GetIslandTag() == islandId) || (colObj0.GetIslandTag() == -1));
+                        Debug.Assert((islandTag == islandId) || (islandTag == -1));
 
-                        if (colObj0.GetIslandTag() == islandId)
+                        if (islandTag == islandId)
                         {
                             if (colObj0.ActivationState == ActivationState.IslandSleeping)
                             {
                                 colObj0.ActivationState = ActivationState.WantsDeactivation;
-                                colObj0.DeactivationTime = 0;
+                                colObj0.DeactivationTime = 0f;
                             }
                         }
                     }
@@ -513,7 +506,7 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
     public interface IIslandCallback
     {
-        void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifolds, int numManifolds, int islandId);
+        void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, ObjectArray<PersistentManifold> manifolds, int startManifold, int numManifolds, int islandId);
     }
 
 

@@ -23,6 +23,7 @@
 
 using BulletXNA.LinearMath;
 
+
 namespace BulletXNA.BulletCollision
 {
     public class TriangleMesh : TriangleIndexVertexArray
@@ -146,26 +147,6 @@ namespace BulletXNA.BulletCollision
         public bool GetUse4componentVertices()
         {
             return m_use4componentVertices;
-        }
-
-        ///By default addTriangle won't search for duplicate vertices, because the search is very slow for large triangle meshes.
-        ///In general it is better to directly use btTriangleIndexVertexArray instead.
-
-        public void AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
-        {
-            AddTriangle(ref vertex0, ref vertex1, ref vertex2);
-        }
-
-        public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2)
-        {
-            AddTriangle(ref vertex0, ref vertex1, ref vertex2, false);
-        }
-        public void AddTriangle(ref Vector3 vertex0, ref Vector3 vertex1, ref Vector3 vertex2, bool removeDuplicateVertices)
-        {
-            m_indexedMeshes[0].m_numTriangles++;
-            AddIndex(FindOrAddVertex(ref vertex0, removeDuplicateVertices));
-            AddIndex(FindOrAddVertex(ref vertex1, removeDuplicateVertices));
-            AddIndex(FindOrAddVertex(ref vertex2, removeDuplicateVertices));
         }
 
         public int GetNumTriangles()

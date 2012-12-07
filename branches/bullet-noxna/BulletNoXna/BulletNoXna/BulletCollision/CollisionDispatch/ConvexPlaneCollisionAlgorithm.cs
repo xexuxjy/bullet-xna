@@ -126,7 +126,7 @@ namespace BulletXNA.BulletCollision
 	        }
             ////first perform a collision query with the non-perturbated collision objects
             //{
-            //    IndexedQuaternion rotq = IndexedQuaternion.Identity;
+            //    Quaternion rotq = Quaternion.Identity;
             //    CollideSingleContact(ref rotq, body0, body1, dispatchInfo, resultOut);
             //}
 
@@ -145,7 +145,7 @@ namespace BulletXNA.BulletCollision
                 {
                     perturbeAngle = angleLimit;
                 }
-                Quaternion perturbeRot = Quaternion.CreateFromAxisAngle(v0, perturbeAngle);
+                Quaternion perturbeRot = new Quaternion(v0, perturbeAngle);
                 for (int i = 0; i < m_numPerturbationIterations; i++)
                 {
                     float iterationAngle = i * (MathUtil.SIMD_2_PI / (float)m_numPerturbationIterations);
@@ -177,7 +177,7 @@ namespace BulletXNA.BulletCollision
             float planeConstant = planeShape.PlaneConstant;
 
             Matrix convexWorldTransform = convexObj.GetWorldTransform();
-            Matrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform; ;
+            Matrix convexInPlaneTrans = planeObj.GetWorldTransform().Inverse() * convexWorldTransform;
 
             //now perturbe the convex-world transform
 

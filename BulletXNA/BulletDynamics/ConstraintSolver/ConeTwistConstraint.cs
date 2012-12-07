@@ -1095,9 +1095,9 @@ namespace BulletXNA.BulletDynamics
             IndexedVector3 omegaB = IndexedVector3.Zero; bodyB.InternalGetAngularVelocity(ref omegaB);
 			IndexedMatrix trAPred;
 			IndexedVector3 zerovec = new IndexedVector3(0,0,0);
-			TransformUtil.IntegrateTransform(trACur, zerovec, omegaA, timeStep, out trAPred);
+			TransformUtil.IntegrateTransform(ref trACur, ref zerovec, ref omegaA, timeStep, out trAPred);
 			IndexedMatrix trBPred;
-			TransformUtil.IntegrateTransform(trBCur, zerovec, omegaB, timeStep, out trBPred);
+			TransformUtil.IntegrateTransform(ref trBCur, ref zerovec, ref omegaB, timeStep, out trBPred);
 
 			// compute desired transforms in world
 			IndexedMatrix trPose = IndexedMatrix.CreateFromQuaternion(m_qTarget);

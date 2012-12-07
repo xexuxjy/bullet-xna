@@ -113,24 +113,24 @@ namespace BulletXNA.BulletCollision
             resultOut.SetPersistentManifold(m_manifoldPtr);
 
             //comment-out next line to test multi-contact generation
-            //resultOut.getPersistentManifold().clearManifold();
+            //resultOut.GetPersistentManifold().ClearManifold();
 
 
             ConvexShape min0 = body0.GetCollisionShape() as ConvexShape;
             ConvexShape min1 = body1.GetCollisionShape() as ConvexShape;
-            IndexedVector3 normalOnB = new IndexedVector3(0, 1, 0);
-            IndexedVector3 pointOnBWorld = IndexedVector3.Zero;
+            IndexedVector3 normalOnB;
+            IndexedVector3 pointOnBWorld;
 #if !BT_DISABLE_CAPSULE_CAPSULE_COLLIDER
             if ((min0.GetShapeType() == BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE) && (min1.GetShapeType() == BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE))
             {
                 CapsuleShape capsuleA = min0 as CapsuleShape;
                 CapsuleShape capsuleB = min1 as CapsuleShape;
-                IndexedVector3 localScalingA = capsuleA.GetLocalScaling();
-                IndexedVector3 localScalingB = capsuleB.GetLocalScaling();
+                //IndexedVector3 localScalingA = capsuleA.GetLocalScaling();
+                //IndexedVector3 localScalingB = capsuleB.GetLocalScaling();
 
                 float threshold = m_manifoldPtr.GetContactBreakingThreshold();
 
-                float dist = CapsuleCapsuleDistance(ref normalOnB, ref pointOnBWorld, capsuleA.GetHalfHeight(), capsuleA.GetRadius(),
+                float dist = CapsuleCapsuleDistance(out normalOnB, out pointOnBWorld, capsuleA.GetHalfHeight(), capsuleA.GetRadius(),
                     capsuleB.GetHalfHeight(), capsuleB.GetRadius(), capsuleA.GetUpAxis(), capsuleB.GetUpAxis(),
                     body0.GetWorldTransform(), body1.GetWorldTransform(), threshold);
 
@@ -637,8 +637,8 @@ namespace BulletXNA.BulletCollision
         }
 
         public static float CapsuleCapsuleDistance(
-            ref IndexedVector3 normalOnB,
-            ref IndexedVector3 pointOnB,
+            out IndexedVector3 normalOnB,
+            out IndexedVector3 pointOnB,
             float capsuleLengthA,
             float capsuleRadiusA,
             float capsuleLengthB,
@@ -649,14 +649,14 @@ namespace BulletXNA.BulletCollision
             IndexedMatrix transformB,
             float distanceThreshold)
         {
-            return CapsuleCapsuleDistance(ref normalOnB, ref pointOnB, capsuleLengthA,
+            return CapsuleCapsuleDistance(out normalOnB, out pointOnB, capsuleLengthA,
                 capsuleRadiusA, capsuleLengthB, capsuleRadiusB, capsuleAxisA, capsuleAxisB,
                 ref transformA, ref transformB, distanceThreshold);
         }
 
         public static float CapsuleCapsuleDistance(
-            ref IndexedVector3 normalOnB,
-            ref IndexedVector3 pointOnB,
+            out IndexedVector3 normalOnB,
+            out IndexedVector3 pointOnB,
             float capsuleLengthA,
             float capsuleRadiusA,
             float capsuleLengthB,
@@ -690,6 +690,8 @@ namespace BulletXNA.BulletCollision
 
             if (distance > distanceThreshold)
             {
+                normalOnB = new IndexedVector3(0, 1, 0);
+                pointOnB = IndexedVector3.Zero;
                 return distance;
             }
 

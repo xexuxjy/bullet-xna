@@ -140,14 +140,14 @@ namespace BulletXNA.LinearMath
             {
                 for (j = 0; j < 3; j++)
                 {
-                    pa = new IndexedVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1],
-                           edgecoord[2] * halfExtents[2]);
+                    pa = new IndexedVector3(edgecoord.X * halfExtents.X, edgecoord.Y * halfExtents.Y,
+                           edgecoord.Z * halfExtents.Z);
                     pa += center;
 
                     int othercoord = j % 3;
                     edgecoord[othercoord] *= -1.0f;
-                    pb = new IndexedVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1],
-                            edgecoord[2] * halfExtents[2]);
+                    pb = new IndexedVector3(edgecoord.X * halfExtents.X, edgecoord.Y * halfExtents.Y,
+                            edgecoord.Z * halfExtents.Z);
                     pb += center;
 
                     DrawLine(pa, pb, color);

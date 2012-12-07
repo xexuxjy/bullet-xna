@@ -16,23 +16,24 @@ namespace BulletXNA.BulletCollision
 
 #if TEST_INTERNAL_OBJECTS
 
-public static void BoxSupport(ref IndexedVector3 extents, ref IndexedVector3 sv, ref IndexedVector3 p)
+public static void BoxSupport(ref IndexedVector3 extents, ref IndexedVector3 sv, out IndexedVector3 p)
 {
 	// This version is ~11.000 cycles (4%) faster overall in one of the tests.
 //	IR(p[0]) = IR(extents[0])|(IR(sv[0])&SIGN_BITMASK);
 //	IR(p[1]) = IR(extents[1])|(IR(sv[1])&SIGN_BITMASK);
 //	IR(p[2]) = IR(extents[2])|(IR(sv[2])&SIGN_BITMASK);
-	p[0] = sv[0] < 0.0f ? -extents[0] : extents[0];
-	p[1] = sv[1] < 0.0f ? -extents[1] : extents[1];
-	p[2] = sv[2] < 0.0f ? -extents[2] : extents[2];
+	p = new IndexedVector3(
+		sv.X < 0.0f ? -extents.X : extents.X,
+		sv.Y < 0.0f ? -extents.Y : extents.Y,
+		sv.Z < 0.0f ? -extents.Z : extents.Z);
 }
 
 public static void InverseTransformPoint3x3(out IndexedVector3 outVec, ref IndexedVector3 input, ref IndexedMatrix tr)
 {
 	IndexedBasisMatrix rot = tr._basis;
-	IndexedVector3 r0 = rot[0];
-	IndexedVector3 r1 = rot[1];
-	IndexedVector3 r2 = rot[2];
+	IndexedVector3 r0 = rot._el0;
+	IndexedVector3 r1 = rot._el1;
+	IndexedVector3 r2 = rot._el2;
 
 	float x = r0.X*input.X + r1.X*input.Y + r2.X*input.Z;
 	float y = r0.Y*input.X + r1.Y*input.Y + r2.Y*input.Z;
@@ -50,13 +51,13 @@ public static bool TestInternalObjects( ref IndexedMatrix trans0, ref IndexedMat
 	IndexedVector3 localAxis1;
 	InverseTransformPoint3x3(out localAxis1, ref axis,ref trans1);
 
-	IndexedVector3 p0 = IndexedVector3.Zero;
-    BoxSupport(ref convex0.m_extents, ref localAxis0, ref p0);
-    IndexedVector3 p1 = IndexedVector3.Zero;
-    BoxSupport(ref convex1.m_extents, ref localAxis1, ref p1);
+	IndexedVector3 p0;
+    BoxSupport(ref convex0.m_extents, ref localAxis0, out p0);
+    IndexedVector3 p1;
+    BoxSupport(ref convex1.m_extents, ref localAxis1, out p1);
 
-	float Radius0 = p0[0]*localAxis0.X + p0[1]*localAxis0.Y + p0[2]*localAxis0.Z;
-	float Radius1 = p1[0]*localAxis1.X + p1[1]*localAxis1.Y + p1[2]*localAxis1.Z;
+	float Radius0 = p0.X*localAxis0.X + p0.Y*localAxis0.Y + p0.Z*localAxis0.Z;
+	float Radius1 = p1.X*localAxis1.X + p1.Y*localAxis1.Y + p1.Z*localAxis1.Z;
 
 	float MinRadius = Radius0>convex0.m_radius ? Radius0 : convex0.m_radius;
 	float MaxRadius = Radius1>convex1.m_radius ? Radius1 : convex1.m_radius;

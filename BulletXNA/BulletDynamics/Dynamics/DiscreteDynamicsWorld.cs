@@ -930,14 +930,14 @@ namespace BulletXNA.BulletDynamics
             m_manifolds.Resize(0);
             m_constraints.Resize(0);
         }
-        public virtual void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, PersistentManifoldArray manifolds, int numManifolds, int islandId)
+        public virtual void ProcessIsland(ObjectArray<CollisionObject> bodies, int numBodies, PersistentManifoldArray manifolds, int startManifold, int numManifolds, int islandId)
         {
             if (islandId < 0)
             {
                 if (numManifolds + m_numConstraints > 0)
                 {
                     ///we don't split islands, so all constraints/contact manifolds/bodies are passed into the solver regardless the island id
-                    m_solver.SolveGroup(bodies, numBodies, manifolds, numManifolds, m_sortedConstraints, 0, m_numConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
+                    m_solver.SolveGroup(bodies, numBodies, manifolds, startManifold, numManifolds, m_sortedConstraints, 0, m_numConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
                 }
             }
             else
@@ -970,7 +970,7 @@ namespace BulletXNA.BulletDynamics
                     ///only call solveGroup if there is some work: avoid virtual function call, its overhead can be excessive
                     if (numManifolds + numCurConstraints > 0)
                     {
-                        m_solver.SolveGroup(bodies, numBodies, manifolds, numManifolds, m_sortedConstraints, startConstraint, numCurConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
+                        m_solver.SolveGroup(bodies, numBodies, manifolds, startManifold, numManifolds, m_sortedConstraints, startConstraint, numCurConstraints, m_solverInfo, m_debugDrawer, m_dispatcher);
                     }
                 }
                 else
@@ -979,7 +979,8 @@ namespace BulletXNA.BulletDynamics
                     {
                         m_bodies.Add(bodies[i]);
                     }
-                    for (i = 0; i < numManifolds; i++)
+                    int lastManifold = startManifold + numManifolds;
+                    for (i = startManifold; i < lastManifold; i++)
                     {
                         m_manifolds.Add(manifolds[i]);
                     }
@@ -1004,7 +1005,7 @@ namespace BulletXNA.BulletDynamics
         {
             if (m_manifolds.Count + m_constraints.Count > 0)
             {
-                m_solver.SolveGroup(m_bodies, m_bodies.Count, m_manifolds, m_manifolds.Count, m_constraints, 0, m_constraints.Count, m_solverInfo, m_debugDrawer, m_dispatcher);
+                m_solver.SolveGroup(m_bodies, m_bodies.Count, m_manifolds, 0, m_manifolds.Count, m_constraints, 0, m_constraints.Count, m_solverInfo, m_debugDrawer, m_dispatcher);
             }
             m_bodies.Clear();
             m_manifolds.Clear();

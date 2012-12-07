@@ -464,7 +464,7 @@ namespace BulletXNA.BulletCollision
                         if((mask&(1<<(int)i)) != 0)
                         {
                             ns.c[ns.rank] =	cs.c[i];
-                            float weight = MathUtil.VectorComponent(ref weights, (int)i);
+                            float weight = weights[(int)i];
                             ns.p[ns.rank++]	= weight;
                             m_ray += cs.c[i].w * weight;
                         }

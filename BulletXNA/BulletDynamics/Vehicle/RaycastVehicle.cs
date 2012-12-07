@@ -70,9 +70,9 @@ namespace BulletXNA.BulletDynamics
 
                 IndexedMatrix temp = GetWheelInfo(v).m_worldTransform;
                 IndexedVector3 axle = new IndexedVector3(
-        GetWheelInfo(v).m_worldTransform._basis[0][GetRightAxis()],
-        GetWheelInfo(v).m_worldTransform._basis[1][GetRightAxis()],
-        GetWheelInfo(v).m_worldTransform._basis[2][GetRightAxis()]);
+        GetWheelInfo(v).m_worldTransform._basis._el0[GetRightAxis()],
+        GetWheelInfo(v).m_worldTransform._basis._el1[GetRightAxis()],
+        GetWheelInfo(v).m_worldTransform._basis._el2[GetRightAxis()]);
 
 		        //debug wheels (cylinders)
 		        debugDrawer.DrawLine(wheelPosWS,wheelPosWS+axle,wheelColor);
@@ -385,9 +385,9 @@ namespace BulletXNA.BulletDynamics
 
 
             IndexedBasisMatrix basis2 = new IndexedBasisMatrix(
-                right[0],fwd[0],up[0],
-                right[1],fwd[1],up[1],
-                right[2],fwd[2],up[2]
+                right.X,fwd.X,up.X,
+                right.Y,fwd.Y,up.Y,
+                right.Z,fwd.Z,up.Z
             );
         	
             // FIXME MAN - MATRIX ORDER
@@ -563,9 +563,9 @@ namespace BulletXNA.BulletDynamics
 
 				        IndexedBasisMatrix wheelBasis0 = wheelTrans._basis;
                         m_axle[i] = new IndexedVector3(
-                        wheelBasis0[0][m_indexRightAxis],
-                        wheelBasis0[1][m_indexRightAxis],
-                        wheelBasis0[2][m_indexRightAxis]);
+                        wheelBasis0._el0[m_indexRightAxis],
+                        wheelBasis0._el1[m_indexRightAxis],
+                        wheelBasis0._el2[m_indexRightAxis]);
     					
 				        IndexedVector3 surfNormalWS = wheelInfo.m_raycastInfo.m_contactNormalWS;
 				        float proj = IndexedVector3.Dot(m_axle[i],surfNormalWS);

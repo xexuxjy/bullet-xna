@@ -322,15 +322,15 @@ namespace BulletXNA.BulletCollision
                       + 0.05f * (a[j] * b[k] + a[k] * b[j] + a[j] * c[k] + a[k] * c[j] + b[j] * c[k] + b[k] * c[j]));
                 }
              }
-         float i00 = -i[0][0];
-         float i11 = -i[1][1];
-         float i22 = -i[2][2];
+         float i00 = -i._el0.X;
+         float i11 = -i._el1.Y;
+         float i22 = -i._el2.Z;
          i[0,0] = i11 + i22; 
          i[1,1] = i22 + i00; 
          i[2,2] = i00 + i11;
-         m_sum[0] += i[0];
-         m_sum[1] += i[1];
-         m_sum[2] += i[2];
+         m_sum._el0 += i._el0;
+         m_sum._el1 += i._el1;
+         m_sum._el2 += i._el2;
         }
 
         public IndexedBasisMatrix GetInertia()

@@ -363,7 +363,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b = t._basis.Absolute();
                         IndexedVector3 center = t._origin;
-                        IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));
+                        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;
@@ -399,7 +399,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b  = t._basis.Absolute();
                         IndexedVector3 center = t._origin;
-                        IndexedVector3 extent = new IndexedVector3(abs_b[0].Dot(ref halfExtents), abs_b[1].Dot(ref halfExtents), abs_b[2].Dot(ref halfExtents));		
+                        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));		
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;

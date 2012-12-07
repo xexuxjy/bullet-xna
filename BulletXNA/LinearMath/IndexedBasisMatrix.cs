@@ -88,9 +88,9 @@ namespace BulletXNA.LinearMath
 
         public void SetValue(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
         {
-            this[0] = new IndexedVector3(m11, m12, m13);
-            this[1] = new IndexedVector3(m21, m22, m23);
-            this[2] = new IndexedVector3(m31, m32, m33);
+            _el0 = new IndexedVector3(m11, m12, m13);
+            _el1 = new IndexedVector3(m21, m22, m23);
+            _el2 = new IndexedVector3(m31, m32, m33);
         }
 
 
@@ -385,7 +385,7 @@ namespace BulletXNA.LinearMath
         public IndexedBasisMatrix Inverse()
         {
             IndexedVector3 co = new IndexedVector3(Cofac(1, 1, 2, 2), Cofac(1, 2, 2, 0), Cofac(1, 0, 2, 1));
-            float det = this[0].Dot(co);
+            float det = _el0.Dot(co);
             Debug.Assert(det != 0.0f);
             float s = 1.0f / det;
             return new IndexedBasisMatrix(co.X * s, Cofac(0, 2, 2, 1) * s, Cofac(0, 1, 1, 2) * s,
@@ -456,36 +456,38 @@ namespace BulletXNA.LinearMath
         public IndexedQuaternion GetRotation()
         {
             float trace = _el0.X + _el1.Y + _el2.Z;
-            IndexedVector3 temp = new IndexedVector3();
-            float temp2 = 0f;
+            float temp2, s;
             if (trace > 0.0f)
             {
-                float s = (float)Math.Sqrt(trace + 1.0f);
+                s = (float)Math.Sqrt(trace + 1.0f);
                 temp2 = (s * 0.5f);
                 s = 0.5f / s;
 
-                temp[0] = ((_el2.Y - _el1.Z) * s);
-                temp[1] = ((_el0.Z - _el2.X) * s);
-                temp[2] = ((_el1.X - _el0.Y) * s);
+                return new IndexedQuaternion(
+                    (_el2.Y - _el1.Z) * s,
+                    (_el0.Z - _el2.X) * s,
+                    (_el1.X - _el0.Y) * s,
+                    temp2);
             }
             else
             {
+                IndexedVector3 temp = new IndexedVector3();
                 int i = _el0.X < _el1.Y ?
                     (_el1.Y < _el2.Z ? 2 : 1) :
                     (_el0.X < _el2.Z ? 2 : 0);
                 int j = (i + 1) % 3;
-                int k = (i + 2) % 3;
+                int k = (j + 1) % 3;
 
-                float s = (float)Math.Sqrt(this[i][i] - this[j][j] - this[k][k] + 1.0f);
+                s = (float)Math.Sqrt(this[i][i] - this[j][j] - this[k][k] + 1.0f);
                 temp[i] = s * 0.5f;
                 s = 0.5f / s;
 
                 temp2 = (this[k][j] - this[j][k]) * s;
                 temp[j] = (this[j][i] + this[i][j]) * s;
                 temp[k] = (this[k][i] + this[i][k]) * s;
-            }
-            return new IndexedQuaternion(temp[0], temp[1], temp[2], temp2);
 
+                return new IndexedQuaternion(temp.X, temp.Y, temp.Z, temp2);
+            }
         }
 
 
@@ -539,15 +541,15 @@ namespace BulletXNA.LinearMath
                 int p = 0;
                 int q = 1;
                 int r = 2;
-                float max = Math.Abs(this[0][1]);
-                float v = Math.Abs(this[0][2]);
+                float max = Math.Abs(_el0.Y);
+                float v = Math.Abs(_el0.Z);
                 if (v > max)
                 {
                     q = 2;
                     r = 1;
                     max = v;
                 }
-                v = Math.Abs(this[1][2]);
+                v = Math.Abs(_el1.Z);
                 if (v > max)
                 {
                     p = 1;
@@ -556,7 +558,7 @@ namespace BulletXNA.LinearMath
                     max = v;
                 }
 
-                float t = threshold * (Math.Abs(this[0][0]) + Math.Abs(this[1][1]) + Math.Abs(this[2][2]));
+                float t = threshold * (Math.Abs(_el0.X) + Math.Abs(_el1.Y) + Math.Abs(_el2.Z));
                 if (max <= t)
                 {
                     if (max <= MathUtil.SIMD_EPSILON * t)
@@ -702,38 +704,38 @@ namespace BulletXNA.LinearMath
 
         public IndexedVector3 Right
         {
-            get { return this[0]; }
-            set{this[0] = value;}
+            get { return _el0; }
+            set { _el0 = value; }
         }
 
         public IndexedVector3 Left
         {
-            get { return -this[0]; }
-            set {this[0] = -value;}
+            get { return -_el0; }
+            set { _el0 = -value; }
         }
 
         public IndexedVector3 Up
         {
-            get { return this[1]; }
-            set { this[1] = value;}
+            get { return _el1; }
+            set { _el1 = value; }
         }
 
         public IndexedVector3 Down
         {
-            get { return -this[1]; }
-            set { this[1] = -value; }
+            get { return -_el1; }
+            set { _el1 = -value; }
         }
 
         public IndexedVector3 Forward
         {
             get { return -this[2]; }
-            set { this[2] = -value; }
+            set { _el2 = -value; }
         }
 
         public IndexedVector3 Backward
         {
             get { return this[2]; }
-            set { this[2] = value; }
+            set { _el2 = value; }
         }
 
         public void GetOpenGLMatrix(out IndexedVector3 v1,out IndexedVector3 v2,out IndexedVector3 v3)

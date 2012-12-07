@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision
             m_dispatcherFlags = DispatcherFlags.CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD;
             SetNearCallback(new DefaultNearCallback());
 
-            int maxTypes = (int)BroadphaseNativeTypes.MAX_BROADPHASE_COLLISION_TYPES;
+            const int maxTypes = (int)BroadphaseNativeTypes.MAX_BROADPHASE_COLLISION_TYPES;
             m_doubleDispatch = new CollisionAlgorithmCreateFunc[maxTypes, maxTypes];
             for (int i = 0; i < maxTypes; i++)
             {

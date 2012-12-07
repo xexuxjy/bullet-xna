@@ -591,12 +591,12 @@ namespace BulletXNA.BulletCollision
 
         public static float Mat3DotCol(ref IndexedBasisMatrix mat, ref IndexedVector3 vec3, int colindex)
         {
-            return vec3[0] * mat[0,colindex] + vec3[1] * mat[1,colindex] + vec3[2] * mat[2,colindex];
+            return vec3.X * mat[0,colindex] + vec3.Y * mat[1,colindex] + vec3.Z * mat[2,colindex];
         }
 
         public static float Mat3DotCol(IndexedBasisMatrix mat, ref IndexedVector3 vec3, int colindex)
         {
-            return vec3[0] * mat[0, colindex] + vec3[1] * mat[1, colindex] + vec3[2] * mat[2, colindex];
+            return vec3.X * mat[0, colindex] + vec3.Y * mat[1, colindex] + vec3.Z * mat[2, colindex];
         }
 
         //! Simple test for planes.
@@ -707,9 +707,9 @@ namespace BulletXNA.BulletCollision
 
         public IndexedVector3 Transform(ref IndexedVector3 point)
         {
-            return new IndexedVector3(m_R1to0[0].Dot(ref point) + m_T1to0.X,
-                m_R1to0[1].Dot(ref point) + m_T1to0.Y,
-                m_R1to0[2].Dot(ref point) + m_T1to0.Z);
+            return new IndexedVector3(m_R1to0._el0.Dot(ref point) + m_T1to0.X,
+                m_R1to0._el1.Dot(ref point) + m_T1to0.Y,
+                m_R1to0._el2.Dot(ref point) + m_T1to0.Z);
         }
     }
 

@@ -22,20 +22,12 @@
  */
 
 using BulletXNA.LinearMath;
-using System;
 
 namespace BulletXNA.BulletCollision
 {
-    public interface IDiscreteCollisionDetectorInterface : IDisposable
+    public interface IDiscreteCollisionDetectorInterface
     {
-        void Initialize(ConvexShape objectA, ConvexShape objectB, ISimplexSolverInterface simplexSolver, IConvexPenetrationDepthSolver penetrationDepthSolver);
-
         void GetClosestPoints(ref ClosestPointInput input, IDiscreteCollisionDetectorInterfaceResult output, IDebugDraw debugDraw, bool swapResults);
-        void SetMinkowskiA(ConvexShape shape);
-        void SetMinkowskiB(ConvexShape shape);
-        IndexedVector3 GetCachedSeparatingAxis();
-        float GetCachedSeparatingDistance();
-
     }
 
     public interface IDiscreteCollisionDetectorInterfaceResult

@@ -77,8 +77,8 @@ namespace BulletXNADemos.Demos
 
             TriangleIndexVertexArray tribuilder = new TriangleIndexVertexArray();
             tribuilder.AddIndexedMesh(mesh, PHY_ScalarType.PHY_INTEGER);
-            BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
-            //TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
+            //BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
+            TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
             //meshShape.SetMargin(world.WorldSettings.Params.collisionMargin);
             float margin = 0.01f;
             meshShape.SetMargin(margin);
@@ -102,8 +102,8 @@ namespace BulletXNADemos.Demos
 
             TriangleIndexVertexArray tribuilder = new TriangleIndexVertexArray();
             tribuilder.AddIndexedMesh(mesh, PHY_ScalarType.PHY_INTEGER);
-            BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
-            //TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
+            //BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
+            TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
             //meshShape.SetMargin(world.WorldSettings.Params.collisionMargin);
             float margin = 0.01f;
             meshShape.SetMargin(margin);
@@ -1251,8 +1251,8 @@ namespace BulletXNADemos.Demos
 
 
 
-            Object o = CreateMeshShapeF(null, indices.Length, indices, Vertices.Length, Vertices);
-            //Object o = CreateMeshShapeV3(null, indices.Length, indices, VerticesV3.Length, VerticesV3);
+            //Object o = CreateMeshShapeF(null, indices.Length, indices, Vertices.Length, Vertices);
+            Object o = CreateMeshShapeV3(null, indices.Length, indices, VerticesV3.Length, VerticesV3);
             return o as CollisionShape;
         }
 

@@ -344,8 +344,8 @@ namespace BulletXNADemos.Demos
 		public const float waveheight = 5.0f;
 		//public const float waveheight = 0.0f;
 		public const float TRIANGLE_SIZE = 8.0f;
-		public const int NUM_VERTS_X = 6;
-		public const int NUM_VERTS_Y = 6;
+		public const int NUM_VERTS_X = 30;
+		public const int NUM_VERTS_Y = 30;
 		public bool m_animatedMesh;
 		public const int totalVerts = NUM_VERTS_X * NUM_VERTS_Y;
         private float m_offset = 0f;

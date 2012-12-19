@@ -76,7 +76,11 @@ namespace BulletXNADemos.Demos
 
             IndexedVector3 gravity = new IndexedVector3(0, -10, 0);
 	        m_dynamicsWorld.SetGravity(ref gravity);
-			
+
+            m_profileManager = new BasicProfileManager();
+            BulletGlobals.g_profileManager = m_profileManager;
+            m_profileIterator = m_profileManager.getIterator();
+
 			BuildBoard();
 
         }
@@ -94,9 +98,12 @@ namespace BulletXNADemos.Demos
 
 		    private void BuildBoard()
 		    {
-			    IndexedVector3 boardBackExtents = new IndexedVector3(40,40,2) /2f;
-			    IndexedVector3 boardSideExtents = new IndexedVector3(1,40,2) /2f;
-			    IndexedVector3 boardBarExtents = new IndexedVector3(40,1,2)/2f;
+                float width = 40;
+                float height = 40;
+
+			    IndexedVector3 boardBackExtents = new IndexedVector3(width,height,2) /2f;
+			    IndexedVector3 boardSideExtents = new IndexedVector3(1,height,2) /2f;
+			    IndexedVector3 boardBarExtents = new IndexedVector3(width,1,2)/2f;
 			    IndexedVector3 pinExtent = new IndexedVector3(0.5f,1f,2f);
 			
 			

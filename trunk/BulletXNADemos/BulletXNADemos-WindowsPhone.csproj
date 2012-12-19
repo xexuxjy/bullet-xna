@@ -85,6 +85,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Demos\BvhBugDemo.cs" />
+    <Compile Include="Demos\CornerDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\Pachinko.cs" />
     <Compile Include="Demos\XNA_ShapeDrawer.cs" />

@@ -84,12 +84,12 @@ namespace BulletXNA.BulletCollision
                                 triangle[1] = vertexList[index2] * meshScaling;
                                 triangle[2] = vertexList[index3] * meshScaling;
 
-						        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
-						        {
-							        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
-						        }
+                                //if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
+                                //{
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+                                //}
 
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
 							}
@@ -110,12 +110,12 @@ namespace BulletXNA.BulletCollision
                                 triangle[1] = new IndexedVector3(vertexList[index2]) * meshScaling;
                                 triangle[2] = new IndexedVector3(vertexList[index3]) * meshScaling;
 
-                                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
-                                {
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T0", triangle[0]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
-                                }
+                                //if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
+                                //{
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T0", triangle[0]);
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+                                //}
 
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
                             }

@@ -145,12 +145,6 @@ namespace BulletXNADemos.Demos
 
         //----------------------------------------------------------------------------------------------
 
-        protected void ShowProfileInfo(ref float xOffset, ref float yStart, float yIncr)
-        {
-        }
-
-        //----------------------------------------------------------------------------------------------
-
         protected virtual void RenderSceneAll(GameTime gameTime)
         {
             if (m_enableshadows)

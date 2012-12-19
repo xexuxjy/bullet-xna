@@ -89,7 +89,6 @@
     <Compile Include="BulletCollision\GImpact\GImpactShape.cs" />
     <Compile Include="BulletCollision\GImpact\TriangleShapeEx.cs" />
     <Compile Include="BulletCollision\NarrowPhaseCollision\PolyhedralContactClipping.cs" />
-    <Compile Include="BulletCollision\NarrowPhaseCollision\XenoCollide.cs" />
     <Compile Include="BulletDynamics\Character\ICharacterControllerInterface.cs" />
     <Compile Include="BulletDynamics\Character\KinematicCharacterController.cs" />
     <Compile Include="BulletDynamics\ConstraintSolver\Generic6DofConstraint.cs" />

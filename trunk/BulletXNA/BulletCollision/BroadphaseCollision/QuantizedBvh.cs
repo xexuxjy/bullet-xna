@@ -21,9 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#define DEBUG_CHECK_DEQUANTIZATION
-#define DEBUG_TREE_BUILDING
-#define VISUALLY_ANALYZE_BVH
+//#define DEBUG_CHECK_DEQUANTIZATION
+//#define DEBUG_TREE_BUILDING
+//#define VISUALLY_ANALYZE_BVH
 #define RAYAABB2
 
 using System;

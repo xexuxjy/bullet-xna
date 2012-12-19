@@ -249,31 +249,26 @@ namespace BulletXNA.BulletCollision
             m_aabbMax = aabbMax;
         }
 
-        public virtual bool graphics()
-        {
-            return m_callback.graphics();
-        }
-
-
 		public virtual void InternalProcessTriangleIndex(IndexedVector3[] triangle,int partId,int triangleIndex)
 		{
-            if (BulletGlobals.gDebugDraw != null)
-            {
-                if ((int)(BulletGlobals.gDebugDraw.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
-                {
-                    IndexedVector3 wv0, wv1, wv2;
-                    wv0 = triangle[0];
-                    wv1 = triangle[1];
-                    wv2 = triangle[2];
+
+            //if (BulletGlobals.gDebugDraw != null)
+            //{
+            //    if ((int)(BulletGlobals.gDebugDraw.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
+            //    {
+            //        IndexedVector3 wv0, wv1, wv2;
+            //        wv0 = triangle[0];
+            //        wv1 = triangle[1];
+            //        wv2 = triangle[2];
 
 
-                    IndexedVector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
-                    IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
-                    normal.Normalize();
-                    IndexedVector3 normalColor = new IndexedVector3(1, 0, 1);
-                    BulletGlobals.gDebugDraw.DrawLine(center, center + normal, normalColor);
-                }
-            }
+            //        IndexedVector3 center = (wv0 + wv1 + wv2) * (1f / 3f);
+            //        IndexedVector3 normal = (wv1 - wv0).Cross(wv2 - wv0);
+            //        normal.Normalize();
+            //        IndexedVector3 normalColor = new IndexedVector3(1, 0, 1);
+            //        BulletGlobals.gDebugDraw.DrawLine(center, center + normal, normalColor);
+            //    }
+            //}
 
 
 
@@ -282,10 +277,10 @@ namespace BulletXNA.BulletCollision
                 //check aabb in triangle-space, before doing this
                 m_callback.ProcessTriangle(triangle, partId, triangleIndex);
             }
-            else
-            {
-                AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax);
-            }
+            //else
+            //{
+            //    AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax);
+            //}
 			
 		}
         public virtual void Cleanup()

@@ -944,7 +944,7 @@ namespace BulletXNA.BulletCollision
             box.m_max = aabbMax;
 
             ObjectArray<int> collided = new ObjectArray<int>();
-            m_box_set.BoxQuery(ref box, collided,callback.graphics());
+            m_box_set.BoxQuery(ref box, collided);
 
             if (collided.Count == 0)
             {

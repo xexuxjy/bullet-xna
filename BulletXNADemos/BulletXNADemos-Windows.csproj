@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.Pachinko</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.BvhBugDemo</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>
@@ -113,10 +113,12 @@
     <Compile Include="Demos\AndrewDemo.cs" />
     <Compile Include="Demos\BasicDemo.cs" />
     <Compile Include="Demos\Box2DDemo.cs" />
+    <Compile Include="Demos\BvhBugDemo.cs" />
     <Compile Include="Demos\CharacterDemo.cs" />
     <Compile Include="Demos\ConcaveDemo.cs" />
     <Compile Include="Demos\ConcaveRaycastDemo.cs" />
     <Compile Include="Demos\ConstraintDemo.cs" />
+    <Compile Include="Demos\CornerDemo.cs" />
     <Compile Include="Demos\DemoApplication.cs" />
     <Compile Include="Demos\DemoMeshes.cs" />
     <Compile Include="Demos\ForkLiftDemo.cs" />

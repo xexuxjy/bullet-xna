@@ -42,7 +42,7 @@ namespace BulletXNADemos.Demos
         public override void InitializeDemo()
         {
             //maxiterations = 10;
-            SetCameraDistance(SCALING * 15f);
+            SetCameraDistance(SCALING * 50f);
 
             //string filename = @"E:\users\man\bullet\xna-basic-output-1.txt";
             //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
@@ -60,9 +60,10 @@ namespace BulletXNADemos.Demos
             m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
 
             IOverlappingPairCache pairCache = null;
-            pairCache = new SortedOverlappingPairCache();
+            //pairCache = new SortedOverlappingPairCache();
+            pairCache = new HashedOverlappingPairCache();
 
-            //m_broadphase = new DbvtBroadphase(pairCache);
+            m_broadphase = new DbvtBroadphase(pairCache);
 
 
             //m_broadphase = new SimpleBroadphase(1000, pairCache);

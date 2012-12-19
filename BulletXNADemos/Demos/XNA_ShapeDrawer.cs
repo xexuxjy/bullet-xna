@@ -764,7 +764,7 @@ namespace BulletXNADemos.Demos
         
         public void RenderOthers(GameTime gameTime, ref IndexedMatrix view, ref IndexedMatrix projection)
         {
-            return;
+        
             m_spriteBatch.Begin();
             for (int i = 0; i < m_textPositionColours.Count; ++i)
             {
@@ -1137,6 +1137,7 @@ namespace BulletXNADemos.Demos
                 m_shapeDrawer.DrawSolidTriangle(triangle);
 		    }
 	    }
+
 
         public virtual void Cleanup()
         {

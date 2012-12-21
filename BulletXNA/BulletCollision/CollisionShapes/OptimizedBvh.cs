@@ -81,10 +81,10 @@ namespace BulletXNA.BulletCollision
 
 	        BuildTree(0,numLeafNodes);
 
-            for (int i = 0; i < m_quantizedContiguousNodes.Count; ++i)
-            {
-                QuantizedBvhNode bvhn = m_quantizedContiguousNodes[i];
-            }
+            //for (int i = 0; i < m_quantizedContiguousNodes.Count; ++i)
+            //{
+            //    QuantizedBvhNode bvhn = m_quantizedContiguousNodes[i];
+            //}
 
 
 	        ///if the entire tree is small then subtree size, we need to create a header info for the tree

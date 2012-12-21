@@ -711,8 +711,9 @@ namespace BulletXNADemos.Demos
 			    ConvexShape childShape = new BoxShape(new IndexedVector3(1f,1f,1f));
 			    m_shootBoxShape = new UniformScalingShape(childShape,0.5f);
 #else
-                //m_shootBoxShape = new SphereShape(1f);//BoxShape(btVector3(1.f,1.f,1.f));
-                m_shootBoxShape = new BoxShape(new IndexedVector3(0.5f, 0.5f, 0.5f));
+                float dims = 0.25f;
+                //m_shootBoxShape = new SphereShape(dims);//BoxShape(btVector3(1.f,1.f,1.f));
+                m_shootBoxShape = new BoxShape(new IndexedVector3(dims));
 
 #endif//
             }
@@ -742,8 +743,12 @@ namespace BulletXNADemos.Demos
                 body.SetLinearVelocity(ref linVel);
                 IndexedVector3 temp = IndexedVector3.Zero;
                 body.SetAngularVelocity(ref temp);
-                body.SetCcdMotionThreshold(1f);
-                body.SetCcdSweptSphereRadius(0.2f);
+
+                body.SetCcdMotionThreshold(0.5f);
+                body.SetCcdSweptSphereRadius(0.9f);
+				// These are bad.....
+                //body.SetCcdMotionThreshold(1f);
+                //body.SetCcdSweptSphereRadius(0.2f);
             }
         }
 

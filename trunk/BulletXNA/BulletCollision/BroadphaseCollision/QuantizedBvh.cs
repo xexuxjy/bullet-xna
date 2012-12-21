@@ -186,8 +186,8 @@ namespace BulletXNA.BulletCollision
             m_bulletVersion = BulletGlobals.BT_BULLET_VERSION;
             m_useQuantization = false;
             //m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS_CACHE_FRIENDLY;
-            //m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS;
-            m_traversalMode = TraversalMode.TRAVERSAL_RECURSIVE;
+            m_traversalMode = TraversalMode.TRAVERSAL_STACKLESS;
+            //m_traversalMode = TraversalMode.TRAVERSAL_RECURSIVE;
             m_subtreeHeaderCount = 0; //PCK: add this line
             m_bvhAabbMin = new IndexedVector3(-MathUtil.SIMD_INFINITY);
             m_bvhAabbMax = new IndexedVector3(MathUtil.SIMD_INFINITY);
@@ -709,21 +709,21 @@ namespace BulletXNA.BulletCollision
                 //#define VISUALLY_ANALYZE_BVH 1
 #if VISUALLY_ANALYZE_BVH
                 //some code snippet to debugDraw aabb, to visually analyze bvh structure
-                int drawPatch = 9;
+                int drawPatch = 1;
                 //need some global access to a debugDrawer
                 IDebugDraw debugDrawerPtr = BulletGlobals.gDebugDraw;
                 //IDebugDraw debugDrawerPtr = null;
                 //if (curIndex == drawPatch&& debugDrawerPtr != null)
-                //if (debugDrawerPtr != null && curIndex == drawPatch)
-                if (debugDrawerPtr != null)
+                if (debugDrawerPtr != null && curIndex == drawPatch)
+                //if (debugDrawerPtr != null)
                 {
                     IndexedVector3 aabbMin, aabbMax;
                     UnQuantize(ref rootNode.m_quantizedAabbMin, out aabbMin);
                     UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax);
                     IndexedVector3 color = new IndexedVector3(1, 0, 0);
-                    //debugDrawerPtr.DrawAabb(ref aabbMin, ref aabbMax, ref color);
-                    IndexedVector3 offset = new IndexedVector3(0, 2, 0);
-                    debugDrawerPtr.DrawAabb(aabbMin=offset, aabbMax+offset, color);
+                    debugDrawerPtr.DrawAabb(ref aabbMin, ref aabbMax, ref color);
+                    //IndexedVector3 offset = new IndexedVector3(0, 2, 0);
+                    //debugDrawerPtr.DrawAabb(aabbMin+offset, aabbMax+offset, color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
 
 

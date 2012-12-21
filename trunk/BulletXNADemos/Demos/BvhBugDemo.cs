@@ -23,13 +23,13 @@ namespace BulletXNADemos.Demos
 
             IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
             IndexedVector3 worldMax = -worldMin;
-            m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
+            //m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
 
             //m_broadphase = new DbvtBroadphase();
             IOverlappingPairCache pairCache = null;
             //pairCache = new SortedOverlappingPairCache();
 
-            //m_broadphase = new SimpleBroadphase(1000, pairCache);
+            m_broadphase = new SimpleBroadphase(1000, pairCache);
 
             ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
             SequentialImpulseConstraintSolver sol = new SequentialImpulseConstraintSolver();
@@ -77,10 +77,10 @@ namespace BulletXNADemos.Demos
 
             TriangleIndexVertexArray tribuilder = new TriangleIndexVertexArray();
             tribuilder.AddIndexedMesh(mesh, PHY_ScalarType.PHY_INTEGER);
-            //BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
-            TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
+            BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, false, true);
+            //TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
             //meshShape.SetMargin(world.WorldSettings.Params.collisionMargin);
-            float margin = 0.01f;
+            float margin = 0.02f;
             meshShape.SetMargin(margin);
             return meshShape;
         }
@@ -102,10 +102,10 @@ namespace BulletXNADemos.Demos
 
             TriangleIndexVertexArray tribuilder = new TriangleIndexVertexArray();
             tribuilder.AddIndexedMesh(mesh, PHY_ScalarType.PHY_INTEGER);
-            //BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, true, true);
-            TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
+            BvhTriangleMeshShape meshShape = new BvhTriangleMeshShape(tribuilder, false, true);
+            //TriangleMeshShape meshShape = new TriangleMeshShape(tribuilder);
             //meshShape.SetMargin(world.WorldSettings.Params.collisionMargin);
-            float margin = 0.01f;
+            float margin = 0.02f;
             meshShape.SetMargin(margin);
             return meshShape;
         }

@@ -136,7 +136,7 @@ namespace BulletXNADemos.Demos
             
             //IndexedVector3 target = m_lightPosition + m_lightDirection * 10;
             IndexedVector3 target = IndexedVector3.Zero;
-            float aspect = m_glutScreenWidth / m_glutScreenHeight;
+            float aspect = m_glutScreenWidth / (float)m_glutScreenHeight;
             float fov = MathHelper.ToRadians(40.0f);
 
             m_lightView = IndexedMatrix.CreateLookAt(m_lightPosition, target, new IndexedVector3(0,1,0));

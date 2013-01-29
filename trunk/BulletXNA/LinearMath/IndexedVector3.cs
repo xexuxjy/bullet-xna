@@ -255,11 +255,6 @@ namespace BulletXNA.LinearMath
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
         }
 
-        public static void Dot(ref IndexedVector3 a, ref IndexedVector3 b, out float r)
-        {
-            r = (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
-        }
-
         public static IndexedVector3 operator +(IndexedVector3 value1, IndexedVector3 value2)
         {
             IndexedVector3 vector;

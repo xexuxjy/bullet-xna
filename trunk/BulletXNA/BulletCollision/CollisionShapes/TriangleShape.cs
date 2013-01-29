@@ -92,10 +92,8 @@ namespace BulletXNA.BulletCollision
 		    IndexedVector3 normal;
 		    CalcNormal(out normal);
 		    //distance to plane
-            float dist;
-            IndexedVector3.Dot(ref pt,ref normal,out dist);
-		    float planeconst;
-            IndexedVector3.Dot(ref m_vertices1[0],ref normal,out planeconst);
+            float dist = IndexedVector3.Dot(ref pt, ref normal);
+            float planeconst = IndexedVector3.Dot(ref m_vertices1[0], ref normal);
 		    dist -= planeconst;
 		    if (dist >= -tolerance && dist <= tolerance)
 		    {
@@ -108,10 +106,8 @@ namespace BulletXNA.BulletCollision
 				    IndexedVector3 edge = pb-pa;
                     IndexedVector3 edgeNormal = edge.Cross(ref normal);
 				    edgeNormal.Normalize();
-                    float dist2;
-                    IndexedVector3.Dot(ref pt, ref edgeNormal,out dist2);
-				    float edgeConst;
-                    IndexedVector3.Dot(ref pa, ref edgeNormal,out edgeConst);
+                    float dist2 = IndexedVector3.Dot(ref pt, ref edgeNormal);
+                    float edgeConst = IndexedVector3.Dot(ref pa, ref edgeNormal);
 				    dist2 -= edgeConst;
 				    if (dist2 < -tolerance)
                     {
@@ -176,29 +172,26 @@ namespace BulletXNA.BulletCollision
         }
 
         public override IndexedVector3 LocalGetSupportingVertexWithoutMargin(ref IndexedVector3 dir)
-	    {
-            float a,b,c;
-            IndexedVector3.Dot(ref dir, ref m_vertices1[0], out a);
-            IndexedVector3.Dot(ref dir, ref m_vertices1[1], out b);
-            IndexedVector3.Dot(ref dir, ref m_vertices1[2], out c);
-            IndexedVector3 dots = new IndexedVector3(a, b, c);
+        {
+            IndexedVector3 dots = new IndexedVector3(
+                dir.Dot(ref m_vertices1[0]),
+                dir.Dot(ref m_vertices1[1]),
+                dir.Dot(ref m_vertices1[2]));
             return m_vertices1[MathUtil.MaxAxis(ref dots)];
-	    }
+        }
 
-	    public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors,IndexedVector4[] supportVerticesOut,int numVectors)
-	    {
-		    for (int i=0;i<numVectors;i++)
-		    {
-			    IndexedVector3 dir = vectors[i];
-                float a, b, c;
-                IndexedVector3.Dot(ref dir, ref m_vertices1[0],out a);
-                IndexedVector3.Dot(ref dir, ref m_vertices1[1],out b);
-                IndexedVector3.Dot(ref dir, ref m_vertices1[2],out c);
-
-                IndexedVector3 dots = new IndexedVector3(a, b, c);
-                supportVerticesOut[i] = new IndexedVector4(m_vertices1[MathUtil.MaxAxis(ref dots)],0);
-		    }
-	    }
+        public override void BatchedUnitVectorGetSupportingVertexWithoutMargin(IndexedVector3[] vectors, IndexedVector4[] supportVerticesOut, int numVectors)
+        {
+            for (int i = 0; i < numVectors; i++)
+            {
+                IndexedVector3 dir = vectors[i];
+                IndexedVector3 dots = new IndexedVector3(
+                    dir.Dot(ref m_vertices1[0]),
+                    dir.Dot(ref m_vertices1[1]),
+                    dir.Dot(ref m_vertices1[2]));
+                supportVerticesOut[i] = new IndexedVector4(m_vertices1[MathUtil.MaxAxis(ref dots)], 0);
+            }
+        }
 
         public void Dispose()
         {

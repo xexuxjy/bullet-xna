@@ -211,8 +211,7 @@ namespace BulletXNA.BulletCollision
 	    {
 		    for (int i=0;i<3;i++)
 		    {
-			    float dot;
-                IndexedVector3.Dot(ref m_supportVecLocal,ref triangle[i],out dot);
+                float dot = IndexedVector3.Dot(ref m_supportVecLocal, ref triangle[i]);
 			    if (dot > m_maxDot)
 			    {
 				    m_maxDot = dot;

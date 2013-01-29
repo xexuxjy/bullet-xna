@@ -68,13 +68,10 @@ namespace BulletXNA.BulletCollision
 
             IndexedVector3 triangleNormal = v10.Cross(ref v20);
 
-            float dist;
-            IndexedVector3.Dot(ref triangle[0], ref triangleNormal, out dist);
-            float dist_a;
-            IndexedVector3.Dot(ref triangleNormal, ref m_from, out dist_a);
+            float dist = IndexedVector3.Dot(ref triangle[0], ref triangleNormal);
+            float dist_a = IndexedVector3.Dot(ref triangleNormal, ref m_from);
             dist_a -= dist;
-            float dist_b;
-            IndexedVector3.Dot(ref triangleNormal, ref m_to, out dist_b);
+            float dist_b = IndexedVector3.Dot(ref triangleNormal, ref m_to);
             dist_b -= dist;
 
             if (dist_a * dist_b >= 0f)
@@ -103,34 +100,25 @@ namespace BulletXNA.BulletCollision
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
                     IndexedVector3 v0p = triangle[0] - point;
-                    IndexedVector3 v1p = triangle[1] - point; ;
+                    IndexedVector3 v1p = triangle[1] - point;
 
                     IndexedVector3 cp0 = v0p.Cross(ref v1p);
 
-                    float dot;
-                    IndexedVector3.Dot(ref cp0, ref triangleNormal, out dot);
-                    if (dot >= edge_tolerance)
+                    if (IndexedVector3.Dot(ref cp0, ref triangleNormal) >= edge_tolerance)
                     {
                         IndexedVector3 v2p = triangle[2] - point;
                         IndexedVector3 cp1 = v1p.Cross(ref v2p);//= IndexedVector3.Cross(v1p,v2p);
-
-                        float dot2;
-                        IndexedVector3.Dot(ref cp1, ref triangleNormal, out dot2);
-
-                        if (dot2 >= edge_tolerance)
+                        if (IndexedVector3.Dot(ref cp1, ref triangleNormal) >= edge_tolerance)
                         {
                             IndexedVector3 cp2 = v2p.Cross(ref v0p);
-                            float dot3;
-                            IndexedVector3.Dot(ref cp2, ref triangleNormal, out dot3);
-
-                            if (dot3 >= edge_tolerance)
+                            if (IndexedVector3.Dot(ref cp2, ref triangleNormal) >= edge_tolerance)
                             {
                                 //@BP Mod
                                 // Triangle normal isn't normalized
                                 triangleNormal.Normalize();
 
                                 //@BP Mod - Allow for unflipped normal when raycasting against backfaces
-                                if (((m_flags & EFlags.kF_KeepUnflippedNormal) != 0) || (dist_a <= 0.0f))
+                                if (((m_flags & EFlags.kF_KeepUnflippedNormal) == 0) && (dist_a <= 0.0f))
                                 {
                                     IndexedVector3 negNormal = -triangleNormal;
                                     m_hitFraction = ReportHit(ref negNormal, distance, partId, triangleIndex);

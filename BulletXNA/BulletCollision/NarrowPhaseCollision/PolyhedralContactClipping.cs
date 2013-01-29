@@ -387,14 +387,14 @@ public static bool TestInternalObjects( ref IndexedMatrix trans0, ref IndexedMat
             IndexedVector3 firstVertex = pVtxIn[pVtxIn.Count - 1];
             IndexedVector3 endVertex = pVtxIn[0];
 
-            IndexedVector3.Dot(ref planeNormalWS, ref firstVertex, out ds);
+            ds = IndexedVector3.Dot(ref planeNormalWS, ref firstVertex);
             ds += planeEqWS;
 
             for (ve = 0; ve < numVerts; ve++)
             {
                 endVertex = pVtxIn[ve];
 
-                IndexedVector3.Dot(ref planeNormalWS, ref endVertex, out de);
+                de = IndexedVector3.Dot(ref planeNormalWS, ref endVertex);
                 de += planeEqWS;
 
                 if (ds < 0)

@@ -110,31 +110,33 @@ namespace BulletXNA.BulletCollision
                     // shouldn't this be Y ?
                     norm.Z = 0;
                 }
-                seperatingAxisInA = seperatingAxisInABatch[i];
-                seperatingAxisInB = seperatingAxisInBBatch[i];
-
-                pInA = new Vector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
-                qInB = new Vector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
-
-			    Matrix.Multiply(out  pWorld ,ref transA ,ref pInA);
-                Matrix.Multiply(out  qWorld, ref transB, ref qInB);	
-                if (check2d)
+                if (norm.LengthSquared() > 0.01f)
                 {
-                    // shouldn't this be Y ?
-                    pWorld.Z = 0f;
-                    qWorld.Z = 0f;
-                }
+                    seperatingAxisInA = seperatingAxisInABatch[i];
+                    seperatingAxisInB = seperatingAxisInBBatch[i];
 
+                    pInA = new Vector3(supportVerticesABatch[i].X, supportVerticesABatch[i].Y, supportVerticesABatch[i].Z);
+                    qInB = new Vector3(supportVerticesBBatch[i].X, supportVerticesBBatch[i].Y, supportVerticesBBatch[i].Z);
 
-                Vector3.Subtract(out w ,ref qWorld ,ref pWorld);
-                float delta = Vector3.Dot(ref norm, ref w);
-                //find smallest delta
-                if (delta < minProj)
-                {
-                    minProj = delta;
-                    minNorm = norm;
-                    minA = pWorld;
-                    minB = qWorld;
+                    Matrix.Multiply(out  pWorld, ref transA, ref pInA);
+                    Matrix.Multiply(out  qWorld, ref transB, ref qInB);
+                    if (check2d)
+                    {
+                        // shouldn't this be Y ?
+                        pWorld.Z = 0f;
+                        qWorld.Z = 0f;
+                    }
+
+                    Vector3.Subtract(out w, ref qWorld, ref pWorld);
+                    float delta = Vector3.Dot(ref norm, ref w);
+                    //find smallest delta
+                    if (delta < minProj)
+                    {
+                        minProj = delta;
+                        minNorm = norm;
+                        minA = pWorld;
+                        minB = qWorld;
+                    }
                 }
             }
 #else

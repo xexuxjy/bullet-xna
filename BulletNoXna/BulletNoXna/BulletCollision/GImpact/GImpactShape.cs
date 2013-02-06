@@ -714,7 +714,6 @@ namespace BulletXNA.BulletCollision
             public void GetVertex(int vertex_index, out Vector3 vertex)
             {
                 ObjectArray<Vector3> svertices = vertexbase as ObjectArray<Vector3>;
-                vertex = Vector3.Zero;
                 if (svertices != null)
                 {
                     int index = vertex_index * stride;
@@ -731,7 +730,10 @@ namespace BulletXNA.BulletCollision
                         vertex.Y = temp[index + 1] * m_scale.Y;
                         vertex.Z = temp[index + 2] * m_scale.Z;
                     }
-
+                    else
+                    {
+                        vertex = Vector3.Zero;
+                    }
                 }
             }
 
@@ -952,7 +954,7 @@ namespace BulletXNA.BulletCollision
             box.m_max = aabbMax;
 
             ObjectArray<int> collided = new ObjectArray<int>();
-            m_box_set.BoxQuery(ref box, collided,callback.graphics());
+            m_box_set.BoxQuery(ref box, collided);
 
             if (collided.Count == 0)
             {
@@ -1028,9 +1030,9 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public StridingMeshInterface MeshInterface
+        public StridingMeshInterface GetMeshInterface()
         {
-            get { return m_meshInterface; }
+            return m_meshInterface;
         }
 
 

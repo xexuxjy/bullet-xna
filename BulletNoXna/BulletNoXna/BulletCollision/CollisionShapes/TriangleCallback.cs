@@ -29,7 +29,6 @@ namespace BulletXNA.BulletCollision
     {
 	    void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex);
         void Cleanup();
-        bool graphics();
 
     }
 
@@ -37,6 +36,5 @@ namespace BulletXNA.BulletCollision
     {
         void InternalProcessTriangleIndex(Vector3[] triangle, int partId, int triangleIndex);
         void Cleanup();
-        bool graphics();
     }
 }

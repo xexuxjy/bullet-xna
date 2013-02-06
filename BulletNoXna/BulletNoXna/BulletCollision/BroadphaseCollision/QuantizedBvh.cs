@@ -21,9 +21,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#define DEBUG_CHECK_DEQUANTIZATION
-#define DEBUG_TREE_BUILDING
-#define VISUALLY_ANALYZE_BVH
+//#define DEBUG_CHECK_DEQUANTIZATION
+//#define DEBUG_TREE_BUILDING
+//#define VISUALLY_ANALYZE_BVH
 #define RAYAABB2
 
 using System;
@@ -53,6 +53,9 @@ namespace BulletXNA.BulletCollision
         //4 bytes
         public int m_escapeIndexOrTriangleIndex;
 
+        public int m_leftChildIndex = -1;
+        public int m_rightChildIndex = -1;
+
         public bool IsLeafNode()
         {
             //skipindex is negative (internal node), triangleindex >=0 (leafnode)
@@ -67,12 +70,17 @@ namespace BulletXNA.BulletCollision
         public int GetTriangleIndex()
         {
             // relax this as we're using it in a cheat on the recursive walker.
-            //Debug.Assert(isLeafNode());
+            Debug.Assert(IsLeafNode());
             // Get only the lower bits where the triangle index is stored
-            int result = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
-            int result2 = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
+            //int result = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
+            //int result2 = (m_escapeIndexOrTriangleIndex & ~((~0) << (31 - QuantizedBvh.MAX_NUM_PARTS_IN_BITS)));
 
-            return result;
+            uint x=0;
+            uint y = (~(x&0))<<(31-QuantizedBvh.MAX_NUM_PARTS_IN_BITS);
+            return (int)(m_escapeIndexOrTriangleIndex & ~(y));
+
+
+//            return result;
         }
         public int GetPartId()
         {
@@ -285,7 +293,7 @@ namespace BulletXNA.BulletCollision
                 OptimizedBvhNode node = m_contiguousNodes[nodeIndex];
                 //non-quantized
                 MathUtil.VectorMin(ref newAabbMin, ref node.m_aabbMinOrg);
-                MathUtil.VectorMin(ref newAabbMax, ref node.m_aabbMaxOrg);
+                MathUtil.VectorMax(ref newAabbMax, ref node.m_aabbMaxOrg);
                 m_contiguousNodes[nodeIndex] = node;
             }
         }
@@ -365,6 +373,8 @@ namespace BulletXNA.BulletCollision
                 MergeInternalNodeAabb(m_curNodeIndex, GetAabbMin(i), GetAabbMax(i));
             }
 
+            int lastIndex = m_curNodeIndex;
+
             m_curNodeIndex++;
 
 
@@ -372,10 +382,14 @@ namespace BulletXNA.BulletCollision
 
             int leftChildNodexIndex = m_curNodeIndex;
 
+            m_quantizedContiguousNodes[lastIndex].m_leftChildIndex = leftChildNodexIndex;
+
+
             //build left child tree
             BuildTree(startIndex, splitIndex);
 
             int rightChildNodexIndex = m_curNodeIndex;
+            m_quantizedContiguousNodes[lastIndex].m_rightChildIndex = rightChildNodexIndex;
             //build right child tree
             BuildTree(splitIndex, endIndex);
 
@@ -695,7 +709,7 @@ namespace BulletXNA.BulletCollision
                 //#define VISUALLY_ANALYZE_BVH 1
 #if VISUALLY_ANALYZE_BVH
                 //some code snippet to debugDraw aabb, to visually analyze bvh structure
-                int drawPatch = 9;
+                int drawPatch = 1;
                 //need some global access to a debugDrawer
                 IDebugDraw debugDrawerPtr = BulletGlobals.gDebugDraw;
                 //IDebugDraw debugDrawerPtr = null;
@@ -708,6 +722,8 @@ namespace BulletXNA.BulletCollision
                     UnQuantize(ref rootNode.m_quantizedAabbMax, out aabbMax);
                     Vector3 color = new Vector3(1, 0, 0);
                     debugDrawerPtr.DrawAabb(ref aabbMin, ref aabbMax, ref color);
+                    //Vector3 offset = new Vector3(0, 2, 0);
+                    //debugDrawerPtr.DrawAabb(aabbMin+offset, aabbMax+offset, color);
                     //Console.Out.WriteLine(String.Format("min[{0},{1},{2}] max[{3},{4},{5}]\n", aabbMin.X, aabbMin.Y, aabbMin.Z, aabbMax.X, aabbMax.Y, aabbMax.Z));
 
 
@@ -896,15 +912,19 @@ namespace BulletXNA.BulletCollision
                     //QuantizedBvhNode leftChildNode = currentNode + 1;
                     // Not sure bout thie replacement... but avoids pointer arithmetic
                     // this is broken ...
-                    int nodeIndex = currentNode.GetTriangleIndex() + 1;
-                    QuantizedBvhNode leftChildNode = m_quantizedContiguousNodes[nodeIndex];
+                    //int nodeIndex = currentNode.GetTriangleIndex() + 1;
+                    if(currentNode.m_leftChildIndex > -1 && currentNode.m_leftChildIndex < m_quantizedContiguousNodes.Count)
+                    {
+                        QuantizedBvhNode leftChildNode = m_quantizedContiguousNodes[currentNode.m_leftChildIndex];
+                        WalkRecursiveQuantizedTreeAgainstQueryAabb(ref leftChildNode, nodeCallback, ref quantizedQueryAabbMin, ref quantizedQueryAabbMax);
+                    }
 
-                    WalkRecursiveQuantizedTreeAgainstQueryAabb(ref leftChildNode, nodeCallback, ref quantizedQueryAabbMin, ref quantizedQueryAabbMax);
-
-                    int newIndex = leftChildNode.IsLeafNode() ? leftChildNode.GetTriangleIndex() + 1 : leftChildNode.GetTriangleIndex() + leftChildNode.GetEscapeIndex();
-                    QuantizedBvhNode rightChildNode = m_quantizedContiguousNodes[newIndex];
-
-                    WalkRecursiveQuantizedTreeAgainstQueryAabb(ref rightChildNode, nodeCallback, ref quantizedQueryAabbMin, ref quantizedQueryAabbMax);
+                    if(currentNode.m_rightChildIndex > -1 && currentNode.m_rightChildIndex < m_quantizedContiguousNodes.Count)
+                    {
+                        //int newIndex = leftChildNode.IsLeafNode() ? leftChildNode.GetTriangleIndex() + 1 : leftChildNode.GetTriangleIndex() + leftChildNode.GetEscapeIndex();
+                        QuantizedBvhNode rightChildNode = m_quantizedContiguousNodes[currentNode.m_rightChildIndex];
+                        WalkRecursiveQuantizedTreeAgainstQueryAabb(ref rightChildNode, nodeCallback, ref quantizedQueryAabbMin, ref quantizedQueryAabbMax);
+                    }
                 }
             }
         }

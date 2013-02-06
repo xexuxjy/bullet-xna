@@ -415,9 +415,8 @@ namespace BulletXNA.BulletCollision
             Vector3.Subtract(out pa, ref p, ref a);
             Vector3.Subtract(out da, ref d, ref a);
 
-            float signp, signd;
-            Vector3.Dot(ref pa, ref normal, out signp);// [AP AB AC]
-            Vector3.Dot(ref da, ref normal, out signd);// [AD AB AC]
+            float signp = Vector3.Dot(ref pa, ref normal);// [AP AB AC]
+            float signd = Vector3.Dot(ref da, ref normal);// [AD AB AC]
             
 
 #if CATCH_DEGENERATE_TETRAHEDRON
@@ -441,9 +440,8 @@ namespace BulletXNA.BulletCollision
             Vector3.Subtract(out ac, ref c, ref a);
             Vector3.Subtract(out ap, ref p, ref a);
             
-            float d1,d2;
-            Vector3.Dot(ref ab, ref ap,out d1);
-            Vector3.Dot(ref ac, ref ap,out d2);
+            float d1 = Vector3.Dot(ref ab, ref ap);
+            float d2 = Vector3.Dot(ref ac, ref ap);
             if (d1 <= 0f && d2 <= 0f)
             {
                 result.m_closestPointOnSimplex = a;
@@ -455,9 +453,8 @@ namespace BulletXNA.BulletCollision
             // Check if P in vertex region outside B
             Vector3 bp;
             Vector3.Subtract(out bp, ref p, ref b);
-            float d3,d4;
-            Vector3.Dot(ref ab, ref bp,out d3);
-            Vector3.Dot(ref ac, ref bp,out d4);
+            float d3 = Vector3.Dot(ref ab, ref bp);
+            float d4 = Vector3.Dot(ref ac, ref bp);
             if (d3 >= 0f && d4 <= d3)
             {
                 result.m_closestPointOnSimplex = b;
@@ -482,9 +479,8 @@ namespace BulletXNA.BulletCollision
             // Check if P in vertex region outside C
             Vector3 cp;
             Vector3.Subtract(out cp, ref p, ref c);
-            float d5, d6;
-            Vector3.Dot(ref ab, ref cp, out d5);
-            Vector3.Dot(ref ac, ref cp, out d6);
+            float d5 = Vector3.Dot(ref ab, ref cp);
+            float d6 = Vector3.Dot(ref ac, ref cp);
 
             if (d6 >= 0f && d5 <= d6)
             {

@@ -195,7 +195,7 @@ namespace BulletXNA.BulletCollision
                     }
 
                     Vector3 w = new Vector3(pWorld.X - qWorld.X,pWorld.Y - qWorld.Y,pWorld.Z - qWorld.Z);
-                    Vector3.Dot(ref m_cachedSeparatingAxis, ref w,out delta);
+                    delta = Vector3.Dot(ref m_cachedSeparatingAxis, ref w);
 
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {

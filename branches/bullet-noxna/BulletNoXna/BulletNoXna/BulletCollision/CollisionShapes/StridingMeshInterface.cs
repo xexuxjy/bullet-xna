@@ -65,49 +65,90 @@ namespace BulletXNA.BulletCollision
 			        {
                         int[] indexList = ((ObjectArray<int>)indexbase).GetRawArray();
 
-						if (vertexbase is ObjectArray<Vector3>)
-						{
+                        if (vertexbase is ObjectArray<Vector3>)
+                        {
                             Vector3[] vertexList = (vertexbase as ObjectArray<Vector3>).GetRawArray();
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								int triIndex = (gfxindex * indexstride);
+                            //string filename = "c:/tmp/xna-bvh-mesh-iv3.txt";
+                            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                            //using (StreamWriter writer = new StreamWriter(filestream))
+                            //{
+                                //writer.WriteLine("XNA IV3");
+                                for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
+                                {
+                                    int triIndex = (gfxindex * indexstride);
 
-								int index1 = indexList[triIndex];
-								int index2 = indexList[triIndex+1];
-								int index3 = indexList[triIndex+2];
+                                    //writer.WriteLine(String.Format("indices[{0}][{1}][{2}]", indexList[triIndex], indexList[triIndex + 1], indexList[triIndex + 2]));
 
-								triangle[0] = vertexList[index1] * meshScaling;
-                                triangle[1] = vertexList[index2] * meshScaling;
-                                triangle[2] = vertexList[index3] * meshScaling;
+                                    int index1 = indexList[triIndex];
+                                    int index2 = indexList[triIndex + 1];
+                                    int index3 = indexList[triIndex + 2];
 
-						        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
-						        {
-							        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
-                                    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
-						        }
+                                    triangle[0] = vertexList[index1] * meshScaling;
+                                    //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", triangle[0].X,triangle[0].Y,triangle[0].Z));
+
+                                    triangle[1] = vertexList[index2] * meshScaling;
+                                    //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", triangle[1].X, triangle[1].Y, triangle[1].Z));
+
+                                    triangle[2] = vertexList[index3] * meshScaling;
+                                    //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", triangle[2].X, triangle[2].Y, triangle[2].Z));
+
+
+                                    //writer.WriteLine(String.Format("index[{0}] triangle[0].X =[{1:0.00000000}] triangle[0].Y =[{2:0.00000000}] triangle[0].Z =[{3:0.00000000}]", gfxindex, triangle[0].X, triangle[0].Y, triangle[0].Z));
+                                    //writer.WriteLine(String.Format("index[{0}] triangle[1].X =[{1:0.00000000}] triangle[1].Y =[{2:0.00000000}] triangle[1].Z =[{3:0.00000000}]", gfxindex, triangle[1].X, triangle[1].Y, triangle[1].Z));
+                                    //writer.WriteLine(String.Format("index[{0}] triangle[2].X =[{1:0.00000000}] triangle[2].Y =[{2:0.00000000}] triangle[2].Z =[{3:0.00000000}]", gfxindex, triangle[2].X, triangle[2].Y, triangle[2].Z));
+
+
+                                    //if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugStridingMesh && !callback.graphics())
+                                    //{
+                                    //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"SMI:T0",triangle[0]);
+                                    //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T1", triangle[1]);
+                                    //    MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "SMI:T2", triangle[2]);
+                                    //}
+
+                                    callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
+                                }
+                            //    writer.Flush();
+                            //}
+                        }
+                        else if (vertexbase is ObjectArray<float>)
+                        {
+                            //string filename = "c:/tmp/xna-bvh-mesh-float.txt";
+                            //FileStream filestream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                            //using (StreamWriter writer = new StreamWriter(filestream))
+                            //{
+                            //writer.WriteLine("XNA FLOAT");
+                            float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();
+                            for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
+                            {
+                                int triIndex = (gfxindex * indexstride);
+                                //writer.WriteLine(String.Format("indices[{0}][{1}][{2}]", indexList[triIndex], indexList[triIndex + 1], indexList[triIndex + 2]));
+
+                                // ugly!!
+                                int index1 = indexList[triIndex];
+
+                                //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]));
+                                triangle[0] = new Vector3(vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]) * meshScaling;
+                                index1 = indexList[triIndex + 1];
+                                //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]));
+                                triangle[1] = new Vector3(vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]) * meshScaling;
+                                index1 = indexList[triIndex + 2];
+                                //writer.WriteLine(String.Format("GB1[{0:0.00000000}][{1:0.00000000}][{2:0.00000000}]", vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]));
+                                triangle[2] = new Vector3(vertexList[index1 * stride], vertexList[(index1 * stride) + 1], vertexList[(index1 * stride) + 2]) * meshScaling;
+
+
+                                //writer.WriteLine(String.Format("index[{0}] triangle[0].X =[{1:0.00000000}] triangle[0].Y =[{2:0.00000000}] triangle[0].Z =[{3:0.00000000}]", gfxindex, triangle[0].X, triangle[0].Y, triangle[0].Z));
+                                //writer.WriteLine(String.Format("index[{0}] triangle[1].X =[{1:0.00000000}] triangle[1].Y =[{2:0.00000000}] triangle[1].Z =[{3:0.00000000}]", gfxindex, triangle[1].X, triangle[1].Y, triangle[1].Z));
+                                //writer.WriteLine(String.Format("index[{0}] triangle[2].X =[{1:0.00000000}] triangle[2].Y =[{2:0.00000000}] triangle[2].Z =[{3:0.00000000}]", gfxindex, triangle[2].X, triangle[2].Y, triangle[2].Z));
 
                                 callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-						}
-                        else if (vertexbase is ObjectArray<float>)
-						{
-							float[] vertexList = (vertexbase as ObjectArray<float>).GetRawArray();
-							for (int gfxindex = 0; gfxindex < numtriangles; gfxindex++)
-							{
-								int triIndex = (gfxindex * indexstride);
-
-								// ugly!!
-								triangle[0] = new Vector3(vertexList[indexList[triIndex]], vertexList[indexList[triIndex] + 1], vertexList[indexList[triIndex] + 2]) * meshScaling;
-								triangle[1] = new Vector3(vertexList[indexList[triIndex+1]], vertexList[indexList[triIndex+1] + 1], vertexList[indexList[triIndex+1] + 2]) * meshScaling;
-								triangle[2] = new Vector3(vertexList[indexList[triIndex+2]], vertexList[indexList[triIndex+2] + 1], vertexList[indexList[triIndex+2] + 2]) * meshScaling;
-								callback.InternalProcessTriangleIndex(triangle, part, gfxindex);
-							}
-						}
-						else
-						{
-							Debug.Assert(false); // unsupported type ....
-						}
+                            }
+                            //writer.Flush();
+                            //}
+                        }
+                        else
+                        {
+                            Debug.Assert(false); // unsupported type ....
+                        }
 				        break;
 			        }
                 default:

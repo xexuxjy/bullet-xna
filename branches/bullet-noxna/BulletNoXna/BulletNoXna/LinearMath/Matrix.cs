@@ -119,6 +119,24 @@ namespace BulletXNA.LinearMath
         //                                matrix1._basis[2].Dot(ref v) + matrix1.Translation.Z);
         //}
 
+        public static Matrix Multiply(Matrix left, Matrix right)
+        {
+            Matrix r;
+            r._basis._el0.X = (left._basis._el0.X * right._basis._el0.X) + (left._basis._el0.Y * right._basis._el1.X) + (left._basis._el0.Z * right._basis._el2.X);
+            r._basis._el0.Y = (left._basis._el0.X * right._basis._el0.Y) + (left._basis._el0.Y * right._basis._el1.Y) + (left._basis._el0.Z * right._basis._el2.Y);
+            r._basis._el0.Z = (left._basis._el0.X * right._basis._el0.Z) + (left._basis._el0.Y * right._basis._el1.Z) + (left._basis._el0.Z * right._basis._el2.Z);
+            r._basis._el1.X = (left._basis._el1.X * right._basis._el0.X) + (left._basis._el1.Y * right._basis._el1.X) + (left._basis._el1.Z * right._basis._el2.X);
+            r._basis._el1.Y = (left._basis._el1.X * right._basis._el0.Y) + (left._basis._el1.Y * right._basis._el1.Y) + (left._basis._el1.Z * right._basis._el2.Y);
+            r._basis._el1.Z = (left._basis._el1.X * right._basis._el0.Z) + (left._basis._el1.Y * right._basis._el1.Z) + (left._basis._el1.Z * right._basis._el2.Z);
+            r._basis._el2.X = (left._basis._el2.X * right._basis._el0.X) + (left._basis._el2.Y * right._basis._el1.X) + (left._basis._el2.Z * right._basis._el2.X);
+            r._basis._el2.Y = (left._basis._el2.X * right._basis._el0.Y) + (left._basis._el2.Y * right._basis._el1.Y) + (left._basis._el2.Z * right._basis._el2.Y);
+            r._basis._el2.Z = (left._basis._el2.X * right._basis._el0.Z) + (left._basis._el2.Y * right._basis._el1.Z) + (left._basis._el2.Z * right._basis._el2.Z);
+            r.Translation.X = (left.Translation.X * right._basis._el0.X) + (left.Translation.Y * right._basis._el1.X) + (left.Translation.Z * right._basis._el2.X) + right.Translation.X;
+            r.Translation.Y = (left.Translation.X * right._basis._el0.Y) + (left.Translation.Y * right._basis._el1.Y) + (left.Translation.Z * right._basis._el2.Y) + right.Translation.Y;
+            r.Translation.Z = (left.Translation.X * right._basis._el0.Z) + (left.Translation.Y * right._basis._el1.Z) + (left.Translation.Z * right._basis._el2.Z) + right.Translation.Z;
+            return r;
+        }
+
         public static Matrix operator *(Matrix matrix1, Matrix matrix2)
         {
             Matrix Matrix;
@@ -304,6 +322,11 @@ namespace BulletXNA.LinearMath
                 0, 0, 0);
 
             return result;
+        }
+
+        public static Matrix CreateFromYawPitchRoll(float yaw, float pitch, float roll)
+        {
+            return Matrix.CreateFromQuaternion(Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll));
         }
 
         public bool Equals(Matrix other)

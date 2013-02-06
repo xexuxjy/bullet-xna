@@ -152,17 +152,8 @@ namespace BulletXNA.BulletCollision
         //! returns the indices of the primitives in the m_primitive_manager
         public bool BoxQuery(ref AABB box, ObjectArray<int> collided_results)
         {
-            return BoxQuery(ref box, collided_results, false);
-        }
-        public bool BoxQuery(ref AABB box, ObjectArray<int> collided_results,bool graphics)
-        {
             int curIndex = 0;
             int numNodes = NodeCount;
-
-            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH && !graphics)
-            {
-                BulletGlobals.g_streamWriter.WriteLine("QIQBVH BoxQuery [{0}]", numNodes);
-            }
 
             //quantize box
 
@@ -181,11 +172,6 @@ namespace BulletXNA.BulletCollision
                 bool aabbOverlap = m_box_tree.TestQuantizedBoxOverlap(curIndex, ref quantizedMin, ref quantizedMax);
                 bool isLeafNode = IsLeafNode(curIndex);
 
-
-                if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH && !graphics)
-                {
-                    BulletGlobals.g_streamWriter.WriteLine("QIQBVH BoxQuery [{0}] o[{1}] l[{2}]", curIndex,aabbOverlap?1:0,isLeafNode?1:0);
-                }
 
                 if (isLeafNode && aabbOverlap)
                 {

@@ -296,7 +296,6 @@ namespace BulletXNA.BulletCollision
                 for (int j = 2; j >= 0; j--)
                 {
                     m_triangle[j] = vertexBaseRaw[indexRaw[indexIndex + j]];
-                    //Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
                     m_triangle[j] *= meshScaling;
                 }
             }
@@ -307,7 +306,6 @@ namespace BulletXNA.BulletCollision
                 for (int j = 2; j >= 0; j--)
                 {
                     m_triangle[j] = new Vector3(vertexBaseRaw[indexRaw[indexIndex + j]]);
-                    //Vector3.Multiply(ref m_triangle[j], ref meshScaling, out m_triangle[j]);
                     m_triangle[j] *= meshScaling;
                 }
             }

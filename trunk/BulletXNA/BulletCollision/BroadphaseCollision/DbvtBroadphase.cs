@@ -1035,8 +1035,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     BulletGlobals.g_streamWriter.WriteLine("{0} : {1} us ({2} ms)\r\n", name, us, ms);
                 }
             }
-        }
 #endif
+        }
     }
 
     public class ProfileBlock

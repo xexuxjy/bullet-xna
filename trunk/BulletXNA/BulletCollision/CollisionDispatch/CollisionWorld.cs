@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -103,13 +103,13 @@ namespace BulletXNA.BulletCollision
 		        MathUtil.VectorMin(ref minAabb2,ref minAabb);
                 MathUtil.VectorMax(ref maxAabb2, ref maxAabb);
             }
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugCollisionWorld)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMin", minAabb);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMax", maxAabb);
             }
-
+#endif
 
             IBroadphaseInterface bp = m_broadphasePairCache as IBroadphaseInterface;
 

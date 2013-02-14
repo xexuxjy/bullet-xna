@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -43,12 +43,13 @@ namespace BulletXNA.BulletCollision
             IndexedMatrix transformA = input.m_transformA;
             IndexedMatrix transformB = input.m_transformB;
 
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "BoxBox:GCP:transformA", transformA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "BoxBox:GCP:transformB", transformB);
             }
-
+#endif
 
 
             int skip = 0;
@@ -548,10 +549,12 @@ namespace BulletXNA.BulletCollision
                         {
                             pointInWorldFA[i] = point[j * 3 + i] + pa[i];
                         }
+#if DEBUG                        
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorldFA);
                         }
+#endif                        
 
                         output.AddContactPoint(-normal, pointInWorldFA, -dep[j]);
                     }
@@ -567,11 +570,12 @@ namespace BulletXNA.BulletCollision
                             pointInWorld[i] = point[j * 3 + i] + pa[i];
 
                         }
-
+#if DEBUG
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                         }
+#endif                        
                         output.AddContactPoint(-normal, pointInWorld, -dep[j]);
                     }
                 }
@@ -606,11 +610,12 @@ namespace BulletXNA.BulletCollision
                     }
                     IndexedVector3 pointInWorld = posInWorldFA;
 
+#if DEBUG
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                     }
-
+#endif
                     output.AddContactPoint((-normal), pointInWorld, -dep[iret[j]]);
 
                 }

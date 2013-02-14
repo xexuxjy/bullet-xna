@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -165,6 +165,7 @@ namespace BulletXNA.BulletCollision
 
                             m_cachedV = m_cachedP1 - m_cachedP2;
 
+#if DEBUG
                             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
                             {
                                 BulletGlobals.g_streamWriter.WriteLine("voronoi update closest points case 3");
@@ -176,7 +177,7 @@ namespace BulletXNA.BulletCollision
                                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "cachedp2", m_cachedP2);
                                 MathUtil.PrintVector4(BulletGlobals.g_streamWriter, "cachedp1", m_cachedBC.m_barycentricCoords);
                             }
-
+#endif
                             ReduceVertices(m_cachedBC.m_usedVertices);
                             m_cachedValidClosest = m_cachedBC.IsValid();
 
@@ -240,7 +241,7 @@ namespace BulletXNA.BulletCollision
                         }
                 };
             }
-
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 BulletGlobals.g_streamWriter.WriteLine("voronoi update closest points");
@@ -250,7 +251,7 @@ namespace BulletXNA.BulletCollision
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "cachedV", m_cachedV);
 
             }
-
+#endif
 
 
             return m_cachedValidClosest;
@@ -556,17 +557,20 @@ namespace BulletXNA.BulletCollision
 
         public bool Closest(out IndexedVector3 v)
         {
+#if DEBUG        
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Voronoi closest pre.", m_cachedV);
             }
+#endif            
             bool succes = UpdateClosestVectorAndPoints();
             v = m_cachedV;
+#if DEBUG            
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugVoronoiSimplex)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Voronoi closest post.", m_cachedV);
             }
-
+#endif
             return succes;
         }
 

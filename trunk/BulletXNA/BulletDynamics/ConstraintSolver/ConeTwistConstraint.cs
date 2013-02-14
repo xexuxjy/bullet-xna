@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -173,10 +173,12 @@ namespace BulletXNA.BulletDynamics
                     info.m_numConstraintRows++;
                     info.nub--;
                 }
+#if DEBUG                
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
                 {
                     PrintInfo1(BulletGlobals.g_streamWriter, this, info);
                 }
+#endif                
             }
         }
 
@@ -308,11 +310,12 @@ namespace BulletXNA.BulletDynamics
 				}
 				++row;
 			}
-
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
                 //PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
+#endif			
 
 		}
 

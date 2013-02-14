@@ -1,4 +1,4 @@
-﻿ /*
+ /*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -132,12 +132,12 @@ namespace BulletXNA.BulletDynamics
 
                 //clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
                 int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
-
+#if DEBUG
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
                 {
                     BulletGlobals.g_streamWriter.WriteLine(String.Format("Stepsimulation numClamped[{0}] timestep[{1:0.00000}]", clampedSimulationSteps, fixedTimeStep));
                 }
-
+#endif
                 SaveKinematicState(fixedTimeStep * clampedSimulationSteps);
 
                 ApplyGravity();
@@ -493,11 +493,12 @@ namespace BulletXNA.BulletDynamics
         {
             BulletGlobals.StartProfile("predictUnconstraintMotion");
             int length = m_nonStaticRigidBodies.Count;
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("PredictUnconstraintMotion [{0}][{1}]", length, timeStep);
             }
+#endif            
 
             //for (int i = 0; i < length;i++)
             for (int i = 0; i < m_nonStaticRigidBodies.Count;i++ )
@@ -522,12 +523,12 @@ namespace BulletXNA.BulletDynamics
 
             IndexedMatrix predictedTrans;
             int length = m_nonStaticRigidBodies.Count;
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("IntegrateTransforms [{0}]", length);
             }
-
+#endif
 
             for (int i = 0; i < length; ++i)
             {
@@ -668,12 +669,12 @@ namespace BulletXNA.BulletDynamics
                 //m_sortedConstraints.Sort(m_islandSortPredicate);
                 m_sortedConstraints.QuickSort(m_islandQuickSortPredicate);
             }
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("solveConstraints");
             }
-
+#endif
 
             //	btAssert(0);
             if (m_solverIslandCallback == null)
@@ -684,19 +685,19 @@ namespace BulletXNA.BulletDynamics
             {
                 m_solverIslandCallback.Setup(solverInfo, m_sortedConstraints, numConstraints, m_debugDrawer);
             }
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("prepareSolve");
             }
-
+#endif
             m_constraintSolver.PrepareSolve(GetCollisionWorld().GetNumCollisionObjects(), GetCollisionWorld().GetDispatcher().GetNumManifolds());
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("buildAndProcessIslands");
             }
-
+#endif
             /// solve all the constraints for this island
             m_islandManager.BuildAndProcessIslands(GetCollisionWorld().GetDispatcher(), GetCollisionWorld(), m_solverIslandCallback);
 
@@ -768,12 +769,12 @@ namespace BulletXNA.BulletDynamics
         protected virtual void InternalSingleStepSimulation(float timeStep)
         {
             BulletGlobals.StartProfile("internalSingleStepSimulation");
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDiscreteDynamicsWorld)
             {
                 BulletGlobals.g_streamWriter.WriteLine("internalSingleStepSimulation");
             }
-
+#endif
             if (null != m_internalPreTickCallback)
             {
                 m_internalPreTickCallback.InternalTickCallback(this, timeStep);

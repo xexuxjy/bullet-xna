@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Diagnostics;
 using BulletXNA.LinearMath;
@@ -193,10 +193,12 @@ namespace BulletXNA.BulletDynamics
 				info.m_numConstraintRows++; // limit 3rd angular as well
 				info.nub--;
 			}
+#if DEBUG			
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo1(BulletGlobals.g_streamWriter, this, info);
 			}
+#endif			
 		}
 
 		public void GetInfo1NonVirtual(ConstraintInfo1 info)
@@ -627,11 +629,12 @@ namespace BulletXNA.BulletDynamics
 					info.m_solverConstraints[nrow].m_rhs *= GetSoftnessLimAng();
 				} // if(limit)
 			} // if angular limit or powered
+#if DEBUG			
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
-
+#endif
 
 		}
 

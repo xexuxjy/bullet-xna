@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -56,11 +56,12 @@ namespace BulletXNA.BulletCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
             }
+#endif            
         }
 
 
@@ -86,11 +87,12 @@ namespace BulletXNA.BulletCollision
             m_ignoreMargin = false;
             m_lastUsedMethod = -1;
             m_catchDegeneracies = true;
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("GjkPairDetector-alt [{0}] [{1}]", objectA.GetName(), objectB.GetName()));
             }
-
+#endif
         }
 
 
@@ -158,14 +160,14 @@ namespace BulletXNA.BulletCollision
             m_degenerateSimplex = 0;
 
             m_lastUsedMethod = -1;
-
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transA", localTransA);
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjk::getClosestPointsNonVirtual transB", localTransB);
 
             }
-
+#endif
 
             {
                 float squaredDistance = MathUtil.BT_LARGE_FLOAT;
@@ -200,6 +202,7 @@ namespace BulletXNA.BulletCollision
                     IndexedVector3 w = new IndexedVector3(pWorld.X - qWorld.X,pWorld.Y - qWorld.Y,pWorld.Z - qWorld.Z);
                     delta = IndexedVector3.Dot(ref m_cachedSeparatingAxis, ref w);
 
+#if DEBUG
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "m_cachedSeparatingAxis", m_cachedSeparatingAxis);
@@ -214,7 +217,7 @@ namespace BulletXNA.BulletCollision
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "pWorld", pWorld);
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "qWorld", qWorld);
                     }
-
+#endif
                     // potential exit, they don't overlap
                     if ((delta > 0f) && (delta * delta > squaredDistance * input.m_maximumDistanceSquared))
                     {
@@ -271,7 +274,7 @@ namespace BulletXNA.BulletCollision
 
                     float previousSquaredDistance = squaredDistance;
                     squaredDistance = newCachedSeparatingAxis.LengthSquared();
-
+#if DEBUG
 					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                     {
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sepAxisA", seperatingAxisInA);
@@ -283,7 +286,7 @@ namespace BulletXNA.BulletCollision
                         MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "newSeperatingAxis", newCachedSeparatingAxis);
                         BulletGlobals.g_streamWriter.WriteLine(String.Format("f0[{0:0.00000000}] f1[{1:0.00000000}] checkSimplex[{2}] degen[{3}]", f0, f1, checkSimplex, m_degenerateSimplex));
                     }
-
+#endif
 
 #if false
                     ///warning: this termination condition leads to some problems in 2d test case see Bullet/Demos/Box2dDemo
@@ -397,7 +400,7 @@ namespace BulletXNA.BulletCollision
                             debugDraw
                             );
 
-
+#if DEBUG
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("calcPenDepthResult");
@@ -410,7 +413,7 @@ namespace BulletXNA.BulletCollision
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "tmpB", tmpPointOnB);
 
                         }
-
+#endif
 
                         if (isValid2)
                         {
@@ -488,12 +491,12 @@ namespace BulletXNA.BulletCollision
                 }
             }
 
-
+#if DEBUG
 	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJKDetector)
 	        {
                 BulletGlobals.g_streamWriter.WriteLine("valid [{0}] distance[{1:0000.00000000}][{2:0000.00000000}] maxDistSq[{3:0000.00000000}]", isValid, distance, distance * distance, input.m_maximumDistanceSquared);
 	        }
-
+#endif
 
             if (isValid && ((distance < 0) || (distance * distance < input.m_maximumDistanceSquared)))
             {

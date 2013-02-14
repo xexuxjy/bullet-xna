@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -49,7 +49,7 @@ namespace BulletXNA.BulletCollision
 
             shapeR.m_toshape1 = wtrs1._basis.TransposeTimes(ref wtrs0._basis);
             shapeR.m_toshape0 = wtrs0.InverseTimes(ref wtrs1);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJK)
             {
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::shape0", shapeR.m_toshape0);
@@ -58,7 +58,7 @@ namespace BulletXNA.BulletCollision
 
                 MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "gjksolver2::init::shape1", shapeR.m_toshape1);
             }
-
+#endif
 
             shapeR.EnableMargin(withmargins);
         }
@@ -502,12 +502,12 @@ namespace BulletXNA.BulletCollision
                 }
             }
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGJK)
             {
                 BulletGlobals.g_streamWriter.WriteLine(String.Format("gjk eval dist[{0}]", m_distance));
             }
-
+#endif
 
             return(m_status);
         }

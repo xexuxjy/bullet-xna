@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -81,7 +81,7 @@ namespace BulletXNA.BulletCollision
         {
 	        IndexedVector3 supVec = IndexedVector3.Zero;
 	        float newDot,maxDot = float.MinValue;
-
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexHull)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("localGetSupportingVertexWithoutMargin");
@@ -91,7 +91,7 @@ namespace BulletXNA.BulletCollision
 					MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_unscaledPoints[i]);
 				}
 			}
-
+#endif
 
 	        for (int i=0;i<m_unscaledPoints.Count;i++)
 	        {

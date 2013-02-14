@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -89,7 +89,7 @@ namespace BulletXNA.BulletCollision
 	        // free temporary hull result that we just copied
 	        hl.ReleaseResult (hr);
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugShapeHull)
 			{
 				BulletGlobals.g_streamWriter.WriteLine("buildHull");
@@ -106,7 +106,7 @@ namespace BulletXNA.BulletCollision
 				}
 
 			}
-
+#endif
 
 	        return true;
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -90,12 +90,12 @@ namespace BulletXNA.BulletCollision
 
 
             m_manifoldsPtr.Add(manifold);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GetNewManifold[{0}][{1}]", manifold.m_index1a,m_manifoldsPtr.Count);
             }
-
+#endif
 
             return manifold;
         }
@@ -115,12 +115,12 @@ namespace BulletXNA.BulletCollision
             //m_manifoldsPtr[findIndex].m_index1a = findIndex;
             //m_manifoldsPtr.RemoveAt(m_manifoldsPtr.Count - 1);
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
             {
                 BulletGlobals.g_streamWriter.WriteLine("ReleaseManifold[{0}][{1}]", manifold.m_index1a, m_manifoldsPtr.Count);
             }
-
+#endif
             // and return it to free list.
             BulletGlobals.PersistentManifoldPool.Free(manifold);
         }
@@ -369,12 +369,12 @@ namespace BulletXNA.BulletCollision
                             dispatchInfo.SetTimeOfImpact(toi);
                         }
                     }
-
+#if DEBUG
                     if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugDispatcher)
                     {
                         BulletGlobals.g_streamWriter.WriteLine("NearCallback[{0}][{1}][{2}]", contactPointResult.GetBody0Internal().GetUserPointer(), contactPointResult.GetBody1Internal().GetUserPointer(),contactPointResult.GetPersistentManifold().GetNumContacts());
                     }
-
+#endif
                     dispatcher.FreeManifoldResult(contactPointResult);
                 }
             }

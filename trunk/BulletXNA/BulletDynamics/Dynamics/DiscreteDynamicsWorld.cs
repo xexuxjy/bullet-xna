@@ -269,7 +269,7 @@ namespace BulletXNA.BulletDynamics
             for (int i = 0; i < length; ++i)
             {
                 RigidBody body = m_nonStaticRigidBodies[i];
-                if (body.IsActive() && ((body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY) != 0))
+                if (body.IsActive() && ((body.GetFlags() & RigidBodyFlags.BT_DISABLE_WORLD_GRAVITY) == 0))
                 {
                     body.SetGravity(ref gravity);
                 }

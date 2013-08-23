@@ -110,7 +110,7 @@ namespace BulletXNA.BulletCollision
                 m_dynamicAabbTree.Remove(m_children[childShapeIndex].m_treeNode);
             }
             m_children.RemoveAtQuick(childShapeIndex);
-            if (m_dynamicAabbTree != null)
+            if (m_dynamicAabbTree != null && m_children.Count > childShapeIndex)
             {
                 m_children[childShapeIndex].m_treeNode.dataAsInt = childShapeIndex;
             }

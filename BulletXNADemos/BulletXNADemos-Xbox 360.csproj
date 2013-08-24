@@ -87,6 +87,7 @@
     <Compile Include="Demos\JengaDemo.cs" />
     <Compile Include="Demos\LargeMeshDemo.cs" />
     <Compile Include="Demos\MotorDemo.cs" />
+    <Compile Include="Demos\MultiWorldDemo.cs" />
     <Compile Include="Demos\Pachinko.cs">
       <SubType>Code</SubType>
     </Compile>

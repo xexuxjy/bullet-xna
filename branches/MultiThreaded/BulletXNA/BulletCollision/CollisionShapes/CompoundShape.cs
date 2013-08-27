@@ -44,7 +44,22 @@ namespace BulletXNA.BulletCollision
             if (enableDynamicAabbTree)
             {
                 m_dynamicAabbTree = new Dbvt();
+
             }
+        }
+        private IDispatcher m_dispatcher;
+        public override IDispatcher Dispatcher
+        {
+            get { return m_dispatcher; }
+            set
+            {
+                m_dispatcher = value;
+                if (m_dynamicAabbTree != null)
+                {
+                    m_dynamicAabbTree.m_dispatcher = value;
+                }
+            }
+
         }
 
         public override void Cleanup()
@@ -220,15 +235,15 @@ namespace BulletXNA.BulletCollision
             float margin = GetMargin();
             localHalfExtents += new IndexedVector3(margin);
 
-         
-           	IndexedBasisMatrix abs_b = trans._basis.Absolute();  
 
-    	    IndexedVector3 center = trans * localCenter;
+            IndexedBasisMatrix abs_b = trans._basis.Absolute();
 
-	        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
-		                            abs_b._el1.Dot(ref localHalfExtents),
-		                            abs_b._el2.Dot(ref localHalfExtents));
- 
+            IndexedVector3 center = trans * localCenter;
+
+            IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
+                                    abs_b._el1.Dot(ref localHalfExtents),
+                                    abs_b._el2.Dot(ref localHalfExtents));
+
             aabbMin = center - extent;
             aabbMax = center + extent;
         }

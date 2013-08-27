@@ -175,7 +175,7 @@ namespace BulletXNA.BulletCollision
 
         public DbvtNode Insert(ref DbvtAabbMm box, int data)
         {
-            DbvtNode leaf = CreateNode(this, null, ref box, data);
+            DbvtNode leaf = CreateNode(this, null, ref box,data);
             InsertLeaf(this, Root, leaf);
             ++m_leaves;
             return leaf;
@@ -220,7 +220,7 @@ namespace BulletXNA.BulletCollision
 
         public void Update(DbvtNode leaf, ref DbvtAabbMm volume)
         {
-            DbvtNode root = RemoveLeaf(this, leaf);
+            DbvtNode root = RemoveLeaf(this,leaf);
             if (root != null)
             {
                 if (m_lkhd >= 0)
@@ -555,11 +555,12 @@ namespace BulletXNA.BulletCollision
         public static void RayTest(DbvtNode root,
                                 ref IndexedVector3 rayFrom,
                                 ref IndexedVector3 rayTo,
-                                ICollide policy)
+                                ICollide policy,IDispatcher dispatcher)
         {
 
-            using (DbvtStackDataBlock stackDataBlock = BulletGlobals.DbvtStackDataBlockPool.Get())
+            using (DbvtStackDataBlock stackDataBlock = dispatcher.GetPooledTypeManager().DbvtStackDataBlockPool.Get())
             {
+                stackDataBlock.m_dispatcher = dispatcher;
                 if (root != null)
                 {
                     IndexedVector3 rayDir = (rayTo - rayFrom);
@@ -634,8 +635,9 @@ namespace BulletXNA.BulletCollision
                                     ref IndexedVector3 aabbMax,
                                     ICollide policy)
         {
-            using (DbvtStackDataBlock stackDataBlock = BulletGlobals.DbvtStackDataBlockPool.Get())
+            using (DbvtStackDataBlock stackDataBlock = m_dispatcher.GetPooledTypeManager().DbvtStackDataBlockPool.Get())
             {
+                stackDataBlock.m_dispatcher = m_dispatcher;
                 //    (void) rayTo;
                 //DBVT_CHECKTYPE
                 if (root != null)
@@ -828,7 +830,7 @@ namespace BulletXNA.BulletCollision
 
         public static DbvtNode CreateNode(Dbvt pdbvt, DbvtNode parent, int data)
         {
-            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
+            DbvtNode node = pdbvt.m_dispatcher.GetPooledTypeManager().DbvtNodePool.Get();
             node.parent = parent;
             node.data = null;
             node.dataAsInt = data;
@@ -840,7 +842,7 @@ namespace BulletXNA.BulletCollision
 
         public static DbvtNode CreateNode(Dbvt pdbvt, DbvtNode parent, Object data)
         {
-            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
+            DbvtNode node = pdbvt.m_dispatcher.GetPooledTypeManager().DbvtNodePool.Get();
             node.parent = parent;
             node.data = data;
             if (node.data is int)
@@ -856,7 +858,7 @@ namespace BulletXNA.BulletCollision
 
         public static DbvtNode CreateNode2(Dbvt tree, DbvtNode aparent, ref DbvtAabbMm avolume, Object adata)
         {
-            DbvtNode node = BulletGlobals.DbvtNodePool.Get();
+            DbvtNode node = tree.m_dispatcher.GetPooledTypeManager().DbvtNodePool.Get();
             node.volume = avolume;
             node.parent = aparent;
             node.data = adata;
@@ -912,7 +914,7 @@ namespace BulletXNA.BulletCollision
             //btAlignedFree(pdbvt.m_free);
             //pdbvt.m_free = node;
             node.Reset();
-            BulletGlobals.DbvtNodePool.Free(node);
+            pdbvt.m_dispatcher.GetPooledTypeManager().DbvtNodePool.Free(node);
         }
 
         public static void RecurseDeleteNode(Dbvt pdbvt, DbvtNode node)
@@ -1056,6 +1058,7 @@ namespace BulletXNA.BulletCollision
         public static int DOUBLE_STACKSIZE = SIMPLE_STACKSIZE * 2;
 
         public DbvtNode m_root;
+        public IDispatcher m_dispatcher;
         //public DbvtNode m_free;
 
         public int m_lkhd;
@@ -1428,10 +1431,11 @@ namespace BulletXNA.BulletCollision
         public ObjectArray<DbvtNode> stack = new ObjectArray<DbvtNode>();
         public bool[] signs = new bool[3];
         public IndexedVector3[] bounds = new IndexedVector3[2];
+        public IDispatcher m_dispatcher;
 
         public void Dispose()
         {
-            BulletGlobals.DbvtStackDataBlockPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().DbvtStackDataBlockPool.Free(this);
         }
 
     }

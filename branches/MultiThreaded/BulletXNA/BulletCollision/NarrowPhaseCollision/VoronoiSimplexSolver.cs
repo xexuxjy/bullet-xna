@@ -280,7 +280,7 @@ namespace BulletXNA.BulletCollision
                 return false;
             }
 
-            SubSimplexClosestResult tempResult = BulletGlobals.SubSimplexClosestResultPool.Get();
+            SubSimplexClosestResult tempResult = m_dispatcher.GetPooledTypeManager().SubSimplexClosestResultPool.Get();
             tempResult.Reset();
 
             float bestSqDist = float.MaxValue;
@@ -390,7 +390,7 @@ namespace BulletXNA.BulletCollision
 
             }
 
-            BulletGlobals.SubSimplexClosestResultPool.Free(tempResult);
+            m_dispatcher.GetPooledTypeManager().SubSimplexClosestResultPool.Free(tempResult);
 
             //help! we ended up full !
 
@@ -671,6 +671,7 @@ namespace BulletXNA.BulletCollision
 
         public SubSimplexClosestResult m_cachedBC = new SubSimplexClosestResult();
 
+        public IDispatcher m_dispatcher;
         public bool m_needsUpdate;
         public const int VORONOI_SIMPLEX_MAX_VERTS = 5;
         public const float VORONOI_DEFAULT_EQUAL_VERTEX_THRESHOLD = 0.0001f;

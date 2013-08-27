@@ -38,21 +38,21 @@ namespace BulletXNA.BulletCollision
     public abstract class TriangleRaycastCallback : ITriangleCallback
     {
         public TriangleRaycastCallback() { } // for pool
-        public TriangleRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
+        //public TriangleRaycastCallback(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
+        //{
+        //    m_from = from;
+        //    m_to = to;
+        //    m_flags = flags;
+        //    m_hitFraction = 1f;
+        //}
+
+        public virtual void Initialize(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags,IDispatcher dispatcher)
         {
             m_from = from;
             m_to = to;
             m_flags = flags;
             m_hitFraction = 1f;
-        }
-
-        public virtual void Initialize(ref IndexedVector3 from, ref IndexedVector3 to, EFlags flags)
-        {
-            m_from = from;
-            m_to = to;
-            m_flags = flags;
-            m_hitFraction = 1f;
-
+            m_dispatcher = dispatcher;
         }
 
         public virtual bool graphics()
@@ -144,28 +144,22 @@ namespace BulletXNA.BulletCollision
         public IndexedVector3 m_to;
         public EFlags m_flags;
         public float m_hitFraction;
+        public IDispatcher m_dispatcher;
 
     }
 
     public abstract class TriangleConvexcastCallback : ITriangleCallback
     {
         public TriangleConvexcastCallback() { } // for pool
-        public TriangleConvexcastCallback(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin)
-        {
-            m_convexShape = convexShape;
-            m_convexShapeFrom = convexShapeFrom;
-            m_convexShapeTo = convexShapeTo;
-            m_triangleToWorld = triangleToWorld;
-            m_triangleCollisionMargin = triangleCollisionMargin;
-        }
 
-        public virtual void Initialize(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin)
+        public virtual void Initialize(ConvexShape convexShape, ref IndexedMatrix convexShapeFrom, ref IndexedMatrix convexShapeTo, ref IndexedMatrix triangleToWorld, float triangleCollisionMargin,IDispatcher dispatcher)
         {
             m_convexShape = convexShape;
             m_convexShapeFrom = convexShapeFrom;
             m_convexShapeTo = convexShapeTo;
             m_triangleToWorld = triangleToWorld;
             m_triangleCollisionMargin = triangleCollisionMargin;
+            m_dispatcher = dispatcher;
         }
 
         public virtual bool graphics()
@@ -179,7 +173,7 @@ namespace BulletXNA.BulletCollision
             TriangleShape triangleShape = new TriangleShape(ref triangle[0], ref triangle[1], ref triangle[2]);
             triangleShape.SetMargin(m_triangleCollisionMargin);
 
-            VoronoiSimplexSolver simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
+            VoronoiSimplexSolver simplexSolver = m_dispatcher.GetPooledTypeManager().VoronoiSimplexSolverPool.Get();
             GjkEpaPenetrationDepthSolver gjkEpaPenetrationSolver = new GjkEpaPenetrationDepthSolver();
 
             //#define  USE_SUBSIMPLEX_CONVEX_CAST 1
@@ -188,12 +182,13 @@ namespace BulletXNA.BulletCollision
 	        SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(m_convexShape, triangleShape, simplexSolver);
 #else
             //btGjkConvexCast	convexCaster(m_convexShape,&triangleShape,&simplexSolver);
-            ContinuousConvexCollision convexCaster = BulletGlobals.ContinuousConvexCollisionPool.Get();
+            ContinuousConvexCollision convexCaster = m_dispatcher.GetPooledTypeManager().ContinuousConvexCollisionPool.Get();
             convexCaster.Initialize(m_convexShape, triangleShape, simplexSolver, gjkEpaPenetrationSolver);
 #endif //#USE_SUBSIMPLEX_CONVEX_CAST
 
-            CastResult castResult = BulletGlobals.CastResultPool.Get();
+            CastResult castResult = m_dispatcher.GetPooledTypeManager().CastResultPool.Get();
             castResult.m_fraction = 1f;
+            castResult.m_dispatcher = m_dispatcher;
             if (convexCaster.CalcTimeOfImpact(ref m_convexShapeFrom, ref m_convexShapeTo, ref m_triangleToWorld, ref m_triangleToWorld, castResult))
             {
                 //add hit
@@ -215,8 +210,8 @@ namespace BulletXNA.BulletCollision
                 }
             }
 
-            BulletGlobals.ContinuousConvexCollisionPool.Free(convexCaster);
-            BulletGlobals.VoronoiSimplexSolverPool.Free(simplexSolver);
+            m_dispatcher.GetPooledTypeManager().ContinuousConvexCollisionPool.Free(convexCaster);
+            m_dispatcher.GetPooledTypeManager().VoronoiSimplexSolverPool.Free(simplexSolver);
             castResult.Cleanup();
         }
 
@@ -233,5 +228,6 @@ namespace BulletXNA.BulletCollision
         public float m_hitFraction;
         public float m_triangleCollisionMargin;
         public float m_allowedPenetration;
+        public IDispatcher m_dispatcher;
     }
 }

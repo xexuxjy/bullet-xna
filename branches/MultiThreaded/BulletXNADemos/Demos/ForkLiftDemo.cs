@@ -64,7 +64,7 @@ namespace BulletXNADemos.Demos
 	        m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 	        IndexedVector3 worldMin = new IndexedVector3(-1000,-1000,-1000);
 	        IndexedVector3 worldMax = new IndexedVector3(1000,1000,1000);
-            m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
+            m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false,m_dispatcher);
             //m_broadphase = new SimpleBroadphase(1000, null);
 
 	        m_constraintSolver = new SequentialImpulseConstraintSolver();
@@ -84,6 +84,7 @@ namespace BulletXNADemos.Demos
 	        m_collisionShapes.Add(chassisShape);
 
 	        CompoundShape compound = new CompoundShape();
+            compound.Dispatcher = m_dispatcher;
 	        m_collisionShapes.Add(compound);
 	        //localTrans effectively shifts the center of mass with respect to the chassis
 	        IndexedMatrix localTrans = IndexedMatrix.CreateTranslation(0,1,0);
@@ -128,6 +129,8 @@ namespace BulletXNADemos.Demos
                 CollisionShape forkShapeA = new BoxShape(new IndexedVector3(1.0f, 0.1f, 0.1f));
                 m_collisionShapes.Add(forkShapeA);
                 CompoundShape forkCompound = new CompoundShape();
+                forkCompound.Dispatcher = m_dispatcher;
+
                 m_collisionShapes.Add(forkCompound);
                 IndexedMatrix forkLocalTrans = IndexedMatrix.Identity;
                 forkCompound.AddChildShape(ref forkLocalTrans, forkShapeA);
@@ -166,6 +169,7 @@ namespace BulletXNADemos.Demos
 #if true
 
                 CompoundShape loadCompound = new CompoundShape(false);
+                loadCompound.Dispatcher = m_dispatcher;
                 m_collisionShapes.Add(loadCompound);
                 CollisionShape loadShapeA = new BoxShape(new IndexedVector3(2.0f, 0.5f, 0.5f));
                 m_collisionShapes.Add(loadShapeA);

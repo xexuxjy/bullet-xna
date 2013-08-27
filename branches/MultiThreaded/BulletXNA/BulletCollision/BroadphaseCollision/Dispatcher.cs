@@ -28,6 +28,8 @@ namespace BulletXNA.BulletCollision
 {
     public interface IDispatcher
     {
+        PooledTypeManager GetPooledTypeManager();
+
         CollisionAlgorithm FindAlgorithm(CollisionObject body0, CollisionObject body1);
 
         CollisionAlgorithm FindAlgorithm(CollisionObject body0, CollisionObject body1, PersistentManifold sharedManifold);

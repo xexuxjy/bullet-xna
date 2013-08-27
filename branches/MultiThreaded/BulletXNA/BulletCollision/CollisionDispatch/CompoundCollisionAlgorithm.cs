@@ -62,7 +62,7 @@ namespace BulletXNA.BulletCollision
         {
             RemoveChildAlgorithms();
             m_compoundShapeRevision = 0;
-            BulletGlobals.CompoundCollisionAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().CompoundCollisionAlgorithmPool.Free(this);
         }
 
         private void RemoveChildAlgorithms()
@@ -133,7 +133,7 @@ namespace BulletXNA.BulletCollision
 
             Dbvt tree = compoundShape.GetDynamicAabbTree();
             //use a dynamic aabb tree to cull potential child-overlaps
-            using (CompoundLeafCallback callback = BulletGlobals.CompoundLeafCallbackPool.Get())
+            using (CompoundLeafCallback callback = m_dispatcher.GetPooledTypeManager().CompoundLeafCallbackPool.Get())
             {
                 callback.Initialize(colObj, otherObj, m_dispatcher, dispatchInfo, resultOut, this, m_childCollisionAlgorithms, m_sharedManifold);
 
@@ -435,7 +435,7 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.CompoundLeafCallbackPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().CompoundLeafCallbackPool.Free(this);
         }
 
         #endregion
@@ -445,7 +445,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            CompoundCollisionAlgorithm algo = BulletGlobals.CompoundCollisionAlgorithmPool.Get();
+            CompoundCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().CompoundCollisionAlgorithmPool.Get();
             algo.Initialize(ci, body0, body1, false);
             return algo;
         }
@@ -455,7 +455,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            CompoundCollisionAlgorithm algo = BulletGlobals.CompoundCollisionAlgorithmPool.Get();
+            CompoundCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().CompoundCollisionAlgorithmPool.Get();
             algo.Initialize(ci, body0, body1, true);
             return algo;
         }

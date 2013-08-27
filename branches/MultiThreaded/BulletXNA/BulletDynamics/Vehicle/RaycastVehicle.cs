@@ -889,32 +889,37 @@ namespace BulletXNA.BulletDynamics
 	    public virtual Object CastRay(ref IndexedVector3 from,ref IndexedVector3 to, ref VehicleRaycasterResult result)
         {
             //	RayResultCallback& resultCallback;
-	        ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(ref from,ref to);
 
-	        m_dynamicsWorld.RayTest(ref from, ref to, rayCallback);
-
-            if (rayCallback.HasHit())
+            using (ClosestRayResultCallback rayCallback = m_dynamicsWorld.GetDispatcher().GetPooledTypeManager().ClosestRayResultCallbackPool.Get())
             {
+                rayCallback.Initialize(from, to, m_dynamicsWorld.GetDispatcher());
+                m_dynamicsWorld.RayTest(ref from, ref to, rayCallback);
 
-                RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
-                if (body != null && body.HasContactResponse())
+                if (rayCallback.HasHit())
                 {
-                    result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
-                    result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
-                    result.m_hitNormalInWorld.Normalize();
-                    result.m_distFraction = rayCallback.m_closestHitFraction;
-                    return body;
+
+                    RigidBody body = RigidBody.Upcast(rayCallback.m_collisionObject);
+                    if (body != null && body.HasContactResponse())
+                    {
+                        result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+                        result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+                        result.m_hitNormalInWorld.Normalize();
+                        result.m_distFraction = rayCallback.m_closestHitFraction;
+                        return body;
+                    }
                 }
-            }
-            else
-            {
-                int ibreak = 0;
-                ClosestRayResultCallback rayCallback2 = new ClosestRayResultCallback(ref from, ref to);
+                else
+                {
 
-                m_dynamicsWorld.RayTest(ref from, ref to, rayCallback2);
+                    using (ClosestRayResultCallback rayCallback2 = m_dynamicsWorld.GetDispatcher().GetPooledTypeManager().ClosestRayResultCallbackPool.Get())
+                    {
+                        rayCallback2.Initialize(from, to,m_dynamicsWorld.GetDispatcher());
+                        m_dynamicsWorld.RayTest(ref from, ref to, rayCallback2);
+                    }
 
+                }
+                rayCallback.Cleanup();
             }
-            rayCallback.Cleanup();
             return null;
         }
     }

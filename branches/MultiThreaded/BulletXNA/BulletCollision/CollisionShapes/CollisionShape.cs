@@ -198,6 +198,12 @@ namespace BulletXNA.BulletCollision
 		    return m_userPointer;
 	    }
 
+        public virtual IDispatcher Dispatcher
+        {
+            get;
+            set;
+        }
+
         protected BroadphaseNativeTypes m_shapeType;
         protected Object m_userPointer;
 

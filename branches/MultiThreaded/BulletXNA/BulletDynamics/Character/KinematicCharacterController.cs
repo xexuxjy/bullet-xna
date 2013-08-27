@@ -625,11 +625,11 @@ namespace BulletXNA.BulletDynamics
 	public class KinematicClosestNotMeRayResultCallback : ClosestRayResultCallback
 	{
 
-		public KinematicClosestNotMeRayResultCallback(CollisionObject me)
-			: base(IndexedVector3.Zero, IndexedVector3.Zero)
-		{
-			m_me = me;
-		}
+        public void Initialize(CollisionObject me)
+        {
+            base.Initialize(IndexedVector3.Zero, IndexedVector3.Zero,me.m_dispatcher);
+            m_me = me;
+        }
 
 		public override float AddSingleResult(ref LocalRayResult rayResult, bool normalInWorldSpace)
 		{

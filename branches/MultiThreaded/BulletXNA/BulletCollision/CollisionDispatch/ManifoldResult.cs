@@ -46,18 +46,14 @@ namespace BulletXNA.BulletCollision
 
         }
 
-        public ManifoldResult(CollisionObject body0, CollisionObject body1)
-        {
-            Initialise(body0, body1);
-        }
-
-        public void Initialise(CollisionObject body0, CollisionObject body1)
+        public void Initialize(CollisionObject body0, CollisionObject body1,IDispatcher dispatcher)
         {
             m_body0 = body0;
             m_body1 = body1;
             m_rootTransA = body0.GetWorldTransform();
             m_rootTransB = body1.GetWorldTransform();
             m_manifoldPtr = null;
+            m_dispatcher = dispatcher;
         }
 
         public void SetPersistentManifold(PersistentManifold manifoldPtr)
@@ -135,8 +131,8 @@ namespace BulletXNA.BulletCollision
                 MathUtil.InverseTransform(ref m_rootTransB, ref pointInWorld, out localB);
             }
 
-            ManifoldPoint newPt = BulletGlobals.ManifoldPointPool.Get();
-            newPt.Initialise(ref localA, ref localB, ref normalOnBInWorld, depth);
+            ManifoldPoint newPt = m_dispatcher.GetPooledTypeManager().ManifoldPointPool.Get();
+            newPt.Initialize(ref localA, ref localB, ref normalOnBInWorld, depth);
             
 
             newPt.SetPositionWorldOnA(ref pointA);
@@ -249,5 +245,6 @@ namespace BulletXNA.BulletCollision
         protected int m_partId1;
         protected int m_index0;
         protected int m_index1;
+        protected IDispatcher m_dispatcher;
     }
 }

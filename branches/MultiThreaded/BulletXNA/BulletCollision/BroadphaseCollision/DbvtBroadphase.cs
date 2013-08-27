@@ -133,14 +133,16 @@ namespace BulletXNA.BulletCollision
     {
         public BroadphaseRayTester() { } // for pool
 
-        public BroadphaseRayTester(BroadphaseRayCallback orgCallback)
+        public BroadphaseRayTester(BroadphaseRayCallback orgCallback,IDispatcher dispatcher)
         {
             m_rayCallback = orgCallback;
+            m_dispatcher = dispatcher;
         }
 
-        public void Initialize(BroadphaseRayCallback orgCallback)
+        public void Initialize(BroadphaseRayCallback orgCallback, IDispatcher dispatcher)
         {
             m_rayCallback = orgCallback;
+            m_dispatcher = dispatcher;
         }
 
         public void Process(DbvtNode leaf)
@@ -167,10 +169,11 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.BroadphaseRayTesterPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().BroadphaseRayTesterPool.Free(this);
         }
 
         BroadphaseRayCallback m_rayCallback;
+        IDispatcher m_dispatcher;
     }
 
 
@@ -179,12 +182,17 @@ namespace BulletXNA.BulletCollision
     public class DbvtBroadphase : IBroadphaseInterface
     {
         /* Methods		*/
-        public DbvtBroadphase() : this(null) { }
+        public DbvtBroadphase() : this(null,null) { }
 
-        public DbvtBroadphase(IOverlappingPairCache paircache)
+        public DbvtBroadphase(IOverlappingPairCache paircache,IDispatcher dispatcher)
         {
             m_sets[0] = new Dbvt();
             m_sets[1] = new Dbvt();
+
+            m_dispatcher = dispatcher;
+            m_sets[0].m_dispatcher = dispatcher;
+            m_sets[1].m_dispatcher = dispatcher;
+
 
             m_deferedcollide = false;
             m_needcleanup = true;
@@ -239,7 +247,7 @@ namespace BulletXNA.BulletCollision
 
             if (current != null)
             {
-                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                DbvtTreeCollider collider = dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                 collider.Initialize(this);
                 do
                 {
@@ -259,12 +267,12 @@ namespace BulletXNA.BulletCollision
                     current = next;
                 } while (current != null);
                 m_fixedleft = m_sets[1].m_leaves;
-                BulletGlobals.DbvtTreeColliderPool.Free(collider);
+                dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
                 m_needcleanup = true;
             }
             /* collide dynamics		*/
             {
-                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                DbvtTreeCollider collider = dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                 collider.Initialize(this);
                 if (m_deferedcollide)
                 {
@@ -284,7 +292,7 @@ namespace BulletXNA.BulletCollision
                     //ddCollideStopwatch.Stop();
                     //m_profiling.m_ddcollide += (ulong)ddCollideStopwatch.ElapsedMilliseconds;
                 }
-                BulletGlobals.DbvtTreeColliderPool.Free(collider);
+                dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
             }
             /* clean up				*/
             if (m_needcleanup)
@@ -368,12 +376,12 @@ namespace BulletXNA.BulletCollision
             ListAppend(proxy, ref m_stageRoots[m_stageCurrent]);
             if (!m_deferedcollide)
             {
-                DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                DbvtTreeCollider collider = m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                 collider.Initialize(this);
                 collider.proxy = proxy;
                 Dbvt.CollideTV(m_sets[0].m_root, ref aabb, collider);
                 Dbvt.CollideTV(m_sets[1].m_root, ref aabb, collider);
-                BulletGlobals.DbvtTreeColliderPool.Free(collider);
+                m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
             }
             return (proxy);
 
@@ -458,11 +466,11 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     m_needcleanup = true;
                     if (!m_deferedcollide)
                     {
-                        DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                        DbvtTreeCollider collider = m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                         collider.Initialize(this);
                         Dbvt.CollideTTpersistentStack(m_sets[1].m_root, proxy.leaf, collider);
                         Dbvt.CollideTTpersistentStack(m_sets[0].m_root, proxy.leaf, collider);
-                        BulletGlobals.DbvtTreeColliderPool.Free(collider);
+                        m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
                     }
                 }
             }
@@ -495,9 +503,9 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
 
         public virtual void RayTest(ref IndexedVector3 rayFrom, ref IndexedVector3 rayTo, BroadphaseRayCallback rayCallback, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax)
         {
-            using (BroadphaseRayTester callback = BulletGlobals.BroadphaseRayTesterPool.Get())
+            using (BroadphaseRayTester callback = m_dispatcher.GetPooledTypeManager().BroadphaseRayTesterPool.Get())
             {
-                callback.Initialize(rayCallback);
+                callback.Initialize(rayCallback,m_dispatcher);
 
                 m_sets[0].RayTestInternal(m_sets[0].m_root,
                     ref rayFrom,
@@ -562,11 +570,11 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 m_needcleanup = true;
                 if (!m_deferedcollide)
                 {
-                    DbvtTreeCollider collider = BulletGlobals.DbvtTreeColliderPool.Get();
+                    DbvtTreeCollider collider = m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                     collider.Initialize(this);
                     Dbvt.CollideTTpersistentStack(m_sets[1].m_root, proxy.leaf, collider);
                     Dbvt.CollideTTpersistentStack(m_sets[0].m_root, proxy.leaf, collider);
-                    BulletGlobals.DbvtTreeColliderPool.Free(collider);
+                    m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
                 }
             }
         }
@@ -905,6 +913,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         public bool m_releasepaircache;			// Release pair cache on delete
         public bool m_deferedcollide;			// Defere dynamic/static collision to collide call
         public bool m_needcleanup;				// Need to run cleanup?
+        public IDispatcher m_dispatcher;
 #if DBVT_BP_PROFILE
         ProfileBlock m_profiling;
 #endif

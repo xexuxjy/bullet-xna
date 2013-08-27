@@ -145,7 +145,7 @@ namespace BulletXNA.BulletCollision
                     m_dispatcher.ReleaseManifold(m_manifoldPtr);
                 }
             }
-            BulletGlobals.SphereSphereCollisionAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().SphereSphereCollisionAlgorithmPool.Free(this);
         }
 
         public bool m_ownManifold;
@@ -157,7 +157,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            SphereSphereCollisionAlgorithm algo = BulletGlobals.SphereSphereCollisionAlgorithmPool.Get();
+            SphereSphereCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().SphereSphereCollisionAlgorithmPool.Get();
             algo.Initialize(null, ci, body0, body1);
             return algo;
         }

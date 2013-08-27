@@ -84,7 +84,7 @@ namespace BulletXNA.BulletCollision
                                 collisionObject.GetCollisionShape(),
                                 ref wt,
                                 resultCallback,
-                                allowedCcdPenetration);
+                                allowedCcdPenetration,m_dispatcher);
                     }
                 }
             }

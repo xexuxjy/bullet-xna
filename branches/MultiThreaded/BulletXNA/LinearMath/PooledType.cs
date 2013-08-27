@@ -10,7 +10,7 @@ namespace BulletXNA.LinearMath
     public class PooledType<T> where T : new()
     {
 
-        public T Get()
+        public virtual T Get()
         {
             if (m_pool.Count == 0)
             {
@@ -19,7 +19,7 @@ namespace BulletXNA.LinearMath
             return m_pool.Pop();
         }
 
-        public void Free(T obj)
+        public virtual void Free(T obj)
         {
             Debug.Assert(!m_pool.Contains(obj));
             m_pool.Push(obj);

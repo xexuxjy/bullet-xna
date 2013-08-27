@@ -37,7 +37,7 @@ namespace BulletXNA.BulletCollision
         }
 
 
-        public void Initialise(ref IndexedVector3 pointA, ref IndexedVector3 pointB, ref IndexedVector3 normal, float distance)
+        public void Initialize(ref IndexedVector3 pointA, ref IndexedVector3 pointB, ref IndexedVector3 normal, float distance)
         {
             /* Don't initialize default values twice in C# */
             m_lateralFrictionDir1 = IndexedVector3.Zero;

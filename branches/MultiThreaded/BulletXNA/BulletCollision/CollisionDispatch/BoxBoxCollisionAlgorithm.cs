@@ -79,7 +79,7 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = false;
             }
 
-            BulletGlobals.BoxBoxCollisionAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().BoxBoxCollisionAlgorithmPool.Free(this);
 
             base.Cleanup();
         }
@@ -146,7 +146,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            BoxBoxCollisionAlgorithm algo = BulletGlobals.BoxBoxCollisionAlgorithmPool.Get();
+            BoxBoxCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().BoxBoxCollisionAlgorithmPool.Get();
             algo.Initialize(null, ci, body0, body1);
             return algo;
         }

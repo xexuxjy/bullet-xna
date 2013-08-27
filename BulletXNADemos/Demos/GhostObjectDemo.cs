@@ -49,7 +49,7 @@ namespace BulletXNADemos.Demos
             ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
             m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
 
-            m_broadphase = new DbvtBroadphase();
+            m_broadphase = new DbvtBroadphase(null,m_dispatcher);
 
             ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
             m_constraintSolver = new SequentialImpulseConstraintSolver();

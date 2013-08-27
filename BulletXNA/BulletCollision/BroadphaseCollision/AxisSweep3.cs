@@ -443,7 +443,7 @@ namespace BulletXNA.BulletCollision
 
 
         //public AxisSweep3Internal(ref IndexedVector3 worldAabbMin,ref IndexedVector3 worldAabbMax, int handleMask, int handleSentinel, int maxHandles = 16384, OverlappingPairCache* pairCache=0,bool disableRaycastAccelerator = false);
-        public AxisSweep3Internal(ref IndexedVector3 worldAabbMin, ref IndexedVector3 worldAabbMax, int handleMask, ushort handleSentinel, ushort userMaxHandles, IOverlappingPairCache pairCache, bool disableRaycastAccelerator)
+        public AxisSweep3Internal(ref IndexedVector3 worldAabbMin, ref IndexedVector3 worldAabbMax, int handleMask, ushort handleSentinel, ushort userMaxHandles, IOverlappingPairCache pairCache, bool disableRaycastAccelerator,IDispatcher dispatcher)
         {
             m_bpHandleMask = (handleMask);
             m_handleSentinel = (handleSentinel);
@@ -463,7 +463,7 @@ namespace BulletXNA.BulletCollision
             if (!disableRaycastAccelerator)
             {
                 m_nullPairCache = new NullPairCache();
-                m_raycastAccelerator = new DbvtBroadphase(m_nullPairCache);//m_pairCache);
+                m_raycastAccelerator = new DbvtBroadphase(m_nullPairCache,dispatcher);//m_pairCache);
                 m_raycastAccelerator.m_deferedcollide = true;//don't add/remove pairs
             }
 

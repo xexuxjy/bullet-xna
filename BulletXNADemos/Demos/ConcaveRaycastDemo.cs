@@ -154,7 +154,7 @@ namespace BulletXNADemos.Demos
 			IndexedVector3 worldMin = aabbMin;
 			IndexedVector3 worldMax = aabbMax;
 
-			m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
+            m_broadphase = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false, m_dispatcher);
 			m_constraintSolver = new SequentialImpulseConstraintSolver();
 			m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
 
@@ -172,6 +172,7 @@ namespace BulletXNADemos.Demos
 
 			//m_raycastBar = new btRaycastBar (m_debugDraw,4000.0f, 0.0f,-1000,30);
 			m_raycastBar = new btRaycastBar(m_debugDraw, 300.0f, 0.0f, -1000, 200,worldMin.X,worldMax.X);
+            m_raycastBar.m_dispatcher = m_dispatcher;
 			m_raycastBar.min_x = -100;
 			m_raycastBar.max_x = -100;
 
@@ -261,6 +262,8 @@ namespace BulletXNADemos.Demos
 public class btRaycastBar
 {
     public IDebugDraw m_debugDraw;
+    public IDispatcher m_dispatcher;
+
     const int NUMRAYS_IN_BAR  = 30;
 	public IndexedVector3[] source = new IndexedVector3[NUMRAYS_IN_BAR];
 	public IndexedVector3[] dest = new IndexedVector3[NUMRAYS_IN_BAR];
@@ -411,9 +414,9 @@ public class btRaycastBar
 #else
 		for (int i = 0; i < NUMRAYS_IN_BAR; i++)
 		{
-            using (ClosestRayResultCallback cb = BulletGlobals.ClosestRayResultCallbackPool.Get())
+            using (ClosestRayResultCallback cb = m_dispatcher.GetPooledTypeManager().ClosestRayResultCallbackPool.Get())
             {
-                cb.Initialize(source[i], dest[i]);
+                cb.Initialize(source[i], dest[i],m_dispatcher);
 
                 cw.RayTest(ref source[i], ref dest[i], cb);
                 if (cb.HasHit())

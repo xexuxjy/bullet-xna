@@ -321,7 +321,7 @@ namespace BulletXNA
 		IDebugDraw m_debugDrawer;
 		IndexedVector3 m_color;
 		IndexedMatrix m_worldTrans;
-
+        IDispatcher m_dispatcher;
 		public virtual bool graphics()
 		{
 			return true;
@@ -329,18 +329,13 @@ namespace BulletXNA
 
         public DebugDrawcallback() { } // for pool
 
-		public DebugDrawcallback(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color)
-		{
-			m_debugDrawer = debugDrawer;
-			m_color = color;
-			m_worldTrans = worldTrans;
-		}
 
-        public void Initialise(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color)
+        public void Initialize(IDebugDraw debugDrawer, ref IndexedMatrix worldTrans, ref IndexedVector3 color,IDispatcher dispatcher)
         {
             m_debugDrawer = debugDrawer;
             m_color = color;
             m_worldTrans = worldTrans;
+            m_dispatcher = dispatcher;
         }
 
 
@@ -387,7 +382,7 @@ namespace BulletXNA
 
         public void Dispose()
         {
-            BulletGlobals.DebugDrawcallbackPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().DebugDrawcallbackPool.Free(this);
         }
 
 	}

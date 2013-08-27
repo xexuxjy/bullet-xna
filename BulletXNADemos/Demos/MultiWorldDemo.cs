@@ -97,7 +97,7 @@ namespace BulletXNADemos.Demos
         {
             IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
             IndexedVector3 worldMax = -worldMin;
-            IBroadphaseInterface bp = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false);
+            IBroadphaseInterface bp = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false, m_dispatcher);
 
             //m_broadphase = new DbvtBroadphase();
             IOverlappingPairCache pairCache = null;

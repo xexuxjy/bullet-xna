@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision
             m_fraction = float.MaxValue;
             m_debugDrawer = null;
             m_allowedPenetration = 0f;
-            BulletGlobals.CastResultPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().CastResultPool.Free(this);
         }
 
         public IndexedMatrix m_hitTransformA;
@@ -62,6 +62,6 @@ namespace BulletXNA.BulletCollision
         public float m_fraction; //input and output
         public IDebugDraw m_debugDrawer;
         public float m_allowedPenetration;
-
+        public IDispatcher m_dispatcher;
     }
 }

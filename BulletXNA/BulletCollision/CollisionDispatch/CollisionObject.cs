@@ -533,6 +533,7 @@ namespace BulletXNA.BulletCollision
             m_worldTransform._origin += v;
         }
 
+        public IDispatcher m_dispatcher;
 
         public IndexedMatrix m_worldTransform;
         protected IndexedMatrix m_interpolationWorldTransform = IndexedMatrix.Identity;

@@ -73,5 +73,6 @@ namespace BulletXNA.BulletCollision
         public float m_lambda_max;
         public virtual void Cleanup() { }
         public abstract bool Process(BroadphaseProxy proxy);
+        public IDispatcher m_dispatcher;
     }
 }

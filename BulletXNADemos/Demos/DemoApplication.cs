@@ -1109,9 +1109,9 @@ namespace BulletXNADemos.Demos
                 //apply an impulse
                 if (m_dynamicsWorld != null)
                 {
-                    using (ClosestRayResultCallback rayCallback = BulletGlobals.ClosestRayResultCallbackPool.Get())
+                    using (ClosestRayResultCallback rayCallback = m_dispatcher.GetPooledTypeManager().ClosestRayResultCallbackPool.Get())
                     {
-                        rayCallback.Initialize(new IndexedVector3(m_cameraPosition), rayTo);
+                        rayCallback.Initialize(new IndexedVector3(m_cameraPosition), rayTo,m_dynamicsWorld.GetDispatcher());
                         IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
                         IndexedVector3 ivTo = new IndexedVector3(rayTo);
                         m_dynamicsWorld.RayTest(ref ivPos, ref ivTo, rayCallback);
@@ -1150,7 +1150,8 @@ namespace BulletXNADemos.Demos
 					}
 
 
-                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback(ref rayFrom, ref rayTo);
+                    ClosestRayResultCallback rayCallback = new ClosestRayResultCallback();
+                    rayCallback.Initialize(ref rayFrom, ref rayTo,m_dispatcher);
                     IndexedVector3 ivPos = new IndexedVector3(m_cameraPosition);
                     IndexedVector3 ivTo = new IndexedVector3(rayTo);
                     m_dynamicsWorld.RayTest(ref ivPos, ref ivTo, rayCallback);

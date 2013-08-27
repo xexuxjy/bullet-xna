@@ -31,7 +31,7 @@ namespace BulletXNA.BulletCollision
 {
     public class GjkEpaSolver2
     {
-        static EPA epa = new EPA();
+        //EPA epa = new EPA();
 
         public static void Initialize(ConvexShape shape0,ref IndexedMatrix wtrs0,
             ConvexShape shape1,ref IndexedMatrix wtrs1,
@@ -65,13 +65,13 @@ namespace BulletXNA.BulletCollision
 
         
         
-        public static bool	Distance(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results)
+        public static bool	Distance(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results,IDispatcher dispatcher)
         {
-            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
-            using (GJK gjk = BulletGlobals.GJKPool.Get())
+            using (GjkEpaSolver2MinkowskiDiff shape = dispatcher.GetPooledTypeManager().GjkEpaSolver2MinkowskiDiffPool.Get())
+            using (GJK gjk = dispatcher.GetPooledTypeManager().GJKPool.Get())
             {
                 Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, false);
-                gjk.Initialise();
+                gjk.Initialize(dispatcher);
                 GJKStatus gjk_status = gjk.Evaluate(shape, ref guess);
                 if (gjk_status == GJKStatus.Valid)
                 {
@@ -100,18 +100,20 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public static bool Penetration(ConvexShape shape0, ref IndexedMatrix wtrs0, ConvexShape shape1, ref IndexedMatrix wtrs1, ref IndexedVector3 guess, ref GjkEpaSolver2Results results)
+        public static bool Penetration(ConvexShape shape0, ref IndexedMatrix wtrs0, ConvexShape shape1, ref IndexedMatrix wtrs1, ref IndexedVector3 guess, ref GjkEpaSolver2Results results,IDispatcher dispatcher)
         {
-            return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, true);
+            return Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, true,dispatcher);
         }
 
-        public static bool Penetration(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results,bool usemargins)
+        public static bool Penetration(ConvexShape shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results,bool usemargins,IDispatcher dispatcher)
         {
-            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
-            using(GJK gjk = BulletGlobals.GJKPool.Get())
+            using (GjkEpaSolver2MinkowskiDiff shape = dispatcher.GetPooledTypeManager().GjkEpaSolver2MinkowskiDiffPool.Get())
+            using (GJK gjk = dispatcher.GetPooledTypeManager().GJKPool.Get())
+            using (EPA epa = dispatcher.GetPooledTypeManager().EPAPool.Get())
             {
+                shape.Initialize(dispatcher);
                 Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, usemargins);
-                gjk.Initialise();
+                gjk.Initialize(dispatcher);
                 IndexedVector3 minusGuess = -guess;
                 GJKStatus gjk_status = gjk.Evaluate(shape, ref minusGuess);
                 switch (gjk_status)
@@ -147,18 +149,18 @@ namespace BulletXNA.BulletCollision
         }
 
         //
-        public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, ref GjkEpaSolver2Results results)
+        public float SignedDistance(ref IndexedVector3 position, float margin, ConvexShape shape0, ref IndexedMatrix wtrs0, ref GjkEpaSolver2Results results,IDispatcher dispatcher)
         {
-            using (GjkEpaSolver2MinkowskiDiff shape = BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Get())
-            using (GJK gjk = BulletGlobals.GJKPool.Get())
+            using (GjkEpaSolver2MinkowskiDiff shape = dispatcher.GetPooledTypeManager().GjkEpaSolver2MinkowskiDiffPool.Get())
+            using (GJK gjk = dispatcher.GetPooledTypeManager().GJKPool.Get())
             {
-                SphereShape shape1 = BulletGlobals.SphereShapePool.Get();
+                SphereShape shape1 = dispatcher.GetPooledTypeManager().SphereShapePool.Get();
                 shape1.Initialize(margin);
                 IndexedMatrix wtrs1 = IndexedMatrix.CreateFromQuaternion(IndexedQuaternion.Identity);
                 wtrs0._origin = position;
 
                 Initialize(shape0, ref wtrs0, shape1, ref wtrs1, ref results, shape, false);
-                gjk.Initialise();
+                gjk.Initialize(dispatcher);
                 IndexedVector3 guess = new IndexedVector3(1);
                 GJKStatus gjk_status = gjk.Evaluate(shape, ref guess);
                 if (gjk_status == GJKStatus.Valid)
@@ -185,7 +187,7 @@ namespace BulletXNA.BulletCollision
                 {
                     if (gjk_status == GJKStatus.Inside)
                     {
-                        if (Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref gjk.m_ray, ref results))
+                        if (Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref gjk.m_ray, ref results,dispatcher))
                         {
                             IndexedVector3 delta = results.witnesses0 - results.witnesses1;
                             float length = delta.Length();
@@ -195,18 +197,19 @@ namespace BulletXNA.BulletCollision
                         }
                     }
                 }
-                BulletGlobals.SphereShapePool.Free(shape1);
+                dispatcher.GetPooledTypeManager().SphereShapePool.Free(shape1);
             }
             return(MathUtil.SIMD_INFINITY);
         }
 
         //
-        public bool SignedDistance(ConvexShape	shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results)
+        public bool SignedDistance(ConvexShape	shape0,ref IndexedMatrix wtrs0,ConvexShape shape1,ref IndexedMatrix wtrs1,ref IndexedVector3 guess,ref GjkEpaSolver2Results results,IDispatcher dispatcher)
         {
-            if(!Distance(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results))
-                return(Penetration(shape0,ref wtrs0,shape1,ref wtrs1,ref guess,ref results,false));
-            else
-                return(true);
+            if (!Distance(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, dispatcher))
+            {
+                return (Penetration(shape0, ref wtrs0, shape1, ref wtrs1, ref guess, ref results, false,dispatcher));
+            }
+            return (true);
         }
 
 
@@ -253,6 +256,12 @@ namespace BulletXNA.BulletCollision
     {
         public GjkEpaSolver2MinkowskiDiff()
         {
+            
+        }
+
+        public void Initialize(IDispatcher dispatcher)
+        {
+            m_dispatcher = dispatcher;
         }
 
         public void EnableMargin(bool enable)
@@ -294,9 +303,10 @@ namespace BulletXNA.BulletCollision
 
         public virtual void Dispose()
         {
-            BulletGlobals.GjkEpaSolver2MinkowskiDiffPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().GjkEpaSolver2MinkowskiDiffPool.Free(this);
         }
 
+        public IDispatcher m_dispatcher;
         public bool m_enableMargin;
         public ConvexShape[] m_shapes = new ConvexShape[2];
         public IndexedBasisMatrix m_toshape1 = IndexedBasisMatrix.Identity;
@@ -335,11 +345,12 @@ namespace BulletXNA.BulletCollision
     {
         public GJK()
         {
-            //Initialise();
+            
         }
         
-        public void Initialise()
+        public void Initialize(IDispatcher dispatcher)
         {
+            m_dispatcher = dispatcher;
             m_ray = IndexedVector3.Zero;
             m_nfree		=	0;
             m_status	=	GJKStatus.Failed;
@@ -788,7 +799,7 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.GJKPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().GJKPool.Free(this);
         }
 
 
@@ -802,11 +813,12 @@ namespace BulletXNA.BulletCollision
         public uint m_current;
         public sSimplex m_simplex = new sSimplex();
         public GJKStatus m_status;
+        public IDispatcher m_dispatcher;
     }
 
 
         // EPA
-        public class EPA
+        public class EPA : IDisposable
         {
             /* Fields		*/ 
             public eStatus	m_status;
@@ -818,6 +830,7 @@ namespace BulletXNA.BulletCollision
             public uint m_nextsv;
             public IList<sFace> m_hull = new List<sFace>();
             public IList<sFace> m_stock = new List<sFace>();
+            public IDispatcher m_dispatcher;
             /* Methods		*/ 
             public EPA()
             {
@@ -1126,6 +1139,11 @@ namespace BulletXNA.BulletCollision
                 }
             }
             return(false);
+        }
+
+        public void Dispose()
+        {
+            m_dispatcher.GetPooledTypeManager().EPAPool.Free(this);
         }
     }
     

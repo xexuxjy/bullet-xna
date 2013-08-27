@@ -39,7 +39,7 @@ namespace BulletXNADemos.Demos
             int maxProxies = 1024;
             IndexedVector3 worldAabbMin = new IndexedVector3(-10000, -10000, -10000);
             IndexedVector3 worldAabbMax = new IndexedVector3(10000, 10000, 10000);
-            m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, false);  
+            m_broadphase = new AxisSweep3Internal(ref worldAabbMin, ref worldAabbMax, 0xfffe, 0xffff, 16384, null, false, m_dispatcher);  
             //m_broadphase = new SimpleBroadphase(16384,null);
             m_constraintSolver = new SequentialImpulseConstraintSolver();
 

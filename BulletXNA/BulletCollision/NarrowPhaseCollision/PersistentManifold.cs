@@ -126,13 +126,14 @@ namespace BulletXNA.BulletCollision
             m_cachedPoints = 0;
         }
 
-        public void Initialise(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold)
+        public void Initialize(Object body0, Object body1, int foo, float contactBreakingThreshold, float contactProcessingThreshold,IDispatcher dispatcher)
         {
             m_body0 = body0;
             m_body1 = body1;
             m_contactBreakingThreshold = contactBreakingThreshold;
             m_contactProcessingThreshold = contactProcessingThreshold;
             m_cachedPoints = 0;
+            m_dispatcher = dispatcher;
         }
 
         public Object GetBody0()
@@ -182,7 +183,7 @@ namespace BulletXNA.BulletCollision
 
 		        DebugPersistency();
             }
-            BulletGlobals.ManifoldPointPool.Free(pt);
+            m_dispatcher.GetPooledTypeManager().ManifoldPointPool.Free(pt);
             pt = null;
         }
 
@@ -327,7 +328,7 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(lifeTime >= 0);
             Object cache = m_pointCache[insertIndex].GetUserPersistentData();
 
-            BulletGlobals.ManifoldPointPool.Free(m_pointCache[insertIndex]);
+            m_dispatcher.GetPooledTypeManager().ManifoldPointPool.Free(m_pointCache[insertIndex]);
 
             m_pointCache[insertIndex] = newPoint;
 
@@ -449,6 +450,8 @@ namespace BulletXNA.BulletCollision
 
         public static IContactDestroyedCallback gContactDestroyedCallback = null;
         public static IContactProcessedCallback gContactProcessedCallback = null;
+
+        public IDispatcher m_dispatcher;
 
         #region IComparable Members
 

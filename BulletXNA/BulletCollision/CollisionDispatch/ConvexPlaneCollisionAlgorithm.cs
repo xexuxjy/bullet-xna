@@ -84,7 +84,7 @@ namespace BulletXNA.BulletCollision
                 }
                 m_ownManifold = false;
             }
-            BulletGlobals.ConvexPlaneAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().ConvexPlaneAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -239,7 +239,7 @@ namespace BulletXNA.BulletCollision
 
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            ConvexPlaneCollisionAlgorithm algo = BulletGlobals.ConvexPlaneAlgorithmPool.Get();
+            ConvexPlaneCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().ConvexPlaneAlgorithmPool.Get();
             if (!m_swapped)
             {
                 algo.Initialize(null, ci, body0, body1, false, m_numPerturbationIterations, m_minimumPointsPerturbationThreshold);

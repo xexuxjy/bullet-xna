@@ -114,9 +114,9 @@ namespace BulletXNA.BulletCollision
         {
             if (m_bvh != null)
             {
-                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                using (MyNodeOverlapCallback myNodeCallback = Dispatcher.GetPooledTypeManager().MyNodeOverlapCallbackPool.Get())
                 {
-                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    myNodeCallback.Initialize(callback, m_meshInterface,Dispatcher);
                     m_bvh.ReportRayOverlappingNodex(myNodeCallback, ref raySource, ref rayTarget);
                 }
             }
@@ -127,9 +127,9 @@ namespace BulletXNA.BulletCollision
         {
             if (m_bvh != null)
             {
-                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                using (MyNodeOverlapCallback myNodeCallback = Dispatcher.GetPooledTypeManager().MyNodeOverlapCallbackPool.Get())
                 {
-                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    myNodeCallback.Initialize(callback, m_meshInterface,Dispatcher);
                     m_bvh.ReportBoxCastOverlappingNodex(myNodeCallback, ref boxSource, ref boxTarget, ref boxMin, ref boxMax);
                 }
             }
@@ -143,9 +143,9 @@ namespace BulletXNA.BulletCollision
 #else
             if (m_bvh != null)
             {
-                using (MyNodeOverlapCallback myNodeCallback = BulletGlobals.MyNodeOverlapCallbackPool.Get())
+                using (MyNodeOverlapCallback myNodeCallback = Dispatcher.GetPooledTypeManager().MyNodeOverlapCallbackPool.Get())
                 {
-                    myNodeCallback.Initialize(callback, m_meshInterface);
+                    myNodeCallback.Initialize(callback, m_meshInterface,Dispatcher);
                     m_bvh.ReportAabbOverlappingNodex(myNodeCallback, ref aabbMin, ref aabbMax);
                 }
             }
@@ -240,20 +240,16 @@ namespace BulletXNA.BulletCollision
     {
         public StridingMeshInterface m_meshInterface;
         public ITriangleCallback m_callback;
-        IndexedVector3[] m_triangle = new IndexedVector3[3];
+        public IndexedVector3[] m_triangle = new IndexedVector3[3];
+        public IDispatcher Dispatcher;
 
         public MyNodeOverlapCallback() { } // for pool
-        public MyNodeOverlapCallback(ITriangleCallback callback, StridingMeshInterface meshInterface)
+
+        public void Initialize(ITriangleCallback callback, StridingMeshInterface meshInterface,IDispatcher dispatcher)
         {
             m_meshInterface = meshInterface;
             m_callback = callback;
-
-        }
-
-        public void Initialize(ITriangleCallback callback, StridingMeshInterface meshInterface)
-        {
-            m_meshInterface = meshInterface;
-            m_callback = callback;
+            Dispatcher = dispatcher;
         }
 
         public virtual void ProcessNode(int nodeSubPart, int nodeTriangleIndex)
@@ -348,7 +344,7 @@ namespace BulletXNA.BulletCollision
         public void Dispose()
         {
             Cleanup();
-            BulletGlobals.MyNodeOverlapCallbackPool.Free(this);
+            Dispatcher.GetPooledTypeManager().MyNodeOverlapCallbackPool.Free(this);
         }
 
 

@@ -29,18 +29,12 @@ namespace BulletXNA.BulletCollision
     public class GjkConvexCast : IConvexCast,IDisposable
     {
         public GjkConvexCast() { } // for pool 
-        public GjkConvexCast(ConvexShape convexA, ConvexShape convexB, ISimplexSolverInterface simplexSolver)
+        public void Initialize(ConvexShape convexA, ConvexShape convexB, ISimplexSolverInterface simplexSolver,IDispatcher dispatcher)
         {
             m_convexA = convexA;
             m_convexB = convexB;
             m_simplexSolver = simplexSolver;
-        }
-
-        public void Initialize(ConvexShape convexA, ConvexShape convexB, ISimplexSolverInterface simplexSolver)
-        {
-            m_convexA = convexA;
-            m_convexB = convexB;
-            m_simplexSolver = simplexSolver;
+            m_dispatcher = dispatcher;
         }
 
         public virtual bool CalcTimeOfImpact(IndexedMatrix fromA, IndexedMatrix toA, IndexedMatrix fromB, IndexedMatrix toB, CastResult result)
@@ -83,7 +77,7 @@ namespace BulletXNA.BulletCollision
             PointCollector pointCollector = new PointCollector();
 
 
-            using (GjkPairDetector gjk = BulletGlobals.GjkPairDetectorPool.Get())
+            using (GjkPairDetector gjk = m_dispatcher.GetPooledTypeManager().GjkPairDetectorPool.Get())
             {
                 gjk.Initialize(m_convexA, m_convexB, m_simplexSolver, null);//m_penetrationDepthSolver);		
                 ClosestPointInput input = ClosestPointInput.Default();
@@ -180,9 +174,10 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.GjkConvexCastPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().GjkConvexCastPool.Free(this);
         }
 
+        private IDispatcher m_dispatcher;
         private ISimplexSolverInterface m_simplexSolver;
         private ConvexShape m_convexA;
         private ConvexShape m_convexB;

@@ -533,7 +533,7 @@ namespace BulletXNA.BulletCollision
 
         public override void Cleanup()
         {
-            BulletGlobals.GImpactCollisionAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().GImpactCollisionAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -706,8 +706,8 @@ namespace BulletXNA.BulletCollision
             shape0.LockChildShapes();
             shape1.LockChildShapes();
 
-            using(GIM_ShapeRetriever retriever0 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
-            using (GIM_ShapeRetriever retriever1 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
+            using (GIM_ShapeRetriever retriever0 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
+            using (GIM_ShapeRetriever retriever1 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
             {
                 retriever0.Initialize(shape0);
                 retriever1.Initialize(shape1);
@@ -837,7 +837,7 @@ namespace BulletXNA.BulletCollision
 
             shape0.LockChildShapes();
 
-            using (GIM_ShapeRetriever retriever0 = BulletGlobals.GIM_ShapeRetrieverPool.Get())
+            using (GIM_ShapeRetriever retriever0 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
             {
                 retriever0.Initialize(shape0);
                 bool child_has_transform0 = shape0.ChildrenHasTransform();
@@ -1033,6 +1033,7 @@ namespace BulletXNA.BulletCollision
         public GImpactShapeInterface m_gim_shape;
         public TriangleShapeEx m_trishape = new TriangleShapeEx();
         public TetrahedronShapeEx m_tetrashape = new TetrahedronShapeEx();
+        public IDispatcher m_dispatcher; 
 
         public class ChildShapeRetriever
         {
@@ -1124,7 +1125,7 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.GIM_ShapeRetrieverPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Free(this);
         }
 
     }
@@ -1133,7 +1134,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            GImpactCollisionAlgorithm algo = BulletGlobals.GImpactCollisionAlgorithmPool.Get();
+            GImpactCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().GImpactCollisionAlgorithmPool.Get();
             algo.Initialize(ci, body0, body1);
             return algo;
         }

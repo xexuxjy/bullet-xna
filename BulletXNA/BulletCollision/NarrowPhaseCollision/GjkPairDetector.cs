@@ -554,7 +554,7 @@ namespace BulletXNA.BulletCollision
         public virtual void Dispose()
         {
 
-            BulletGlobals.GjkPairDetectorPool.Free(this);
+            m_minkowskiA.Dispatcher.GetPooledTypeManager().GjkPairDetectorPool.Free(this);
         }
 
 

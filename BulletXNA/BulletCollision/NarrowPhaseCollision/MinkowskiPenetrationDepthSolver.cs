@@ -235,7 +235,7 @@ namespace BulletXNA.BulletCollision
 
 
 
-            GjkPairDetector gjkdet = BulletGlobals.GjkPairDetectorPool.Get();
+            GjkPairDetector gjkdet = convexA.Dispatcher.GetPooledTypeManager().GjkPairDetectorPool.Get();
             gjkdet.Initialize(convexA, convexB, simplexSolver, null);
 
             float offsetDist = minProj;
@@ -281,10 +281,11 @@ namespace BulletXNA.BulletCollision
 
             }
 
-            BulletGlobals.GjkPairDetectorPool.Free(gjkdet);
+            convexA.Dispatcher.GetPooledTypeManager().GjkPairDetectorPool.Free(gjkdet);
             return res.m_hasResult;
         }
 
+            
         private const int NUM_UNITSPHERE_POINTS = 42;
         private readonly static IndexedVector3[] sPenetrationDirections = {
             new IndexedVector3(0.000000f , -0.000000f,-1.000000f),

@@ -68,39 +68,87 @@ namespace BulletXNA.BulletCollision
     CollisionAlgorithmCreateFunc m_planeConvexCF;
     CollisionAlgorithmCreateFunc m_convexPlaneCF;
     CollisionAlgorithmCreateFunc m_convexAlgo2DCF;
-    public DefaultCollisionConfiguration() : this(new DefaultCollisionConstructionInfo())
+    public DefaultCollisionConfiguration()
+        : this(new DefaultCollisionConstructionInfo())
     {
     }
+
+    private IDispatcher m_dispatcher;
+    public IDispatcher Dispatcher
+    {
+        get
+        {
+            return m_dispatcher;
+        }
+        set
+        {
+            m_dispatcher = value;
+            if (m_simplexSolver == null)
+            {
+                m_simplexSolver = Dispatcher.GetPooledTypeManager().VoronoiSimplexSolverPool.Get();
+                m_simplexSolver.m_dispatcher = Dispatcher;
+                m_pdSolver = new MinkowskiPenetrationDepthSolver();
+
+                m_useEpaPenetrationAlgorithm = true;
+
+                //default CreationFunctions, filling the m_doubleDispatch table
+                m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver, m_pdSolver);
+                m_convexConcaveCreateFunc = new ConvexConcaveCreateFunc();
+                m_swappedConvexConcaveCreateFunc = new SwappedConvexConcaveCreateFunc();
+                m_compoundCreateFunc = new CompoundCreateFunc();
+                m_swappedCompoundCreateFunc = new SwappedCompoundCreateFunc();
+                m_emptyCreateFunc = new EmptyCreateFunc();
+
+                m_sphereSphereCF = new SphereSphereCreateFunc();
+                m_sphereBoxCF = new SphereBoxCreateFunc();
+                m_boxSphereCF = new SwappedSphereBoxCreateFunc();
+
+                m_convexAlgo2DCF = new Convex2dConvex2dCreateFunc(m_simplexSolver, m_pdSolver);
+                m_sphereTriangleCF = new SphereTriangleCreateFunc();
+                m_triangleSphereCF = new SphereTriangleCreateFunc();
+                m_triangleSphereCF.m_swapped = true;
+
+                m_boxBoxCF = new BoxBoxCreateFunc();
+
+                //convex versus plane
+                m_convexPlaneCF = new ConvexPlaneCreateFunc();
+                m_planeConvexCF = new ConvexPlaneCreateFunc();
+                m_planeConvexCF.m_swapped = true;
+
+            }
+
+        }
+    }
+
 	public DefaultCollisionConfiguration(DefaultCollisionConstructionInfo constructionInfo)
     {
-        m_simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
         //m_pdSolver = new GjkEpaPenetrationDepthSolver();
-        m_pdSolver = new MinkowskiPenetrationDepthSolver();
-        m_useEpaPenetrationAlgorithm = true;
+        //m_pdSolver = new MinkowskiPenetrationDepthSolver();
+        //m_useEpaPenetrationAlgorithm = true;
 
-	    //default CreationFunctions, filling the m_doubleDispatch table
-	    m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver,m_pdSolver);
-	    m_convexConcaveCreateFunc = new ConvexConcaveCreateFunc();
-	    m_swappedConvexConcaveCreateFunc = new SwappedConvexConcaveCreateFunc();
-	    m_compoundCreateFunc = new CompoundCreateFunc();
-	    m_swappedCompoundCreateFunc = new SwappedCompoundCreateFunc();
-	    m_emptyCreateFunc = new EmptyCreateFunc();
+        ////default CreationFunctions, filling the m_doubleDispatch table
+        //m_convexConvexCreateFunc = new ConvexConvexCreateFunc(m_simplexSolver,m_pdSolver);
+        //m_convexConcaveCreateFunc = new ConvexConcaveCreateFunc();
+        //m_swappedConvexConcaveCreateFunc = new SwappedConvexConcaveCreateFunc();
+        //m_compoundCreateFunc = new CompoundCreateFunc();
+        //m_swappedCompoundCreateFunc = new SwappedCompoundCreateFunc();
+        //m_emptyCreateFunc = new EmptyCreateFunc();
 	
-    	m_sphereSphereCF = new SphereSphereCreateFunc();
-        m_sphereBoxCF = new SphereBoxCreateFunc();
-        m_boxSphereCF = new SwappedSphereBoxCreateFunc();
+        //m_sphereSphereCF = new SphereSphereCreateFunc();
+        //m_sphereBoxCF = new SphereBoxCreateFunc();
+        //m_boxSphereCF = new SwappedSphereBoxCreateFunc();
 
-        m_convexAlgo2DCF = new Convex2dConvex2dCreateFunc(m_simplexSolver, m_pdSolver);
-	    m_sphereTriangleCF = new SphereTriangleCreateFunc();
-	    m_triangleSphereCF = new SphereTriangleCreateFunc();
-	    m_triangleSphereCF.m_swapped = true;
+        //m_convexAlgo2DCF = new Convex2dConvex2dCreateFunc(m_simplexSolver, m_pdSolver);
+        //m_sphereTriangleCF = new SphereTriangleCreateFunc();
+        //m_triangleSphereCF = new SphereTriangleCreateFunc();
+        //m_triangleSphereCF.m_swapped = true;
     	
-	    m_boxBoxCF = new BoxBoxCreateFunc();
+        //m_boxBoxCF = new BoxBoxCreateFunc();
 
-	    //convex versus plane
-	    m_convexPlaneCF = new ConvexPlaneCreateFunc();
-	    m_planeConvexCF = new ConvexPlaneCreateFunc();
-	    m_planeConvexCF.m_swapped = true;
+        ////convex versus plane
+        //m_convexPlaneCF = new ConvexPlaneCreateFunc();
+        //m_planeConvexCF = new ConvexPlaneCreateFunc();
+        //m_planeConvexCF.m_swapped = true;
     	
     }
 

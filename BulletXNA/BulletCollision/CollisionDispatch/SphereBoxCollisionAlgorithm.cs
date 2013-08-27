@@ -75,7 +75,7 @@ namespace BulletXNA.BulletCollision
                 m_ownManifold = false;
             }
             m_ownManifold = false;
-            BulletGlobals.SphereBoxCollisionAlgorithmPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().SphereBoxCollisionAlgorithmPool.Free(this);
         }
 
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
@@ -257,7 +257,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            SphereBoxCollisionAlgorithm algo = BulletGlobals.SphereBoxCollisionAlgorithmPool.Get();
+            SphereBoxCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().SphereBoxCollisionAlgorithmPool.Get();
             algo.Initialize(null, ci, body0, body1, false);
             return algo;
         }
@@ -267,7 +267,7 @@ namespace BulletXNA.BulletCollision
     {
         public override CollisionAlgorithm CreateCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
-            SphereBoxCollisionAlgorithm algo = BulletGlobals.SphereBoxCollisionAlgorithmPool.Get();
+            SphereBoxCollisionAlgorithm algo = ci.GetDispatcher().GetPooledTypeManager().SphereBoxCollisionAlgorithmPool.Get();
             algo.Initialize(null, ci, body0, body1, true);
             return algo;
         }

@@ -551,11 +551,11 @@ namespace BulletXNA.BulletDynamics
                             {
                                 gNumClampedCcdMotions++;
 
-                                using (ClosestNotMeConvexResultCallback sweepResults = BulletGlobals.ClosestNotMeConvexResultCallbackPool.Get())
+                                using (ClosestNotMeConvexResultCallback sweepResults = GetDispatcher().GetPooledTypeManager().ClosestNotMeConvexResultCallbackPool.Get())
                                 {
                                     sweepResults.Initialize(body, body.GetWorldTransform()._origin, predictedTrans._origin, GetBroadphase().GetOverlappingPairCache(), GetDispatcher());
                                     //btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
-                                    SphereShape tmpSphere = BulletGlobals.SphereShapePool.Get();
+                                    SphereShape tmpSphere = GetDispatcher().GetPooledTypeManager().SphereShapePool.Get();
                                     tmpSphere.Initialize(body.GetCcdSweptSphereRadius());//btConvexShape* convexShape = static_cast<btConvexShape*>(body.GetCollisionShape());
                                     sweepResults.m_allowedPenetration = GetDispatchInfo().GetAllowedCcdPenetration();
 
@@ -606,7 +606,7 @@ namespace BulletXNA.BulletDynamics
                                     }
 
 
-                                    BulletGlobals.SphereShapePool.Free(tmpSphere);
+                                    GetDispatcher().GetPooledTypeManager().SphereShapePool.Free(tmpSphere);
                                 }
                             }
                             BulletGlobals.StopProfile();
@@ -1027,10 +1027,6 @@ namespace BulletXNA.BulletDynamics
 
 
         public ClosestNotMeConvexResultCallback() { }  // for pool
-        public ClosestNotMeConvexResultCallback(CollisionObject me, IndexedVector3 fromA, IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
-            : this(me, ref fromA, ref toA, pairCache, dispatcher)
-        {
-        }
 
         public virtual void Initialize(CollisionObject me, ref IndexedVector3 fromA, ref IndexedVector3 toA, IOverlappingPairCache pairCache, IDispatcher dispatcher)
         {
@@ -1122,7 +1118,7 @@ namespace BulletXNA.BulletDynamics
 
         public void Dispose()
         {
-            BulletGlobals.ClosestNotMeConvexResultCallbackPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().ClosestNotMeConvexResultCallbackPool.Free(this);
         }
 
     

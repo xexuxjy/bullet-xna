@@ -34,7 +34,9 @@ namespace BulletXNA.BulletCollision
     {
         public CollisionDispatcher(ICollisionConfiguration collisionConfiguration)
         {
+            m_pooledTypeManager = new PooledTypeManager(this);
             m_collisionConfiguration = collisionConfiguration;
+            collisionConfiguration.Dispatcher = this;
             m_dispatcherFlags = DispatcherFlags.CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD;
             SetNearCallback(new DefaultNearCallback());
 
@@ -49,6 +51,13 @@ namespace BulletXNA.BulletCollision
                 }
             }
         }
+
+        PooledTypeManager m_pooledTypeManager;
+        public PooledTypeManager GetPooledTypeManager()
+        {
+            return m_pooledTypeManager;
+        }
+
 
         public DispatcherFlags GetDispatcherFlags()
         {
@@ -83,8 +92,8 @@ namespace BulletXNA.BulletCollision
 
             // nothing in our pool so create a new one and return it.
             // need a way to flush the pool ideally
-            PersistentManifold manifold = BulletGlobals.PersistentManifoldPool.Get();
-            manifold.Initialise(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
+            PersistentManifold manifold = GetPooledTypeManager().PersistentManifoldPool.Get();
+            manifold.Initialize(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold,this);
 
             manifold.m_index1a = m_manifoldsPtr.Count;
 
@@ -122,7 +131,7 @@ namespace BulletXNA.BulletCollision
             }
 #endif
             // and return it to free list.
-            BulletGlobals.PersistentManifoldPool.Free(manifold);
+            GetPooledTypeManager().PersistentManifoldPool.Free(manifold);
         }
 
         public virtual void ClearManifold(PersistentManifold manifold)
@@ -252,16 +261,16 @@ namespace BulletXNA.BulletCollision
         {
             ManifoldResult manifoldResult = null;
 #if USE_POOLED_MANIFOLDRESULT
-            manifoldResult = BulletGlobals.ManifoldResultPool.Get();
+            manifoldResult = GetPooledTypeManager().ManifoldResultPool.Get();
 #endif
-            manifoldResult.Initialise(o1, o2);
+            manifoldResult.Initialize(o1, o2,this);
             return manifoldResult;
         }
 
         public void FreeManifoldResult(ManifoldResult result)
         {
 #if USE_POOLED_MANIFOLDRESULT
-            BulletGlobals.ManifoldResultPool.Free(result);
+            GetPooledTypeManager().ManifoldResultPool.Free(result);
 #else
 
 #endif

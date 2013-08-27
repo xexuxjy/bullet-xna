@@ -195,7 +195,7 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.TriangleShapePool.Free(this);
+            Dispatcher.GetPooledTypeManager().TriangleShapePool.Free(this);
         }
 
         public IndexedVector3[] m_vertices1 = new IndexedVector3[3];

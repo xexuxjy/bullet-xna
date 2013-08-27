@@ -29,18 +29,13 @@ namespace BulletXNA.BulletCollision
     public class SphereTriangleDetector : IDiscreteCollisionDetectorInterface,IDisposable
     {
         public SphereTriangleDetector() { } // for pool
-        public SphereTriangleDetector(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
-        {
-            m_sphere = sphere;
-            m_triangle = triangle;
-            m_contactBreakingThreshold = contactBreakingThreshold;
-        }
 
-        public void Initialize(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold)
+        public void Initialize(SphereShape sphere, TriangleShape triangle, float contactBreakingThreshold,IDispatcher dispatcher)
         {
             m_sphere = sphere;
             m_triangle = triangle;
             m_contactBreakingThreshold = contactBreakingThreshold;
+            m_dispatcher = dispatcher;
         }
 
         public bool Collide(ref IndexedVector3 sphereCenter, out IndexedVector3 point, out IndexedVector3 resultNormal, ref float depth, ref float timeOfImpact, float contactBreakingThreshold)
@@ -240,6 +235,7 @@ namespace BulletXNA.BulletCollision
             return IndexedVector3.Dot(ref diff, ref diff);
         }
 
+        private IDispatcher m_dispatcher;
         private SphereShape m_sphere;
         private TriangleShape m_triangle;
         private float m_contactBreakingThreshold;
@@ -249,7 +245,7 @@ namespace BulletXNA.BulletCollision
 
         public void Dispose()
         {
-            BulletGlobals.SphereTriangleDetectorPool.Free(this);
+            m_dispatcher.GetPooledTypeManager().SphereTriangleDetectorPool.Free(this);
         }
 
     }

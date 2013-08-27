@@ -16,7 +16,7 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <StartupObject>BulletXNADemos.Demos.MultiWorldDemo</StartupObject>
+    <StartupObject>BulletXNADemos.Demos.GImpactTestDemo</StartupObject>
     <XnaUpgrade>
     </XnaUpgrade>
     <XnaOutputType>Game</XnaOutputType>

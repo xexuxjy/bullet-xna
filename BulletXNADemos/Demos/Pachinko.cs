@@ -62,7 +62,7 @@ namespace BulletXNADemos.Demos
             //pairCache = new SortedOverlappingPairCache();
 
             //m_broadphase = new SimpleBroadphase(1000, pairCache);
-            m_broadphase = new DbvtBroadphase();
+            m_broadphase = new DbvtBroadphase(pairCache,m_dispatcher);
 
             IndexedVector3 worldAabbMin = new IndexedVector3(-200, -200, -200);
             IndexedVector3 worldAabbMax = -worldAabbMin;

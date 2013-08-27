@@ -36,6 +36,24 @@ namespace BulletXNADemos.Demos
             gVertices.GetRawArray()[1].Y = 0.1f;
 
 
+            m_collisionConfiguration = new DefaultCollisionConfiguration();
+
+
+            m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
+
+
+
+            m_broadphase = new DbvtBroadphase(null,m_dispatcher);
+            m_constraintSolver = new SequentialImpulseConstraintSolver();
+            m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
+            m_dynamicsWorld.SetDebugDrawer(m_debugDraw);
+
+            IndexedVector3 gravity = new IndexedVector3(0, -10, 0);
+            m_dynamicsWorld.SetGravity(ref gravity);
+
+
+
+
 	int index=0;
     int i, j;
 	for (i=0;i<NUM_VERTS_X-1;i++)
@@ -107,28 +125,13 @@ namespace BulletXNADemos.Demos
              IndexedVector3 aabbMax = new IndexedVector3(1000, 1000, 1000);
 	
             trimeshShape  = new BvhTriangleMeshShape(m_indexVertexArrays,useQuantizedAabbCompression,ref aabbMin,ref aabbMax,true);
-
+            trimeshShape.Dispatcher = m_dispatcher;
             CollisionShape groundShape = trimeshShape;
 
             TriangleInfoMap triangleInfoMap = new TriangleInfoMap();
 
             InternalEdgeUtility.GenerateInternalEdgeInfo(trimeshShape, triangleInfoMap);
 
-
-            m_collisionConfiguration = new DefaultCollisionConfiguration();
-
-
-            m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
-
-
-
-            m_broadphase = new DbvtBroadphase();
-            m_constraintSolver = new SequentialImpulseConstraintSolver();
-            m_dynamicsWorld = new DiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
-            m_dynamicsWorld.SetDebugDrawer(m_debugDraw);
-
-            IndexedVector3 gravity = new IndexedVector3(0,-10,0);
-	        m_dynamicsWorld.SetGravity(ref gravity);
 
 	
 	        float mass = 0.0f;

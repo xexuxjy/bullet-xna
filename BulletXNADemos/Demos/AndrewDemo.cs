@@ -57,7 +57,7 @@ namespace BulletXNADemos.Demos
 
             ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
             m_dispatcher = new CollisionDispatcher(m_collisionConfiguration);
-            m_broadphase = new DbvtBroadphase();
+            m_broadphase = new DbvtBroadphase(null,m_dispatcher);
 
             m_broadphase.GetOverlappingPairCache().SetInternalGhostPairCallback(new GhostPairCallback());	// Needed once to enable ghost objects inside Bullet
 

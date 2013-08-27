@@ -95,9 +95,6 @@ namespace BulletXNADemos.Demos
 
         public void InitialiseWorld(ref DiscreteDynamicsWorld world)
         {
-            IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
-            IndexedVector3 worldMax = -worldMin;
-            IBroadphaseInterface bp = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false, m_dispatcher);
 
             //m_broadphase = new DbvtBroadphase();
             IOverlappingPairCache pairCache = null;
@@ -111,6 +108,11 @@ namespace BulletXNADemos.Demos
 
             ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
             CollisionDispatcher dispatcher = new CollisionDispatcher(collisionConfig);
+
+            IndexedVector3 worldMin = new IndexedVector3(-1000, -1000, -1000);
+            IndexedVector3 worldMax = -worldMin;
+            IBroadphaseInterface bp = new AxisSweep3Internal(ref worldMin, ref worldMax, 0xfffe, 0xffff, 16384, null, false, dispatcher);
+
 
             world = new DiscreteDynamicsWorld(dispatcher, bp, sol, collisionConfig);
 

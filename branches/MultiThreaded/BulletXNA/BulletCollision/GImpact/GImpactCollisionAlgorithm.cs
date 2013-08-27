@@ -709,8 +709,8 @@ namespace BulletXNA.BulletCollision
             using (GIM_ShapeRetriever retriever0 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
             using (GIM_ShapeRetriever retriever1 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
             {
-                retriever0.Initialize(shape0);
-                retriever1.Initialize(shape1);
+                retriever0.Initialize(shape0,body0.m_dispatcher);
+                retriever1.Initialize(shape1, body0.m_dispatcher);
 
                 bool child_has_transform0 = shape0.ChildrenHasTransform();
                 bool child_has_transform1 = shape1.ChildrenHasTransform();
@@ -839,7 +839,7 @@ namespace BulletXNA.BulletCollision
 
             using (GIM_ShapeRetriever retriever0 = m_dispatcher.GetPooledTypeManager().GIM_ShapeRetrieverPool.Get())
             {
-                retriever0.Initialize(shape0);
+                retriever0.Initialize(shape0, body0.m_dispatcher);
                 bool child_has_transform0 = shape0.ChildrenHasTransform();
 
 
@@ -1096,9 +1096,10 @@ namespace BulletXNA.BulletCollision
             m_current_retriever.m_parent = this;
         }
 
-        public void Initialize(GImpactShapeInterface gim_shape)
+        public void Initialize(GImpactShapeInterface gim_shape,IDispatcher dispatcher)
         {
             m_gim_shape = gim_shape;
+            m_dispatcher = dispatcher;
             //select retriever
             if (m_gim_shape.NeedsRetrieveTriangles())
             {

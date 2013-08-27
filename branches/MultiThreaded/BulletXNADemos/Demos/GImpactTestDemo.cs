@@ -67,7 +67,7 @@ namespace BulletXNADemos.Demos
             staticboxShape1.SetUserPointer("BackWall");
 
             CompoundShape staticScenario = new CompoundShape();//static scenario
-
+            staticScenario.Dispatcher = m_dispatcher;
             startTransform._origin = new IndexedVector3(0, 0, 0);
             staticScenario.AddChildShape(ref startTransform, staticboxShape1);
             startTransform._origin = new IndexedVector3(-200, 25, 0);

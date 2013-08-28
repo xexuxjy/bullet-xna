@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
-    public struct IndexedVector2
+    public struct IndexedVector2 : IEquatable<IndexedVector2>
     {
         public IndexedVector2(float x, float y)
         {
@@ -91,6 +91,11 @@ namespace BulletXNA.LinearMath
         public override string ToString()
         {
             return "X : " + X + " Y " + Y ;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)((double)this.X + (double)this.Y);
         }
 
 

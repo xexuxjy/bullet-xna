@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
-    public struct  IndexedVector4
+    public struct  IndexedVector4 : IEquatable<IndexedVector4>
     {
         public IndexedVector4(float x, float y, float z,float w)
         {
@@ -114,6 +114,41 @@ namespace BulletXNA.LinearMath
                         }
                 }
             }
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)((double)this.X + (double)this.Y + (double)this.Z + (double)this.W);
+        }
+
+        public static bool operator ==(IndexedVector4 value1, IndexedVector4 value2)
+        {
+            if ((double)value1.W == (double)value2.W && (double)value1.X == (double)value2.X && (double)value1.Y == (double)value2.Y)
+                return (double)value1.Z == (double)value2.Z;
+            else
+                return false;
+        }
+
+        public static bool operator !=(IndexedVector4 value1, IndexedVector4 value2)
+        {
+            return !(value1 == value2);
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is IndexedVector4))
+                return false;
+            else
+                return this == (IndexedVector4)obj;
+        }
+
+        public bool Equals(IndexedVector4 other)
+        {
+            if ((double)this.W == (double)other.W && (double)this.X == (double)other.X && (double)this.Y == (double)other.Y)
+                return (double)this.Z == (double)other.Z;
+            else
+                return false;
         }
 
         private static IndexedVector4 _zero = new IndexedVector4(0f);

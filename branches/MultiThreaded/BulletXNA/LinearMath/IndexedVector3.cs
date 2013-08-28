@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace BulletXNA.LinearMath
 {
-    public struct IndexedVector3
+    public struct IndexedVector3 : IEquatable<IndexedVector3>
     {
         public IndexedVector3(float x, float y, float z)
         {
@@ -666,6 +666,10 @@ namespace BulletXNA.LinearMath
             return "X : " + X + " Y " + Y + " Z " + Z;
         }
 
+        public override int GetHashCode()
+        {
+            return (int)((double)this.X + (double)this.Y + (double)this.Z);
+        }
 
         private static IndexedVector3 _zero = new IndexedVector3();
         private static IndexedVector3 _one = new IndexedVector3(1f, 1f, 1f);
@@ -683,5 +687,14 @@ namespace BulletXNA.LinearMath
         public float X;
         public float Y;
         public float Z;
+
+        //#region IEquatable<IndexedVector3> Members
+
+        //bool IEquatable<IndexedVector3>.Equals(IndexedVector3 other)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //#endregion
     }
 }

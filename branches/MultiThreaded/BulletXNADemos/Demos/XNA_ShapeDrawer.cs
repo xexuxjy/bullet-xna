@@ -1000,16 +1000,17 @@ namespace BulletXNADemos.Demos
 
 		private Texture2D GetTexture(ref IndexedVector3 color)
 		{
-			if(!m_colorMap.ContainsKey(color))
+            Texture2D newTexture = null;
+			if(!m_colorMap.TryGetValue(color,out newTexture))
 			{
-				Texture2D newTexture = new Texture2D(m_game.GraphicsDevice,1,1);
+				newTexture = new Texture2D(m_game.GraphicsDevice,1,1);
 				Color[] colorData = new Color[1];
 				newTexture.GetData<Color>(colorData);
 				colorData[0] = new Color(color.ToVector3());
 				newTexture.SetData(colorData);
 				m_colorMap[color] = newTexture;
 			}
-			return m_colorMap[color];
+            return newTexture;
 		}
 
 		private Dictionary<IndexedVector3, Texture2D> m_colorMap = new Dictionary<IndexedVector3, Texture2D>();

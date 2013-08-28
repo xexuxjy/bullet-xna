@@ -54,9 +54,12 @@ namespace BulletXNA.BulletCollision
 
         public static void Swap(Edge a, Edge b)
         {
-            swapEdge.Copy(a);
-            a.Copy(b);
-            b.Copy(swapEdge);
+            lock (swapEdge)
+            {
+                swapEdge.Copy(a);
+                a.Copy(b);
+                b.Copy(swapEdge);
+            }
         }
         private static Edge swapEdge = new Edge(); // not threadsafe
     }

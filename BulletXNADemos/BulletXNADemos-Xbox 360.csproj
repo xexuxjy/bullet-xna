@@ -91,6 +91,7 @@
     <Compile Include="Demos\Pachinko.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Demos\PoolTest.cs" />
     <Compile Include="Demos\PyramidDemo.cs" />
     <Compile Include="Demos\RagDollDemo.cs" />
     <Compile Include="Demos\SimpleCompoundDemo.cs" />

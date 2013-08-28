@@ -38,7 +38,7 @@ namespace BulletXNA.BulletCollision
 
         // Work in progress to copy redo the box detector to remove un-necessary allocations
 
-        public static void GetClosestPoints(BoxShape box1,BoxShape box2, ref ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults)
+        public static void GetClosestPoints(BoxShape box1,BoxShape box2, ref ClosestPointInput input, ManifoldResult output, IDebugDraw debugDraw, bool swapResults,IDispatcher dispatcher)
         {
             IndexedMatrix transformA = input.m_transformA;
             IndexedMatrix transformB = input.m_transformB;
@@ -74,54 +74,34 @@ namespace BulletXNA.BulletCollision
             IndexedBasisMatrix rotateA = transformA._basis.Transpose();
             IndexedBasisMatrix rotateB = transformB._basis.Transpose();
 
+            float[] unpackedTransformA = dispatcher.GetPooledTypeManager().FloatArray12Pool.Get();
+            float[] unpackedTransformB = dispatcher.GetPooledTypeManager().FloatArray12Pool.Get();
+
             for (int j = 0; j < 3; j++)
             {
-                s_temp1[0 + 4 * j] = transformA._basis[j].X;
-                s_temp2[0 + 4 * j] = transformB._basis[j].X;
+                unpackedTransformA[0 + 4 * j] = transformA._basis[j].X;
+                unpackedTransformB[0 + 4 * j] = transformB._basis[j].X;
 
-                s_temp1[1 + 4 * j] = transformA._basis[j].Y;
-                s_temp2[1 + 4 * j] = transformB._basis[j].Y;
+                unpackedTransformA[1 + 4 * j] = transformA._basis[j].Y;
+                unpackedTransformB[1 + 4 * j] = transformB._basis[j].Y;
 
-
-                s_temp1[2 + 4 * j] = transformA._basis[j].Z;
-                s_temp2[2 + 4 * j] = transformB._basis[j].Z;
+                unpackedTransformA[2 + 4 * j] = transformA._basis[j].Z;
+                unpackedTransformB[2 + 4 * j] = transformB._basis[j].Z;
 
             }
 
-            //s_temp1[0] = rotateA._Row0.X;
-            //s_temp1[1] = rotateA._Row0.Y;
-            //s_temp1[2] = rotateA._Row0.Z;
-
-            //s_temp1[4] = rotateA._Row1.X;
-            //s_temp1[5] = rotateA._Row1.Y;
-            //s_temp1[6] = rotateA._Row1.Z;
-
-            //s_temp1[8] = rotateA._Row2.X;
-            //s_temp1[9] = rotateA._Row2.X;
-            //s_temp1[10] = rotateA._Row2.X;
-
-
-            //s_temp2[0] = rotateB._Row0.X;
-            //s_temp2[1] = rotateB._Row0.Y;
-            //s_temp2[2] = rotateB._Row0.Z;
-
-            //s_temp2[4] = rotateB._Row1.X;
-            //s_temp2[5] = rotateB._Row1.Y;
-            //s_temp2[6] = rotateB._Row1.Z;
-
-            //s_temp2[8] = rotateB._Row2.X;
-            //s_temp2[9] = rotateB._Row2.Y;
-            //s_temp2[10] = rotateB._Row2.Z;
-
             DBoxBox2(ref translationA,
-            s_temp1,
+            unpackedTransformA,
             ref box1Margin,
             ref translationB,
-            s_temp2,
+            unpackedTransformB,
             ref box2Margin,
             ref normal, ref depth, ref return_code,
             maxc, contact, skip,
-            output);
+            output,dispatcher);
+
+            dispatcher.GetPooledTypeManager().FloatArray12Pool.Free(unpackedTransformA);
+            dispatcher.GetPooledTypeManager().FloatArray12Pool.Free(unpackedTransformB);
 
         }
 
@@ -129,7 +109,7 @@ namespace BulletXNA.BulletCollision
         ref IndexedVector3 side1, ref IndexedVector3 p2,
         float[] R2, ref IndexedVector3 side2,
         ref IndexedVector3 normal, ref float depth, ref int return_code,
-        int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output)
+        int maxc, Object contact, int skip, IDiscreteCollisionDetectorInterfaceResult output,IDispatcher dispatcher)
         {
             //IndexedVector3 centerDifference = IndexedVector3.Zero, ppv = IndexedVector3.Zero;
             float[] normalR = null;
@@ -454,7 +434,7 @@ namespace BulletXNA.BulletCollision
             }
 
             // find the four corners of the incident face, in reference-face coordinates
-            float[] quad = s_quad;	// 2D coordinate of incident face (x,y pairs)
+            float[] quad = dispatcher.GetPooledTypeManager().FloatArray8Pool.Get();	// 2D coordinate of incident face (x,y pairs)
             float c1, c2, m11, m12, m21, m22;
             c1 = DDOT14(ref center, 0, Ra, code1);
             c2 = DDOT14(ref center, 0, Ra, code2);
@@ -483,146 +463,174 @@ namespace BulletXNA.BulletCollision
 
             // find the size of the reference face
             //float[] s_rectReferenceFace = new float[2];
-            s_rectReferenceFace[0] = Sa[code1];
-            s_rectReferenceFace[1] = Sa[code2];
+            IndexedVector2 rectReferenceFace2 = new IndexedVector2(Sa[code1],Sa[code2]);
+            //s_rectReferenceFace2[0] = Sa[code1];
+            //s_rectReferenceFace2[1] = Sa[code2];
 
             // intersect the incident and reference faces
-            float[] ret = s_ret;
-            int n = IntersectRectQuad2(s_rectReferenceFace, quad, ret);
-            if (n < 1)
-            {
-                return 0;		// this should never happen
-            }
+            float[] ret = null;
+            float[] point = null; 		// penetrating contact points
+            float[] dep = null;		// depths for those points
 
-            // convert the intersection points into reference-face coordinates,
-            // and compute the contact position and depth for each point. only keep
-            // those points that have a positive (penetrating) depth. delete points in
-            // the 'ret' array as necessary so that 'point' and 'ret' correspond.
-            float[] point = s_point;		// penetrating contact points
-            float[] dep = s_dep;			// depths for those points
-            float det1 = 1f / (m11 * m22 - m12 * m21);
-            m11 *= det1;
-            m12 *= det1;
-            m21 *= det1;
-            m22 *= det1;
-            int cnum = 0;			// number of penetrating contact points found
-            for (int j = 0; j < n; j++)
+            try
             {
-                float k1 = m22 * (ret[j * 2] - c1) - m12 * (ret[j * 2 + 1] - c2);
-                float k2 = -m21 * (ret[j * 2] - c1) + m11 * (ret[j * 2 + 1] - c2);
-                for (int i = 0; i < 3; i++)
+                ret = dispatcher.GetPooledTypeManager().FloatArray16Pool.Get();
+                int n = IntersectRectQuad2(ref rectReferenceFace2, quad, ret, dispatcher);
+                if (n < 1)
                 {
-                    point[cnum * 3 + i] = center[i] + k1 * Rb[i * 4 + a1] + k2 * Rb[i * 4 + a2];
+                    return 0;		// this should never happen
                 }
-                dep[cnum] = Sa[codeN] - DDOT(ref normal2, 0, point, cnum * 3);
-                if (dep[cnum] >= 0)
-                {
-                    ret[cnum * 2] = ret[j * 2];
-                    ret[cnum * 2 + 1] = ret[j * 2 + 1];
-                    cnum++;
-                }
-            }
-            if (cnum < 1)
-            {
-                return 0;	// this should never happen
-            }
 
-            // we can't generate more contacts than we actually have
-            if (maxc > cnum)
-            {
-                maxc = cnum;
-            }
-            if (maxc < 1)
-            {
-                maxc = 1;
-            }
-
-            if (cnum <= maxc)
-            {
-                if (code < 4)
+                // convert the intersection points into reference-face coordinates,
+                // and compute the contact position and depth for each point. only keep
+                // those points that have a positive (penetrating) depth. delete points in
+                // the 'ret' array as necessary so that 'point' and 'ret' correspond.
+                point = dispatcher.GetPooledTypeManager().FloatArray24Pool.Get(); ;		// penetrating contact points
+                dep = dispatcher.GetPooledTypeManager().FloatArray8Pool.Get(); ;			// depths for those points
+                float det1 = 1f / (m11 * m22 - m12 * m21);
+                m11 *= det1;
+                m12 *= det1;
+                m21 *= det1;
+                m22 *= det1;
+                int cnum = 0;			// number of penetrating contact points found
+                for (int j = 0; j < n; j++)
                 {
-                    // we have less contacts than we need, so we use them all
-                    for (int j = 0; j < cnum; j++)
+                    float k1 = m22 * (ret[j * 2] - c1) - m12 * (ret[j * 2 + 1] - c2);
+                    float k2 = -m21 * (ret[j * 2] - c1) + m11 * (ret[j * 2 + 1] - c2);
+                    for (int i = 0; i < 3; i++)
                     {
-                        IndexedVector3 pointInWorldFA = new IndexedVector3(); ;
-                        for (int i = 0; i < 3; i++)
-                        {
-                            pointInWorldFA[i] = point[j * 3 + i] + pa[i];
-                        }
-#if DEBUG                        
-						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
-                        {
-                            MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorldFA);
-                        }
-#endif                        
+                        point[cnum * 3 + i] = center[i] + k1 * Rb[i * 4 + a1] + k2 * Rb[i * 4 + a2];
+                    }
+                    dep[cnum] = Sa[codeN] - DDOT(ref normal2, 0, point, cnum * 3);
+                    if (dep[cnum] >= 0)
+                    {
+                        ret[cnum * 2] = ret[j * 2];
+                        ret[cnum * 2 + 1] = ret[j * 2 + 1];
+                        cnum++;
+                    }
+                }
+                if (cnum < 1)
+                {
+                    return 0;	// this should never happen
+                }
 
-                        output.AddContactPoint(-normal, pointInWorldFA, -dep[j]);
+                // we can't generate more contacts than we actually have
+                if (maxc > cnum)
+                {
+                    maxc = cnum;
+                }
+                if (maxc < 1)
+                {
+                    maxc = 1;
+                }
+
+                if (cnum <= maxc)
+                {
+                    if (code < 4)
+                    {
+                        // we have less contacts than we need, so we use them all
+                        for (int j = 0; j < cnum; j++)
+                        {
+                            IndexedVector3 pointInWorldFA = new IndexedVector3(); ;
+                            for (int i = 0; i < 3; i++)
+                            {
+                                pointInWorldFA[i] = point[j * 3 + i] + pa[i];
+                            }
+#if DEBUG
+                            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
+                            {
+                                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorldFA);
+                            }
+#endif
+
+                            output.AddContactPoint(-normal, pointInWorldFA, -dep[j]);
+                        }
+                    }
+                    else
+                    {
+                        // we have less contacts than we need, so we use them all
+                        for (int j = 0; j < cnum; j++)
+                        {
+                            IndexedVector3 pointInWorld = new IndexedVector3(); ;
+                            for (int i = 0; i < 3; i++)
+                            {
+                                pointInWorld[i] = point[j * 3 + i] + pa[i];
+
+                            }
+#if DEBUG
+                            if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
+                            {
+                                MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
+                            }
+#endif
+                            output.AddContactPoint(-normal, pointInWorld, -dep[j]);
+                        }
                     }
                 }
                 else
                 {
-                    // we have less contacts than we need, so we use them all
-                    for (int j = 0; j < cnum; j++)
+                    // we have more contacts than are wanted, some of them must be culled.
+                    // find the deepest point, it is always the first contact.
+                    int i1 = 0;
+                    float maxdepth = dep[0];
+                    for (int i = 1; i < cnum; i++)
                     {
-                        IndexedVector3 pointInWorld = new IndexedVector3(); ;
+                        if (dep[i] > maxdepth)
+                        {
+                            maxdepth = dep[i];
+                            i1 = i;
+                        }
+                    }
+
+                    int[] iret = dispatcher.GetPooledTypeManager().IntArray8Pool.Get();
+                    CullPoints2(cnum, ret, maxc, i1, iret,dispatcher);
+
+                    for (int j = 0; j < maxc; j++)
+                    {
+                        //      dContactGeom *con = CONTACT(contact,skip*j);
+                        //    for (i=0; i<3; i++) con->pos[i] = point[iret[j]*3+i] + pa[i];
+                        //  con->depth = dep[iret[j]];
+                        IndexedVector3 posInWorldFA = new IndexedVector3(); ;
                         for (int i = 0; i < 3; i++)
                         {
-                            pointInWorld[i] = point[j * 3 + i] + pa[i];
-
+                            posInWorldFA[i] = point[iret[j] * 3 + i] + pa[i];
                         }
+                        IndexedVector3 pointInWorld = posInWorldFA;
+
 #if DEBUG
-						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
+                        if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
                         {
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
                         }
-#endif                        
-                        output.AddContactPoint(-normal, pointInWorld, -dep[j]);
-                    }
-                }
-            }
-            else
-            {
-                // we have more contacts than are wanted, some of them must be culled.
-                // find the deepest point, it is always the first contact.
-                int i1 = 0;
-                float maxdepth = dep[0];
-                for (int i = 1; i < cnum; i++)
-                {
-                    if (dep[i] > maxdepth)
-                    {
-                        maxdepth = dep[i];
-                        i1 = i;
-                    }
-                }
-
-                int[] iret = new int[8];
-                CullPoints2(cnum, ret, maxc, i1, iret);
-
-                for (int j = 0; j < maxc; j++)
-                {
-                    //      dContactGeom *con = CONTACT(contact,skip*j);
-                    //    for (i=0; i<3; i++) con->pos[i] = point[iret[j]*3+i] + pa[i];
-                    //  con->depth = dep[iret[j]];
-                    IndexedVector3 posInWorldFA = new IndexedVector3(); ;
-                    for (int i = 0; i < 3; i++)
-                    {
-                        posInWorldFA[i] = point[iret[j] * 3 + i] + pa[i];
-                    }
-                    IndexedVector3 pointInWorld = posInWorldFA;
-
-#if DEBUG
-					if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxBoxDetector)
-                    {
-                        MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "boxbox get closest", pointInWorld);
-                    }
 #endif
-                    output.AddContactPoint((-normal), pointInWorld, -dep[iret[j]]);
+                        output.AddContactPoint((-normal), pointInWorld, -dep[iret[j]]);
 
+                    }
+                    dispatcher.GetPooledTypeManager().IntArray8Pool.Free(iret);
+                    cnum = maxc;
                 }
-                cnum = maxc;
+                return_code = code;
+                return cnum;
             }
-            return_code = code;
-            return cnum;
+            finally
+            {
+                if (quad != null)
+                {
+                    dispatcher.GetPooledTypeManager().FloatArray8Pool.Free(quad);
+                }
+                if (ret != null)
+                {
+                    dispatcher.GetPooledTypeManager().FloatArray16Pool.Free(ret);
+                }
+                if (point != null)
+                {
+                    dispatcher.GetPooledTypeManager().FloatArray24Pool.Free(point);
+                }
+                if (dep != null)
+                {
+                    dispatcher.GetPooledTypeManager().FloatArray8Pool.Free(dep);
+                }
+            }
         }
 
         private static void DLineClosestApproach(ref IndexedVector3 pa, ref IndexedVector3 ua,
@@ -657,12 +665,12 @@ namespace BulletXNA.BulletCollision
         // the number of intersection points is returned by the function (this will
         // be in the range 0 to 8).
 
-        static int IntersectRectQuad2(float[] h, float[] p, float[] ret)
+        static int IntersectRectQuad2(ref IndexedVector2 h, float[] p, float[] ret,IDispatcher dispatcher)
         {
             // q (and r) contain nq (and nr) coordinate points for the current (and
             // chopped) polygons
             int nq = 4, nr = 0;
-            float[] buffer = s_quadBuffer;
+            float[] buffer = dispatcher.GetPooledTypeManager().FloatArray16Pool.Get();
             float[] q = p;
             float[] r = ret;
 
@@ -736,6 +744,8 @@ namespace BulletXNA.BulletCollision
                     ret[i] = q[i];
                 }
             }
+            dispatcher.GetPooledTypeManager().FloatArray16Pool.Free(buffer);
+
             return nr;
         }
 
@@ -747,7 +757,7 @@ namespace BulletXNA.BulletCollision
         // n must be in the range [1..8]. m must be in the range [1..n]. i0 must be
         // in the range [0..n-1].
 
-        private static void CullPoints2(int n, float[] p, int m, int i0, int[] iret)
+        private static void CullPoints2(int n, float[] p, int m, int i0, int[] iret,IDispatcher dispatcher)
         {
             // compute the centroid of the polygon in cx,cy
             int iretIndex = 0;
@@ -789,18 +799,19 @@ namespace BulletXNA.BulletCollision
             }
 
             // compute the angle of each point w.r.t. the centroid
-            float[] A = s_A;
+            float[] A = dispatcher.GetPooledTypeManager().FloatArray8Pool.Get() ;
             for (i = 0; i < n; i++)
             {
                 A[i] = (float)Math.Atan2(p[i * 2 + 1] - cy, p[i * 2] - cx);
             }
 
+            int[] availablePoints = dispatcher.GetPooledTypeManager().IntArray8Pool.Get();
             // search for points that have angles closest to A[i0] + i*(2*pi/m).
             for (i = 0; i < n; i++)
             {
-                s_availablePoints[i] = 1;
+                availablePoints[i] = 1;
             }
-            s_availablePoints[i0] = 0;
+            availablePoints[i0] = 0;
             iret[0] = i0;
             iretIndex++;
             for (j = 1; j < m; j++)
@@ -816,7 +827,7 @@ namespace BulletXNA.BulletCollision
 
                 for (i = 0; i < n; i++)
                 {
-                    if (s_availablePoints[i] != 0)
+                    if (availablePoints[i] != 0)
                     {
                         diff = Math.Abs(A[i] - a);
                         if (diff > MathUtil.SIMD_PI)
@@ -833,9 +844,12 @@ namespace BulletXNA.BulletCollision
                 //#if defined(DEBUG) || defined (_DEBUG)
                 //    btAssert (*iret != i0);	// ensure iret got set
                 //#endif
-                s_availablePoints[iret[iretIndex]] = 0;
+                availablePoints[iret[iretIndex]] = 0;
                 iretIndex++;
             }
+
+            dispatcher.GetPooledTypeManager().IntArray8Pool.Free(availablePoints);
+            dispatcher.GetPooledTypeManager().FloatArray8Pool.Free(A);
         }
 
         private static bool TST(float expr1, float expr2, float[] norm, ref float[] normalR, int offset, ref int normalROffset, int cc, ref int code, ref float s, ref bool invert_normal)
@@ -962,18 +976,18 @@ namespace BulletXNA.BulletCollision
         //private BoxShape m_box2;
         private static float fudge_factor = 1.05f;
 
-        private static float[] s_buffer = new float[12];
-        private static float[] s_quadBuffer = new float[16];
+        //private static float[] s_buffer12 = new float[12];
+        //private static float[] s_quadBuffer16 = new float[16];
 
-        private static float[] s_temp1 = new float[12];
-        private static float[] s_temp2 = new float[12];
-        private static float[] s_quad = new float[8];
-        private static float[] s_ret = new float[16];
-        private static float[] s_point = new float[3 * 8];		// penetrating contact points
-        private static float[] s_dep = new float[8];			// depths for those points
-        private static float[] s_A = new float[8];
-        private static float[] s_rectReferenceFace = new float[2];
-        private static int[] s_availablePoints = new int[8];
+        //private static float[] s_temp112 = new float[12];
+        //private static float[] s_temp212 = new float[12];
+        //private static float[] s_quad8 = new float[8];
+        //private static float[] s_ret16 = new float[16];
+        //private static float[] s_point24 = new float[3 * 8];		// penetrating contact points
+        //private static float[] s_dep8 = new float[8];			// depths for those points
+        //private static float[] s_A8 = new float[8];
+        //private static float[] s_rectReferenceFace2 = new float[2];
+        //private static int[] s_availablePoints = new int[8];
 
     }
 

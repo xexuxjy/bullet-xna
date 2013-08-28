@@ -379,8 +379,8 @@ namespace BulletXNA.BulletCollision
                 DbvtTreeCollider collider = m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Get();
                 collider.Initialize(this);
                 collider.proxy = proxy;
-                Dbvt.CollideTV(m_sets[0].m_root, ref aabb, collider);
-                Dbvt.CollideTV(m_sets[1].m_root, ref aabb, collider);
+                Dbvt.CollideTV(m_sets[0].m_root, ref aabb, collider,m_sets[0].m_dispatcher);
+                Dbvt.CollideTV(m_sets[1].m_root, ref aabb, collider,m_sets[1].m_dispatcher);
                 m_dispatcher.GetPooledTypeManager().DbvtTreeColliderPool.Free(collider);
             }
             return (proxy);
@@ -482,8 +482,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
         {
             BroadphaseAabbTester callback = new BroadphaseAabbTester(aabbCallback);
             DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref aabbMin, ref aabbMax);
-            Dbvt.CollideTV(m_sets[0].m_root, ref bounds, callback);
-            Dbvt.CollideTV(m_sets[1].m_root, ref bounds, callback);
+            Dbvt.CollideTV(m_sets[0].m_root, ref bounds, callback, m_sets[0].m_dispatcher);
+            Dbvt.CollideTV(m_sets[1].m_root, ref bounds, callback, m_sets[1].m_dispatcher);
         }
 
 

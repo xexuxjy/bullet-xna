@@ -416,10 +416,9 @@ namespace BulletXNA.BulletCollision
         private static ObjectArray<sStkNN> CollideTTStack = new ObjectArray<sStkNN>(DOUBLE_STACKSIZE);
         private static int CollideTTCount = 0;
 
-        public static void CollideTT(DbvtNode root0, DbvtNode root1, ICollide collideable)
+        public static void CollideTT(DbvtNode root0, DbvtNode root1, ICollide collideable,IDispatcher dispatcher)
         {
-            CollideTTCount++;
-            Debug.Assert(CollideTTCount < 2);
+            CollideTTStack = dispatcher.GetPooledTypeManager().StkArrayPool.Get();
             CollideTTStack.Clear();
 
             if (root0 != null && root1 != null)
@@ -479,7 +478,8 @@ namespace BulletXNA.BulletCollision
                     }
                 } while (depth > 0);
             }
-            CollideTTCount--;
+            dispatcher.GetPooledTypeManager().StkArrayPool.Free(CollideTTStack);
+
         }
 
 
@@ -679,13 +679,9 @@ namespace BulletXNA.BulletCollision
 
 
 
-        private static Stack<DbvtNode> CollideTVStack = new Stack<DbvtNode>(SIMPLE_STACKSIZE);
-        private static int CollideTVCount = 0;
-
-        public static void CollideTV(DbvtNode root, ref DbvtAabbMm volume, ICollide collideable)
+        public static void CollideTV(DbvtNode root, ref DbvtAabbMm volume, ICollide collideable,IDispatcher dispatcher)
         {
-            CollideTVCount++;
-            Debug.Assert(CollideTVCount < 2);
+            Stack<DbvtNode> CollideTVStack = dispatcher.GetPooledTypeManager().DbvtNodeStackPool.Get();
             CollideTVStack.Clear();
             if (root != null)
             {
@@ -707,7 +703,7 @@ namespace BulletXNA.BulletCollision
                     }
                 } while (CollideTVStack.Count > 0);
             }
-            CollideTVCount--;
+            dispatcher.GetPooledTypeManager().DbvtNodeStackPool.Free(CollideTVStack);
         }
 
         //

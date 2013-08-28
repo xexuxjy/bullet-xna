@@ -5,6 +5,7 @@ using System.Text;
 using BulletXNA.LinearMath;
 using BulletXNA.BulletCollision;
 using BulletXNA.BulletDynamics;
+using System.Diagnostics;
 
 namespace BulletXNA
 {
@@ -57,6 +58,14 @@ namespace BulletXNA
             ClosestRayResultCallbackPool = new PooledType<ClosestRayResultCallback>();
             DebugDrawcallbackPool = new PooledType<DebugDrawcallback>();
             EPAPool = new EPAPoolV2(this);
+            StkArrayPool = new PooledType<ObjectArray<sStkNN>>();
+            DbvtNodeStackPool = new PooledType<Stack<DbvtNode>>();
+            FloatArray2Pool = new FloatArrayPool(2);
+            FloatArray8Pool = new FloatArrayPool(8);
+            FloatArray12Pool = new FloatArrayPool(12);
+            FloatArray16Pool = new FloatArrayPool(16);
+            FloatArray24Pool = new FloatArrayPool(24);
+            IntArray8Pool = new IntArrayPool(8);
         }
 
         public IDispatcher Dispatcher
@@ -109,8 +118,95 @@ namespace BulletXNA
         public PooledType<ClosestRayResultCallback> ClosestRayResultCallbackPool;
         public PooledType<DebugDrawcallback> DebugDrawcallbackPool;
         public PooledType<EPA> EPAPool;
+        public PooledType<ObjectArray<sStkNN>> StkArrayPool;
+        public PooledType<Stack<DbvtNode>> DbvtNodeStackPool;
+        public FloatArrayPool FloatArray2Pool;
+        public FloatArrayPool FloatArray8Pool;
+        public FloatArrayPool FloatArray12Pool;
+        public FloatArrayPool FloatArray16Pool;
+        public FloatArrayPool FloatArray24Pool;
+        public IntArrayPool IntArray8Pool;
+
 
     }
+
+    public class FloatArrayPool
+    {
+        public FloatArrayPool(int size)
+        {
+            m_size = size;
+        }
+
+        public float[] Get()
+        {
+            if (m_pool.Count == 0)
+            {
+                m_pool.Push(new float[m_size]);
+            }
+            return m_pool.Pop();
+        }
+
+        public virtual void Free(float[] obj)
+        {
+            Debug.Assert(obj != null);
+            Debug.Assert(!m_pool.Contains(obj));
+            Debug.Assert(obj.Length == m_size);
+            m_pool.Push(obj);
+        }
+        private int m_size;
+        private Stack<float[]> m_pool = new Stack<float[]>();
+    }
+
+    public class IntArrayPool
+    {
+        public IntArrayPool(int size)
+        {
+            m_size = size;
+        }
+
+        public int[] Get()
+        {
+            if (m_pool.Count == 0)
+            {
+                m_pool.Push(new int[m_size]);
+            }
+            return m_pool.Pop();
+        }
+
+        public virtual void Free(int[] obj)
+        {
+            Debug.Assert(obj != null);
+            Debug.Assert(!m_pool.Contains(obj));
+            Debug.Assert(obj.Length == m_size);
+            m_pool.Push(obj);
+        }
+        private int m_size;
+        private Stack<int[]> m_pool = new Stack<int[]>();
+    }
+
+
+        public class PooledType<T> where T : new()
+    {
+
+        public virtual T Get()
+        {
+            if (m_pool.Count == 0)
+            {
+                m_pool.Push(new T());
+            }
+            return m_pool.Pop();
+        }
+
+        public virtual void Free(T obj)
+        {
+            Debug.Assert(!m_pool.Contains(obj));
+            m_pool.Push(obj);
+        }
+
+
+        private Stack<T> m_pool = new Stack<T>();
+    }
+
 
     public class VoronoiSimplexSolverPoolV2 : PooledType<VoronoiSimplexSolver>
     {

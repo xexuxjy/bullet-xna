@@ -174,7 +174,7 @@ namespace BulletXNA.BulletCollision
 
                     DbvtAabbMm bounds = DbvtAabbMm.FromMM(ref localAabbMin, ref localAabbMax);
                     //process all children, that overlap with  the given AABB bounds
-                    Dbvt.CollideTV(tree.m_root, ref bounds, callback);
+                    Dbvt.CollideTV(tree.m_root, ref bounds, callback,colObj.m_dispatcher);
 
                 }
                 else

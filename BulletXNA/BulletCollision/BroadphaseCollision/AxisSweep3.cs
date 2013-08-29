@@ -644,9 +644,10 @@ namespace BulletXNA.BulletCollision
         public ushort AddHandle(ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, Object pOwner, CollisionFilterGroups collisionFilterGroup, CollisionFilterGroups collisionFilterMask, IDispatcher dispatcher, Object multiSapProxy)
         {
             // quantize the bounds
-            ushort[] min = new ushort[3], max = new ushort[3];
-            Quantize(min, ref aabbMin, 0);
-            Quantize(max, ref aabbMax, 1);
+            UShortVector3 min = new UShortVector3();
+            UShortVector3 max = new UShortVector3();
+            Quantize(ref min, ref aabbMin, 0);
+            Quantize(ref max, ref aabbMax, 1);
 
             // allocate a handle
             ushort handle = AllocHandle();
@@ -745,14 +746,16 @@ namespace BulletXNA.BulletCollision
             FreeHandle(handle);
         }
 
-        static ushort[] min = new ushort[3], max = new ushort[3];
         public void UpdateHandle(ushort handle, ref IndexedVector3 aabbMin, ref IndexedVector3 aabbMax, IDispatcher dispatcher)
         {
+            UShortVector3 min = new UShortVector3();
+            UShortVector3 max = new UShortVector3();
+   
             Handle pHandle = GetHandle(handle);
 
             // quantize the new bounds
-            Quantize(min, ref aabbMin, 0);
-            Quantize(max, ref aabbMax, 1);
+            Quantize(ref min, ref aabbMin, 0);
+            Quantize(ref max, ref aabbMax, 1);
 
             // update changed edges
             for (int axis = 0; axis < 3; axis++)
@@ -914,7 +917,7 @@ namespace BulletXNA.BulletCollision
             }
         }
 
-        public void Quantize(ushort[] output, ref IndexedVector3 point, int isMax)
+        public void Quantize(ref UShortVector3 output, ref IndexedVector3 point, int isMax)
         {
 #if OLD_CLAMPING_METHOD
 	    ///problem with this clamping method is that the floating point during quantization might still go outside the range [(0|isMax) .. (m_handleSentinel&m_bpHandleMask]|isMax]
@@ -939,8 +942,8 @@ namespace BulletXNA.BulletCollision
         {
             Handle pHandle = (Handle)proxy;
 
-            ushort[] vecInMin = new ushort[3];
-            ushort[] vecInMax = new ushort[3];
+            UShortVector3 vecInMin = new UShortVector3();
+            UShortVector3 vecInMax = new UShortVector3();
 
             vecInMin[0] = (ushort)m_pEdges[0, pHandle.m_minEdges[0]].m_pos;
             vecInMax[0] = (ushort)(m_pEdges[0, pHandle.m_maxEdges[0]].m_pos + 1);

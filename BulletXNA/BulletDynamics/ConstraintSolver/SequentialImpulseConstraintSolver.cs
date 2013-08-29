@@ -757,12 +757,15 @@ namespace BulletXNA.BulletDynamics
 
 		public static RigidBody GetFixedBody()
 		{
-			if (s_fixed == null)
-			{
-				s_fixed = new RigidBody(0f, null, null, IndexedVector3.Zero);
-                s_fixed.SetUserPointer("SICS:Fixed");
-			}
-			s_fixed.SetMassProps(0f, IndexedVector3.Zero);
+            lock (s_fixed)
+            {
+                if (s_fixed == null)
+                {
+                    s_fixed = new RigidBody(0f, null, null, IndexedVector3.Zero);
+                    s_fixed.SetUserPointer("SICS:Fixed");
+                }
+                s_fixed.SetMassProps(0f, IndexedVector3.Zero);
+            }
 			return s_fixed;
 		}
 

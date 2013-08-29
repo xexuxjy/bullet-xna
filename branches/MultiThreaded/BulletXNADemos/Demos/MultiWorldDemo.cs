@@ -8,6 +8,7 @@ using BulletXNA.BulletCollision;
 using Microsoft.Xna.Framework;
 using BulletXNA;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace BulletXNADemos.Demos
 {
@@ -83,10 +84,13 @@ namespace BulletXNADemos.Demos
             //ms *= 0.1f;
             ///step the simulation
             ///
+            List<Task> taskList = new List<Task>();
             foreach (DiscreteDynamicsWorld world in m_worlds)
             {
-                world.StepSimulation(ms, 1);
+                var worldCopy = world;
+                Task t1 = Task.Factory.StartNew(() => worldCopy.StepSimulation(ms,1));
             }
+            Task.WaitAll(taskList.ToArray());
 
         }
 
@@ -338,6 +342,10 @@ namespace BulletXNADemos.Demos
         //----------------------------------------------------------------------------------------------
 
         public List<DiscreteDynamicsWorld> m_worlds = new List<DiscreteDynamicsWorld>();
+        //Future<bool> parallelDraw = ParallelTasks.Parallel.Start<bool>(DoThreadedDraw, new WorkOptions() { DetachFromParent = true, MaximumThreads = 1 });
+        //parallelDraw.GetResult();
+
+
 
         static void Main(string[] args)
         {

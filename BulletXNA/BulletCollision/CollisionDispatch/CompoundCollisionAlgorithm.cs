@@ -347,6 +347,10 @@ namespace BulletXNA.BulletCollision
             m_parent = parent;
         }
 
+        public CollisionAlgorithm GetChildAlgorithm(int n)
+        {
+            return m_childCollisionAlgorithms[n];
+        }
 
         public void ProcessChildShape(CollisionShape childShape, int index)
         {
@@ -368,6 +372,14 @@ namespace BulletXNA.BulletCollision
 
             childShape.GetAabb(ref newChildWorldTrans, out aabbMin0, out aabbMax0);
             m_otherObj.GetCollisionShape().GetAabb(m_otherObj.GetWorldTransform(), out aabbMin1, out aabbMax1);
+
+            //if (BulletGlobals.CompoundChildShapePairCallback)
+            //{
+            //    if (!gCompoundChildShapePairCallback(m_otherObj.GetCollisionShape(), childShape))
+            //    {
+            //        return;
+            //    }
+            //}
 
             if (AabbUtil2.TestAabbAgainstAabb2(ref aabbMin0, ref aabbMax0, ref aabbMin1, ref aabbMax1))
             {

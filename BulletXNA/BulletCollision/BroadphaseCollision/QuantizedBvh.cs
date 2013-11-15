@@ -985,6 +985,23 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 aabbSize = m_bvhAabbMax - m_bvhAabbMin;
             m_bvhQuantization = new IndexedVector3(65533.000f) / aabbSize;
             m_useQuantization = true;
+
+	        {
+		        UShortVector3 vecIn;
+		        IndexedVector3 v;
+		        {
+			        Quantize(out vecIn,ref m_bvhAabbMin,false);
+			        UnQuantize(ref vecIn,out v);
+			        m_bvhAabbMin.SetMin(v-clampValue);
+		        }
+		        {
+			        Quantize(out vecIn,ref m_bvhAabbMax,true);
+			        UnQuantize(ref vecIn,out v);
+			        m_bvhAabbMax.SetMax(v+clampValue);
+		        }
+		        aabbSize = m_bvhAabbMax - m_bvhAabbMin;
+		        m_bvhQuantization = new IndexedVector3(65533.0f) / aabbSize;
+	        }
         }
 
         public ObjectArray<QuantizedBvhNode> GetLeafNodeArray()

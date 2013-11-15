@@ -57,6 +57,7 @@ namespace BulletXNA.BulletCollision
     CollisionAlgorithmCreateFunc m_swappedConvexConcaveCreateFunc;
     CollisionAlgorithmCreateFunc m_compoundCreateFunc;
     CollisionAlgorithmCreateFunc m_swappedCompoundCreateFunc;
+    CollisionAlgorithmCreateFunc m_compoundCompoundCreateFunc;
     CollisionAlgorithmCreateFunc m_emptyCreateFunc;
     CollisionAlgorithmCreateFunc m_sphereSphereCF;
     CollisionAlgorithmCreateFunc m_sphereBoxCF;
@@ -84,6 +85,8 @@ namespace BulletXNA.BulletCollision
 	    m_swappedConvexConcaveCreateFunc = new SwappedConvexConcaveCreateFunc();
 	    m_compoundCreateFunc = new CompoundCreateFunc();
 	    m_swappedCompoundCreateFunc = new SwappedCompoundCreateFunc();
+        m_compoundCompoundCreateFunc = new CompoundCompoundCreateFunc();
+    
 	    m_emptyCreateFunc = new EmptyCreateFunc();
 	
     	m_sphereSphereCF = new SphereSphereCreateFunc();
@@ -189,6 +192,11 @@ namespace BulletXNA.BulletCollision
 	    if (BroadphaseProxy.IsConvex(proxyType1) && BroadphaseProxy.IsConcave(proxyType0))
 	    {
 		    return m_swappedConvexConcaveCreateFunc;
+	    }
+
+        if (BroadphaseProxy.IsCompound(proxyType0) && BroadphaseProxy.IsCompound(proxyType1))
+	    {
+		    return m_compoundCompoundCreateFunc;
 	    }
 
 	    if (BroadphaseProxy.IsCompound(proxyType0))

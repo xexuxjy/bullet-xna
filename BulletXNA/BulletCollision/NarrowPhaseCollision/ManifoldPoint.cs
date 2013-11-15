@@ -288,6 +288,15 @@ namespace BulletXNA.BulletCollision
             m_index1 = index;
         }
 
+        public void SetCombinedRollingFriction(float val)
+        {
+            m_combinedRollingFriction = val;
+        }
+
+        public float GetCombinedRollingFriction()
+        {
+            return m_combinedRollingFriction;
+        }
 
         public IndexedVector3 m_localPointA;
         public IndexedVector3 m_localPointB;
@@ -300,6 +309,7 @@ namespace BulletXNA.BulletCollision
         public float m_distance1;
         public float m_combinedFriction;
         public float m_combinedRestitution;
+        public float m_combinedRollingFriction;
 
         //BP mod, store contact triangles.
         public int m_partId0;

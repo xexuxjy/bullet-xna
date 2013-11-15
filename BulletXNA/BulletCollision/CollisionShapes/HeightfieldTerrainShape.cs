@@ -107,7 +107,7 @@ namespace BulletXNA.BulletCollision
         protected PHY_ScalarType m_heightDataType;
         protected bool m_flipQuadEdges;
         protected bool m_useDiamondSubdivision;
-
+        protected bool m_useZigzagSubdivision;
         protected int m_upAxis;
 
         protected IndexedVector3 m_localScaling;
@@ -941,6 +941,11 @@ namespace BulletXNA.BulletCollision
             m_useDiamondSubdivision = useDiamondSubdivision;
         }
 
+        public void SetUseZigzagSubdivision(bool useZigzagSubdivision) 
+        { 
+            m_useZigzagSubdivision = useZigzagSubdivision; 
+        }
+
 
         public override void GetAabb(ref IndexedMatrix t, out IndexedVector3 aabbMin, out IndexedVector3 aabbMax)
         {
@@ -955,6 +960,8 @@ namespace BulletXNA.BulletCollision
             IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtents),
 		                                                abs_b._el1.Dot(ref halfExtents),
 		                                                abs_b._el2.Dot(ref halfExtents));
+
+            IndexedVector3 extent = halfExtents.Dot3(abs_b._el0, abs_b._el1, abs_b._el2);
 
             extent += new IndexedVector3(GetMargin());
 
@@ -1066,7 +1073,7 @@ namespace BulletXNA.BulletCollision
             {
                 for (int x = startX; x < endX; x++)
                 {
-                    if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0)))
+                    if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) > 0) || (m_useZigzagSubdivision  && (j & 1) > 0)))
                     {
                         //first triangle
                         GetVertex(x, j, out vertices[0]);
@@ -1074,7 +1081,7 @@ namespace BulletXNA.BulletCollision
                         GetVertex(x + 1, j + 1, out vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                         //second triangle
-                        GetVertex(x, j, out vertices[0]);
+                        //GetVertex(x, j, out vertices[0]);
                         GetVertex(x + 1, j + 1, out vertices[1]);
                         GetVertex(x, j + 1, out vertices[2]);
 
@@ -1090,7 +1097,7 @@ namespace BulletXNA.BulletCollision
 
                         //second triangle
                         GetVertex(x + 1, j, out vertices[0]);
-                        GetVertex(x, j + 1, out vertices[1]);
+                        //GetVertex(x, j + 1, out vertices[1]);
                         GetVertex(x + 1, j + 1, out vertices[2]);
                         callback.ProcessTriangle(vertices, x, j);
                     }

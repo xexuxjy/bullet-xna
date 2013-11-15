@@ -21,8 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#define MAINTAIN_PERSISTENCY
-#define KEEP_DEEPEST_POINT
+//#define MAINTAIN_PERSISTENCY
+//#define KEEP_DEEPEST_POINT
 //#define DEBUG_PERSISTENCY
 
 using System;

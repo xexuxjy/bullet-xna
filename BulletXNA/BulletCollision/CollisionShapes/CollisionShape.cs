@@ -183,6 +183,11 @@ namespace BulletXNA.BulletCollision
             return m_shapeType;
         }
 
+        public virtual IndexedVector3 GetAnisotropicRollingFrictionDirection()
+        {
+            return IndexedVector3.One;
+        }
+
         public abstract void SetMargin(float margin);
 
         public abstract float GetMargin();

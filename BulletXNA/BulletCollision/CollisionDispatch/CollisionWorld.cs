@@ -685,23 +685,12 @@ namespace BulletXNA.BulletCollision
 
                 ConvexShape convexShape = collisionShape as ConvexShape;
                 VoronoiSimplexSolver simplexSolver = BulletGlobals.VoronoiSimplexSolverPool.Get();
-                //#define USE_SUBSIMPLEX_CONVEX_CAST 1
-                //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
 
-                // FIXME - MAN - convexcat here seems to make big difference to forklift.
-
-                SubSimplexConvexCast convexCaster = BulletGlobals.SubSimplexConvexCastPool.Get();
-                convexCaster.Initialize(castShape, convexShape, simplexSolver);
-
-                //GjkConvexCast convexCaster = new GjkConvexCast(castShape, convexShape, simplexSolver);
+                SubSimplexConvexCast subSimplexConvexCaster = BulletGlobals.SubSimplexConvexCastPool.Get();
+                subSimplexConvexCaster.Initialize(castShape, convexShape, simplexSolver);
 
 
-                //#else
-                //btGjkConvexCast	convexCaster(castShape,convexShape,&simplexSolver);
-                //btContinuousConvexCollision convexCaster(castShape,convexShape,&simplexSolver,0);
-                //#endif //#USE_SUBSIMPLEX_CONVEX_CAST
-
-                if (convexCaster.CalcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult))
+                if (subSimplexConvexCaster.CalcTimeOfImpact(ref rayFromTrans, ref rayToTrans, ref colObjWorldTransform, ref colObjWorldTransform, castResult))
                 {
                     //add hit
                     if (castResult.m_normal.LengthSquared() > 0.0001f)
@@ -735,7 +724,7 @@ namespace BulletXNA.BulletCollision
                     }
                 }
                 castResult.Cleanup();
-                BulletGlobals.SubSimplexConvexCastPool.Free(convexCaster);
+                BulletGlobals.SubSimplexConvexCastPool.Free(subSimplexConvexCaster);
                 BulletGlobals.VoronoiSimplexSolverPool.Free(simplexSolver);
 
                 BulletGlobals.StopProfile();
@@ -744,14 +733,15 @@ namespace BulletXNA.BulletCollision
             {
                 if (collisionShape.IsConcave())
                 {
+                    IndexedMatrix worldTocollisionObject = colObjWorldTransform.Inverse();
+                    IndexedVector3 rayFromLocal = worldTocollisionObject * rayFromTrans._origin;
+                    IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
+
                     BulletGlobals.StartProfile("rayTestConcave");
                     if (collisionShape.GetShapeType() == BroadphaseNativeTypes.TRIANGLE_MESH_SHAPE_PROXYTYPE && collisionShape is BvhTriangleMeshShape)
                     {
                         ///optimized version for btBvhTriangleMeshShape
                         BvhTriangleMeshShape triangleMesh = (BvhTriangleMeshShape)collisionShape;
-                        IndexedMatrix worldTocollisionObject = colObjWorldTransform.Inverse();
-                        IndexedVector3 rayFromLocal = worldTocollisionObject * rayFromTrans._origin;
-                        IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
 
                         IndexedMatrix transform = IndexedMatrix.Identity;
                         using (BridgeTriangleRaycastCallback rcb = BulletGlobals.BridgeTriangleRaycastCallbackPool.Get())
@@ -765,9 +755,6 @@ namespace BulletXNA.BulletCollision
                     {
                         ///optimized version for btBvhTriangleMeshShape
                         HeightfieldTerrainShape heightField = (HeightfieldTerrainShape)collisionShape;
-                        IndexedMatrix worldTocollisionObject = colObjWorldTransform.Inverse();
-                        IndexedVector3 rayFromLocal = worldTocollisionObject * rayFromTrans._origin;
-                        IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
 
                         IndexedMatrix transform = IndexedMatrix.Identity;
                         using (BridgeTriangleConcaveRaycastCallback rcb = BulletGlobals.BridgeTriangleConcaveRaycastCallbackPool.Get())
@@ -781,12 +768,6 @@ namespace BulletXNA.BulletCollision
                     {
                         //generic (slower) case
                         ConcaveShape concaveShape = (ConcaveShape)collisionShape;
-
-                        IndexedMatrix worldTocollisionObject = colObjWorldTransform.Inverse();
-
-                        IndexedVector3 rayFromLocal = worldTocollisionObject * rayFromTrans._origin;
-                        IndexedVector3 rayToLocal = worldTocollisionObject * rayToTrans._origin;
-
                         //ConvexCast::CastResult
                         IndexedMatrix transform = IndexedMatrix.Identity;
                         using (BridgeTriangleConcaveRaycastCallback rcb = BulletGlobals.BridgeTriangleConcaveRaycastCallbackPool.Get())
@@ -835,7 +816,7 @@ namespace BulletXNA.BulletCollision
                         {
                             for (int i = 0, n = compoundShape.GetNumChildShapes(); i < n; ++i)
                             {
-                                rayCB.Process(i);
+                                rayCB.ProcessLeaf(i);
                             }
                         }
                         rayCB.Cleanup();
@@ -1794,6 +1775,7 @@ namespace BulletXNA.BulletCollision
             m_i = i;
             m_userCallback = user;
             m_closestHitFraction = user.m_closestHitFraction;
+            m_flags = user.m_flags;
         }
 
         public override float AddSingleResult(ref LocalRayResult r, bool b)
@@ -2003,7 +1985,7 @@ namespace BulletXNA.BulletCollision
             m_resultCallback = resultCallback;
         }
 
-        public void Process(int i)
+        public void ProcessLeaf(int i)
         {
             CollisionShape childCollisionShape = m_compoundShape.GetChildShape(i);
             IndexedMatrix childTrans = m_compoundShape.GetChildTransform(i);
@@ -2029,7 +2011,7 @@ namespace BulletXNA.BulletCollision
 
         public override void Process(DbvtNode leaf)
         {
-            Process(leaf.dataAsInt);
+            ProcessLeaf(leaf.dataAsInt);
         }
 
         public virtual void Cleanup()

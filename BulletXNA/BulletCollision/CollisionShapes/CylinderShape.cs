@@ -52,6 +52,13 @@ namespace BulletXNA.BulletCollision
 		    return halfExtents;
 	    }
     	
+        public override IndexedVector3 GetAnisotropicRollingFrictionDirection() 
+	    {
+		    IndexedVector3  aniDir = new IndexedVector3();
+		    aniDir[GetUpAxis()]=1;
+		    return aniDir;
+	    }
+
         public override void CalculateLocalInertia(float mass, out IndexedVector3 inertia)
         {
 

@@ -146,6 +146,8 @@ namespace BulletXNA.BulletCollision
 
             newPt.SetCombinedFriction(CalculateCombinedFriction(m_body0, m_body1));
             newPt.SetCombinedRestitution(CalculateCombinedRestitution(m_body0, m_body1));
+            newPt.SetCombinedRollingFriction(CalculateCombinedRollingFriction(m_body0, m_body1));
+            TransformUtil.PlaneSpace1(ref newPt.m_normalWorldOnB, out newPt.m_lateralFrictionDir1, out newPt.m_lateralFrictionDir2);
 
             //BP mod, store contact triangles.
             if (isSwapped)
@@ -231,6 +233,19 @@ namespace BulletXNA.BulletCollision
             return friction;
 
         }
+
+        private float CalculateCombinedRollingFriction(CollisionObject body0,CollisionObject body1)
+        {
+	        float friction = body0.GetRollingFriction() * body1.GetRollingFriction();
+
+            float MAX_FRICTION = 10f;
+	        if (friction < -MAX_FRICTION)
+		        friction = -MAX_FRICTION;
+	        if (friction > MAX_FRICTION)
+		        friction = MAX_FRICTION;
+	        return friction;
+        }
+
 
         private float CalculateCombinedRestitution(CollisionObject body0, CollisionObject body1)
         {

@@ -133,13 +133,21 @@ namespace BulletXNA.BulletCollision
                     Debug.Assert(false);
                     break;
             };
-
+            m_implicitShapeDimensions[m_coneIndices[0]] = m_radius;
+            m_implicitShapeDimensions[m_coneIndices[1]] = m_height;
+            m_implicitShapeDimensions[m_coneIndices[2]] = m_radius;
         }
     		
 	    public int GetConeUpIndex() 
 	    {
 		    return m_coneIndices[1];
 	    }
+
+        public override IndexedVector3 GetAnisotropicRollingFrictionDirection()
+        {
+            return IndexedVector3.Up;
+        }
+
 
 	    protected float m_sinAngle;
 	    protected float m_radius;
@@ -192,6 +200,15 @@ namespace BulletXNA.BulletCollision
         {
             SetConeUpIndex(0);
         }
+        public override IndexedVector3 GetAnisotropicRollingFrictionDirection()
+        {
+            return IndexedVector3.Right;
+        }
+        public override String GetName()
+        {
+            return "ConeX";
+        }
+
     }
 
     ///btConeShapeZ implements a Cone shape, around the Z axis
@@ -201,6 +218,14 @@ namespace BulletXNA.BulletCollision
             : base(radius, height)
         {
             SetConeUpIndex(2);
+        }
+        public override IndexedVector3 GetAnisotropicRollingFrictionDirection()
+        {
+            return IndexedVector3.Forward;
+        }
+        public override String GetName()
+        {
+            return "ConeZ";
         }
 
     }

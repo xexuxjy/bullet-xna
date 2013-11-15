@@ -252,24 +252,32 @@ namespace BulletXNA.BulletCollision
 	        return true;
         }
 #endif
-
-        public void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, out float min, out float max)
+        public void Project(ref IndexedMatrix trans, ref IndexedVector3 dir, out float minProj, out float maxProj, ref IndexedVector3 witnessPtMin, ref IndexedVector3 witnessPtMax)
         {
-            min = float.MaxValue;
-            max = float.MinValue;
+            minProj = float.MaxValue;
+            maxProj = float.MinValue;
             int numVerts = m_vertices.Count;
             for (int i = 0; i < numVerts; i++)
             {
                 IndexedVector3 pt = trans * m_vertices[i];
                 float dp = IndexedVector3.Dot(pt, dir);
-                if (dp < min) min = dp;
-                if (dp > max) max = dp;
+                if (dp < minProj)
+                {
+                    minProj = dp;
+                    witnessPtMin = pt;
+                }
+                if (dp > maxProj)
+                {
+                    maxProj = dp;
+                    witnessPtMax = pt; 
+                }
             }
-            if (min > max)
+            if (minProj > maxProj)
             {
-                float tmp = min;
-                min = max;
-                max = tmp;
+                float tmp = minProj;
+                minProj = maxProj;
+                maxProj = tmp;
+                IndexedVector3.Swap(ref witnessPtMin, ref witnessPtMax);
             }
         }
 

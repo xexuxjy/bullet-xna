@@ -169,7 +169,7 @@ namespace BulletXNA.BulletCollision
 			IndexedVector3 v11 = vertices1[edge1];
 			IndexedVector3 v12 = edge1 + 1 < count1 ? vertices1[edge1+1] : vertices1[0];
 
-			IndexedVector3 dv = v12 - v11;
+			//IndexedVector3 dv = v12 - v11;
 			IndexedVector3 sideNormal = xf1._basis * (v12 - v11);
 			sideNormal.Normalize();
 			IndexedVector3 frontNormal = CrossS(ref sideNormal, 1.0f);
@@ -290,15 +290,11 @@ namespace BulletXNA.BulletCollision
 			int index = 0;
 			float minDot = MathUtil.BT_LARGE_FLOAT;
 
-			for (int i = 0; i < count2; ++i)
-			{
-				float dot = vertices2[i].Dot(normal1);
-				if (dot < minDot)
-				{
-					minDot = dot;
-					index = i;
-				}
-			}
+            if (count2 > 0)
+            {
+                index = normal1.MinDot(vertices2, count2, ref minDot);
+            }
+
 
             IndexedVector3 v1 = xf1 * vertices1[edge1];
 			IndexedVector3 v2 = xf2 * vertices2[index];
@@ -322,15 +318,11 @@ namespace BulletXNA.BulletCollision
 			// Find edge normal on poly1 that has the largest projection onto d.
 			int edge = 0;
 			float maxDot = -MathUtil.BT_LARGE_FLOAT;
-			for (int i = 0; i < count1; ++i)
-			{
-				float dot = normals1[i].Dot(ref dLocal1);
-				if (dot > maxDot)
-				{
-					maxDot = dot;
-					edge = i;
-				}
-			}
+            if (count1 > 0)
+            {
+                edge = (int)dLocal1.MaxDot(normals1, count1, ref maxDot);
+
+            }
 
 			// Get the separation for the edge normal.
 			float s = EdgeSeparation(poly1, ref xf1, edge, poly2, ref xf2);

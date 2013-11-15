@@ -38,6 +38,11 @@ namespace BulletXNA
         public static int BT_BULLET_VERSION = 276;
         public static int RAND_MAX = int.MaxValue;
 
+
+        public static int gAddedSimplePairs = 0;
+        public static int gFindSimplePairs = 0;
+        public static int gRemoveSimplePairs = 0;
+
         public static float gContactBreakingThreshold = .02f;
 
         public static Random gRandom = new Random();

@@ -49,7 +49,8 @@ namespace BulletXNA.BulletCollision
         CO_GHOST_OBJECT=4,
         CO_SOFT_BODY=8,
         CO_HF_FLUID=16,
-        CO_USER_TYPE=32
+        CO_USER_TYPE=32,
+		CO_FEATHERSTONE_LINK=64
     }
 
 
@@ -64,6 +65,12 @@ namespace BulletXNA.BulletCollision
         DISABLE_SIMULATION = 5
     }
 
+    public enum AnisotropicFrictionFlags
+    {
+        CF_ANISOTROPIC_FRICTION_DISABLED = 0,
+        CF_ANISOTROPIC_FRICTION = 1,
+        CF_ANISOTROPIC_ROLLING_FRICTION = 2
+    };
 
 
     public class CollisionObject
@@ -72,7 +79,7 @@ namespace BulletXNA.BulletCollision
         public CollisionObject()
         {
             m_anisotropicFriction = new IndexedVector3(1f);
-            m_hasAnisotropicFriction = false;
+            m_hasAnisotropicFriction = AnisotropicFrictionFlags.CF_ANISOTROPIC_FRICTION;
             m_contactProcessingThreshold = MathUtil.BT_LARGE_FLOAT;
             m_broadphaseHandle = null;
             m_collisionShape = null;
@@ -83,6 +90,7 @@ namespace BulletXNA.BulletCollision
             m_activationState1 = ActivationState.ACTIVE_TAG;
             m_deactivationTime = 0f;
             m_friction = 0.5f;
+            m_rollingFriction = 0f;
             m_userObjectPointer = null;
             m_internalType = CollisionObjectTypes.CO_COLLISION_OBJECT;
             m_hitFraction = 1f;
@@ -90,6 +98,7 @@ namespace BulletXNA.BulletCollision
             m_ccdMotionThreshold = 0f;
             m_checkCollideWith = false;
             m_worldTransform = IndexedMatrix.Identity;
+            m_updateRevision = 0;
         }
 
         public virtual bool CheckCollideWithOverride(CollisionObject obj)
@@ -114,20 +123,30 @@ namespace BulletXNA.BulletCollision
         }
 
 
-
         public void SetAnisotropicFriction(ref IndexedVector3 anisotropicFriction)
         {
-            m_anisotropicFriction = anisotropicFriction;
-            m_hasAnisotropicFriction = (anisotropicFriction.X != 1f) || (anisotropicFriction.Y != 1f) || (anisotropicFriction.Z != 1f);
+            SetAnisotropicFriction(ref anisotropicFriction, AnisotropicFrictionFlags.CF_ANISOTROPIC_FRICTION);
         }
 
-
+        public void SetAnisotropicFriction(ref IndexedVector3 anisotropicFriction, AnisotropicFrictionFlags frictionMode)
+        {
+            m_anisotropicFriction = anisotropicFriction;
+            bool isUnity = (anisotropicFriction.X != 1f) || (anisotropicFriction.Y != 1f) || (anisotropicFriction.Z != 1f);
+    		m_hasAnisotropicFriction = isUnity?frictionMode : 0;
+        }
 
         public bool HasAnisotropicFriction()
         {
-            return m_hasAnisotropicFriction;
+            return HasAnisotropicFriction(AnisotropicFrictionFlags.CF_ANISOTROPIC_FRICTION);
         }
 
+        public bool	HasAnisotropicFriction(AnisotropicFrictionFlags frictionMode)
+	    {
+		    return (m_hasAnisotropicFriction&frictionMode)!=0;
+	    }
+
+
+        
 
 
         public void SetContactProcessingThreshold(float contactProcessingThreshold)
@@ -174,6 +193,7 @@ namespace BulletXNA.BulletCollision
 
         public virtual void SetCollisionShape(CollisionShape collisionShape)
         {
+            m_updateRevision++;
             m_collisionShape = collisionShape;
             m_rootCollisionShape = collisionShape;
         }
@@ -279,6 +299,7 @@ namespace BulletXNA.BulletCollision
 
         public void SetRestitution(float rest)
         {
+            m_updateRevision++;
             m_restitution = rest;
         }
 
@@ -293,6 +314,7 @@ namespace BulletXNA.BulletCollision
 
         public void SetFriction(float frict)
         {
+            m_updateRevision++;
             m_friction = frict;
         }
 
@@ -303,7 +325,16 @@ namespace BulletXNA.BulletCollision
             return m_friction;
         }
 
+        public void SetRollingFriction(float frict)
+        {
+            m_updateRevision++;
+            m_rollingFriction = frict;
+        }
 
+        public float GetRollingFriction()
+        {
+            return m_rollingFriction;
+        }
 
         ///reserved for Bullet internal usage
         public CollisionObjectTypes GetInternalType()
@@ -332,11 +363,13 @@ namespace BulletXNA.BulletCollision
 
         public void SetWorldTransform(IndexedMatrix worldTrans)
         {
+            m_updateRevision++;
             m_worldTransform = worldTrans;
         }
 
         public void SetWorldTransform(ref IndexedMatrix worldTrans)
         {
+            m_updateRevision++;
             m_worldTransform = worldTrans;
         }
 
@@ -365,6 +398,7 @@ namespace BulletXNA.BulletCollision
 
         public void SetInterpolationWorldTransform(ref IndexedMatrix trans)
         {
+            m_updateRevision++;
             m_interpolationWorldTransform = trans;
         }
 
@@ -372,11 +406,13 @@ namespace BulletXNA.BulletCollision
 
         public void SetInterpolationLinearVelocity(ref IndexedVector3 linvel)
         {
+            m_updateRevision++;
             m_interpolationLinearVelocity = linvel;
         }
 
         public void SetInterpolationAngularVelocity(ref IndexedVector3 angvel)
         {
+            m_updateRevision++;
             m_interpolationAngularVelocity = angvel;
         }
 
@@ -516,6 +552,10 @@ namespace BulletXNA.BulletCollision
             return true;
         }
 
+	    public int	GetUpdateRevisionInternal() 
+	    {
+		    return m_updateRevision;
+	    }
 
 
         public virtual void Cleanup()
@@ -539,7 +579,7 @@ namespace BulletXNA.BulletCollision
         protected IndexedVector3 m_interpolationAngularVelocity;
         protected IndexedVector3 m_interpolationLinearVelocity;
         protected IndexedVector3 m_anisotropicFriction;
-        protected bool m_hasAnisotropicFriction;
+        protected AnisotropicFrictionFlags m_hasAnisotropicFriction;
         protected float m_contactProcessingThreshold;
         protected BroadphaseProxy m_broadphaseHandle;
         protected CollisionShape m_collisionShape;
@@ -551,6 +591,7 @@ namespace BulletXNA.BulletCollision
         protected float m_deactivationTime;
         protected float m_friction;
         protected float m_restitution;
+        protected float m_rollingFriction;
         protected Object m_userObjectPointer;
         protected Object m_extensionPointer;
 
@@ -559,5 +600,9 @@ namespace BulletXNA.BulletCollision
         protected float m_ccdSweptSphereRadius;
         protected float m_ccdMotionThreshold;
         protected bool m_checkCollideWith;
+
+        ///internal update revision number. It will be increased when the object changes. This allows some subsystems to perform lazy evaluation.
+        int m_updateRevision;
+
     }
 }

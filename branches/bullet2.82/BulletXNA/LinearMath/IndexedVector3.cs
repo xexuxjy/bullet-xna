@@ -177,9 +177,27 @@ namespace BulletXNA.LinearMath
         {
             float num = 1f / (float)Math.Sqrt(X * X + Y * Y + Z * Z);
             return new IndexedVector3(X * num, Y * num, Z * num);
+       }
 
-
+        public static void Swap(ref IndexedVector3 a, ref IndexedVector3 b)
+        {
+            IndexedVector3 t = a;
+            a.X = b.X;
+            a.Y = b.Y;
+            a.Z = b.Z;
+            b = t;
         }
+
+        public IndexedVector3 Dot3(IndexedVector3 a, IndexedVector3 b, IndexedVector3 c)
+        {
+            return new IndexedVector3(Dot(ref a, ref this), Dot(ref b, ref this), Dot(ref c, ref this));
+        }
+
+        public IndexedVector3 Dot3(ref IndexedVector3 a, ref IndexedVector3 b, ref IndexedVector3 c)
+        {
+            return new IndexedVector3(Dot(ref a, ref this), Dot(ref b, ref this), Dot(ref c, ref this));
+        }
+
 
         public static void Transform(IndexedVector3[] source, ref IndexedMatrix t, IndexedVector3[] dest)
         {
@@ -213,6 +231,8 @@ namespace BulletXNA.LinearMath
 
         public IndexedVector3 Cross(IndexedVector3 v)
         {
+
+
             return new IndexedVector3(
                 Y * v.Z - Z * v.Y,
                 Z * v.X - X * v.Z,
@@ -634,6 +654,37 @@ namespace BulletXNA.LinearMath
             }
         }
 
+        public void SetMin(IndexedVector3 v)
+        {
+            if (v.X < X)
+            {
+                X = v.X;
+            }
+            if (v.Y < Y)
+            {
+                Y = v.Y;
+            }
+            if (v.Z < Z)
+            {
+                Z = v.Z;
+            }
+        }
+
+        public void SetMax(IndexedVector3 v)
+        {
+            if (v.X > X)
+            {
+                X = v.X;
+            }
+            if (v.Y > Y)
+            {
+                Y = v.Y;
+            }
+            if (v.Z > Z)
+            {
+                Z = v.Z;
+            }
+        }
 
         public void SetMax(ref IndexedVector3 v)
         {

@@ -172,7 +172,7 @@ namespace BulletXNA.BulletCollision
                 //		childScale = childScale * (childTrans.getBasis() * scaling);
                 childScale = childScale * scaling / m_localScaling;
                 m_children[i].m_childShape.SetLocalScaling(ref childScale);
-                childTrans._origin = ((childTrans._origin) * scaling);
+                childTrans._origin = ((childTrans._origin) * scaling) / m_localScaling);
                 UpdateChildTransform(i, ref childTrans, false);
             }
             m_localScaling = scaling;
@@ -225,9 +225,7 @@ namespace BulletXNA.BulletCollision
 
     	    IndexedVector3 center = trans * localCenter;
 
-	        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref localHalfExtents),
-		                            abs_b._el1.Dot(ref localHalfExtents),
-		                            abs_b._el2.Dot(ref localHalfExtents));
+            IndexedVector3 extent = localHalfExtents.Dot3(abs_b._el0, abs_b._el1, abs_b._el2);
  
             aabbMin = center - extent;
             aabbMax = center + extent;

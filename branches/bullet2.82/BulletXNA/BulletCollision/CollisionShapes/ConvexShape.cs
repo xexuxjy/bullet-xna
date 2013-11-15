@@ -101,7 +101,7 @@ namespace BulletXNA.BulletCollision
                         TriangleShape triangleShape = (TriangleShape)this;
                         IndexedVector3 dir = localDir;
                         IndexedVector3[] vertices = triangleShape.m_vertices1;
-                        IndexedVector3 dots = new IndexedVector3(IndexedVector3.Dot(ref dir, ref vertices[0]), IndexedVector3.Dot(ref dir, ref vertices[1]), IndexedVector3.Dot(ref dir, ref vertices[2]));
+                        IndexedVector3 dots = dir.Dot3(ref vertices[0], ref vertices[1], ref vertices[2]);
                         int maxAxis = MathUtil.MaxAxis(ref dots);
                         IndexedVector3 sup = vertices[maxAxis];
 #if DEBUG                        
@@ -321,6 +321,11 @@ namespace BulletXNA.BulletCollision
                         CylinderShape cylShape = this as CylinderShape;
                         return cylShape.GetMarginNV();
                     }
+                case BroadphaseNativeTypes.CONE_SHAPE_PROXYTYPE:
+                    {
+                        ConeShape conShape = this as ConeShape;
+                        return conShape.GetMarginNV();
+                    }
                 case BroadphaseNativeTypes.CAPSULE_SHAPE_PROXYTYPE:
                     {
                         CapsuleShape capsuleShape = this as CapsuleShape;
@@ -368,7 +373,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b = t._basis.Absolute();
                         IndexedVector3 center = t._origin;
-                        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));
+                        IndexedVector3 extent = halfExtents.Dot3(abs_b._el0, abs_b._el1, abs_b._el2);
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;
@@ -404,7 +409,7 @@ namespace BulletXNA.BulletCollision
 
                         IndexedBasisMatrix abs_b  = t._basis.Absolute();
                         IndexedVector3 center = t._origin;
-                        IndexedVector3 extent = new IndexedVector3(abs_b._el0.Dot(ref halfExtents), abs_b._el1.Dot(ref halfExtents), abs_b._el2.Dot(ref halfExtents));		
+                        IndexedVector3 extent = halfExtents.Dot3(abs_b._el0, abs_b._el1, abs_b._el2);
 
                         aabbMin = center - extent;
                         aabbMax = center + extent;

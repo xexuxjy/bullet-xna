@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -102,13 +102,13 @@ namespace BulletXNA.BulletCollision
 		        MathUtil.VectorMin(ref minAabb2,ref minAabb);
                 MathUtil.VectorMax(ref maxAabb2, ref maxAabb);
             }
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugCollisionWorld)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMin", minAabb);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "updateSingleAabbMax", maxAabb);
             }
-
+#endif
 
             IBroadphaseInterface bp = m_broadphasePairCache as IBroadphaseInterface;
 
@@ -538,8 +538,8 @@ namespace BulletXNA.BulletCollision
 			        AabbUtil2.AabbExpand(ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref castShapeAabbMin, ref castShapeAabbMax);
 			        float hitLambda = 1f; //could use resultCallback.m_closestHitFraction, but needs testing
 			        Vector3 hitNormal = new Vector3();
-                    Vector3 fromOrigin = convexFromWorld._origin;
-                    Vector3 toOrigin = convexToWorld._origin;
+                    Vector3 fromOrigin = convexFromWorld.Translation;
+                    Vector3 toOrigin = convexToWorld.Translation;
                     if (AabbUtil2.RayAabb(ref fromOrigin, ref toOrigin, ref collisionObjectAabbMin, ref collisionObjectAabbMax, ref hitLambda, ref hitNormal))
 			        {
                         Matrix trans = collisionObject.GetWorldTransform();

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -91,13 +91,14 @@ namespace BulletXNA.BulletCollision
                     input.m_transformB = body1.GetWorldTransform();
 
                     gjkPairDetector.GetClosestPoints(ref input, resultOut, dispatchInfo.getDebugDraw(), false);
-
+#if DEBUG
                     if (BulletGlobals.g_streamWriter != null)
                     {
                         BulletGlobals.g_streamWriter.WriteLine("c2dc2d processCollision");
                         MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformA", input.m_transformA);
                         MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transformB", input.m_transformB);
                     }
+#endif                    
                 }
                 //BulletGlobals.GjkPairDetectorPool.Free(gjkPairDetector);
                 //btVector3 v0,v1;

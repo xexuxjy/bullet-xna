@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
@@ -133,11 +133,12 @@ namespace BulletXNA.BulletCollision
         // Call before process collision
         protected void CheckConvexAlgorithm(CollisionObject body0, CollisionObject body1)
         {
+#if DEBUG        
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAlgo::CheckConvexAlgo");
             }
-
+#endif
             if (m_convex_algorithm != null)
             {
                 return;
@@ -162,6 +163,7 @@ namespace BulletXNA.BulletCollision
                         ref Vector3 normal,
                         float distance)
         {
+#if DEBUG        
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAlgo::AddContactPoint");
@@ -169,7 +171,7 @@ namespace BulletXNA.BulletCollision
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "normal", normal);
 
             }
-
+#endif
             m_resultOut.SetShapeIdentifiersA(m_part0, m_triface0);
             m_resultOut.SetShapeIdentifiersB(m_part1, m_triface1);
             CheckManifold(body0, body1);
@@ -193,12 +195,12 @@ namespace BulletXNA.BulletCollision
             shape1.LockChildShapes();
 
             int pair_pointer = 0;
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::CollideGjkTriangles [{0}]", pair_count);
             }
-
+#endif
             while (pair_count-- != 0)
             {
 
@@ -237,11 +239,12 @@ namespace BulletXNA.BulletCollision
             PrimitiveTriangle ptri0 = new PrimitiveTriangle();
             PrimitiveTriangle ptri1 = new PrimitiveTriangle();
 
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::CollideSatTriangles [{0}]", pair_count);
             }
-
+#endif
 
             shape0.LockChildShapes();
             shape1.LockChildShapes();
@@ -315,12 +318,12 @@ namespace BulletXNA.BulletCollision
 
             body0.InternalSetTemporaryCollisionShape(shape0);
             body1.InternalSetTemporaryCollisionShape(shape1);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ShapeVsShape");
             }
-
+#endif
 
 
             {
@@ -350,12 +353,12 @@ namespace BulletXNA.BulletCollision
 
             body0.InternalSetTemporaryCollisionShape(shape0);
             body1.InternalSetTemporaryCollisionShape(shape1);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ConvexVsConvex");
             }
-
+#endif
 
             m_resultOut.SetShapeIdentifiersA(m_part0, m_triface0);
             m_resultOut.SetShapeIdentifiersB(m_part1, m_triface1);
@@ -402,10 +405,12 @@ namespace BulletXNA.BulletCollision
                     }
                 }
             }
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsGImpactFindPairs [{0}]", pairset.Count);
             }
+#endif            
         }
 
         protected void GImpactVsShapeFindPairs(
@@ -425,12 +430,14 @@ namespace BulletXNA.BulletCollision
                 trans1to0 = trans1to0 * trans1;
                 //trans1to0 = MathUtil.BulletMatrixMultiply(trans1,trans1to0);
                 shape1.GetAabb(ref trans1to0, out boxshape.m_min, out boxshape.m_max);
+#if DEBUG                
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
                 {
                     MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "GImpactAglo::GImpactVsShapeFindPairs trans1to0", trans1to0);
                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "box min", boxshape.m_min);
                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "box max", boxshape.m_max);
                 }
+#endif                
                 shape0.GetBoxSet().BoxQuery(ref boxshape, collided_primitives);
             }
             else
@@ -532,12 +539,12 @@ namespace BulletXNA.BulletCollision
         public override void ProcessCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             ClearCache();
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::ProcessCollision");
             }
-
+#endif
 
             m_resultOut = resultOut;
             m_dispatchInfo = dispatchInfo;
@@ -673,12 +680,12 @@ namespace BulletXNA.BulletCollision
 
             if (pairset.Count == 0) return;
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsGImpact [{0}]",pairset.Count);
             }
-
+#endif
             if (shape0.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE_PART &&
                 shape1.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE_PART)
             {
@@ -753,11 +760,12 @@ namespace BulletXNA.BulletCollision
                           GImpactShapeInterface shape0,
                           CollisionShape shape1, bool swapped)
         {
+#if DEBUG        
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
 	        {
 		        BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape");
 	        }
-
+#endif
 
             if (shape0.GetGImpactShapeType() == GIMPACT_SHAPE_TYPE.CONST_GIMPACT_TRIMESH_SHAPE)
             {
@@ -836,12 +844,12 @@ namespace BulletXNA.BulletCollision
 
 
                 int i = collided_results.Count;
-
+#if DEBUG
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
                 {
                     BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsShape [{0}]", collided_results.Count);
                 }
-
+#endif
 
                 while (i-- != 0)
                 {
@@ -887,11 +895,12 @@ namespace BulletXNA.BulletCollision
         {
             Matrix orgtrans1 = body1.GetWorldTransform();
 
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactAlgo)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GImpactAglo::GImpactVsCompoundshape");
             }
-
+#endif
 
             int i = shape1.GetNumChildShapes();
             while (i-- != 0)

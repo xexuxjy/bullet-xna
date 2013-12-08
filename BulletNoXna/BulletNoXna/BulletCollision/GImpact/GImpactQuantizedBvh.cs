@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
@@ -627,14 +627,14 @@ namespace BulletXNA.BulletCollision
                 //We have a leaf node
                 SetNodeBound(curIndex, ref primitive_boxes.GetRawArray()[startIndex].m_bound);
                 m_node_array[curIndex].SetDataIndex(primitive_boxes[startIndex].m_data);
-
+#if DEBUG
 		        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH)
 		        {
 			        BulletGlobals.g_streamWriter.WriteLine("bst curIndex[{0}] dataIndex[{1}]",curIndex,primitive_boxes[startIndex].m_data);
 			        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"bst min",primitive_boxes[startIndex].m_bound.m_min);
                     MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"bst max", primitive_boxes[startIndex].m_bound.m_max);
 		        }
-
+#endif
 
                 return;
             }
@@ -670,14 +670,14 @@ namespace BulletXNA.BulletCollision
             BuildSubTree(primitive_boxes, splitIndex, endIndex);
 
             m_node_array.GetRawArray()[curIndex].SetEscapeIndex(m_num_nodes - curIndex);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugGimpactBVH)
             {
                 BulletGlobals.g_streamWriter.WriteLine("bst curIndex[{0}] escapeIndex[{1}]", curIndex, m_node_array.GetRawArray()[curIndex].GetEscapeIndex());
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "bst node min", node_bound.m_min);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "bst node max", node_bound.m_max);
             }
-
+#endif
 
         }
 

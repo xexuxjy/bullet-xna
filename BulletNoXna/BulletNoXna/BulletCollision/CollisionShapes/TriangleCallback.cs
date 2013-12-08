@@ -29,7 +29,6 @@ namespace BulletXNA.BulletCollision
     {
 	    void ProcessTriangle(Vector3[] triangle, int partId, int triangleIndex);
         void Cleanup();
-
     }
 
     public interface IInternalTriangleIndexCallback

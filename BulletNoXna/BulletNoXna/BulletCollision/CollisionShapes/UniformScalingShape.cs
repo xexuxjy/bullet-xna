@@ -52,7 +52,7 @@ namespace BulletXNA.BulletCollision
 	        m_childConvexShape.BatchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
 	        for (int i=0;i<numVectors;i++)
 	        {
-                supportVerticesOut[i] = (supportVerticesOut[i] * m_uniformScalingFactor); ;
+                supportVerticesOut[i] = (supportVerticesOut[i] * m_uniformScalingFactor);
 	        }
         }
 

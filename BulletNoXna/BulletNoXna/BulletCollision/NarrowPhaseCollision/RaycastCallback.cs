@@ -100,7 +100,7 @@ namespace BulletXNA.BulletCollision
                 point = MathUtil.Interpolate3(ref m_from, ref m_to, distance);
                 {
                     Vector3 v0p = triangle[0] - point;
-                    Vector3 v1p = triangle[1] - point; ;
+                    Vector3 v1p = triangle[1] - point;
 
                     Vector3 cp0 = v0p.Cross(ref v1p);
 

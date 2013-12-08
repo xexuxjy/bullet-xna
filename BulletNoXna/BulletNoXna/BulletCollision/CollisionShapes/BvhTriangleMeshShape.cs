@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -327,6 +327,7 @@ namespace BulletXNA.BulletCollision
 
 
             //FIXME - Debug here and on quantized Bvh walking
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBVHTriangleMesh)
             {
                 BulletGlobals.g_streamWriter.WriteLine("BVH Triangle");
@@ -334,6 +335,7 @@ namespace BulletXNA.BulletCollision
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[1]);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, m_triangle[2]);
             }
+#endif            
             /* Perform ray vs. triangle collision here */
             m_callback.ProcessTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
             m_meshInterface.UnLockReadOnlyVertexBase(nodeSubPart);

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -102,14 +102,14 @@ namespace BulletXNA.BulletCollision
             Debug.Assert(m_manifoldPtr != null);
             //order in manifold needs to match
 
-
+#if DEBUG
 	        if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugManifoldResult)
 	        {
 		        BulletGlobals.g_streamWriter.WriteLine("AddContactPoint depth[{0}]",depth);
 		        MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"normalOnBInWorld",normalOnBInWorld);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"pointInWorld", pointInWorld);
 	        }
-
+#endif
 
             //if (depth > m_manifoldPtr.ContactProcessingThreshold)
             if (depth > m_manifoldPtr.GetContactBreakingThreshold())
@@ -163,10 +163,12 @@ namespace BulletXNA.BulletCollision
                 newPt.m_index1 = m_index1;
             }
 
+#if DEBUG
             if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugManifoldResult)
             {
                 MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter ,newPt);
             }
+#endif
 
             //printf("depth=%f\n",depth);
             ///@todo, check this for any side effects

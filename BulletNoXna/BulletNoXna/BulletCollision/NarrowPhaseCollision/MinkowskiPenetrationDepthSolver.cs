@@ -285,7 +285,7 @@ namespace BulletXNA.BulletCollision
             return res.m_hasResult;
         }
 
-        private readonly static int NUM_UNITSPHERE_POINTS = 42;
+        private const int NUM_UNITSPHERE_POINTS = 42;
         private readonly static Vector3[] sPenetrationDirections = {
             new Vector3(0.000000f , -0.000000f,-1.000000f),
             new Vector3(0.723608f , -0.525725f,-0.447219f),

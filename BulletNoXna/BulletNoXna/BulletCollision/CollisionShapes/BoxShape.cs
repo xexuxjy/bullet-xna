@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -120,6 +120,7 @@ namespace BulletXNA.BulletCollision
         {
             Vector3 halfExtents = GetHalfExtentsWithoutMargin();
             AabbUtil2.TransformAabb(ref halfExtents, Margin, ref trans, out aabbMin, out aabbMax);
+#if DEBUG            
             	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxShape)
 	    {
 		    BulletGlobals.g_streamWriter.WriteLine("box::getAabb");
@@ -128,7 +129,7 @@ namespace BulletXNA.BulletCollision
             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "outMin", aabbMin);
             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "outMax", aabbMax);
 	    }
-
+#endif
         }
 
         public override void CalculateLocalInertia(float mass, out Vector3 inertia)
@@ -338,11 +339,13 @@ namespace BulletXNA.BulletCollision
                 penetrationVector = Vector3.Zero;
                 break;
 		    }
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugBoxShape)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "Box::GetPreferredPenetrationDirection", penetrationVector);
             }
+#endif
+            
 
 	    }
 

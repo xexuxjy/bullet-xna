@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -203,12 +203,12 @@ namespace BulletXNA.BulletCollision
 
             m_overlappingPairArray.RemoveAt(lastPairIndex);
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
             {
                 BulletGlobals.g_streamWriter.WriteLine("HPC:RemoveOverlappingPair endSize[{0}].", m_overlappingPairArray.Count);
             }
-
+#endif
             return userData;
         }
 
@@ -221,12 +221,12 @@ namespace BulletXNA.BulletCollision
 
             bool collides = (proxy0.m_collisionFilterGroup & proxy1.m_collisionFilterMask) != 0;
             collides = collides && ((proxy1.m_collisionFilterGroup & proxy0.m_collisionFilterMask) != 0);
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
             {
                 BulletGlobals.g_streamWriter.WriteLine("HPC:NeedsBroadphaseCollision collides[{0}].", collides);
             }
-
+#endif
 
             return collides;
         }
@@ -256,11 +256,12 @@ namespace BulletXNA.BulletCollision
 
         public virtual void ProcessAllOverlappingPairs(IOverlapCallback callback, IDispatcher dispatcher)
         {
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPairCache)
             {
                 BulletGlobals.g_streamWriter.WriteLine("HPC:ProcessAllOverlappingPairs overlap[{0}].", m_overlappingPairArray.Count);
             }
-
+#endif
             for (int i = 0; i < m_overlappingPairArray.Count; )
             {
                 BroadphasePair pair = m_overlappingPairArray[i];

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -662,6 +662,8 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                 int spawn_count = (object_count * experiment.spawn_count) / 100;
                 float speed = experiment.speed;
                 float amplitude = experiment.amplitude;
+                
+#if DEBUG                
                 if (BulletGlobals.g_streamWriter != null)
                 {
                     BulletGlobals.g_streamWriter.WriteLine("Experiment #{0} '{1}':", iexp, experiment.name);
@@ -671,6 +673,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     BulletGlobals.g_streamWriter.WriteLine("\tSpeed: {0}", speed);
                     BulletGlobals.g_streamWriter.WriteLine("\tAmplitude: {0}", amplitude);
                 }
+#endif
                 //srand(180673);
                 /* Create objects	*/
                 wallclock.Reset();
@@ -1020,6 +1023,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
             ulong us = (ulong)sw.ElapsedMilliseconds;
             ulong ms = (us + 500) / 1000;
             float sec = us / (1000f * 1000f);
+#if DEBUG            
             if(BulletGlobals.g_streamWriter != null)
             {
                 if (count > 0)
@@ -1031,6 +1035,7 @@ m_sets[0].Update(proxy.leaf, ref aabb, ref velocity, DBVT_BP_MARGIN)
                     BulletGlobals.g_streamWriter.WriteLine("{0} : {1} us ({2} ms)\r\n", name, us, ms);
                 }
             }
+#endif
         }
     }
 

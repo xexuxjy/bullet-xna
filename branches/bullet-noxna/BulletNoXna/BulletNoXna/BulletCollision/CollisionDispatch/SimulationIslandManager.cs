@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -233,11 +233,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                 {
                     int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
 
+#if DEBUG
                     if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                     {
                         BulletGlobals.g_streamWriter.WriteLine(String.Format("buildAndProcessIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                     }
-
+#endif
 
                     bool islandSleeping = true;
 
@@ -259,12 +260,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     if (startManifoldIndex < numManifolds)
                     {
                         int curIslandId = GetIslandId(m_islandmanifold[startManifoldIndex]);
-
+#if DEBUG
                         if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
 				        {
 					        BulletGlobals.g_streamWriter.WriteLine("curIsland[{0}] startManifold[{1}].",curIslandId,startManifoldIndex);
 				        }
-
+#endif
 
 
                         if (curIslandId == islandId)
@@ -273,10 +274,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
 
                             for (endManifoldIndex = startManifoldIndex + 1; (endManifoldIndex < numManifolds) && (islandId == GetIslandId(m_islandmanifold[endManifoldIndex])); endManifoldIndex++)
                             {
+#if DEBUG
                                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                                 {
                                     BulletGlobals.g_streamWriter.WriteLine("endManifoldIndex[{0}] islandId[{1}] getIsland[{2}].",endManifoldIndex,startManifoldIndex,GetIslandId(m_islandmanifold[endManifoldIndex]));
                                 }
+#endif                                
 
                             }
                             /// Process the actual simulation, only if not sleeping/deactivated
@@ -292,10 +295,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
                     }
                     else
                     {
+#if DEBUG                    
                         if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("islandSleeping.");
                         }
+#endif                        
                     }
 
                     if (numIslandManifolds != 0)
@@ -330,12 +335,12 @@ public void   StoreIslandActivationState(CollisionWorld colWorld)
             for (int startIslandIndex = 0; startIslandIndex < numElem; startIslandIndex = endIslandIndex)
             {
                 int islandId = GetUnionFind().GetElement(startIslandIndex).m_id;
-
+#if DEBUG
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugIslands)
                 {
                     BulletGlobals.g_streamWriter.WriteLine(String.Format("buildIslands start[{0}] end[{1}] id[{2}]", startIslandIndex, endIslandIndex, islandId));
                 }
-
+#endif
                 for (endIslandIndex = startIslandIndex + 1; (endIslandIndex < numElem) && (GetUnionFind().GetElement(endIslandIndex).m_id == islandId); endIslandIndex++)
                 {
                 }

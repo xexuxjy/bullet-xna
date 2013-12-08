@@ -398,7 +398,7 @@ namespace BulletXNA
         //            Matrix abs_b;
         //            AbsoluteMatrix(ref trans, out abs_b);
 
-        //            center = trans._origin;
+        //            center = trans.Translation;
         //            extent = new Vector3(Vector3.Dot(abs_b.Right, vec),
         //                                            Vector3.Dot(abs_b.Up, vec),
         //                                            Vector3.Dot(abs_b.Backward, vec));
@@ -1209,9 +1209,9 @@ namespace BulletXNA
         //        public static Vector3 MatrixToVector(Matrix m, Vector3 v)
         //        {
         //            return new Vector3(
-        //                Vector3.Dot(new Vector3(m.M11, m.M12, m.M13), v) + m._origin.X,
-        //                Vector3.Dot(new Vector3(m.M21, m.M22, m.M23), v) + m._origin.Y,
-        //                Vector3.Dot(new Vector3(m.M31, m.M32, m.M33), v) + m._origin.Z
+        //                Vector3.Dot(new Vector3(m.M11, m.M12, m.M13), v) + m.Translation.X,
+        //                Vector3.Dot(new Vector3(m.M21, m.M22, m.M23), v) + m.Translation.Y,
+        //                Vector3.Dot(new Vector3(m.M31, m.M32, m.M33), v) + m.Translation.Z
         //                );
         //        }
 
@@ -1381,7 +1381,7 @@ namespace BulletXNA
         }
 
         public static T Clamp<T>(T value, T min, T max)
-         where T : System.IComparable<T>
+                 where T : System.IComparable<T>
         {
             T result = value;
             if (value.CompareTo(max) > 0)

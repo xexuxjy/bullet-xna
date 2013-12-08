@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -64,11 +64,12 @@ namespace BulletXNA.BulletCollision
         public Vector3 LocalGetSupportVertexWithoutMarginNonVirtual(ref Vector3 localDir)
         {
             Vector3 result = Vector3.Zero;
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
             {
                 BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual " + Name);
             }
-
+#endif
             switch (m_shapeType)
             {
                 case BroadphaseNativeType.SphereShape:
@@ -84,6 +85,7 @@ namespace BulletXNA.BulletCollision
                         result = new Vector3(MathUtil.FSel(localDir.X, halfExtents.X, -halfExtents.X),
                             MathUtil.FSel(localDir.Y, halfExtents.Y, -halfExtents.Y),
                             MathUtil.FSel(localDir.Z, halfExtents.Z, -halfExtents.Z));
+#if DEBUG                            
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual::Box");
@@ -91,7 +93,7 @@ namespace BulletXNA.BulletCollision
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "localDir", localDir);
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "result", result);
                         }
-
+#endif
                         break;
                     }
                 case BroadphaseNativeType.TriangleShape:
@@ -102,6 +104,7 @@ namespace BulletXNA.BulletCollision
                         Vector3 dots = new Vector3(Vector3.Dot(ref dir, ref vertices[0]), Vector3.Dot(ref dir, ref vertices[1]), Vector3.Dot(ref dir, ref vertices[2]));
                         int maxAxis = MathUtil.MaxAxis(ref dots);
                         Vector3 sup = vertices[maxAxis];
+#if DEBUG                        
 						if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
                         {
                             BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual::Triangle");
@@ -114,7 +117,7 @@ namespace BulletXNA.BulletCollision
                             MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "sup", sup);
 
                         }
-
+#endif
                         
                         
                         result = sup;
@@ -270,12 +273,14 @@ namespace BulletXNA.BulletCollision
 
             // should never reach here
             //Debug.Assert(false);
+#if DEBUG            
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConvexShape)
             {
                 BulletGlobals.g_streamWriter.WriteLine("localGetSupportVertexWithoutMarginNonVirtual");
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "localDir", localDir);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "result", result);
             }
+#endif            
             return result;
 
         }

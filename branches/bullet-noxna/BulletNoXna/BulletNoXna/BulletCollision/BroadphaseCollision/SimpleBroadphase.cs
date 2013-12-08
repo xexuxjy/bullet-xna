@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -83,6 +83,7 @@ namespace BulletXNA.BulletCollision
             Vector3 p1Min = proxy1.GetMinAABB();
             Vector3 p1Max = proxy1.GetMaxAABB();
 
+#if DEBUG
 	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
 	{
 		BulletGlobals.g_streamWriter.WriteLine("simple aabOverlap");
@@ -91,6 +92,7 @@ namespace BulletXNA.BulletCollision
 		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1min",p1Min);
 		MathUtil.PrintVector3(BulletGlobals.g_streamWriter,"1max",p1Max);
 	}
+#endif
 
 
 
@@ -152,10 +154,12 @@ namespace BulletXNA.BulletCollision
 
         public virtual void CalculateOverlappingPairs(IDispatcher dispatcher)
         {
+#if DEBUG        
     	if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugBroadphase)
 	    {
             BulletGlobals.g_streamWriter.WriteLine("simple calculateOverlappingPairs");
         }
+#endif        
 
             //first check for new overlapping pairs
             if (m_numHandles > 0)

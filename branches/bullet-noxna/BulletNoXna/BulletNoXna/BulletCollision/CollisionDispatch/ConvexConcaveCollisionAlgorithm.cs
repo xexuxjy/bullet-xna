@@ -75,7 +75,7 @@ namespace BulletXNA.BulletCollision
         //        CollisionObject triOb = triBody;
         //        ConcaveShape concaveShape = (ConcaveShape)(triOb.CollisionShape);
 
-        //        if (convexBody.CollisionShape.isConvex())
+        //        if (convexBody.CollisionShape.IsConvex)
         //        {
         //            float collisionMarginTriangle = concaveShape.Margin;
 
@@ -126,19 +126,19 @@ namespace BulletXNA.BulletCollision
         //    Matrix convexFromLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getWorldTransform());
         //    Matrix convexToLocal = MathUtil.inverseTimes(triBody.getWorldTransform(), convexbody.getInterpolationWorldTransform());
 
-        //    if (triBody.CollisionShape.isConcave())
+        //    if (triBody.CollisionShape.IsConcave)
         //    {
         //        Vector3 rayAabbMin = convexFromLocal.Translation;
         //        MathUtil.vectorMin(convexToLocal.Translation, ref rayAabbMin);
         //        Vector3 rayAabbMax = convexFromLocal.Translation;
         //        MathUtil.vectorMax(convexToLocal.Translation,ref rayAabbMax);
-        //        float ccdRadius0 = convexbody.getCcdSweptSphereRadius();
+        //        float ccdRadius0 = convexbody.CcdSweptSphereRadius;
         //        rayAabbMin -= new Vector3(ccdRadius0,ccdRadius0,ccdRadius0);
         //        rayAabbMax += new Vector3(ccdRadius0,ccdRadius0,ccdRadius0);
 
         //        float curHitFraction = 1.0f; //is this available?
         //        LocalTriangleSphereCastCallback raycastCallback = new LocalTriangleSphereCastCallback(ref convexFromLocal, ref convexToLocal,
-        //            convexbody.getCcdSweptSphereRadius(),curHitFraction);
+        //            convexbody.CcdSweptSphereRadius,curHitFraction);
 
         //        raycastCallback.m_hitFraction = convexbody.getHitFraction();
 

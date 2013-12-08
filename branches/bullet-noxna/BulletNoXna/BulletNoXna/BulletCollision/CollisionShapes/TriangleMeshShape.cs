@@ -252,7 +252,7 @@ namespace BulletXNA.BulletCollision
 
             //if (BulletGlobals.gDebugDraw != null)
             //{
-            //    if ((int)(BulletGlobals.gDebugDraw.GetDebugMode() & DebugDrawModes.DBG_DrawNormals) != 0)
+            //    if ((int)(BulletGlobals.gDebugDrawDebugMode & DebugDrawModes.DBG_DrawNormals) != 0)
             //    {
             //        Vector3 wv0, wv1, wv2;
             //        wv0 = triangle[0];

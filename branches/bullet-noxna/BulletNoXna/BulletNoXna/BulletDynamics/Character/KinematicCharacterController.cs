@@ -186,7 +186,7 @@ namespace BulletXNA.BulletDynamics
 		{
 			//	printf("originalDir=%f,%f,%f\n",originalDir[0],originalDir[1],originalDir[2]);
 			// phase 2: forward and strafe
-            Matrix start = Matrix.Identity, end = Matrix.Identity;
+			Matrix start = Matrix.Identity, end = Matrix.Identity;
 			m_targetPosition = m_currentPosition + walkMove;
 
 			float fraction = 1.0f;
@@ -206,7 +206,7 @@ namespace BulletXNA.BulletDynamics
 			while (fraction > 0.01f && maxIter-- > 0)
 			{
 				start.Translation = (m_currentPosition);
-                end.Translation = (m_targetPosition);
+				end.Translation = (m_targetPosition);
 
 				Vector3 sweepDirNegative = m_currentPosition - m_targetPosition;
 
@@ -290,7 +290,7 @@ namespace BulletXNA.BulletDynamics
 			m_targetPosition -= step_drop;
 
 			start.Translation = m_currentPosition;
-            end.Translation = m_targetPosition;
+			end.Translation = m_targetPosition;
 
 			KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(m_ghostObject, upAxisDirection[m_upAxis], m_maxSlopeCosine);
 			callback.m_collisionFilterGroup = GetGhostObject().BroadphaseHandle.m_collisionFilterGroup;
@@ -348,8 +348,8 @@ namespace BulletXNA.BulletDynamics
 		///btActionInterface interface
 		public virtual void UpdateAction(CollisionWorld collisionWorld, float deltaTime)
 		{
-			PreStep(collisionWorld);
-			PlayerStep(collisionWorld, deltaTime);
+            PreStep(collisionWorld);
+            PlayerStep(collisionWorld, deltaTime);
 		}
 
 		///btActionInterface interface
@@ -595,7 +595,7 @@ namespace BulletXNA.BulletDynamics
 		protected Vector3 m_targetPosition;
 
 		///keep track of the contact manifolds
-        protected ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
+		protected ObjectArray<PersistentManifold> m_manifoldArray = new ObjectArray<PersistentManifold>();
 
 		protected bool m_touchingContact;
 		protected Vector3 m_touchingNormal;

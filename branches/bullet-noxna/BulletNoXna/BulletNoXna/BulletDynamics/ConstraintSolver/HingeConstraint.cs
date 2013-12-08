@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -291,10 +291,12 @@ namespace BulletXNA.BulletDynamics
                 info.m_numConstraintRows++; // limit 3rd anguar as well
                 info.nub--;
             }
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
                 PrintInfo1(BulletGlobals.g_streamWriter, this, info);
             }
+#endif            
 		}
 
 		public void GetInfo1NonVirtual(ConstraintInfo1 info)
@@ -302,10 +304,12 @@ namespace BulletXNA.BulletDynamics
             //always add the 'limit' row, to avoid computation (data is not available yet)
             info.m_numConstraintRows = 6; // Fixed 3 linear + 2 angular
             info.nub = 0;
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
                 PrintInfo1(BulletGlobals.g_streamWriter, this, info);
             }
+#endif            
 		}
 
 		public override void GetInfo2(ConstraintInfo2 info)
@@ -546,11 +550,12 @@ namespace BulletXNA.BulletDynamics
 
 				} // if(limit)
 			} // if angular limit or powered
+#if DEBUG			
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
-
+#endif
 		}
 
 		public void SetFrames(ref Matrix frameA, ref Matrix frameB)
@@ -569,6 +574,7 @@ namespace BulletXNA.BulletDynamics
 		public void GetInfo2InternalUsingFrameOffset(ConstraintInfo2 info, ref Matrix transA, ref Matrix transB, ref Vector3 angVelA, ref Vector3 angVelB)
 		{
 			// transforms in world space
+#if DEBUG			
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "rbAFrame", m_rbAFrame);
@@ -576,15 +582,17 @@ namespace BulletXNA.BulletDynamics
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transA", transA);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "transB", transB);
 			}
-
+#endif
             Matrix trA = transA * m_rbAFrame;
             Matrix trB = transB * m_rbBFrame;
 
+#if DEBUG
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trA", trA);
 				MathUtil.PrintMatrix(BulletGlobals.g_streamWriter, "trB", trB);
 			}
+#endif			
 			// pivot point
 			Vector3 pivotAInW = trA.Translation;
 			Vector3 pivotBInW = trB.Translation;
@@ -847,11 +855,12 @@ namespace BulletXNA.BulletDynamics
 
 				} // if(limit)
 			} // if angular limit or powered
+#if DEBUG			
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
 			{
 				PrintInfo2(BulletGlobals.g_streamWriter, this, info);
 			}
-
+#endif
 		}
 
 		public void UpdateRHS(float timeStep)
@@ -1030,10 +1039,12 @@ namespace BulletXNA.BulletDynamics
             float angle = (float)Math.Atan2(a,b );
 
             float result = m_referenceSign * angle;
+#if DEBUG            
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugConstraints)
             {
                 BulletGlobals.g_streamWriter.WriteLine("GetHingeAngle [{0:0.00000000}][{1:0.00000000}][{2:0.00000000}][{3:0.00000000}]", a,b,m_referenceSign,result);
             }
+#endif            
             return result;
 		}
 

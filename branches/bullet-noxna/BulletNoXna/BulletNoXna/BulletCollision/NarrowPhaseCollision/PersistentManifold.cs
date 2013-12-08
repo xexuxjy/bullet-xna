@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -21,8 +21,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-//#define MAINTAIN_PERSISTENCY
-//#define KEEP_DEEPEST_POINT
+#define MAINTAIN_PERSISTENCY
+#define KEEP_DEEPEST_POINT
 //#define DEBUG_PERSISTENCY
 
 using System;
@@ -95,11 +95,12 @@ namespace BulletXNA.BulletCollision
             Vector4 maxvec = new Vector4(res0, res1, res2, res3);
             int biggestarea = MathUtil.ClosestAxis(ref maxvec);
 
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("sortCachedPoints [{0}]", biggestarea);
             }
-
+#endif
 
             return biggestarea;
 
@@ -154,6 +155,7 @@ namespace BulletXNA.BulletCollision
             Object oldPtr = pt.m_userPersistentData;
             if (oldPtr != null)
             {
+#if DEBUG            
                 if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
                 {
 
@@ -171,6 +173,7 @@ namespace BulletXNA.BulletCollision
                     }
                     //Debug.Assert(occurance<=0);
                 }
+#endif                
                 if (pt.m_userPersistentData != null && gContactDestroyedCallback != null)
                 {
                     gContactDestroyedCallback.Callback(pt.m_userPersistentData);
@@ -185,8 +188,9 @@ namespace BulletXNA.BulletCollision
 
 	    public void	DebugPersistency()
         {
-                if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
-                {
+#if DEBUG        
+			if(BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
+			{
 				BulletGlobals.g_streamWriter.WriteLine("DebugPersistency : numPoints {0}", m_cachedPoints);
 				for (int i = 0; i < m_cachedPoints; i++)
 				{
@@ -196,6 +200,7 @@ namespace BulletXNA.BulletCollision
 					MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "NormalB", m_pointCache[i].GetNormalWorldOnB());
 				}
 			}
+#endif			
         }
 
         public int GetNumContacts()
@@ -237,11 +242,12 @@ namespace BulletXNA.BulletCollision
                     nearestPoint = i;
                 }
             }
+#if DEBUG            
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("getCacheEntry [{0}]", nearestPoint);
             }
-
+#endif
 
             return nearestPoint;
         }
@@ -277,13 +283,13 @@ namespace BulletXNA.BulletCollision
             //Debug.Assert(m_pointCache[insertIndex].GetUserPersistentData() == null);
             m_pointCache[insertIndex] = newPoint;
 
-
+#if DEBUG
             if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("addManifoldPoint[{0}][{1}]",insertIndex,m_cachedPoints);
                 MathUtil.PrintContactPoint(BulletGlobals.g_streamWriter, newPoint);
             }
-
+#endif
 
             return insertIndex;
         }
@@ -349,12 +355,13 @@ namespace BulletXNA.BulletCollision
         /// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
         public void RefreshContactPoints(ref Matrix trA, ref Matrix trB)
         {
+#if DEBUG        
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "refreshContactPoints trA", trA.Translation);
                 MathUtil.PrintVector3(BulletGlobals.g_streamWriter, "refreshContactPoints trB", trB.Translation);
             }
-
+#endif
 
             /// first refresh worldspace positions and distance
             int numContacts = GetNumContacts() - 1;
@@ -415,10 +422,12 @@ namespace BulletXNA.BulletCollision
                 ClearUserCache(ref m_pointCache[i]);
             }
             m_cachedPoints = 0;
+#if DEBUG            
 			if (BulletGlobals.g_streamWriter != null && BulletGlobals.debugPersistentManifold)
             {
                 BulletGlobals.g_streamWriter.WriteLine("clearManifold");
             }
+#endif            
         }
 
         private ManifoldPoint[] m_pointCache = new ManifoldPoint[MANIFOLD_CACHE_SIZE];

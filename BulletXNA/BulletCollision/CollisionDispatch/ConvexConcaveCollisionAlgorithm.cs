@@ -1,4 +1,4 @@
-﻿/*
+/*
  * C# / XNA  port of Bullet (c) 2011 Mark Neale <xexuxjy@hotmail.com>
  *
  * Bullet Continuous Collision Detection and Physics Library
@@ -426,6 +426,13 @@ namespace BulletXNA.BulletCollision
 
         public virtual void ProcessTriangle(IndexedVector3[] triangle, int partId, int triangleIndex)
         {
+        
+        
+        	if (!AabbUtil2.TestTriangleAgainstAabb2(triangle, ref m_aabbMin, ref m_aabbMax))
+			{
+				return;
+			}
+
             //aabb filter is already applied!	
             CollisionAlgorithmConstructionInfo ci = new CollisionAlgorithmConstructionInfo();
             ci.SetDispatcher(m_dispatcher);
